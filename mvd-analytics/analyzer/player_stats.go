@@ -33,8 +33,14 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 		matchMs = 0
 	}
 
-	teamplay := isTeamplay(res, co)
-	xferOK := teamplay && len(res.Backpacks) > 0
+	teamplay := isTeamplay(co)
+	// Pack TRANSFERS are observable only where the wire named the pack: the
+	// `//ktx bp` pickup hint carries the dropper, and it ships with the same
+	// KTX generation as the `//ktx drop` hint. A RECONSTRUCTED drops section
+	// proves a pack existed but says nothing about who recovered it, so the
+	// zero-fill below must not fire there — an unobservable transfer count
+	// would otherwise be published as an observed zero.
+	xferOK := teamplay && hasWireBackpacks(res)
 
 	ps := &result.PlayerStatsResult{
 		Sources: result.PlayerStatsSources{
@@ -50,11 +56,14 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 	}
 	takenEnemy := deriveTakenEnemy(res)
 	enemyWeaponKills := deriveEnemyWeaponKills(res)
+	sprees := deriveSprees(res)
+	reconHits := deriveReconHits(res)
+	measured := deriveMeasuredAcc(res)
 	logins := deriveLogins(co)
 
 	for i := range res.Streams.Players {
 		p := &res.Streams.Players[i]
-		row := buildPlayerStatsRow(res, p, matchMs, pickups, takenEnemy, enemyWeaponKills)
+		row := buildPlayerStatsRow(res, p, matchMs, pickups, takenEnemy, enemyWeaponKills, sprees, reconHits, measured)
 		row.Login = logins[row.Name]
 		ps.Players = append(ps.Players, row)
 	}
@@ -76,11 +85,11 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 				Team:   mp.Team,
 				Login:  logins[mp.Name],
 				Window: result.PlayerStatsWindow{MatchMs: matchMs},
-				Score:  deriveScore(res, mp.Name, enemyWeaponKills),
+				Score:  deriveScore(res, mp.Name, enemyWeaponKills, sprees),
 				Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
 			}
 			row.Damage = deriveDamage(res, mp.Name, takenEnemy)
-			row.Accuracy = deriveAccuracy(res, mp.Name)
+			row.Accuracy = deriveAccuracy(res, mp.Name, reconHits, measured)
 			row.Pickups = pickupsFor(pickups, mp.Name)
 			ps.Players = append(ps.Players, row)
 		}
@@ -110,7 +119,7 @@ func playerStatsPost(res *Result, co *CoreOutputs) {
 }
 
 // buildPlayerStatsRow assembles one streamed player's row.
-func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pickups map[string]map[string]result.PlayerStatsPickup, takenEnemy map[string]int, enemyWeaponKills map[string]*enemyWeaponKills) result.PlayerStatsRow {
+func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pickups map[string]map[string]result.PlayerStatsPickup, takenEnemy map[string]int, enemyWeaponKills map[string]*enemyWeaponKills, sprees map[string]*spreeCounts, reconHits map[string]map[string]reconHit, measured map[string]map[string]measuredAcc) result.PlayerStatsRow {
 	present := presenceWindow(p, matchMs)
 	alive := clipIntervals(aliveIntervals(p.Spawns, p.Deaths, matchMs), present)
 
@@ -130,9 +139,9 @@ func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pic
 		Identity: p.Identity,
 		Sessions: p.Sessions,
 		Window:   w,
-		Score:    deriveScore(res, p.Name, enemyWeaponKills),
+		Score:    deriveScore(res, p.Name, enemyWeaponKills, sprees),
 		Damage:   deriveDamage(res, p.Name, takenEnemy),
-		Accuracy: deriveAccuracy(res, p.Name),
+		Accuracy: deriveAccuracy(res, p.Name, reconHits, measured),
 		Pickups:  pickupsFor(pickups, p.Name),
 		Hold:     deriveHold(p, alive, w),
 	}
@@ -153,7 +162,7 @@ func buildPlayerStatsRow(res *Result, p *result.PlayerStream, matchMs int32, pic
 // entry. Reporting 0 kills and 0.0% efficiency there is
 // byte-indistinguishable from a genuinely killless team, so the fields
 // are omitted instead. See result.PlayerStatsScore.
-func deriveScore(res *Result, name string, enemyWeaponKills map[string]*enemyWeaponKills) result.PlayerStatsScore {
+func deriveScore(res *Result, name string, enemyWeaponKills map[string]*enemyWeaponKills, sprees map[string]*spreeCounts) result.PlayerStatsScore {
 	s := result.PlayerStatsScore{Src: result.SrcDerived}
 	var kills, suicides, teamKills int
 	var byWeapon map[string]int
@@ -212,6 +221,15 @@ func deriveScore(res *Result, name string, enemyWeaponKills map[string]*enemyWea
 			s.ByEnemyWeapon = k.byBucket
 			s.ByWeaponVsEnemyWeapon = k.cross
 		}
+		// Same family, same gate, same reason as the two maps above: a
+		// streak is a run of the very kills Kills counts. A player the
+		// replay produced no entry for never killed and never died on this
+		// demo, which is a measured pair of zeros, not an absence.
+		maxSpree, maxQuad := 0, 0
+		if sp := sprees[name]; sp != nil {
+			maxSpree, maxQuad = sp.max, sp.maxQuad
+		}
+		s.MaxSpree, s.MaxQuadSpree = &maxSpree, &maxQuad
 	}
 	return s
 }
@@ -443,7 +461,16 @@ func deriveDamage(res *Result, name string, takenEnemy map[string]int) *result.P
 	// that row would both overstate the degradation and split a team's
 	// members across two src values.
 	srcName := result.SrcDerived
-	if strings.HasPrefix(res.Damage.BoundedMode, "skipped:") {
+	switch {
+	case res.Damage.Source == result.DamageSourceReconstructed:
+		// The damage section itself is the damage-recon node's
+		// reconstruction (no wire damage stream on this demo) — a
+		// different evidence grade than wire-derived, marked so the
+		// consumer can tell (SrcReconstructed doc). Mutually exclusive
+		// with the skipped:* branch: reconstruction stands down on those
+		// modes and the section would be absent entirely.
+		srcName = result.SrcReconstructed
+	case strings.HasPrefix(res.Damage.BoundedMode, "skipped:"):
 		srcName = result.SrcDerivedUnbounded
 	}
 	taken := src.Taken
@@ -595,17 +622,49 @@ func deathsOf(res *Result, name string) int {
 // stream, so a demo with no KTX demoinfo still answers "how well did they
 // aim" instead of dropping the field.
 //
-// It is NOT the same measurement as KTX's, and the family's Src says so.
-// KTX counts server-side: for the shotgun and super shotgun its `attacks`
-// is a PELLET count and `hits` counts pellets that connected. Ours counts
-// TRIGGER PULLS and the fires that produced at least one linked damage
-// event — so shotgun accuracy in particular reads on a different scale,
-// and the two must never be compared across demos without reading Src.
-// For the single-projectile weapons (rl, lg, gl, ng, sng) the two count
-// the same events and are broadly comparable.
+// Src is the evidence GRADE (`derived` off the wire, `reconstructed` off the
+// rebuilt log), never the counting convention: both tiers publish KTX'S OWN
+// convention per weapon, so a row here and a row lifted from a demoinfo block
+// answer the same question and may be compared. PlayerStatsAcc.HitsConvention
+// names it per weapon, because a KTX block is not uniform:
+//
+//   - sg/ssg — PELLETS on both sides of the ratio. KTX advances `attacks` by
+//     the pellet count of the fire (`attacks += bullets`,
+//     ktx/src/weapons.c:812 for the shotgun's 6, :869 for the super shotgun's
+//     14) and `hits` once per PELLET that connected (:387, :392, inside the
+//     pellet loop of W_FireBullets). Both come off the aim section's Pellets /
+//     PelletHits.
+//   - rl — `hits` is the DIRECT-impact count. KTX increments it in the
+//     projectile touch handler and nowhere else (T_MissileTouch,
+//     ktx/src/weapons.c:994); a victim caught by the blast goes to the
+//     separate rhits/vhits counters instead (ktx/src/combat.c:1099-1121). It
+//     comes off the aim section's Direct. `attacks` stays the FIRE count —
+//     that is KTX's own `attacks++` per rocket launched (:1033).
+//   - gl — KTX counts the same touch (GrenadeTouch, ktx/src/weapons.c:1331)
+//     and the wire cannot see it, so it is re-derived from the flight
+//     geometry (result.WeaponAim). gl therefore publishes the direct-impact
+//     count wherever that derivation ran, and the any-path count — labelled —
+//     where it did not. See deriveMeasuredAcc.
+//   - lg, ng, sng, axe — one trace per fire (`hits++` at
+//     ktx/src/weapons.c:1106 against `attacks++` at :1233), one nail per
+//     spike (:1549, :1620), one swing for the axe (:85, :119). Each has a
+//     single damage path, so "the fire landed damage" IS the event KTX
+//     counts, and the fire→damage join is already on its scale.
+//
+// The KTX-convention counters are READ from the published aim section rather
+// than recomputed here, exactly as deriveReconHits reads the recon tier: the
+// two sections then cannot disagree, and aim's own withholds (the pellet
+// split, the rl/gl direct/splash split) are inherited by construction. Where
+// the aim section is absent, or holds no row for a weapon, the row falls back
+// to the fire→damage join with its convention STATED — never to a silent zero.
+//
+// Measured against the verbatim block on 186 instrumented archive demos
+// (cmd/qw-demoinfo-eval, `acc.*.{attacks,hits}/measured`): see
+// damagerecon/ACCURACY.md §"The wire-linked accuracy family vs the verbatim
+// block".
 //
 // Returns nil when the demo decoded no weapon fires for this player.
-func deriveAccuracy(res *Result, name string) *result.PlayerStatsAccuracy {
+func deriveAccuracy(res *Result, name string, reconHits map[string]map[string]reconHit, measured map[string]map[string]measuredAcc) *result.PlayerStatsAccuracy {
 	if res.Shots == nil {
 		return nil
 	}
@@ -614,30 +673,286 @@ func deriveAccuracy(res *Result, name string) *result.PlayerStatsAccuracy {
 		if ps.Player != name {
 			continue
 		}
-		// Hits come from linking each fire to a damage event, so they are
-		// only meaningful when the demo carries a damage stream at all.
+		// Hits come from linking each fire to a WIRE damage event, so they
+		// are only meaningful when the demo carried the KTX damage stream.
 		// Without one every weapon would read hits=0, i.e. "shot and never
 		// hit" — a fabricated zero where the honest answer is "not
-		// measurable". Attacks still stand on their own.
-		linkable := res.Damage != nil
+		// measurable". Attacks still stand on their own. The check must be
+		// on Source, not mere presence: since the damage-recon post fills
+		// res.Damage on pre-instrumentation demos too, presence alone
+		// re-introduced exactly the fabricated zero this guard exists to
+		// prevent (the shot linker never saw a DamageEvent there, so every
+		// Hit is false by construction, not by measurement).
+		linkable := res.Damage != nil && res.Damage.Source == result.DamageSourceKTX
+		// The reconstructed tier fills the same field on the demos the wire
+		// join cannot serve — the whole point of lead 9. It is a DIFFERENT
+		// evidence grade, so it moves the family's Src to
+		// SrcReconstructed rather than passing itself off as the wire-linked
+		// number, exactly as the damage family does.
+		recon := reconHits[name]
+		meas := measured[name]
+		// ng/sng fires link to their damage through the svc_nails id
+		// brackets, and that decode is opt-in (ShotsAnalyzer.canLink gates
+		// them on ctx.Nails; qw-analyze -include nails, which mvd-api and the
+		// WASM build always request). Without it no nail fire ever links and
+		// every nailgun row would read hits=0 — the same fabricated zero the
+		// `linkable` gate above exists to prevent, one weapon down (measured:
+		// ffa_1[dm2] Myagi, ng 177 attacks, 0 hits without the flag and 17
+		// with). Streams.NailsComputed is the pipeline's own latch for "the
+		// nail stream was built", set truthfully by the shots analyzer
+		// whether or not it found any nails.
+		nailsTracked := res.Streams != nil && res.Streams.NailsComputed
 		byWeapon := map[string]result.PlayerStatsAcc{}
+		reconUsed := false
 		for _, w := range ps.ByWeapon {
 			if w.Shots == 0 {
 				continue
 			}
 			e := result.PlayerStatsAcc{Attacks: w.Shots}
-			if linkable {
-				hits := w.Hits
-				e.Hits = &hits
+			// The convention is published rather than implied by src
+			// (result.PlayerStatsAcc.HitsConvention). Both tiers aim at KTX's
+			// own convention per weapon (see the function comment) and reach
+			// it from different evidence: the wire-linked branch off the aim
+			// section's measured pellet / direct-impact counters, the
+			// reconstructed one off the recon tier's DirectHits.
+			switch {
+			case linkable && isNailWeapon(w.Weapon) && !nailsTracked:
+				// Hits ABSENT — see nailsTracked above. Attacks still stand.
+			case linkable:
+				m, ok := meas[w.Weapon]
+				if !ok {
+					// No aim row for this weapon (no aim section at all, or a
+					// weapon whose KTX-convention counter aim withheld): the
+					// fire→damage join, saying so.
+					m = measuredAcc{hits: w.Hits, convention: result.HitsAnyDamage}
+				}
+				if m.attacks > 0 {
+					e.Attacks = m.attacks
+				}
+				h := m.hits
+				e.Hits, e.HitsConvention = &h, m.convention
+			default:
+				// Only the weapons the aim tier validated carry a recovery;
+				// the rest (ng/sng) keep an ABSENT hits, inheriting the
+				// withhold rather than laundering a zero through this
+				// section. See result.WeaponAimRecon.
+				if hits, ok := recon[w.Weapon]; ok {
+					h := hits.n
+					e.Hits, e.HitsConvention = &h, hits.convention
+					reconUsed = true
+				}
 			}
 			byWeapon[w.Weapon] = e
 		}
 		if len(byWeapon) == 0 {
 			return nil
 		}
-		return &result.PlayerStatsAccuracy{Src: result.SrcDerived, ByWeapon: byWeapon}
+		src := result.SrcDerived
+		if reconUsed {
+			src = result.SrcReconstructed
+		}
+		return &result.PlayerStatsAccuracy{Src: src, ByWeapon: byWeapon}
 	}
 	return nil
+}
+
+// DerivedStatsForEval re-derives the two player-stats families that change
+// when the wire damage stream is withheld — `damage` and `accuracy` — against
+// whatever damage and aim sections the caller has installed on res, and
+// returns a copy of the stored section carrying them.
+//
+// It exists for cmd/qw-demoinfo-eval's withhold-and-compare: an INSTRUMENTED
+// demo is parsed once, its blind reconstruction is swapped in for the wire
+// damage log, aim is recomputed, and this reproduces the section an old demo
+// would have published — scored against the verbatim KTX block the same demo
+// also carries. Only those two families move under that swap (score rides the
+// frag log, pickups the item and weapon-pickup timelines, hold the possession
+// streams — none of which read damage), so the rest of the stored section is
+// already the old-demo answer and is carried through unchanged rather than
+// recomputed, which would need the CoreOutputs the pipeline no longer holds.
+//
+// Calls the pipeline's own derivations, so what the harness scores is what
+// production publishes.
+func DerivedStatsForEval(res *Result) *result.PlayerStatsResult {
+	if res.PlayerStats == nil {
+		return nil
+	}
+	out := *res.PlayerStats
+	out.Players = append([]result.PlayerStatsRow(nil), res.PlayerStats.Players...)
+	takenEnemy := deriveTakenEnemy(res)
+	reconHits := deriveReconHits(res)
+	measured := deriveMeasuredAcc(res)
+	for i := range out.Players {
+		row := &out.Players[i]
+		row.Damage = deriveDamage(res, row.Name, takenEnemy)
+		row.Accuracy = deriveAccuracy(res, row.Name, reconHits, measured)
+	}
+	return &out
+}
+
+// deriveReconHits reads the PUBLISHED aim recon tier — the fire→reconstructed-
+// damage join in result.WeaponAimRecon — as player -> weapon -> hits.
+//
+// It reads the aim artifact rather than re-running the join so that the two
+// sections can never disagree, and so that the tier's own withholds (the
+// weapon set it validated, the section-level gate) are inherited by
+// construction instead of being restated here. Returns nil unless the aim
+// section says its hits came from a reconstruction; on a wire-measured demo
+// the accuracy family links its own fires and this map must stay out of it.
+func deriveReconHits(res *Result) map[string]map[string]reconHit {
+	if res.Aim == nil || res.Aim.HitsSource != result.AimHitsSourceReconstructed {
+		return nil
+	}
+	out := map[string]map[string]reconHit{}
+	for i := range res.Aim.Players {
+		pa := &res.Aim.Players[i]
+		for j := range pa.Weapons {
+			w := &pa.Weapons[j]
+			if w.Recon == nil {
+				continue
+			}
+			if out[pa.Player] == nil {
+				out[pa.Player] = map[string]reconHit{}
+			}
+			// rl/gl publish the DIRECT-impact count where the tier recovered
+			// one: that is the convention KTX's own block uses for those two
+			// weapons, so an old demo's row and a KTX row answer the same
+			// question and may be compared. Every other weapon keeps the
+			// any-path count, which is also what KTX counts there.
+			h := reconHit{n: w.Recon.Hits, convention: result.HitsAnyDamage}
+			if w.Recon.DirectHits != nil {
+				h = reconHit{n: *w.Recon.DirectHits, convention: result.HitsDirectImpact}
+			}
+			out[pa.Player][w.Weapon] = h
+		}
+	}
+	return out
+}
+
+// reconHit is one weapon's recovered hit count together with the convention
+// it counts under — the two travel as a pair because the aim recon tier
+// answers a different question for rl/gl (a projectile that TOUCHED a
+// player) than for the rest (a fire that landed damage by any path), and
+// publishing a number without saying which is exactly the ambiguity
+// PlayerStatsAcc.HitsConvention exists to end.
+type reconHit struct {
+	n          int
+	convention string
+}
+
+// deriveMeasuredAcc reads the PUBLISHED aim section's WIRE-MEASURED counters
+// — the ones that answer KTX's question rather than this pipeline's — as
+// player -> weapon -> row, for the weapons where the two questions differ.
+//
+// It reads the aim artifact rather than re-running the pellet split and the
+// direct/splash classification so that the two sections can never disagree
+// (the same rule deriveReconHits follows for the reconstructed tier), and so
+// that aim's own withholds are inherited here instead of being restated.
+// Returns nil unless the aim section says its hits were MEASURED off the wire
+// damage stream; on a reconstructed demo the recon tier owns this field.
+//
+// Only sg/ssg, rl and gl appear. Every other weapon has a single damage path,
+// so KTX's counter and the fire→damage join count the same event and the
+// caller's fallback is already right (see deriveAccuracy).
+//
+// GL'S ROW IS CONDITIONAL: its Direct comes from the flight-geometry touch
+// classifier rather than off the wire, because the wire cannot see a grenade
+// touch — the whole story is in result.WeaponAim's Direct/Splash doc. What is
+// gated HERE is the row's own presence: this function reads whether aim
+// published a Direct rather than re-deriving the condition from
+// Streams.ShotStreamsComputed, so the two cannot drift. A nil row falls back
+// to the caller's any-path count honestly labelled HitsAnyDamage rather than
+// to a fabricated near-zero claiming to be KTX's number.
+//
+// Measured against the verbatim block, gl at 92.0% of 424 archive rows exact
+// and 3.79% aggregate, bias −0.07 per row — above the reconstructed tier
+// whose classifier it is (89.6% / 3.55% on the same rows), because the wire
+// row names the attacker and the weapon instead of inferring them
+// (damagerecon/ACCURACY.md).
+//
+// WITHHELD FIRES ARE STILL ATTACKS. WeaponAim.Pellets is Shots × 6/14 over
+// every in-window fire (aimcore/aim.go: `wa.Pellets = wa.Shots * perFire`) —
+// nothing is dropped for a fire the linker could not resolve — which is what
+// keeps it on the same footing as KTX's `attacks += bullets`, incremented
+// before a single pellet is traced (ktx/src/weapons.c:812, :869).
+//
+// Two KTX branches this does NOT model, both of them a per-fire pellet count
+// other than aim's unconditional 6/14, so a demo of either kind reads its sg
+// or ssg row off-scale against the block:
+//
+//   - `k_instagib` — the sg slot is a railgun and KTX counts ONE attack per
+//     fire, not six (:806-810);
+//   - `k_yawnmode` — the ssg fires 21 pellets, not 14 (:858), and `attacks`
+//     follows.
+//
+// The eval corpus (186 demos, all team / duel / ffa) contains neither mode, so
+// both are STATED, NOT GUARDED — a branch here would be untestable against any
+// population we have measured.
+func deriveMeasuredAcc(res *Result) map[string]map[string]measuredAcc {
+	// The SAME predicate deriveAccuracy calls `linkable` and aimcore calls
+	// `hitsMeasured`: the demo carried the wire damage stream. It is the one
+	// gate these counters need — under it aim ran both splits over every row
+	// it emitted, so a zero here is a measured zero.
+	if res.Aim == nil || !res.Aim.HitsMeasured {
+		return nil
+	}
+	out := map[string]map[string]measuredAcc{}
+	for i := range res.Aim.Players {
+		pa := &res.Aim.Players[i]
+		for j := range pa.Weapons {
+			w := &pa.Weapons[j]
+			var m measuredAcc
+			switch w.Weapon {
+			case "sg", "ssg":
+				// Pellets is Shots × 6/14 on every fired shotgun row aim
+				// emits — the split has no withhold of its own, unlike the
+				// projectile one below.
+				m = measuredAcc{attacks: w.Pellets, hits: w.PelletHits, convention: result.HitsPellets}
+			case "rl", "gl":
+				// One branch, one gate: the ROW's own Direct. It is a pointer
+				// exactly so this read can tell a classified "touched nobody"
+				// (a present 0) from a split that never ran (nil), which is
+				// what a withheld gl looks like on a parse with no spatial
+				// shot streams — the touch classifier's own input, and the
+				// only reachable difference between the two weapons here. On
+				// nil the row is left out and the caller falls back to its
+				// any-path count with the convention stated, rather than
+				// publishing a withheld 0 as KTX's number.
+				//
+				// The guarantee is NOT per-projectile, and no per-row test
+				// can make it one. What a present count is exposed to is the
+				// LINKER: a rocket that touched somebody but whose damage row
+				// the fire→damage join did not reach leaves no direct row and
+				// reads as a miss. That is the same exposure the pre-v75
+				// any-path count always had, and it is measured rather than
+				// assumed — against the verbatim KTX block, rl 99.8% of 632
+				// archive rows exact at 0.02% aggregate and gl 92.0% of 424
+				// at 3.79% (damagerecon/ACCURACY.md).
+				if w.Direct == nil {
+					continue
+				}
+				m = measuredAcc{hits: *w.Direct, convention: result.HitsDirectImpact}
+			default:
+				continue
+			}
+			if out[pa.Player] == nil {
+				out[pa.Player] = map[string]measuredAcc{}
+			}
+			out[pa.Player][w.Weapon] = m
+		}
+	}
+	return out
+}
+
+// measuredAcc is one weapon's wire-measured accounting on KTX'S scale: the
+// hit count, the convention it counts under, and — for the shotguns, whose
+// KTX counter is per PELLET on BOTH sides of the ratio — the attack count
+// that goes with it. A zero attacks means "keep the fire count", which is
+// KTX's own unit for every other weapon.
+type measuredAcc struct {
+	attacks    int
+	hits       int
+	convention string
 }
 
 // deriveLogins maps player name to the `*auth` login from userinfo — the
@@ -1214,65 +1529,30 @@ func longestMs(iv []result.Interval) int32 {
 }
 
 // isTeamplay reports whether this match had real teams, mirroring KTX's
-// isTeam() gate on the transfer counters. The serverinfo/countdown
-// teamplay cvar is the direct signal; the roster's duel verdict and a
-// team-membership count back it up on demos that carry neither.
+// isTeam() gate on the transfer counters. It is the mode descriptor's
+// TeamBased verdict (analyzer/gamemode.go), which resolves KTX's demoinfo
+// `tp`, the serverinfo / countdown teamplay cvars, the mode vocabularies and
+// the roster shape in that order — the precedence this function used to
+// carry inline, minus its own ad-hoc solo-mode table.
+//
+// The duel check stays in front of it: MatchAnalyzer can promote a
+// no-demoinfo two-player match to duel AFTER the descriptor was resolved,
+// and this post-processor runs later still, so the roster is the fresher
+// signal on exactly that population.
 //
 // KTX's own gate is the MODE (`k_mode == gtTeam`, ktx/src/g_utils.c:1581),
 // not the cvar, and the two disagree: an FFA server can run with
-// `teamplay 2` set — the ffa_5[dm4] demo in the test corpus does — and
-// then every player sits on their own "team" (often the empty string).
-// Trusting the cvar there made `DropperTeam == Team` trivially true and
-// invented a pack transfer for every backpack anyone picked up. So a mode
-// KTX would not count for is rejected before the cvar is consulted.
-func isTeamplay(res *Result, co *CoreOutputs) bool {
+// `teamplay 2` set and then every player sits on their own "team" (often the
+// empty string). Trusting the cvar there made `DropperTeam == Team`
+// trivially true and invented a pack transfer for every backpack anyone
+// picked up. The descriptor rejects a mode KTX would not count for before
+// the cvar is consulted, which is where that rule now lives.
+func isTeamplay(co *CoreOutputs) bool {
 	if co.IsDuel() {
 		return false
 	}
-	if res.Metadata != nil {
-		if ms := res.Metadata.MatchSettings; ms != nil {
-			if isNonTeamMode(ms.Mode) {
-				return false
-			}
-			if ms.Teamplay > 0 {
-				return true
-			}
-		}
-		if tp, ok := res.Metadata.ServerInfo["teamplay"]; ok {
-			return tp != "" && tp != "0"
-		}
-	}
-	// No cvar: fall back to the roster shape — teams exist and at least
-	// one holds more than a single player (an FFA scoreboard lists each
-	// player under their own colour, which is not teamplay).
-	if res.Match == nil {
-		return false
-	}
-	counts := map[string]int{}
-	for i := range res.Match.Players {
-		if t := res.Match.Players[i].Team; t != "" {
-			counts[t]++
-		}
-	}
-	for _, n := range counts {
-		if n > 1 {
-			return true
-		}
-	}
-	return false
-}
-
-// isNonTeamMode reports whether the countdown's Mode line names a mode
-// where every player fights alone, so "the dropper's team" is not a real
-// team. The names come from KTX's countdown centerprint (metadata.go
-// flattens "F F A" to "FFA"); anything unrecognised — including CTF, where
-// the teams ARE real — falls through to the cvar and roster checks.
-func isNonTeamMode(mode string) bool {
-	switch strings.ToLower(mode) {
-	case "ffa", "duel", "1on1", "race", "bloodfest":
-		return true
-	}
-	return false
+	gm := co.Mode()
+	return gm != nil && gm.TeamBased
 }
 
 // aggregateTeamRows sums the player rows per team. Hold shares are
@@ -1324,6 +1604,12 @@ func aggregateTeamRows(players []result.PlayerStatsRow, matchMs int32) []result.
 			row.Score.Kills = addPtr(row.Score.Kills, m.Score.Kills)
 			row.Score.Suicides = addPtr(row.Score.Suicides, m.Score.Suicides)
 			row.Score.TeamKills = addPtr(row.Score.TeamKills, m.Score.TeamKills)
+			// A streak belongs to one player, so the team figure is the best
+			// any member managed — the same max-over-members rule
+			// HoldStat.LongestMs follows. Summing them would invent a team
+			// streak nobody ran.
+			row.Score.MaxSpree = maxPtr(row.Score.MaxSpree, m.Score.MaxSpree)
+			row.Score.MaxQuadSpree = maxPtr(row.Score.MaxQuadSpree, m.Score.MaxQuadSpree)
 			row.Score.ByWeapon = addWeaponCounts(row.Score.ByWeapon, m.Score.ByWeapon)
 			row.Score.ByEnemyWeapon = addWeaponCounts(row.Score.ByEnemyWeapon, m.Score.ByEnemyWeapon)
 			row.Score.ByWeaponVsEnemyWeapon = addNestedWeaponCounts(row.Score.ByWeaponVsEnemyWeapon, m.Score.ByWeaponVsEnemyWeapon)
@@ -1440,6 +1726,23 @@ func addPtr(dst, src *int) *int {
 		return &v
 	}
 	*dst += *src
+	return dst
+}
+
+// maxPtr keeps the larger of two optional counters, preserving "absent" only
+// while every member is absent — the addPtr doctrine for a figure that is a
+// maximum rather than a sum.
+func maxPtr(dst, src *int) *int {
+	if src == nil {
+		return dst
+	}
+	if dst == nil {
+		v := *src
+		return &v
+	}
+	if *src > *dst {
+		*dst = *src
+	}
 	return dst
 }
 

@@ -118,6 +118,14 @@ in `mvd-analytics/analyzer/aim.go`; the tab only bins and paints. Target
 attribution: hits use the server-confirmed victim (exact in duels and team
 games alike); misses are exact in duels and a labeled nearest-crosshair
 heuristic in team games, only among enemies alive at the fire time.
+There is **one accuracy table per weapon**, in the order `lg`, `sg`, `ssg`,
+`rl`, `gl`, `ng`, `sng`, `axe`, skipping any weapon nobody fired. The axe
+takes the four generic columns the nailguns take (shots / hits / dmg /
+hit %): one swing sound per attack is all it carries (schema v71), with no
+spread, splash or beam to classify a miss by. It was missing from that list
+until now, which silently dropped every axe swing on the tab — 107 of them
+on one player in the committed corpus — even though the shot stream has
+carried them since v71 and the recon tier recovers their hits.
 A **Victims** filter (All / Enemy / Team / Self) slices every panel by who
 the shots hit — the tables read the Go-computed per-bucket counter slices
 (`WeaponAim.enemy/team/self`), the heatmaps/marginals filter samples by the
@@ -136,14 +144,61 @@ measured zero renders `0` and only an unmeasured split renders `-`.
 measured; where the self split is not (a KTX-block-without-stream demo)
 the cell shows a `≥`-prefixed lower bound whose tooltip names what is
 missing, never a silently partial total.
-The **Key Moments** tab has seven tables in a two-column grid — powerup
+**Hits / Hit % serve three states**, keyed off `aim.hitsMeasured` +
+`aim.hitsSource` (schema v73/v74). Measured (`hitsSource: "ktx"`) renders
+plainly. On a demo with no wire damage log the measured counters are
+withheld and the columns fall back to `weapons[].recon.hits` — the
+reconstruction's recovered count over the same fires, so it divides by the
+same `Shots` — rendered with the `.stat-recon` dotted underline and a
+tooltip naming what it is. Where neither answers, the cell is `—` and its
+tooltip says which of the two reasons applies: the tier covers
+lg/sg/ssg/axe/rl/gl and stops there (ng/sng are never recovered), and it
+carries **no victim split**, so the Victims filter drops back to `—`
+outside `All` rather than serving an all-victims number under an
+Enemy/Team/Self heading. `hits: 0` inside a present block is a real
+"linked nothing" and prints `0`.
+Every OTHER hit-derived column — the pellet block, full/partial/miss,
+direct/splash/missed, the LG miss types and all their % twins — is withheld
+by the analyzer on such a demo and now renders `—` too. It used to print a
+fabricated `0`, which beside a recovered 22% hit rate read as a measurement
+that contradicted it; the reconstruction recovers hit COUNTS only, never
+the breakdown of how a fire hit or missed.
+The **Key Moments** tab has ten tables — a two-column grid of powerup
 runs beside the longest frag streaks, **Top Damage Windows (10 s)**
-beside **Top RL Kills**, **Demo Markers** beside **Top LG Kills** — and a
-full-width **Airborne Rocket Gibs** table — enemy rocket hits on airborne victims
-(`timelineAnalysis.airgibs`), sortable by any column and defaulting to
-height-above-shooter descending (the vertical gap the rocket climbed).
-Its rows are empty unless the map's BSP is provisioned (height needs the
-clip hull; see `PositionTrack.h`). The **Demo Markers** table lists the
+beside **Top RL Kills**, **Demo Markers** beside **Top LG Kills** — and
+four full-width **highlight** tables read from the stored highlight
+catalogue (`result.highlights`, schema v76), where every row carries what
+each participant HAD at the instant (health/armor+type, tracked weapons,
+powerups, loc; `(spawn)` marks a victim whose spawn stats had not reached
+the wire, so the spawn state 100/0 is shown):
+
+- **Direct Rocket Air Hits** (`highlights.airgibs`) — direct enemy rocket hits on airborne
+  victims, lethal or not (the Lethal column's `gib` badge marks the ones
+  that killed), defaulting to height-above-shooter descending (the
+  vertical gap the rocket climbed). Its rows are empty unless the map's
+  BSP is provisioned (height needs the clip hull; see `PositionTrack.h`).
+- **Discharges** (`highlights.discharges`) — every LG water discharge with
+  evidence: the cells dumped, numeric Enemy / Team / Self kill columns, the
+  frag delta (enemy − team − self, KTX's scoring), the bounded given
+  damage split into enemy / team columns (every victim hit, killed or
+  not), and the victims split into Enemy / Team columns — one line per
+  victim (name, stack, gear; dimmed when hurt but not killed). Armor and
+  powerups carry the timeline's colors and caps ("180 RA", "Quad").
+  Default sort: kill value — killed enemies holding RL or LG, +1 more per
+  killed enemy with quad — then enemy kills, then bounded enemy damage.
+- **Quadbores** (`highlights.quadbores`) — self-kills by own rocket or
+  grenade while holding quad: quad left (30 s KTX quad minus the time
+  held), the quad's frags before the bore, the stack thrown away, anyone
+  the same rocket took along. Default sort: quad left descending.
+- **Telefrags** (`highlights.telefrags`) — every `tele` death: killer,
+  victim, relation, the victim's stack (the ranking scalar), gear, and the
+  kind (`telefrag` / `deflect` — the teleporter died on a pentagram holder,
+  shown as *survived* / `spawnicide`). Default sort: stack descending, with
+  the rows where the teleporter died last.
+
+All four are sortable by any column (`makeSortable`), seek the timeline on
+the time cell, and link the Hub replay from the actor's perspective. The
+**Demo Markers** table lists the
 user-inserted `/demomark` bookmarks (`timelineAnalysis.demoMarkers`) —
 Time, Player, Team, Note, and a Hub Watch link — so a viewer can jump
 straight to the moments players flagged in-game; it is routinely empty
@@ -195,8 +250,10 @@ sorts names A→Z and numbers biggest-first; clicking the active column
 flips it.
 
 The **Chat** tab has a **Hide team chat** checkbox that drops `say_team`
-lines (`event.type === 'teamsay'`) from the two chat columns; frags and
-public `say` are untouched, and the flag resets per demo load.
+lines (`event.type === 'teamsay'`) from the chat column(s); frags and
+public `say` are untouched, and the flag resets per demo load. Its columns
+are Kills plus one per side — or, in an individual layout that is not a
+duel, Kills plus a single "Chat" column (see *A mode with no teams* below).
 
 The Search tab is the first tab and is always available — it holds the
 file picker, the hub-URL load row, and the filter form for browsing
@@ -289,11 +346,25 @@ Two consequences worth knowing:
   where the `K` cell beside it is also `-`. Both weapon tables now scroll
   inside their own box (`.items-table-wrap`) at 25 columns.
 - **Basic Stats has `TDmg` between `Dmg` and `Taken`** — `damage.givenTeam`,
-  friendly fire DEALT. It is measured whenever the damage family is present,
+  friendly fire DEALT. It is measured whenever the damage family is present
+  (on `src: "reconstructed"` demos — pre-instrumentation, rebuilt damage —
+  read every damage figure as an estimate rather than a measurement: ~1%
+  median error **at full coverage**, and a FLOOR below it, since a
+  `damage.coverage.ratio` under 1 means the evidence never saw part of the
+  match at all. The panel banner prints that ratio — see "Reconstructed
+  damage" below),
   so `0` there is a real reading rather than a gap, and it is deliberately
   *not* folded into the victim's `Taken`-side story: this is what the player
   put into teammates, a different question from `TK` (which counts only the
   friendly damage that finished someone off). Always 0 in a duel.
+- **Basic Stats ends the kill block with `Spree` / `QSpree`** —
+  `score.maxSpree` / `score.maxQuadSpree` (schema v74), the longest kill run
+  between deaths and the longest run held under quad. They ride the kill
+  family's measuredness with everything else in it, so they render `-`
+  exactly where `Kills` does, and a team row carries the **best any member
+  ran, never a sum**. Our gate does not count a suicide as a kill where KTX's
+  does (teamplay off), so a duel or FFA row can read one lower than the
+  server's own `spree.max`; the `<th title>` says so.
 - **Absent is rendered `-`, never `0`.** A field the pipeline could not
   measure is omitted rather than zeroed, so the tables test for absence:
   the kill side of `score` (kills / suicides / teamKills / efficiency /
@@ -318,6 +389,329 @@ Two consequences worth knowing:
 - **The three "Per Team" tables hide when `playerStats.teams` is empty**
   (body class `no-team-rows`), which is FFA and duels — otherwise FFA
   rendered three headers over an empty tbody.
+
+### Reconstructed damage says so, above every table that rides it
+
+Roughly half the archive predates the server's `mvdhidden_dmgdone` log, and
+on those demos the damage section is **rebuilt** rather than measured
+(`damage.source: "reconstructed"`, schema v71). The WASM build reaches that
+path on every eligible demo — `registry.BuildShotStreams = true` in
+`cmd/wasm/main.go` is the precondition, and it is set unconditionally — so
+this is a normal state in the browser, not an edge case.
+
+Everything downstream inherits its evidence grade from that one field
+rather than carrying a copy: the Basic Stats damage columns, Weapon Stats'
+`Dmg` and `Acc`, the Aim tab's `Dmg` and recovered `Hits`, and the three
+damage-ranked tables on Key Moments (**Top Damage Windows**, **Top RL
+Kills**, **Top LG Kills** — their `Dmg`, `Hits` and `Return` figures are the
+same bounded family, read through `view.TopWindows` / `view.TopKills`). So
+one renderer (`damageProvenanceHtml`) states it once above each of those six
+panels, in a `.panel-provenance` banner — always visible, unlike the
+`More info` disclosures, because a reconstructed damage figure read as a
+measured one is the mistake the banner exists to prevent. Powerup Runs, the
+frag streaks and Demo Markers carry no banner: they are frag-log-only and
+show no damage-derived figure.
+
+The second line of the banner is `damage.coverage` (schema v74): how much
+of the frag-log-visible match the reconstruction's evidence actually
+accounts for. **`ratio` is printed as a magnitude, never thresholded** —
+the pipeline has no cutoff and neither does this; the only comparison in
+the code is against `1`, which is the definition of a complete section
+rather than a number the UI picked. A complete section reads "the evidence
+accounts for all N of the match's scoreable kills"; an incomplete one takes
+the amber `.warn` variant and reads "Damage evidence covers 23% of this
+match's kills (22 of 96 scoreable kills) — the figures below are floors,
+not measurements". Absent coverage on a reconstructed section is its own
+sentence ("the frag log named no scoreable kill, so … was not assessed"),
+because silence there would read as "complete". The printed percentage
+never reaches 100 while the ratio is below it: a near-complete section
+(one uncovered kill out of 200+, which is a normal 4on4) would otherwise
+round up to a bold "100%" inside the sentence saying it is incomplete, so
+`coveragePct` truncates to two decimals in that window instead.
+
+Per-weapon accuracy carries the same grade at cell level: a
+`playerStats.accuracy` family with `src: "reconstructed"` renders its `Acc`
+cells inside `.stat-recon`. `derived` and `ktx` do not — both are measured
+off the wire, and marking half the corpus would make the mark meaningless.
+
+### The `≠` on an Acc cell: two scales, one column
+
+The WASM entry point applies the KTX overlay (`view.PlayerStats`, in
+`withPlayerStatsOverlay`), so the `Acc` column serves whichever accuracy
+family the demo has — and they were not all counted the same way. KTX's
+own counter is direct impacts for `rl`/`gl` and PELLETS for `sg`/`ssg`;
+before v75 the `derived` family counted any fire that landed damage, on
+every weapon, which on `rl` is ~4.5× the KTX number. Same column, same
+`%`, different question — and the comparison people actually make is
+between two screenshots, where a tooltip does not exist.
+
+So a cell whose `hitsConvention` (v74) is not the one KTX uses for that
+weapon wears a **`≠`** in the text, with a footnote under the table that
+appears exactly when some cell wears it. The rule is per weapon, not per
+family (`ktxHitsConvention` mirrors `view.ktxHitsConvention`), and since
+v75 every computed tier publishes KTX's convention on every weapon but
+one, so the mark has shrunk from four cells to one. A KTX-overlaid family
+matches on every weapon and is never marked. A `derived` one is not marked
+at all here: its `rl`/`gl` publish direct impacts and its `sg`/`ssg`
+pellets. A `reconstructed` one is marked on **`sg`/`ssg` alone** (its
+`rl`/`gl` publish `recon.directHits`, v74), which is not an oversight — a
+reconstructed damage delta merges every hit landing on one instant, so
+dividing its magnitude into pellets would credit one shooter with
+another's.
+
+`gl` wore the mark on a `derived` row until v75 and is the interesting
+case, because the wire genuinely cannot answer its question: a grenade
+that touches a player detonates, and every damage row the server then
+writes is flagged splash, so counting non-splash `gl` rows off the wire
+reproduces 0.00% of the block's total. The touch is re-derived instead —
+from the grenade's tracked flight, its detonation point against the
+victim's hull and the 2.5 s fuse — by the same classifier a
+pre-instrumentation demo uses (92% of 424 archive player rows exact
+against the verbatim block). This build always parses with the projectile
+streams that classifier reads, so a `gl` cell here is always on KTX's
+scale; a payload from a parse without them says `anyDamage` and is marked
+like any other off-scale cell. Two `Acc` figures are comparable exactly
+when weapon **and** convention match; the full convention text stays in
+the tooltip.
+
+The Aim tab's `Hits` column is deliberately the OTHER number on those two
+weapons: it stands in for the withheld measured counter, which is an
+any-path count, so a reconstructed `RL` figure there reads higher than the
+Summary's `Acc`. The same split now exists on a wire-measured demo, where
+the Aim tab's `Hits`/`Hit %` are the any-path counters and the Summary's
+`Acc` is KTX's direct-impact question — the Aim tab's own `Direct` column
+is the number the Summary shows, on `GL` as well as `RL` since v75. Both
+are labelled; neither is a correction of the other. (A `GL` `Direct` can
+read ABOVE its `Hits`: it is a touch count from the flight geometry, not a
+subset of the fires the linker connected, so a touch whose fire went
+unlinked still counts and `Splash` floors at zero.)
+A reader with both on screen gets the reconciliation IN THE PAYLOAD, not
+only in the source: the Aim cell's tooltip on `rl`/`gl` names its own
+convention and the Summary number it differs from, with the size of the
+gap (~4x on RL, ~1.5x on GL — `RECON_ANYDAMAGE_NOTE`, appended to
+`RECON_ACCURACY_NOTE` for those two weapons only, since everywhere else
+the two conventions coincide and the sentence would invent a difference).
+
+Note that `getAccuracyClass` (`accuracy-high/medium/low`) is currently
+inert on these cells — the only rule for those classes is scoped to
+`#accuracy-table`, an id no longer in the DOM — so the colour thresholds
+are not, today, a second cross-convention trap. Anyone re-pointing that
+rule must scope the thresholds by convention first.
+
+### The match wall clock
+
+The Summary **Date** cell and the topbar date prefer KTX's own
+`demoInfo.date` — the server's stamp, to the second, with its zone
+printed. Where the demoinfo block does not exist (the pre-`ktxstats` half
+of the archive, which used to render `-`) they fall back to
+`streams.global.matchStartUnixMs`, the graded wall-clock anchor added in
+schema v72.
+
+**It is rendered in UTC and says "UTC" in the text.** The anchors are Unix
+epoch milliseconds and the schema publishes no local-time field on purpose:
+the stamp a demo carries was written in whatever zone the server ran in,
+and on the old half it carries no zone at all (read as UTC, `assumedUtc`,
+accuracy ±14 h). Rendering it in the viewer's zone would invent a precision
+the anchor does not have and would move the date under a reader in
+Auckland.
+
+The grade is visible, not just hoverable. `matchStartConfidence: "exact"`
+renders plainly; every other grade gets a leading **`~`**, and
+`contradicted` — the grade where a hard check failed — adds
+**`(disputed)`** after the stamp. Both are in the TEXT: the two hedged
+grades are also coloured (`.date-unverified` muted, `.date-contradicted`
+amber), but a colour alone is exactly what a screenshot in a channel and a
+colour-blind reader cannot tell apart, and this is a date somebody may
+write down. The anchor is never dropped or coerced on a bad grade — the
+schema grades rather than withholds, and so does the UI; source,
+`±accuracy` and `matchStartNote` all ride the tooltip.
+
+**Precision follows `matchStartAccuracyMs`, by magnitude.** A stamp printed
+to the minute claims a minute. The ±14 h `assumedUtc` grade puts the true
+instant anywhere in a 28-hour window, so an anchor accurate to an hour or
+worse prints the DAY plus its ± instead — `~2002-08-04 UTC ±14 h`, not
+`~2002-08-04 11:44 UTC`. Second-scale and tighter anchors keep the minute.
+`formatUtcStamp` switches on the number, like `formatAccuracyMs` beside it,
+so a new rung on the accuracy ladder needs no change here.
+
+### A mode with no teams (FFA, race — and every duel)
+
+`match.gameMode.teamBased` (schema v75) is the pipeline's one verdict on
+whether a player's team tag names a SIDE. When it is false the Go side lays
+the match out with one side per player — `match.teams` one row per player,
+every `players[].team` equal to the player's own name, the raw clan tag kept
+on `players[].rawTeam` — which is the layout duels have always produced.
+
+**Two questions, two predicates.** The frontend asks "is every player their
+own side here?" (LAYOUT) and "was the teamplay ruleset in force?"
+(SEMANTICS), and they have different answers on the same demo — a 1v1 on a
+CTF server is laid out individually and genuinely was teamplay. So:
+
+| Question | Helper | Reads | Decides |
+|---|---|---|---|
+| Layout | `isIndividualLayout(result)` | `match.sources.teams === 'individual'` — authoritative, no fallback: the page only ever renders the Result its bundled WASM just produced from a `.mvd` (index.html `accept`), so a Result is always at this build's schema version | Which panels exist, which palette, the scoreboard shape |
+| Semantics | `isTeamBasedMode(result)` | `match.gameMode.teamBased === true` — same, no fallback | Whether a same-team quantity can exist |
+| Field | `isMultiPlayerIndividual(result)` | `isIndividualLayout && !isDuel` | The one test behind the player palette, the per-player Timeline and the single-column Chat (`individual-field` on `<body>`, set by `setIndividualFieldLayout`) |
+| Both | `hasTeammates(result)` | teamplay in force AND not laid out per player | The aim tab's Team victim filter |
+
+`displayResults` puts an `individual-mode` class on `<body>` from the LAYOUT
+predicate. The CSS then hides **every team surface**: the Teams panel, the
+"Per Team" aggregates in all three tabs, and the scoreboard's `Team` column
+(a copy of `Player`) plus `TK` / `TDmg`, which are structurally 0 when
+nobody has a teammate. Region control is not driven by that class:
+`initRegionControl` hides its two panels itself whenever the layout is
+individual and not a duel (`isMultiPlayerIndividual`), because the result
+ships `timelineAnalysis.regionControl.regions` (the region GEOMETRY, a
+property of the map) for every demo — the panels are NOT hidden by a
+missing-data gate, and before this they rendered an editor whose Apply
+button only logged a warning. A two-participant match keeps them: it has two
+sides.
+
+**Colours in a field of players come from a different palette.**
+CLAUDE.md's rule stands, including its stability property: `TEAM_COLORS[i]`
+is the colour of `timelineState.teams[i]`, every surface indexes that one
+array, and WHICH palette entry lands at each index is decided by NAME, never
+by rank, so the colours do not move when the scoreline does.
+
+A **duel** is unchanged from before individual modes existed: two players
+are a matchup, so it keeps `assignTeamColors` and the four-entry team
+palette (`red`/`blue` claim their own entries, the rest go in name sort
+order). Only an individual layout with MORE than two players switches
+palettes — `timelineState.teams` is then the frag-sorted PLAYER list (each
+row's `team` IS its name, so every existing `teamOrder.indexOf(row.team)`
+lookup resolves unchanged) and `setCanonicalTeams` fills the array via
+`assignPlayerColors`, twelve `PLAYER_PALETTE` entries handed out in name
+sort order. Four entries do not cover a field of eleven; assigning them by
+frag RANK instead recoloured the whole board when the result changed.
+
+The topbar names the leader and the field size (`toast 33 · 8 players`)
+rather than inventing an "A vs B" matchup; a two-player individual match — a
+duel, or a 1v1 FFA — still renders as "A vs B", which is what it is.
+
+**The Timeline tab drops its two-sided views.** Team Status and the Score /
+Weapons / Team Health/Armor diverging graphs are structurally two-sided: they
+draw `timelineState.teams[0]` against `[1]`. On a duel that is the whole
+match; on a multi-player FFA it is the top two PLAYERS and nobody else. So
+when the layout is individual and not a duel —
+`isMultiPlayerIndividual(result)`, i.e. `isIndividualLayout && !isDuel`,
+where `isDuel` needs exactly two `playerStats` rows, so a lone player takes
+this layout too; the same test `initRegionControl` and the palette apply — `setIndividualFieldLayout` puts an `individual-field` class
+on `<body>`, and the tab becomes the per-player views:
+
+- CSS hides Team Status and the three A↑/B↓ graphs, which takes their
+  Team A / Team B legends with them.
+- The three per-player drill-downs leave their collapsed `<details>` and
+  become panels of their own, in order: **Frags / deaths per player**,
+  **Weapons per player**, **Health / armor per player**. The live nodes are
+  RE-PARENTED into the panel bodies, never cloned — they own the canvases and
+  the `_sig` / `_cells` rebuild cache, and a second copy would render into a
+  detached tree. The selected-range label rides along from the Weapons
+  heading. The move reverses on the next demo load: `resetUIToCleanState`
+  restores the two-sided layout, then `applyDuelModeUI` re-promotes if the new
+  demo wants it, so an FFA → 4on4 → duel walk lands on the right layout each
+  time.
+- Rows are taller there — mini charts 44 → 60 px, weapon-span rows 20 → 28 px
+  (`ppMiniHeight` / `ppSpanRowHeight`) — since these three views now carry the
+  tab instead of hiding under a graph.
+- `timelinePlayersByTeam` returns one group per entry in
+  `timelineState.teams` instead of always two, so EVERY player gets a row.
+  Before, only the players whose team matched `teams[0]` / `teams[1]` did —
+  in an individual layout that is two of N. Group index is still the
+  `TEAM_COLORS` index, so the rows carry the player palette exactly as
+  CLAUDE.md's rule requires. A player's side is their own name there, so no
+  roster lookup is involved.
+- **Powerups is hidden.** Its rows are per powerup TYPE, coloured by which of
+  two TEAMS holds it, so a field of N paints the top two and greys every
+  other run as `other`. `updatePowerupTimeline` hides the panel itself, the
+  way `initRegionControl` hides region control. Colouring those spans per
+  player is separate work.
+
+A duel (or a 1v1 FFA) is A-vs-B and keeps every panel exactly as before.
+
+**The Chat tab collapses to one chat column.** Its three columns are Kills,
+`teams[0]` chat and `teams[1]` chat — a column per side, which is a column
+per player only in a duel. In a field of eight, six players' say lines were
+split into no column at all and simply did not render. So on the same test —
+`isMultiPlayerIndividual(result)` — the same `individual-field` body class
+that drives the Timeline also:
+
+- CSS hides `#team-b-chat-header` and `#team-b-messages`. Both remaining
+  columns are `flex: 1`, so Kills and Chat split the width; nothing is moved
+  or cloned, the hidden container just stays empty.
+- `buildFullChat` pours EVERY say line — `say` and `say_team` alike — into
+  the one column in time order. In an FFA a `say_team` reaches only the
+  players sharing the speaker's clan tag, which makes it narrower than public
+  chat but still chat; it keeps its own colour (`.chat-time-marker-msg
+  .teamsay`), so the two read apart in the single column.
+- Each row is prefixed with the speaker's name (`.chat-speaker`), coloured by
+  `chatSpeakerColor` = `TEAM_COLORS[timelineState.teams.indexOf(player)]` —
+  CLAUDE.md's canonical index, so a name here is the colour that player
+  carries on the scoreboard, the map and the timeline; a speaker who is not
+  in that list (a spectator under `sv_spectalk 1`, a mid-match rename) gets
+  neutral grey rather than being dropped. With two sides the column heading
+  said who was talking; with eight players nothing else does.
+  The Kills column is unchanged — obituaries name their own players.
+- The heading becomes plain **Chat**. `displayTimelineAnalysis`'s
+  `${teams[0]} Chat` write is skipped while the class is on — it re-runs from
+  `applyDeferredBuckets` long after `applyDuelModeUI`, so the body class, not
+  the result, is what the render paths read.
+- **"Hide team chat" stays.** It filters on message TYPE (`say_team`), not on
+  side, so it keeps its meaning here.
+- Reverses with the Timeline layout: `resetUIToCleanState` calls
+  `setIndividualFieldLayout(false)` and restores the default titles, then
+  `applyDuelModeUI` re-applies for the new demo.
+
+The time axis, the current-time line and scroll-to-current-time are unchanged
+— the axis is its own column and the line spans the scroll inner, so neither
+depends on how many message columns there are.
+
+### A recording with no match in it
+
+`result.noMatch` (schema v74) is present exactly when `streams` is absent —
+2.03% of the archive. Every stream-fed panel is empty on such a demo, and
+the tab used to render headers over nothing with an "Analysis complete!"
+status, indistinguishable from a bug.
+
+`displayNoMatch()` now renders the marker's own story at the top of the
+Summary tab: a reason-appropriate heading (the five `reason` values are a
+total partition, so the title map is exhaustive by contract), the marker's
+`detail` sentence verbatim — it is **display-only** by contract, unstable
+wording that is never parsed, and every fact in it is a structured field
+beside it — and those fields as an evidence grid: status at demo open
+(`not sent` where the opening dump carried no `status` key at all, which is
+a different reading from any value it could have had), whether the match
+clock was ever seen running, the game dir, the frag-log kill count (`0` is
+the reading that *defines* `noPlayRecorded`, so it always prints) and the
+first usable `dateMarkers` entry, since the whole date family rides here
+instead of `streams.global` on such a result.
+
+Under that sentence sits the **plain reading**: what the finding means for
+the person holding the file, and an action where one honestly exists. Only
+`demoUnreadable` has one — of the 20 such demos in the archive sweep, 16
+abort within the first 16 bytes on a "block size" that is plainly ASCII text
+(`us\0C`, `rdem`, `le n`), 2 on a `dem_cmd` no MVD carries and 2 on an
+unexpected EOF, so the file is either not an MVD or a truncated one and a
+fresh download is a real fix. Nothing a reader can do makes a recording that
+started mid-match contain its own start, so the other four reasons
+translate and stop there. A second line rides the **gamedir** rather than
+the reason ("This looks like a fortress demo; this tool analyzes KTX-style
+QuakeWorld matches"), because that is where the foreign content sits: 165
+of the 170 `noMatchDeclared` demos in the sweep name a non-`qw` gamedir,
+`fortress` alone 148 of them, and the same mods turn up under three of the
+other reasons. The pipeline's own `detail` strings are untouched — they are
+the finding, and display-only by contract either way.
+
+It is deliberately **not** styled as an error. `errors[]` means the
+pipeline failed; the marker means the demo holds no match. They coincide on
+exactly one reason, and there — `demoUnreadable` — the panel also prints
+the reader's own message. The load status line likewise drops to the
+neutral `status` class rather than the red `status error`.
+
+The body class `no-match` hides the four Summary panels fed by `streams`
+(Basic Stats, Weapon Stats, Item Pickups, Kills by Weapon); Match Info,
+Match Settings and Server Info stay, because they have something to say.
+The Teams box is hidden only when the frag log named no teams either — a
+mid-match recording often carries a real scoreline.
 
 `cmd/wasm/main.go` also exports `getDemoInfo()`, which returns just the
 KTX demoinfo summary (`result.DemoInfo` — map, players, teams, scores,
@@ -411,8 +805,11 @@ The Search tab queries the same Supabase `v1_games` table that the
 hub-loader uses (so no backend of our own) and lets the user filter by
 player, team, map, mode (1v1 / 2v2 / 4v4 / FFA / CTF), game tag, and
 date range. All filters are AND-combined, empty fields act as
-wildcards, and the latest 20 matches sorted by date descending are
-listed. Clicking a row downloads the demo and runs the normal analysis
+wildcards, and matches are listed sorted by date descending in pages
+of 100. A footer under the list shows "N of M matches" (M is the exact
+total, from PostgREST's `count=exact` Content-Range) with a **Load
+more** button that appends the next offset page until every match is
+shown. Clicking a row downloads the demo and runs the normal analysis
 pipeline; the user lands on the Summary tab.
 
 Search state is reflected in the URL so links are shareable. Supported
@@ -497,8 +894,40 @@ joined with its pickup outcome. The drop side comes from
 `result.backpacks`; the pickup side from `result.weaponPickups` entries
 with `source == "backpack"`, joined on `(backpackEnt, dropTime)` —
 the compound key is needed because QW servers recycle backpack
-edict numbers across drops, so `entNum` alone would collide. A drop
-with no matching pickup is shown as `expired`.
+edict numbers across drops, so `entNum` alone would collide. A drop with
+no matching pickup is shown as `expired` only when KTX announced the
+removal itself — `//ktx expire <ent>`, which reaches the frontend as the
+drop row's own `fate: "expired"` (schema v72). Otherwise it is
+`unobserved`: over the archive that hint accounts for barely half the
+pickup-less drops, the rest being packs the recording simply ended on top
+of, and the table used to call all of them expired.
+
+On demos older than KTX 1.38 the drop side is RECONSTRUCTED rather than
+hinted (`backpacks[].source == "reconstructed"`, schema v72), and there is
+no `//ktx bp` for it to join to. Those rows carry their pickup side on the
+drop row instead — `fate` / `picker` / `pickerTeam` / `pickupTime`, read
+off the wire's backpack-entity track — and `packDropPickup()` adapts those
+fields into the same row shape the join produces, so one renderer, one set
+of filters and one Picker column serve both provenances.
+
+Two things stay different on a reconstructed row, because the wire cannot
+say them: the status chip is a plain `picked` rather than
+`xfer`/`enemy`(`RL`/`LG`), since `hadBefore` is not derivable (KTX ORs the
+weapon bit in, so a redundant grab leaves no trace); and the `Kills`
+column renders `-` rather than `0`, since kill credit needs `hadBefore`
+too. `unobserved` survives as the honest residual — "the wire did not
+answer", which is a different fact from `expired`'s observed "nobody took
+it".
+
+An EMPTY tab on such a demo is ambiguous and must not be captioned as a
+refusal: an absent `backpacks` section means either that no RL/LG pack
+dropped or that the reconstruction stood down (frozen weapon state, no
+frag log, a fairpacks / yawnmode / bloodfest ruleset), and the Result
+shape does not distinguish the two.
+
+Drop markers on the map overlay sit where the pack sat: `origin` is the
+victim's position less the 24 units KTX drops the pack by
+(`ktx/src/items.c:2703-2704`), on both provenances.
 
 The "RL / LG only" scope is a wire-protocol limit, not a UI
 decision: KTX's `//ktx drop` and `//ktx bp` directives fire only
@@ -520,14 +949,23 @@ Status column derivation:
 
 | condition                               | label        |
 |-----------------------------------------|--------------|
-| no matching pickup                      | `expired`    |
+| drop `source == "reconstructed"`, `fate == "picked"` | `picked`     |
+| drop `source == "reconstructed"`, `fate == "expired"` | `expired`    |
+| drop `source == "reconstructed"`, any other `fate`    | `unobserved` |
+| no matching pickup, `fate == "expired"` (the `//ktx expire` hint) | `expired`    |
+| no matching pickup, no `fate`           | `unobserved` |
 | same team as dropper, picker !hadBefore | `xfer`       |
 | same team as dropper, picker hadBefore  | `xfer RL/LG` |
 | enemy team, picker !hadBefore           | `enemy`      |
 | enemy team, picker hadBefore            | `enemy RL/LG`|
 
+The reconstructed branch is decided by `source`, not by "did a pickup row
+join" — a reconstructed drop's `entNum` is a real edict now, and reading a
+join failure as `expired` there would restate a fact the wire never gave.
+
 The `Kills` column is `weaponPickups[i].kills` — frags the picker
-scored with the pack's weapon before their next death. Only
+scored with the pack's weapon before their next death (`-` on a
+reconstructed row, which has no kill credit). Only
 pickups that actually granted the weapon (the picker didn't have
 it yet) are eligible for kill credit; redundant grabs — where
 `hadBefore` is true and the pickup didn't give the picker anything

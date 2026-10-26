@@ -42,6 +42,12 @@ func (m *moverTrack) atCursor(tMs int32, cur *int) (org [3]float32, visible bool
 }
 
 func (m *moverTrack) append(tMs int32, org [3]float32, visible bool) {
+	// Drop samples with a non-finite origin (seen in some
+	// pre-instrumentation demos): they poison the floor-height and LOS
+	// probes downstream, and encoding/json refuses NaN/Inf.
+	if !finiteVec3(org) {
+		return
+	}
 	m.t = append(m.t, tMs)
 	m.org = append(m.org, org)
 	m.vis = append(m.vis, visible)

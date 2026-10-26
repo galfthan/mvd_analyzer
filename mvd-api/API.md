@@ -87,17 +87,19 @@ present, is a **constant `"ms"` self-description echo**:
 > all — `/loc-table`, `/metadata`, and the no-time artifacts
 > (`/artifacts/{metadata,map-entities}`) — carry no echo.**
 
-The four formerly bare-array endpoints wrap their array in an object so
-the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/airgibs` →
-`{timeUnit, airgibs:[…]}`, `/backpacks` → `{timeUnit, backpacks:[…]}`,
-`/weapon-pickups` → `{timeUnit, pickups:[…]}`.
+The three formerly bare-array endpoints wrap their array in an object so
+the echo has a home: `/chat` → `{timeUnit, messages:[…]}`, `/backpacks` →
+`{timeUnit, backpacks:[…]}`, `/weapon-pickups` → `{timeUnit, pickups:[…]}`.
+`/highlights` is the multi-list form of the same idea: `{timeUnit, kinds,
+preMs, discharges:[…], quadbores:[…], telefrags:[…], airgibs:[…]}`, all
+four lists always present.
 
 **Field-name conventions — the dense/sparse key rule.** The per-item
 time key follows what the data scales with; both spellings are int32 ms
 (the name never encodes the unit). **Event-scaled** sparse lists and
 singleton timestamps carry the descriptive **`time`**: the event lists
 (`/frags`, `/damage`, `/shots`, `/chat`, `/backpacks`,
-`/weapon-pickups`, `/airgibs`), `/events` rows, `/buckets?layout=row`
+`/weapon-pickups`, `/highlights`), `/events` rows, `/buckets?layout=row`
 rows, `/state-at`'s envelope, and `/items?summary=true`'s `firstTake`.
 **Sample-rate-scaled** dense arrays carry the terse **`t`**: `/aim`'s
 crosshair `t` + `lgRamp` `since`, the columnar `/buckets` grid, and the
@@ -132,7 +134,17 @@ and `/metadata` — carry no echo because there is no time value to unit.
 
 `/overview`'s `timing` block is consistent with the rule: its wall-clock
 fields are explicitly `*Ms`-named (`demoOffset`, `demoStartUnixMs`,
-`demoStartAccuracyMs`, `pauses[].atMs`/`.durationMs`).
+`demoStartAccuracyMs`, `matchStartUnixMs`, `matchStartAccuracyMs`,
+`matchEndUnixMs`, `pauses[].atMs`/`.durationMs`).
+
+To answer *when a match was played*, read `timing.matchStartUnixMs`
+(schema v72) rather than `demoStartUnixMs`: it comes from the date
+markers the server printed on the wire, so it is present on ~95% of demos
+where the server-clock anchor reaches ~25%. It is graded, not filtered —
+check `matchStartConfidence` (`exact` / `unverified` / `contradicted`)
+and, when it is not `exact`, `matchStartNote`, which names the check that
+failed (typically an unset server clock stamping a date before its own
+binary was released).
 
 **Query inputs follow the same rule**: `from`/`to`/`time` on demo
 endpoints are **integer milliseconds**. A non-integer value (e.g.
@@ -176,14 +188,15 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   and rejects an unknown token with `400 invalid_param` (naming the valid
   set) rather than matching nothing: core codes are `rl,lg,gl,ssg,sng,ng,
   sg,axe`; `/damage` also takes the pseudo-codes `tele`/`stomp` (positional
-  kills) plus death-type/environmental codes (`explobox,squish,lava,slime,
-  drown,fall,trigger,suicide,unknown`); `/frags` also takes the obituary
-  cause codes (`hook,rail,squish,fall,lava,slime,water,world,tele,stomp,
-  unknown,suicide,teamkill`); `/backpacks` accepts only `rl,lg`;
+  kills) plus death-type/environmental codes (`hook,explobox,squish,lava,
+  slime,drown,fall,trigger,suicide,unknown`); `/frags` also takes the
+  obituary cause codes (`hook,rail,squish,explobox,fall,lava,slime,water,
+  world,tele,stomp,unknown,suicide,teamkill`); `/backpacks` accepts only
+  `rl,lg`;
   `/weapon-pickups` only `ssg,ng,sng,gl,rl,lg`. On `/top-windows` the
   vocabulary follows the chosen `metric`'s **own source** — the frag one for
   `frags`/`deaths`/`netFrags`, the damage one for the damage metrics, and
-  fire-derived `rl,lg,gl,ssg,sng,ng,sg` for `shots`/`hits` — so `weapons=lava`
+  fire-derived `rl,lg,gl,ssg,sng,ng,sg,axe` for `shots`/`hits` — so `weapons=lava`
   is meaningful on `metric=deaths` and a 400 on `metric=shots`. On
   `/top-kills` it filters the **killing** weapon (which is also the burst's
   own weapon) against the burst-capable subset only — `rl,lg,gl,ssg,sng,ng,
@@ -195,6 +208,21 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   no emitted token changed). The pre-16.2 singular
   spelling `weapon` remains an accepted legacy alias; `weapons` wins when
   both are present.
+- **`kinds`** (`/highlights`) — CSV of `discharge`, `quadbore`, `telefrag`,
+  `airgib`; omit for all four. The unrequested lists still come back,
+  empty, and the envelope's `kinds` echoes what applied. An unknown kind
+  400s. `players` on `/highlights` keeps rows whose **actor or a victim**
+  is named.
+- **`preMs`** (`/highlights`) — the pre-hit look-back in ms (default 100,
+  range `0..1000`): an airgib victim must read clear air (at or above the
+  airborne height threshold) at every pre-impact sample of
+  `[hit − preMs, hit − 40ms]` — the tick preceding the window decides when
+  it holds no sample (old coarse-tick demos) — and no sample beside the
+  hit may read ground contact. Samples near the damage stamp can already
+  carry the rocket's own knockback, which over-reports height but cannot
+  fake a grounded reading. `preMs=0` turns the pre-hit gate off (the
+  pre-v72 rule); the default serves the stored list, any other value
+  recomputes. Every response echoes the effective value.
 - **`reducers`** (`/buckets`) — comma-separated `field=name` pairs, e.g.
   `reducers=h=min,a=last`. Names come from the reducer registry in
   RESULT_SCHEMA.md.
@@ -232,7 +260,8 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   additive `bounded` fields). The default is **`bounded`** for both
   summaries and the full log (effective damage is what the scoreboard
   means; raw overkill is the opt-in). A *defaulted* request on a demo
-  whose reconstruction was skipped (midair / instagib / dmgfrags modes)
+  whose reconstruction was skipped (`skipped:*` — midair / instagib /
+  dmgfrags / the clan-arena family ca / wipeout / ra / lgc / race)
   falls back to `raw`; an *explicit* `dmg=bounded` there is a
   `422 bounded_unavailable`. Unfiltered bounded summaries source the
   per-player figures from KTX's exact scoreboard (`boundedSource: "ktx"`).
@@ -249,6 +278,51 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   envelope `dmg` / `boundedMode`, exactly as `/damage` does; read `dmg`
   rather than assuming the default took. Both echoes are absent only on a
   demo with no damage stream at all (`measured.damage: false`).
+
+  **Damage provenance (`source`, schema v71).** `/damage` responses carry
+  `source: "ktx"` when the log was decoded from the wire's damage stream
+  (raw per-hit values measured; bounded is arithmetic over them) or
+  `source: "reconstructed"` when the demo
+  predates that instrumentation and the section was rebuilt from the
+  state streams (health/armor deltas + beams / projectile flights / fire
+  sounds / position tracks / the frag log). Reconstructed magnitudes are
+  near-exact; attribution is best-effort — treat per-player match totals
+  as ~1% estimates and prefer aggregates over individual hits (accuracy
+  tables: `mvd-analytics/damagerecon/ACCURACY.md`). That ~1% assumes the
+  recording carried the evidence, so a reconstructed section also carries
+  **`coverage`** (schema v74) — `{kills, covered, ratio}`, the share of
+  the frag log's weapon kills whose damage it accounts for. **Read it
+  before quoting a reconstructed figure as a match total**: a small class
+  of archive recordings barely broadcast the health/armor stat channel,
+  and `ratio` is what distinguishes a quiet match from a section that is
+  a fraction of the frag-log-visible one. Measured over the full
+  10 702-demo sweep: 99.0% read ≥ 0.95 (median 1.000), 0.80% are that
+  broken class (0.182 median, 0.488 worst), 0.18% fall between them
+  spanning 0.500–0.944 — a hard bimodal core with a thin gradient tail,
+  so read `ratio` as a magnitude, not as a two-valued flag. **Its
+  denominator is the frag log**, which bounds what it can see: a loss
+  that removes obituaries and damage evidence TOGETHER — a recording that
+  starts late, a hole in the stream, a demo cut short — shrinks `kills`
+  and `covered` in step and reads a clean 1.000 over the surviving
+  fraction. Check the match clock and `/demoinfo` / `//finalscores`
+  against that; `coverage` answers how much of the frag-log-visible match
+  is in the section, not whether the recording was complete. It is also
+  one number for the whole demo: it does not localize to a player, so a
+  mid-band figure may be one unobserved victim beside a perfect one.
+  Nothing is gated on it. Absent on `source: "ktx"`, whose coverage would
+  be the constant 1, and on a reconstructed section whose frag log names
+  no scoreable kill — there the absence means completeness was never
+  assessed, not that it was zero. Whole-match like `source` itself — a
+  filter carries it through unrescoped. Distinct from
+  `boundedSource` above, which records the KTX-scoreboard substitution
+  WITHIN a KTX-sourced summary. The raw temp-entity evidence behind the
+  reconstruction (detonation points, blood telemetry) is itself
+  browsable at `/streams/point-effects`. Only `/damage` (and `/player-stats` via
+  its `src` labels) echoes provenance in-band; the other damage-shaped
+  endpoints (`/top-kills`, `/lives`, `/top-windows`, `/buckets`,
+  `/events`) serve reconstructed figures WITHOUT a marker on old demos —
+  check `/damage`'s `source` (or `/player-stats` `src`) when the grade
+  matters.
 - **`time`** — match-relative **integer milliseconds**; **required** on
   `/state-at`. A non-integer value 400s `invalid_param` with an `(integer
   milliseconds)` hint.
@@ -273,9 +347,11 @@ every endpoint. Enum-valued params likewise reject an unknown **value** with
   the `from`/`to` window, `players`/`fields` scoping, and `summary`.
   `limit`/`offset` pagination applies only to the game-discovery
   endpoint `GET /v1/games/search` (page until `offset + count >= total`).
-  There `limit` defaults to 20 (omit the param) and is capped at 100 — an
-  explicit `limit=0`, a `limit` above 100, or a negative `limit`/`offset`
-  is rejected with `400 invalid_param` (no longer silently clamped).
+  There `limit` defaults to 20 (omit the param) and is capped at 1000 —
+  the hub's own PostgREST page ceiling, so a bigger single page is
+  impossible upstream. An explicit `limit=0`, a `limit` above 1000, or a
+  negative `limit`/`offset` is rejected with `400 invalid_param` (no
+  longer silently clamped).
   `/top-windows` and `/top-kills` also take a `limit`, but as a **ranking
   cut-off, not a page**: there is no `offset` and no next page, because the
   response is already the top *n* of a total order. It defaults to 10 (20 on
@@ -314,7 +390,11 @@ looking up). These `vp`/`vya` view angles (and `/state-at`'s `view`) are
 **raw angle16 wire shorts**; contrast `/aim`'s `dyaw`/`dpitch`, which are
 already **float degrees** off the target. Floor height is `hgt`; liquid state is `lq`;
 **velocity** (vx/vy/vz, Quake units/sec, schema v32) is `vel`.
-Height/liquid no longer ride along `pos` — request each by code.
+Height/liquid no longer ride along `pos` — request each by code. The
+**wielded weapon** (schema v72) is the opt-in `aw` field: the victim's
+`STAT_ACTIVEWEAPON` `IT_*` bit — 1 SG, 2 SSG, 4 NG, 8 SNG, 16 GL, 32 RL,
+64 LG, 4096 axe, 0 nothing held — which is a different question from the
+`rl`/`lg`/… inventory intervals.
 Note (schema v33+): the coordinate values `pos` x/y/z, `vel` vx/vy/vz,
 and `hgt` are **`float32`** Quake units (sub-unit precise — earlier
 versions rounded them to whole `int32` units), so expect fractional
@@ -326,21 +406,26 @@ so a value reads `-58.333`, not `-58.333332`. The point-in-time
 not rounded). Only the **time axes** stay int32 ms (above). The `hgt`
 no-floor sentinel is `-1000000000` (was `-2147483648`).
 
-### 2.3 Caching (use it — the data is immutable)
+### 2.3 Caching (store, but revalidate every use)
 
 Successful 2xx responses on the **per-demo** endpoints set:
 
 ```
-Cache-Control: public, max-age=86400, immutable
+Cache-Control: no-cache
 ETag: "<sha>-v<schemaVersion>"
 X-Schema-Version: <n>
 X-Cache: HIT | WARM | MISS
 ```
 
-A demo's analysis never changes for a given schema version, so frontends
-should cache aggressively and send `If-None-Match: "<etag>"` for a cheap
-`304`. A schema bump changes the ETag suffix and invalidates client
-caches automatically.
+`no-cache` does **not** mean "don't store" — it means a stored copy must
+be revalidated before every use. Keep the body cached and send
+`If-None-Match: "<etag>"` on each request: a demo's analysis never
+changes for a given schema version, so the normal answer is a cheap
+`304`. Because the ETag embeds the schema version, that mandatory
+revalidation is also a version check — a deploy that bumps the schema
+misses the ETag and the client re-downloads the new shape immediately,
+instead of serving a stale one out of cache (which the previous
+`max-age=86400, immutable` policy allowed for up to a day).
 
 Two families carry a **different ETag shape**:
 
@@ -386,15 +471,15 @@ Non-2xx responses use a stable envelope:
 | 422 | `playerstats_unavailable` | parse degraded to no player streams. **Not** raised for a missing KTX block — `/player-stats` serves those normally |
 | 422 | `metadata_unavailable` | no fullserverinfo / countdown centerprint |
 | 422 | `frags_unavailable` | no frag log |
-| 422 | `damage_unavailable` | no KTX `mvdhidden_dmgdone` damage stream |
-| 422 | `bounded_unavailable` | `dmg=bounded` on a demo whose bounded reconstruction was skipped (midair / instagib / dmgfrags mode) |
+| 422 | `damage_unavailable` | no damage section at all: no KTX `mvdhidden_dmgdone` stream AND the reconstruction stood down (no player streams, or a midair/instagib/dmgfrags mode). Since schema v71 pre-instrumentation demos normally serve a **reconstructed** section instead of this 422 — check the response's `source` field (see "Damage provenance" in §2) |
+| 422 | `bounded_unavailable` | `dmg=bounded` on a demo whose bounded reconstruction was skipped (`skipped:*` mode — midair / instagib / dmgfrags / ca / wipeout / ra / lgc / race) |
 | 422 | `shots_unavailable` | no shot data (no weapon fires decoded) |
 | 422 | `aim_unavailable` | no aim data (needs shots + position/view streams) |
 | 422 | `locgraph_unavailable` | no position track |
 | 422 | `los_unavailable` | `/los` on a map with no usable visibility BSP (no map name, BSP not provisioned, or a provisioned BSP that fails to parse) — never cached, so a retry after provisioning succeeds |
 | 422 | `opening_unavailable` | no detected match start (`/v1/demos/{id}/artifacts/opening`) |
 | 422 | `region_control_unavailable` | no region-control layout for this map |
-| 422 | `airgibs_unavailable` | no timeline analysis (BSP-less maps return `[]`, not this) |
+| 422 | `highlights_unavailable` | no highlight catalogue — the demo has no match streams or no frag log to build one from (a match with no discharges / quadbores / telefrags / airgibs returns four `[]`, not this) |
 | 422 | `top_windows_unavailable` | no source stream for the chosen `metric` (frag log / damage stream / shot stream). Missing loc data only omits `locs`/`eventLocs` — it does not raise this |
 | 422 | `lives_unavailable` | no per-player streams to segment into lives, **or** streams on none of which liveness was measurable (serving `lives: []` there would read as "nobody ever lived"). A missing damage stream does **not** raise it — `/lives` serves those demos with the damage fields at measured zero |
 | 422 | `top_kills_unavailable` | no frag log, no damage log, **or** no measurable liveness — the burst walk is clipped by the victim's current life start, and without that clip the top-ranked rows are exactly the contaminated ones |
@@ -415,7 +500,9 @@ syntactic parsing or view-layer validation.)
 
 **Available vs unavailable — the `422` rule.** A `422 <section>_unavailable`
 means the demo **structurally lacks the signal** that section needs — a
-non-KTX server has no `demoinfo`/`damage`, a demo without a position track
+non-KTX server has no `demoinfo` (and only a `skipped:*`-mode or
+stream-less demo lacks `damage` — the reconstruction covers most
+pre-instrumentation ones), a demo without a position track
 has no `loc-graph`, a map without a region layout has no `region-control`.
 These are **expected** for some demos; treat them as "this panel is
 unavailable for this demo", not a hard failure. Better still, **don't
@@ -424,8 +511,28 @@ each mirroring the very predicate behind that view's `422`, so a `false`
 there is exactly the `422` you would have received. It is the only way to
 learn the BSP-derived ones (`height`, `liquid`, `los`) — those turn on the
 server's map provisioning rather than on the demo, so the same demo answers
-differently on two deployments. Use it (with `errors`) to hide panels up
-front. Endpoints whose data
+differently on two deployments. Use it (with `errors` and, for
+reader-level gaps, `parseWarnings`) to hide panels up front.
+
+When almost every flag reads `false` at once, look at **`noMatch`**
+(schema v74) before concluding anything went wrong — and read it before
+`errors` / `parseWarnings` in general, since it decides whether those
+describe a partial match or nothing at all. It is present exactly when the
+`streams` block is absent — 2% of the QuakeWorld archive — and it names the
+reason: `midMatchRecording` (the recording starts after the match began),
+`matchStartUnannounced` (the server ran a match and none of the four
+match-start signals the reader knows produced an analyzable result — rare
+since schema v75, which salvaged every demo carrying this reason in the
+archive sweep), `noMatchDeclared` (no match declaration
+this pipeline can see, yet kills were parsed — usually unmanaged play on a
+mod with no match state, see `gameDir`, but possibly a managed match on a
+mod whose declarations we cannot read), `noPlayRecorded` (the same absent
+declaration and no kills parsed — usually an idle or aborted server) or
+`demoUnreadable` (a truncated read — the only reason that ALSO means a
+failure, with the reader's message in `errors`). `detail` is the same
+verdict as a sentence you can show a user; it is unstable display text, so
+never parse it — every fact in it is a structured field beside it. Such a
+demo is not a failed parse and retrying it changes nothing. Endpoints whose data
 is always computable or list-shaped — `/items`, `/backpacks`,
 `/weapon-pickups`, `/chat` — instead return **`200` with an empty body**
 when there's nothing, never `422`.
@@ -812,7 +919,18 @@ server also renders standalone at **`GET /docs/result-schema`**.
 Common frontend features → the call that backs them.
 
 - **Match header / scoreboard** → `GET /overview` (one call: teams,
-  players, top streaks/powerups, degraded flag).
+  players, top streaks/powerups, degraded flag). **Branch on
+  `gameMode.teamBased`, never on the mode string.** `overview.mode` is the
+  server's own DISPLAY spelling (`Duel`, `FFA`, `Clan Arena`) and there are
+  five such vocabularies in the archive with no translation between them;
+  `gameMode` (schema v75) is the normalised verdict, with a `sources` block
+  naming which vocabulary decided each field. When `teamBased` is false —
+  every duel, FFA, race — the match is laid out with ONE SIDE PER PLAYER:
+  `teams` is one row per player, every `players[].team` equals the player's
+  own name (the raw clan tag rides on `match.players[].rawTeam`), and there
+  are no team aggregates or region control to render. That is the same shape
+  duels have always returned, so a client that already handles a duel
+  scoreboard handles FFA with no new code.
 - **Kill feed with obituaries** → `GET /events?types=frag` (use
   `/frags` if you need the `isSuicide`/`isTeamKill` flags instead).
 - **Score-over-time line** → `GET /events?types=frag`, accumulate
@@ -869,7 +987,15 @@ Common frontend features → the call that backs them.
   time in one row per player and per team, on **every** demo including
   ones with no KTX block. Prefer it over stitching `/demoinfo` +
   `/frags` + `/damage` yourself; read each family's `src` to see whether
-  a number came from KTX or was derived here.
+  a number came from KTX, was derived here, or was reconstructed.
+  `score.maxSpree` / `score.maxQuadSpree` (longest kill run between
+  deaths, and while holding the quad) are the derived equivalent of the
+  KTX block's `spree.max` / `spree.quad` — so they answer "best streak?"
+  on the pre-ktxstats half of the archive too. They are never overlaid
+  from KTX and are gated with `kills`; a team row carries the best any
+  member ran, not a sum. They deliberately exclude the self-kill that
+  KTX's own gate lets bump a streak wherever teamplay is off, so a duel
+  with suicides reads 1 lower per affected streak than the KTX block.
 - **"Are these two rows the same person?" / "which userid do I `track=`
   at time t?"** → `GET /player-stats`, read `identity` and `sessions[]`.
   A player who reconnects while their old connection is still spawned is
@@ -897,6 +1023,38 @@ Common frontend features → the call that backs them.
 - **Weapon effectiveness** → `GET /player-stats` (accuracy + per-weapon
   pickups + hold time), `GET /demoinfo` (KTX's own verbatim numbers, the
   audit trail), or `/weapon-pickups` (kills-before-next-death).
+  Check `accuracy.src` before you trust the hit side: on a demo with no
+  wire damage stream `accuracy.byWeapon[].hits` is filled from the aim
+  reconstruction tier and the family reads `"reconstructed"` — a weaker
+  evidence grade, covering only `lg` / `sg` / `ssg` / `axe` / `rl` /
+  `gl`, with `hits` still ABSENT on `ng` / `sng` (not recovered, which
+  is not the same as no hits). `attacks` is shot-derived on every demo
+  and matches KTX to the row on the single-projectile weapons. Each
+  family answers KTX's own question as far as its evidence reaches:
+  `rl` and `gl` count direct impacts on all three (`reconstructed` since
+  v74, `derived` since v75; against `/demoinfo` in aggregate, `rl` within
+  1.3% / 0.02% and `gl` within 3.6% / 3.8%), `lg`/`ng`/`sng`/`axe` count
+  a connecting fire, which is KTX's own event for them, and `sg`/`ssg`
+  count pellets on both sides of the ratio on a `ktx` or wire-linked
+  `derived` row (100.0% of the archive eval's rows exact since v75).
+  `gl`'s number is the one that is not read off the wire at all: a
+  grenade that touches a player explodes and every damage row the wire
+  then carries is flagged splash, so the touch is re-derived from the
+  grenade's tracked flight and its 2.5 s fuse by the same classifier a
+  `reconstructed` row uses (the API always parses with the projectile
+  streams that needs; a payload lacking them says `anyDamage`). ONE gap
+  remains, and it is marked: `sg`/`ssg` on a `reconstructed` family
+  count fires that landed damage against TRIGGER PULLS, because the
+  pellet split needs a per-hit magnitude the rebuilt log does not carry.
+  Read
+  `accuracy.byWeapon[].hitsConvention` rather than re-deriving that rule
+  — `anyDamage` | `directImpact` | `pellets`, present whenever `hits`
+  is, per WEAPON because one `src: "ktx"` row uses all three at once. It
+  is also what says which unit `attacks` is in: pellets exactly where
+  the convention is `pellets`, trigger pulls everywhere else.
+  Two rows are comparable exactly when weapon and convention match, so
+  gate any cross-demo or cross-era aggregation on it; ignoring it turns
+  a ~4x definition change on `rl` into a trend.
 - **Analyze a local demo file (no hub gameId)** → upload it, then use the
   returned `demoId` with any per-demo GET:
 
@@ -920,3 +1078,28 @@ Common frontend features → the call that backs them.
 
 When fetching positions or any raw stream in `index` loc mode, fetch
 `/loc-table` once and decode client-side.
+
+### Toplists from `/highlights`
+
+The highlight catalogue (`GET /v1/demos/{id}/highlights`) already carries
+what everyone involved had — relation to the actor, `health` / `armor` /
+`armorType` / `stack`, `weapons`, `powerups`, `loc` — so a toplist is one
+client-side sort:
+
+- **Discharges** — the lists arrive sorted by `enemyKills`, then `damage`;
+  re-sort by `cells` for the biggest dump (35 × cells radius damage), or
+  keep `actor.killed` rows for the suicidal ones. A discharge that killed a
+  teammate shows the teammate under `victims[]` with `relation: "team"`.
+- **Quadbores** — sorted by `quadHeldMs` ascending; the quad thrown away is
+  `30000 − quadHeldMs` (KTX's 30 s quad), and `quadFrags` says what the run
+  yielded before the bore.
+- **Telefrags** — sorted by `victims[0].stack` descending (the victim's
+  health + armor just before the frag; `stateSource: "spawn"` marks a
+  victim who had only just spawned). `teleKind: "deflect"` rows are the
+  teleporter dying on a pentagram holder — the holder is the victim row
+  with `survived: true`.
+- **Airgibs** — `highlights.airgibs` is the airgib list plus the
+  victim's state; sort by `heightAboveAttacker` for the spectacular ones.
+
+`kinds=telefrag` (etc.) trims the body to one list; `players=` keeps rows a
+player took part in on either side.

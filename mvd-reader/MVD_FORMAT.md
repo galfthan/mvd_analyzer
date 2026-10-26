@@ -656,8 +656,35 @@ Offset  Size  Field
 ```
 
 The parser decodes the **lightning beams** into `BeamEvent` (firing entity +
-start/end) and consumes every other type for its known length; an unknown
-type bails rather than guessing a length and drifting the cursor.
+start/end) and every other known type into `PointEffectEvent` (type, count,
+origin); an unknown type bails rather than guessing a length and drifting
+the cursor.
+
+**Damage telemetry in the point effects.** Two QW-specific types are written
+from the server's damage code itself, so they are direct hit evidence on
+every demo back to original qwprogs (the aggregation lives in the progs, not
+the engine):
+
+- **`TE_BLOOD` (12)** — hitscan damage striking a player. KTX `TraceAttack`
+  increments `blood_count` once per pellet that strikes a player and
+  `Multi_Finish` multicasts ONE message per volley with `count` = pellet
+  hits and the impact origin (`ktx/src/weapons.c:226,313-327`); volley
+  damage = 4·count. Older generations (KTX 1.38, vanilla qwprogs) write one
+  message **per pellet** with `count` = 1 (volley damage = 4·messages). Axe
+  and nail hits write `count` = the damage itself (axe: 20). The packaging
+  convention varies per server generation and per mod (one RL-only mod
+  writes rocket directs with a constant count of 5), so consumers must
+  calibrate per demo — validate 4·count against observed health/armor
+  deltas — rather than assume a convention.
+- **`TE_LIGHTNINGBLOOD` (13)** — an LG cell's damage striking a player at
+  the beam's trace endpoint (`ktx/src/weapons.c` `LightningDamage`), one
+  per hit, no count. The beam fires on every attack; the blood only on a
+  hit — together they measure LG accuracy directly.
+
+`TE_GUNSHOT` (2) is the complementary miss signal (wall puff where pellets
+struck geometry, with the same count-byte packaging), and `TE_EXPLOSION`
+(3) is the exact rocket/grenade detonation point — including point-blank
+explosions whose projectile entity was never broadcast.
 
 **Player Lightning Gun.** `TE_LIGHTNING2` is the bolt KTX writes once per LG
 fire tick (`ktx/src/weapons.c` `W_FireLightning`), carrying the firing
@@ -912,9 +939,11 @@ Per-player "this player just died" / "this player just spawned" boundaries are n
 |---|---|---|---|---|---|
 | 1 | **`STAT_HEALTH` crossings** | `svc_updatestat` health crosses 0 | yes | **directed via `dem_stats`** | Kills whose stat update is bundled in a `dem_stats` block addressed to a different POV player. The recorder must currently be POV'd on (or near) the victim. |
 | 2 | **`DF_DEAD` bit in `svc_playerinfo`** | bit 8 of the flag word; set when `ent->v->health <= 0` (mvdsv/src/sv_demo.c) | yes | yes — every recorded frame | Tight respawn cycles compressed into a single inter-frame gap (no sampled frame ever shows `DF_DEAD=1` between two adjacent recorded frames). |
-| 3 | **Obituary `svc_print`** | KTX fragfile lines like `"X was rocketed by Y"`, `"X suicides"`, the pent-deflection `"Satan's power deflects X's telefrag"`, etc. Old kmod/qwe splits these across several `svc_print` messages, so match the *assembled line*, never one message — see [One console line is often several `svc_print` messages](#one-console-line-is-often-several-svc_print-messages). | yes (victim is named) | yes | Deaths emitted by mods/death-types with no print path; pre-match obits arriving before the match-start phrase (parser-side `matchStarted` gate). |
+| 3 | **Obituary `svc_print`** | KTX fragfile lines like `"X was rocketed by Y"`, `"X suicides"`, the pent-deflection `"Satan's power deflects X's telefrag"`, etc. Old kmod/qwe splits these across several `svc_print` messages, so match the *assembled line*, never one message — see [One console line is often several `svc_print` messages](#one-console-line-is-often-several-svc_print-messages). | yes (victim is named) | yes | Deaths emitted by mods/death-types with no print path; pre-match obits arriving before the match-start signal (parser-side `matchStarted` gate, see [Match Start Detection](#match-start-detection)). |
 
 KTX's authoritative deaths counter (`logfrag(targ, targ)` and friends — see `ktx/src/client.c`) increments once per kill regardless of which of these wire-level signals fires. Validating reconstructed death counts against KTX's `demoInfo.players[].stats.deaths` is the cleanest end-to-end check.
+
+Every obituary row in `parser.ObituaryPatterns` carries a canonical `Weapon`; since schema v76 a few also carry a `Cause` **beneath** it, for the deathtypes KTX prints distinctly but books under an ordinary weapon (its own per-weapon stats map `dtLG_DIS` / `dtLG_DIS_SELF` to `wpLG`, `ktx/src/client.c:4935-4938`): `"discharge"` on the LG water-discharge prints — the six self forms `" electrocutes himself/herself"` (`dtLG_DIS_SELF`, `:5292`), `" heats up the water"`, `" discharges into the water/slime/lava"` (`dtLG_DIS`, `:5300-5325`) and the kill print `" drains X's batteries"` (`:5645-5660`); `"deflect"` on the pentagram telefrag deflections `"Satan's power deflects X's telefrag"` (`dtTELE2`, `:5219`) and `"X was telefragged by Y's Satan's power"` (`dtTELE3`, `:5228`); `"spawnicide"` on the three `dtTELE4` spawn-telefrag prints (`:5240-5261`). `Weapon` stays `lg` / `tele` on all of them. The second discharge kill print, `"X accepts Y's discharge"` (`:5656`), shares its `" accepts "` marker with the ordinary shaft kill, so the table cannot carry it — the analytics matcher promotes it off the `'s discharge` suffix. Analytics publishes the cause as `frags[].cause` and, for dtTELE3, the surviving pent holder Y as `frags[].deflector`.
 
 The mvd-reader parser deduplicates across the three signals so consumers see one `DeathEvent`/`SpawnEvent` per real transition; see `mvd-reader/parser/stats.go` (`maybeEmitDeath` / `maybeEmitSpawn`) and `mvd-reader/parser/print.go` (`tryEmitObituaryDeath`, `forceEmitDeath` — obit bypasses dedup so the dtTELE2 deflection corner case is still counted).
 
@@ -1444,40 +1473,79 @@ Before a match starts, players are in **warmup mode** where:
 - Frags don't count
 - Player state data is **meaningless for analysis**
 
-The countdown sequence typically looks like:
-```
-"The match begins in 10 seconds"
-"The match begins in 5"
-"The match begins in 4"
-"The match begins in 3"
-"The match begins in 2"
-"The match begins in 1"
-"Fight!"
-```
+On KTX the countdown itself is a **centerprint**: `TimerStartThink`
+(`ktx/src/match.c:2018-2075`) calls `PrintCountdown` (`:1454`) once a
+second, which centerprints the settings table headed `Countdown: N`; the
+admin force-start's "N seconds left before game starts" (`admin.c:624`) is
+a centerprint too. (`ShowMatchSettings`, `:2077`, is the separate
+`G_bprint` dump of the same settings.) Nothing in the countdown reaches
+the print matchers below. The only countdown text that arrives as
+`svc_print` is what a foreign mod chooses to bprint (the arena mod's
+`Series begins in 10 seconds...`, below).
 
 #### Match Start Detection
 
-The match officially starts when one of these messages appears:
+The parser raises **one** `MatchStartEvent` per demo, at the **first** of
+four independent wire signals to arrive (`mvd-reader/parser/matchstart.go`).
+It carries the demo-clock time and a `Source` naming which signal fired;
+Layer 2 republishes that as `streams.global.matchStartSignal`. The same
+verdict flips the parser's own `matchStarted` gate, so the obituary-death
+corroborator and the analytics `MatchTimingDetector` cannot disagree.
 
-The full table is `parser.MatchStartPatterns` (`mvd-reader/parser/print.go`),
-reproduced here in its entirety — all six entries, matched as
-case-insensitive substrings:
+| Source | Wire form | Emitted by | Notes |
+|---|---|---|---|
+| `matchdate` | `svc_print` level 2, line-**initial** `matchdate: …` | `ktx/src/match.c:1291`, `G_bprint(2, "matchdate: %s\n", date)` | Gated only on `deathmatch != 0` and, on hoony, the first point (`match.c:1287`: `deathmatch && (!isHoonyModeAny() \|\| HM_current_point() == 0)`), so it survives matchless play. First on the wire in every KTX demo measured (13 matchless FFA + the whole golden corpus), which makes it the source that names most modern demos. Line-initial, not "contains": a chat line quoting the stamp must not start a match. |
+| `print` | `svc_print` matching `parser.MatchStartPatterns` (table below) | `ktx/src/match.c:1296` (`"The match has begun!"`), kmod/qwe mode spellings | The only signal a pre-KTX server gives. **Absent on matchless servers** — see below. |
+| `ktx-matchstart` | `svc_stufftext` `//ktx matchstart` | `ktx/src/match.c:1372`, `STUFFCMD_DEMOONLY` | Unconditional at every match start in every KTX mode — no cvar gate at all. It is the last line of `StartMatch()`, after the date print and the "has begun" print, so it never arrives first on a demo that carries either; but the `serverinfo status` localcmd written before it (`:1337`) only executes at the next frame's `Cbuf_Execute` (`mvdsv/src/sv_main.c:3323`), so on the wire the directive **precedes** the status update. On a non-deathmatch match and on every hoony point after the first, where `matchdate:` is gated off, it is therefore the first signal, with the status transition a frame behind; the once-per-demo latch means those later points do not re-raise it. |
+| `status` | `svc_serverinfo` `status` moving to a running clock from a value that was not one | `ktx/src/match.c:1337` (`"%d min left"`); foreign mods write their own `"%d:%02d left"` | Weakest and last of the four on the wire, so it decides only where the others are absent — ktx 1.38 / 1.40-beta demos that print no `matchdate:`, and the `fortress` / `ctf` mods. The **transition** is what counts: the once-a-minute countdown ticks that follow (`match.c:723`) are not a start, and a recording that opens with the clock already running (`fullserverinfo … \status\4 min left`) never fires at all — that demo is a mid-match recording, not a match start. |
 
-| Pattern | Provenance | Notes |
-|---------|-----------|-------|
-| `"has begun"` | **verified** in `ktx/` | Catches KTX's `"The match has begun!"` (`ktx/src/match.c:1173`, a `G_bprint`) **and** kmod/qwe's `"The duel has begun!"`, which announces the *mode* rather than the word "match" (observed in a 2003 kmod 1.58 demo). This is the entry that fires on a modern KTX demo. |
-| `"fight!"` | **not a broadcast in current KTX** | KTX's `FIGHT!` is a `G_centerprint` / `G_cp2all` (`ktx/src/arena.c:602,617-618`; `clan_arena.c:1402-1403,1537`), which travels as `svc_centerprint` and so can never reach this matcher. Retained for other mods that may bprint it; harmless, but do not expect it to fire on KTX. |
-| `"go!"` | **not a broadcast in current KTX** | `GO!` is a `G_cp2all` in the race countdown (`ktx/src/race.c:2614`) — again `svc_centerprint`, not `svc_print`. Also the loosest entry in the table, a bare `"go!"` substring, which is why chat is refused (below). |
-| `"match started"` | **not printed at all** | The only occurrence in the vendored trees is a C comment (`ktx/src/commands.c:5123`). |
-| `"begins in 1"` | unverified | No printed string in `ktx/`, `mvdsv/` or `ezquake-source/`. If some mod does emit it, note it fires ~1 s *before* the start proper. |
-| `"game start"` | **not a broadcast in current KTX** | The only KTX string containing it is the pre-match countdown `"N seconds left before game starts"`, a `G_centerprint` (`ktx/src/admin.c:624`) — so it cannot reach this matcher, and would be a *pre*-start phrase if it could. |
+**Why four and not one: matchless servers.** A KTX server with
+`k_matchless 1` (`ktx/src/world.c:1874-1877` re-arms `StartTimer()` every
+frame while a player is present; `match.c:2460-2466` zeroes the countdown)
+runs continuous play with no ready-up and no countdown, and forces the
+usermode to FFA or CTF (`world.c:1638-1666`). `StartMatch()` still runs,
+but skips exactly three things — `ShowMatchSettings()`, the `protect2.wav`
+cue, and this line:
 
-The last five entries predate this table and are kept because removing a
-pattern can only lose match-start detection on a mod nobody here has a
-demo for. None of them is quietly attributed to KTX: the only phrase this
-repo can prove a current KTX server *broadcasts* is `"has begun"`. Four
-of the five do exist in `ktx/`, but as `svc_centerprint` text or a C
-comment, so on a KTX demo they are dead weight rather than a live path.
+```c
+if (!k_matchLess || cvar("k_matchless_countdown"))
+    G_bprint(2, "%s\n", redtext("The match has begun!"));
+```
+
+There is no serverinfo key that says "matchless": `mode=ffa` names the
+usermode, and an FFA server with `k_matchless 0` runs the ordinary
+ready → countdown → "has begun" flow. Before the other three signals
+existed, every matchless demo detected no match start at all — which meant
+no streams, no derived analysis, and (because the obituary gate stayed
+shut) zero deaths on a demo full of frags. 138 demos in a 50 951-demo
+archive sweep were in that state; all 138 are now analyzable.
+
+**In modern KTX all four land in the same server frame.** `StartMatch()`
+prints the date, prints "has begun", sets `status`, and stuffs the
+directive one after another, so the `TimeMs` is identical whichever fires
+first and `Source` names which byte arrived first, not a different instant.
+Measured across the golden corpus, no demo's match start moved when the
+three new signals were added.
+
+The print table is `parser.MatchStartPatterns` (`mvd-reader/parser/print.go`),
+reproduced here in its entirety — three entries, matched as
+case-insensitive substrings on non-chat prints:
+
+| Pattern | Producer | Notes |
+|---------|----------|-------|
+| `"has begun"` | **KTX** `"The match has begun!"` (`ktx/src/match.c:1296`, `G_bprint` at PRINT_HIGH), inherited verbatim from Kombat Teams (`kteams/v2.07/SRC/MATCH.QC:384`, `v2.21/SRC/MATCH.QC:759`) | Also catches kmod/qwe's `"The duel has begun!"`, which announces the *mode* rather than the word "match" (observed in a 2003 kmod 1.58 demo). Reached on 468 of the 3 123-demo census, every era. On a modern KTX demo `matchdate:` arrives first and this is the backstop. |
+| `"match started"` | a **CTF mod**'s `"Match Started!"` broadcast | 55 archive demos, all E0, all gamedir `ctf` — the same population that writes `mode=1` and an `M:SS left` status clock. Not a KTX string: the only occurrence in `ktx/` is a C comment (`commands.c:5247`). |
+| `"begins in 1"` | an **arena mod**'s `"Series begins in 10 seconds..."` broadcast | 13 archive demos (12 gamedir `arena`, 1 `qw`), all E0. The match is on the *digit* — the same mod's `"Match begins in 5 seconds"` does not fire — and lands ~10 s before play. Kept because nothing else on those demos declares a start (the mod's `status` key is a `Round n/m` counter, not a clock). No printed string in `ktx/`, `mvdsv/` or `ezquake-source/` contains it. |
+
+Three former entries — `"fight!"`, `"go!"`, `"game start"` — were removed
+after a sweep of all 50 964 archive demos
+(`.reports/vocab-sweep-2026-08-29`, probe S1) found no server broadcast
+behind any of them. KTX's `FIGHT!` / `GO!` are centerprints
+(`ktx/src/arena.c:602-618`; `clan_arena.c:1540,1684`; `race.c:2614`) and never reach this matcher; what `"go!"` *did* match, on
+12 demos, was obituary and scoreboard lines carrying the player name
+`RINGO!!!` — a false match start on every one — and `"game start"` matched
+only KTX's `latejoin ... join a team after the game started` help text.
+A pattern in this table is a live path or it is a hazard.
 
 **Implementation note**: match on the substring `"has begun"`, not
 `"match has begun"`. kmod 1.58 / qwe 0.170 (2003-era) broadcast
@@ -1486,17 +1554,14 @@ stream sampling is gated on the match being started, missing it drops the
 entire streams-derived half of the pipeline (possession times, positions,
 armor/weapon transitions) *and* leaves the parser's obituary-death gate
 shut, so the demo also reports zero deaths. Both failures are silent.
-The table is shared with the analytics `MatchTimingDetector`, so the two
-consumers cannot drift.
 
-**Chat is refused.** These phrases are meant to match server broadcasts
-(`G_bprint` at PRINT_MEDIUM/PRINT_HIGH), and the gate never resets once
-flipped, so a single prewar `"go go go!"` in `say_team` would open the
-obituary-death path for the rest of the demo. Both consumers skip
-`PRINT_CHAT` (level 3): `parser/print.go` in
-`updateMatchStartedFromPrint`, and `analyzer/matchtiming.go` in
-`OnPrint`. An implementer following only the substring rule reproduces
-exactly the false positive this guards against.
+**Chat is refused.** The print-borne signals (`print` and `matchdate`) are
+meant to match server broadcasts (`G_bprint` at PRINT_MEDIUM/PRINT_HIGH),
+and the gate never resets once flipped, so a single prewar `"go go go!"`
+in `say_team` would open the obituary-death path for the rest of the demo.
+`PRINT_CHAT` (level 3) is skipped in `tryEmitMatchStartFromPrint`
+(`parser/matchstart.go`). An implementer following only the substring rule
+reproduces exactly the false positive this guards against.
 
 **Critical**: All player state (items, health, armor, ammo) before match start should be **discarded**. Players spawn fresh with:
 - 100 health
@@ -1504,36 +1569,92 @@ exactly the false positive this guards against.
 - Axe + Shotgun (25 shells)
 - No powerups
 
+#### Match Date Markers (`matchdate:` / `matchkey:`)
+
+Two eras of server mod announce the **wall-clock date** on the same
+`svc_print` channel, at `PRINT_HIGH` (level 2), as a broadcast:
+
+| Marker | Emitted by | Layout |
+|---|---|---|
+| `matchdate: 2008-01-05 20:05:38 CET` | KTX, immediately before `"The match has begun!"` (`ktx/src/match.c:1291`, `G_bprint(2, "matchdate: %s\n", date)`) — and printed even when that line is skipped, which is why it doubles as a match-start signal (above) | strftime `%Y-%m-%d %H:%M:%S %Z` |
+| `matchdate: Mon Jul 03, 01:01:14 2006` | older KTX builds, same call site | strftime `%a %b %d, %H:%M:%S %Y`, usually with no zone at all |
+| `matchkey: 8-2005-8-13:19-56-18` | kmod / KTeam era (pre-KTX), also at match start | `<matchid>-<yyyy>-<m>-<d>:<h>-<mm>-<ss>`, never zoned, fields not zero-padded |
+
+Both are line-assembled like any other print — the kmod one is commonly
+split across three `svc_print` fragments (`"matchkey: 9-"`, `"195923-"`,
+`"1626\n"`), so a per-message matcher sees none of them.
+
+Traps worth knowing:
+
+- `%Z` is whatever the server's C library calls the local zone. Besides
+  the usual abbreviations it can be a numeric offset, or a locale
+  sentence with spaces and a comma in it (`Västeuropa, sommartid`) —
+  which arrives *mangled* because `Q_normalizetext` folds the high-bit
+  `ä` down to `d`. Treat the whole remainder of the line as the zone
+  token, and match the Swedish forms on the ASCII tail (`sommartid` /
+  `normaltid`).
+- Not every `matchkey:` carries a date: some servers print an opaque
+  key (`matchkey: 9-195923-1626`) in the same slot.
+- `Build date:` is the **mvdsv binary's** build stamp, not a match date.
+- The `serverdemo` filename embeds a date that is genuinely ambiguous
+  (`%d%m%y` and `%y%m%d` are both observed in the archive) — do not parse
+  it without a print-derived cross-check.
+- Servers with unset clocks stamp real markers with wrong dates (whole
+  "nights" of 2000-01-0x appear across the archive). The date value alone
+  never proves this; see the trust model in
+  [RESULT_SCHEMA.md](../mvd-analytics/RESULT_SCHEMA.md#globalstream).
+
+A third date lives in the KTX demoinfo (ktxstats) block's `date` field,
+`%Y-%m-%d %H:%M:%S %z`. That block is written at intermission, so it names
+match **end**, not match start.
+
 #### Match End Detection
 
-The match ends when one of these messages appears:
+The match ends at the first of two signals after the start
+(`mvd-analytics/analyzer/matchtiming.go`): `svc_intermission`, or a
+non-chat print containing the one phrase in `matchEndPatterns`:
 
-| Pattern | Cause |
-|---------|-------|
-| `"The match is over"` | Normal end |
-| `"match ended"` | Various |
-| `"Game over"` | Generic end |
-| `"Match complete"` | Some servers |
-| `"Timelimit hit"` | Time ran out |
-| `"Fraglimit hit"` | Frag limit reached |
+| Pattern | Producer | Notes |
+|---------|----------|-------|
+| `"match is over"` | **KTX** `"The match is over"` (`ktx/src/match.c:331` — the `else if (deathmatch)` after the hoony branch at `:324`, so a hoony series never prints it: 0 of 45 archive hoony demos do), inherited verbatim from Kombat Teams (`kteams/v2.07/SRC/MATCH.QC:139`, `v2.21/SRC/MATCH.QC:172`) | Printed a frame or so before the intermission on a normal end, so it is usually the one that fires. |
+
+Five former entries — `"match ended"`, `"match complete"`, `"game over"`,
+`"timelimit hit"`, `"fraglimit hit"` — were removed after a sweep of all
+50 964 archive demos (`.reports/vocab-sweep-2026-08-29`, probe S2) found
+no non-chat print carrying any of them, except one E0 spectator *named*
+"game over" — which would have ended the match at their connect line.
+
+KTX's other end line, `"The point is over"` (`match.c:326`), is
+deliberately **not** an end pattern. It is the per-*point* end of a
+hoony/blitz series: for every point but the last, `EndMatch` resets
+`match_over` and re-readies the players (`match.c:426-447`), `StartMatch`
+runs again (re-stuffing `//ktx matchstart`, which the once-per-demo latch
+ignores) and the same series continues. The series closes at
+`svc_intermission`, so a hoony demo spans every point — archive
+`0543ac01…` is 10 points over 191 s with one `//demomark 0 round-N`
+(`match.c:447`, surfaced as `timelineAnalysis.demoMarkers`) per point
+boundary. Points are not otherwise modelled; see the top-level README's
+known limitations.
 
 #### Example Timeline
 
 ```
 [0.0s]   Demo recording starts
 [0.5s]   Players connecting, warmup begins
-[5.2s]   "The match begins in 10 seconds"
-[10.2s]  "The match begins in 5"
-...
-[14.2s]  "The match begins in 1"   <- matches the unverified "begins in 1"
-                                     entry, so the gate flips HERE on a mod
-                                     that emits this line
-[15.2s]  "The match has begun!"    <- matchStartTime on a real KTX demo
-                                     (KTX's own "FIGHT!" is a centerprint
-                                     and never reaches this matcher)
+[5.2s]   svc_centerprint "Countdown: 10 ...\nMode  D u e l\n..."   <- settings
+                                     table; never reaches the print matchers
+[14.2s]  svc_centerprint "1 second left before game starts"
+[15.2s]  "matchdate: 2023-01-16 00:10:40 UTC"   <- matchStartTime (first of the
+[15.2s]  "The match has begun!"                    four signals on the wire)
+[15.2s]  svc_stufftext "//ktx matchstart"
+[15.2s]  svc_serverinfo status "20 min left"     <- last of the four: the
+                                     localcmd runs at the next frame's
+                                     Cbuf_Execute; usually the same demo
+                                     timestamp, sometimes one frame later
 [15.3s]  First valid player state updates
 ...
 [1215.2s] "The match is over"  <- matchEndTime (20 min match)
+[1215.3s] svc_intermission
 ```
 
 **Match duration** = `matchEndTime - matchStartTime` (not demo duration)
@@ -1568,19 +1689,50 @@ Kill messages appear at `PRINT_MEDIUM` (level 1). Common patterns:
 | `"X sleeps with the fishes"` | Drowning |
 | `"X sucks it down"` | Slime |
 | `"X burst into flames"` | Lava |
+| `"X blew up"` | Explosive box (`dtEXPLO_BOX`, weapon `explobox` — the same token the wire damage log uses) |
+| `"X died"` | `dtTRIGGER_HURT` or the world branch's catch-all; one string for both, so weapon `world` |
+| `"X was telefragged by Y's Satan's power"` | `dtTELE3` — a suicide despite the kill-shaped verb; see the KTX telefrag-variants table below |
 
-**Team Kills**:
-| Pattern | Description |
-|---------|-------------|
-| `"X mows down a teammate"` | Team kill |
-| `"X gets a frag for the other team"` | Self-damage hurting team |
+**Team Kills** (`ktx/src/client.c:5343-5410`). KTX's team branch of
+`ClientObituary` tests three death types by name and prints a dedicated
+message for each *before* it falls through to a random pick of four generic
+phrasings. So a teamkill obituary hides one of the two players' names, but
+for three death types it does NOT hide the cause. `ObituaryPatterns` carries
+that split: the three deathtype-tested rows keep the same cause token their
+non-team siblings use, and only the random four carry the cause-less
+placeholder `teamkill`. All eight rows set `TeamKill: true`.
+
+| Pattern | Death type | Weapon | Which name is on the wire |
+|---|---|---|---|
+| `"X was telefragged by his/her teammate"` | `dtTELE1` (:5355) | `tele` | victim |
+| `"X squished a teammate"` | `dtSQUISH` (:5362) | `squish` | killer |
+| `"X was jumped by his/her teammate"` | `dtSTOMP` (:5368) | `stomp` | victim |
+| `"X was crushed by his/her teammate"` | `dtSTOMP` (:5368) | `stomp` | victim |
+| `"X checks his/her glasses"` | — (:5386) | `teamkill` | killer |
+| `"X loses another friend"` | — (:5386) | `teamkill` | killer |
+| `"X gets a frag for the other team"` | — (:5386) | `teamkill` | killer (also `Suicide`) |
+| `"X mows down a teammate"` | — (:5386) | `teamkill` | killer |
+
+The cause tokens are deliberately the SAME words the non-team forms use —
+`tele` for `"X was telefragged by Y"`, `stomp` for `"X was jumped by Y"`,
+`squish` for `"X squishes Y"` and the world crush `"X was squished"` — so a
+consumer filtering on a cause gets the team and non-team spellings alike.
+`teamkill` means *the phrasing carried no cause*, not *this was a teamkill*;
+`TeamKill` (`isTeamKill` downstream) is the flag for that.
+
+Two consequences downstream, both in mvd-analytics: a teammate telefrag or
+stomp is a positional instant kill and must not be priced on the damage curve
+(the observed corpse drop runs to KTX's −99 clamp, so booking one as team
+weapon damage charges ~99 points the engine never dealt), while a teammate
+crush IS ordinary damage — KTX deals it through `T_Damage` with the door's
+activator as the attacker (`ktx/src/doors.c:68`) — and prices normally.
 
 **KTX special telefrag variants** (`ktx/src/client.c:5141-5185`, death types `dtTELE2`–`dtTELE4`):
 
 | Pattern | Death type | Note |
 |---|---|---|
 | `"Satan's power deflects X's telefrag"` | `dtTELE2` | Pent player is the survivor; X (the would-be telefragger) dies. Infix form — victim is bracketed by the prefix `"Satan's power deflects "` and the suffix `"'s telefrag"`. KTX counts this against X's deathcount even though no `DF_DEAD` or stat transition may appear on the wire — see [Death / Spawn Detection](#death--spawn-detection--three-signal-sources). |
-| `"X was telefragged by Y's Satan's power"` | `dtTELE3` | Pent-vs-pent double-666 telefrag. Victim-prefix; killer suffix is `"'s Satan's power"`. |
+| `"X was telefragged by Y's Satan's power"` | `dtTELE3` | Pent-vs-pent double-666 telefrag. Victim-prefix; killer suffix is `"'s Satan's power"`. **This is a SUICIDE, not a kill**: KTX runs `targ->s.v.frags -= 1; logfrag(targ, targ)` and credits Y nothing (`client.c:5228-5237`). It shares the ordinary telefrag verb, so `ObituaryPatterns` carries a suicide row whose `Suffix` is a REQUIRED discriminator; the suicide run is scanned before the kill run in both consumers, so it wins. |
 | `"X couldn't resist the shiny spawn point"` | `dtTELE4` | Spawnicide variant (random 1-of-3 when `k_spawnicide` is enabled). |
 | `"X got too close to the baby factory"` | `dtTELE4` | Spawnicide variant. |
 | `"X was fragged by poor life choices"` | `dtTELE4` | Spawnicide variant. |
@@ -1961,7 +2113,18 @@ Offset  Size  Field
 **Important Notes**:
 - Entity numbers are 1-indexed (entity 0 is world). Convert to player number: `player_num = entity - 1`
 - The `damage_amount` is **raw/unbound damage** including overkill (see [Damage Tracking](#damage-tracking-details))
-- Splash damage flag indicates indirect damage (e.g., rocket splash, not direct hit)
+- Splash damage flag indicates indirect damage (e.g., rocket splash, not direct hit).
+  KTX raises it only inside `T_RadiusDamage` (`ktx/src/combat.c:1207-1227`), so a
+  rocket's DIRECT touch damage — a flat **110** since KTX 1.36 (`weapons.c:986`;
+  commit `c7263e8f`, 2008-09-29, replacing id1's `100 + g_random()*20`) — reaches
+  the wire unflagged, while the 120-base radius pass that follows it skips that
+  same victim (`weapons.c:1006` passes them as `ignore`). A GRENADE never deals
+  touch damage at all (`GrenadeTouch` → `GrenadeExplode` → `T_RadiusDamage` with
+  `ignore = world`, `:1300`), so every grenade record is splash-flagged whether or
+  not the grenade touched a player. Counting unflagged rl records per attacker
+  reproduces KTX's own `acc.rl.hits`, which increments in the touch handler and
+  nowhere else (`weapons.c:990-996`), exactly — 638 of 638 player rows on the
+  archive validation set.
 - KTX emits the record when **either** the attacker or the victim is a player
   (`ktx/src/combat.c:810`). The parser emits a `DamageEvent` whenever the
   **victim** is a player and `damage > 0`. World/environmental damage-taken
@@ -2488,7 +2651,7 @@ Obituary messages are sent via `svc_print` at `PRINT_MEDIUM` (level 1). All patt
 | Pattern | Weapon ID | Category |
 |---------|-----------|----------|
 | `"X suicides"` | 0 (die) | /kill command |
-| `"X died"` | 0 (die) | Generic death |
+| `"X died"` | 0 (die) | `dtTRIGGER_HURT` **and** the world branch's catch-all `else` — KTX prints the same string for both (`ktx/src/client.c:5775-5782`), so the line establishes only "the map killed them". `ObituaryPatterns` stamps `world` (not `trigger`, which stays a damage-log-only token) and anchors the marker to the END of the line, since a player name can contain it |
 | `"X tried to leave"` | 0 (die) | Changelevel |
 | `"X becomes bored with life"` | 7 (rl) | Self-rocket |
 | `"X discovers blast radius"` | 7 (rl) | Self-rocket |
@@ -2571,6 +2734,13 @@ Obituary messages are sent via `svc_print` at `PRINT_MEDIUM` (level 1). All patt
 | `"X checks his glasses"` | 16 | Teamkill (male) |
 | `"X checks her glasses"` | 16 | Teamkill (female) |
 | `"X loses another friend"` | 16 | Teamkill |
+
+`sv_mod_frags.h:107` buckets `"X squished a teammate"` under 16 (`team`)
+with the rest, but KTX's own source shows it is deathtype-tested — the team
+branch prints it only for `dtSQUISH` (`ktx/src/client.c:5362`), *before* the
+random pick that produces the other four. `parser.ObituaryPatterns` follows
+the engine and stamps it `squish`; see the Team Kills table under
+[Obituary Messages](#obituary-messages-frag-detection).
 
 ### Team Kill Patterns (1-player, victim only)
 
@@ -2657,14 +2827,25 @@ Offset  Size     Field
 5       1        colormap
 6       1        skinnum
 7       2 or 4   origin[0] (coord or float if FLOATCOORDS)
-+       1        angles[0] (angle byte)
++       1 or 2   angles[0] (angle byte; short if FLOATCOORDS)
 +       2 or 4   origin[1]
-+       1        angles[1]
++       1 or 2   angles[1]
 +       2 or 4   origin[2]
-+       1        angles[2]
++       1 or 2   angles[2]
 ```
 
-**Total size**: 15 bytes (standard coords) or 21 bytes (float coords).
+**Total size**: 15 bytes (standard coords) or 24 bytes (float coords).
+
+**Angle width follows the coord negotiation.** `sv_bigcoords` raises
+BOTH `msg_coordsize` (2→4) and `msg_anglesize` (1→2) in one switch
+(`mvdsv/src/sv_init.c:326-336`), and the demo advertises it through the
+same `FTE_PEXT_FLOATCOORDS` bit (`mvdsv/src/sv_demo.c:1247-1253`);
+ezquake's `MSG_ReadAngle` reads a short in that mode
+(`com_msg.c:653-666`). Reading a fixed 1-byte angle on a bigcoords demo
+(~5% of the old archive, MVDSV 0.33/0.34 era) under-reads every
+angle-carrying entity and silently desyncs the rest of the packet —
+this applies to the baseline above AND the per-axis `U_ANGLE1/2/3`
+fields of `svc_packetentities` / `svc_deltapacketentities`.
 
 ### svc_fte_spawnbaseline2 (66) — FTE Extended Baseline
 
@@ -2874,9 +3055,14 @@ Resolve `modelindex` → path via the `svc_modellist` table. Index 0 is reserved
 1. On `svc_modellist` / `svc_fte_modellistshort`: populate `modelList[modelindex] = path`.
 2. On `svc_spawnbaseline` / `svc_fte_spawnbaseline2`: store `EntityState{modelIndex, origin, skin, frame, ...}` keyed by entity number. Classify against the model path; if recognised, emit `ItemSpawnEvent{EntNum, Kind, Origin, TimeMs}`.
 3. On `svc_packetentities` (full) / `svc_deltapacketentities` (delta): maintain a rolling `currentEntities` map. Full packets replace it; deltas copy from previous and apply per-entity updates. `U_REMOVE` deletes; other flags update fields.
-4. Diff new frame vs previous frame per tracked item — emit `ItemStateEvent{EntNum, Kind, Taken: bool, TimeMs}` on every visibility flip (present + modelindex > 0 → absent, or vice versa).
+4. Diff new frame vs previous frame per tracked item — emit `ItemStateEvent{EntNum, Kind, Taken: bool, Origin, TimeMs}` on every visibility flip (present + modelindex > 0 → absent, or vice versa). `Origin` is the entity origin at the transition: the new one when it appeared, the last visible one when it went away.
+5. Emit `ItemMoveEvent{EntNum, Kind, Origin, TimeMs}` when a **visible** tracked item's origin changes, on the same hold-last convention as `MoverStateEvent` below. Map items never move, so on a normal demo this fires only for dropped backpacks.
 
 Baselines seed the "initial" state so items at match start are already "up". Non-item entities (players, lights) pass through the item classifier as empty kind and are silently filtered — except inline brush-model entities (which feed the mover events below) and slow projectiles (which feed the projectile events below).
+
+**Item edicts are not all stable.** Map items are allocated at map load and never freed, so their entnum names one object for the whole match — which is why the classification can be cached across the modelindex-0 stretch a taken item spends invisible. Backpacks are not like that: `DropBackpack` calls `spawn()` (`ktx/src/items.c:2701`) and `BackpackTouch` calls `ent_remove()` (`items.c:2489`), so a pack's edict is handed on within seconds to another pack, a rocket or a gib. A parser that keeps the cached kind while the wire is sending a different model reports every later tenant's appearance and disappearance as the original pack flickering (this repo measured 16.4 such "visibility flips per real pack" before fixing it). The rule that removes the artefact entirely: **the cache never outranks a model index the wire is currently sending** — whenever the entity is visible, re-read the model, and on a changed kind close the old item (`Taken=true` at its own last origin) and open the new one. mvdsv will not reallocate an edict freed less than half a second ago (`pr_edict.c:118-127`, comment: "can cause the client to think the entity morphed into something else"), so the handover is always separated by the old pack's own disappearance — an origin jump is never a disguised recycle.
+
+**Backpacks move.** `DropBackpack` gives the pack `velocity[2] = 300` plus a random ±100 horizontal kick and `MOVETYPE_TOSS` (`items.c:2856-2861`), so it arcs and falls off ledges and down lift shafts before settling: measured over 24 hint-carrying demos, 58 units of travel at p50, 422 at p99, 583 at max. The `ItemMoveEvent` track is the only wire record of where a pack actually ended up. It also removes the pack after 120 s (`item->s.v.nextthink = time + (self->ct == ctPlayer ? 120 : 30)` with `think = SUB_Remove`, `items.c:2871-2872`), which is the one disappearance that is positively not a pickup.
 
 ### Projectile tracking via entity state
 
@@ -3053,7 +3239,7 @@ Offset  Size  Field
 1       var   command (null-terminated string)
 ```
 
-The server is pushing a console command into the client. There are four classes of stufftext you'll see in MVDs and they're all worth surfacing as parser events:
+The server is pushing a console command into the client. There are five classes of stufftext you'll see in MVDs and they're all worth surfacing as parser events:
 
 1. **`fullserverinfo "\key1\value1\key2\value2\..."`** — the bulk cvar dump sent at connection time. This is the **single richest source of server metadata** in the demo: every CVAR_SERVERINFO cvar that mvdsv exposes plus every key KTX has mirrored via `localcmd "serverinfo …"`. See [Demo Metadata Sources](#demo-metadata-sources) below for the full key list.
 2. **`//ktx …` directives** — KTX-specific client hints prefixed with `//` so older clients silently drop them. Emitted via `stuffcmd_flags(..., STUFFCMD_DEMOONLY, ...)` so they only appear in the recorded MVD, not in live gameplay. The common ones:
@@ -3065,11 +3251,13 @@ The server is pushing a console command into the client. There are four classes 
     | `//ktx timer <ent> <respawn_sec>` | `ktx/src/items.c:406` | MH rot finished — the delayed 20 s respawn timer is now armed |
     | `//ktx drop <ent> <item_flags> <player_ent>` | `ktx/src/items.c:2740` | Player dropped a weapon (backpack spawned). `item_flags` is the QW items bitfield — `32 = IT_ROCKET_LAUNCHER`, `64 = IT_LIGHTNING`. Only fires for RL/LG packs. |
     | `//ktx bp <backpack_ent> <player_ent>` | `ktx/src/items.c:2471` | Backpack picked up. Symmetric to `//ktx drop` — fires only when the pack contains RL or LG, so drop/pickup pairs share `backpack_ent`. This is the **only** reliable backpack-pickup attribution signal: the entity-state stream shows visibility flutter for backpack edicts that is indistinguishable from fast regrabs. |
-    | `//ktx expire <ent>` | `ktx/src/g_spawn.c:200` | Item entity is about to be removed (mode-specific despawn, e.g. powerup expires unattended) |
+    | `//ktx expire <ent>` | `ktx/src/g_spawn.c:196-210` | **Backpack removed untaken.** `SUB_Remove` emits it for every entity it deletes whose `classname` is `"backpack"` and whose `items` is exactly `IT_ROCKET_LAUNCHER` or `IT_LIGHTNING` — the same RL/LG domain as `//ktx drop` / `//ktx bp`, so the three form one family and a pack that leaves the map accounts for itself in exactly one of the latter two. `DropBackpack` arms `nextthink = time + 120; think = SUB_Remove` on every pack it spawns (`items.c:2870-2872`) and nothing re-arms it, so on a dropped pack this fires at the 120 s timeout. Unlike its two siblings it is stuffed at `world`, not at a client (the KTX comment says why: "get away with 'world' because mvdsv will exit before test with `STUFFCMD_DEMOONLY`"), so it carries no player argument and needs none. This is the **only positive evidence in the wire that a pack was not taken** — the absence of a `//ktx bp` cannot establish it, because a demo can carry the drop hint and no pickup hints at all. Not a powerup or world-item signal: `SUB_Remove` guards on the backpack classname before printing anything. |
     | `//ktx di <dmg> <armor> <take> <attacker> <victim> <weapon> <team>` | `ktx/src/combat.c:819` | Damage-info hint, targeted at the *attacker* (client-side HUD). Emitted with `STUFFCMD_IGNOREINDEMO`, so it's not in the recorded MVD — listed here for completeness. |
     | `//wps <slot> <weapon> <hits> <shots>` | `ktx/src/stats.c` | Per-player weapon-stats ticker for the spectator HUD |
 
     These are *not* server config — they're per-event HUD hooks for clients that understand the KTX HUD protocol. They are also **KTX-specific**: ktpro, CustomTF, and other progs don't emit them.
+
+    **Backpack lifecycle** — the three RL/LG backpack directives are one family and cover a pack's whole life: `//ktx drop` when `DropBackpack` spawns it, then exactly one of `//ktx bp` (a player touched it) or `//ktx expire` (`SUB_Remove` took it at the 120 s timeout). Measured over 223 archive demos that carry all three: 10 384 drops = 10 006 `bp` + 190 `expire` + 188 rows claimed by neither — the residual being packs the recording ended on top of, whose removal never happened inside the demo. **No row ever carried both**, and every `expire` paired with a drop on its own edict at 119 953-120 027 ms. The `<ent>` is recycled across packs within a match, so any join on it must use time as well.
 
     **Pickup attribution strategy** — the `//ktx took` + `//ktx bp` pair gives deterministic, same-tick pickup attribution without any heuristic. On KTX servers, analytics should prefer these over the [entity-state stream](#item-tracking-via-entity-state) for identifying *who took what*: the entity stream tells you *when* a pickup happened but not reliably by whom (nearest-player-origin is ambiguous in contests and unusable for backpack regrabs due to visibility flutter). For non-KTX servers (ktpro / CustomTF / vanilla), fall back to the entity-state stream or to per-player `svc_updatestat` deltas (STAT_ITEMS bitfield, STAT_HEALTH / STAT_ARMOR / STAT_* AMMO jumps — the MVD transports every player's stats, not just the POV's).
 
@@ -3090,9 +3278,27 @@ The server is pushing a console command into the client. There are four classes 
     - **Hoonymode round markers**: at the start of every HoonyMode round KTX stuffs `//demomark 0 round-%2d\n` to one arbitrary player (`ktx/src/match.c:428`) — the only variant that carries arguments. ezquake's exact-match seek ignores it; a parser should capture the argument tail as a label.
     - **Frogbot rocket-jump marks**: with the frogbot option `FB_OPTION_DEMOMARK_ROCKETJUMPS` enabled, bots call `DemoMark()` on every rocket jump (`ktx/src/bot_botjump.c:358`), so bot demos can be dense with markers.
     - **End-of-match listing**: if any in-match markers were recorded, KTX broadcasts a "Demo markers" table (`ktx/src/match.c:234-258`) listing `Time: m:ss (name)` per marker. The heading and `Time` label are red-text (bit 7 set on every char), so naive ASCII grep misses it. The stufftexts are the authoritative signal; the listing is presentation (and is capped/debounced as above).
-4. **`play sound/file.wav`** style commands — countdown beeps, intermission music. Safe to ignore.
+4. **`//finalscores "<date>" "<mode>" "<map>" "<team1>" <s1> "<team2>" <s2>`** — the end-of-match scoreline, stuffed once per match into the *first* connected client (`ktx/src/commands.c:6963-6977`, at the tail of `lastscore_add`, under a comment calling it "a HACK for QTV, ok EZTV"). Because it goes to one client it is recorded as a `dem_single` block, but nothing in it is per-client: the payload is the server's own result.
 
-A single-pass parser should emit all four as a `StuffTextEvent` and let the consuming analyzer decide which prefix to react to. `//demomark` is the one class where the `StuffTextEvent` alone is insufficient — attribution lives in the demo block's target slot, which the parser must capture at demux time.
+    ```
+    //finalscores "Sep 29, 21:27" "duel" "aerowalk" "kip" 19 "grisling" 24
+    //finalscores "Mar 08, 21:16" "team" "dm2" "'tbg" 169 "PEX" 214
+    ```
+
+    Field by field:
+
+    - **date** — `QVMstrftime("%b %d, %H:%M")` of the server's LOCAL clock. **No year, no seconds, no timezone**, which is why it can corroborate a date but never establish one on its own.
+    - **mode** — `lastscores2str` (`commands.c:6755`): `duel`, `team`, `FFA`, `CTF`, `RA`, `Clan Arena`, `Wipeout`, `HoonyMode`, `race`, `unknown`. Forks add their own (`Extinction` occurs in the archive). Note this is a *third* mode vocabulary, distinct from both the ktxstats `mode` (`GetMode`, `ktx/src/stats.c:309` — `duel`, `team`, `ffa`, `clan-arena`, …) and the serverinfo `mode` key (`1on1`, `4on4-midair`, `world.c:1542`).
+    - **map** — `mapname`, the canonical short name.
+    - **team1/s1, team2/s2** — the two sides. On a duel the "team" is the player's own name (the branch at `commands.c:6836-6866` reads the two duelers' `frags` directly). **What the score counts is mode-dependent**: `get_scores1/2` sums the sides' frags (`g_utils.c:1868-1919`), *except* on Clan Arena and Wipeout, where `lastscore_add` substitutes `CA_get_score_1/2` — **rounds won** (`commands.c:6867-6886`). Scores can be negative (suicides outnumbering frags).
+
+    The names are player-authored userinfo values and arrive in the Quake charset (colour codes and all), so normalise them like any other name. The whole line is terminated with `\n` before the string's NUL.
+
+    **Why it matters**: it rides ~64% of the 51k-demo archive against the KTX demoinfo block's ~46%, and the two eras only partly overlap — on the pre-ktxstats half this is the only place the *server* states a mode, a map or a final result. A 12 000-demo archive scan found exactly one directive per demo and not a single malformed copy, but a parser should still shape-check (seven arguments, the five quoted ones quoted, both scores integers) and drop what fails: stuffed values do get corrupted on this archive, and a half-parsed scoreline is worse than none.
+
+5. **`play sound/file.wav`** style commands — countdown beeps, intermission music. Safe to ignore.
+
+A single-pass parser should emit all five as a `StuffTextEvent` and let the consuming analyzer decide which prefix to react to. `//demomark` is the one class where the `StuffTextEvent` alone is insufficient — attribution lives in the demo block's target slot, which the parser must capture at demux time.
 
 ### svc_setangle (10)
 
@@ -3306,8 +3512,8 @@ KTX renders the **complete match-settings table** into an `svc_centerprint` once
 
 | Row label | Meaning | Source |
 |-----------|---------|--------|
-| `Mode` | Game mode (`Duel`, `Team`, `FFA`, `CA`, `CTF`, `LGC`, `BlitzTDM`, `Hoony`, `RACE`, etc.) | `match.c:1410-1447` |
-| `Deathmatch` | `deathmatch` cvar value | `match.c:1384` |
+| `Mode` | Game mode: `D u e l`, `T e a m`, `F F A`, `C T F`, `R A C E`, `C O O P`, `CA`, `RA`, `Wipeout`, `Hoony`, `BlitzTDM`, `LGC`, `BLOODFST`, `Unknown` (redtext; the analyzer strips the spaces). At least one current server build prints `CA` for wipeout too. On a hoony duel the last three frames are `PersonalisedCountdown` (`:1498-1503`) and carry no table — at most a `Next` / `Duration` / `Draw` row. | `match.c:1511-1571` |
+| `Deathmatch` | `deathmatch` cvar value | `match.c:1508` |
 | `Teamplay` | `teamplay` cvar value (only printed in team modes) | `match.c` |
 | `Timelimit` | minutes | `match.c` |
 | `Fraglimit` | frags | `match.c` |
@@ -3368,7 +3574,7 @@ A complete metadata extractor needs to:
 
 1. Listen for `svc_stufftext` and on the `fullserverinfo "..."` command, split the quoted blob into a `serverInfo` map.
 2. Listen for `svc_serverinfo` and apply each update to the same map (last write wins).
-3. Listen for `svc_centerprint` and for any centerprint that contains `"Countdown:"` (after Q_normalizetext), keep the *last* one observed before `"the match has begun"` arrives via `svc_print`. Parse it line-by-line into a structured `MatchSettings` view.
+3. Listen for `svc_centerprint` and for any centerprint that contains `"Countdown:"` (after Q_normalizetext), keep the *last* one observed before the match starts (the `MatchStartEvent` signal, not the "has begun" print alone — a matchless server never prints it). Parse it line-by-line into a structured `MatchSettings` view.
 4. Parse the `mvdhidden_demoinfo` JSON and surface per-player `handicap` and `bot` fields.
 
 Steps 1 and 3 are independent of the player-stat machinery and can run in parallel with the match analyzer. Step 4 is already part of any KTX-aware analyzer.
@@ -3836,6 +4042,8 @@ Enables `mvdhidden_usercmd` (0x0001) recording per player. Used primarily for ra
 - Added [Per-client pickup prints — and the PRINT_LOW filter](#per-client-pickup-prints--and-the-print_low-filter) to the `svc_print` section. KTX's `G_sprint(PRINT_LOW)` pickup messages ("You got the Red Armor", "You receive 25 health", "You get " backpack opener) carry pickup-attribution via the `dem_single` target slot and would cover categories `//ktx took` skips (ammo boxes, H15/H25), **but** `SV_ClientPrintf` filters by the picking client's `messagelevel` cvar before the MVD write — competitive players widely set `msg 2`, which strips PRINT_LOW from the recording entirely. Coverage is per-player and per-demo; `//ktx took` / `//ktx bp` are the only signals that bypass the filter.
 - Added [Derived events — death and spawn](#derived-events--death-and-spawn) — why every `StatHealth` crossing of zero should be surfaced as its own event at the parser layer rather than inferred by per-sample comparison, and the instant-respawn case that motivates it.
 - Added [Practical gap — non-RL/LG backpack pickups on competitive demos](#svc_stufftext-9) under the `//ktx` directives, combining the two pre-existing limits (`//ktx bp` is RL/LG-only, and KTX's `"You get "` backpack-opener print is stripped by `SV_ClientPrintf` when `messagelevel >= 1`) into the explicit conclusion that **non-RL/LG backpack pickups have no authoritative wire signal on a typical 4on4 / duel MVD**. Notes the residual indirect signal (STAT_ITEMS bit + STAT_SHELLS/NAILS/ROCKETS/CELLS deltas via `svc_updatestat`) that a future heuristic analyzer could correlate with nearby `BackpackDropHintEvent`s.
+- **Corrected `//ktx expire <ent>`** in the [`//ktx` directives](#svc_stufftext-9) table. It was documented as a generic "item entity is about to be removed (mode-specific despawn, e.g. powerup expires unattended)" signal; it is nothing of the sort. `SUB_Remove` (`ktx/src/g_spawn.c:196-210`) guards on `classname == "backpack"` and `items == IT_ROCKET_LAUNCHER || IT_LIGHTNING` before printing, so it is the third member of the RL/LG backpack family and fires for a dropped pack at `DropBackpack`'s 120 s `nextthink` timeout. It is also the only signal on the wire that positively says a pack was **not** taken — the absence of a `//ktx bp` cannot, since 107 of 330 archive demos emit `//ktx drop` and no pickup hints at all. Added the [Backpack lifecycle](#svc_stufftext-9) note with the archive census that backs it (10 384 drops = 10 006 `bp` + 190 `expire` + 188 claimed by neither, zero rows claiming both), and the warning that the `<ent>` is recycled within a match so any join must use time as well.
+- Added [`//finalscores`](#svc_stufftext-9) as its own stufftext class — the end-of-match scoreline KTX stuffs into the first client (`ktx/src/commands.c:6963-6977`). It rides ~64% of the 51k-demo archive against the demoinfo block's ~46%, making it the only server-stated mode / map / result on the pre-ktxstats half. Documents the three traps: the date has no year, the mode is a third vocabulary distinct from both ktxstats' and the serverinfo key's, and the score is **rounds won** rather than frags on Clan Arena / Wipeout.
 
 ### MVD_PEXT1 Hidden Message History
 

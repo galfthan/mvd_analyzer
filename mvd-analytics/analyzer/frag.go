@@ -37,6 +37,10 @@ type FragAnalyzer struct {
 	// the recoverTelefragTeamkills post-processor can recover the killer
 	// from position co-location + the teamkiller's frag-penalty.
 	victimNamedTeamkills []FragEntry
+	// unpaired are the teamkill obituaries whose other party neither
+	// recovery could name; they are published as FragResult.Unpaired rather
+	// than dropped. See that field for why they cannot join frags.
+	unpaired []FragEntry
 }
 
 // slotDeath is one match-time death pinned to the wire slot that died
@@ -76,6 +80,8 @@ func (a *FragAnalyzer) Init(ctx *Context) error {
 
 func (a *FragAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
+	case *events.MatchStartEvent:
+		a.timing.OnMatchStart(e)
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 		a.handleObituaryPrint(e)
@@ -171,20 +177,38 @@ func adjustWeaponCount(m map[string]int, weapon string, delta int) {
 }
 
 func (a *FragAnalyzer) Finalize(result *Result) error {
-	// Re-evaluate teamkill status using DemoInfo. During OnEvent,
-	// isTeamKill() compared obituary display names against ctx.Players
-	// which may have had auth names, causing misses.
-	if a.core != nil && a.core.DemoInfo != nil {
+	// Re-evaluate teamkill status now that the mode descriptor and the
+	// DemoInfo name→team table exist. Neither is available during OnEvent —
+	// CoreOutputs is handed over just before Finalize — so the OnEvent
+	// verdict is a provisional read of the live userinfo table, and this is
+	// where it is settled:
+	//
+	//   - In an individual mode nothing is a team kill. KTX's teamkill
+	//     obituaries are unreachable outside team / CTF / coop
+	//     (ktx/src/client.c:5342-5343 gates the whole branch on
+	//     `(isTeam() || isCTF()) && same team || coop`), so a team kill on
+	//     an FFA demo is not a signal we would be discarding — it is our own
+	//     tag comparison misfiring on clan decoration. It fired 34 times in
+	//     211 kills on ffa_1[dm2], where three players wore `red`.
+	//   - Otherwise the DemoInfo table wins where it exists: during OnEvent
+	//     isTeamKill() compared obituary display names against ctx.Players,
+	//     which may have carried auth names, causing misses.
+	individual := a.core.IndividualMode()
+	if individual || (a.core != nil && a.core.DemoInfo != nil) {
 		names := a.core.Names
 		for i := range a.frags {
 			f := &a.frags[i]
 			if f.IsSuicide {
 				continue
 			}
-			killerTeam := names.TeamForName(f.Killer)
-			victimTeam := names.TeamForName(f.Victim)
+			want := false
+			if !individual {
+				killerTeam := names.TeamForName(f.Killer)
+				victimTeam := names.TeamForName(f.Victim)
+				want = killerTeam != "" && victimTeam != "" && killerTeam == victimTeam
+			}
 			wasTeamKill := f.IsTeamKill
-			f.IsTeamKill = killerTeam != "" && victimTeam != "" && killerTeam == victimTeam
+			f.IsTeamKill = want
 
 			// Fix kill counts if teamkill status changed.
 			//
@@ -195,7 +219,8 @@ func (a *FragAnalyzer) Finalize(result *Result) error {
 			// same footing (result.PlayerStatsScore.ByWeapon). This path
 			// fires on auth-name servers, where OnEvent's isTeamKill()
 			// compared obituary display names against userinfo that carried
-			// auth names instead; no golden demo reaches it.
+			// auth names instead, and on every individual-mode demo whose
+			// players share a colour tag.
 			if f.IsTeamKill == wasTeamKill {
 				continue
 			}
@@ -249,6 +274,7 @@ func (a *FragAnalyzer) Finalize(result *Result) error {
 		Frags:      a.frags,
 		ByWeapon:   a.byWeapon,
 		ByPlayer:   a.byPlayer,
+		Unpaired:   a.unpaired,
 	}
 
 	// Born-correct timestamps: emit the frag log on the match clock. The shift
@@ -265,6 +291,14 @@ func (a *FragAnalyzer) Finalize(result *Result) error {
 			shifted[i].Time -= ms
 		}
 		result.Frags.Frags = shifted
+		if len(a.unpaired) > 0 {
+			up := make([]FragEntry, len(a.unpaired))
+			copy(up, a.unpaired)
+			for i := range up {
+				up[i].Time -= ms
+			}
+			result.Frags.Unpaired = up
+		}
 	}
 	return nil
 }
@@ -337,6 +371,8 @@ func (a *FragAnalyzer) recoverTeamkills() {
 			// it's a teamkill, not a suicide (killer != victim).
 			entry.IsSuicide = false
 			a.frags = append(a.frags, entry)
+		} else {
+			a.unpaired = append(a.unpaired, tk)
 		}
 	}
 
@@ -410,6 +446,8 @@ func (a *FragAnalyzer) parseObituary(msg string, timeMs int32) *FragEntry {
 		Victim:    o.Victim,
 		Weapon:    o.Weapon,
 		IsSuicide: o.Suicide,
+		Cause:     o.Cause,
+		Deflector: o.Other,
 	}
 	switch {
 	case o.TeamKill:
@@ -424,7 +462,10 @@ func (a *FragAnalyzer) parseObituary(msg string, timeMs int32) *FragEntry {
 	return f
 }
 
-// isTeamKill checks if killer and victim are on the same team
+// isTeamKill checks if killer and victim are on the same team, from the LIVE
+// userinfo table — a provisional verdict, because this runs during the event
+// pass, before CoreOutputs exists. Finalize settles it against the mode
+// descriptor and the DemoInfo name→team table.
 func (a *FragAnalyzer) isTeamKill(victim, killer string) bool {
 	var victimTeam, killerTeam string
 

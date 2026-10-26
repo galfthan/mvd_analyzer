@@ -100,3 +100,42 @@ func TestFragUpdate_TransientCorruptionStillRejected(t *testing.T) {
 		t.Errorf("got %d events summing %d, want 10/10 (nine +1s plus the correction; garbage dropped)", n, sum)
 	}
 }
+
+// TestFragUpdate_AfterMatchEndNotRecorded pins the !Ended half of the
+// match-window gate at timeline.go:405, the fix that rode along with the
+// Layer-1 match start.
+//
+// The reachable case is a player who quits AFTER the match is over on a
+// server that keeps recording — normal on a KTX matchless server, and the
+// shape `ffa_matchless_nova_260704` carries: nexus drops at demo t=364.3 s,
+// 3.7 s past the match-over print. SV_DropClient zeroes the leaving slot's
+// score and broadcasts it (mvdsv/src/sv_main.c:419-428), which reaches this
+// handler as a plain svc_updatefrags to 0. The Vacated handler that would
+// drop the phantom sits INSIDE the match window, so on "started" alone the
+// zeroing landed in timelineAnalysis.fragEvents dated past matchEnd.
+//
+// The drop here is -3, comfortably inside the [-5,5] corruption guard, so
+// what keeps it out is the Ended gate and nothing else.
+func TestFragUpdate_AfterMatchEndNotRecorded(t *testing.T) {
+	a := NewTimelineAnalyzer()
+	feed := func(ev events.Event) { _ = a.OnEvent(ev) }
+
+	feed(&events.MatchStartEvent{TimeMs: 1000, Source: "matchdate"})
+	feed(&events.UserInfoEvent{Player: &events.PlayerInfo{Slot: 4, UserID: 17, Name: "nexus"}, TimeMs: 1000})
+	for f := 1; f <= 3; f++ {
+		feed(&events.FragUpdateEvent{PlayerNum: 4, Frags: f, TimeMs: int32(f) * 10000})
+	}
+
+	feed(&events.PrintEvent{Level: events.PrintHigh, Message: "The match is over\n", TimeMs: 360600})
+	if !a.timing.Ended {
+		t.Fatal("the match-over print did not end the match")
+	}
+
+	// The quit: SV_DropClient zeroes the scoreboard 3.7 s past the end.
+	feed(&events.FragUpdateEvent{PlayerNum: 4, Frags: 0, TimeMs: 364300})
+
+	n, sum := sumDeltasForSlot(a, 4)
+	if n != 3 || sum != 3 {
+		t.Errorf("got %d events summing %d, want 3/3 — a post-match scoreboard update reached the frag timeline", n, sum)
+	}
+}

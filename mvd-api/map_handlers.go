@@ -142,11 +142,13 @@ func corpusToResult(me *mapents.MapEntities) *result.MapEntitiesResult {
 	return out
 }
 
-// writeStaticHeaders sets immutable cache headers + ETag for per-map
-// static responses and honours If-None-Match. Returns false when it has
-// already written a 304 and the caller should stop.
+// writeStaticHeaders sets revalidate-always cache headers + ETag for
+// per-map static responses and honours If-None-Match. Returns false when
+// it has already written a 304 and the caller should stop. no-cache, not
+// immutable: a mapgen regeneration ships new bodies under the same URLs,
+// and the ETag makes revalidation a cheap 304 when nothing changed.
 func writeStaticHeaders(w http.ResponseWriter, r *http.Request, etag string) bool {
-	w.Header().Set("Cache-Control", "public, max-age=86400, immutable")
+	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("ETag", etag)
 	if match := r.Header.Get("If-None-Match"); match != "" && strings.Contains(match, etag) {
 		w.WriteHeader(http.StatusNotModified)

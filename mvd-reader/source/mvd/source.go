@@ -133,6 +133,19 @@ func (s *Source) Parser() *parser.Parser {
 	return s.parser
 }
 
+// The census reaches the analytics pipeline through this optional
+// capability, not through Parser() — a Source that stopped satisfying it
+// would silently take every demo's warnings out of the Result.
+var _ events.WarningReporter = (*Source)(nil)
+
+// WarningSummary implements events.WarningReporter: the census of svc_*
+// commands, temp entities, hidden blocks and payloads this source could
+// not decode. Always collected, so a consumer sees it without opting
+// into diagnostic mode. Complete once the stream has been drained.
+func (s *Source) WarningSummary() events.WarningSummary {
+	return s.parser.WarningSummary()
+}
+
 // chainCloser closes the decompressor wrapper and the underlying file in
 // order, returning the first non-nil error so callers can spot trouble.
 type chainCloser struct {

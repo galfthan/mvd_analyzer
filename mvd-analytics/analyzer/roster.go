@@ -22,6 +22,21 @@ type Roster struct {
 	// labels are rewritten to the player's own name.
 	isDuel bool
 
+	// individual is the general form of the same rewrite: the resolved game
+	// mode has no teams at all (GameMode.TeamBased false, from a source that
+	// actually saw a mode or a teamplay cvar — see individualLayoutFromMode),
+	// so every player is their own side. FFA is the case it exists for: KTX
+	// forces `teamplay 0` there (ktx/src/world.c:1652-1655) and the userinfo
+	// team tags players still wear are clan decoration — on ffa_1[dm2] three
+	// of them read `red` and those three killed each other.
+	//
+	// It differs from isDuel only in the participant set: a duel rewrites
+	// exactly the two demoinfo players and leaves anyone else's tag alone,
+	// while an individual mode has no fixed roster (players come and go, and
+	// a matchless FFA carries no demoinfo block to enumerate them), so every
+	// name it is asked about is its own side.
+	individual bool
+
 	// demoDecided records that DemoInfo carried a players list, which is KTX's
 	// authoritative end-of-match participant snapshot. When set, the duel
 	// verdict is final and the no-demoinfo match fallback (noteMatchParticipants)
@@ -90,14 +105,22 @@ func (r *Roster) Duel() bool { return r != nil && r.isDuel }
 
 // TeamFor returns the FINAL team label a producer should stamp for a record it
 // attributes to name: the player's own name in a duel (when name is a tracked
-// participant), otherwise the raw resolved team unchanged. Nil-safe and a
-// no-op outside duel mode, so migrating a producer to call it is byte-identical
-// on team games and folds in the duel rewrite on 1v1s.
+// participant) or in any other individual mode (any name at all), otherwise the
+// raw resolved team unchanged. Nil-safe and a no-op on team games, so migrating
+// a producer to call it is byte-identical there and folds in the individual
+// rewrite everywhere else.
 func (r *Roster) TeamFor(name, rawTeam string) string {
-	if r != nil && r.isDuel {
+	if r == nil || name == "" {
+		return rawTeam
+	}
+	if r.isDuel {
 		if _, ok := r.participants[name]; ok {
 			return name
 		}
+		return rawTeam
+	}
+	if r.individual {
+		return name
 	}
 	return rawTeam
 }
@@ -118,14 +141,17 @@ func (r *Roster) Participants() []string {
 // first. It writes nothing to Result directly except the in-place duel rewrite
 // of the DemoInfo team labels it owns; every other producer reads the published
 // Roster at Finalize.
-type RosterAnalyzer struct{}
+type RosterAnalyzer struct{ ctx *Context }
 
 // NewRosterAnalyzer creates the roster analyzer.
 func NewRosterAnalyzer() *RosterAnalyzer { return &RosterAnalyzer{} }
 
 func (a *RosterAnalyzer) Name() string { return "roster" }
 
-func (a *RosterAnalyzer) Init(ctx *Context) error { return nil }
+func (a *RosterAnalyzer) Init(ctx *Context) error {
+	a.ctx = ctx
+	return nil
+}
 
 func (a *RosterAnalyzer) OnEvent(event events.Event) error { return nil }
 
@@ -144,18 +170,76 @@ func (a *RosterAnalyzer) PopulateCore(co *CoreOutputs) {
 	r := newRoster(co.DemoInfo)
 	co.Roster = r
 
-	// DemoInfo team rewrite (the old normalizeDuelTeams DemoInfo block). In a
-	// duel each player's team becomes their own name and DemoInfo.Teams is
-	// rebuilt as the one-player-per-team layout in player order. The NameTable
-	// (built from the raw teams earlier in demoinfo.PopulateCore) is left
-	// untouched, so producers still resolve raw teams and apply the roster label
-	// on top.
-	if r.isDuel && co.DemoInfo != nil {
+	// The mode descriptor is resolved here, and only here, because this is
+	// the earliest point where all five of its sources exist (roster's
+	// `requires` edges on demoinfo and metadata) and the last point before
+	// the team-labelling producers run. See analyzer/gamemode.go.
+	gm := resolveGameMode(co.DemoInfo, co.FinalScores, co.MatchSettings, co.ServerInfo, r, a.liveTeamCounts())
+	co.GameMode = &gm
+	r.individual = individualLayoutFromMode(&gm)
+
+	// DemoInfo team rewrite (the old normalizeDuelTeams DemoInfo block). In
+	// EVERY individual layout — a duel and, since v75, an FFA or any other
+	// mode with no teamplay — each player's team becomes their own name and
+	// DemoInfo.Teams is rebuilt as the one-player-per-team layout in player
+	// order. The NameTable (built from the raw teams earlier in
+	// demoinfo.PopulateCore) is left untouched, so producers still resolve
+	// raw teams and apply the roster label on top.
+	//
+	// Applying it to duels alone left `demoInfo.players[].team` carrying the
+	// decorative clan tags on an FFA with a KTX block while every other
+	// section named players — and demoInfo is the FIRST place several
+	// consumers look for a name→team map, so they came out keyed on tags
+	// nothing else used or, in the frontend's case, empty (the map tab's
+	// player symbols, the loc heatmap, the timeline's per-team player
+	// lists). The two Go readers with the same shape are locgraph's byTeam
+	// and view.regionControl's name→team fallback.
+	//
+	// The raw userinfo tag is NOT lost: match.players[].rawTeam carries it
+	// verbatim (rebuildIndividualMatch) — but only because this rewrite is
+	// scheduled after `identity`. co.DemoInfo, ctx.DemoInfo and
+	// result.DemoInfo are ONE pointer (demoinfo.go), so the assignment
+	// below is destructive: IdentityAnalyzer.PopulateCore copies dp.Team
+	// into every session it resolves, and with roster running first it
+	// copied the player's own name and rebuildIndividualMatch then saw
+	// raw == name and omitted rawTeam. That is why the roster node declares
+	// a `requires` edge on `identity` (dag.go) even though it reads nothing
+	// identity publishes: the edge is the write-after-read order.
+	if co.IndividualMode() && co.DemoInfo != nil && len(co.DemoInfo.Players) > 0 {
+		teams := make([]string, 0, len(co.DemoInfo.Players))
+		seen := make(map[string]bool, len(co.DemoInfo.Players))
 		for i := range co.DemoInfo.Players {
-			co.DemoInfo.Players[i].Team = co.DemoInfo.Players[i].Name
+			name := co.DemoInfo.Players[i].Name
+			co.DemoInfo.Players[i].Team = name
+			if name == "" || seen[name] {
+				continue
+			}
+			seen[name] = true
+			teams = append(teams, name)
 		}
-		teams := make([]string, len(r.order))
-		copy(teams, r.order)
 		co.DemoInfo.Teams = teams
 	}
+}
+
+// liveTeamCounts counts how many wire slots carry each non-empty userinfo
+// `team` tag. It is the roster-shape input to the mode resolver's weakest
+// TeamBased fallback — the demos with no demoinfo block, no serverinfo
+// `teamplay` key and no countdown — where "does any tag hold more than one
+// player" is the only evidence left. The live userinfo table is read rather
+// than the match scoreboard because that node has not run yet; the two
+// disagree only on players the scoreboard's participation gate drops, which
+// cannot turn a one-tag-per-player shape into a shared one.
+func (a *RosterAnalyzer) liveTeamCounts() map[string]int {
+	if a.ctx == nil {
+		return nil
+	}
+	counts := map[string]int{}
+	for i := range a.ctx.Players {
+		p := a.ctx.Players[i]
+		if p == nil || p.Spectator || p.Team == "" {
+			continue
+		}
+		counts[p.Team]++
+	}
+	return counts
 }

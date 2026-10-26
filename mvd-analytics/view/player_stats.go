@@ -168,8 +168,19 @@ var ktxItemKind = map[string]string{
 //     so folding one into the other would silently change what the field
 //     means.
 //   - accuracy: KTX's whole block wins when present; the analyzer's
-//     fire-stream reconstruction stands when it is not. The two are
-//     different measurements, which is what `src` is for — see
+//     fire-stream derivation stands when it is not. `src` says which
+//     evidence the numbers rest on, never what a number counts —
+//     PlayerStatsAcc.HitsConvention says that, per weapon, on every row
+//     that carries `hits`. Since v75 the WIRE-LINKED tier reaches KTX's
+//     own convention on every weapon KTX counts differently (pellets for
+//     sg/ssg, direct impacts for rl off the wire's splash flag and for gl
+//     off the touch classifier the reconstruction uses), and the
+//     RECONSTRUCTED tier reaches it for rl/gl (v74) but not for the
+//     shotguns, whose pellet split needs a per-hit magnitude the rebuilt
+//     log does not carry. So `pellets`
+//     rows count pellets on both sides of the ratio and every other row
+//     counts trigger pulls — the convention marker, not `src` and not
+//     the weapon, is what tells them apart. See
 //     result.PlayerStatsAccuracy.
 //   - pickups: took / totalTook / dropped from KTX; xfer / xferSelf stay
 //     derived (KTX conflates the two). Ammo kinds have no KTX counterpart
@@ -385,11 +396,15 @@ func derivedTakenToDie(derived *result.PlayerStatsDamage) *int {
 //
 // The KTX block replaces the derived one WHOLESALE — it never reads
 // row.Accuracy — and that is deliberate, unlike the per-weapon merge
-// overlayDamage does. Damage is the same unit in both sources; accuracy
-// is not. KTX counts PELLETS server-side for sg/ssg while the
-// reconstruction counts trigger pulls (result.PlayerStatsAccuracy), so a
-// per-weapon merge would put the two scales side by side in one map under
-// one `src`, which is exactly the coercion this section exists to avoid.
+// overlayDamage does. Damage is the same unit in both sources; accuracy is
+// not necessarily, even now that every tier publishes KTX's convention per
+// weapon (schema v75): a `reconstructed` row counts sg/ssg fires where KTX
+// counts pellets, and gl `hits` falls back to the any-path count on a parse
+// that built no spatial shot streams — the touch classifier's own input, the
+// wire log having no record of a grenade touch (see
+// analyzer.deriveMeasuredAcc). A per-weapon merge would put those scales next
+// to KTX's in one map under one `src`, which is exactly the coercion this
+// section exists to avoid.
 //
 // Measured before deciding: across all 42 cached corpus demos, every one
 // of which carries a KTX block, 228 player rows with a derived accuracy
@@ -408,7 +423,10 @@ func overlayAccuracy(di *result.DemoInfoPlayer) *result.PlayerStatsAccuracy {
 			continue
 		}
 		hits := wv.Acc.Hits
-		e := result.PlayerStatsAcc{Attacks: wv.Acc.Attacks, Hits: &hits}
+		e := result.PlayerStatsAcc{
+			Attacks: wv.Acc.Attacks, Hits: &hits,
+			HitsConvention: ktxHitsConvention(w),
+		}
 		// KTX omits the real/virtual split entirely unless it recorded one
 		// (`if (stats->rhits || stats->vhits)`, ktx/src/stats_json.c:146) —
 		// carry the distinction rather than zero-filling.
@@ -422,6 +440,27 @@ func overlayAccuracy(di *result.DemoInfoPlayer) *result.PlayerStatsAccuracy {
 		return nil
 	}
 	return &result.PlayerStatsAccuracy{Src: result.SrcKTX, ByWeapon: byWeapon}
+}
+
+// ktxHitsConvention names what KTX's OWN hits counter counts for one weapon.
+// The block is not uniform, which is the whole reason the marker is
+// per-weapon: sg/ssg advance per pellet on both sides of the ratio
+// (ktx/src/weapons.c:812 and :387), rl/gl only when the projectile touches a
+// player (:994, :1329), and everything else once per fire that damaged —
+// which for a weapon with one damage path is the same event as a direct hit.
+//
+// The default is deliberately the any-path value rather than "unknown": KTX
+// keeps one hits counter per weapon and the only two that count something
+// else are enumerated here, so a weapon this pipeline has not met yet is
+// still a per-fire counter until it is shown otherwise.
+func ktxHitsConvention(weapon string) string {
+	switch weapon {
+	case "sg", "ssg":
+		return result.HitsPellets
+	case "rl", "gl":
+		return result.HitsDirectImpact
+	}
+	return result.HitsAnyDamage
 }
 
 // overlayPickups folds KTX's pickup counters over the derived tallies,

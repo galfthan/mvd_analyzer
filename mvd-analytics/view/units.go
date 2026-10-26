@@ -121,12 +121,6 @@ type ChatEnvelope struct {
 	Messages []result.MatchEvent `json:"messages"`
 }
 
-// AirgibsEnvelope wraps the /airgibs key-moment list (ms-native).
-type AirgibsEnvelope struct {
-	TimeUnit TimeUnit             `json:"timeUnit"`
-	Airgibs  []result.AirgibEvent `json:"airgibs"`
-}
-
 // BackpacksEnvelope wraps the /backpacks drop list (ms-native).
 type BackpacksEnvelope struct {
 	TimeUnit  TimeUnit              `json:"timeUnit"`

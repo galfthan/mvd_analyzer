@@ -45,9 +45,11 @@ const (
 	EventSpawn
 	EventItemSpawn
 	EventItemState
+	EventItemMove
 	EventBackpackDropHint
 	EventItemPickupHint
 	EventBackpackPickupHint
+	EventBackpackExpireHint
 	EventItemPickupPrint
 	EventDemoStartTimestamp
 	EventPausedDuration
@@ -61,6 +63,9 @@ const (
 	EventDemoMark
 	EventPlayerDeparture
 	EventPlayerRejoin
+	EventPointEffect
+	EventFinalScores
+	EventMatchStart
 )
 
 // IntermissionEvent is emitted when the server enters intermission
@@ -146,8 +151,14 @@ type Parser struct {
 	playerDead      [mvd.MaxClients]bool
 	playerDeadKnown [mvd.MaxClients]bool
 	playerSeenInfo  [mvd.MaxClients]bool
-	// matchStarted flips on the first svc_print whose text matches one
-	// of the canonical match-start phrases (see matchStartedFromPrint).
+	// matchStarted flips on the first match-start signal the wire
+	// carried — a match-start print, the `matchdate:` stamp, KTX's
+	// `//ktx matchstart` stuffcmd, or a serverinfo `status` transition
+	// to a running clock (see matchstart.go). It is also the
+	// once-per-stream latch for MatchStartEvent: the flag flips and the
+	// event is emitted in the same step, so Layer 2's verdict and this
+	// gate cannot disagree.
+	//
 	// It gates the obituary-derived DeathEvent path in
 	// tryEmitObituaryDeath: telefrag obits that fire at the *exact*
 	// wire time of the start print arrive in the event stream before
@@ -157,16 +168,35 @@ type Parser struct {
 	// on this flag keeps warmup obits silent and lets the dedup state
 	// flow normally once the match is live.
 	matchStarted bool
+	// statusRunning is the last serverinfo `status` reading's verdict
+	// (StatusNamesRunningGame), from the opening `fullserverinfo` dump
+	// or a later svc_serverinfo update. The match-start detector needs
+	// the PREVIOUS reading to tell a transition into a running game
+	// from the once-a-minute countdown ticks that follow it.
+	statusRunning bool
 	// printLines buffers svc_print fragments per (level, dem_single
 	// target) until the line they belong to is terminated. See
 	// assemblePrintLine in print.go.
-	printLines     map[printLineKey]*printLineBuf
-	handlers       []Handler
-	floatCoords    bool
+	printLines  map[printLineKey]*printLineBuf
+	handlers    []Handler
+	floatCoords bool
+	// msgWide mirrors msg_coordsize/msg_anglesize (sv_bigcoords /
+	// FTE_PEXT_FLOATCOORDS only — see serverdata.go). floatCoords above is
+	// the combined FTE|MVD1 flag and governs entity-delta ORIGINS only.
+	msgWide        bool
 	fteExtensions  uint32 // FTE protocol extension flags
 	diagnosticMode bool
 	decodeNails    bool // opt-in: decode svc_nails/svc_nails2 into NailsFrameEvent (off by default; high volume)
 	warnings       []Warning
+
+	// Parse-warning census, always collected (see diagnostic.go). The
+	// counters are exact; warnGroups retains at most MaxWarningGroups
+	// distinct (type, message) rows and counts every warning past that
+	// into warnDropped.
+	warnTotal   int
+	warnByType  map[string]int
+	warnGroups  map[warnKey]*warnGroup
+	warnDropped int
 
 	// Entity state tracking — fills from svc_modellist, svc_spawnbaseline,
 	// and svc_packetentities / svc_deltapacketentities so the parser
@@ -407,10 +437,17 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			}
 
 		case mvd.SvcIntermission:
-			// 3 short coords (6) + 3 byte angles (3) = 9 bytes camera pose.
-			// We don't need the pose but we do need to signal intermission to
-			// downstream analyzers so they can stop sampling player state.
-			if err := r.Skip(9); err != nil {
+			// Camera pose: 3 coords + 3 angles, both width-negotiated
+			// (short/byte normally; float/short under FLOATCOORDS — ezquake
+			// CL_ParseServerMessage reads MSG_ReadCoord×3 + MSG_ReadAngle×3,
+			// honoring msg_coordsize/msg_anglesize). We don't need the pose
+			// but we do need to signal intermission to downstream analyzers
+			// so they can stop sampling player state.
+			coordSize := 2
+			if p.msgWide {
+				coordSize = 4
+			}
+			if err := r.Skip(3*coordSize + 3*angleSize(p.msgWide)); err != nil {
 				p.warn(msg.TimeMs, "parse_error", "svc_intermission: %v", err)
 				return nil
 			}
@@ -433,6 +470,16 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			if err := p.tryEmitKtxHints(s, msg.TimeMs); err != nil {
 				return err
 			}
+			// `//ktx matchstart` is KTX's own match-boundary directive and
+			// the opening `fullserverinfo` dump carries the baseline
+			// `status` reading the serverinfo detector compares against;
+			// both feed the once-per-stream MatchStartEvent (matchstart.go).
+			if err := p.tryEmitMatchStartFromStuffText(s, msg.TimeMs); err != nil {
+				return err
+			}
+			if err := p.observeFullServerInfoStatus(s, msg.TimeMs); err != nil {
+				return err
+			}
 			// A `//demomark` stuffcmd is attributed by the demo block's
 			// target: mvdsv writes it as a dem_single addressed at the
 			// marking player's slot. Non-slot-addressed blocks carry no
@@ -442,6 +489,11 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 				demoMarkSlot = msg.Header.PlayerNum
 			}
 			if err := p.tryEmitDemoMark(s, demoMarkSlot, msg.TimeMs); err != nil {
+				return err
+			}
+			// `//finalscores` is stuffed at match end and carries the
+			// server's own final scoreline (see ktx_finalscores.go).
+			if err := p.tryEmitFinalScores(s, msg.TimeMs); err != nil {
 				return err
 			}
 
@@ -473,6 +525,11 @@ func (p *Parser) parseNetworkMessage(msg *mvd.DemoMessage) error {
 			}
 			if err := p.emit(&ServerInfoEvent{Key: k, Value: v, TimeMs: msg.TimeMs}); err != nil {
 				return err
+			}
+			if k == "status" {
+				if err := p.observeServerInfoStatus(v, msg.TimeMs, true); err != nil {
+					return err
+				}
 			}
 
 		case mvd.SvcSpawnBaseline:
@@ -810,7 +867,11 @@ func (p *Parser) skipCommand(r *mvd.BufferReader, cmd byte) error {
 	case mvd.SvcBad:
 		return nil
 	case mvd.SvcSetAngle:
-		return r.Skip(3) // 3 angles (bytes)
+		// MVD framing carries a leading client-number byte before the 3
+		// width-negotiated angles (mvdsv sv_send.c writes svc_setangle +
+		// clnum + 3×MSG_WriteAngle; ezquake's mvdplayback path reads the
+		// byte back before the angles).
+		return r.Skip(1 + 3*angleSize(p.msgWide))
 	case mvd.SvcLightStyle:
 		_, err := r.ReadByte()
 		if err != nil {
@@ -830,7 +891,7 @@ func (p *Parser) skipCommand(r *mvd.BufferReader, cmd byte) error {
 		// svc_spawnstatic has no entity-number prefix — CL_ParseStatic calls
 		// CL_ParseBaseline directly (ezquake cl_parse.c). Decode the shared
 		// baseline body and discard: static entities are scenery, not tracked.
-		_, err := readBaselineBody(r, p.floatCoords)
+		_, err := readBaselineBody(r, p.floatCoords, p.msgWide)
 		return err
 	case mvd.SvcKilledMonster:
 		return nil

@@ -1,5 +1,7 @@
 {
   "aim": {
+    "hitsMeasured": true,
+    "hitsSource": "ktx",
     "players": [
       {
         "crosshair": {
@@ -269,6 +271,7 @@
             "hits": 62,
             "missed": 106,
             "self": {
+              "direct": 0,
               "hits": 16
             },
             "shots": 168,
@@ -276,7 +279,6 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 8,
             "shots": 8,
             "weapon": "gl"
@@ -579,6 +581,7 @@
             "hits": 54,
             "missed": 105,
             "self": {
+              "direct": 0,
               "hits": 13
             },
             "shots": 159,
@@ -589,11 +592,9 @@
             "hits": 3,
             "missed": 24,
             "shots": 27,
-            "splash": 3,
             "weapon": "gl"
           },
           {
-            "hits": 0,
             "shots": 2,
             "weapon": "ng"
           }
@@ -608,9 +609,10 @@
       "origin": [
         1815.75,
         -1183.125,
-        57.125
+        33.125
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 39091,
       "weapon": "rl"
@@ -621,9 +623,10 @@
       "origin": [
         2539.25,
         -1607.75,
-        59.125
+        35.125
       ],
       "player": "banan falco",
+      "source": "ktx",
       "team": "banan falco",
       "time": 54766,
       "weapon": "rl"
@@ -634,9 +637,10 @@
       "origin": [
         2565.125,
         -1903.75,
-        65
+        41
       ],
       "player": "banan falco",
+      "source": "ktx",
       "team": "banan falco",
       "time": 59896,
       "weapon": "rl"
@@ -647,9 +651,10 @@
       "origin": [
         2585.75,
         -1590.125,
-        82.375
+        58.375
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 65636,
       "weapon": "rl"
@@ -660,9 +665,10 @@
       "origin": [
         1843.125,
         -1195.25,
-        57.75
+        33.75
       ],
       "player": "banan falco",
+      "source": "ktx",
       "team": "banan falco",
       "time": 245400,
       "weapon": "rl"
@@ -673,9 +679,10 @@
       "origin": [
         2201.625,
         -1668.125,
-        29.875
+        5.875
       ],
       "player": "banan falco",
+      "source": "ktx",
       "team": "banan falco",
       "time": 338348,
       "weapon": "rl"
@@ -686,9 +693,10 @@
       "origin": [
         2544,
         -1039.75,
-        25.5
+        1.5
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 352411,
       "weapon": "rl"
@@ -699,9 +707,10 @@
       "origin": [
         2514,
         -913.25,
-        106
+        82
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 379917,
       "weapon": "rl"
@@ -712,9 +721,10 @@
       "origin": [
         2678.625,
         -2163.125,
-        172
+        148
       ],
       "player": "banan falco",
+      "source": "ktx",
       "team": "banan falco",
       "time": 387632,
       "weapon": "rl"
@@ -725,9 +735,10 @@
       "origin": [
         1689.625,
         -895,
-        20
+        -4
       ],
       "player": "banan falco",
+      "source": "ktx",
       "team": "banan falco",
       "time": 411819,
       "weapon": "rl"
@@ -738,9 +749,10 @@
       "origin": [
         2071.625,
         -1695,
-        61.25
+        37.25
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 417281,
       "weapon": "rl"
@@ -751,9 +763,10 @@
       "origin": [
         1648,
         -716.875,
-        24
+        0
       ],
       "player": "banan falco",
+      "source": "ktx",
       "team": "banan falco",
       "time": 429762,
       "weapon": "rl"
@@ -764,9 +777,10 @@
       "origin": [
         1880.5,
         -887.25,
-        62.5
+        38.5
       ],
       "player": "banan falco",
+      "source": "ktx",
       "team": "banan falco",
       "time": 472293,
       "weapon": "rl"
@@ -777,9 +791,10 @@
       "origin": [
         1677.5,
         -1137.125,
-        24.5
+        0.5
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 472371,
       "weapon": "rl"
@@ -790,9 +805,10 @@
       "origin": [
         2064,
         -400.125,
-        111.25
+        87.25
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 494515,
       "weapon": "rl"
@@ -803,9 +819,10 @@
       "origin": [
         1984.25,
         -422.375,
-        115.5
+        91.5
       ],
       "player": "banan falco",
+      "source": "ktx",
       "team": "banan falco",
       "time": 494515,
       "weapon": "rl"
@@ -816,9 +833,10 @@
       "origin": [
         2354.625,
         -79.25,
-        -72.625
+        -96.625
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 514306,
       "weapon": "rl"
@@ -829,9 +847,10 @@
       "origin": [
         2159.25,
         -2078.5,
-        89.75
+        65.75
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 519878,
       "weapon": "rl"
@@ -842,9 +861,10 @@
       "origin": [
         2468,
         -1362.125,
-        98.75
+        74.75
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 530189,
       "weapon": "rl"
@@ -855,9 +875,10 @@
       "origin": [
         1957.375,
         -1365,
-        120
+        96
       ],
       "player": "banan falco",
+      "source": "ktx",
       "team": "banan falco",
       "time": 543383,
       "weapon": "rl"
@@ -868,9 +889,10 @@
       "origin": [
         1670.625,
         -1548.375,
-        24
+        0
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 546604,
       "weapon": "rl"
@@ -881,9 +903,10 @@
       "origin": [
         1675.25,
         -838.625,
-        20
+        -4
       ],
       "player": "betowen",
+      "source": "ktx",
       "team": "betowen",
       "time": 595558,
       "weapon": "rl"
@@ -3579,10 +3602,12 @@
         }
       }
     },
+    "source": "ktx",
     "totalDamage": 14339
   },
   "demoInfo": {
     "date": "2026-04-24 18:27:08 +0200",
+    "deathmatch": 3,
     "demo": "duel_betowen_vs_banan_falco[dm2]260424-1816-duel1.mvd",
     "duration": 600,
     "hostname": "play.quake1.pl - duel #1",
@@ -4115,6 +4140,106 @@
     ],
     "killsMeasured": true,
     "totalFrags": 35
+  },
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 161,
+          "armorType": "ra",
+          "health": 160,
+          "loc": "big.stairs",
+          "name": "banan falco",
+          "relation": "self",
+          "stack": 321,
+          "stateSource": "stream",
+          "team": "banan falco",
+          "userId": 39,
+          "weapons": [
+            "rl",
+            "ssg"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 356.34375,
+        "heightAboveAttacker": 304.375,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 156362,
+        "victims": [
+          {
+            "activeWeapon": "sg",
+            "armor": 107,
+            "armorType": "ya",
+            "damage": 110,
+            "health": 169,
+            "loc": "floating",
+            "name": "betowen",
+            "relation": "enemy",
+            "stack": 276,
+            "stateSource": "stream",
+            "team": "betowen",
+            "userId": 37,
+            "weapons": [
+              "gl"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 69,
+          "armorType": "ya",
+          "health": 147,
+          "loc": "big",
+          "name": "banan falco",
+          "relation": "self",
+          "stack": 216,
+          "stateSource": "stream",
+          "team": "banan falco",
+          "userId": 39,
+          "weapons": [
+            "rl",
+            "gl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 111.21875,
+        "heightAboveAttacker": 83.5,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 469683,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 144,
+            "armorType": "ra",
+            "damage": 110,
+            "health": 147,
+            "loc": "big.stairs",
+            "name": "betowen",
+            "relation": "enemy",
+            "stack": 291,
+            "stateSource": "stream",
+            "team": "betowen",
+            "userId": 37,
+            "weapons": [
+              "rl"
+            ]
+          }
+        ]
+      }
+    ]
   },
   "items": {
     "items": [
@@ -10265,14 +10390,24 @@
   "match": {
     "duration": 599980,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "duel",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
     "map": "dm2",
     "mapTitle": "Claustrophobopolis",
+    "mode": "duel",
     "players": [
       {
         "deaths": 22,
         "frags": 7,
         "kills": 10,
         "name": "betowen",
+        "rawTeam": "red",
         "suicides": 3,
         "team": "betowen"
       },
@@ -10281,10 +10416,16 @@
         "frags": 16,
         "kills": 19,
         "name": "banan falco",
+        "rawTeam": "coop",
         "suicides": 3,
         "team": "banan falco"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "individual"
+    },
     "teams": [
       {
         "frags": 7,
@@ -10682,6 +10823,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  3\nMode  D u e l\nRespawns  KT2\nAntilag     2\nTimelimit  10\nOvertime    3\n\nno matchtag\n\n\n",
+    "finalScores": {
+      "date": "Apr 24, 18:27",
+      "map": "dm2",
+      "mode": "duel",
+      "score1": 7,
+      "score2": 16,
+      "team1": "betowen",
+      "team2": "banan falco"
+    },
     "matchSettings": {
       "antilag": 2,
       "deathmatch": 3,
@@ -10818,19 +10968,21 @@
           "byWeapon": {
             "gl": {
               "attacks": 27,
-              "hits": 3
+              "hits": 3,
+              "hitsConvention": "anyDamage"
             },
             "ng": {
-              "attacks": 2,
-              "hits": 0
+              "attacks": 2
             },
             "rl": {
               "attacks": 159,
-              "hits": 54
+              "hits": 10,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 28,
-              "hits": 9
+              "attacks": 168,
+              "hits": 38,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -10974,6 +11126,8 @@
           "efficiency": 0.3125,
           "frags": 7,
           "kills": 10,
+          "maxQuadSpree": 0,
+          "maxSpree": 2,
           "src": "derived",
           "suicides": 3,
           "teamKills": 0
@@ -11000,19 +11154,23 @@
           "byWeapon": {
             "gl": {
               "attacks": 8,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 168,
-              "hits": 62
+              "hits": 13,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 19,
-              "hits": 7
+              "attacks": 114,
+              "hits": 19,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 6,
-              "hits": 1
+              "attacks": 84,
+              "hits": 10,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -11161,6 +11319,8 @@
           "efficiency": 0.5938,
           "frags": 16,
           "kills": 19,
+          "maxQuadSpree": 0,
+          "maxSpree": 6,
           "src": "derived",
           "suicides": 3,
           "teamKills": 0
@@ -11191,7 +11351,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 70,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {
@@ -11341,6 +11501,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 8675,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11348,6 +11509,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 10455,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11362,6 +11524,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 14922,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11369,6 +11532,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 19597,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11376,6 +11540,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 20139,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11383,6 +11548,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 23961,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11399,6 +11565,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 24078,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11415,6 +11582,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 25039,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11422,6 +11590,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 24883,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11429,6 +11598,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 25844,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11468,6 +11638,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 35571,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11475,6 +11646,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 37377,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11482,6 +11654,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 37377,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11489,6 +11662,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 38078,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11500,6 +11674,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 38507,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11507,6 +11682,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 38663,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11518,6 +11694,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 39091,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11548,6 +11725,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 45233,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11559,6 +11737,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 45973,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11570,6 +11749,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 49532,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11584,6 +11764,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 51117,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11591,6 +11772,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 51662,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11598,6 +11780,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 52130,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11605,6 +11788,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 51896,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11616,6 +11800,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 52468,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11623,6 +11808,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 52545,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11637,6 +11823,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 53130,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11648,6 +11835,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 53402,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11655,6 +11843,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 54103,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11666,6 +11855,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 54337,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11684,6 +11874,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 59000,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11702,6 +11893,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 59896,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11713,6 +11905,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 59856,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11724,6 +11917,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 65064,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11735,6 +11929,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 65636,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11746,6 +11941,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 69506,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11760,6 +11956,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 79454,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11771,6 +11968,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 80116,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11805,6 +12003,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 80935,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11821,6 +12020,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 84610,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11832,6 +12032,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 85388,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11850,6 +12051,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 89468,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11857,6 +12059,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 89544,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11871,6 +12074,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 91869,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -11882,6 +12086,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 92531,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11889,6 +12094,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 92649,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11896,6 +12102,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 93739,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11903,6 +12110,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 93700,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11910,6 +12118,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 94324,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11917,6 +12126,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 94285,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11924,6 +12134,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 96883,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -11931,6 +12142,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 97583,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11938,6 +12150,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 98830,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11945,6 +12158,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 99649,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11952,6 +12166,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 100506,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11970,6 +12185,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 111181,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11981,6 +12197,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 112057,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -11992,6 +12209,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 113102,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -11999,6 +12217,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 113102,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12006,6 +12225,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 113570,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12027,6 +12247,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 116635,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12034,6 +12255,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 116869,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12041,6 +12263,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 116596,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12048,6 +12271,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 116830,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12066,6 +12290,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 117804,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12073,6 +12298,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 118349,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12080,6 +12306,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 118537,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12087,6 +12314,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 119674,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12094,6 +12322,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 119674,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12101,6 +12330,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 120017,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12108,6 +12338,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 121454,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12115,6 +12346,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 122778,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12154,6 +12386,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 131182,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12183,6 +12416,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 131882,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12205,6 +12439,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 132701,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12226,6 +12461,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 133401,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12249,6 +12485,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 148375,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12256,6 +12493,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 152661,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12263,6 +12501,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 152816,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12270,6 +12509,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 155739,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12277,6 +12517,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 153985,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12288,6 +12529,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 156440,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12295,6 +12537,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 157213,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12302,6 +12545,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 155621,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12309,6 +12553,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 156362,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12320,6 +12565,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 159661,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12327,6 +12573,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 157557,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12334,6 +12581,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 160284,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12341,6 +12589,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 158492,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12352,6 +12601,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 160908,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12359,6 +12609,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 159193,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12366,6 +12617,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 161524,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12373,6 +12625,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 162141,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12380,6 +12633,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 160284,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12391,6 +12645,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 162726,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12398,6 +12653,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 161063,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12405,6 +12661,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 163349,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12412,6 +12669,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 161757,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12423,6 +12681,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 161986,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12430,6 +12689,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 164556,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12437,6 +12697,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 162921,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12444,6 +12705,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 165167,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12451,6 +12713,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 163738,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12458,6 +12721,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 165946,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12465,6 +12729,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 165479,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12476,6 +12741,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 164595,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12490,6 +12756,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 165400,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12497,6 +12764,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 166570,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12529,6 +12797,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 182219,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12536,6 +12805,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 184699,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12550,6 +12820,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 188556,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12561,6 +12832,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 188790,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12575,6 +12847,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 192024,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12582,6 +12855,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 190154,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12589,6 +12863,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 190738,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12603,6 +12878,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 197110,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12610,6 +12886,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 197726,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12617,6 +12894,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 197842,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12628,6 +12906,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 198530,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12635,6 +12914,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 199154,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12646,6 +12926,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 199231,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12660,6 +12941,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 200004,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12671,6 +12953,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 200270,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12682,6 +12965,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 200803,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12693,6 +12977,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 200998,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12704,6 +12989,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 202009,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12711,6 +12997,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 202043,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12722,6 +13009,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 202895,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12733,6 +13021,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 207141,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12747,6 +13036,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 209815,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12754,6 +13044,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 211595,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12761,6 +13052,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 225101,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12768,6 +13060,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 227465,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12782,6 +13075,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 230406,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12789,6 +13083,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 238692,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12803,6 +13098,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 243114,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12810,6 +13106,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 243880,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12824,6 +13121,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 244698,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -12835,6 +13133,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 244660,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12915,6 +13214,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 253959,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -12922,6 +13222,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 253374,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12936,6 +13237,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 263166,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -12950,6 +13252,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 268803,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12957,6 +13260,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 269465,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12964,6 +13268,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 270087,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12971,6 +13276,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 270673,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12978,6 +13284,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 271296,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12985,6 +13292,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 271919,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12992,6 +13300,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 272581,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -12999,6 +13308,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 273166,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13006,6 +13316,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 273789,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13013,6 +13324,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 274413,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13024,6 +13336,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 274997,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13031,6 +13344,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 273673,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13038,6 +13352,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 275614,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13052,6 +13367,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 277737,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13063,6 +13379,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 278167,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13070,6 +13387,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 278672,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13077,6 +13395,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 279218,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13084,6 +13403,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 279296,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13105,6 +13425,7 @@
         "weapon": "ng"
       },
       {
+        "flightEnd": 280802,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13116,6 +13437,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 280802,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13123,6 +13445,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 281542,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13134,6 +13457,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 281932,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13145,6 +13469,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 283633,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13159,6 +13484,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 305892,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13166,6 +13492,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 309892,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13173,6 +13500,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 310516,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13180,6 +13508,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 309542,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13187,6 +13516,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 313282,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13194,6 +13524,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 314399,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13215,6 +13546,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 336788,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13231,6 +13563,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 336788,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13247,6 +13580,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 337879,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13254,6 +13588,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 337684,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13272,6 +13607,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 338348,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13295,6 +13631,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 346244,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13302,6 +13639,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 349009,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13309,6 +13647,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 349516,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13320,6 +13659,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 350061,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13331,6 +13671,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 350528,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13338,6 +13679,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 350568,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13345,6 +13687,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 351308,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13356,6 +13699,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 351308,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13367,6 +13711,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 352411,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13378,6 +13723,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 352528,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13392,6 +13738,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 356774,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13399,6 +13746,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 358633,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13420,6 +13768,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 372892,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13453,6 +13802,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 373852,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13500,6 +13850,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 379606,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13507,6 +13858,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 379917,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13525,6 +13877,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 382580,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13532,6 +13885,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 383268,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13539,6 +13893,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 383191,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13546,6 +13901,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 384281,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13560,6 +13916,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 385002,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13567,6 +13924,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 386165,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13574,6 +13932,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 387476,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13599,6 +13958,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 398631,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13606,6 +13966,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 399178,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13613,6 +13974,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 399801,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13620,6 +13982,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 400229,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13627,6 +13990,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 401125,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13634,6 +13998,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 402593,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13641,6 +14006,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 403593,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13648,6 +14014,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 403893,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13655,6 +14022,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 403930,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13666,6 +14034,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 404514,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13673,6 +14042,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 405099,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13680,6 +14050,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 405871,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13687,6 +14058,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 406177,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13694,6 +14066,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 407034,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13701,6 +14074,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 408276,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13708,6 +14082,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 410125,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13715,6 +14090,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 411164,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13726,6 +14102,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 411164,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13737,6 +14114,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 411748,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13753,6 +14131,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 411819,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13769,6 +14148,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 414269,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13802,6 +14182,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 414775,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13823,6 +14204,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 417281,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13834,6 +14216,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 417203,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13848,6 +14231,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 427781,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13855,6 +14239,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 428358,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13866,6 +14251,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 428788,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13873,6 +14259,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 429022,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13884,6 +14271,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 429372,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13891,6 +14279,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 429762,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13907,6 +14296,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 443786,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13914,6 +14304,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 444449,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13932,6 +14323,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 445489,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13943,6 +14335,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 446099,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13954,6 +14347,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 446761,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -13965,6 +14359,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 446878,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -13972,6 +14367,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 447579,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13979,6 +14375,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 447658,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -13990,6 +14387,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 448515,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -13997,6 +14395,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 448827,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14004,6 +14403,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 449411,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14011,6 +14411,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 449684,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14018,6 +14419,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 451046,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14025,6 +14427,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 451280,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14039,6 +14442,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 455034,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14046,6 +14450,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 455968,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14053,6 +14458,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 456982,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14074,6 +14480,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 459397,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14088,6 +14495,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 464722,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14095,6 +14503,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 466241,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14102,6 +14511,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 466436,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14109,6 +14519,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 466930,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14116,6 +14527,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 467345,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14127,6 +14539,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 467761,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14134,6 +14547,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 468325,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14141,6 +14555,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 468177,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14152,6 +14567,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 468982,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14159,6 +14575,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 468943,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14170,6 +14587,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 469800,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14177,6 +14595,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 469683,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14184,6 +14603,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 470852,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14195,6 +14615,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 470891,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14206,6 +14627,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 471397,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14213,6 +14635,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 471592,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14220,6 +14643,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 472293,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14231,6 +14655,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 472371,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14270,6 +14695,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 493046,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14291,6 +14717,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 494553,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14326,6 +14753,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 506559,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14333,6 +14761,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 513682,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14340,6 +14769,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 514306,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14347,6 +14777,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 514306,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14358,6 +14789,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 516475,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14372,6 +14804,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 518526,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14379,6 +14812,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 519488,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14386,6 +14820,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 519838,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14422,6 +14857,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 526539,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14438,6 +14874,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 529527,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14449,6 +14886,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 529527,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14478,6 +14916,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 539150,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14489,6 +14928,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 540539,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14500,6 +14940,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 540890,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14507,6 +14948,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 541240,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14523,6 +14965,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 541786,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14534,6 +14977,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542565,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14545,6 +14989,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542760,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14556,6 +15001,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 543227,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14567,6 +15013,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 543383,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14594,6 +15041,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 545709,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14612,6 +15060,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 546565,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14641,6 +15090,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 556890,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14676,6 +15126,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 563279,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14683,6 +15134,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 563747,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14690,6 +15142,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 563902,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14701,6 +15154,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 564604,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14715,6 +15169,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 569006,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14729,6 +15184,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 576032,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14736,6 +15192,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 580434,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14743,6 +15200,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 587006,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14750,6 +15208,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 587896,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14757,6 +15216,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 588734,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14764,6 +15224,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 590668,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14775,6 +15236,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 590980,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14782,6 +15244,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 591564,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14789,6 +15252,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 591681,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14800,6 +15264,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 592259,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14816,6 +15281,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 593032,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14823,6 +15289,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 593577,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14830,6 +15297,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 594046,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14837,6 +15305,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 593928,
         "hit": true,
         "player": "betowen",
         "source": "sound",
@@ -14851,6 +15320,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 594785,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14862,6 +15332,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 595020,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14869,6 +15340,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 595558,
         "hit": true,
         "player": "banan falco",
         "source": "sound",
@@ -14885,6 +15357,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 595791,
         "player": "betowen",
         "source": "sound",
         "team": "betowen",
@@ -14892,6 +15365,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 596635,
         "player": "banan falco",
         "source": "sound",
         "team": "banan falco",
@@ -14916,9 +15390,42 @@
   },
   "streams": {
     "global": {
+      "dateMarkers": [
+        {
+          "atMs": 10286,
+          "kind": "matchStart",
+          "raw": "2026-04-24 18:17:08 CEST",
+          "source": "matchdate",
+          "tz": "CEST",
+          "unixMs": 1777047428000
+        },
+        {
+          "kind": "matchEnd",
+          "raw": "2026-04-24 18:27:08 +0200",
+          "source": "ktxstats",
+          "tz": "+0200",
+          "unixMs": 1777048028000
+        },
+        {
+          "kind": "matchEnd",
+          "raw": "Apr 24, 18:27",
+          "source": "finalscores",
+          "unixMs": 1777048020000,
+          "yearFrom": "matchdate"
+        }
+      ],
       "demoOffset": 10286,
+      "demoStartAccuracyMs": 1000,
+      "demoStartSource": "matchdate",
+      "demoStartUnixMs": 1777047417714,
       "matchEnd": 599980,
-      "matchStart": 0
+      "matchEndUnixMs": 1777048028000,
+      "matchStart": 0,
+      "matchStartAccuracyMs": 1000,
+      "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
+      "matchStartSource": "matchdate",
+      "matchStartUnixMs": 1777047428000
     },
     "movers": [
       {
@@ -253737,6 +254244,852 @@
             "v": ""
           }
         ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 6728,
+            "v": 32
+          },
+          {
+            "t": 7507,
+            "v": 1
+          },
+          {
+            "t": 14143,
+            "v": 32
+          },
+          {
+            "t": 14922,
+            "v": 1
+          },
+          {
+            "t": 24000,
+            "v": 32
+          },
+          {
+            "t": 26428,
+            "v": 1
+          },
+          {
+            "t": 27013,
+            "v": 32
+          },
+          {
+            "t": 27818,
+            "v": 1
+          },
+          {
+            "t": 29299,
+            "v": 32
+          },
+          {
+            "t": 30077,
+            "v": 1
+          },
+          {
+            "t": 33753,
+            "v": 32
+          },
+          {
+            "t": 34571,
+            "v": 1
+          },
+          {
+            "t": 35429,
+            "v": 32
+          },
+          {
+            "t": 36233,
+            "v": 1
+          },
+          {
+            "t": 36831,
+            "v": 32
+          },
+          {
+            "t": 39441,
+            "v": 1
+          },
+          {
+            "t": 49843,
+            "v": 32
+          },
+          {
+            "t": 50649,
+            "v": 1
+          },
+          {
+            "t": 50961,
+            "v": 32
+          },
+          {
+            "t": 51740,
+            "v": 1
+          },
+          {
+            "t": 52051,
+            "v": 32
+          },
+          {
+            "t": 52857,
+            "v": 1
+          },
+          {
+            "t": 53013,
+            "v": 32
+          },
+          {
+            "t": 54611,
+            "v": 1
+          },
+          {
+            "t": 58844,
+            "v": 32
+          },
+          {
+            "t": 60441,
+            "v": 1
+          },
+          {
+            "t": 64830,
+            "v": 32
+          },
+          {
+            "t": 65986,
+            "v": 1
+          },
+          {
+            "t": 88531,
+            "v": 32
+          },
+          {
+            "t": 89350,
+            "v": 1
+          },
+          {
+            "t": 90129,
+            "v": 32
+          },
+          {
+            "t": 90901,
+            "v": 1
+          },
+          {
+            "t": 91597,
+            "v": 32
+          },
+          {
+            "t": 94012,
+            "v": 1
+          },
+          {
+            "t": 94168,
+            "v": 32
+          },
+          {
+            "t": 94986,
+            "v": 1
+          },
+          {
+            "t": 96649,
+            "v": 32
+          },
+          {
+            "t": 97466,
+            "v": 1
+          },
+          {
+            "t": 112752,
+            "v": 32
+          },
+          {
+            "t": 113570,
+            "v": 1
+          },
+          {
+            "t": 114116,
+            "v": 32
+          },
+          {
+            "t": 114934,
+            "v": 1
+          },
+          {
+            "t": 115285,
+            "v": 32
+          },
+          {
+            "t": 116908,
+            "v": 1
+          },
+          {
+            "t": 116947,
+            "v": 32
+          },
+          {
+            "t": 120168,
+            "v": 1
+          },
+          {
+            "t": 153245,
+            "v": 16
+          },
+          {
+            "t": 153869,
+            "v": 1
+          },
+          {
+            "t": 153947,
+            "v": 16
+          },
+          {
+            "t": 154531,
+            "v": 1
+          },
+          {
+            "t": 154725,
+            "v": 16
+          },
+          {
+            "t": 155309,
+            "v": 1
+          },
+          {
+            "t": 157173,
+            "v": 16
+          },
+          {
+            "t": 163310,
+            "v": 1
+          },
+          {
+            "t": 163466,
+            "v": 16
+          },
+          {
+            "t": 164674,
+            "v": 1
+          },
+          {
+            "t": 175439,
+            "v": 32
+          },
+          {
+            "t": 176219,
+            "v": 1
+          },
+          {
+            "t": 182764,
+            "v": 32
+          },
+          {
+            "t": 183582,
+            "v": 1
+          },
+          {
+            "t": 188751,
+            "v": 32
+          },
+          {
+            "t": 190348,
+            "v": 1
+          },
+          {
+            "t": 197530,
+            "v": 32
+          },
+          {
+            "t": 199154,
+            "v": 1
+          },
+          {
+            "t": 199193,
+            "v": 32
+          },
+          {
+            "t": 202387,
+            "v": 1
+          },
+          {
+            "t": 202427,
+            "v": 32
+          },
+          {
+            "t": 203205,
+            "v": 1
+          },
+          {
+            "t": 206985,
+            "v": 32
+          },
+          {
+            "t": 207764,
+            "v": 1
+          },
+          {
+            "t": 209271,
+            "v": 32
+          },
+          {
+            "t": 210089,
+            "v": 1
+          },
+          {
+            "t": 227426,
+            "v": 32
+          },
+          {
+            "t": 228206,
+            "v": 1
+          },
+          {
+            "t": 242958,
+            "v": 32
+          },
+          {
+            "t": 246179,
+            "v": 1
+          },
+          {
+            "t": 251348,
+            "v": 32
+          },
+          {
+            "t": 252162,
+            "v": 1
+          },
+          {
+            "t": 252881,
+            "v": 32
+          },
+          {
+            "t": 253687,
+            "v": 1
+          },
+          {
+            "t": 266347,
+            "v": 16
+          },
+          {
+            "t": 269387,
+            "v": 1
+          },
+          {
+            "t": 269426,
+            "v": 16
+          },
+          {
+            "t": 273712,
+            "v": 1
+          },
+          {
+            "t": 277315,
+            "v": 32
+          },
+          {
+            "t": 279724,
+            "v": 4
+          },
+          {
+            "t": 280036,
+            "v": 1
+          },
+          {
+            "t": 280413,
+            "v": 32
+          },
+          {
+            "t": 282010,
+            "v": 1
+          },
+          {
+            "t": 283010,
+            "v": 32
+          },
+          {
+            "t": 283789,
+            "v": 1
+          },
+          {
+            "t": 318269,
+            "v": 32
+          },
+          {
+            "t": 319088,
+            "v": 1
+          },
+          {
+            "t": 336671,
+            "v": 32
+          },
+          {
+            "t": 339087,
+            "v": 1
+          },
+          {
+            "t": 341295,
+            "v": 32
+          },
+          {
+            "t": 342100,
+            "v": 1
+          },
+          {
+            "t": 345697,
+            "v": 32
+          },
+          {
+            "t": 346515,
+            "v": 1
+          },
+          {
+            "t": 347879,
+            "v": 32
+          },
+          {
+            "t": 349477,
+            "v": 1
+          },
+          {
+            "t": 349516,
+            "v": 32
+          },
+          {
+            "t": 351950,
+            "v": 1
+          },
+          {
+            "t": 352145,
+            "v": 32
+          },
+          {
+            "t": 352801,
+            "v": 1
+          },
+          {
+            "t": 379372,
+            "v": 32
+          },
+          {
+            "t": 380846,
+            "v": 1
+          },
+          {
+            "t": 382430,
+            "v": 32
+          },
+          {
+            "t": 383229,
+            "v": 1
+          },
+          {
+            "t": 384242,
+            "v": 32
+          },
+          {
+            "t": 385040,
+            "v": 1
+          },
+          {
+            "t": 385697,
+            "v": 32
+          },
+          {
+            "t": 386502,
+            "v": 1
+          },
+          {
+            "t": 387281,
+            "v": 32
+          },
+          {
+            "t": 388100,
+            "v": 1
+          },
+          {
+            "t": 395334,
+            "v": 32
+          },
+          {
+            "t": 396151,
+            "v": 1
+          },
+          {
+            "t": 398008,
+            "v": 32
+          },
+          {
+            "t": 399606,
+            "v": 1
+          },
+          {
+            "t": 399723,
+            "v": 32
+          },
+          {
+            "t": 401320,
+            "v": 1
+          },
+          {
+            "t": 401866,
+            "v": 32
+          },
+          {
+            "t": 404281,
+            "v": 1
+          },
+          {
+            "t": 404437,
+            "v": 32
+          },
+          {
+            "t": 405216,
+            "v": 1
+          },
+          {
+            "t": 405450,
+            "v": 32
+          },
+          {
+            "t": 407073,
+            "v": 1
+          },
+          {
+            "t": 407853,
+            "v": 32
+          },
+          {
+            "t": 408664,
+            "v": 1
+          },
+          {
+            "t": 409696,
+            "v": 32
+          },
+          {
+            "t": 410502,
+            "v": 1
+          },
+          {
+            "t": 410892,
+            "v": 32
+          },
+          {
+            "t": 412515,
+            "v": 1
+          },
+          {
+            "t": 413645,
+            "v": 32
+          },
+          {
+            "t": 414424,
+            "v": 1
+          },
+          {
+            "t": 414462,
+            "v": 32
+          },
+          {
+            "t": 415268,
+            "v": 1
+          },
+          {
+            "t": 415424,
+            "v": 32
+          },
+          {
+            "t": 416229,
+            "v": 1
+          },
+          {
+            "t": 417008,
+            "v": 32
+          },
+          {
+            "t": 418138,
+            "v": 1
+          },
+          {
+            "t": 428048,
+            "v": 32
+          },
+          {
+            "t": 430456,
+            "v": 1
+          },
+          {
+            "t": 443359,
+            "v": 32
+          },
+          {
+            "t": 444988,
+            "v": 1
+          },
+          {
+            "t": 445066,
+            "v": 32
+          },
+          {
+            "t": 445871,
+            "v": 1
+          },
+          {
+            "t": 445910,
+            "v": 32
+          },
+          {
+            "t": 448319,
+            "v": 1
+          },
+          {
+            "t": 448436,
+            "v": 32
+          },
+          {
+            "t": 450034,
+            "v": 1
+          },
+          {
+            "t": 450813,
+            "v": 32
+          },
+          {
+            "t": 451631,
+            "v": 1
+          },
+          {
+            "t": 454528,
+            "v": 32
+          },
+          {
+            "t": 456125,
+            "v": 1
+          },
+          {
+            "t": 456164,
+            "v": 32
+          },
+          {
+            "t": 456982,
+            "v": 1
+          },
+          {
+            "t": 458813,
+            "v": 32
+          },
+          {
+            "t": 459631,
+            "v": 1
+          },
+          {
+            "t": 460371,
+            "v": 32
+          },
+          {
+            "t": 461190,
+            "v": 1
+          },
+          {
+            "t": 465579,
+            "v": 32
+          },
+          {
+            "t": 472678,
+            "v": 1
+          },
+          {
+            "t": 474540,
+            "v": 32
+          },
+          {
+            "t": 475319,
+            "v": 1
+          },
+          {
+            "t": 484747,
+            "v": 32
+          },
+          {
+            "t": 485553,
+            "v": 1
+          },
+          {
+            "t": 492929,
+            "v": 32
+          },
+          {
+            "t": 495176,
+            "v": 1
+          },
+          {
+            "t": 503812,
+            "v": 32
+          },
+          {
+            "t": 504592,
+            "v": 1
+          },
+          {
+            "t": 506326,
+            "v": 32
+          },
+          {
+            "t": 507136,
+            "v": 1
+          },
+          {
+            "t": 513150,
+            "v": 32
+          },
+          {
+            "t": 515163,
+            "v": 1
+          },
+          {
+            "t": 517682,
+            "v": 32
+          },
+          {
+            "t": 518488,
+            "v": 1
+          },
+          {
+            "t": 518598,
+            "v": 32
+          },
+          {
+            "t": 519410,
+            "v": 1
+          },
+          {
+            "t": 519878,
+            "v": 32
+          },
+          {
+            "t": 520851,
+            "v": 1
+          },
+          {
+            "t": 529410,
+            "v": 32
+          },
+          {
+            "t": 531045,
+            "v": 1
+          },
+          {
+            "t": 538838,
+            "v": 32
+          },
+          {
+            "t": 539657,
+            "v": 1
+          },
+          {
+            "t": 540580,
+            "v": 32
+          },
+          {
+            "t": 541396,
+            "v": 1
+          },
+          {
+            "t": 541591,
+            "v": 32
+          },
+          {
+            "t": 543227,
+            "v": 1
+          },
+          {
+            "t": 543344,
+            "v": 32
+          },
+          {
+            "t": 544123,
+            "v": 1
+          },
+          {
+            "t": 545176,
+            "v": 32
+          },
+          {
+            "t": 547500,
+            "v": 1
+          },
+          {
+            "t": 556850,
+            "v": 32
+          },
+          {
+            "t": 557657,
+            "v": 1
+          },
+          {
+            "t": 562812,
+            "v": 32
+          },
+          {
+            "t": 564447,
+            "v": 1
+          },
+          {
+            "t": 567837,
+            "v": 32
+          },
+          {
+            "t": 568656,
+            "v": 1
+          },
+          {
+            "t": 579896,
+            "v": 32
+          },
+          {
+            "t": 580707,
+            "v": 1
+          },
+          {
+            "t": 586623,
+            "v": 32
+          },
+          {
+            "t": 589045,
+            "v": 1
+          },
+          {
+            "t": 590591,
+            "v": 32
+          },
+          {
+            "t": 592181,
+            "v": 1
+          },
+          {
+            "t": 592220,
+            "v": 32
+          },
+          {
+            "t": 594668,
+            "v": 1
+          },
+          {
+            "t": 594707,
+            "v": 32
+          },
+          {
+            "t": 596405,
+            "v": 1
+          },
+          {
+            "t": 599285,
+            "v": 32
+          }
+        ],
         "cl": [
           {
             "t": 0,
@@ -268995,6 +270348,1168 @@
             "v": "ra"
           }
         ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 8403,
+            "v": 32
+          },
+          {
+            "t": 9182,
+            "v": 1
+          },
+          {
+            "t": 9909,
+            "v": 32
+          },
+          {
+            "t": 10720,
+            "v": 1
+          },
+          {
+            "t": 14338,
+            "v": 32
+          },
+          {
+            "t": 15155,
+            "v": 1
+          },
+          {
+            "t": 17025,
+            "v": 16
+          },
+          {
+            "t": 18273,
+            "v": 1
+          },
+          {
+            "t": 23922,
+            "v": 32
+          },
+          {
+            "t": 24727,
+            "v": 1
+          },
+          {
+            "t": 24844,
+            "v": 32
+          },
+          {
+            "t": 25649,
+            "v": 1
+          },
+          {
+            "t": 37221,
+            "v": 32
+          },
+          {
+            "t": 38818,
+            "v": 1
+          },
+          {
+            "t": 39013,
+            "v": 32
+          },
+          {
+            "t": 39792,
+            "v": 1
+          },
+          {
+            "t": 43947,
+            "v": 32
+          },
+          {
+            "t": 44767,
+            "v": 1
+          },
+          {
+            "t": 44961,
+            "v": 32
+          },
+          {
+            "t": 45779,
+            "v": 1
+          },
+          {
+            "t": 45817,
+            "v": 32
+          },
+          {
+            "t": 46597,
+            "v": 1
+          },
+          {
+            "t": 49493,
+            "v": 32
+          },
+          {
+            "t": 50311,
+            "v": 1
+          },
+          {
+            "t": 50687,
+            "v": 32
+          },
+          {
+            "t": 52318,
+            "v": 1
+          },
+          {
+            "t": 52468,
+            "v": 32
+          },
+          {
+            "t": 54064,
+            "v": 1
+          },
+          {
+            "t": 54103,
+            "v": 32
+          },
+          {
+            "t": 55584,
+            "v": 1
+          },
+          {
+            "t": 59662,
+            "v": 32
+          },
+          {
+            "t": 60130,
+            "v": 1
+          },
+          {
+            "t": 65447,
+            "v": 32
+          },
+          {
+            "t": 66259,
+            "v": 1
+          },
+          {
+            "t": 68493,
+            "v": 32
+          },
+          {
+            "t": 69310,
+            "v": 1
+          },
+          {
+            "t": 76051,
+            "v": 32
+          },
+          {
+            "t": 76869,
+            "v": 1
+          },
+          {
+            "t": 79143,
+            "v": 32
+          },
+          {
+            "t": 79960,
+            "v": 1
+          },
+          {
+            "t": 80078,
+            "v": 32
+          },
+          {
+            "t": 81714,
+            "v": 1
+          },
+          {
+            "t": 84337,
+            "v": 32
+          },
+          {
+            "t": 85934,
+            "v": 1
+          },
+          {
+            "t": 87142,
+            "v": 32
+          },
+          {
+            "t": 87947,
+            "v": 1
+          },
+          {
+            "t": 89000,
+            "v": 32
+          },
+          {
+            "t": 89779,
+            "v": 1
+          },
+          {
+            "t": 92259,
+            "v": 32
+          },
+          {
+            "t": 93856,
+            "v": 1
+          },
+          {
+            "t": 93973,
+            "v": 32
+          },
+          {
+            "t": 94791,
+            "v": 1
+          },
+          {
+            "t": 96921,
+            "v": 32
+          },
+          {
+            "t": 97739,
+            "v": 1
+          },
+          {
+            "t": 98402,
+            "v": 32
+          },
+          {
+            "t": 99180,
+            "v": 1
+          },
+          {
+            "t": 99220,
+            "v": 32
+          },
+          {
+            "t": 99999,
+            "v": 1
+          },
+          {
+            "t": 100155,
+            "v": 32
+          },
+          {
+            "t": 100960,
+            "v": 1
+          },
+          {
+            "t": 104323,
+            "v": 32
+          },
+          {
+            "t": 105103,
+            "v": 1
+          },
+          {
+            "t": 110869,
+            "v": 32
+          },
+          {
+            "t": 111674,
+            "v": 1
+          },
+          {
+            "t": 111753,
+            "v": 32
+          },
+          {
+            "t": 113376,
+            "v": 1
+          },
+          {
+            "t": 113531,
+            "v": 32
+          },
+          {
+            "t": 114349,
+            "v": 1
+          },
+          {
+            "t": 115791,
+            "v": 32
+          },
+          {
+            "t": 116596,
+            "v": 1
+          },
+          {
+            "t": 116635,
+            "v": 32
+          },
+          {
+            "t": 117414,
+            "v": 1
+          },
+          {
+            "t": 117493,
+            "v": 32
+          },
+          {
+            "t": 119102,
+            "v": 1
+          },
+          {
+            "t": 119290,
+            "v": 32
+          },
+          {
+            "t": 120090,
+            "v": 1
+          },
+          {
+            "t": 121064,
+            "v": 32
+          },
+          {
+            "t": 122701,
+            "v": 1
+          },
+          {
+            "t": 123090,
+            "v": 2
+          },
+          {
+            "t": 123791,
+            "v": 1
+          },
+          {
+            "t": 129817,
+            "v": 32
+          },
+          {
+            "t": 130597,
+            "v": 1
+          },
+          {
+            "t": 130714,
+            "v": 32
+          },
+          {
+            "t": 131531,
+            "v": 1
+          },
+          {
+            "t": 131609,
+            "v": 32
+          },
+          {
+            "t": 132427,
+            "v": 1
+          },
+          {
+            "t": 132505,
+            "v": 32
+          },
+          {
+            "t": 134141,
+            "v": 1
+          },
+          {
+            "t": 143011,
+            "v": 32
+          },
+          {
+            "t": 143830,
+            "v": 1
+          },
+          {
+            "t": 147908,
+            "v": 32
+          },
+          {
+            "t": 148722,
+            "v": 1
+          },
+          {
+            "t": 151544,
+            "v": 32
+          },
+          {
+            "t": 152349,
+            "v": 1
+          },
+          {
+            "t": 152544,
+            "v": 32
+          },
+          {
+            "t": 153362,
+            "v": 1
+          },
+          {
+            "t": 153518,
+            "v": 32
+          },
+          {
+            "t": 154336,
+            "v": 1
+          },
+          {
+            "t": 155193,
+            "v": 32
+          },
+          {
+            "t": 156783,
+            "v": 1
+          },
+          {
+            "t": 157285,
+            "v": 32
+          },
+          {
+            "t": 158102,
+            "v": 1
+          },
+          {
+            "t": 158141,
+            "v": 32
+          },
+          {
+            "t": 159778,
+            "v": 1
+          },
+          {
+            "t": 159972,
+            "v": 32
+          },
+          {
+            "t": 162374,
+            "v": 1
+          },
+          {
+            "t": 162531,
+            "v": 32
+          },
+          {
+            "t": 164128,
+            "v": 1
+          },
+          {
+            "t": 164284,
+            "v": 32
+          },
+          {
+            "t": 165908,
+            "v": 1
+          },
+          {
+            "t": 166103,
+            "v": 32
+          },
+          {
+            "t": 166921,
+            "v": 1
+          },
+          {
+            "t": 170115,
+            "v": 2
+          },
+          {
+            "t": 170817,
+            "v": 1
+          },
+          {
+            "t": 179726,
+            "v": 16
+          },
+          {
+            "t": 180309,
+            "v": 1
+          },
+          {
+            "t": 182219,
+            "v": 16
+          },
+          {
+            "t": 182842,
+            "v": 1
+          },
+          {
+            "t": 188362,
+            "v": 32
+          },
+          {
+            "t": 189179,
+            "v": 1
+          },
+          {
+            "t": 189530,
+            "v": 16
+          },
+          {
+            "t": 190154,
+            "v": 32
+          },
+          {
+            "t": 190972,
+            "v": 1
+          },
+          {
+            "t": 192141,
+            "v": 2
+          },
+          {
+            "t": 192842,
+            "v": 1
+          },
+          {
+            "t": 196686,
+            "v": 32
+          },
+          {
+            "t": 198302,
+            "v": 1
+          },
+          {
+            "t": 198920,
+            "v": 32
+          },
+          {
+            "t": 199738,
+            "v": 1
+          },
+          {
+            "t": 199778,
+            "v": 32
+          },
+          {
+            "t": 200608,
+            "v": 1
+          },
+          {
+            "t": 200648,
+            "v": 32
+          },
+          {
+            "t": 201452,
+            "v": 1
+          },
+          {
+            "t": 201491,
+            "v": 32
+          },
+          {
+            "t": 202310,
+            "v": 1
+          },
+          {
+            "t": 210829,
+            "v": 32
+          },
+          {
+            "t": 211634,
+            "v": 1
+          },
+          {
+            "t": 224569,
+            "v": 32
+          },
+          {
+            "t": 225374,
+            "v": 1
+          },
+          {
+            "t": 229640,
+            "v": 32
+          },
+          {
+            "t": 230445,
+            "v": 1
+          },
+          {
+            "t": 238309,
+            "v": 32
+          },
+          {
+            "t": 239108,
+            "v": 1
+          },
+          {
+            "t": 242997,
+            "v": 32
+          },
+          {
+            "t": 246568,
+            "v": 1
+          },
+          {
+            "t": 252777,
+            "v": 32
+          },
+          {
+            "t": 253569,
+            "v": 1
+          },
+          {
+            "t": 263127,
+            "v": 32
+          },
+          {
+            "t": 263945,
+            "v": 1
+          },
+          {
+            "t": 273049,
+            "v": 32
+          },
+          {
+            "t": 273867,
+            "v": 1
+          },
+          {
+            "t": 275652,
+            "v": 32
+          },
+          {
+            "t": 276426,
+            "v": 1
+          },
+          {
+            "t": 277620,
+            "v": 32
+          },
+          {
+            "t": 279257,
+            "v": 1
+          },
+          {
+            "t": 280607,
+            "v": 32
+          },
+          {
+            "t": 282237,
+            "v": 1
+          },
+          {
+            "t": 295191,
+            "v": 32
+          },
+          {
+            "t": 295971,
+            "v": 1
+          },
+          {
+            "t": 305269,
+            "v": 32
+          },
+          {
+            "t": 306088,
+            "v": 1
+          },
+          {
+            "t": 307373,
+            "v": 16
+          },
+          {
+            "t": 308568,
+            "v": 1
+          },
+          {
+            "t": 308958,
+            "v": 32
+          },
+          {
+            "t": 309775,
+            "v": 1
+          },
+          {
+            "t": 310749,
+            "v": 16
+          },
+          {
+            "t": 311373,
+            "v": 1
+          },
+          {
+            "t": 313633,
+            "v": 32
+          },
+          {
+            "t": 314438,
+            "v": 1
+          },
+          {
+            "t": 336632,
+            "v": 32
+          },
+          {
+            "t": 339165,
+            "v": 1
+          },
+          {
+            "t": 350217,
+            "v": 32
+          },
+          {
+            "t": 351840,
+            "v": 1
+          },
+          {
+            "t": 351874,
+            "v": 32
+          },
+          {
+            "t": 352684,
+            "v": 1
+          },
+          {
+            "t": 355957,
+            "v": 32
+          },
+          {
+            "t": 356736,
+            "v": 1
+          },
+          {
+            "t": 358399,
+            "v": 32
+          },
+          {
+            "t": 359217,
+            "v": 1
+          },
+          {
+            "t": 359412,
+            "v": 32
+          },
+          {
+            "t": 360190,
+            "v": 1
+          },
+          {
+            "t": 365879,
+            "v": 32
+          },
+          {
+            "t": 366697,
+            "v": 1
+          },
+          {
+            "t": 372502,
+            "v": 32
+          },
+          {
+            "t": 373314,
+            "v": 1
+          },
+          {
+            "t": 373658,
+            "v": 32
+          },
+          {
+            "t": 374438,
+            "v": 1
+          },
+          {
+            "t": 374554,
+            "v": 32
+          },
+          {
+            "t": 375372,
+            "v": 1
+          },
+          {
+            "t": 379645,
+            "v": 32
+          },
+          {
+            "t": 380464,
+            "v": 1
+          },
+          {
+            "t": 381697,
+            "v": 32
+          },
+          {
+            "t": 383308,
+            "v": 1
+          },
+          {
+            "t": 383619,
+            "v": 32
+          },
+          {
+            "t": 384437,
+            "v": 1
+          },
+          {
+            "t": 384472,
+            "v": 32
+          },
+          {
+            "t": 385268,
+            "v": 1
+          },
+          {
+            "t": 387632,
+            "v": 32
+          },
+          {
+            "t": 389385,
+            "v": 1
+          },
+          {
+            "t": 398944,
+            "v": 32
+          },
+          {
+            "t": 399761,
+            "v": 1
+          },
+          {
+            "t": 403281,
+            "v": 32
+          },
+          {
+            "t": 404086,
+            "v": 1
+          },
+          {
+            "t": 404397,
+            "v": 32
+          },
+          {
+            "t": 405216,
+            "v": 1
+          },
+          {
+            "t": 405645,
+            "v": 32
+          },
+          {
+            "t": 406450,
+            "v": 1
+          },
+          {
+            "t": 410969,
+            "v": 32
+          },
+          {
+            "t": 412904,
+            "v": 1
+          },
+          {
+            "t": 416930,
+            "v": 32
+          },
+          {
+            "t": 417748,
+            "v": 1
+          },
+          {
+            "t": 425801,
+            "v": 32
+          },
+          {
+            "t": 426579,
+            "v": 1
+          },
+          {
+            "t": 427313,
+            "v": 32
+          },
+          {
+            "t": 428125,
+            "v": 1
+          },
+          {
+            "t": 428281,
+            "v": 32
+          },
+          {
+            "t": 430152,
+            "v": 1
+          },
+          {
+            "t": 445261,
+            "v": 32
+          },
+          {
+            "t": 446059,
+            "v": 1
+          },
+          {
+            "t": 446449,
+            "v": 32
+          },
+          {
+            "t": 447267,
+            "v": 1
+          },
+          {
+            "t": 447306,
+            "v": 32
+          },
+          {
+            "t": 448125,
+            "v": 1
+          },
+          {
+            "t": 448281,
+            "v": 32
+          },
+          {
+            "t": 449917,
+            "v": 1
+          },
+          {
+            "t": 450423,
+            "v": 32
+          },
+          {
+            "t": 451242,
+            "v": 1
+          },
+          {
+            "t": 464177,
+            "v": 32
+          },
+          {
+            "t": 464955,
+            "v": 1
+          },
+          {
+            "t": 465813,
+            "v": 32
+          },
+          {
+            "t": 466624,
+            "v": 1
+          },
+          {
+            "t": 466813,
+            "v": 32
+          },
+          {
+            "t": 467644,
+            "v": 1
+          },
+          {
+            "t": 467949,
+            "v": 32
+          },
+          {
+            "t": 469566,
+            "v": 1
+          },
+          {
+            "t": 469605,
+            "v": 32
+          },
+          {
+            "t": 470384,
+            "v": 1
+          },
+          {
+            "t": 470462,
+            "v": 32
+          },
+          {
+            "t": 473098,
+            "v": 1
+          },
+          {
+            "t": 492890,
+            "v": 32
+          },
+          {
+            "t": 495371,
+            "v": 1
+          },
+          {
+            "t": 513994,
+            "v": 32
+          },
+          {
+            "t": 514812,
+            "v": 1
+          },
+          {
+            "t": 516436,
+            "v": 32
+          },
+          {
+            "t": 517253,
+            "v": 1
+          },
+          {
+            "t": 519488,
+            "v": 32
+          },
+          {
+            "t": 520305,
+            "v": 1
+          },
+          {
+            "t": 523266,
+            "v": 32
+          },
+          {
+            "t": 524085,
+            "v": 1
+          },
+          {
+            "t": 526461,
+            "v": 32
+          },
+          {
+            "t": 527266,
+            "v": 1
+          },
+          {
+            "t": 529292,
+            "v": 32
+          },
+          {
+            "t": 530111,
+            "v": 1
+          },
+          {
+            "t": 530189,
+            "v": 2
+          },
+          {
+            "t": 530890,
+            "v": 1
+          },
+          {
+            "t": 532124,
+            "v": 2
+          },
+          {
+            "t": 532819,
+            "v": 1
+          },
+          {
+            "t": 540350,
+            "v": 32
+          },
+          {
+            "t": 541980,
+            "v": 1
+          },
+          {
+            "t": 542097,
+            "v": 32
+          },
+          {
+            "t": 542877,
+            "v": 1
+          },
+          {
+            "t": 542994,
+            "v": 32
+          },
+          {
+            "t": 544474,
+            "v": 1
+          },
+          {
+            "t": 561311,
+            "v": 32
+          },
+          {
+            "t": 562123,
+            "v": 1
+          },
+          {
+            "t": 563123,
+            "v": 32
+          },
+          {
+            "t": 563942,
+            "v": 1
+          },
+          {
+            "t": 564332,
+            "v": 32
+          },
+          {
+            "t": 565142,
+            "v": 1
+          },
+          {
+            "t": 568461,
+            "v": 32
+          },
+          {
+            "t": 569280,
+            "v": 1
+          },
+          {
+            "t": 572123,
+            "v": 2
+          },
+          {
+            "t": 572811,
+            "v": 1
+          },
+          {
+            "t": 575033,
+            "v": 32
+          },
+          {
+            "t": 575837,
+            "v": 1
+          },
+          {
+            "t": 590278,
+            "v": 32
+          },
+          {
+            "t": 591098,
+            "v": 1
+          },
+          {
+            "t": 591487,
+            "v": 32
+          },
+          {
+            "t": 592298,
+            "v": 1
+          },
+          {
+            "t": 592721,
+            "v": 32
+          },
+          {
+            "t": 593539,
+            "v": 1
+          },
+          {
+            "t": 593577,
+            "v": 32
+          },
+          {
+            "t": 595174,
+            "v": 1
+          },
+          {
+            "t": 595363,
+            "v": 32
+          },
+          {
+            "t": 596174,
+            "v": 1
+          },
+          {
+            "t": 596253,
+            "v": 32
+          },
+          {
+            "t": 597058,
+            "v": 1
+          },
+          {
+            "t": 598902,
+            "v": 32
+          },
+          {
+            "t": 599707,
+            "v": 1
+          }
+        ],
         "cl": [
           {
             "t": 0,
@@ -284098,34 +286613,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "banan falco",
-        "attackerTeam": "banan falco",
-        "attackerUserID": 39,
-        "damage": 110,
-        "height": 376.96875,
-        "heightAboveAttacker": 309,
-        "loc": "floating",
-        "time": 156362,
-        "victim": "betowen",
-        "victimTeam": "betowen",
-        "victimUserID": 37
-      },
-      {
-        "attacker": "banan falco",
-        "attackerTeam": "banan falco",
-        "attackerUserID": 39,
-        "damage": 110,
-        "height": 115.21875,
-        "heightAboveAttacker": 83.25,
-        "loc": "big.stairs",
-        "time": 469683,
-        "victim": "betowen",
-        "victimTeam": "betowen",
-        "victimUserID": 37
-      }
-    ],
     "deathEvents": [
       {
         "player": "banan falco",

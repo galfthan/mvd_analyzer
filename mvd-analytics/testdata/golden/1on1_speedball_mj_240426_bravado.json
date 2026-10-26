@@ -1,5 +1,7 @@
 {
   "aim": {
+    "hitsMeasured": true,
+    "hitsSource": "ktx",
     "players": [
       {
         "crosshair": {
@@ -1052,6 +1054,7 @@
             "hits": 65,
             "missed": 192,
             "self": {
+              "direct": 0,
               "hits": 11
             },
             "shots": 257,
@@ -1062,7 +1065,6 @@
             "hits": 1,
             "missed": 19,
             "shots": 20,
-            "splash": 1,
             "weapon": "gl"
           }
         ]
@@ -6377,6 +6379,7 @@
             "hits": 77,
             "missed": 172,
             "self": {
+              "direct": 0,
               "hits": 21
             },
             "shots": 249,
@@ -6384,7 +6387,6 @@
             "weapon": "rl"
           },
           {
-            "hits": 0,
             "missed": 14,
             "shots": 14,
             "weapon": "gl"
@@ -6400,9 +6402,10 @@
       "origin": [
         -593,
         484,
-        314.25
+        290.25
       ],
       "player": "speedball",
+      "source": "ktx",
       "team": "speedball",
       "time": 7641,
       "weapon": "rl"
@@ -6413,9 +6416,10 @@
       "origin": [
         -631.625,
         560,
-        296
+        272
       ],
       "player": "speedball",
+      "source": "ktx",
       "team": "speedball",
       "time": 35533,
       "weapon": "lg"
@@ -6426,9 +6430,10 @@
       "origin": [
         -359,
         1153,
-        152
+        128
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 41740,
       "weapon": "rl"
@@ -6439,9 +6444,10 @@
       "origin": [
         -191.75,
         1171.75,
-        152
+        128
       ],
       "player": "speedball",
+      "source": "ktx",
       "team": "speedball",
       "time": 45494,
       "weapon": "lg"
@@ -6452,9 +6458,10 @@
       "origin": [
         -423.125,
         634,
-        243
+        219
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 50572,
       "weapon": "rl"
@@ -6465,9 +6472,10 @@
       "origin": [
         287.25,
         1013.5,
-        188.875
+        164.875
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 65500,
       "weapon": "rl"
@@ -6478,22 +6486,24 @@
       "origin": [
         208.75,
         469,
-        24
+        0
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 78027,
       "weapon": "rl"
     },
     {
       "entNum": 93,
-      "loc": "LG",
+      "loc": "SNG",
       "origin": [
         -21.625,
         473.5,
-        267.625
+        243.625
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 81690,
       "weapon": "lg"
@@ -6504,9 +6514,10 @@
       "origin": [
         -564,
         480.375,
-        296
+        272
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 87742,
       "weapon": "rl"
@@ -6517,9 +6528,10 @@
       "origin": [
         394.5,
         137.625,
-        296
+        272
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 99131,
       "weapon": "rl"
@@ -6530,9 +6542,10 @@
       "origin": [
         -121.25,
         989.5,
-        24
+        0
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 105002,
       "weapon": "rl"
@@ -6543,9 +6556,10 @@
       "origin": [
         240.25,
         1062.375,
-        168
+        144
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 113885,
       "weapon": "rl"
@@ -6556,9 +6570,10 @@
       "origin": [
         450.75,
         349.375,
-        24
+        0
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 165730,
       "weapon": "rl"
@@ -6569,9 +6584,10 @@
       "origin": [
         905,
         561.375,
-        104
+        80
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 178912,
       "weapon": "rl"
@@ -6582,9 +6598,10 @@
       "origin": [
         435.25,
         790.875,
-        169
+        145
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 195043,
       "weapon": "lg"
@@ -6595,9 +6612,10 @@
       "origin": [
         -46.625,
         557.625,
-        24
+        0
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 203407,
       "weapon": "lg"
@@ -6608,9 +6626,10 @@
       "origin": [
         939,
         478.125,
-        104
+        80
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 211875,
       "weapon": "rl"
@@ -6621,9 +6640,10 @@
       "origin": [
         880,
         828.375,
-        132.375
+        108.375
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 220979,
       "weapon": "rl"
@@ -6634,9 +6654,10 @@
       "origin": [
         -37.875,
         301.75,
-        18.25
+        -5.75
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 245785,
       "weapon": "rl"
@@ -6647,9 +6668,10 @@
       "origin": [
         888.125,
         427.625,
-        104
+        80
       ],
       "player": "speedball",
+      "source": "ktx",
       "team": "speedball",
       "time": 261292,
       "weapon": "rl"
@@ -6660,9 +6682,10 @@
       "origin": [
         85.375,
         -138.5,
-        24
+        0
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 279980,
       "weapon": "rl"
@@ -6673,9 +6696,10 @@
       "origin": [
         -45.875,
         48,
-        296
+        272
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 291521,
       "weapon": "rl"
@@ -6686,9 +6710,10 @@
       "origin": [
         334.375,
         -17.875,
-        209.875
+        185.875
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 297819,
       "weapon": "rl"
@@ -6699,9 +6724,10 @@
       "origin": [
         -338.5,
         895.625,
-        216
+        192
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 303838,
       "weapon": "rl"
@@ -6712,9 +6738,10 @@
       "origin": [
         504.5,
         231.625,
-        168
+        144
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 307864,
       "weapon": "rl"
@@ -6725,9 +6752,10 @@
       "origin": [
         -206.625,
         272,
-        296
+        272
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 329665,
       "weapon": "rl"
@@ -6738,9 +6766,10 @@
       "origin": [
         351.75,
         -359.375,
-        259.5
+        235.5
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 355385,
       "weapon": "rl"
@@ -6751,9 +6780,10 @@
       "origin": [
         207.375,
         1089.625,
-        211.25
+        187.25
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 361411,
       "weapon": "rl"
@@ -6764,9 +6794,10 @@
       "origin": [
         -100.625,
         1056.625,
-        47.25
+        23.25
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 372938,
       "weapon": "rl"
@@ -6777,9 +6808,10 @@
       "origin": [
         -395.625,
         750.625,
-        237.375
+        213.375
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 382944,
       "weapon": "rl"
@@ -6790,9 +6822,10 @@
       "origin": [
         559.375,
         367.25,
-        27.375
+        3.375
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 396710,
       "weapon": "rl"
@@ -6803,9 +6836,10 @@
       "origin": [
         67.875,
         820,
-        332.625
+        308.625
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 400048,
       "weapon": "lg"
@@ -6816,9 +6850,10 @@
       "origin": [
         252,
         451.375,
-        168
+        144
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 416918,
       "weapon": "rl"
@@ -6829,9 +6864,10 @@
       "origin": [
         473.5,
         424.125,
-        182.5
+        158.5
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 437958,
       "weapon": "rl"
@@ -6842,9 +6878,10 @@
       "origin": [
         -33.25,
         804.875,
-        65
+        41
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 443799,
       "weapon": "rl"
@@ -6855,9 +6892,10 @@
       "origin": [
         -518.25,
         386.125,
-        319.875
+        295.875
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 454270,
       "weapon": "rl"
@@ -6868,9 +6906,10 @@
       "origin": [
         -292,
         812.75,
-        259.375
+        235.375
       ],
       "player": "speedball",
+      "source": "ktx",
       "team": "speedball",
       "time": 461920,
       "weapon": "rl"
@@ -6881,9 +6920,10 @@
       "origin": [
         -171.5,
         1092.875,
-        152
+        128
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 490154,
       "weapon": "rl"
@@ -6894,9 +6934,10 @@
       "origin": [
         -408.375,
         407,
-        296
+        272
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 524480,
       "weapon": "rl"
@@ -6907,9 +6948,10 @@
       "origin": [
         557.75,
         -124.25,
-        168
+        144
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 533714,
       "weapon": "rl"
@@ -6920,9 +6962,10 @@
       "origin": [
         891.875,
         365.125,
-        104
+        80
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 546169,
       "weapon": "lg"
@@ -6933,9 +6976,10 @@
       "origin": [
         249.75,
         -110.625,
-        77.875
+        53.875
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 558088,
       "weapon": "rl"
@@ -6946,9 +6990,10 @@
       "origin": [
         219.25,
         1031.5,
-        168
+        144
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 565455,
       "weapon": "rl"
@@ -6959,9 +7004,10 @@
       "origin": [
         221.625,
         848,
-        24
+        0
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 574205,
       "weapon": "rl"
@@ -6972,9 +7018,10 @@
       "origin": [
         159.875,
         944,
-        60
+        36
       ],
       "player": "speedball",
+      "source": "ktx",
       "team": "speedball",
       "time": 574235,
       "weapon": "rl"
@@ -6985,9 +7032,10 @@
       "origin": [
         548.625,
         -161.5,
-        223.75
+        199.75
       ],
       "player": "mj",
+      "source": "ktx",
       "team": "mj",
       "time": 592958,
       "weapon": "rl"
@@ -10640,10 +10688,12 @@
         }
       }
     },
+    "source": "ktx",
     "totalDamage": 17843
   },
   "demoInfo": {
     "date": "2026-04-24 22:54:38 +0000",
+    "deathmatch": 3,
     "demo": "duel_speedball_vs_mj[bravado]20260424-2244.mvd",
     "duration": 600,
     "hostname": "dm6.nl #1 antilag",
@@ -11414,6 +11464,211 @@
     ],
     "killsMeasured": true,
     "totalFrags": 66
+  },
+  "highlights": {
+    "airgibs": [
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 115,
+          "armorType": "ra",
+          "health": 99,
+          "loc": "high LG packs",
+          "name": "speedball",
+          "relation": "self",
+          "stack": 214,
+          "stateSource": "stream",
+          "team": "speedball",
+          "userId": 72,
+          "weapons": [
+            "rl",
+            "lg",
+            "gl",
+            "ssg",
+            "sng"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 308.46875,
+        "heightAboveAttacker": 164.5,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 400048,
+        "victims": [
+          {
+            "activeWeapon": "lg",
+            "armor": 0,
+            "damage": 110,
+            "health": 100,
+            "killed": true,
+            "loc": "LG",
+            "name": "mj",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "mj",
+            "userId": 70,
+            "weapons": [
+              "lg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 127,
+          "armorType": "ya",
+          "health": 61,
+          "loc": "GA",
+          "name": "speedball",
+          "relation": "self",
+          "stack": 188,
+          "stateSource": "stream",
+          "team": "speedball",
+          "userId": 72,
+          "weapons": [
+            "rl",
+            "lg",
+            "ssg",
+            "sng"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 1,
+        "height": 250.34375,
+        "heightAboveAttacker": 250.375,
+        "kind": "airgib",
+        "sources": [
+          "frags",
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 81690,
+        "victims": [
+          {
+            "activeWeapon": "lg",
+            "armor": 0,
+            "damage": 110,
+            "health": 100,
+            "killed": true,
+            "loc": "LG",
+            "name": "mj",
+            "relation": "enemy",
+            "stack": 100,
+            "stateSource": "stream",
+            "team": "mj",
+            "userId": 70,
+            "weapons": [
+              "lg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 132,
+          "armorType": "ya",
+          "health": 88,
+          "loc": "GL",
+          "name": "speedball",
+          "relation": "self",
+          "stack": 220,
+          "stateSource": "stream",
+          "team": "speedball",
+          "userId": 72,
+          "weapons": [
+            "rl",
+            "ssg",
+            "sng"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 178.84375,
+        "heightAboveAttacker": -59.75,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 59715,
+        "victims": [
+          {
+            "activeWeapon": "lg",
+            "armor": 0,
+            "damage": 110,
+            "health": 174,
+            "loc": "GL",
+            "name": "mj",
+            "relation": "enemy",
+            "stack": 174,
+            "stateSource": "stream",
+            "team": "mj",
+            "userId": 70,
+            "weapons": [
+              "lg",
+              "ssg"
+            ]
+          }
+        ]
+      },
+      {
+        "actor": {
+          "activeWeapon": "rl",
+          "armor": 0,
+          "health": 40,
+          "loc": "RL",
+          "name": "mj",
+          "relation": "self",
+          "stack": 40,
+          "stateSource": "stream",
+          "team": "mj",
+          "userId": 70,
+          "weapons": [
+            "rl"
+          ]
+        },
+        "damage": 110,
+        "enemyKills": 0,
+        "height": 134.59375,
+        "heightAboveAttacker": 134.625,
+        "kind": "airgib",
+        "sources": [
+          "damage"
+        ],
+        "teamKills": 0,
+        "time": 533636,
+        "victims": [
+          {
+            "activeWeapon": "rl",
+            "armor": 168,
+            "armorType": "ra",
+            "damage": 110,
+            "health": 92,
+            "loc": "RL",
+            "name": "speedball",
+            "relation": "enemy",
+            "stack": 260,
+            "stateSource": "stream",
+            "team": "speedball",
+            "userId": 72,
+            "weapons": [
+              "rl",
+              "lg",
+              "gl",
+              "sng"
+            ]
+          }
+        ]
+      }
+    ]
   },
   "items": {
     "items": [
@@ -16986,8 +17241,17 @@
   "match": {
     "duration": 600001,
     "gameDir": "qw",
+    "gameMode": {
+      "canonical": "duel",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
     "map": "bravado",
     "mapTitle": "Bravado -",
+    "mode": "duel",
     "players": [
       {
         "deaths": 7,
@@ -17002,10 +17266,16 @@
         "frags": 6,
         "kills": 6,
         "name": "mj",
+        "rawTeam": "red",
         "suicides": 0,
         "team": "mj"
       }
     ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "individual"
+    },
     "teams": [
       {
         "frags": 58,
@@ -17640,6 +17910,15 @@
   },
   "metadata": {
     "countdownText": "Countdown:  1\n\n\nDeathmatch  3\nMode  D u e l\nRespawns  KT2\nAntilag     1\nTimelimit  10\nOvertime    3\nSOCDv2  stats\n\nno matchtag\n\n\n",
+    "finalScores": {
+      "date": "Apr 24, 22:54",
+      "map": "bravado",
+      "mode": "duel",
+      "score1": 58,
+      "score2": 6,
+      "team1": "speedball",
+      "team2": "mj"
+    },
     "matchSettings": {
       "antilag": 1,
       "deathmatch": 3,
@@ -17762,23 +18041,28 @@
           "byWeapon": {
             "gl": {
               "attacks": 14,
-              "hits": 0
+              "hits": 0,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 513,
-              "hits": 159
+              "hits": 159,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 249,
-              "hits": 77
+              "hits": 14,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 33,
-              "hits": 3
+              "attacks": 198,
+              "hits": 11,
+              "hitsConvention": "pellets"
             },
             "ssg": {
-              "attacks": 5,
-              "hits": 3
+              "attacks": 70,
+              "hits": 15,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -17973,6 +18257,8 @@
           "efficiency": 0.8939,
           "frags": 58,
           "kills": 59,
+          "maxQuadSpree": 0,
+          "maxSpree": 23,
           "src": "derived",
           "suicides": 1,
           "teamKills": 0
@@ -17999,19 +18285,23 @@
           "byWeapon": {
             "gl": {
               "attacks": 20,
-              "hits": 1
+              "hits": 1,
+              "hitsConvention": "anyDamage"
             },
             "lg": {
               "attacks": 57,
-              "hits": 15
+              "hits": 15,
+              "hitsConvention": "anyDamage"
             },
             "rl": {
               "attacks": 257,
-              "hits": 65
+              "hits": 12,
+              "hitsConvention": "directImpact"
             },
             "sg": {
-              "attacks": 48,
-              "hits": 16
+              "attacks": 288,
+              "hits": 52,
+              "hitsConvention": "pellets"
             }
           },
           "src": "derived"
@@ -18196,6 +18486,8 @@
           "efficiency": 0.0923,
           "frags": 6,
           "kills": 6,
+          "maxQuadSpree": 0,
+          "maxSpree": 2,
           "src": "derived",
           "suicides": 0,
           "teamKills": 0
@@ -18226,7 +18518,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 70,
+  "schemaVersion": 76,
   "shots": {
     "byPlayer": [
       {
@@ -18393,6 +18685,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 4649,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -18404,6 +18697,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 4991,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -18411,6 +18705,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 6000,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -18422,6 +18717,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 6558,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -18436,6 +18732,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 7641,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -18459,6 +18756,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 11896,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -18466,6 +18764,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 9767,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18473,6 +18772,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 12520,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -18480,6 +18780,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 10875,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18487,6 +18788,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 12148,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18494,6 +18796,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 14766,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -18501,6 +18804,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 15377,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -18508,6 +18812,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 15974,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -18515,6 +18820,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 14408,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -18533,6 +18839,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 15195,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18547,6 +18854,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 17260,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18561,6 +18869,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 17818,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18575,6 +18884,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 18741,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18631,6 +18941,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 21745,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18688,6 +18999,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 22278,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -18702,6 +19014,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 22546,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -18713,6 +19026,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 23610,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18720,6 +19034,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 24285,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18727,6 +19042,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 25065,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -18734,6 +19050,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 27227,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18741,6 +19058,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 27961,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -18748,6 +19066,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 30520,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18755,6 +19074,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 31694,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18762,6 +19082,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 31110,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -18769,6 +19090,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 31941,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -18780,6 +19102,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 33343,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -19024,6 +19347,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 38208,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19042,6 +19366,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 38798,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -19071,6 +19396,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 40286,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -19082,6 +19408,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 41156,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19089,6 +19416,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 42000,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19268,6 +19596,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 48169,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19286,6 +19615,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 48987,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19293,6 +19623,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 49071,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -19304,6 +19635,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 50156,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19311,6 +19643,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 50572,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -19322,6 +19655,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 51364,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -19329,6 +19663,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 53052,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -19347,6 +19682,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 56364,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -19379,6 +19715,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 59715,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -19451,6 +19788,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 60949,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -19493,6 +19831,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 64474,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -19504,6 +19843,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 65793,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19579,6 +19919,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 68131,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -19597,6 +19938,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 69461,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -19611,6 +19953,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 73494,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -19618,6 +19961,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 74045,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -19625,6 +19969,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 74442,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -19696,6 +20041,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 75624,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19703,6 +20049,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 76461,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -19714,6 +20061,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 76884,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19721,6 +20069,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 77338,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19728,6 +20077,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 78604,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19767,6 +20117,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 79547,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -19781,6 +20132,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 81690,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -19813,6 +20165,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 87027,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -19820,6 +20173,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 87755,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -19831,6 +20185,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 87742,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -19847,6 +20202,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 87742,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19946,6 +20302,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 93014,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -19960,6 +20317,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 96300,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -19967,6 +20325,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 98664,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19974,6 +20333,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 99131,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -19992,6 +20352,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 101924,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -19999,6 +20360,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 103054,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20006,6 +20368,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 104197,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20024,6 +20387,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 104586,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20091,6 +20455,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 105352,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20169,6 +20534,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 109235,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20176,6 +20542,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 110579,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20183,6 +20550,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 111785,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20190,6 +20558,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 111618,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20197,6 +20566,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 112566,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20204,6 +20574,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 112826,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20272,6 +20643,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 114228,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20311,6 +20683,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 115124,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20332,6 +20705,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 116989,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20339,6 +20713,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 117963,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20346,6 +20721,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 118501,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -20357,6 +20733,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 118956,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20364,6 +20741,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 119930,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20410,6 +20788,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 121314,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20424,6 +20803,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 122833,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20431,6 +20811,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 123638,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20438,6 +20819,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 123566,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -20449,6 +20831,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 124703,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20456,6 +20839,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 126288,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20463,6 +20847,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 127008,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20470,6 +20855,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 127963,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20477,6 +20863,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 128924,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20484,6 +20871,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 129158,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20491,6 +20879,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 129898,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20498,6 +20887,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 130521,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20505,6 +20895,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 131158,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20512,6 +20903,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 131834,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20519,6 +20911,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 132794,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -20530,6 +20923,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 133756,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -20541,6 +20935,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 134593,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20548,6 +20943,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 135171,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20555,6 +20951,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 135340,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20562,6 +20959,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 135834,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20569,6 +20967,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 135964,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20576,6 +20975,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 137178,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20583,6 +20983,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 137210,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20590,6 +20991,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 138132,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20597,6 +20999,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 139294,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20604,6 +21007,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 139489,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20611,6 +21015,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 140574,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20625,6 +21030,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 141782,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20661,6 +21067,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 142340,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -20722,6 +21129,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 143847,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20729,6 +21137,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 143372,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20736,6 +21145,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 144639,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20743,6 +21153,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 144444,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20750,6 +21161,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 144977,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20757,6 +21169,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 144925,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20764,6 +21177,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 145873,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20771,6 +21185,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 145860,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20778,6 +21193,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 146288,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20785,6 +21201,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 146652,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20792,6 +21209,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 147159,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20799,6 +21217,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 147834,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -20817,6 +21236,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 149263,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20824,6 +21244,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 149918,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -20930,6 +21351,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 151847,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20944,6 +21366,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 152912,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20951,6 +21374,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 154094,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20958,6 +21382,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 154964,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -20969,6 +21394,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 155847,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20976,6 +21402,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 155964,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20983,6 +21410,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 157406,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -20990,6 +21418,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 157406,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -20997,6 +21426,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 158496,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21004,6 +21434,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 160198,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21011,6 +21442,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 160295,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21018,6 +21450,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 160730,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21025,6 +21458,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 161217,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21032,6 +21466,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 161484,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21046,6 +21481,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 162691,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21121,6 +21557,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 163159,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21135,6 +21572,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 163782,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21142,6 +21580,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 164393,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21163,6 +21602,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 165360,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21234,6 +21674,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 165730,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21273,6 +21714,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 167905,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -21291,6 +21733,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 172328,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21298,6 +21741,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 172944,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21312,6 +21756,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 172867,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21319,6 +21764,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 173756,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21326,6 +21772,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 174724,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21333,6 +21780,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 175263,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21340,6 +21788,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 175295,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21347,6 +21796,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 175510,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21354,6 +21804,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 176659,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21361,6 +21812,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 179068,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21422,6 +21874,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 180263,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -21490,6 +21943,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 181672,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -21508,6 +21962,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 185387,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21515,6 +21970,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 186809,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21522,6 +21978,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 186705,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -21533,6 +21990,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 187329,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21540,6 +21998,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 189900,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21547,6 +22006,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 190731,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21554,6 +22014,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 191705,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21561,6 +22022,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 191705,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -21572,6 +22034,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 192452,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -21583,6 +22046,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 193173,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21590,6 +22054,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 193173,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21597,6 +22062,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 194511,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21604,6 +22070,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 194283,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21611,6 +22078,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 195043,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -21636,6 +22104,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 195874,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21725,6 +22194,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 199179,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -21736,6 +22206,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 202238,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -21747,6 +22218,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 203407,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -21758,6 +22230,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 204173,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21765,6 +22238,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 207160,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21812,6 +22286,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 209498,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -21848,6 +22323,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 210888,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21855,6 +22331,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 211225,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21873,6 +22350,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 212043,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -21920,6 +22398,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 216602,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21927,6 +22406,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 216310,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21934,6 +22414,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 216738,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -21941,6 +22422,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 218758,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -21959,6 +22441,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 219355,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22044,6 +22527,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 220479,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22090,6 +22574,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 220979,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -22101,6 +22586,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 221056,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22108,6 +22594,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 223096,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22115,6 +22602,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 222881,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -22126,6 +22614,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 223134,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22133,6 +22622,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 223986,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -22144,6 +22634,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 225550,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22151,6 +22642,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 227005,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22158,6 +22650,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 226836,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22165,6 +22658,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 227647,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22172,6 +22666,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 227784,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22179,6 +22674,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 228576,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22186,6 +22682,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 229901,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22193,6 +22690,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 232484,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22207,6 +22705,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 231557,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -22218,6 +22717,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 234005,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22225,6 +22725,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 236720,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22239,6 +22740,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 240032,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22253,6 +22755,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 242265,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22260,6 +22763,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 243480,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -22271,6 +22775,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 243986,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -22282,6 +22787,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 244110,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -22298,6 +22804,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 245278,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22305,6 +22812,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 245785,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -22316,6 +22824,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 245993,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22334,6 +22843,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 246629,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -22357,6 +22867,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 252220,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22364,6 +22875,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 253603,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22371,6 +22883,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 254863,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22461,6 +22974,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 255084,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -22472,6 +22986,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 256110,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22486,6 +23001,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 258350,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -22508,6 +23024,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 259188,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -22558,6 +23075,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 260616,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22572,6 +23090,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 260616,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22579,6 +23098,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 261292,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -22597,6 +23117,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 264642,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22604,6 +23125,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 266928,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22611,6 +23133,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 268461,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22618,6 +23141,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 269253,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22625,6 +23149,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 269370,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22632,6 +23157,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 270227,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22639,6 +23165,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 270474,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22646,6 +23173,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 271156,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22653,6 +23181,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 271194,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22660,6 +23189,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 272201,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22667,6 +23197,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 272740,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22674,6 +23205,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 273526,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22681,6 +23213,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 273454,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22695,6 +23228,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 274214,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22727,6 +23261,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 277565,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22752,6 +23287,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 278850,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22831,6 +23367,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 279520,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -22860,6 +23397,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 279980,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -22871,6 +23409,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 284175,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22878,6 +23417,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 284721,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -22892,6 +23432,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 287871,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -22903,6 +23444,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 288825,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22917,6 +23459,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 290345,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -22928,6 +23471,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 291202,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -22971,6 +23515,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 291721,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23007,6 +23552,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 292110,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23014,6 +23560,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 296384,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23021,6 +23568,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 296604,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -23053,6 +23601,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 297280,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -23064,6 +23613,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 297669,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23096,6 +23646,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 300521,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23103,6 +23654,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 300721,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23110,6 +23662,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 302248,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23117,6 +23670,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 302669,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23124,6 +23678,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 303443,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23149,6 +23704,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 303482,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23245,6 +23801,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 306924,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -23256,6 +23813,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 307371,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -23314,6 +23872,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 307975,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23374,6 +23933,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 311157,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23381,6 +23941,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 312729,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23388,6 +23949,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 313417,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23395,6 +23957,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 313586,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23402,6 +23965,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 314137,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23409,6 +23973,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 314449,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23416,6 +23981,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 315085,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23423,6 +23989,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 314825,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23430,6 +23997,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 315703,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23437,6 +24005,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 315651,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23444,6 +24013,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 316592,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23451,6 +24021,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 316930,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23458,6 +24029,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 317742,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23465,6 +24037,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 318514,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23472,6 +24045,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 320150,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23479,6 +24053,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 323509,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23486,6 +24061,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 326859,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23493,6 +24069,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 326787,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23518,6 +24095,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 329540,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23593,6 +24171,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 330950,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -23653,6 +24232,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 333081,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23709,6 +24289,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 335184,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -23720,6 +24301,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 336418,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -23734,6 +24316,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 337189,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -23748,6 +24331,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 338054,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23755,6 +24339,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 337995,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -23769,6 +24354,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 338839,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23783,6 +24369,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 341476,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23790,6 +24377,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 340229,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23797,6 +24385,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 341834,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23804,6 +24393,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 341977,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23811,6 +24401,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 344551,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23818,6 +24409,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 345619,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23825,6 +24417,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 347029,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23832,6 +24425,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 349626,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23839,6 +24433,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 347808,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -23850,6 +24445,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 350250,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23857,6 +24453,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 350852,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -23864,6 +24461,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 349203,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -23979,6 +24577,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 353133,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -23993,6 +24592,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 354606,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -24000,6 +24600,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 355385,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -24011,6 +24612,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 358528,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24018,6 +24620,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 358775,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -24025,6 +24628,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 359333,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24039,6 +24643,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 360788,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -24050,6 +24655,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 361094,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -24057,6 +24663,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 361411,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -24068,6 +24675,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 364294,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24093,6 +24701,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 365289,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24111,6 +24720,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 365606,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24136,6 +24746,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 366237,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -24154,6 +24765,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 367125,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24239,6 +24851,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 368684,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24246,6 +24859,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 370055,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24299,6 +24913,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 372190,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -24310,6 +24925,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 372523,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -24326,6 +24942,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 372938,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -24342,6 +24959,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 374433,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24378,6 +24996,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 375619,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24385,6 +25004,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 377165,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24392,6 +25012,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 378264,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24399,6 +25020,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 378463,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -24420,6 +25042,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 380463,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -24434,6 +25057,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 382074,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -24492,6 +25116,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 382898,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -24553,6 +25178,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 387606,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24585,6 +25211,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 391086,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -24659,6 +25286,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 391827,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -24666,6 +25294,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 391788,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24673,6 +25302,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 392666,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24680,6 +25310,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 392723,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -24687,6 +25318,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 393489,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -24748,6 +25380,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 394303,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -24759,6 +25392,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 394996,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -24798,6 +25432,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 396412,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -24873,6 +25508,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 400048,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -24884,6 +25520,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 402563,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -24895,6 +25532,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 405412,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -24956,6 +25594,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 405827,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -24978,6 +25617,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 407191,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -25014,6 +25654,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 409659,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25028,6 +25669,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 411100,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25035,6 +25677,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 414113,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25042,6 +25685,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 414317,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25070,6 +25714,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 414979,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25084,6 +25729,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 415230,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -25095,6 +25741,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 415866,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -25106,6 +25753,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 416308,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25113,6 +25761,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 416607,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -25192,6 +25841,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 420408,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -25210,6 +25860,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 425269,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25217,6 +25868,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 424191,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -25228,6 +25880,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 424932,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25235,6 +25888,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 424919,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25242,6 +25896,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 425875,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25249,6 +25904,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 427032,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25256,6 +25912,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 428698,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25263,6 +25920,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 429607,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25270,6 +25928,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 431941,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -25281,6 +25940,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 432330,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25331,6 +25991,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 433373,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25366,6 +26027,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 433893,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -25377,6 +26039,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 434474,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25384,6 +26047,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 435101,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25391,6 +26055,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 435681,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25398,6 +26063,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 435906,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25405,6 +26071,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 436451,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25412,6 +26079,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 437113,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25426,6 +26094,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 438074,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25490,6 +26159,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 439006,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25497,6 +26167,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 440711,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25504,6 +26175,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 441114,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25539,6 +26211,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 441538,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -25553,6 +26226,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 442422,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25560,6 +26234,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 442724,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25603,6 +26278,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 443672,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25617,6 +26293,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 443799,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -25628,6 +26305,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 445123,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -25639,6 +26317,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 446149,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -25671,6 +26350,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 449590,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25724,6 +26404,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 450205,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25767,6 +26448,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 449045,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25774,6 +26456,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 452708,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25781,6 +26464,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 453370,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -25797,6 +26481,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 453851,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25804,6 +26489,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 454218,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -25820,6 +26506,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 454270,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -25836,6 +26523,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 458075,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25843,6 +26531,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 458851,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25850,6 +26539,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 459712,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -25857,6 +26547,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 459972,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25864,6 +26555,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 460695,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -25875,6 +26567,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 460981,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -25886,6 +26579,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 461920,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -25897,6 +26591,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 461920,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -25915,6 +26610,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 464205,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25929,6 +26625,7 @@
         "weapon": "ssg"
       },
       {
+        "flightEnd": 464907,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -25990,6 +26687,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 467387,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -26015,6 +26713,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 468942,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -26037,6 +26736,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 470764,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26044,6 +26744,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 471011,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -26058,6 +26759,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 472478,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26079,6 +26781,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 474270,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26100,6 +26803,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 476050,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -26111,6 +26815,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 476527,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -26143,6 +26848,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 482426,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26150,6 +26856,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 483102,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26157,6 +26864,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 483722,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26164,6 +26872,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 484501,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -26175,6 +26884,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 485124,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26182,6 +26892,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 486232,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26189,6 +26900,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 487449,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26267,6 +26979,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 489462,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26274,6 +26987,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 488881,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -26290,6 +27004,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 489816,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -26369,6 +27084,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 494504,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26376,6 +27092,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 492683,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26383,6 +27100,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 495151,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26390,6 +27108,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 495764,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26415,6 +27134,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 496375,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26476,6 +27196,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 497034,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -26487,6 +27208,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 497566,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -26581,6 +27303,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 501713,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26588,6 +27311,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 504128,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26595,6 +27319,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 505008,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26602,6 +27327,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 503518,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26609,6 +27335,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 505610,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26616,6 +27343,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 504453,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26623,6 +27351,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 506281,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26630,6 +27359,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 505788,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26637,6 +27367,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 507649,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26644,6 +27375,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 506519,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -26655,6 +27387,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 507350,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26712,6 +27445,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 510506,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26719,6 +27453,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 514216,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26726,6 +27461,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 514467,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26733,6 +27469,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 515788,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26740,6 +27477,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 516623,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26747,6 +27485,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 519034,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26754,6 +27493,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 517545,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26761,6 +27501,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 519636,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26768,6 +27509,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 518195,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26775,6 +27517,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 518857,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26782,6 +27525,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 518649,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -26796,6 +27540,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 522389,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26803,6 +27548,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 522424,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -26817,6 +27563,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 523337,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -26828,6 +27575,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 523385,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26835,6 +27583,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 524234,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -26925,6 +27674,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 531152,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26932,6 +27682,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 532182,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -26943,6 +27694,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 532727,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -26950,6 +27702,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 532792,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -26964,6 +27717,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 533636,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -26975,6 +27729,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 533714,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -26986,6 +27741,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 539256,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -26993,6 +27749,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 540386,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -27000,6 +27757,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 542714,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -27007,6 +27765,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 543567,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -27151,6 +27910,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 546169,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -27180,6 +27940,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 548385,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -27187,6 +27948,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 550256,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -27194,6 +27956,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 553035,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -27208,6 +27971,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 555624,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -27215,6 +27979,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 556191,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -27229,6 +27994,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 556884,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -27245,6 +28011,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 557079,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -27256,6 +28023,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 558118,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -27309,6 +28077,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 562867,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -27316,6 +28085,7 @@
         "weapon": "gl"
       },
       {
+        "flightEnd": 561962,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -27327,6 +28097,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 562767,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -27334,6 +28105,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 562789,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -27341,6 +28113,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 563542,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -27352,6 +28125,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 564465,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -27415,6 +28189,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 564840,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -27479,6 +28254,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 565741,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -27522,6 +28298,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 566517,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -27529,6 +28306,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 568192,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -27536,6 +28314,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 568261,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -27835,6 +28614,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 573533,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -27846,6 +28626,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 573659,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -27857,6 +28638,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 574205,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -27880,6 +28662,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 580725,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -27912,6 +28695,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 580469,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -27928,6 +28712,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 580634,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -27944,6 +28729,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 581685,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -27951,6 +28737,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 582634,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -27958,6 +28745,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 582309,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -27965,6 +28753,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 582897,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -27990,6 +28779,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 583689,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -27997,6 +28787,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 584495,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -28015,6 +28806,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 585322,
         "hit": true,
         "player": "speedball",
         "source": "sound",
@@ -28033,6 +28825,7 @@
         "weapon": "sg"
       },
       {
+        "flightEnd": 588440,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -28040,6 +28833,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 589235,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -28047,6 +28841,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 591505,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -28061,6 +28856,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 592625,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -28118,6 +28914,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 593521,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -28157,6 +28954,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 596140,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -28164,6 +28962,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 597742,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -28182,6 +28981,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 598573,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -28203,6 +29003,7 @@
         "weapon": "lg"
       },
       {
+        "flightEnd": 598884,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -28210,6 +29011,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 599391,
         "player": "mj",
         "source": "sound",
         "team": "mj",
@@ -28217,6 +29019,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 599690,
         "player": "speedball",
         "source": "sound",
         "team": "speedball",
@@ -28224,6 +29027,7 @@
         "weapon": "rl"
       },
       {
+        "flightEnd": 599962,
         "hit": true,
         "player": "mj",
         "source": "sound",
@@ -28238,11 +29042,43 @@
   },
   "streams": {
     "global": {
+      "dateMarkers": [
+        {
+          "atMs": 10091,
+          "kind": "matchStart",
+          "raw": "2026-04-24 22:44:38 UTC",
+          "source": "matchdate",
+          "tz": "UTC",
+          "unixMs": 1777070678000
+        },
+        {
+          "kind": "matchEnd",
+          "raw": "2026-04-24 22:54:38 +0000",
+          "source": "ktxstats",
+          "tz": "+0000",
+          "unixMs": 1777071278000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Apr 24, 22:54",
+          "source": "finalscores",
+          "unixMs": 1777071240000,
+          "yearFrom": "epoch"
+        }
+      ],
       "demoOffset": 10091,
       "demoStartAccuracyMs": 1000,
+      "demoStartSource": "epoch",
       "demoStartUnixMs": 1777070668000,
       "matchEnd": 600001,
-      "matchStart": 0
+      "matchEndUnixMs": 1777071278000,
+      "matchStart": 0,
+      "matchStartAccuracyMs": 1000,
+      "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
+      "matchStartSource": "epoch",
+      "matchStartUnixMs": 1777070678091
     },
     "movers": [
       {
@@ -30716,6 +31552,712 @@
           {
             "t": 591871,
             "v": "ya"
+          }
+        ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 1200,
+            "v": 32
+          },
+          {
+            "t": 8473,
+            "v": 1
+          },
+          {
+            "t": 9416,
+            "v": 16
+          },
+          {
+            "t": 14104,
+            "v": 1
+          },
+          {
+            "t": 21278,
+            "v": 64
+          },
+          {
+            "t": 22260,
+            "v": 32
+          },
+          {
+            "t": 34520,
+            "v": 64
+          },
+          {
+            "t": 36357,
+            "v": 1
+          },
+          {
+            "t": 41637,
+            "v": 64
+          },
+          {
+            "t": 46474,
+            "v": 1
+          },
+          {
+            "t": 47409,
+            "v": 2
+          },
+          {
+            "t": 48845,
+            "v": 32
+          },
+          {
+            "t": 54143,
+            "v": 1
+          },
+          {
+            "t": 55759,
+            "v": 32
+          },
+          {
+            "t": 56564,
+            "v": 8
+          },
+          {
+            "t": 56780,
+            "v": 1
+          },
+          {
+            "t": 59630,
+            "v": 32
+          },
+          {
+            "t": 65097,
+            "v": 64
+          },
+          {
+            "t": 67499,
+            "v": 32
+          },
+          {
+            "t": 74377,
+            "v": 64
+          },
+          {
+            "t": 75546,
+            "v": 32
+          },
+          {
+            "t": 77925,
+            "v": 64
+          },
+          {
+            "t": 79513,
+            "v": 32
+          },
+          {
+            "t": 81949,
+            "v": 64
+          },
+          {
+            "t": 83007,
+            "v": 1
+          },
+          {
+            "t": 84293,
+            "v": 32
+          },
+          {
+            "t": 90085,
+            "v": 64
+          },
+          {
+            "t": 92033,
+            "v": 32
+          },
+          {
+            "t": 100157,
+            "v": 1
+          },
+          {
+            "t": 102495,
+            "v": 32
+          },
+          {
+            "t": 103981,
+            "v": 64
+          },
+          {
+            "t": 108742,
+            "v": 32
+          },
+          {
+            "t": 113046,
+            "v": 64
+          },
+          {
+            "t": 114469,
+            "v": 32
+          },
+          {
+            "t": 115280,
+            "v": 1
+          },
+          {
+            "t": 116573,
+            "v": 32
+          },
+          {
+            "t": 119768,
+            "v": 64
+          },
+          {
+            "t": 120372,
+            "v": 32
+          },
+          {
+            "t": 141522,
+            "v": 64
+          },
+          {
+            "t": 142606,
+            "v": 32
+          },
+          {
+            "t": 149496,
+            "v": 64
+          },
+          {
+            "t": 151977,
+            "v": 1
+          },
+          {
+            "t": 155096,
+            "v": 32
+          },
+          {
+            "t": 162289,
+            "v": 64
+          },
+          {
+            "t": 163419,
+            "v": 32
+          },
+          {
+            "t": 164224,
+            "v": 64
+          },
+          {
+            "t": 167542,
+            "v": 32
+          },
+          {
+            "t": 169250,
+            "v": 1
+          },
+          {
+            "t": 170749,
+            "v": 32
+          },
+          {
+            "t": 178698,
+            "v": 64
+          },
+          {
+            "t": 180244,
+            "v": 32
+          },
+          {
+            "t": 181035,
+            "v": 64
+          },
+          {
+            "t": 181568,
+            "v": 32
+          },
+          {
+            "t": 197734,
+            "v": 64
+          },
+          {
+            "t": 198835,
+            "v": 32
+          },
+          {
+            "t": 204667,
+            "v": 16
+          },
+          {
+            "t": 205277,
+            "v": 64
+          },
+          {
+            "t": 206446,
+            "v": 32
+          },
+          {
+            "t": 209231,
+            "v": 64
+          },
+          {
+            "t": 210758,
+            "v": 32
+          },
+          {
+            "t": 211556,
+            "v": 64
+          },
+          {
+            "t": 214101,
+            "v": 16
+          },
+          {
+            "t": 215479,
+            "v": 32
+          },
+          {
+            "t": 218713,
+            "v": 64
+          },
+          {
+            "t": 220784,
+            "v": 32
+          },
+          {
+            "t": 229986,
+            "v": 16
+          },
+          {
+            "t": 231233,
+            "v": 32
+          },
+          {
+            "t": 236421,
+            "v": 64
+          },
+          {
+            "t": 240480,
+            "v": 1
+          },
+          {
+            "t": 243245,
+            "v": 32
+          },
+          {
+            "t": 249759,
+            "v": 64
+          },
+          {
+            "t": 257383,
+            "v": 32
+          },
+          {
+            "t": 258947,
+            "v": 64
+          },
+          {
+            "t": 260116,
+            "v": 32
+          },
+          {
+            "t": 261590,
+            "v": 1
+          },
+          {
+            "t": 268902,
+            "v": 32
+          },
+          {
+            "t": 273175,
+            "v": 1
+          },
+          {
+            "t": 278383,
+            "v": 64
+          },
+          {
+            "t": 279831,
+            "v": 32
+          },
+          {
+            "t": 290819,
+            "v": 64
+          },
+          {
+            "t": 291721,
+            "v": 32
+          },
+          {
+            "t": 296560,
+            "v": 64
+          },
+          {
+            "t": 297002,
+            "v": 32
+          },
+          {
+            "t": 297819,
+            "v": 64
+          },
+          {
+            "t": 300300,
+            "v": 32
+          },
+          {
+            "t": 302936,
+            "v": 64
+          },
+          {
+            "t": 306300,
+            "v": 32
+          },
+          {
+            "t": 307171,
+            "v": 64
+          },
+          {
+            "t": 309391,
+            "v": 32
+          },
+          {
+            "t": 328969,
+            "v": 64
+          },
+          {
+            "t": 330314,
+            "v": 32
+          },
+          {
+            "t": 331327,
+            "v": 64
+          },
+          {
+            "t": 332470,
+            "v": 32
+          },
+          {
+            "t": 333852,
+            "v": 64
+          },
+          {
+            "t": 334756,
+            "v": 32
+          },
+          {
+            "t": 349203,
+            "v": 64
+          },
+          {
+            "t": 352678,
+            "v": 32
+          },
+          {
+            "t": 367393,
+            "v": 64
+          },
+          {
+            "t": 368190,
+            "v": 32
+          },
+          {
+            "t": 370341,
+            "v": 64
+          },
+          {
+            "t": 372061,
+            "v": 32
+          },
+          {
+            "t": 374502,
+            "v": 64
+          },
+          {
+            "t": 375151,
+            "v": 32
+          },
+          {
+            "t": 378593,
+            "v": 64
+          },
+          {
+            "t": 385835,
+            "v": 32
+          },
+          {
+            "t": 390367,
+            "v": 64
+          },
+          {
+            "t": 391576,
+            "v": 32
+          },
+          {
+            "t": 393355,
+            "v": 64
+          },
+          {
+            "t": 394060,
+            "v": 32
+          },
+          {
+            "t": 394866,
+            "v": 64
+          },
+          {
+            "t": 399433,
+            "v": 32
+          },
+          {
+            "t": 402918,
+            "v": 16
+          },
+          {
+            "t": 403529,
+            "v": 64
+          },
+          {
+            "t": 405485,
+            "v": 32
+          },
+          {
+            "t": 407797,
+            "v": 64
+          },
+          {
+            "t": 409252,
+            "v": 32
+          },
+          {
+            "t": 411620,
+            "v": 16
+          },
+          {
+            "t": 414213,
+            "v": 64
+          },
+          {
+            "t": 414902,
+            "v": 32
+          },
+          {
+            "t": 416525,
+            "v": 64
+          },
+          {
+            "t": 419243,
+            "v": 32
+          },
+          {
+            "t": 422776,
+            "v": 16
+          },
+          {
+            "t": 424382,
+            "v": 32
+          },
+          {
+            "t": 432655,
+            "v": 64
+          },
+          {
+            "t": 433659,
+            "v": 32
+          },
+          {
+            "t": 437551,
+            "v": 64
+          },
+          {
+            "t": 438750,
+            "v": 32
+          },
+          {
+            "t": 440776,
+            "v": 64
+          },
+          {
+            "t": 442062,
+            "v": 32
+          },
+          {
+            "t": 442876,
+            "v": 64
+          },
+          {
+            "t": 443556,
+            "v": 32
+          },
+          {
+            "t": 446967,
+            "v": 64
+          },
+          {
+            "t": 448279,
+            "v": 8
+          },
+          {
+            "t": 448642,
+            "v": 32
+          },
+          {
+            "t": 462257,
+            "v": 1
+          },
+          {
+            "t": 463994,
+            "v": 2
+          },
+          {
+            "t": 467033,
+            "v": 32
+          },
+          {
+            "t": 473007,
+            "v": 1
+          },
+          {
+            "t": 481891,
+            "v": 32
+          },
+          {
+            "t": 487245,
+            "v": 64
+          },
+          {
+            "t": 488852,
+            "v": 32
+          },
+          {
+            "t": 489647,
+            "v": 64
+          },
+          {
+            "t": 490267,
+            "v": 1
+          },
+          {
+            "t": 491437,
+            "v": 32
+          },
+          {
+            "t": 493725,
+            "v": 64
+          },
+          {
+            "t": 496453,
+            "v": 32
+          },
+          {
+            "t": 499138,
+            "v": 64
+          },
+          {
+            "t": 500894,
+            "v": 32
+          },
+          {
+            "t": 509103,
+            "v": 64
+          },
+          {
+            "t": 510220,
+            "v": 32
+          },
+          {
+            "t": 516541,
+            "v": 16
+          },
+          {
+            "t": 518268,
+            "v": 32
+          },
+          {
+            "t": 523974,
+            "v": 64
+          },
+          {
+            "t": 531844,
+            "v": 32
+          },
+          {
+            "t": 545234,
+            "v": 64
+          },
+          {
+            "t": 545931,
+            "v": 32
+          },
+          {
+            "t": 557780,
+            "v": 64
+          },
+          {
+            "t": 560386,
+            "v": 16
+          },
+          {
+            "t": 561494,
+            "v": 32
+          },
+          {
+            "t": 563845,
+            "v": 64
+          },
+          {
+            "t": 566105,
+            "v": 32
+          },
+          {
+            "t": 569183,
+            "v": 64
+          },
+          {
+            "t": 573348,
+            "v": 32
+          },
+          {
+            "t": 575153,
+            "v": 1
+          },
+          {
+            "t": 579923,
+            "v": 64
+          },
+          {
+            "t": 580439,
+            "v": 32
+          },
+          {
+            "t": 582897,
+            "v": 64
+          },
+          {
+            "t": 583296,
+            "v": 32
+          },
+          {
+            "t": 586079,
+            "v": 64
+          },
+          {
+            "t": 586815,
+            "v": 1
+          },
+          {
+            "t": 592349,
+            "v": 64
+          },
+          {
+            "t": 593456,
+            "v": 8
+          },
+          {
+            "t": 595738,
+            "v": 32
+          },
+          {
+            "t": 598014,
+            "v": 64
+          },
+          {
+            "t": 598427,
+            "v": 32
           }
         ],
         "cl": [
@@ -33229,6 +34771,476 @@
             "v": ""
           }
         ],
+        "aw": [
+          {
+            "t": 0,
+            "v": 1
+          },
+          {
+            "t": 3507,
+            "v": 32
+          },
+          {
+            "t": 18935,
+            "v": 64
+          },
+          {
+            "t": 21169,
+            "v": 32
+          },
+          {
+            "t": 27831,
+            "v": 16
+          },
+          {
+            "t": 29974,
+            "v": 32
+          },
+          {
+            "t": 33792,
+            "v": 64
+          },
+          {
+            "t": 37273,
+            "v": 32
+          },
+          {
+            "t": 42611,
+            "v": 1
+          },
+          {
+            "t": 44896,
+            "v": 64
+          },
+          {
+            "t": 46474,
+            "v": 32
+          },
+          {
+            "t": 51499,
+            "v": 1
+          },
+          {
+            "t": 53325,
+            "v": 64
+          },
+          {
+            "t": 60936,
+            "v": 2
+          },
+          {
+            "t": 63799,
+            "v": 32
+          },
+          {
+            "t": 66416,
+            "v": 1
+          },
+          {
+            "t": 72027,
+            "v": 32
+          },
+          {
+            "t": 79006,
+            "v": 1
+          },
+          {
+            "t": 81131,
+            "v": 64
+          },
+          {
+            "t": 82630,
+            "v": 1
+          },
+          {
+            "t": 85604,
+            "v": 32
+          },
+          {
+            "t": 88638,
+            "v": 1
+          },
+          {
+            "t": 94703,
+            "v": 32
+          },
+          {
+            "t": 100041,
+            "v": 1
+          },
+          {
+            "t": 100846,
+            "v": 32
+          },
+          {
+            "t": 105950,
+            "v": 1
+          },
+          {
+            "t": 108034,
+            "v": 64
+          },
+          {
+            "t": 109872,
+            "v": 32
+          },
+          {
+            "t": 114839,
+            "v": 1
+          },
+          {
+            "t": 116800,
+            "v": 32
+          },
+          {
+            "t": 166646,
+            "v": 1
+          },
+          {
+            "t": 169289,
+            "v": 16
+          },
+          {
+            "t": 171068,
+            "v": 32
+          },
+          {
+            "t": 179834,
+            "v": 1
+          },
+          {
+            "t": 184608,
+            "v": 64
+          },
+          {
+            "t": 186290,
+            "v": 32
+          },
+          {
+            "t": 194582,
+            "v": 64
+          },
+          {
+            "t": 195952,
+            "v": 1
+          },
+          {
+            "t": 202030,
+            "v": 64
+          },
+          {
+            "t": 204310,
+            "v": 1
+          },
+          {
+            "t": 209316,
+            "v": 32
+          },
+          {
+            "t": 212797,
+            "v": 1
+          },
+          {
+            "t": 215680,
+            "v": 32
+          },
+          {
+            "t": 221492,
+            "v": 1
+          },
+          {
+            "t": 222238,
+            "v": 32
+          },
+          {
+            "t": 231290,
+            "v": 4
+          },
+          {
+            "t": 232582,
+            "v": 1
+          },
+          {
+            "t": 236700,
+            "v": 32
+          },
+          {
+            "t": 246149,
+            "v": 1
+          },
+          {
+            "t": 250304,
+            "v": 32
+          },
+          {
+            "t": 280974,
+            "v": 1
+          },
+          {
+            "t": 283578,
+            "v": 32
+          },
+          {
+            "t": 292384,
+            "v": 1
+          },
+          {
+            "t": 295397,
+            "v": 32
+          },
+          {
+            "t": 298734,
+            "v": 1
+          },
+          {
+            "t": 299475,
+            "v": 32
+          },
+          {
+            "t": 304819,
+            "v": 1
+          },
+          {
+            "t": 306579,
+            "v": 32
+          },
+          {
+            "t": 308786,
+            "v": 1
+          },
+          {
+            "t": 311423,
+            "v": 32
+          },
+          {
+            "t": 330657,
+            "v": 1
+          },
+          {
+            "t": 336943,
+            "v": 32
+          },
+          {
+            "t": 338995,
+            "v": 16
+          },
+          {
+            "t": 339592,
+            "v": 32
+          },
+          {
+            "t": 347112,
+            "v": 16
+          },
+          {
+            "t": 350210,
+            "v": 1
+          },
+          {
+            "t": 354021,
+            "v": 32
+          },
+          {
+            "t": 356320,
+            "v": 1
+          },
+          {
+            "t": 357146,
+            "v": 32
+          },
+          {
+            "t": 362302,
+            "v": 1
+          },
+          {
+            "t": 372346,
+            "v": 32
+          },
+          {
+            "t": 373320,
+            "v": 1
+          },
+          {
+            "t": 376190,
+            "v": 32
+          },
+          {
+            "t": 383879,
+            "v": 1
+          },
+          {
+            "t": 387658,
+            "v": 32
+          },
+          {
+            "t": 397606,
+            "v": 1
+          },
+          {
+            "t": 399490,
+            "v": 64
+          },
+          {
+            "t": 400957,
+            "v": 1
+          },
+          {
+            "t": 406295,
+            "v": 2
+          },
+          {
+            "t": 408745,
+            "v": 1
+          },
+          {
+            "t": 410814,
+            "v": 32
+          },
+          {
+            "t": 417875,
+            "v": 1
+          },
+          {
+            "t": 423187,
+            "v": 32
+          },
+          {
+            "t": 438828,
+            "v": 1
+          },
+          {
+            "t": 439659,
+            "v": 32
+          },
+          {
+            "t": 444153,
+            "v": 1
+          },
+          {
+            "t": 447045,
+            "v": 16
+          },
+          {
+            "t": 448760,
+            "v": 1
+          },
+          {
+            "t": 450266,
+            "v": 32
+          },
+          {
+            "t": 455166,
+            "v": 1
+          },
+          {
+            "t": 458426,
+            "v": 32
+          },
+          {
+            "t": 465357,
+            "v": 1
+          },
+          {
+            "t": 471491,
+            "v": 32
+          },
+          {
+            "t": 485634,
+            "v": 64
+          },
+          {
+            "t": 486284,
+            "v": 32
+          },
+          {
+            "t": 491037,
+            "v": 1
+          },
+          {
+            "t": 491868,
+            "v": 16
+          },
+          {
+            "t": 495059,
+            "v": 1
+          },
+          {
+            "t": 501423,
+            "v": 16
+          },
+          {
+            "t": 505766,
+            "v": 1
+          },
+          {
+            "t": 513961,
+            "v": 32
+          },
+          {
+            "t": 525437,
+            "v": 1
+          },
+          {
+            "t": 530208,
+            "v": 32
+          },
+          {
+            "t": 534684,
+            "v": 1
+          },
+          {
+            "t": 536740,
+            "v": 64
+          },
+          {
+            "t": 547078,
+            "v": 1
+          },
+          {
+            "t": 550001,
+            "v": 32
+          },
+          {
+            "t": 558975,
+            "v": 1
+          },
+          {
+            "t": 561949,
+            "v": 32
+          },
+          {
+            "t": 566429,
+            "v": 1
+          },
+          {
+            "t": 573348,
+            "v": 32
+          },
+          {
+            "t": 574793,
+            "v": 1
+          },
+          {
+            "t": 578274,
+            "v": 32
+          },
+          {
+            "t": 584985,
+            "v": 1
+          },
+          {
+            "t": 587131,
+            "v": 32
+          },
+          {
+            "t": 594040,
+            "v": 1
+          },
+          {
+            "t": 596859,
+            "v": 32
+          }
+        ],
         "cl": [
           {
             "t": 0,
@@ -35569,62 +37581,6 @@
     ]
   },
   "timelineAnalysis": {
-    "airgibs": [
-      {
-        "attacker": "speedball",
-        "attackerTeam": "speedball",
-        "attackerUserID": 72,
-        "damage": 110,
-        "height": 315.21875,
-        "heightAboveAttacker": 171.25,
-        "lethal": true,
-        "loc": "LG",
-        "time": 400048,
-        "victim": "mj",
-        "victimTeam": "mj",
-        "victimUserID": 70
-      },
-      {
-        "attacker": "speedball",
-        "attackerTeam": "speedball",
-        "attackerUserID": 72,
-        "damage": 110,
-        "height": 241.21875,
-        "heightAboveAttacker": 241.25,
-        "lethal": true,
-        "loc": "GL",
-        "time": 81690,
-        "victim": "mj",
-        "victimTeam": "mj",
-        "victimUserID": 70
-      },
-      {
-        "attacker": "speedball",
-        "attackerTeam": "speedball",
-        "attackerUserID": 72,
-        "damage": 110,
-        "height": 171.46875,
-        "heightAboveAttacker": -52,
-        "loc": "GL",
-        "time": 59715,
-        "victim": "mj",
-        "victimTeam": "mj",
-        "victimUserID": 70
-      },
-      {
-        "attacker": "mj",
-        "attackerTeam": "mj",
-        "attackerUserID": 70,
-        "damage": 110,
-        "height": 121.71875,
-        "heightAboveAttacker": 121.75,
-        "loc": "RL",
-        "time": 533636,
-        "victim": "speedball",
-        "victimTeam": "speedball",
-        "victimUserID": 72
-      }
-    ],
     "deathEvents": [
       {
         "player": "speedball",

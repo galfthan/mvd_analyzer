@@ -1,16 +1,24 @@
 # backpacks analyser
 
 **Phase:** Derived
-**Inputs:** `BackpackDropHintEvent`, `PlayerPositionEvent`,
-            `StuffTextEvent`, `PrintEvent`, `IntermissionEvent`
+**Inputs:** `BackpackDropHintEvent`, `BackpackExpireHintEvent`,
+            `PlayerPositionEvent`, `StuffTextEvent`, `PrintEvent`,
+            `IntermissionEvent`
 **Writes to Result:** `result.Backpacks` (`[]BackpackDrop`)
+
+Paired with the `backpack-recon` post-processor
+(`backpack_recon.go`), which fills the SAME section from
+`DropBackpack`'s own rule on demos older than the hint. Its
+validation numbers and stand-down conditions are in
+[BACKPACKS.md](BACKPACKS.md).
 
 ## What it does
 
 Records every RL or LG drop emitted by KTX as a `//ktx drop` hint
 hidden message. Each entry carries the dropper, weapon, drop time,
-origin, and an entity-number key that joins with `WeaponPickup` for
-end-to-end "who dropped this for whom" attribution.
+origin, an entity-number key that joins with `WeaponPickup` for
+end-to-end "who dropped this for whom" attribution, and
+`source: "ktx"` naming the provenance.
 
 Only **RL** and **LG** drops are tracked — these are the
 weapons KTX explicitly hints. SG/SSG/NG/SNG/GL drops happen but are
@@ -21,23 +29,38 @@ not announced and are therefore invisible to this analyser.
 1. `BackpackDropHintEvent` fires when KTX emits the hidden message.
    Its `ItemFlags` bitfield encodes which weapon was dropped:
    `IT_ROCKET_LAUNCHER` → "rl", `IT_LIGHTNING` → "lg".
-2. The dropper's most recent `PlayerPositionEvent.Origin` is captured
-   as the drop origin (KTX spawns the backpack at the dying player's
-   `s.v.origin`).
+2. The dropper's most recent `PlayerPositionEvent.Origin`, less the 24
+   units KTX drops the pack by, is captured as the drop origin — KTX
+   copies the dying player's `s.v.origin` and then applies
+   `item->s.v.origin[2] -= 24` (`ktx/src/items.c:2703-2704`), which puts
+   the pack at their feet. The reconstruction applies the same offset, so
+   the two provenances publish one origin convention. A slot with no
+   position at all keeps the zero vector (the "unknown origin" value),
+   rather than a bare -24 that would read as a real point on the map.
+   Only the SLOT is recorded at event time; the name
+   and team are resolved at Finalize through the shared
+   `ResolveSlotAt` chain, so a drop carries the same display name
+   every other section joins on (this also fixes the former
+   auth-name capture bug, where the raw userinfo name was stamped and
+   joined against nothing).
 3. `MatchTimingDetector` gates the recording so warmup drops don't
    pollute the match output.
-4. At Finalize, drops are sorted by time and `Loc` is resolved
+4. `BackpackExpireHintEvent` — KTX's `//ktx expire <ent>`, written by
+   `SUB_Remove` for every RL/LG pack it deletes untaken
+   (`ktx/src/g_spawn.c:196-210`) — is joined at Finalize onto the drop it
+   closes and stamps that row `fate: "expired"`. The join is by edict AND
+   time (edicts are recycled): the newest drop at or before the hint, and
+   only when the gap is `DropBackpack`'s own 120 s deadline. It is the
+   only pickup-side field a hint row carries, because it is the one thing
+   the `WeaponPickup` join cannot state — a demo can carry `//ktx drop`
+   and no `//ktx bp` at all, so a missing pickup row is not an expiry.
+   An expiry naming a pack this analyser has no row for (a warmup drop) is
+   left on the floor.
+5. At Finalize, drops are sorted by time and `Loc` is resolved
    best-effort from the map's `.loc` corpus.
 
 ## Limitations / known issues
 
-- **Auth-name capture (pre-existing bug)**: the dropper's name is
-  read from `ctx.Players[slot].Name` at OnEvent time, which is the
-  userinfo name. Every other analyser emits the demoinfo display
-  name. For demos with auth-override players the join against
-  demoinfo's `Name` field silently fails. See
-  `NOTES-pickup-attribution-quality.md` §2 for the proposed fix
-  (defer name resolution to Finalize, mirroring weapon_pickups).
 - Both-bits-set or zero-bits `ItemFlags` values are dropped
   defensively. Stock KTX always sends exactly one flag bit; the
   defence guards against unknown future bit combinations.
@@ -47,4 +70,5 @@ not announced and are therefore invisible to this analyser.
 ## Reference
 
 - KTX drop emitter: `ktx/src/items.c` (search "//ktx drop")
+- KTX expiry emitter: `ktx/src/g_spawn.c` `SUB_Remove`
 - Item bit layout: `ktx/include/g_local.h` (`IT_*` constants)

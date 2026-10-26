@@ -16,7 +16,6 @@ type TimelineAnalysisResult struct {
 	PowerupEvents []PowerupEvent       `json:"powerupEvents,omitempty"` // Powerup pickups for Key Moments
 	FragStreaks   []FragStreakEvent    `json:"fragStreaks,omitempty"`   // Top longest frag streaks for Key Moments
 	DemoMarkers   []DemoMarkerEvent    `json:"demoMarkers,omitempty"`   // Player-inserted `/demomark` bookmarks for Key Moments
-	Airgibs       []AirgibEvent        `json:"airgibs,omitempty"`       // Top airborne rocket hits (airgibs) for Key Moments
 	LocationData  []MapLocation        `json:"locationData,omitempty"`  // Location points from .loc file for map view
 	LocTable      []string             `json:"locTable,omitempty"`      // Interned loc names; index 0 is "" sentinel.
 	PlayerUserIDs map[string]int       `json:"playerUserIDs,omitempty"` // Player name -> UserID for Hub viewer links
@@ -24,7 +23,9 @@ type TimelineAnalysisResult struct {
 }
 
 // AirgibEvent is one enemy rocket hit landed on an airborne victim — an
-// "airgib" — surfaced in Key Moments (schema v25). Height is the victim's
+// "airgib" — surfaced in Key Moments (schema v25; since v76 the SERIALIZED
+// rows live at Result.Highlights.Airgibs as HighlightEvent, and this type
+// is the detector's — view.ComputeAirgibs' — output shape only). Height is the victim's
 // feet above the floor at the moment of the hit (PositionTrack.H), so the
 // list is meaningful only on maps with a provisioned BSP (where H is
 // populated). The analyzer emits every qualifying hit sorted by Height

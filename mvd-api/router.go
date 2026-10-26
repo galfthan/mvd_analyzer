@@ -96,13 +96,14 @@ func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uplo
 	mux.HandleFunc("GET /v1/demos/{id}/streams/projectiles", s.handleProjectiles)
 	mux.HandleFunc("GET /v1/demos/{id}/streams/beams", s.handleBeams)
 	mux.HandleFunc("GET /v1/demos/{id}/streams/nails", s.handleNails)
+	mux.HandleFunc("GET /v1/demos/{id}/streams/point-effects", s.handlePointEffects)
 	mux.HandleFunc("GET /v1/demos/{id}/loc-trails", s.handleLocTrails)
 	mux.HandleFunc("GET /v1/demos/{id}/loc-table", s.handleLocTable)
 	mux.HandleFunc("GET /v1/demos/{id}/region-control", s.handleRegionControl)
 	mux.HandleFunc("GET /v1/demos/{id}/top-windows", s.handleTopWindows)
 	mux.HandleFunc("GET /v1/demos/{id}/top-kills", s.handleTopKills)
 	mux.HandleFunc("GET /v1/demos/{id}/lives", s.handleLives)
-	mux.HandleFunc("GET /v1/demos/{id}/airgibs", s.handleAirgibs)
+	mux.HandleFunc("GET /v1/demos/{id}/highlights", s.handleHighlights)
 
 	// Hub game discovery (no demo needed; hits a live upstream).
 	mux.HandleFunc("GET /v1/games/search", s.handleGamesSearch)

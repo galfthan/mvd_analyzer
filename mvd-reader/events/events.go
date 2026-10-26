@@ -33,6 +33,34 @@ type Source interface {
 	Close() error
 }
 
+// WarningReporter is an OPTIONAL capability of a Source: the census of
+// things the source could not read off its wire. A consumer type-asserts
+// for it after draining the stream (the counts are complete only then)
+// and surfaces the summary rather than dropping it — a protocol gap the
+// pipeline silently tolerates is exactly how the sv_bigcoords desync
+// degraded years of archived demos unnoticed.
+//
+// A source that cannot fail to decode anything (a JSON replay, a
+// synthetic test source) simply does not implement it.
+type WarningReporter interface {
+	WarningSummary() WarningSummary
+}
+
+// Parse-warning types, re-exported from the parser like every other
+// wire-level type here. WarningSummary is the always-collected census;
+// Warning is one instance (retained only in the parser's diagnostic
+// mode).
+type (
+	Warning        = parser.Warning
+	WarningSummary = parser.WarningSummary
+	WarningGroup   = parser.WarningGroup
+)
+
+// MaxWarningGroups is the retention cap on WarningSummary.Groups — how
+// many distinct messages a summary samples before it starts counting
+// every further warning into DroppedWarnings.
+const MaxWarningGroups = parser.MaxWarningGroups
+
 // Event is the interface implemented by every concrete event type. Use
 // a type switch on Event to dispatch on the specific event kind.
 type Event = parser.Event
@@ -63,10 +91,14 @@ type (
 	SpawnEvent              = parser.SpawnEvent
 	ItemSpawnEvent          = parser.ItemSpawnEvent
 	ItemStateEvent          = parser.ItemStateEvent
+	ItemMoveEvent           = parser.ItemMoveEvent
 	BackpackDropHintEvent   = parser.BackpackDropHintEvent
 	ItemPickupHintEvent     = parser.ItemPickupHintEvent
 	BackpackPickupHintEvent = parser.BackpackPickupHintEvent
+	BackpackExpireHintEvent = parser.BackpackExpireHintEvent
 	DemoMarkEvent           = parser.DemoMarkEvent
+	FinalScoresEvent        = parser.FinalScoresEvent
+	MatchStartEvent         = parser.MatchStartEvent
 	ItemPickupPrintEvent    = parser.ItemPickupPrintEvent
 	PlayerDepartureEvent    = parser.PlayerDepartureEvent
 	PlayerRejoinEvent       = parser.PlayerRejoinEvent
@@ -78,6 +110,7 @@ type (
 	ProjectileSpawnEvent    = parser.ProjectileSpawnEvent
 	ProjectileDespawnEvent  = parser.ProjectileDespawnEvent
 	BeamEvent               = parser.BeamEvent
+	PointEffectEvent        = parser.PointEffectEvent
 	NailsFrameEvent         = parser.NailsFrameEvent
 	Nail                    = parser.Nail
 )
@@ -98,11 +131,44 @@ const (
 	PrintChat   = mvd.PrintChat
 )
 
+// Temp-entity point-effect types (PointEffectEvent.Type).
+const (
+	TeSpike          = parser.TeSpike
+	TeSuperSpike     = parser.TeSuperSpike
+	TeGunshot        = parser.TeGunshot
+	TeExplosion      = parser.TeExplosion
+	TeTarExplosion   = parser.TeTarExplosion
+	TeWizSpike       = parser.TeWizSpike
+	TeKnightSpike    = parser.TeKnightSpike
+	TeLavaSplash     = parser.TeLavaSplash
+	TeTeleport       = parser.TeTeleport
+	TeBlood          = parser.TeBlood
+	TeLightningBlood = parser.TeLightningBlood
+)
+
 // MatchStartPatterns re-exports the canonical Layer 1 match-start phrase
 // table (parser.MatchStartPatterns) so analytics consumers can share the
 // single definition without importing the parser package directly. It is
 // read-only; do not mutate the returned slice.
 var MatchStartPatterns = parser.MatchStartPatterns
+
+// MatchStartEvent.Source vocabulary, re-exported from Layer 1. The parser
+// emits the event once per stream at the first of the four signals that
+// reaches the wire; consumers that publish the source (result
+// `streams.global.matchStartSignal`) read these names.
+const (
+	MatchStartSourceKtxDirective = parser.MatchStartSourceKtxDirective
+	MatchStartSourcePrint        = parser.MatchStartSourcePrint
+	MatchStartSourceMatchDate    = parser.MatchStartSourceMatchDate
+	MatchStartSourceStatus       = parser.MatchStartSourceStatus
+)
+
+// StatusNamesRunningGame re-exports the Layer 1 reading of the serverinfo
+// `status` key: does this value say a game is under way? Shared by the
+// parser's match-start detector and the analytics no-match marker, for the
+// same reason MatchStartPatterns is — one definition, and the dependency
+// arrow points only one way.
+var StatusNamesRunningGame = parser.StatusNamesRunningGame
 
 // Stat indices for StatUpdateEvent.StatIndex — KTX/QW stat slot IDs.
 const (

@@ -126,7 +126,8 @@ const (
 )
 
 // weaponBit maps a pickup Weapon code to the STAT_ITEMS bit that
-// indicates the player already holds that weapon.
+// indicates the player already holds that weapon — KTX's IT_* item flags
+// (ktx/include/g_consts.h:87-92), unchanged from id1.
 var weaponBit = map[string]int{
 	"ssg": wpItSuperShotgun,
 	"ng":  wpItNailgun,
@@ -159,6 +160,8 @@ func (a *WeaponPickupsAnalyzer) Init(ctx *Context) error {
 
 func (a *WeaponPickupsAnalyzer) OnEvent(event events.Event) error {
 	switch e := event.(type) {
+	case *events.MatchStartEvent:
+		a.timing.OnMatchStart(e)
 	case *events.PrintEvent:
 		a.timing.OnPrint(e)
 	case *events.IntermissionEvent:

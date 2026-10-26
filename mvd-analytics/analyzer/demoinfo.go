@@ -148,10 +148,14 @@ func (a *DemoInfoAnalyzer) parseBlocks() *DemoInfoResult {
 		Mode:      raw.Mode,
 		Timelimit: raw.Timelimit,
 		Fraglimit: raw.Fraglimit,
-		Duration:  raw.Duration,
-		Demo:      raw.Demo,
-		Teams:     cleanedTeams,
-		Players:   make([]DemoInfoPlayer, 0, len(raw.Players)),
+		// KTX's own dm / tp cvars — the authoritative teamplay verdict, see
+		// DemoInfoResult.Teamplay.
+		Deathmatch: raw.Deathmatch,
+		Teamplay:   raw.Teamplay,
+		Duration:   raw.Duration,
+		Demo:       raw.Demo,
+		Teams:      cleanedTeams,
+		Players:    make([]DemoInfoPlayer, 0, len(raw.Players)),
 	}
 
 	for _, p := range raw.Players {

@@ -27,9 +27,23 @@ type Overview struct {
 	// equals Map — the common case where the map has no distinct title
 	// (repo precedent: MessageClean elides when identical to the raw
 	// message).
-	MapTitle   string           `json:"mapTitle,omitempty"`
-	GameDir    string           `json:"gameDir,omitempty"`
-	Mode       string           `json:"mode,omitempty"`
+	MapTitle string `json:"mapTitle,omitempty"`
+	GameDir  string `json:"gameDir,omitempty"`
+	// Mode is the server's own DISPLAY spelling of the mode, verbatim: the
+	// KTX countdown centerprint's Mode row ("Duel", "FFA", "Clan Arena")
+	// where the demo has one, else result.MatchResult.Mode (the demoinfo /
+	// //finalscores vocabulary — "duel", "team", "FFA"). Two vocabularies,
+	// neither normalised, and the precedence between them is the reverse of
+	// the one MatchResult.Mode itself resolves. It stays that way because it
+	// is a label for a human, and because clients have been reading it since
+	// v1 — anything that needs to BRANCH on the mode reads GameMode below,
+	// which is one normalised verdict with provenance.
+	Mode string `json:"mode,omitempty"`
+	// GameMode is the normalised mode descriptor (schema v75): canonical
+	// shape, whether teamplay was in force, whether the score is rounds, the
+	// submode tokens, and which vocabulary decided each. Absent on a Result
+	// cached before v75.
+	GameMode   *result.GameMode `json:"gameMode,omitempty"`
 	Matchtag   string           `json:"matchtag,omitempty"`
 	Duration   int32            `json:"duration"`
 	MatchStart int32            `json:"matchStart"`
@@ -65,12 +79,28 @@ type Overview struct {
 	// /player-stats' per-row sessions[] carries every one of a player's
 	// ids with the window it was live in — the lossless form of this map.
 	PlayerUserIDs map[string]int `json:"playerUserIDs,omitempty"`
+	// NoMatch is present only when this demo yielded no analyzable match:
+	// `players` is empty, `available.*` is false almost throughout, and
+	// this block says WHY (schema v74). It is the difference between "the
+	// recording holds no match" and "the parse failed" — the latter is
+	// Errors below, and only the `demoUnreadable` reason implies both.
+	// 2.0% of the QuakeWorld archive lands here. Omitted on every demo
+	// with players, which is the normal case.
+	NoMatch *result.NoMatchResult `json:"noMatch,omitempty"`
 	// Errors carries the analyzer's non-fatal errors verbatim (a
 	// sub-analyzer's Finalize failed but the pipeline continued). A
 	// non-empty list means the result is degraded — some sections may
 	// be missing or partial. Surfaced here so a consumer sees it on the
 	// first call without parsing the full result. Omitted when empty.
 	Errors []string `json:"errors,omitempty"`
+	// ParseWarnings is the READER's census (result.parseWarnings): wire
+	// data the MVD decoder could not read at all — unknown svc_* /
+	// temp-entity / hidden-message types, payloads that failed to parse.
+	// Distinct from Errors, which reports analyzer failures over events
+	// that DID decode. Non-empty means this demo hit a protocol gap and
+	// the views downstream of it may be thin. Omitted on a clean parse,
+	// which is the normal case.
+	ParseWarnings *result.ParseWarnings `json:"parseWarnings,omitempty"`
 }
 
 // OverviewTeam mirrors result.TeamStat.
@@ -79,19 +109,37 @@ type OverviewTeam struct {
 	Frags int    `json:"frags"`
 }
 
-// OverviewTiming exposes the demo-open wall-clock anchor (streams.global) so a
+// OverviewTiming exposes the wall-clock anchors (streams.global) so a
 // REST/MCP consumer can map a match-relative game time g (ms) to real time:
 //
 //	wallClockMs = demoStartUnixMs + demoOffset + g + Σ pauses[i].durationMs (atMs <= g)
 //	             (±demoStartAccuracyMs)
 //
-// All fields omitempty; the block itself is omitted when no wall-clock source
-// is present. Pauses reuses the result shape: {atMs, durationMs}.
+// matchStartUnixMs is the separate "when was this played" anchor (schema v72):
+// it is what the wire date markers state, and it is present on ~95% of demos
+// against ~25% for the server-clock sources behind demoStartUnixMs.
+// matchStartConfidence grades it — see RESULT_SCHEMA.md's GlobalStream section.
+//
+// matchStartSignal (schema v75) is the odd one out: it names the WIRE SIGNAL
+// the match start was detected from, not a wall-clock value, and it is set on
+// every result that holds a match — so it also brings the block into
+// existence on a demo carrying no clock at all.
+//
+// All fields omitempty; the block itself is omitted when the result holds no
+// match. Pauses reuses the result shape: {atMs, durationMs}.
 type OverviewTiming struct {
-	DemoOffset          int32                  `json:"demoOffset,omitempty"`
-	DemoStartUnixMs     int64                  `json:"demoStartUnixMs,omitempty"`
-	DemoStartAccuracyMs int32                  `json:"demoStartAccuracyMs,omitempty"`
-	Pauses              []result.TimelinePause `json:"pauses,omitempty"`
+	DemoOffset           int32                  `json:"demoOffset,omitempty"`
+	DemoStartUnixMs      int64                  `json:"demoStartUnixMs,omitempty"`
+	DemoStartAccuracyMs  int32                  `json:"demoStartAccuracyMs,omitempty"`
+	DemoStartSource      string                 `json:"demoStartSource,omitempty"`
+	MatchStartSignal     string                 `json:"matchStartSignal,omitempty"`
+	MatchStartUnixMs     int64                  `json:"matchStartUnixMs,omitempty"`
+	MatchStartAccuracyMs int32                  `json:"matchStartAccuracyMs,omitempty"`
+	MatchStartSource     string                 `json:"matchStartSource,omitempty"`
+	MatchStartConfidence string                 `json:"matchStartConfidence,omitempty"`
+	MatchStartNote       string                 `json:"matchStartNote,omitempty"`
+	MatchEndUnixMs       int64                  `json:"matchEndUnixMs,omitempty"`
+	Pauses               []result.TimelinePause `json:"pauses,omitempty"`
 }
 
 // OverviewPlayer carries each player's identity + scoreboard line, taken
@@ -119,6 +167,8 @@ func BuildOverview(r *result.Result) Overview {
 	ov.SchemaVersion = r.SchemaVersion
 	ov.FilePath = r.FilePath
 	ov.Errors = r.Errors
+	ov.ParseWarnings = r.ParseWarnings
+	ov.NoMatch = r.NoMatch
 
 	// map = the canonical shortname, mapTitle = the display-only level title.
 	// Match publishes both (result/match.go), but EffectiveMap stays the
@@ -153,18 +203,38 @@ func BuildOverview(r *result.Result) Overview {
 		g := r.Streams.Global
 		ov.MatchStart = g.MatchStart
 		ov.MatchEnd = g.MatchEnd
-		if g.DemoOffset != 0 || g.DemoStartUnixMs != 0 || len(g.Pauses) > 0 {
+		if g.DemoOffset != 0 || g.DemoStartUnixMs != 0 || g.MatchStartUnixMs != 0 || len(g.Pauses) > 0 || g.MatchStartSignal != "" {
 			ov.Timing = &OverviewTiming{
-				DemoOffset:          g.DemoOffset,
-				DemoStartUnixMs:     g.DemoStartUnixMs,
-				DemoStartAccuracyMs: g.DemoStartAccuracyMs,
-				Pauses:              g.Pauses,
+				DemoOffset:           g.DemoOffset,
+				DemoStartUnixMs:      g.DemoStartUnixMs,
+				DemoStartAccuracyMs:  g.DemoStartAccuracyMs,
+				DemoStartSource:      g.DemoStartSource,
+				MatchStartUnixMs:     g.MatchStartUnixMs,
+				MatchStartAccuracyMs: g.MatchStartAccuracyMs,
+				MatchStartSignal:     g.MatchStartSignal,
+				MatchStartSource:     g.MatchStartSource,
+				MatchStartConfidence: g.MatchStartConfidence,
+				MatchStartNote:       g.MatchStartNote,
+				MatchEndUnixMs:       g.MatchEndUnixMs,
+				Pauses:               g.Pauses,
 			}
 		}
 	}
 	if r.Metadata != nil && r.Metadata.MatchSettings != nil {
 		ov.Mode = r.Metadata.MatchSettings.Mode
 		ov.Matchtag = r.Metadata.MatchSettings.Matchtag
+	}
+	if r.Match != nil {
+		if ov.Mode == "" {
+			// The countdown centerprint above is a KTX-era signal; Match.Mode
+			// resolves the demoinfo / //finalscores vocabulary instead, which is
+			// what the pre-ktxstats half of the archive has (schema v72). It is a
+			// different spelling of the same idea ("duel" vs "Duel") — hence the
+			// fallback rather than a merge; result.MatchResult.Sources.Mode names
+			// which one a demo got.
+			ov.Mode = r.Match.Mode
+		}
+		ov.GameMode = r.Match.GameMode
 	}
 	if r.TimelineAnalysis != nil {
 		ov.LocCount = len(r.TimelineAnalysis.LocTable)

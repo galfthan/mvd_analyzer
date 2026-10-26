@@ -42,9 +42,11 @@ func TestShots_SoundMappingAndProjectileDisambiguation(t *testing.T) {
 	_ = a.OnEvent(weaponSound(4, "weapons/guncock.wav", 400))  // sg
 	_ = a.OnEvent(weaponSound(4, "weapons/shotgn2.wav", 500))  // ssg
 	_ = a.OnEvent(weaponSound(4, "weapons/spike2.wav", 600))   // sng
+	_ = a.OnEvent(weaponSound(4, "weapons/ax1.wav", 650))      // axe swing
 	// Non-fire sounds and non-weapon channel: ignored.
 	_ = a.OnEvent(weaponSound(4, "weapons/bounce.wav", 700)) // grenade bounce
 	_ = a.OnEvent(weaponSound(4, "weapons/lhit.wav", 800))   // LG hit
+	_ = a.OnEvent(weaponSound(4, "player/axhit2.wav", 850))  // axe wall clank
 	_ = a.OnEvent(&events.SoundEvent{Ent: 4, Channel: 2, Name: "weapons/sgun1.wav", TimeMs: 900})
 
 	r := &Result{}
@@ -64,7 +66,7 @@ func TestShots_SoundMappingAndProjectileDisambiguation(t *testing.T) {
 			t.Errorf("shot %+v: player = %q, want shooter", s, s.Player)
 		}
 	}
-	want := []string{"rl", "ng", "gl", "sg", "ssg", "sng"}
+	want := []string{"rl", "ng", "gl", "sg", "ssg", "sng", "axe"}
 	if len(weapons) != len(want) {
 		t.Fatalf("weapons = %v, want %v", weapons, want)
 	}
@@ -91,16 +93,34 @@ func TestShots_HitscanLinking(t *testing.T) {
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 2000))
 	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtRL, Damage: 80, TimeMs: 2000})
 
+	// Axe swing by slot 3 at 3000ms; W_FireAxe runs the damage traceline
+	// 200ms after the swing sound (player_axe3), so the damage lands at
+	// 3200ms and links through the axe's delayed window.
+	_ = a.OnEvent(weaponSound(4, "weapons/ax1.wav", 3000))
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 0, DeathType: mvd.DtAxe, Damage: 20, TimeMs: 3200})
+
+	// A second swing at 4000ms with a same-frame axe damage event: the
+	// engine cannot produce that timing (the traceline is always two think
+	// frames late), so it must NOT link.
+	_ = a.OnEvent(weaponSound(4, "weapons/ax1.wav", 4000))
+	_ = a.OnEvent(&events.DamageEvent{Attacker: 3, Victim: 1, DeathType: mvd.DtAxe, Damage: 20, TimeMs: 4000})
+
 	r := &Result{}
 	_ = a.Finalize(r)
 
-	var sg, rl *Shot
+	var sg, rl, axe, axe2 *Shot
 	for i := range r.Shots.Shots {
 		switch r.Shots.Shots[i].Weapon {
 		case "sg":
 			sg = &r.Shots.Shots[i]
 		case "rl":
 			rl = &r.Shots.Shots[i]
+		case "axe":
+			if r.Shots.Shots[i].Time == 3000 {
+				axe = &r.Shots.Shots[i]
+			} else {
+				axe2 = &r.Shots.Shots[i]
+			}
 		}
 	}
 	if sg == nil || !sg.Hit || len(sg.Victims) != 2 {
@@ -111,6 +131,12 @@ func TestShots_HitscanLinking(t *testing.T) {
 	}
 	if rl == nil || rl.Hit {
 		t.Errorf("rl shot = %+v, want unlinked (projectile)", rl)
+	}
+	if axe == nil || !axe.Hit || len(axe.Victims) != 1 || axe.Victims[0] != "victimA" {
+		t.Errorf("axe shot = %+v, want Hit with victim victimA", axe)
+	}
+	if axe2 == nil || axe2.Hit {
+		t.Errorf("axe shot@4000 = %+v, want unlinked (same-frame axe damage is engine-impossible)", axe2)
 	}
 
 	// Aggregate accuracy: 1 connecting SG shot of 1 SG shot = 1.0.
@@ -183,6 +209,16 @@ func TestShots_ProjectileBracketDisambiguation(t *testing.T) {
 	if !b0.Hit || len(b0.Victims) != 1 || b0.Victims[0] != "victimA" {
 		t.Errorf("shot@1300 = %+v, want hit victimA", b0)
 	}
+	// Each fire publishes ITS OWN flight's end (schema v74) — the half of the
+	// bracket that decided the victims above. Reading them off the projectile
+	// stream instead cannot tell these two apart: their spawn frames are 300 ms
+	// apart but their impacts arrive in the opposite order.
+	if a0.FlightEnd == nil || *a0.FlightEnd != 1500 {
+		t.Errorf("shot@1000 flightEnd = %v, want 1500", a0.FlightEnd)
+	}
+	if b0.FlightEnd == nil || *b0.FlightEnd != 1400 {
+		t.Errorf("shot@1300 flightEnd = %v, want 1400", b0.FlightEnd)
+	}
 }
 
 // TestShots_ProjectileMiss leaves a rocket whose flight ends with no damage
@@ -209,6 +245,18 @@ func TestShots_ProjectileMiss(t *testing.T) {
 			hits++
 		}
 	}
+	// flightEnd reports the FLIGHT, not the damage: the rocket that connected
+	// and the one that hit a wall both tracked one and both say when it ended.
+	want := map[int32]int32{1000: 1500, 3000: 3600}
+	for _, s := range r.Shots.Shots {
+		w, ok := want[s.Time]
+		if !ok {
+			continue
+		}
+		if s.FlightEnd == nil || *s.FlightEnd != w {
+			t.Errorf("shot@%d flightEnd = %v, want %d", s.Time, s.FlightEnd, w)
+		}
+	}
 	if hits != 1 {
 		t.Errorf("rl hits = %d, want 1 (one of two rockets connected)", hits)
 	}
@@ -218,6 +266,70 @@ func TestShots_ProjectileMiss(t *testing.T) {
 				t.Errorf("rl accuracy = %v, want 0.5", w.Accuracy)
 			}
 		}
+	}
+}
+
+// TestShots_ProjectileWithoutFlight pins the absence half of the v74 contract:
+// a rocket the server never broadcast as an entity leaves the fire with no
+// flightEnd — and that absence is load-bearing, since it is the state both the
+// measured hit counter and the reconstructed tier read as a miss.
+func TestShots_ProjectileWithoutFlight(t *testing.T) {
+	a, _ := newTestShotsAnalyzer()
+	a.hadDmg = true
+
+	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 1000))
+	_ = a.OnEvent(rlDamage(3, 0, 1030)) // damage, but no spawn/despawn pair
+
+	r := &Result{}
+	_ = a.Finalize(r)
+
+	if len(r.Shots.Shots) != 1 {
+		t.Fatalf("shots = %+v, want 1", r.Shots.Shots)
+	}
+	s := r.Shots.Shots[0]
+	if s.FlightEnd != nil {
+		t.Errorf("flightEnd = %d, want absent — no flight was tracked", *s.FlightEnd)
+	}
+	if s.Hit {
+		t.Errorf("shot = %+v, want a miss — an untracked rocket links to nothing", s)
+	}
+}
+
+// TestShots_FlightEndMayPrecedeFireSound pins that flightEnd is the tracked
+// despawn frame and nothing else — including when that frame lands BEFORE the
+// fire sound it is published on. The two timestamps are quantized
+// independently (the sound and the entity update need not reach the demo in the
+// same frame), so a point-blank rocket whose spawn was seen a frame early and
+// whose despawn follows immediately can end "before" its own fire. Measured on
+// the 53-demo dm2/dm3 eval corpus: 6 of 37974 tracked rl/gl flights, worst
+// −29 ms — inside one sv_demofps 30 frame.
+//
+// Clamping or dropping those would fabricate a flight time the wire never
+// showed and hide the quantization from consumers, so the linker publishes the
+// despawn as observed; the reconstructed-tier join is unaffected because it
+// anchors on the flight end alone and never differences it against the fire.
+func TestShots_FlightEndMayPrecedeFireSound(t *testing.T) {
+	a, _ := newTestShotsAnalyzer()
+	a.hadDmg = true
+
+	// Rocket entity seen at 1000, gone at 1040; the fire sound arrives at 1050,
+	// inside the ±50 ms spawn bracket but after the flight already ended.
+	_ = a.OnEvent(projSpawn(50, "rl", [3]float32{0, 0, 0}, 1000))
+	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 1050))
+	_ = a.OnEvent(projDespawn(50, "rl", 1040))
+
+	r := &Result{}
+	_ = a.Finalize(r)
+
+	if len(r.Shots.Shots) != 1 {
+		t.Fatalf("shots = %+v, want 1", r.Shots.Shots)
+	}
+	s := r.Shots.Shots[0]
+	if s.FlightEnd == nil {
+		t.Fatalf("shot@%d has no flightEnd — the flight was tracked and linked", s.Time)
+	}
+	if *s.FlightEnd != 1040 {
+		t.Errorf("flightEnd = %d, want the observed despawn 1040 (fire at %d)", *s.FlightEnd, s.Time)
 	}
 }
 
@@ -506,7 +618,7 @@ func TestShots_WarmupGating(t *testing.T) {
 	a.timing.Started = false // start in warmup
 
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 100)) // warmup rl
-	_ = a.OnEvent(&events.PrintEvent{Message: "fight!", TimeMs: 200})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 200})
 	_ = a.OnEvent(weaponSound(4, "weapons/sgun1.wav", 300)) // match rl
 
 	r := &Result{}

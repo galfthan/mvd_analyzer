@@ -116,21 +116,22 @@ func TestGamesSearch_InvalidParam(t *testing.T) {
 }
 
 // limit/offset are bounded at the API boundary rather than silently clamped
-// downstream (v57 reject-loudly posture): limit>100, an explicit limit=0, and
-// negative limit/offset all 400 invalid_param; an omitted limit keeps the
-// default; a valid limit reaches the searcher unchanged.
+// downstream (v57 reject-loudly posture): limit above hubfetch.MaxSearchLimit,
+// an explicit limit=0, and negative limit/offset all 400 invalid_param; an
+// omitted limit keeps the default; a valid limit reaches the searcher
+// unchanged.
 func TestGamesSearch_LimitOffsetBounds(t *testing.T) {
 	t.Run("limit-too-large", func(t *testing.T) {
 		sr := &capturingSearcher{}
 		srv := newSearchServer(t, sr)
 		defer srv.Close()
 
-		body, status := getRaw(t, srv.URL+"/v1/games/search?limit=500")
+		body, status := getRaw(t, srv.URL+"/v1/games/search?limit=1001")
 		if status != 400 {
 			t.Fatalf("status = %d, want 400 (body=%s)", status, body)
 		}
-		if !strings.Contains(string(body), `"invalid_param"`) || !strings.Contains(string(body), "max 100") {
-			t.Errorf("body missing invalid_param/max-100 detail: %s", body)
+		if !strings.Contains(string(body), `"invalid_param"`) || !strings.Contains(string(body), "max 1000") {
+			t.Errorf("body missing invalid_param/max-1000 detail: %s", body)
 		}
 		if sr.seen {
 			t.Error("searcher must not be called when limit is out of range")
@@ -142,12 +143,12 @@ func TestGamesSearch_LimitOffsetBounds(t *testing.T) {
 		srv := newSearchServer(t, sr)
 		defer srv.Close()
 
-		getJSON(t, srv.URL+"/v1/games/search?limit=100", 200)
+		getJSON(t, srv.URL+"/v1/games/search?limit=1000", 200)
 		if !sr.seen {
-			t.Fatal("searcher was not invoked for limit=100")
+			t.Fatal("searcher was not invoked for limit=1000")
 		}
-		if sr.got.Limit != 100 {
-			t.Errorf("limit = %d; want 100", sr.got.Limit)
+		if sr.got.Limit != hubfetch.MaxSearchLimit {
+			t.Errorf("limit = %d; want %d", sr.got.Limit, hubfetch.MaxSearchLimit)
 		}
 	})
 

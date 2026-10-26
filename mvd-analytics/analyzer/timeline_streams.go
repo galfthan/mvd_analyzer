@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"math"
 	"sort"
 	"strconv"
 	"sync"
@@ -70,6 +71,9 @@ func (b *streamBuilder) recordRockets(tMs int32, v int16) {
 func (b *streamBuilder) recordCells(tMs int32, v int16) {
 	appendChangeI16(&b.cells, b.dedupBase.cells, tMs, v)
 }
+func (b *streamBuilder) recordActiveWeapon(tMs int32, v int16) {
+	appendChangeI16(&b.activeWeapon, b.dedupBase.activeWeapon, tMs, v)
+}
 
 // recordPosition appends every native sample (no dedup; D11
 // asymmetry). Time is integer milliseconds — the canonical wire-native
@@ -81,6 +85,12 @@ func (b *streamBuilder) recordCells(tMs int32, v int16) {
 // PositionTrack column checklist site 2 (record-time append); see the
 // checklist in result/coord.go (PositionTrack.MarshalJSON).
 func (b *streamBuilder) recordPosition(tMs int32, x, y, z float32, vp, vya int16) {
+	// Skip samples with a non-finite origin (seen in some
+	// pre-instrumentation demos): encoding/json refuses NaN/Inf, and a
+	// non-finite sample would poison the derived velocity columns too.
+	if !finiteVec3([3]float32{x, y, z}) {
+		return
+	}
 	b.posT = append(b.posT, tMs)
 	b.posX = append(b.posX, x)
 	b.posY = append(b.posY, y)
@@ -172,8 +182,26 @@ func (b *streamBuilder) endOccupancy(tMs int32) {
 		nails:     len(b.nails),
 		rockets:   len(b.rockets),
 		cells:     len(b.cells),
+
+		activeWeapon: len(b.activeWeapon),
 	}
 	b.occCuts = append(b.occCuts, tMs)
+}
+
+// cutActiveWeaponDedup raises the wielded-weapon column's dedup floor to the
+// current length — the one piece of endOccupancy a handover OUTSIDE the match
+// window still needs.
+//
+// Every other change stream is recorded only between match start and match
+// end, so a warmup handover cannot corrupt them; the wielded weapon is
+// recorded through the countdown as well (it is delta-coded, and the
+// match-start rebase needs the latest pre-match value). Without this cut the
+// first sample of a new occupant who happens to hold what the departing one
+// held is suppressed as a repeat, and the session slice then keeps the
+// departing occupant's entry out of the new occupant's stream — the same
+// "stream fragment opens blank" defect endOccupancy fixes for health/armor.
+func (b *streamBuilder) cutActiveWeaponDedup() {
+	b.dedupBase.activeWeapon = len(b.activeWeapon)
 }
 
 // recordItemFlags is a one-shot helper called from the analyzer's
@@ -223,6 +251,7 @@ func (b *streamBuilder) toPlayerStream(name, team string) result.PlayerStream {
 	ps.Nails = toChangeI16s(b.nails)
 	ps.Rockets = toChangeI16s(b.rockets)
 	ps.Cells = toChangeI16s(b.cells)
+	ps.ActiveWeapon = toChangeI16s(b.activeWeapon)
 	// PositionTrack column checklist site 3 (builder → result.PlayerStream);
 	// see the checklist in result/coord.go (PositionTrack.MarshalJSON).
 	if len(b.posT) > 0 {
@@ -347,6 +376,7 @@ func (b *streamBuilder) appendSlice(src *streamBuilder, startMs, endMs int32) {
 	appendI16(&b.nails, src.nails)
 	appendI16(&b.rockets, src.rockets)
 	appendI16(&b.cells, src.cells)
+	appendI16(&b.activeWeapon, src.activeWeapon)
 
 	for _, c := range src.armorType {
 		if !in(c.t) {
@@ -595,7 +625,14 @@ func (a *TimelineAnalyzer) buildStreamsResult(slotToName map[int]string, slotToT
 			// identity. Guarded on a known match end (0 on a demo with no
 			// detected match, where nothing may be withheld).
 			postgame := matchEndMs > 0 && sess.OccStartMs >= matchEndMs
-			if sess.UserID != 0 && !postgame {
+			// A spectate stint is withheld for the same reason. It is a
+			// real connection, but not a PLAY window: after a live player
+			// types `observe` (mvdsv sv_user.c:2757-2830) the client keeps
+			// its slot and userid with no player entity, and publishing it
+			// would restate the leaver's window as running to the end of the
+			// recording — on ffa_1[tox] nexus left the game at 263681 and
+			// his session claimed 359981.
+			if sess.UserID != 0 && !postgame && !sess.SpectateStint {
 				// Published window: the observed occupancy, with the only
 				// synthetic bound being a client still connected when the
 				// recording stopped (no wire event to report — close it
@@ -724,6 +761,8 @@ func (a *TimelineAnalyzer) buildMoverStreams() []result.MoverStream {
 		if mt == nil || len(mt.t) == 0 {
 			continue
 		}
+		// Non-finite origins are dropped at record time (moverTrack.append),
+		// so every sample here carries usable geometry.
 		ms := result.MoverStream{
 			EntNum:   ent,
 			SubModel: mt.subModel,
@@ -748,6 +787,21 @@ const (
 	minInt32 = int32(-1 << 31)
 	maxInt32 = int32(1<<31 - 1)
 )
+
+// finiteVec3 reports whether every component is a finite float (no
+// NaN/Inf). Some pre-instrumentation demos carry non-finite origins on
+// the wire; encoding/json refuses them, so ingestion sites drop such
+// samples (recordPosition, moverTrack.append, flightsToStream,
+// handleItemSpawn).
+func finiteVec3(v [3]float32) bool {
+	for _, c := range v {
+		f := float64(c)
+		if math.IsNaN(f) || math.IsInf(f, 0) {
+			return false
+		}
+	}
+	return true
+}
 
 // isEmpty reports whether the builder recorded no player activity at
 // all — no vitals, positions, intervals, spawns or deaths. Used to drop

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
@@ -211,7 +212,13 @@ func cacheState(meta democache.CacheMeta) string {
 }
 
 func setCacheHeaders(w http.ResponseWriter, meta democache.CacheMeta) {
-	w.Header().Set("Cache-Control", "public, max-age=86400, immutable")
+	// no-cache = store, but revalidate on every use. The ETag embeds the
+	// schema version, so the mandatory revalidation is a version check: a
+	// schema bump misses the ETag and re-downloads, an unchanged result is
+	// a cheap 304. The previous max-age=86400+immutable let clients serve
+	// day-old shapes after a schema bump because immutable suppresses the
+	// revalidation that would have noticed the new ETag.
+	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("X-Schema-Version", fmt.Sprintf("%d", meta.SchemaVersion))
 	w.Header().Set("X-Cache", cacheState(meta))
 	w.Header().Set("ETag", fmt.Sprintf(`"%s-v%d"`, meta.SHA256, meta.SchemaVersion))
@@ -454,7 +461,7 @@ func (s *server) handleDamage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.writeUnavailable(w, r, err, "damage_unavailable",
-			"this demo has no damage data (no KTX mvdhidden_dmgdone stream)")
+			"this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)")
 		return
 	}
 	writeJSON(w, http.StatusOK, view.DamageEnvelope{TimeUnit: view.UnitMs, DamageResult: out})
@@ -1042,6 +1049,124 @@ func (s *server) handleNails(w http.ResponseWriter, r *http.Request) {
 	}{view.UnitMs, nl})
 }
 
+// teNames maps the point-effect TE codes (result.PointEffectStreams `ty`,
+// vocabulary in mvd-reader/parser/tempentity.go) to the stable lowercase
+// names the `types` filter accepts and the response legend serves. The
+// lightning bolt types (5/6/9) are beams, never point effects, so they
+// cannot appear here. A code outside the map (a server extension) legends
+// as "te<code>" and is filterable by that same token, so the endpoint
+// never hides rows it cannot name.
+var teNames = map[int32]string{
+	0:  "spike",
+	1:  "superspike",
+	2:  "gunshot",
+	3:  "explosion",
+	4:  "tarexplosion",
+	7:  "wizspike",
+	8:  "knightspike",
+	10: "lavasplash",
+	11: "teleport",
+	12: "blood",
+	13: "lightningblood",
+}
+
+func teName(code int32) string {
+	if n, ok := teNames[code]; ok {
+		return n
+	}
+	return fmt.Sprintf("te%d", code)
+}
+
+// knownTEName reports whether a (lowercased) `types` token is in the
+// vocabulary: a named type or the te<code> escape for unnamed codes.
+func knownTEName(n string) bool {
+	for _, v := range teNames {
+		if v == n {
+			return true
+		}
+	}
+	if rest, ok := strings.CutPrefix(n, "te"); ok && rest != "" {
+		if _, err := strconv.Atoi(rest); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+// handlePointEffects serves the point-effect temp-entity stream — exact
+// rocket/grenade detonation points (explosion), hitscan hit telemetry on
+// players (blood), LG cell hits (lightningblood), wall puffs (gunshot),
+// teleporter sparkles and the rest; from the always-full base parse. Body
+// is {"pointEffects": ...}, null when the demo carried none. `types`
+// narrows the rows to a CSV set of effect names; the `types` legend in the
+// response maps the codes present in the DEMO (pre-filter) to names, so a
+// filtered consumer still sees what else it could ask for. A filter that
+// matches nothing returns empty columns, not null — null is reserved for
+// "the demo carried no point effects at all".
+func (s *server) handlePointEffects(w http.ResponseWriter, r *http.Request) {
+	res, _, ok := s.resolveDemo(w, r)
+	if !ok {
+		return
+	}
+	p := newQP(r.URL.Query())
+	wantNames := p.CSV("types")
+	if writeInvalidParam(w, p.Err()) {
+		return
+	}
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	// types is a closed vocabulary; a typo must 400, not silently match
+	// nothing. Case-insensitive like every other token filter.
+	want := map[string]bool{}
+	for _, n := range wantNames {
+		ln := strings.ToLower(n)
+		if !knownTEName(ln) {
+			writeError(w, http.StatusBadRequest, "invalid_param",
+				fmt.Sprintf("unknown point-effect type %q; valid: spike, superspike, gunshot, explosion, tarexplosion, wizspike, knightspike, lavasplash, teleport, blood, lightningblood, or te<code> for an unnamed code", n))
+			return
+		}
+		want[ln] = true
+	}
+
+	var pe *result.PointEffectStreams
+	if res.Streams != nil {
+		pe = res.Streams.PointEffects
+	}
+
+	var legend map[string]string
+	if pe != nil {
+		legend = map[string]string{}
+		for _, c := range pe.Type {
+			legend[fmt.Sprintf("%d", c)] = teName(c)
+		}
+	}
+	if pe != nil && len(want) > 0 {
+		f := &result.PointEffectStreams{
+			T: []int32{}, Type: []int32{}, Count: []int32{},
+			X: []float32{}, Y: []float32{}, Z: []float32{},
+		}
+		for i, c := range pe.Type {
+			if !want[teName(c)] {
+				continue
+			}
+			f.T = append(f.T, pe.T[i])
+			f.Type = append(f.Type, c)
+			f.Count = append(f.Count, pe.Count[i])
+			f.X = append(f.X, pe.X[i])
+			f.Y = append(f.Y, pe.Y[i])
+			f.Z = append(f.Z, pe.Z[i])
+		}
+		pe = f
+	}
+
+	writeJSON(w, http.StatusOK, struct {
+		TimeUnit     view.TimeUnit              `json:"timeUnit"`
+		Types        map[string]string          `json:"types,omitempty"`
+		PointEffects *result.PointEffectStreams `json:"pointEffects"`
+	}{view.UnitMs, legend, pe})
+}
+
 func (s *server) handleLocTrails(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
@@ -1130,26 +1255,72 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, view.RegionControlEnvelope{TimeUnit: view.UnitMs, RegionControlResult: body})
 }
 
-// handleAirgibs: GET /v1/demos/{id}/airgibs — the Key Moments airgib list
-// (timelineAnalysis.airgibs): every DIRECT enemy rocket hit on an airborne
-// victim above the height threshold, sorted by height descending. Height
-// needs the map's clip hull, so the list is empty (not an error) when the
-// map's BSP was not provisioned at parse time.
-func (s *server) handleAirgibs(w http.ResponseWriter, r *http.Request) {
+// handleHighlights: GET /v1/demos/{id}/highlights — the highlight catalogue
+// (result.Highlights): every discharge, quadbore, telefrag and airgib, each
+// row carrying what everyone involved had at the instant (relation to the
+// actor, health/armor/stack, weapons, powerups, loc). All four lists are
+// always present in the body — [] when the match had none of that kind or
+// kinds= excluded it — so toplists are built client-side by sorting.
+//
+// Query params:
+//
+//	kinds    csv — discharge | quadbore | telefrag | airgib (default all);
+//	              the unrequested lists come back empty, kinds echoes.
+//	players  csv — keep events whose actor or a victim is named.
+//	preMs    int — the airgib pre-hit look-back
+//	              it (default 100, 0 = gate off); a non-default value
+//	              recomputes the airgib list only, the other three lists are
+//	              stored.
+//
+// 422 highlights_unavailable when the demo has no highlights section — no
+// match streams or no frag log to build one from.
+func (s *server) handleHighlights(w http.ResponseWriter, r *http.Request) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
 		return
 	}
-	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+	p := newQP(r.URL.Query())
+	kinds := p.CSV("kinds")
+	players := p.CSV("players")
+	preMs := p.Int("preMs", view.DefaultAirgibPreMs)
+	if writeInvalidParam(w, p.Err()) {
 		return
 	}
-	airgibs, err := view.Airgibs(res)
+	if writeUnknownParam(w, p.Unknown()) {
+		return
+	}
+	if writeInvalidParam(w, view.ValidateHighlightKinds(kinds)) {
+		return
+	}
+	if writeInvalidParam(w, view.ValidateAirgibPreMs(preMs)) {
+		return
+	}
+	h, err := view.Highlights(res)
 	if err != nil {
-		s.writeUnavailable(w, r, err, "airgibs_unavailable",
-			"this demo has no timeline analysis")
+		s.writeUnavailable(w, r, err, "highlights_unavailable",
+			"this demo has no highlights (no match streams or no frag log)")
 		return
 	}
-	writeJSON(w, http.StatusOK, view.AirgibsEnvelope{TimeUnit: view.UnitMs, Airgibs: airgibs})
+	if preMs != view.DefaultAirgibPreMs {
+		// preMs translation: 0 means "no pre-hit gate" to the
+		// caller, and the compute reads 0 as "stored", so hand it a negative.
+		opt := int32(preMs)
+		if preMs == 0 {
+			opt = -1
+		}
+		copyH := *h
+		if re := view.ComputeHighlights(res, view.HighlightsOptions{AirgibPreMs: opt}); re != nil {
+			copyH.Airgibs = re.Airgibs
+		} else {
+			copyH.Airgibs = nil
+		}
+		h = &copyH
+	}
+	env, err := view.FilterHighlights(h, view.HighlightsOptions{Kinds: kinds, Players: players}, preMs)
+	if writeInvalidParam(w, err) {
+		return
+	}
+	writeJSON(w, http.StatusOK, env)
 }
 
 // handleTopWindows: GET /v1/demos/{id}/top-windows — each player's best
@@ -1357,7 +1528,7 @@ func topWindowsUnavailableMsg(metric string) string {
 	case view.MetricShots, view.MetricHits:
 		return "this demo has no weapon-fire stream"
 	case view.MetricDamageGiven, view.MetricDamageTaken, view.MetricNetDamage:
-		return "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"
+		return "this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)"
 	default:
 		return "this demo has no frag log"
 	}

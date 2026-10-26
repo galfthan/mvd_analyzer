@@ -54,6 +54,14 @@ func (p *Parser) parseServerData(r *mvd.BufferReader, timeMs int32) error {
 	// Update decoder with extensions
 	p.decoder.SetExtensions(ext)
 	p.floatCoords = p.decoder.FloatCoords()
+	// msgWide mirrors the server's msg_coordsize/msg_anglesize switch: ONLY
+	// sv_bigcoords (advertised as FTE_PEXT_FLOATCOORDS) widens the generic
+	// MSG_WriteCoord/MSG_WriteAngle paths (coords 2→4, angles 1→2;
+	// mvdsv/src/sv_init.c:326-336). MVD_PEXT1_FLOATCOORDS widens ONLY
+	// entity-delta origins via explicit long-coord writes
+	// (sv_ents.c:281-304,731-734) — its angles stay 1 byte, so the widths
+	// must not key on the combined floatCoords flag.
+	p.msgWide = ext.FTE&mvd.FTEPextFloatCoords != 0
 	p.fteExtensions = ext.FTE
 
 	// Read server count

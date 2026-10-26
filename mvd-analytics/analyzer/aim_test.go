@@ -37,6 +37,7 @@ func TestAimPostDuel(t *testing.T) {
 			ByPlayer: []result.PlayerShots{{Player: "A"}, {Player: "B"}},
 		},
 		Damage: &result.DamageResult{
+			Source: result.DamageSourceKTX,
 			Events: []result.DamageEntry{
 				{Time: 2000, Attacker: "A", Victim: "B", Weapon: "rl"}, // non-splash → direct
 			},
@@ -92,10 +93,10 @@ func TestAimPostDuel(t *testing.T) {
 
 	// Per-weapon: RL — N=2, one linked hit which is a direct; identity holds.
 	rl := findWeaponAim(pa, "rl")
-	if rl == nil || rl.Shots != 2 || rl.Hits != 1 || rl.Direct != 1 || rl.Splash != 0 || rl.Missed != 1 {
+	if rl == nil || rl.Shots != 2 || rl.Hits != 1 || aimN(rl.Direct) != 1 || aimN(rl.Splash) != 0 || rl.Missed != 1 {
 		t.Fatalf("rl weapon = %+v, want shots2 hits1 direct1 splash0 missed1", rl)
 	}
-	if rl.Direct+rl.Splash+rl.Missed != rl.Shots {
+	if aimN(rl.Direct)+aimN(rl.Splash)+rl.Missed != rl.Shots {
 		t.Errorf("rocket identity broken: %+v", rl)
 	}
 
@@ -120,6 +121,7 @@ func TestAimPostRocketBlockWithoutProjectileStream(t *testing.T) {
 			},
 		},
 		Damage: &result.DamageResult{
+			Source: result.DamageSourceKTX,
 			Events: []result.DamageEntry{
 				{Time: 2000, Attacker: "A", Victim: "B", Weapon: "rl"}, // non-splash → direct
 			},
@@ -140,7 +142,7 @@ func TestAimPostRocketBlockWithoutProjectileStream(t *testing.T) {
 		t.Fatalf("expected 1 aim player, got %+v", res.Aim)
 	}
 	rl := findWeaponAim(res.Aim.Players[0], "rl")
-	if rl == nil || rl.Direct != 1 || rl.Splash != 0 || rl.Missed != 1 {
+	if rl == nil || aimN(rl.Direct) != 1 || aimN(rl.Splash) != 0 || rl.Missed != 1 {
 		t.Fatalf("rl = %+v, want direct1 splash0 missed1 without the opt-in stream (F18)", rl)
 	}
 }
@@ -161,6 +163,7 @@ func TestAimPostDamageFromMatchGatedEvents(t *testing.T) {
 			},
 		},
 		Damage: &result.DamageResult{
+			Source: result.DamageSourceKTX,
 			// Already in-match (the analyzer dropped any warmup / post-match
 			// hits before this point).
 			Events: []result.DamageEntry{
@@ -184,9 +187,19 @@ func TestAimPostDamageFromMatchGatedEvents(t *testing.T) {
 		t.Fatalf("expected 1 aim player, got %+v", res.Aim)
 	}
 	rl := findWeaponAim(res.Aim.Players[0], "rl")
-	if rl == nil || rl.Direct != 1 || rl.Splash != 1 || rl.Missed != 0 {
+	if rl == nil || aimN(rl.Direct) != 1 || aimN(rl.Splash) != 1 || rl.Missed != 0 {
 		t.Fatalf("rl = %+v, want direct1 splash1 missed0 (one direct + one splash hit)", rl)
 	}
+}
+
+// aimN reads a WeaponAim direct/splash counter, which is a POINTER so a
+// withheld split and a measured zero are different values (result.WeaponAim).
+// A withheld one reads as -1 here so it can never satisfy a "want 0".
+func aimN(p *int) int {
+	if p == nil {
+		return -1
+	}
+	return *p
 }
 
 func findWeaponAim(pa result.PlayerAim, w string) *result.WeaponAim {
@@ -367,6 +380,7 @@ func TestAimPostTeamHitSplits(t *testing.T) {
 			},
 		},
 		Damage: &result.DamageResult{
+			Source: result.DamageSourceKTX,
 			Events: []result.DamageEntry{
 				{Time: 1000, Attacker: "A", Victim: "C", Weapon: "sg", Damage: 12, IsTeam: true},
 				{Time: 2000, Attacker: "B", Victim: "A", Weapon: "sg", Damage: 24},
@@ -501,6 +515,9 @@ func TestAimPostLGMissClasses(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			res := &result.Result{
+				// The whiff classes only classify measured misses — a wire
+				// damage stream must be present (see AimResult.HitsMeasured).
+				Damage: &result.DamageResult{Source: result.DamageSourceKTX},
 				Shots: &result.ShotsResult{
 					Shots:    []result.Shot{{Time: 1000, Player: "A", Weapon: "lg", Hit: false}},
 					ByPlayer: []result.PlayerShots{{Player: "A"}, {Player: "B"}},

@@ -250,6 +250,232 @@ func addBoundedFamily(d *result.DamageResult) {
 // validated. The two records cover both shapes: an attributed player mark
 // (no spectator/label) and a labelled spectator mark. Assignment, not append,
 // so the two tests that share the cached golden can both call it.
+// addPointEffects installs a small point-effect stream: the golden demo was
+// pinned by the default (streams-off) registry, so the served Result never
+// carries one and the non-null half of the PointEffects schema — plus the
+// types legend and the types= filter — would go unvalidated.
+func addPointEffects(s *result.Streams) {
+	s.PointEffects = &result.PointEffectStreams{
+		T: []int32{4000, 4100}, Type: []int32{3, 12}, Count: []int32{0, 4},
+		X: []float32{1, 2}, Y: []float32{3, 4}, Z: []float32{5, 6},
+	}
+}
+
+// addParseWarnings installs a reader-level parse census on the served Result.
+// Every golden-corpus demo parses without a single warning, so `parseWarnings`
+// was never present in a validated body and the whole sub-schema — its groups
+// table and its counters — went unexercised, the same blind spot demoMarkers
+// had. The rows cover both categories the archive actually raises and a
+// non-zero droppedWarnings, so the retention-cap counter is validated too.
+// Assignment, not append, so the tests sharing the cached golden can both call it.
+func addParseWarnings(r *result.Result) {
+	r.ParseWarnings = &result.ParseWarnings{
+		Total:  21,
+		ByType: map[string]int{"unknown_svc": 19, "parse_error": 2},
+		Groups: []result.ParseWarningGroup{
+			{Type: "unknown_svc", Message: "svc_unknown_61 (cmd 61)", Count: 7, FirstDemoTimeMs: 61200},
+			{Type: "parse_error", Message: "svc_playerinfo: unexpected EOF", Count: 2, FirstDemoTimeMs: 400},
+		},
+		DroppedWarnings: 12,
+	}
+}
+
+// addReconstructedBackpacks appends `reconstructed` drops carrying the v72
+// pickup-linkage fields to the served backpacks section. Every corpus demo is
+// a hint-carrying one, so its whole section is `source: "ktx"` and the fate /
+// picker / pickerTeam / pickupTime half of BackpackDrop — the half the linkage
+// exists to publish — was validated only against its own absence, the same
+// blind spot demoMarkers and parseWarnings had.
+//
+// A real demo never mixes the two provenances (backpacks.go states it as an
+// invariant); this fixture deliberately does, because the endpoint's schema
+// has to accept either kind of row and this is the only served body there is.
+// The three rows cover the shapes that differ: a named picker with a team, a
+// named picker with NONE (pickerTeam is omitempty, so a teamless FFA picker
+// omits it — RESULT_SCHEMA.md), and an `expired` pack, whose picker fields are
+// all absent.
+func addReconstructedBackpacks(r *result.Result) {
+	r.Backpacks = append(r.Backpacks,
+		result.BackpackDrop{
+			Time: 300000, Player: "nlk", Team: "bps", Weapon: "rl",
+			Origin: [3]float32{1597.75, -878.125, 24}, Loc: "YA",
+			EntNum: 211, Source: result.BackpackSourceReconstructed,
+			Fate: result.BackpackFatePicked, Picker: "lakso", PickerTeam: "oSaMs",
+			PickupTime: 302500,
+		},
+		result.BackpackDrop{
+			Time: 310000, Player: "sCorp", Weapon: "lg",
+			Origin: [3]float32{943.375, 257, -4.375}, Loc: "Quad",
+			EntNum: 214, Source: result.BackpackSourceReconstructed,
+			Fate: result.BackpackFatePicked, Picker: "marksuzu",
+			PickupTime: 311200,
+		},
+		result.BackpackDrop{
+			Time: 320000, Player: "lakso", Team: "oSaMs", Weapon: "rl",
+			Origin: [3]float32{1852.75, -441.5, -72}, Loc: "bridge.high",
+			EntNum: 219, Source: result.BackpackSourceReconstructed,
+			Fate: result.BackpackFateExpired,
+		},
+	)
+}
+
+// addReconAimTier turns the served aim into the v73 RECONSTRUCTED tier. Same
+// reason as the helpers above: every corpus demo carries the wire damage
+// stream, so `hitsSource` is always "ktx" there and the `recon` block — which
+// only ever appears on a reconstructed section — would never be validated.
+//
+// It applies the withholding contract in full rather than only stamping
+// `hitsSource`: on a reconstructed section every Shot.Hit is false by
+// construction, so hitsMeasured is false, every measured counter is absent and
+// the per-fire `hit`/`team` columns are omitted (aimcore/aim.go). Leaving the
+// corpus's measured hits in place would validate a response the pipeline can
+// never emit — measured counters beside a recon block — which is exactly the
+// mixture the tier exists to make impossible.
+func addReconAimTier(am *result.AimResult) {
+	if am == nil || len(am.Players) == 0 {
+		return
+	}
+	am.HitsMeasured = false
+	am.HitsSource = result.AimHitsSourceReconstructed
+	// The shipped tier (aimcore reconTierWeapons): the same-server-frame
+	// weapons plus the v74 flight-joined projectiles.
+	tier := map[string]bool{"lg": true, "sg": true, "ssg": true, "axe": true, "rl": true, "gl": true}
+	for i := range am.Players {
+		pa := &am.Players[i]
+		if pa.Crosshair != nil {
+			pa.Crosshair.Hit, pa.Crosshair.Team = nil, nil
+		}
+		if pa.LGRamp != nil {
+			pa.LGRamp.Hit, pa.LGRamp.Team = nil, nil
+		}
+		for j := range pa.Weapons {
+			w := &pa.Weapons[j]
+			// Shots is measurement-grade either way; everything hit-derived
+			// goes, including the enemy/team/self splits.
+			*w = result.WeaponAim{Weapon: w.Weapon, Shots: w.Shots}
+			if tier[w.Weapon] {
+				w.Recon = &result.WeaponAimRecon{Hits: w.Shots / 3}
+				// rl/gl also carry the v74 direct-impact count — KTX's own
+				// convention for them, and the number the reconstructed
+				// player-stats row publishes.
+				if w.Weapon == "rl" || w.Weapon == "gl" {
+					d := w.Shots / 8
+					w.Recon.DirectHits = &d
+				}
+			}
+		}
+	}
+}
+
+// reconAccuracyResult is a player-stats body in the v74 RECONSTRUCTED shape —
+// the player-stats twin of addReconAimTier, and it has to be its own demo
+// rather than an augmentation of the golden: every corpus demo carries a KTX
+// demoinfo block, and view.PlayerStats replaces the accuracy family wholesale
+// from it at read time, so nothing written into the golden's stored section
+// can ever reach a served body.
+//
+// What only this shape carries: `src: "reconstructed"`, the per-weapon
+// withhold that leaves ng/sng with NO hits, and both hit conventions side by
+// side — `anyDamage` on lg and, since v74, `directImpact` on rl, which is the
+// whole point of the reconstructed row (it answers KTX's own rl/gl question).
+// All omitempty or optional, so without a served body they would be validated
+// against their own absence.
+func reconAccuracyResult() *result.Result {
+	hits := func(n int) *int { return &n }
+	return &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		PlayerStats: &result.PlayerStatsResult{
+			Players: []result.PlayerStatsRow{{
+				Name:   "old",
+				Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
+				Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 12, Deaths: 9},
+				Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcReconstructed,
+					ByWeapon: map[string]result.PlayerStatsAcc{
+						"rl": {Attacks: 90, Hits: hits(31), HitsConvention: result.HitsDirectImpact},
+						"lg": {Attacks: 400, Hits: hits(122), HitsConvention: result.HitsAnyDamage},
+						// Outside the validated tier: the withhold inherits,
+						// so neither the count nor the marker appears.
+						"sng": {Attacks: 60},
+					}},
+				Hold: result.PlayerStatsHold{Src: result.SrcDerived},
+			}},
+			Sources: result.PlayerStatsSources{
+				Score: result.SrcDerived, Accuracy: result.SrcReconstructed, Hold: result.SrcDerived,
+			},
+		},
+	}
+}
+
+// reconDamageResult is a served /damage body in the v74 RECONSTRUCTED shape:
+// `source: "reconstructed"` with the `coverage` object and the measured
+// `rocketDirectDamage` era signal beside it. Like
+// reconAccuracyResult it has to be its own demo — every golden-corpus demo
+// carries the wire KTX damage stream, so its section is `source: "ktx"` and
+// coverage is absent BY CONTRACT there, which left the whole sub-schema
+// validated only against its own absence: deleting view.Damage's coverage
+// projection kept every openapi case green.
+//
+// The figures are a schema fixture, not a numeric one, but the ratio is the
+// exact quotient of the two integers beside it (30/40) — a body carrying a
+// ratio that does not match its own kills/covered is not a shape this
+// pipeline can emit.
+func reconDamageResult() *result.Result {
+	b := func(n int) *int { return &n }
+	return &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Damage: &result.DamageResult{
+			TotalDamage: 260,
+			Source:      result.DamageSourceReconstructed,
+			BoundedMode: "standard",
+			Dmg:         "both",
+			Coverage:    &result.DamageCoverage{Kills: 40, Covered: 30, Ratio: 0.75},
+			// The direct-damage constant this demo's own hits established —
+			// omitempty, so without a value here the field is validated
+			// against its own absence exactly like `coverage` was.
+			RocketDirectDamage: 110,
+			Events: []result.DamageEntry{
+				{Time: 30000, Attacker: "old", Victim: "older", Weapon: "rl", Damage: 100, Bounded: b(100)},
+				{Time: 120000, Attacker: "older", Victim: "old", Weapon: "lg", Damage: 60, Bounded: b(60)},
+				{Time: 240000, Attacker: "old", Victim: "older", Weapon: "sg", Damage: 100, Bounded: b(40)},
+			},
+			ByWeapon: map[string]int{"rl": 100, "lg": 60, "sg": 100},
+			ByPlayer: map[string]*result.PlayerDamage{
+				"old": {Given: 200, Taken: 60, ByWeapon: map[string]int{"rl": 100, "sg": 100},
+					Bounded: &result.PlayerDamage{Given: 140, Taken: 60, ByWeapon: map[string]int{"rl": 100, "sg": 40}}},
+				"older": {Given: 60, Taken: 200, ByWeapon: map[string]int{"lg": 60},
+					Bounded: &result.PlayerDamage{Given: 60, Taken: 140, ByWeapon: map[string]int{"lg": 60}}},
+			},
+			Matrix: []result.DamagePair{
+				{Attacker: "old", Victim: "older", Damage: 200, ByWeapon: map[string]int{"rl": 100, "sg": 100}},
+				{Attacker: "older", Victim: "old", Damage: 60, ByWeapon: map[string]int{"lg": 60}},
+			},
+		},
+	}
+}
+
+// losBspLessResult is a two-player Result on a map no BSP corpus will ever
+// hold, so analyzer.ComputeLOS returns ErrNoBSP and /los is a 422
+// los_unavailable BY CONSTRUCTION.
+//
+// The err-los-unavailable case used to point at the golden demo (dm3) and
+// depend on the AMBIENT environment for its status code: with MVDA_BSP_DIR
+// set to a full map set — which the repo's own eval commands do — dm3's BSP
+// resolves, /los answers a real 200, and the case failed. A validation
+// fixture must not read the developer's environment.
+func losBspLessResult() *result.Result {
+	return &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Metadata:      &result.MetadataResult{ServerInfo: map[string]string{"map": "no_such_map_openapi_fixture"}},
+		Streams: &result.Streams{
+			Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
+			Players: []result.PlayerStream{
+				{Name: "p1", Alive: []result.Interval{{Start: 0, End: 10000}}},
+				{Name: "p2", Alive: []result.Interval{{Start: 0, End: 10000}}},
+			},
+		},
+	}
+}
+
 func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 	ta.DemoMarkers = []result.DemoMarkerEvent{
 		{Time: 61000, PlayerName: "nlk", PlayerSlot: 3, PlayerUserID: 17, Team: "bps"},
@@ -259,7 +485,7 @@ func addDemoMarkers(ta *result.TimelineAnalysisResult) {
 
 // allFieldCodes is every fields= selector, to exercise the widest
 // stream-slice / state-at / buckets shapes.
-const allFieldCodes = "h,a,at,li,pos,view,hgt,lq,vel,rl,lg,gl,ssg,sng,q,pe,r,sh,nl,rk,cl,sp,d"
+const allFieldCodes = "h,a,at,li,pos,view,hgt,lq,vel,rl,lg,gl,ssg,sng,q,pe,r,sh,nl,rk,cl,aw,sp,d"
 
 type validationCase struct {
 	name   string
@@ -273,6 +499,11 @@ type validationCase struct {
 	// case was added for validates just as happily as one that carries it —
 	// this is how such a case says which field it is here for.
 	mustContain []string
+	// mustNotContain is the mirror: substrings the response must NOT carry.
+	// For contracts phrased as "these fields are WITHHELD here", the schema
+	// alone cannot help — every one of them is omitempty, so a response that
+	// leaked them validates too.
+	mustNotContain []string
 }
 
 // gzipDemoBody is a tiny valid gzip stream used as the upload request body.
@@ -310,13 +541,57 @@ func validationCases(t *testing.T) []validationCase {
 		// in from the 422 predicates.
 		{name: "overview", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200,
 			mustContain: []string{`"available":{"demoInfo":`, `"los":`}},
+		// parseWarnings is omitempty and every golden demo parses clean, so
+		// without a synthetic census (addParseWarnings) the sub-schema is
+		// validated only against its own absence. mustContain names each
+		// field, since an empty object would satisfy the schema just as well.
+		{name: "overview-parse-warnings", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200,
+			mustContain: []string{
+				`"parseWarnings":{"total":21`,
+				`"byType":{`, `"unknown_svc":19`,
+				`"groups":[{"type":"unknown_svc","message":"svc_unknown_61 (cmd 61)","count":7,"firstDemoTimeMs":61200}`,
+				`"droppedWarnings":12`,
+			}},
+		// The no-match marker (v74) is omitempty and every golden demo holds
+		// a real match, so the sub-schema is validated only against its own
+		// absence without the gameId:43 fixture. mustContain names every
+		// NoMatch field, for the same reason parseWarnings does.
+		{name: "overview-no-match", url: "/v1/demos/gameId:43/overview", path: "/v1/demos/{id}/overview", status: 200,
+			mustContain: []string{
+				`"noMatch":{"reason":"midMatchRecording"`,
+				// detail is `required` in the schema, which an EMPTY string
+				// satisfies, so it is pinned here too. The substring is the
+				// fixture's own sentence (defined a few hundred lines down),
+				// not production wording — the marker's real detail text is
+				// unstable by contract and is pinned nowhere.
+				`"detail":"the recording starts mid-game`,
+				`"statusAtOpen":"1 min left"`, `"statusRunningSeen":true`,
+				`"gameDir":"qw"`, `"kills":42`,
+				`"dateMarkers":[{"source":"matchdate","kind":"matchStart"`,
+			}},
+		{name: "artifact-no-match-marked", url: "/v1/demos/gameId:43/artifacts/no-match", path: "/v1/demos/{id}/artifacts/{name}", status: 200,
+			mustContain: []string{`"noMatch":{"reason":"midMatchRecording"`}},
 		{name: "demoinfo", url: "/v1/demos/gameId:42/demoinfo", path: "/v1/demos/{id}/demoinfo", status: 200},
 		{name: "metadata", url: "/v1/demos/gameId:42/metadata", path: "/v1/demos/{id}/metadata", status: 200},
 		// mustContain names the v66 identity export: both fields are
 		// omitempty, so a regression that stopped emitting them would still
 		// validate against the schema (the demoMarkers lesson).
+		// mustContain names the v66 identity export and the v74 derived
+		// demoinfo fields: all of them are omitempty, so a regression that
+		// stopped emitting them would still validate against the schema (the
+		// demoMarkers lesson). The accuracy half is served from the
+		// addReconAccuracy fixture, which is the only shape carrying
+		// src:"reconstructed" and the per-weapon withhold; the sprees ride
+		// the corpus demo's own frag log.
 		{name: "player-stats", url: "/v1/demos/gameId:42/player-stats", path: "/v1/demos/{id}/player-stats", status: 200,
-			mustContain: []string{`"identity":"s`, `"sessions":[{"startMs":`, `"userId":`}},
+			mustContain: []string{`"identity":"s`, `"sessions":[{"startMs":`, `"userId":`,
+				`"maxSpree":`, `"maxQuadSpree":`,
+				`"hitsConvention":"directImpact"`, `"hitsConvention":"pellets"`}},
+		// The pre-instrumentation half: no KTX block, so the accuracy family
+		// stays reconstructed and carries the per-weapon withhold.
+		{name: "player-stats-reconstructed", url: "/v1/demos/gameId:46/player-stats", path: "/v1/demos/{id}/player-stats", status: 200,
+			mustContain: []string{`"src":"reconstructed"`, `"hitsConvention":"anyDamage"`,
+				`"hitsConvention":"directImpact"`, `"sng":{"attacks":60}`}},
 		{name: "player-stats-filtered", url: "/v1/demos/gameId:42/player-stats?players=nlk", path: "/v1/demos/{id}/player-stats", status: 200},
 
 		{name: "frags", url: "/v1/demos/gameId:42/frags", path: "/v1/demos/{id}/frags", status: 200},
@@ -334,14 +609,53 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "damage-dmg-bounded", url: "/v1/demos/gameId:42/damage?dmg=bounded", path: "/v1/demos/{id}/damage", status: 200},
 		{name: "damage-dmg-invalid", url: "/v1/demos/gameId:42/damage?dmg=nope", path: "/v1/demos/{id}/damage", status: 400},
 		{name: "err-bounded-unavailable", url: "/v1/demos/gameId:44/damage?dmg=bounded", path: "/v1/demos/{id}/damage", status: 422},
-		{name: "shots", url: "/v1/demos/gameId:42/shots", path: "/v1/demos/{id}/shots", status: 200},
-		{name: "aim", url: "/v1/demos/gameId:42/aim", path: "/v1/demos/{id}/aim", status: 200},
-		{name: "aim-summary", url: "/v1/demos/gameId:42/aim?summary=1", path: "/v1/demos/{id}/aim", status: 200},
+		// The v74 coverage object rides only a RECONSTRUCTED section, and
+		// every corpus demo carries the wire damage stream — so without
+		// gameId:47 the sub-schema is validated against its own absence and
+		// dropping view.Damage's projection keeps this file green. The
+		// filtered twin pins the other half of the contract: coverage is a
+		// WHOLE-MATCH stamp, so a players/time filter carries it through
+		// unchanged rather than rescoping it to the shown hits.
+		{name: "damage-reconstructed", url: "/v1/demos/gameId:47/damage", path: "/v1/demos/{id}/damage", status: 200,
+			mustContain: []string{`"source":"reconstructed"`, `"coverage":{"kills":40,"covered":30,"ratio":0.75}`,
+				`"rocketDirectDamage":110`}},
+		{name: "damage-reconstructed-filtered", url: "/v1/demos/gameId:47/damage?players=old&from=60&to=300",
+			path: "/v1/demos/{id}/damage", status: 200,
+			mustContain: []string{`"source":"reconstructed"`, `"coverage":{"kills":40,"covered":30,"ratio":0.75}`}},
+		// mustContain pins the v74 fire→flight association: `flightEnd` is
+		// omitempty, so a projection that dropped it would validate exactly as
+		// happily — and the reconstructed rl/gl hit tier is built on it.
+		{name: "shots", url: "/v1/demos/gameId:42/shots", path: "/v1/demos/{id}/shots", status: 200,
+			mustContain: []string{`"flightEnd":`}},
+		// The unwindowed cases serve the stored aim, which addReconAimTier has
+		// turned into the v73 reconstructed tier — the only shape that
+		// exercises `recon` + the withholding contract, since every corpus demo
+		// carries wire damage. Both halves are pinned: the recon block and
+		// hitsSource (omitempty and optional — a projection that dropped them
+		// would validate exactly as happily), and the measured counters that
+		// must NOT be there beside them. `aim-windowed` is deliberately
+		// unpinned: it recomputes over the demo's own (wire) damage section, so
+		// it is measured, and it is here for the windowed projection.
+		{name: "aim", url: "/v1/demos/gameId:42/aim", path: "/v1/demos/{id}/aim", status: 200,
+			mustContain:    []string{`"hitsMeasured":false`, `"hitsSource":"reconstructed"`, `"recon":{"hits":`, `"directHits":`},
+			mustNotContain: []string{`"hitsMeasured":true`, `"pellets":`, `"pelletHits":`, `"blocked":`}},
+		{name: "aim-summary", url: "/v1/demos/gameId:42/aim?summary=1", path: "/v1/demos/{id}/aim", status: 200,
+			mustContain: []string{`"hitsSource":"reconstructed"`, `"recon":{"hits":`}},
 		{name: "aim-windowed", url: "/v1/demos/gameId:42/aim?from=60&to=300", path: "/v1/demos/{id}/aim", status: 200},
 
 		{name: "loc-graph", url: "/v1/demos/gameId:42/loc-graph", path: "/v1/demos/{id}/loc-graph", status: 200},
 		{name: "chat", url: "/v1/demos/gameId:42/chat", path: "/v1/demos/{id}/chat", status: 200},
-		{name: "backpacks", url: "/v1/demos/gameId:42/backpacks", path: "/v1/demos/{id}/backpacks", status: 200},
+		// mustContain pins the v72 linkage half of BackpackDrop. Every one of
+		// those fields is omitempty, so a regression that stopped emitting
+		// them would validate against the schema exactly as happily; the
+		// pins name a picked row with a pickerTeam, a picked row WITHOUT one
+		// (the teamless-picker shape), and an expired row.
+		{name: "backpacks", url: "/v1/demos/gameId:42/backpacks", path: "/v1/demos/{id}/backpacks", status: 200,
+			mustContain: []string{
+				`"entNum":211,"source":"reconstructed","fate":"picked","picker":"lakso","pickerTeam":"oSaMs","pickupTime":302500`,
+				`"entNum":214,"source":"reconstructed","fate":"picked","picker":"marksuzu","pickupTime":311200`,
+				`"entNum":219,"source":"reconstructed","fate":"expired"`,
+			}},
 		{name: "items", url: "/v1/demos/gameId:42/items", path: "/v1/demos/{id}/items", status: 200},
 		{name: "items-summary", url: "/v1/demos/gameId:42/items?summary=1", path: "/v1/demos/{id}/items", status: 200},
 		{name: "items-windowed", url: "/v1/demos/gameId:42/items?from=0&to=60&kinds=armor,mega", path: "/v1/demos/{id}/items", status: 200},
@@ -372,14 +686,31 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "state-at-position-track", url: "/v1/demos/gameId:45/state-at?time=1500&fields=pos,view,hgt,lq,vel",
 			path: "/v1/demos/{id}/state-at", status: 200,
 			mustContain: []string{`"posAgeMs":500`, `"pos"`, `"view"`, `"vel"`, `"hgt"`, `"lq"`}},
-		// los on gameId:42 (real streams, no test BSP) is a 422 los_unavailable
-		// (Phase 3); gameId:43 has no Streams, so /los is a legitimate 200-empty
-		// that still validates the Los schema (timeUnit + empty players array).
+		// aw is opt-in, so the default-field cases never reach it, and the
+		// corpus windows above are too narrow to promise a sample. These two
+		// make the schema's aw branch answer for a body that carries it.
+		{name: "stream-slice-active-weapon", url: "/v1/demos/gameId:45/stream-slice?from=0&to=3000&fields=aw",
+			path: "/v1/demos/{id}/stream-slice", status: 200,
+			mustContain: []string{`"aw":[{"t":0,"v":1},{"t":1200,"v":32}]`}},
+		{name: "state-at-active-weapon", url: "/v1/demos/gameId:45/state-at?time=1500&fields=aw",
+			path: "/v1/demos/{id}/state-at", status: 200,
+			mustContain: []string{`"aw":32`}},
+		// gameId:43 has no Streams, so /los is a legitimate 200-empty that
+		// still validates the Los schema (timeUnit + empty players array).
+		// gameId:48 is two players on a map name no BSP corpus holds, so the
+		// 422 is a property of the fixture rather than of whether the
+		// developer happened to export MVDA_BSP_DIR.
 		{name: "los", url: "/v1/demos/gameId:43/los", path: "/v1/demos/{id}/los", status: 200},
-		{name: "err-los-unavailable", url: "/v1/demos/gameId:42/los", path: "/v1/demos/{id}/los", status: 422},
+		{name: "err-los-unavailable", url: "/v1/demos/gameId:48/los", path: "/v1/demos/{id}/los", status: 422},
 		{name: "projectiles", url: "/v1/demos/gameId:42/streams/projectiles", path: "/v1/demos/{id}/streams/projectiles", status: 200},
 		{name: "beams", url: "/v1/demos/gameId:42/streams/beams", path: "/v1/demos/{id}/streams/beams", status: 200},
 		{name: "nails", url: "/v1/demos/gameId:42/streams/nails", path: "/v1/demos/{id}/streams/nails", status: 200},
+		// mustContain pins the legend + columns; a null body would validate
+		// the schema without exercising the non-null half.
+		{name: "point-effects", url: "/v1/demos/gameId:42/streams/point-effects", path: "/v1/demos/{id}/streams/point-effects", status: 200,
+			mustContain: []string{`"3":"explosion"`, `"12":"blood"`, `"ty"`}},
+		{name: "point-effects-filtered", url: "/v1/demos/gameId:42/streams/point-effects?types=blood", path: "/v1/demos/{id}/streams/point-effects", status: 200,
+			mustContain: []string{`"3":"explosion"`, `"ty":[12]`}},
 		{name: "loc-trails", url: "/v1/demos/gameId:42/loc-trails?minDwellMs=500", path: "/v1/demos/{id}/loc-trails", status: 200},
 		{name: "loc-table", url: "/v1/demos/gameId:42/loc-table", path: "/v1/demos/{id}/loc-table", status: 200},
 		{name: "region-control", url: "/v1/demos/gameId:42/region-control?windowMs=5000", path: "/v1/demos/{id}/region-control", status: 200},
@@ -404,7 +735,12 @@ func validationCases(t *testing.T) []validationCase {
 			path: "/v1/demos/{id}/top-kills", status: 200},
 		{name: "lives", url: "/v1/demos/gameId:42/lives", path: "/v1/demos/{id}/lives", status: 200},
 		{name: "lives-filtered", url: "/v1/demos/gameId:42/lives?minMs=1000&from=1000&to=500000", path: "/v1/demos/{id}/lives", status: 200},
-		{name: "airgibs", url: "/v1/demos/gameId:42/airgibs", path: "/v1/demos/{id}/airgibs", status: 200},
+		// highlights: mustContain names the four lists, which an empty
+		// catalogue would validate without.
+		{name: "highlights", url: "/v1/demos/gameId:42/highlights", path: "/v1/demos/{id}/highlights", status: 200,
+			mustContain: []string{`"discharges":`, `"quadbores":`, `"telefrags":`, `"airgibs":`}},
+		{name: "highlights-filtered", url: "/v1/demos/gameId:42/highlights?kinds=telefrag,airgib&preMs=200",
+			path: "/v1/demos/{id}/highlights", status: 200},
 		// The timeline artifact is already swept below with every other
 		// servable artifact, but that generic case validates whatever the
 		// body happens to carry. No corpus demo carries a /demomark bookmark,
@@ -418,7 +754,7 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "games-search", url: "/v1/games/search?map=dm3&mode=4on4", path: "/v1/games/search", status: 200},
 		// The timeUnit echo (schema v56) is asserted by the schema-validated
 		// cases above: overview / events / state-at / stream-slice / loc-trails /
-		// buckets-row / items-summary, the four list envelopes (chat, airgibs,
+		// buckets-row / items-summary, the three list envelopes (chat,
 		// backpacks, weapon-pickups), and the four dense columnar stream bodies
 		// (los, streams/projectiles, streams/beams, streams/nails) all mark
 		// timeUnit `required`, so a 200 that validates confirms the fixed native
@@ -473,11 +809,44 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 	// Same reason for demo markers: no corpus demo has one, so the timeline
 	// artifact never exercised the demoMarkers half of its schema.
 	addDemoMarkers(res.TimelineAnalysis)
+	// Same reason for point effects: the golden was pinned streams-off.
+	addPointEffects(res.Streams)
+	// Same reason for the reader's parse census: every golden demo is clean.
+	addParseWarnings(res)
+	// Same reason for the v72 pickup linkage: the corpus is hint-carrying, so
+	// no served row was ever `reconstructed` or carried a fate.
+	addReconstructedBackpacks(res)
+	// Same reason for the v73 aim tier: the corpus demo carries wire damage,
+	// so its aim is measured and grows no `recon` block of its own.
+	addReconAimTier(res.Aim)
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:42": res,
+		// gameId:46 is the pre-instrumentation player-stats shape: no KTX
+		// block to overlay, so the accuracy family stays reconstructed.
+		"gameId:46": reconAccuracyResult(),
+		// gameId:47 is the pre-instrumentation DAMAGE shape — the only one
+		// that carries source:"reconstructed" and the v74 coverage object.
+		"gameId:47": reconDamageResult(),
+		// gameId:48 makes the 422 los_unavailable a property of the fixture
+		// (a map with no BSP anywhere) instead of of the ambient MVDA_BSP_DIR.
+		"gameId:48": losBspLessResult(),
 		// gameId:43 is a well-formed but capability-empty Result for the
-		// 422 error paths.
-		"gameId:43": {SchemaVersion: result.CurrentSchemaVersion},
+		// 422 error paths. It carries the v74 no-match marker, which is what
+		// such a Result looks like coming out of the real pipeline — and the
+		// only fixture that exercises the NoMatch schema.
+		"gameId:43": {SchemaVersion: result.CurrentSchemaVersion, NoMatch: &result.NoMatchResult{
+			Reason:            result.NoMatchMidMatchRecording,
+			Detail:            "the recording starts mid-game: the server already reported \"1 min left\" at demo open",
+			StatusAtOpen:      "1 min left",
+			StatusRunningSeen: true,
+			GameDir:           "qw",
+			Kills:             42,
+			DateMarkers: []result.WallClockMarker{{
+				Source: "matchdate", Kind: "matchStart",
+				UnixMs: 1627844964000, AtMs: 255, TZ: "EDT",
+				Raw: "2021-08-01 15:09:24 EDT",
+			}},
+		}},
 		// gameId:44 carries damage whose bounded reconstruction was skipped —
 		// dmg=bounded there is a 422 bounded_unavailable.
 		"gameId:44": {SchemaVersion: result.CurrentSchemaVersion, Damage: &result.DamageResult{
@@ -489,14 +858,17 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 		// position track, with the optional h/lq/velocity columns, so the
 		// positional half of the state-at schema (pos, view, hgt, lq, vel and
 		// the posAgeMs that dates them all) gets validated against a real
-		// response instead of an absent one.
+		// response instead of an absent one. It also carries the wielded-weapon
+		// column, whose window in the corpus cases is too narrow to guarantee
+		// a sample.
 		"gameId:45": {
 			SchemaVersion: result.CurrentSchemaVersion,
 			Streams: &result.Streams{
 				Global: result.GlobalStream{MatchStart: 0, MatchEnd: 10000},
 				Players: []result.PlayerStream{{
-					Name:  "p1",
-					Alive: []result.Interval{{Start: 0, End: 10000}},
+					Name:         "p1",
+					Alive:        []result.Interval{{Start: 0, End: 10000}},
+					ActiveWeapon: []result.ChangeI16{{T: 0, V: 1}, {T: 1200, V: 32}},
 					Position: &result.PositionTrack{
 						T:   []int32{0, 1000, 2000},
 						X:   []float32{0, 100, 200},
@@ -547,6 +919,11 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 			for _, want := range tc.mustContain {
 				if !bytes.Contains(body, []byte(want)) {
 					t.Errorf("response does not contain %s — the case would validate vacuously; body: %.300s", want, body)
+				}
+			}
+			for _, unwanted := range tc.mustNotContain {
+				if bytes.Contains(body, []byte(unwanted)) {
+					t.Errorf("response contains %s, which this case's contract withholds; body: %.300s", unwanted, body)
 				}
 			}
 			schema, hasJSON := sd.responseSchema(t, tc.path, method, fmt.Sprintf("%d", tc.status))

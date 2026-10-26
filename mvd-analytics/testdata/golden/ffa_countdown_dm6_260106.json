@@ -1,0 +1,2786 @@
+{
+  "demoInfo": {
+    "date": "2026-01-06 03:40:27 +0000",
+    "deathmatch": 3,
+    "demo": "ffa_3[dm6]20260106-0332.mvd",
+    "duration": 480,
+    "fraglimit": 8,
+    "hostname": "ny.quake.world:28502 NAQW",
+    "ip": "127.0.1.1",
+    "map": "dm6",
+    "mode": "ffa",
+    "players": [
+      {
+        "bottomColor": 4,
+        "control": 0,
+        "dmg": {
+          "enemy-weapons": 1081,
+          "given": 1315,
+          "self": 94,
+          "taken": 4166,
+          "taken-to-die": 134
+        },
+        "items": {
+          "ga": {
+            "time": 90,
+            "took": 8
+          },
+          "health_100": {
+            "took": 4
+          },
+          "health_15": {
+            "took": 9
+          },
+          "health_25": {
+            "took": 2
+          },
+          "ra": {
+            "time": 16,
+            "took": 1
+          }
+        },
+        "name": "Polish Rifle",
+        "ping": 92,
+        "speed": {
+          "avg": 238.009262,
+          "max": 972.693787
+        },
+        "spree": {
+          "max": 1
+        },
+        "stats": {
+          "deaths": 31,
+          "frags": 0,
+          "kills": 2,
+          "suicides": 2
+        },
+        "team": "Polish Rifle",
+        "weapons": {
+          "gl": {
+            "acc": {
+              "attacks": 10,
+              "hits": 3,
+              "real": 3,
+              "virtual": 3
+            },
+            "damage": {
+              "enemy": 296
+            },
+            "deaths": 2,
+            "kills": {
+              "enemy": 1,
+              "self": 1,
+              "total": 1
+            },
+            "pickups": {
+              "dropped": 5,
+              "spawn-taken": 7,
+              "spawn-total-taken": 7,
+              "taken": 7,
+              "total-taken": 7
+            }
+          },
+          "lg": {
+            "acc": {
+              "attacks": 7,
+              "hits": 1
+            },
+            "damage": {
+              "enemy": 30
+            },
+            "deaths": 12,
+            "pickups": {
+              "dropped": 1,
+              "spawn-taken": 1,
+              "spawn-total-taken": 1,
+              "taken": 1,
+              "total-taken": 1
+            }
+          },
+          "ng": {
+            "acc": {
+              "attacks": 2,
+              "hits": 0
+            },
+            "pickups": {
+              "dropped": 1,
+              "spawn-taken": 4,
+              "spawn-total-taken": 4,
+              "taken": 5,
+              "total-taken": 5
+            }
+          },
+          "rl": {
+            "acc": {
+              "attacks": 22,
+              "hits": 2,
+              "real": 9,
+              "virtual": 9
+            },
+            "damage": {
+              "enemy": 619
+            },
+            "deaths": 13,
+            "kills": {
+              "enemy": 1,
+              "self": 1,
+              "total": 1
+            },
+            "pickups": {
+              "dropped": 12,
+              "spawn-taken": 13,
+              "spawn-total-taken": 13,
+              "taken": 14,
+              "total-taken": 15
+            }
+          },
+          "sg": {
+            "acc": {
+              "attacks": 474,
+              "hits": 52
+            },
+            "damage": {
+              "enemy": 208
+            },
+            "deaths": 1,
+            "pickups": {
+              "dropped": 10,
+              "total-taken": 3
+            }
+          },
+          "sng": {
+            "acc": {
+              "attacks": 101,
+              "hits": 9
+            },
+            "damage": {
+              "enemy": 162
+            },
+            "deaths": 1,
+            "kills": {
+              "enemy": 1
+            },
+            "pickups": {
+              "dropped": 2,
+              "spawn-taken": 10,
+              "spawn-total-taken": 10,
+              "taken": 10,
+              "total-taken": 10
+            }
+          },
+          "ssg": {
+            "pickups": {
+              "spawn-taken": 1,
+              "spawn-total-taken": 1,
+              "taken": 1,
+              "total-taken": 1
+            }
+          }
+        }
+      },
+      {
+        "bottomColor": 4,
+        "control": 0,
+        "dmg": {
+          "enemy-weapons": 3038,
+          "given": 5311,
+          "self": 756,
+          "taken": 2772,
+          "taken-to-die": 924
+        },
+        "items": {
+          "ga": {
+            "time": 13,
+            "took": 1
+          },
+          "health_15": {
+            "took": 40
+          },
+          "health_25": {
+            "took": 9
+          },
+          "ra": {
+            "time": 433,
+            "took": 20
+          }
+        },
+        "name": "keith",
+        "ping": 117,
+        "speed": {
+          "avg": 301.475037,
+          "max": 944.310852
+        },
+        "spree": {
+          "max": 27
+        },
+        "stats": {
+          "deaths": 3,
+          "frags": 39,
+          "kills": 40,
+          "suicides": 1
+        },
+        "team": "keith",
+        "topColor": 4,
+        "weapons": {
+          "gl": {
+            "acc": {
+              "attacks": 58,
+              "hits": 3,
+              "real": 4,
+              "virtual": 4
+            },
+            "damage": {
+              "enemy": 217
+            },
+            "kills": {
+              "enemy": 13,
+              "total": 2
+            },
+            "pickups": {
+              "spawn-taken": 4,
+              "spawn-total-taken": 4,
+              "taken": 4,
+              "total-taken": 11
+            }
+          },
+          "lg": {
+            "acc": {
+              "attacks": 338,
+              "hits": 82
+            },
+            "damage": {
+              "enemy": 2138
+            },
+            "kills": {
+              "enemy": 4,
+              "total": 21
+            },
+            "pickups": {
+              "spawn-taken": 3,
+              "spawn-total-taken": 3,
+              "taken": 3,
+              "total-taken": 7
+            }
+          },
+          "ng": {
+            "kills": {
+              "enemy": 4
+            },
+            "pickups": {
+              "spawn-taken": 3,
+              "spawn-total-taken": 3,
+              "taken": 3,
+              "total-taken": 3
+            }
+          },
+          "rl": {
+            "acc": {
+              "attacks": 99,
+              "hits": 13,
+              "real": 44,
+              "virtual": 44
+            },
+            "damage": {
+              "enemy": 2924
+            },
+            "deaths": 2,
+            "kills": {
+              "enemy": 20,
+              "self": 1,
+              "total": 17
+            },
+            "pickups": {
+              "dropped": 3,
+              "spawn-taken": 4,
+              "spawn-total-taken": 4,
+              "taken": 4,
+              "total-taken": 19
+            }
+          },
+          "sg": {
+            "acc": {
+              "attacks": 90,
+              "hits": 8
+            },
+            "damage": {
+              "enemy": 32
+            },
+            "pickups": {
+              "total-taken": 8
+            }
+          },
+          "sng": {
+            "kills": {
+              "enemy": 13
+            },
+            "pickups": {
+              "taken": 1,
+              "total-taken": 2
+            }
+          },
+          "ssg": {
+            "kills": {
+              "enemy": 2
+            },
+            "pickups": {
+              "spawn-taken": 2,
+              "spawn-total-taken": 2,
+              "taken": 2,
+              "total-taken": 2
+            }
+          }
+        }
+      },
+      {
+        "bottomColor": 4,
+        "control": 0,
+        "dmg": {
+          "enemy-weapons": 2485,
+          "given": 3244,
+          "self": 331,
+          "taken": 2932,
+          "taken-to-die": 146
+        },
+        "items": {
+          "ga": {
+            "time": 117,
+            "took": 4
+          },
+          "health_100": {
+            "took": 7
+          },
+          "health_15": {
+            "took": 10
+          },
+          "health_25": {
+            "took": 2
+          },
+          "ra": {
+            "time": 28,
+            "took": 1
+          }
+        },
+        "name": "rdleifriaf",
+        "ping": 90,
+        "speed": {
+          "avg": 257.080048,
+          "max": 920.286072
+        },
+        "spree": {
+          "max": 3
+        },
+        "stats": {
+          "deaths": 20,
+          "frags": 7,
+          "kills": 8,
+          "suicides": 1
+        },
+        "team": "rdleifriaf",
+        "topColor": 4,
+        "weapons": {
+          "gl": {
+            "acc": {
+              "attacks": 31,
+              "hits": 2,
+              "real": 4,
+              "virtual": 4
+            },
+            "damage": {
+              "enemy": 314
+            },
+            "deaths": 1,
+            "kills": {
+              "enemy": 2
+            },
+            "pickups": {
+              "dropped": 3,
+              "spawn-taken": 9,
+              "spawn-total-taken": 9,
+              "taken": 9,
+              "total-taken": 10
+            }
+          },
+          "lg": {
+            "acc": {
+              "attacks": 29,
+              "hits": 0
+            },
+            "deaths": 9,
+            "kills": {
+              "enemy": 2
+            },
+            "pickups": {
+              "dropped": 3,
+              "spawn-taken": 3,
+              "spawn-total-taken": 3,
+              "taken": 3,
+              "total-taken": 3
+            }
+          },
+          "ng": {
+            "acc": {
+              "attacks": 10,
+              "hits": 1
+            },
+            "damage": {
+              "enemy": 9
+            },
+            "kills": {
+              "enemy": 4
+            },
+            "pickups": {
+              "spawn-taken": 2,
+              "spawn-total-taken": 2,
+              "taken": 2,
+              "total-taken": 2
+            }
+          },
+          "rl": {
+            "acc": {
+              "attacks": 85,
+              "hits": 11,
+              "real": 30,
+              "virtual": 30
+            },
+            "damage": {
+              "enemy": 2458
+            },
+            "deaths": 9,
+            "kills": {
+              "enemy": 4,
+              "self": 1,
+              "total": 6
+            },
+            "pickups": {
+              "dropped": 9,
+              "spawn-taken": 12,
+              "spawn-total-taken": 12,
+              "taken": 12,
+              "total-taken": 18
+            }
+          },
+          "sg": {
+            "acc": {
+              "attacks": 498,
+              "hits": 79
+            },
+            "damage": {
+              "enemy": 309
+            },
+            "kills": {
+              "total": 1
+            },
+            "pickups": {
+              "dropped": 5,
+              "total-taken": 4
+            }
+          },
+          "sng": {
+            "acc": {
+              "attacks": 60,
+              "hits": 9
+            },
+            "damage": {
+              "enemy": 154
+            },
+            "kills": {
+              "enemy": 2,
+              "total": 1
+            },
+            "pickups": {
+              "spawn-taken": 7,
+              "spawn-total-taken": 7,
+              "taken": 7,
+              "total-taken": 7
+            }
+          },
+          "ssg": {
+            "kills": {
+              "enemy": 1
+            },
+            "pickups": {
+              "spawn-taken": 1,
+              "spawn-total-taken": 1,
+              "taken": 1,
+              "total-taken": 1
+            }
+          }
+        }
+      }
+    ],
+    "port": 28502,
+    "teams": [
+      "Polish Rifle",
+      "keith",
+      "rdleifriaf"
+    ],
+    "timelimit": 8,
+    "version": 3
+  },
+  "locGraph": {
+    "edges": [
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "keith": 1,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "keith": 1,
+            "rdleifriaf": 1
+          },
+          "total": 3
+        },
+        "byPlayer": {
+          "Polish Rifle": 6,
+          "keith": 1,
+          "rdleifriaf": 3
+        },
+        "byTeam": {
+          "Polish Rifle": 6,
+          "keith": 1,
+          "rdleifriaf": 3
+        },
+        "from": "GA",
+        "kind": "normal",
+        "to": "GA.cells",
+        "total": 10,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 5,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 5,
+            "rdleifriaf": 2
+          },
+          "total": 7
+        }
+      },
+      {
+        "byPlayer": {
+          "Polish Rifle": 1,
+          "rdleifriaf": 1
+        },
+        "byTeam": {
+          "Polish Rifle": 1,
+          "rdleifriaf": 1
+        },
+        "from": "GA",
+        "kind": "normal",
+        "to": "GA.hide",
+        "total": 2,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 1
+          },
+          "total": 2
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 5,
+            "keith": 3,
+            "rdleifriaf": 4
+          },
+          "byTeam": {
+            "Polish Rifle": 5,
+            "keith": 3,
+            "rdleifriaf": 4
+          },
+          "total": 12
+        },
+        "byPlayer": {
+          "Polish Rifle": 11,
+          "keith": 3,
+          "rdleifriaf": 7
+        },
+        "byTeam": {
+          "Polish Rifle": 11,
+          "keith": 3,
+          "rdleifriaf": 7
+        },
+        "from": "GA",
+        "kind": "normal",
+        "to": "GA.shells",
+        "total": 21,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 6,
+            "rdleifriaf": 3
+          },
+          "byTeam": {
+            "Polish Rifle": 6,
+            "rdleifriaf": 3
+          },
+          "total": 9
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "keith": 1,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "keith": 1,
+            "rdleifriaf": 1
+          },
+          "total": 3
+        },
+        "byPlayer": {
+          "Polish Rifle": 6,
+          "keith": 2,
+          "rdleifriaf": 8
+        },
+        "byTeam": {
+          "Polish Rifle": 6,
+          "keith": 2,
+          "rdleifriaf": 8
+        },
+        "from": "GA",
+        "kind": "teleport",
+        "to": "MH",
+        "total": 16,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 5,
+            "keith": 1,
+            "rdleifriaf": 7
+          },
+          "byTeam": {
+            "Polish Rifle": 5,
+            "keith": 1,
+            "rdleifriaf": 7
+          },
+          "total": 13
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "keith": 4
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "keith": 4
+          },
+          "total": 5
+        },
+        "byPlayer": {
+          "Polish Rifle": 9,
+          "keith": 5,
+          "rdleifriaf": 7
+        },
+        "byTeam": {
+          "Polish Rifle": 9,
+          "keith": 5,
+          "rdleifriaf": 7
+        },
+        "from": "GA.cells",
+        "kind": "normal",
+        "to": "GA",
+        "total": 21,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 8,
+            "keith": 1,
+            "rdleifriaf": 7
+          },
+          "byTeam": {
+            "Polish Rifle": 8,
+            "keith": 1,
+            "rdleifriaf": 7
+          },
+          "total": 16
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "keith": 2,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "keith": 2,
+            "rdleifriaf": 1
+          },
+          "total": 4
+        },
+        "byPlayer": {
+          "Polish Rifle": 8,
+          "keith": 2,
+          "rdleifriaf": 7
+        },
+        "byTeam": {
+          "Polish Rifle": 8,
+          "keith": 2,
+          "rdleifriaf": 7
+        },
+        "from": "GA.cells",
+        "kind": "normal",
+        "to": "GL",
+        "total": 17,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 7,
+            "rdleifriaf": 6
+          },
+          "byTeam": {
+            "Polish Rifle": 7,
+            "rdleifriaf": 6
+          },
+          "total": 13
+        }
+      },
+      {
+        "byPlayer": {
+          "Polish Rifle": 8,
+          "rdleifriaf": 3
+        },
+        "byTeam": {
+          "Polish Rifle": 8,
+          "rdleifriaf": 3
+        },
+        "from": "GA.hide",
+        "kind": "normal",
+        "to": "GA",
+        "total": 11,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 8,
+            "rdleifriaf": 3
+          },
+          "byTeam": {
+            "Polish Rifle": 8,
+            "rdleifriaf": 3
+          },
+          "total": 11
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 3,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 3,
+            "rdleifriaf": 1
+          },
+          "total": 4
+        },
+        "byPlayer": {
+          "Polish Rifle": 5,
+          "rdleifriaf": 3
+        },
+        "byTeam": {
+          "Polish Rifle": 5,
+          "rdleifriaf": 3
+        },
+        "from": "GA.shells",
+        "kind": "normal",
+        "to": "GA",
+        "total": 8,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 2,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 2,
+            "rdleifriaf": 2
+          },
+          "total": 4
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "keith": 4,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "keith": 4,
+            "rdleifriaf": 2
+          },
+          "total": 7
+        },
+        "byPlayer": {
+          "Polish Rifle": 5,
+          "keith": 4,
+          "rdleifriaf": 3
+        },
+        "byTeam": {
+          "Polish Rifle": 5,
+          "keith": 4,
+          "rdleifriaf": 3
+        },
+        "from": "GA.shells",
+        "kind": "normal",
+        "to": "big",
+        "total": 12,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 4,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 4,
+            "rdleifriaf": 1
+          },
+          "total": 5
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "keith": 5
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "keith": 5
+          },
+          "total": 6
+        },
+        "byPlayer": {
+          "Polish Rifle": 1,
+          "keith": 5,
+          "rdleifriaf": 2
+        },
+        "byTeam": {
+          "Polish Rifle": 1,
+          "keith": 5,
+          "rdleifriaf": 2
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "GA.cells",
+        "total": 8,
+        "unarmed": {
+          "byPlayer": {
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "rdleifriaf": 2
+          },
+          "total": 2
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 5,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "keith": 5,
+            "rdleifriaf": 1
+          },
+          "total": 6
+        },
+        "byPlayer": {
+          "Polish Rifle": 2,
+          "keith": 6,
+          "rdleifriaf": 1
+        },
+        "byTeam": {
+          "Polish Rifle": 2,
+          "keith": 6,
+          "rdleifriaf": 1
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "GL.RA",
+        "total": 9,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 2,
+            "keith": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 2,
+            "keith": 1
+          },
+          "total": 3
+        }
+      },
+      {
+        "byPlayer": {
+          "Polish Rifle": 2,
+          "rdleifriaf": 2
+        },
+        "byTeam": {
+          "Polish Rifle": 2,
+          "rdleifriaf": 2
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "GL.hide",
+        "total": 4,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 2,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 2,
+            "rdleifriaf": 2
+          },
+          "total": 4
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 1
+          },
+          "byTeam": {
+            "keith": 1
+          },
+          "total": 1
+        },
+        "byPlayer": {
+          "keith": 1
+        },
+        "byTeam": {
+          "keith": 1
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "RA.tunnel",
+        "total": 1
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 8
+          },
+          "byTeam": {
+            "keith": 8
+          },
+          "total": 8
+        },
+        "byPlayer": {
+          "Polish Rifle": 2,
+          "keith": 8,
+          "rdleifriaf": 3
+        },
+        "byTeam": {
+          "Polish Rifle": 2,
+          "keith": 8,
+          "rdleifriaf": 3
+        },
+        "from": "GL",
+        "kind": "normal",
+        "to": "big",
+        "total": 13,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 2,
+            "rdleifriaf": 3
+          },
+          "byTeam": {
+            "Polish Rifle": 2,
+            "rdleifriaf": 3
+          },
+          "total": 5
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 16
+          },
+          "byTeam": {
+            "keith": 16
+          },
+          "total": 16
+        },
+        "byPlayer": {
+          "Polish Rifle": 2,
+          "keith": 16
+        },
+        "byTeam": {
+          "Polish Rifle": 2,
+          "keith": 16
+        },
+        "from": "GL.RA",
+        "kind": "normal",
+        "to": "GL",
+        "total": 18,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 2
+          },
+          "total": 2
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 4,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "keith": 4,
+            "rdleifriaf": 1
+          },
+          "total": 5
+        },
+        "byPlayer": {
+          "keith": 5,
+          "rdleifriaf": 1
+        },
+        "byTeam": {
+          "keith": 5,
+          "rdleifriaf": 1
+        },
+        "from": "GL.RA",
+        "kind": "normal",
+        "to": "RA",
+        "total": 6,
+        "unarmed": {
+          "byPlayer": {
+            "keith": 1
+          },
+          "byTeam": {
+            "keith": 1
+          },
+          "total": 1
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 9
+          },
+          "byTeam": {
+            "keith": 9
+          },
+          "total": 9
+        },
+        "byPlayer": {
+          "Polish Rifle": 1,
+          "keith": 9,
+          "rdleifriaf": 1
+        },
+        "byTeam": {
+          "Polish Rifle": 1,
+          "keith": 9,
+          "rdleifriaf": 1
+        },
+        "from": "GL.below",
+        "kind": "normal",
+        "to": "RA",
+        "total": 11,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 1
+          },
+          "total": 2
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 3,
+            "keith": 6,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 3,
+            "keith": 6,
+            "rdleifriaf": 1
+          },
+          "total": 10
+        },
+        "byPlayer": {
+          "Polish Rifle": 4,
+          "keith": 6,
+          "rdleifriaf": 1
+        },
+        "byTeam": {
+          "Polish Rifle": 4,
+          "keith": 6,
+          "rdleifriaf": 1
+        },
+        "from": "GL.below",
+        "kind": "normal",
+        "to": "big",
+        "total": 11,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 1
+          },
+          "total": 1
+        }
+      },
+      {
+        "byPlayer": {
+          "Polish Rifle": 4,
+          "keith": 1,
+          "rdleifriaf": 5
+        },
+        "byTeam": {
+          "Polish Rifle": 4,
+          "keith": 1,
+          "rdleifriaf": 5
+        },
+        "from": "GL.hide",
+        "kind": "normal",
+        "to": "GL",
+        "total": 10,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 4,
+            "keith": 1,
+            "rdleifriaf": 5
+          },
+          "byTeam": {
+            "Polish Rifle": 4,
+            "keith": 1,
+            "rdleifriaf": 5
+          },
+          "total": 10
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 9,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "keith": 9,
+            "rdleifriaf": 1
+          },
+          "total": 10
+        },
+        "byPlayer": {
+          "keith": 9,
+          "rdleifriaf": 1
+        },
+        "byTeam": {
+          "keith": 9,
+          "rdleifriaf": 1
+        },
+        "from": "LG",
+        "kind": "teleport",
+        "to": "big",
+        "total": 10
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 3,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 3,
+            "rdleifriaf": 2
+          },
+          "total": 5
+        },
+        "byPlayer": {
+          "Polish Rifle": 3,
+          "rdleifriaf": 2
+        },
+        "byTeam": {
+          "Polish Rifle": 3,
+          "rdleifriaf": 2
+        },
+        "from": "MH",
+        "kind": "teleport",
+        "to": "GA",
+        "total": 5
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 4
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 4
+          },
+          "total": 5
+        },
+        "byPlayer": {
+          "Polish Rifle": 1,
+          "rdleifriaf": 4
+        },
+        "byTeam": {
+          "Polish Rifle": 1,
+          "rdleifriaf": 4
+        },
+        "from": "MH",
+        "kind": "normal",
+        "to": "MH.behind",
+        "total": 5
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 2,
+            "keith": 6,
+            "rdleifriaf": 13
+          },
+          "byTeam": {
+            "Polish Rifle": 2,
+            "keith": 6,
+            "rdleifriaf": 13
+          },
+          "total": 21
+        },
+        "byPlayer": {
+          "Polish Rifle": 2,
+          "keith": 6,
+          "rdleifriaf": 13
+        },
+        "byTeam": {
+          "Polish Rifle": 2,
+          "keith": 6,
+          "rdleifriaf": 13
+        },
+        "from": "MH",
+        "kind": "normal",
+        "to": "MH.pipe",
+        "total": 21
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 4
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 4
+          },
+          "total": 5
+        },
+        "byPlayer": {
+          "Polish Rifle": 1,
+          "rdleifriaf": 4
+        },
+        "byTeam": {
+          "Polish Rifle": 1,
+          "rdleifriaf": 4
+        },
+        "from": "MH.behind",
+        "kind": "normal",
+        "to": "MH",
+        "total": 5
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 5,
+            "rdleifriaf": 8
+          },
+          "byTeam": {
+            "keith": 5,
+            "rdleifriaf": 8
+          },
+          "total": 13
+        },
+        "byPlayer": {
+          "keith": 5,
+          "rdleifriaf": 9
+        },
+        "byTeam": {
+          "keith": 5,
+          "rdleifriaf": 9
+        },
+        "from": "MH.pipe",
+        "kind": "normal",
+        "to": "MH",
+        "total": 14,
+        "unarmed": {
+          "byPlayer": {
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "rdleifriaf": 1
+          },
+          "total": 1
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 1
+          },
+          "byTeam": {
+            "keith": 1
+          },
+          "total": 1
+        },
+        "byPlayer": {
+          "keith": 1
+        },
+        "byTeam": {
+          "keith": 1
+        },
+        "from": "MH.pipe",
+        "kind": "normal",
+        "to": "RA.tunnel",
+        "total": 1
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 2,
+            "keith": 4,
+            "rdleifriaf": 4
+          },
+          "byTeam": {
+            "Polish Rifle": 2,
+            "keith": 4,
+            "rdleifriaf": 4
+          },
+          "total": 10
+        },
+        "byPlayer": {
+          "Polish Rifle": 2,
+          "keith": 4,
+          "rdleifriaf": 4
+        },
+        "byTeam": {
+          "Polish Rifle": 2,
+          "keith": 4,
+          "rdleifriaf": 4
+        },
+        "from": "MH.pipe",
+        "kind": "normal",
+        "to": "big",
+        "total": 10
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "rdleifriaf": 1
+          },
+          "total": 1
+        },
+        "byPlayer": {
+          "rdleifriaf": 1
+        },
+        "byTeam": {
+          "rdleifriaf": 1
+        },
+        "from": "MH.pipe",
+        "kind": "normal",
+        "to": "big.hatch",
+        "total": 1
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 15
+          },
+          "byTeam": {
+            "keith": 15
+          },
+          "total": 15
+        },
+        "byPlayer": {
+          "Polish Rifle": 1,
+          "keith": 15
+        },
+        "byTeam": {
+          "Polish Rifle": 1,
+          "keith": 15
+        },
+        "from": "RA",
+        "kind": "normal",
+        "to": "GL.RA",
+        "total": 16,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 1
+          },
+          "total": 1
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 2,
+            "keith": 2,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 2,
+            "keith": 2,
+            "rdleifriaf": 2
+          },
+          "total": 6
+        },
+        "byPlayer": {
+          "Polish Rifle": 2,
+          "keith": 2,
+          "rdleifriaf": 2
+        },
+        "byTeam": {
+          "Polish Rifle": 2,
+          "keith": 2,
+          "rdleifriaf": 2
+        },
+        "from": "RA",
+        "kind": "normal",
+        "to": "GL.below",
+        "total": 6
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 1
+          },
+          "byTeam": {
+            "keith": 1
+          },
+          "total": 1
+        },
+        "byPlayer": {
+          "Polish Rifle": 1,
+          "keith": 1
+        },
+        "byTeam": {
+          "Polish Rifle": 1,
+          "keith": 1
+        },
+        "from": "RA",
+        "kind": "normal",
+        "to": "RA.behind",
+        "total": 2,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 1
+          },
+          "total": 1
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 3,
+            "keith": 5,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 3,
+            "keith": 5,
+            "rdleifriaf": 2
+          },
+          "total": 10
+        },
+        "byPlayer": {
+          "Polish Rifle": 3,
+          "keith": 5,
+          "rdleifriaf": 2
+        },
+        "byTeam": {
+          "Polish Rifle": 3,
+          "keith": 5,
+          "rdleifriaf": 2
+        },
+        "from": "RA",
+        "kind": "normal",
+        "to": "RA.tunnel",
+        "total": 10
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 1
+          },
+          "byTeam": {
+            "keith": 1
+          },
+          "total": 1
+        },
+        "byPlayer": {
+          "Polish Rifle": 3,
+          "keith": 3,
+          "rdleifriaf": 1
+        },
+        "byTeam": {
+          "Polish Rifle": 3,
+          "keith": 3,
+          "rdleifriaf": 1
+        },
+        "from": "RA.behind",
+        "kind": "normal",
+        "to": "RA",
+        "total": 7,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 3,
+            "keith": 2,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 3,
+            "keith": 2,
+            "rdleifriaf": 1
+          },
+          "total": 6
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "keith": 9,
+            "rdleifriaf": 3
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "keith": 9,
+            "rdleifriaf": 3
+          },
+          "total": 13
+        },
+        "byPlayer": {
+          "Polish Rifle": 5,
+          "keith": 9,
+          "rdleifriaf": 4
+        },
+        "byTeam": {
+          "Polish Rifle": 5,
+          "keith": 9,
+          "rdleifriaf": 4
+        },
+        "from": "RA.tunnel",
+        "kind": "normal",
+        "to": "RA",
+        "total": 18,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 4,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 4,
+            "rdleifriaf": 1
+          },
+          "total": 5
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 3,
+            "keith": 10,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 3,
+            "keith": 10,
+            "rdleifriaf": 1
+          },
+          "total": 14
+        },
+        "byPlayer": {
+          "Polish Rifle": 3,
+          "keith": 10,
+          "rdleifriaf": 4
+        },
+        "byTeam": {
+          "Polish Rifle": 3,
+          "keith": 10,
+          "rdleifriaf": 4
+        },
+        "from": "RA.tunnel",
+        "kind": "normal",
+        "to": "big",
+        "total": 17,
+        "unarmed": {
+          "byPlayer": {
+            "rdleifriaf": 3
+          },
+          "byTeam": {
+            "rdleifriaf": 3
+          },
+          "total": 3
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 2,
+            "keith": 1,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 2,
+            "keith": 1,
+            "rdleifriaf": 2
+          },
+          "total": 5
+        },
+        "byPlayer": {
+          "Polish Rifle": 3,
+          "keith": 1,
+          "rdleifriaf": 4
+        },
+        "byTeam": {
+          "Polish Rifle": 3,
+          "keith": 1,
+          "rdleifriaf": 4
+        },
+        "from": "big",
+        "kind": "teleport",
+        "to": "GA",
+        "total": 8,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 2
+          },
+          "total": 3
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 1
+          },
+          "byTeam": {
+            "keith": 1
+          },
+          "total": 1
+        },
+        "byPlayer": {
+          "keith": 1
+        },
+        "byTeam": {
+          "keith": 1
+        },
+        "from": "big",
+        "kind": "normal",
+        "to": "GA.shells",
+        "total": 1
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 1
+          },
+          "byTeam": {
+            "keith": 1
+          },
+          "total": 1
+        },
+        "byPlayer": {
+          "keith": 1
+        },
+        "byTeam": {
+          "keith": 1
+        },
+        "from": "big",
+        "kind": "normal",
+        "to": "GL",
+        "total": 1
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "keith": 13,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "keith": 13,
+            "rdleifriaf": 1
+          },
+          "total": 15
+        },
+        "byPlayer": {
+          "Polish Rifle": 4,
+          "keith": 13,
+          "rdleifriaf": 2
+        },
+        "byTeam": {
+          "Polish Rifle": 4,
+          "keith": 13,
+          "rdleifriaf": 2
+        },
+        "from": "big",
+        "kind": "normal",
+        "to": "GL.below",
+        "total": 19,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 3,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 3,
+            "rdleifriaf": 1
+          },
+          "total": 4
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 4
+          },
+          "byTeam": {
+            "keith": 4
+          },
+          "total": 4
+        },
+        "byPlayer": {
+          "keith": 4,
+          "rdleifriaf": 1
+        },
+        "byTeam": {
+          "keith": 4,
+          "rdleifriaf": 1
+        },
+        "from": "big",
+        "kind": "normal",
+        "to": "MH.pipe",
+        "total": 5,
+        "unarmed": {
+          "byPlayer": {
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "rdleifriaf": 1
+          },
+          "total": 1
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 2,
+            "keith": 12,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 2,
+            "keith": 12,
+            "rdleifriaf": 2
+          },
+          "total": 16
+        },
+        "byPlayer": {
+          "Polish Rifle": 2,
+          "keith": 12,
+          "rdleifriaf": 3
+        },
+        "byTeam": {
+          "Polish Rifle": 2,
+          "keith": 12,
+          "rdleifriaf": 3
+        },
+        "from": "big",
+        "kind": "normal",
+        "to": "RA.tunnel",
+        "total": 17,
+        "unarmed": {
+          "byPlayer": {
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "rdleifriaf": 1
+          },
+          "total": 1
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 3,
+            "keith": 16,
+            "rdleifriaf": 3
+          },
+          "byTeam": {
+            "Polish Rifle": 3,
+            "keith": 16,
+            "rdleifriaf": 3
+          },
+          "total": 22
+        },
+        "byPlayer": {
+          "Polish Rifle": 5,
+          "keith": 16,
+          "rdleifriaf": 6
+        },
+        "byTeam": {
+          "Polish Rifle": 5,
+          "keith": 16,
+          "rdleifriaf": 6
+        },
+        "from": "big",
+        "kind": "normal",
+        "to": "big.hatch",
+        "total": 27,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 2,
+            "rdleifriaf": 3
+          },
+          "byTeam": {
+            "Polish Rifle": 2,
+            "rdleifriaf": 3
+          },
+          "total": 5
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "rdleifriaf": 1
+          },
+          "total": 1
+        },
+        "byPlayer": {
+          "rdleifriaf": 1
+        },
+        "byTeam": {
+          "rdleifriaf": 1
+        },
+        "from": "big.hatch",
+        "kind": "normal",
+        "to": "GA",
+        "total": 1
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 9,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "keith": 9,
+            "rdleifriaf": 2
+          },
+          "total": 11
+        },
+        "byPlayer": {
+          "Polish Rifle": 1,
+          "keith": 9,
+          "rdleifriaf": 3
+        },
+        "byTeam": {
+          "Polish Rifle": 1,
+          "keith": 9,
+          "rdleifriaf": 3
+        },
+        "from": "big.hatch",
+        "kind": "normal",
+        "to": "LG",
+        "total": 13,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 1
+          },
+          "total": 2
+        }
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 2,
+            "keith": 7,
+            "rdleifriaf": 1
+          },
+          "byTeam": {
+            "Polish Rifle": 2,
+            "keith": 7,
+            "rdleifriaf": 1
+          },
+          "total": 10
+        },
+        "byPlayer": {
+          "Polish Rifle": 3,
+          "keith": 7,
+          "rdleifriaf": 3
+        },
+        "byTeam": {
+          "Polish Rifle": 3,
+          "keith": 7,
+          "rdleifriaf": 3
+        },
+        "from": "big.hatch",
+        "kind": "normal",
+        "to": "big",
+        "total": 13,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 2
+          },
+          "byTeam": {
+            "Polish Rifle": 1,
+            "rdleifriaf": 2
+          },
+          "total": 3
+        }
+      }
+    ],
+    "locs": [
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 23890,
+            "keith": 19460,
+            "rdleifriaf": 26942
+          },
+          "byTeam": {
+            "Polish Rifle": 23890,
+            "keith": 19460,
+            "rdleifriaf": 26942
+          },
+          "total": 70292
+        },
+        "byPlayer": {
+          "Polish Rifle": 87863,
+          "keith": 21796,
+          "rdleifriaf": 77004
+        },
+        "byTeam": {
+          "Polish Rifle": 87863,
+          "keith": 21796,
+          "rdleifriaf": 77004
+        },
+        "name": "GA",
+        "total": 186663,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 63973,
+            "keith": 2336,
+            "rdleifriaf": 50062
+          },
+          "byTeam": {
+            "Polish Rifle": 63973,
+            "keith": 2336,
+            "rdleifriaf": 50062
+          },
+          "total": 116371
+        },
+        "x": 387.25,
+        "y": -1809.25,
+        "z": 40
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 4516,
+            "keith": 13650,
+            "rdleifriaf": 2130
+          },
+          "byTeam": {
+            "Polish Rifle": 4516,
+            "keith": 13650,
+            "rdleifriaf": 2130
+          },
+          "total": 20296
+        },
+        "byPlayer": {
+          "Polish Rifle": 38052,
+          "keith": 14303,
+          "rdleifriaf": 23081
+        },
+        "byTeam": {
+          "Polish Rifle": 38052,
+          "keith": 14303,
+          "rdleifriaf": 23081
+        },
+        "name": "GA.cells",
+        "total": 75436,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 33536,
+            "keith": 653,
+            "rdleifriaf": 20951
+          },
+          "byTeam": {
+            "Polish Rifle": 33536,
+            "keith": 653,
+            "rdleifriaf": 20951
+          },
+          "total": 55140
+        },
+        "x": 495.875,
+        "y": -1103.875,
+        "z": 256
+      },
+      {
+        "byPlayer": {
+          "Polish Rifle": 12279,
+          "rdleifriaf": 4475
+        },
+        "byTeam": {
+          "Polish Rifle": 12279,
+          "rdleifriaf": 4475
+        },
+        "name": "GA.hide",
+        "total": 16754,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 12279,
+            "rdleifriaf": 4475
+          },
+          "byTeam": {
+            "Polish Rifle": 12279,
+            "rdleifriaf": 4475
+          },
+          "total": 16754
+        },
+        "x": 72,
+        "y": -1541.125,
+        "z": 40
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 11565,
+            "keith": 8423,
+            "rdleifriaf": 16966
+          },
+          "byTeam": {
+            "Polish Rifle": 11565,
+            "keith": 8423,
+            "rdleifriaf": 16966
+          },
+          "total": 36954
+        },
+        "byPlayer": {
+          "Polish Rifle": 25633,
+          "keith": 8423,
+          "rdleifriaf": 34819
+        },
+        "byTeam": {
+          "Polish Rifle": 25633,
+          "keith": 8423,
+          "rdleifriaf": 34819
+        },
+        "name": "GA.shells",
+        "total": 68875,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 14068,
+            "rdleifriaf": 17853
+          },
+          "byTeam": {
+            "Polish Rifle": 14068,
+            "rdleifriaf": 17853
+          },
+          "total": 31921
+        },
+        "x": 627.5,
+        "y": -1668.125,
+        "z": 40
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 5261,
+            "keith": 68242,
+            "rdleifriaf": 16838
+          },
+          "byTeam": {
+            "Polish Rifle": 5261,
+            "keith": 68242,
+            "rdleifriaf": 16838
+          },
+          "total": 90341
+        },
+        "byPlayer": {
+          "Polish Rifle": 47733,
+          "keith": 69476,
+          "rdleifriaf": 65607
+        },
+        "byTeam": {
+          "Polish Rifle": 47733,
+          "keith": 69476,
+          "rdleifriaf": 65607
+        },
+        "name": "GL",
+        "total": 182816,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 42472,
+            "keith": 1234,
+            "rdleifriaf": 48769
+          },
+          "byTeam": {
+            "Polish Rifle": 42472,
+            "keith": 1234,
+            "rdleifriaf": 48769
+          },
+          "total": 92475
+        },
+        "x": 784.375,
+        "y": -1100.625,
+        "z": 256
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 27764,
+            "rdleifriaf": 1666
+          },
+          "byTeam": {
+            "keith": 27764,
+            "rdleifriaf": 1666
+          },
+          "total": 29430
+        },
+        "byPlayer": {
+          "Polish Rifle": 6261,
+          "keith": 28776,
+          "rdleifriaf": 1666
+        },
+        "byTeam": {
+          "Polish Rifle": 6261,
+          "keith": 28776,
+          "rdleifriaf": 1666
+        },
+        "name": "GL.RA",
+        "total": 36703,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 6261,
+            "keith": 1012
+          },
+          "byTeam": {
+            "Polish Rifle": 6261,
+            "keith": 1012
+          },
+          "total": 7273
+        },
+        "x": 1807.875,
+        "y": -1065.375,
+        "z": 168
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 6767,
+            "keith": 51596,
+            "rdleifriaf": 4221
+          },
+          "byTeam": {
+            "Polish Rifle": 6767,
+            "keith": 51596,
+            "rdleifriaf": 4221
+          },
+          "total": 62584
+        },
+        "byPlayer": {
+          "Polish Rifle": 13749,
+          "keith": 51596,
+          "rdleifriaf": 6883
+        },
+        "byTeam": {
+          "Polish Rifle": 13749,
+          "keith": 51596,
+          "rdleifriaf": 6883
+        },
+        "name": "GL.below",
+        "total": 72228,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 6982,
+            "rdleifriaf": 2662
+          },
+          "byTeam": {
+            "Polish Rifle": 6982,
+            "rdleifriaf": 2662
+          },
+          "total": 9644
+        },
+        "x": 1784.125,
+        "y": -971.5,
+        "z": 40
+      },
+      {
+        "byPlayer": {
+          "Polish Rifle": 12789,
+          "keith": 909,
+          "rdleifriaf": 6434
+        },
+        "byTeam": {
+          "Polish Rifle": 12789,
+          "keith": 909,
+          "rdleifriaf": 6434
+        },
+        "name": "GL.hide",
+        "total": 20132,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 12789,
+            "keith": 909,
+            "rdleifriaf": 6434
+          },
+          "byTeam": {
+            "Polish Rifle": 12789,
+            "keith": 909,
+            "rdleifriaf": 6434
+          },
+          "total": 20132
+        },
+        "x": 872.25,
+        "y": -1440,
+        "z": 256
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 51757,
+            "keith": 13529,
+            "rdleifriaf": 9506
+          },
+          "byTeam": {
+            "Polish Rifle": 51757,
+            "keith": 13529,
+            "rdleifriaf": 9506
+          },
+          "total": 74792
+        },
+        "byPlayer": {
+          "Polish Rifle": 52196,
+          "keith": 13529,
+          "rdleifriaf": 9561
+        },
+        "byTeam": {
+          "Polish Rifle": 52196,
+          "keith": 13529,
+          "rdleifriaf": 9561
+        },
+        "name": "LG",
+        "total": 75286,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 439,
+            "rdleifriaf": 55
+          },
+          "byTeam": {
+            "Polish Rifle": 439,
+            "rdleifriaf": 55
+          },
+          "total": 494
+        },
+        "x": 505.25,
+        "y": -1091.5,
+        "z": -279.875
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 21365,
+            "keith": 10614,
+            "rdleifriaf": 61071
+          },
+          "byTeam": {
+            "Polish Rifle": 21365,
+            "keith": 10614,
+            "rdleifriaf": 61071
+          },
+          "total": 93050
+        },
+        "byPlayer": {
+          "Polish Rifle": 43367,
+          "keith": 11174,
+          "rdleifriaf": 67814
+        },
+        "byTeam": {
+          "Polish Rifle": 43367,
+          "keith": 11174,
+          "rdleifriaf": 67814
+        },
+        "name": "MH",
+        "total": 122355,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 22002,
+            "keith": 560,
+            "rdleifriaf": 6743
+          },
+          "byTeam": {
+            "Polish Rifle": 22002,
+            "keith": 560,
+            "rdleifriaf": 6743
+          },
+          "total": 29305
+        },
+        "x": 235.625,
+        "y": -897.5,
+        "z": 136
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 12631,
+            "rdleifriaf": 12544
+          },
+          "byTeam": {
+            "Polish Rifle": 12631,
+            "rdleifriaf": 12544
+          },
+          "total": 25175
+        },
+        "byPlayer": {
+          "Polish Rifle": 12631,
+          "rdleifriaf": 12544
+        },
+        "byTeam": {
+          "Polish Rifle": 12631,
+          "rdleifriaf": 12544
+        },
+        "name": "MH.behind",
+        "total": 25175,
+        "x": 113.5,
+        "y": -854.875,
+        "z": 136
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 2493,
+            "keith": 21401,
+            "rdleifriaf": 53488
+          },
+          "byTeam": {
+            "Polish Rifle": 2493,
+            "keith": 21401,
+            "rdleifriaf": 53488
+          },
+          "total": 77382
+        },
+        "byPlayer": {
+          "Polish Rifle": 2493,
+          "keith": 21401,
+          "rdleifriaf": 55010
+        },
+        "byTeam": {
+          "Polish Rifle": 2493,
+          "keith": 21401,
+          "rdleifriaf": 55010
+        },
+        "name": "MH.pipe",
+        "total": 78904,
+        "unarmed": {
+          "byPlayer": {
+            "rdleifriaf": 1522
+          },
+          "byTeam": {
+            "rdleifriaf": 1522
+          },
+          "total": 1522
+        },
+        "x": 466.375,
+        "y": -1094.875,
+        "z": 128
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 14241,
+            "keith": 111904,
+            "rdleifriaf": 19056
+          },
+          "byTeam": {
+            "Polish Rifle": 14241,
+            "keith": 111904,
+            "rdleifriaf": 19056
+          },
+          "total": 145201
+        },
+        "byPlayer": {
+          "Polish Rifle": 23241,
+          "keith": 115083,
+          "rdleifriaf": 22252
+        },
+        "byTeam": {
+          "Polish Rifle": 23241,
+          "keith": 115083,
+          "rdleifriaf": 22252
+        },
+        "name": "RA",
+        "total": 160576,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 9000,
+            "keith": 3179,
+            "rdleifriaf": 3196
+          },
+          "byTeam": {
+            "Polish Rifle": 9000,
+            "keith": 3179,
+            "rdleifriaf": 3196
+          },
+          "total": 15375
+        },
+        "x": 1543.75,
+        "y": -606,
+        "z": 72
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "keith": 479
+          },
+          "byTeam": {
+            "keith": 479
+          },
+          "total": 479
+        },
+        "byPlayer": {
+          "Polish Rifle": 18945,
+          "keith": 3678,
+          "rdleifriaf": 2027
+        },
+        "byTeam": {
+          "Polish Rifle": 18945,
+          "keith": 3678,
+          "rdleifriaf": 2027
+        },
+        "name": "RA.behind",
+        "total": 24650,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 18945,
+            "keith": 3199,
+            "rdleifriaf": 2027
+          },
+          "byTeam": {
+            "Polish Rifle": 18945,
+            "keith": 3199,
+            "rdleifriaf": 2027
+          },
+          "total": 24171
+        },
+        "x": 1803.5,
+        "y": -191.875,
+        "z": 168
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 19658,
+            "keith": 39494,
+            "rdleifriaf": 12106
+          },
+          "byTeam": {
+            "Polish Rifle": 19658,
+            "keith": 39494,
+            "rdleifriaf": 12106
+          },
+          "total": 71258
+        },
+        "byPlayer": {
+          "Polish Rifle": 28673,
+          "keith": 39494,
+          "rdleifriaf": 30506
+        },
+        "byTeam": {
+          "Polish Rifle": 28673,
+          "keith": 39494,
+          "rdleifriaf": 30506
+        },
+        "name": "RA.tunnel",
+        "total": 98673,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 9015,
+            "rdleifriaf": 18400
+          },
+          "byTeam": {
+            "Polish Rifle": 9015,
+            "rdleifriaf": 18400
+          },
+          "total": 27415
+        },
+        "x": 1016.625,
+        "y": -682.375,
+        "z": 40
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 9714,
+            "keith": 64620,
+            "rdleifriaf": 15019
+          },
+          "byTeam": {
+            "Polish Rifle": 9714,
+            "keith": 64620,
+            "rdleifriaf": 15019
+          },
+          "total": 89353
+        },
+        "byPlayer": {
+          "Polish Rifle": 17973,
+          "keith": 64620,
+          "rdleifriaf": 32495
+        },
+        "byTeam": {
+          "Polish Rifle": 17973,
+          "keith": 64620,
+          "rdleifriaf": 32495
+        },
+        "name": "big",
+        "total": 115088,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 8259,
+            "rdleifriaf": 17476
+          },
+          "byTeam": {
+            "Polish Rifle": 8259,
+            "rdleifriaf": 17476
+          },
+          "total": 25735
+        },
+        "x": 926,
+        "y": -979.125,
+        "z": -39.875
+      },
+      {
+        "armed": {
+          "byPlayer": {
+            "Polish Rifle": 1076,
+            "keith": 9764,
+            "rdleifriaf": 2929
+          },
+          "byTeam": {
+            "Polish Rifle": 1076,
+            "keith": 9764,
+            "rdleifriaf": 2929
+          },
+          "total": 13769
+        },
+        "byPlayer": {
+          "Polish Rifle": 2375,
+          "keith": 9764,
+          "rdleifriaf": 4110
+        },
+        "byTeam": {
+          "Polish Rifle": 2375,
+          "keith": 9764,
+          "rdleifriaf": 4110
+        },
+        "name": "big.hatch",
+        "total": 16249,
+        "unarmed": {
+          "byPlayer": {
+            "Polish Rifle": 1299,
+            "rdleifriaf": 1181
+          },
+          "byTeam": {
+            "Polish Rifle": 1299,
+            "rdleifriaf": 1181
+          },
+          "total": 2480
+        },
+        "x": 850.25,
+        "y": -1074.25,
+        "z": -43.875
+      }
+    ]
+  },
+  "match": {
+    "duration": 480005,
+    "gameDir": "qw",
+    "gameMode": {
+      "canonical": "ffa",
+      "sources": {
+        "canonical": "ktx",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
+    "map": "dm6",
+    "mapTitle": "The Dark Zone",
+    "mode": "ffa",
+    "players": [
+      {
+        "deaths": 31,
+        "frags": 0,
+        "kills": 2,
+        "name": "Polish Rifle",
+        "suicides": 2,
+        "team": "Polish Rifle"
+      },
+      {
+        "deaths": 3,
+        "frags": 39,
+        "kills": 40,
+        "name": "keith",
+        "rawTeam": "tsc",
+        "suicides": 1,
+        "team": "keith"
+      },
+      {
+        "deaths": 20,
+        "frags": 7,
+        "kills": 8,
+        "name": "rdleifriaf",
+        "rawTeam": "red",
+        "suicides": 1,
+        "team": "rdleifriaf"
+      }
+    ],
+    "sources": {
+      "map": "ktx",
+      "mode": "ktx",
+      "teams": "individual"
+    },
+    "teams": [
+      {
+        "frags": 0,
+        "name": "Polish Rifle"
+      },
+      {
+        "frags": 39,
+        "name": "keith"
+      },
+      {
+        "frags": 7,
+        "name": "rdleifriaf"
+      }
+    ]
+  },
+  "streams": {
+    "global": {
+      "dateMarkers": [
+        {
+          "atMs": 10104,
+          "kind": "matchStart",
+          "raw": "2026-01-06 03:32:27 UTC",
+          "source": "matchdate",
+          "tz": "UTC",
+          "unixMs": 1767670347000
+        },
+        {
+          "kind": "matchEnd",
+          "raw": "2026-01-06 03:40:27 +0000",
+          "source": "ktxstats",
+          "tz": "+0000",
+          "unixMs": 1767670827000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Jan 06, 03:40",
+          "source": "finalscores",
+          "unixMs": 1767670800000,
+          "yearFrom": "epoch"
+        }
+      ],
+      "demoOffset": 10104,
+      "demoStartAccuracyMs": 1000,
+      "demoStartSource": "epoch",
+      "demoStartUnixMs": 1767670337000,
+      "matchEnd": 480005,
+      "matchEndUnixMs": 1767670827000,
+      "matchStart": 0,
+      "matchStartAccuracyMs": 1000,
+      "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
+      "matchStartSource": "epoch",
+      "matchStartUnixMs": 1767670347104
+    },
+    "players": [
+      {
+        "identity": "s0u27",
+        "name": "Polish Rifle",
+        "sessions": [
+          {
+            "endMs": 480005,
+            "name": "Polish Rifle",
+            "slot": 0,
+            "startMs": -10104,
+            "userId": 27
+          }
+        ]
+      },
+      {
+        "identity": "s1u31",
+        "name": "keith",
+        "sessions": [
+          {
+            "endMs": 480005,
+            "name": "keith",
+            "slot": 1,
+            "startMs": -10104,
+            "userId": 31
+          }
+        ]
+      },
+      {
+        "identity": "s2u30",
+        "name": "rdleifriaf",
+        "sessions": [
+          {
+            "endMs": 480005,
+            "name": "rdleifriaf",
+            "slot": 2,
+            "startMs": -10104,
+            "userId": 30
+          }
+        ]
+      }
+    ]
+  }
+}

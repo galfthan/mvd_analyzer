@@ -1,0 +1,244 @@
+// Package damagerecon reconstructs the per-hit damage log for demos that
+// predate the KTX mvdhidden_dmgdone instrumentation (~45% of the archive:
+// res.Damage == nil because the wire never carried a damage stream).
+//
+// The reconstruction reads only spectator-visible evidence that the
+// analyzer pipeline already extracts into the Result:
+//
+//   - the per-player health/armor CHANGE streams (result.PlayerStream.Health/
+//     Armor) — change-driven at server frame rate, so every hit lands as a
+//     same-instant h/a drop and the observed delta IS the KTX bounded value
+//     (armor absorbed + health share capped at remaining health);
+//   - LG beam segments and rocket/grenade entity flights
+//     (result.Streams.Beams / .Projectiles);
+//   - the point-effect temp entities (result.Streams.PointEffects):
+//     TE_EXPLOSION anchors rockets/grenades on their exact detonation
+//     points, TE_BLOOD confirms hitscan hits (count-pinned magnitudes
+//     after per-demo calibration), TE_LIGHTNINGBLOOD confirms LG hits;
+//   - weapon fire sounds (result.ShotsResult — only the damage-free
+//     Time/Player/Weapon columns; Hit/Victims are damage-derived and are
+//     deliberately never read);
+//   - position/view/velocity tracks, spawn/death instants, held-weapon and
+//     quad intervals (result.PlayerStream);
+//   - the frag log (result.FragResult), anchoring every kill.
+//
+// Magnitudes come from the deltas (deltas.go); attribution scores candidate
+// explanations by geometry + QW damage-model consistency (attribution.go);
+// aggregation reproduces the exact DamageResult shape the KTX-derived
+// analyzer emits (aggregate.go), stamped Source = "reconstructed".
+//
+// Feasibility, validation method, and the residual error classes are
+// documented in the 2026-08-11 study this package ports
+// (.reports/qw-damage-recon-2026-08-11/REPORT.md); the Go port's own
+// accuracy numbers live in ACCURACY.md next to this file.
+package damagerecon
+
+import (
+	"errors"
+
+	"github.com/mvd-analyzer/mvd-analytics/result"
+)
+
+// Errors reported by Compute. All mean "no reconstruction was produced";
+// none is a pipeline failure.
+var (
+	// ErrNoStreams: the Result carries no per-player streams (aborted or
+	// pre-match-only demo) — there is nothing to reconstruct from.
+	ErrNoStreams = errors.New("damagerecon: no player streams")
+	// ErrNoSpatialStreams: the beam/projectile spatial streams were never
+	// built (Registry.BuildShotStreams off). Reconstruction without them
+	// would silently degrade attribution, so it refuses instead.
+	ErrNoSpatialStreams = errors.New("damagerecon: spatial shot streams not built (enable BuildShotStreams / -include projectiles,beams)")
+	// ErrSkippedMode: the server mode rewrites T_Damage in ways the
+	// damage model cannot follow (midair / instagib / dmgfrags) — the same
+	// modes the KTX-side bounded reconstruction refuses.
+	ErrSkippedMode = errors.New("damagerecon: server mode not reconstructable")
+)
+
+// Options selects a non-default reconstruction run. The zero value is the
+// production configuration; the flags exist for the accuracy harnesses.
+type Options struct {
+	// WithholdObituaries cuts the frag log out of the ATTRIBUTION side: a
+	// killing delta is then explained by geometry and the damage model
+	// alone, exactly like the survived hits around it, instead of taking
+	// the killer and weapon the obituary names.
+	//
+	// Delta EXTRACTION keeps its frag anchors (deltas.go's killAnchors), so
+	// a withheld run observes the same instants at the same magnitudes —
+	// only the attacker/weapon verdict changes. That is what makes the
+	// obituary usable as ground truth for attribution on demos with no KTX
+	// damage log (cmd/qw-recon-oracle): the thing under test can no longer
+	// read the answer.
+	WithholdObituaries bool
+}
+
+// Compute reconstructs a DamageResult from the assembled Result's state
+// streams. It never reads res.Damage (the caller decides whether a wire
+// damage stream takes precedence) nor any damage-derived field.
+func Compute(res *result.Result) (*result.DamageResult, error) {
+	return ComputeWithOptions(res, Options{})
+}
+
+// ComputeWithOptions is Compute with the harness knobs of Options.
+func ComputeWithOptions(res *result.Result, opt Options) (*result.DamageResult, error) {
+	if res == nil || res.Streams == nil || len(res.Streams.Players) == 0 {
+		return nil, ErrNoStreams
+	}
+	if !res.Streams.ShotStreamsComputed {
+		return nil, ErrNoSpatialStreams
+	}
+	if mode := ReconSkipReason(res); mode != "" {
+		return nil, ErrSkippedMode
+	}
+
+	in := buildInputs(res)
+	in.noObituary = opt.WithholdObituaries
+	in.bsp = loadBSPGate(res)
+	events := attribute(in)
+	return aggregate(in, events), nil
+}
+
+// ReconSkipReason is this package's complete stand-down reason for an
+// assembled Result — "" when the reconstruction will run. It is the server-
+// mode detection SkipModeReason shares with the KTX-side bounded pass, plus
+// the gates that are damagerecon's alone because they are about the damage
+// MODEL rather than about the wire values.
+func ReconSkipReason(res *result.Result) string {
+	if r := SkipModeReasonFromResult(res); r != "" {
+		return r
+	}
+	return quadRegimeSkipReason(res)
+}
+
+// quadRegimeSkipReason stands the reconstruction down on a recording whose
+// QUAD MULTIPLIER the damage model does not follow. KTX makes the quad an
+// OCTA in deathmatch 4 — `damage *= (deathmatch != 4 ? 4 : tot_mode_enabled()
+// ? FrogbotQuadMultiplier() : 8)`, ktx/src/combat.c:541 — while this package
+// models a flat ×4 everywhere (quadFactor, modelBounds). Every modeled quad
+// hit in such a demo would be published at about half its true value, stamped
+// Source = "reconstructed" with nothing marking it, which is the one thing
+// this pipeline may not do.
+//
+// Deliberately narrow: it fires only when the recording actually contains a
+// quad, so quad-less deathmatch 4 (povdmm4 duels are the population) stays
+// analyzable. `deathmatch` is a plain serverinfo key the pipeline already
+// reads elsewhere (analyzer/backpack_linkage.go:378).
+//
+// Modelling the octa instead of refusing — and the tot_mode custom
+// multiplier, which is not on the wire at all — is plan-damage-recon.md §8
+// lead C. This gate is the interim answer, not the intended one.
+//
+// It is NOT part of SkipModeReason, because that one also gates
+// analyzer/damage.go's bounded reconstruction, which reads the server's own
+// damage values off the wire and does not care which multiplier produced
+// them.
+func quadRegimeSkipReason(res *result.Result) string {
+	if res == nil || res.Metadata == nil || res.Metadata.ServerInfo["deathmatch"] != "4" {
+		return ""
+	}
+	if res.Streams == nil {
+		return ""
+	}
+	for i := range res.Streams.Players {
+		if len(res.Streams.Players[i].Quad) > 0 {
+			return "dmm4-quad"
+		}
+	}
+	return ""
+}
+
+// SkipModeReasonFromResult applies the full two-source skip detection to
+// the assembled Result: serverinfo plus the countdown-derived match
+// settings.
+func SkipModeReasonFromResult(res *result.Result) string {
+	if res.Metadata == nil {
+		return ""
+	}
+	return SkipModeReasonFull(res.Metadata.ServerInfo, res.Metadata.MatchSettings)
+}
+
+// SkipModeReasonFull folds the countdown-centerprint MatchSettings over
+// the serverinfo detection. Old KTX (observed 1.41-beta on archive
+// demos) published NO mode signal in serverinfo at all — no k_* cvars,
+// no composite `mode` string — while its countdown table still printed
+// "Midair on"; the parsed MatchSettings are the only wire record of the
+// ruleset there. Serverinfo wins when both speak.
+func SkipModeReasonFull(si map[string]string, ms *result.MatchSettings) string {
+	if r := SkipModeReason(si); r != "" {
+		return r
+	}
+	if ms != nil {
+		switch {
+		case ms.Midair:
+			return "midair"
+		case ms.Instagib:
+			return "instagib"
+		case ms.Dmgfrags:
+			return "dmgfrags"
+		}
+	}
+	return ""
+}
+
+// SkipModeReasons is every value SkipModeReason / SkipModeReasonFull can
+// return, other than "". It is the vocabulary the `boundedMode` field
+// publishes as `skipped:<reason>` (mvd-api openapi.yaml), and the API's
+// drift test asserts that enum covers this list — the enum was a
+// hand-mirrored copy that had already lagged once.
+//
+// TestSkipModeReasonsAreComplete drives every detectable input through the
+// function and checks the answer is in here, so adding a detection without
+// adding its name fails the build rather than the schema.
+var SkipModeReasons = []string{
+	"midair", "instagib", "dmgfrags", "ca", "wipeout", "ra", "lgc", "race",
+}
+
+// SkipModeReason names the server mode that makes damage arithmetic
+// unreconstructable from the wire, or "" when the standard rules apply.
+// Shared by this package's gate and the KTX-side bounded reconstruction
+// (analyzer/damage.go boundedSkipReason) so the two can never disagree.
+//
+// Two detection layers, because KTX moved the signal:
+//
+//   - legacy cvar keys (k_midair / k_instagib / k_dmgfrags), which older
+//     servers published in serverinfo directly;
+//   - the modern composite `mode` string, `umode[-submode...]` built by
+//     SetMode4ServerInfo (ktx/src/world.c:1475): submode tokens -midair,
+//     -instagib, -df (dmgfrags), -ca / -wo (k_clan_arena 1/2), -ra
+//     (rocket arena), -lgc, -race — plus the base umodes that imply an
+//     arena ruleset outright (wipeout, ca, race). Clan-arena modes
+//     suppress drowning/fall damage and ignore almost all damage between
+//     rounds while STILL multicasting raw values (combat.c:475-491);
+//     lgc rewrites non-LG damage; dmgfrags inverts pent/telefrag
+//     accounting — none observable per hit.
+func SkipModeReason(si map[string]string) string {
+	for _, m := range [...]struct{ cvar, mode string }{
+		{"k_midair", "midair"},
+		{"k_instagib", "instagib"},
+		{"k_dmgfrags", "dmgfrags"},
+	} {
+		if v := si[m.cvar]; v != "" && v != "0" {
+			return m.mode
+		}
+	}
+	m := result.ParseServerinfoMode(si["mode"])
+	switch m.Umode {
+	case "wipeout", "ca", "race":
+		return m.Umode
+	}
+	for _, sub := range m.Submodes {
+		switch sub {
+		case "midair", "instagib", "lgc", "race":
+			return sub
+		case "df":
+			return "dmgfrags"
+		case "ca":
+			return "ca"
+		case "wo":
+			return "wipeout"
+		case "ra":
+			return "ra"
+		}
+	}
+	return ""
+}

@@ -54,7 +54,7 @@ func TestListEnvelopes(t *testing.T) {
 		t.Errorf("chat envelope wrong: %s", s)
 	}
 	// An empty (but non-nil) list stays [] — matching the view constructors.
-	empty := AirgibsEnvelope{TimeUnit: UnitMs, Airgibs: []result.AirgibEvent{}}
+	empty := HighlightsEnvelope{TimeUnit: UnitMs, Airgibs: []result.HighlightEvent{}}
 	if s := marshal(t, empty); !strings.Contains(s, `"airgibs":[]`) {
 		t.Errorf("empty airgibs should be []: %s", s)
 	}

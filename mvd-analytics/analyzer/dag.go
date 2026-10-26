@@ -20,7 +20,7 @@ import "fmt"
 // The out-of-band lazy pass ComputeLOS (los.go) is modelled as a lazy DAG node
 // since Stage 3 (materialize.go): a nodeSpec with Lazy:true, registered in
 // lazyArtifacts rather than in the eager analyzer / post-processor slices. It
-// does NOT enter analyzeSource's execution order (r.specs / r.nodes stay the 21 eager
+// does NOT enter analyzeSource's execution order (r.specs / r.nodes stay the 25 eager
 // nodes), so the eager bundle and the golden corpus are unchanged; it appears
 // in -graph output marked lazy and is materialised on demand through the
 // LazyArtifact hooks (mvd-api's per-artifact tier-3 cache). (The spatial
@@ -97,46 +97,58 @@ var analyzerNodeMeta = map[string]nodeMeta{
 		desc: "KTX demoinfo scoreboard blob: per-player weapon accuracy, kills, deaths, damage, sprees, and item pickup counts, verbatim from the server."},
 	"identity": {name: "identity", requires: []string{"demoinfo"},
 		desc: "Player identity sessions — the slot→name/userid/team resolution every downstream producer reads."},
-	"frag": {name: "frag", requires: []string{"clock", "demoinfo", "identity"}, resultKey: "frags",
+	"frag": {name: "frag", requires: []string{"clock", "demoinfo", "identity", "roster:final"}, resultKey: "frags",
 		desc: "Raw frag aggregates and the chronological kill log (weapon, suicide, team-kill flags). In-pipeline consumers wanting the telefrag-recovered log require `frags:final`; the served `frags` key is final by serve time since all nodes run."},
-	"roster": {name: "roster", requires: []string{"demoinfo"},
-		desc: "Canonical player roster with team labels (duel player-as-team rewrite applied), read by every team-aware producer."},
+	"roster": {name: "roster", requires: []string{"demoinfo", "identity", "metadata"},
+		desc: "Canonical player roster with team labels (the individual player-as-team rewrite applied to duels and to every mode with no teamplay) plus the normalised game-mode descriptor, read by every team-aware producer — which binds `roster:final` (published by `match`) rather than this node, since a demo with no demoinfo block gets its duel verdict from the match scoreboard. Requires `metadata` because the mode resolver reads the serverinfo cvars and the countdown settings table, and `identity` because the individual rewrite OVERWRITES co.DemoInfo.Players[].Team in place (roster.go) — identity copies the raw tag out of the same struct into its session table, so it has to read first."},
 
 	// Derived consumers / independent peers.
 	"metadata": {name: "metadata", resultKey: "metadata",
-		desc: "Server cvars and parsed KTX match settings (mode, timelimit, antilag, midair, instagib, ...)."},
-	"match": {name: "match", requires: []string{"demoinfo", "identity", "metadata"}, resultKey: "match",
-		desc: "Match summary: map, mode, duration, and the per-player scoreboard. In-pipeline consumers wanting the frag-log-corrected kills/deaths/suicides require `match:final`; the served `match` key is corrected by serve time since all nodes run."},
-	"messages": {name: "messages", requires: []string{"clock", "demoinfo", "roster"}, resultKey: "messages",
+		desc: "Server cvars, parsed KTX match settings (mode, timelimit, antilag, midair, instagib, ...) and KTX's //finalscores end-of-match scoreline."},
+	"match": {name: "match", requires: []string{"demoinfo", "identity", "metadata", "roster"}, provides: []string{"roster:final"}, resultKey: "match",
+		desc: "Match summary: map, mode, duration, the per-player scoreboard, and a `sources` block naming where the map / mode / team rows came from (demoinfo, serverinfo, //finalscores, derived, individual). Also publishes `roster:final`: on a demo with no demoinfo block this node is what settles the two-participant duel verdict and the mode descriptor derived from it, so every co.Roster / co.GameMode reader binds that artifact. In-pipeline consumers wanting the frag-log-corrected kills/deaths/suicides require `match:final`; the served `match` key is corrected by serve time since all nodes run."},
+	"messages": {name: "messages", requires: []string{"clock", "demoinfo", "roster:final"}, resultKey: "messages",
 		desc: "Chat, teamsay, and other match print messages with markup-stripped text."},
-	"timelineAnalysis": {name: "timeline", requires: []string{"clock", "demoinfo", "identity", "frag", "roster", "metadata"}, resultKey: "timelineAnalysis",
-		desc: "Match timeline: phases, streaks, powerup runs, pauses, region-control layout, airgibs, and the per-player event-stream container. LARGE — one of the biggest Result sections; prefer the windowed views (events, buckets, region-control) over fetching it whole."},
-	"items": {name: "items", requires: []string{"clock", "demoinfo", "identity", "roster"}, resultKey: "items",
+	"timelineAnalysis": {name: "timeline", requires: []string{"clock", "demoinfo", "identity", "frag", "roster:final", "metadata"}, resultKey: "timelineAnalysis",
+		desc: "Match timeline: phases, streaks, powerup runs, pauses, region-control layout, and the per-player event-stream container. LARGE — one of the biggest Result sections; prefer the windowed views (events, buckets, region-control) over fetching it whole."},
+	"items": {name: "items", requires: []string{"clock", "demoinfo", "identity", "roster:final"}, resultKey: "items",
 		desc: "Per-item pickup/respawn timeline with world position and nearest loc."},
-	"damage": {name: "damage", requires: []string{"clock", "demoinfo", "identity", "roster"}, resultKey: "damage",
-		desc: "Per-hit damage from the KTX stream: totals, matrix, per-weapon, EWep buckets, telefrags, stomps, and the scoreboard cross-check."},
-	"shots": {name: "shots", requires: []string{"clock", "demoinfo", "identity", "timeline", "roster"}, resultKey: "shots",
+	"damage": {name: "damage", requires: []string{"clock", "demoinfo", "identity", "roster:final", "metadata"}, resultKey: "damage",
+		desc: "Per-hit damage: totals, matrix, per-weapon, EWep buckets, telefrags, stomps, and the scoreboard cross-check. Decoded from the wire KTX stream when present (source=ktx); on pre-instrumentation demos the damage-recon post fills the same section (source=reconstructed), so the served artifact carries whichever the demo yielded."},
+	"shots": {name: "shots", requires: []string{"clock", "demoinfo", "identity", "timeline", "roster:final"}, resultKey: "shots",
 		desc: "Per-fire weapon stream with per-player accuracy aggregates and the KTX cross-check. Stream-derived splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build)."},
 	"map_entities": {name: "map-entities", resultKey: "mapEntities",
 		desc: "The map's static designed entity layout (item spawns, spawnpoints, teleporters) resolved from the embedded BSP corpus."},
-	"backpacks": {name: "backpacks", requires: []string{"clock", "roster"}, resultKey: "backpacks",
-		desc: "RL/LG backpack drops from KTX drop hints, with dropper, weapon, origin, and the ent number joining to weapon pickups."},
-	"weaponPickups": {name: "weapon-pickups", requires: []string{"clock", "identity", "frag", "roster"}, resultKey: "weaponPickups",
+	"backpacks": {name: "backpacks", requires: []string{"clock", "identity", "demoinfo", "roster:final"}, resultKey: "backpacks",
+		desc: "RL/LG backpack drops with dropper, weapon, origin and a `source` naming the provenance: `ktx` from the wire `//ktx drop` hint (which also carries the ent number joining to weapon pickups), or `reconstructed` from the backpack-recon node on demos older than that hint. A `ktx` row also carries `fate: expired` when KTX's `//ktx expire` hint announced the pack's 120 s removal — the only wire statement that a pack was NOT taken, which the weapon-pickups join cannot make."},
+	"weaponPickups": {name: "weapon-pickups", requires: []string{"clock", "identity", "frag", "roster:final"}, resultKey: "weaponPickups",
 		desc: "Slot-weapon acquisitions (world spawners and backpacks) with kills-before-next-death effectiveness."},
 }
 
 // postNodeMeta declares the DAG edges for each post-processor, keyed by
 // its resolved function name (postProcName). It encodes §1.3's result.*
-// read edges. Both whole-Result barrier pseudo-artifacts have now retired:
+// read edges. One of the two whole-Result barrier pseudo-artifacts has
+// retired; the other came back under a name that says what it is:
 //
 //   - "epoch:match" retired with the clock refactor — timestamps are born
 //     match-relative in each producer's Finalize.
-//   - "teams:final" retired with the roster refactor — team labels are born
-//     correct in each producer's Finalize (roster/match/timeline/messages/
-//     items/pickups/backpacks/shots read co.Roster). aim / match-final /
-//     loc-graph / region-control therefore keep only their data edges: they
-//     already read final team labels through those artifacts (aim via shots,
-//     match-final via match, loc-graph/region-control via streams + match).
+//   - "teams:final" retired with the roster refactor, because team labels
+//     are born correct in each producer's Finalize (roster/match/timeline/
+//     messages/items/pickups/backpacks/shots read co.Roster) — but the
+//     roster is NOT final when the roster node publishes it. On a demo with
+//     no usable demoinfo block, MatchAnalyzer.Finalize is what establishes
+//     the two-participant duel verdict (Roster.noteMatchParticipants) and
+//     refines the mode descriptor from it, mutating both shared structs. So
+//     `match` publishes "roster:final" and every co.Roster / co.GameMode
+//     reader binds THAT, not the raw "roster". Without the edge the verdict
+//     was schedule-dependent: `frag` finalised before `match` under the
+//     default tie-break and flagged team kills from the pre-promotion
+//     descriptor while damage / shots / timeline / player-stats saw the
+//     promoted one (archive e57be1ab5334…, no demoinfo, two participants,
+//     serverinfo teamplay 4). aim / match-final / loc-graph /
+//     region-control keep only their data edges: they already read final
+//     team labels through those artifacts (aim via shots, match-final via
+//     match, loc-graph/region-control via streams + match).
 //
 // The two fix-up nodes are FINAL-artifact producers, not anonymous mutators.
 // frags-final appends recovered telefrag team-kills to the raw frag log and
@@ -159,14 +171,15 @@ var postNodeMeta = map[string]nodeMeta{
 	},
 	"aimPost": {
 		name: "aim", mutates: true,
-		requires:  []string{"shots", "timeline", "damage"},
+		requires:  []string{"shots", "timeline", "damage:final"},
 		resultKey: "aim",
-		desc:      "Per-player aim analysis: per-weapon effectiveness, crosshair-error samples, and the LG ramp series. Full splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build).",
+		desc:      "Per-player aim analysis: per-weapon effectiveness, crosshair-error samples, and the LG ramp series. Full splits ride the opt-in projectile/beam/nail streams (built by qw-analyze -include, always by mvd-api and the WASM web build). Binds `damage:final` so a reconstructed section is visible: the MEASURED counters still gate on damage.source == ktx, and reconstructed damage feeds only the separate `weapons[].recon` hit tier.",
 	},
-	"airgibsPost": {
-		name: "airgibs", mutates: true,
-		requires: []string{"demoinfo", "frag", "timeline", "damage"},
-		desc:     "Folds the Key-Moments airgib list into the timeline (direct enemy rocket hits on airborne victims above the height threshold).",
+	"highlightsPost": {
+		name:      "highlights",
+		requires:  []string{"demoinfo", "timeline", "frags:final", "damage:final"},
+		resultKey: "highlights",
+		desc:      "Highlight catalogue for Key Moments: every discharge (LG fired in water — obituary-named or a damage-log LG radius hit, clustered per discharger with the cells dumped), quadbore (self-kill by own rocket/grenade while holding quad, with the quad time held and its frags), telefrag (every `tele` death incl. the pentagram deflections and spawnicides, the killed victim's stack as the ranking scalar) and the airgib list (the view.ComputeAirgibs detector, run in here) — one row shape, each participant carrying relation to the actor, health/armor/stack read one millisecond before the event, weapons, powerups and loc. Binds `frags:final` (recovered team telefrags) and `damage:final` (the discharge/telefrag joins and the airgib detector read wire and reconstructed logs alike — pre-instrumentation demos get airgibs from the reconstruction's geometric direct hits). Absent when the demo has no streams or frag log.",
 	},
 	"scoreboardStatsPost": {
 		name: "match-final", mutates: true,
@@ -180,6 +193,17 @@ var postNodeMeta = map[string]nodeMeta{
 		resultKey: "locGraph",
 		desc:      "Per-map loc adjacency graph with directed transition weights derived from player movement.",
 	},
+	"noMatchPost": {
+		name:      "no-match",
+		requires:  []string{"timeline", "metadata", "frags:final"},
+		resultKey: "noMatch",
+		desc:      "Explicit marker on a result whose `streams` block is absent, naming why there is no analyzable match (midMatchRecording / matchStartUnannounced / noMatchDeclared / noPlayRecorded / demoUnreadable) with the wire evidence behind the verdict. Present exactly when `streams` is absent — one predicate, so no result carries both.",
+	},
+	"wallClockPost": {
+		name: "wall-clock", mutates: true,
+		requires: []string{"clock", "demoinfo", "metadata", "timeline", "no-match"},
+		desc:     "Match-start wall-clock anchor on `streams.global`: resolves the wire date markers (matchdate / matchkey prints, ktxstats date, the year-less //finalscores stamp) against the serverinfo version floors and each other into a graded instant (exact / unverified / contradicted). On a result with no streams the raw markers land on `noMatch.dateMarkers` instead — which is why it binds that node — and the graded anchor is NOT published there: it is a projection through a match window such a result does not have.",
+	},
 	"regionControlPost": {
 		name: "region-control", mutates: true,
 		requires: []string{"timeline", "match", "demoinfo"},
@@ -187,15 +211,32 @@ var postNodeMeta = map[string]nodeMeta{
 	},
 	"playerStatsPost": {
 		name:      "player-stats",
-		requires:  []string{"clock", "identity", "roster", "timeline", "match:final", "frags:final", "damage", "shots", "items", "weapon-pickups", "backpacks", "metadata"},
+		requires:  []string{"clock", "identity", "roster:final", "timeline", "match:final", "frags:final", "damage:final", "shots", "items", "weapon-pickups", "backpacks:final", "metadata", "aim"},
 		resultKey: "playerStats",
-		desc:      "Canonical per-player and per-team statistics: corrected scoreboard, damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats.",
+		desc:      "Canonical per-player and per-team statistics: corrected scoreboard (including the derived kill-spree maxima), damage, pickup tallies, and possession time (time with each weapon / armor type / no armor) with explicit match-present-alive denominators. Computed for every demo, degrading to derived reconstructions rather than dropping fields; the KTX overlay is applied at read time by view.PlayerStats. Binds `aim` for both hit tiers: the reconstructed one, which fills the accuracy family's `hits` on demos with no wire damage stream (src=reconstructed), and the measured pellet / direct-impact counters the wire-linked branch publishes as KTX's own convention (schema v75) — reading the published section rather than re-running either join is what makes its weapon-level withholds inherit here.",
 	},
 	"openingPost": {
 		name: "opening", mutates: true,
 		requires:  []string{"timeline", "items"},
 		resultKey: "opening",
 		desc:      "Match opening: each player's match-start spawn location plus the first in-match take of every contested spawner (armors, mega, powerups, RL/LG). A pure projection of items + streams, kept small for one-call fetches.",
+	},
+	"backpackReconPost": {
+		name: "backpack-recon", mutates: true,
+		requires: []string{"backpacks", "timeline", "frags:final", "metadata"},
+		provides: []string{"backpacks:final"},
+		desc:     "Reconstructed RL/LG backpack drops for demos older than the KTX `//ktx drop` hint (KTX 1.38): replays DropBackpack's default rule — the victim's wielded weapon at the death instant, dropped at their last broadcast position — into the same `backpacks` section, stamped source=reconstructed and carrying no entNum. A hint-carrying demo is never touched, and the pass stands down (leaving the section absent) on frozen weapon state, a missing frag log or active-weapon stat, a fairpacks/yawnmode/bloodfest ruleset, or a mod new enough to have hinted.",
+	},
+	"backpackLinkagePost": {
+		name: "backpack-linkage", mutates: true,
+		requires: []string{"backpacks:final", "timeline", "items"},
+		desc:     "Fate of each RECONSTRUCTED backpack drop, read off the wire's backpack-entity track: the pack that appears at the drop's time and place is bound to it, followed to where it lands, and its disappearance classified as `picked` (a live player's bounding box overlapped it, the same test the server ran before BackpackTouch — attributed when the evidence names one player), `expired` (KTX's 120 s SUB_Remove with nobody on it) or `unobserved`. Stamps `backpacks[].fate/picker/pickerTeam/pickupTime/entNum`. A hint-carrying demo is never touched: `//ktx bp` already names the picker in `weaponPickups`.",
+	},
+	"damageReconPost": {
+		name: "damage-recon", mutates: true,
+		requires: []string{"damage", "timeline", "shots", "frags:final", "metadata", "demoinfo"},
+		provides: []string{"damage:final"},
+		desc:     "Reconstructed damage for pre-instrumentation demos: when the wire carried no mvdhidden_dmgdone stream, rebuilds the damage section (raw + bounded) from the h/a change streams, LG beams, projectile flights, fire sounds and the frag log, stamped source=reconstructed; publishes `damage:final`. A wire-measured section is never touched. player-stats, highlights and aim all bind `damage:final`: player-stats' damage family and the highlights' airgib detection ride the reconstruction on old demos (src=reconstructed), while aim's measured counters still gate on Damage.Source == ktx and the reconstruction feeds only its separate `recon` hit tier (a raw `damage` edge alone would not pin the pre-mutation value under every topological order).",
 	},
 }
 

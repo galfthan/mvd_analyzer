@@ -201,7 +201,15 @@ func stubResult() *result.Result {
 				{
 					Name: "bps", Team: "blue",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 500000, DeadMs: 100000},
-					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: intp(32), Deaths: 20, Efficiency: psShare(0.6154)},
+					Score: result.PlayerStatsScore{Src: result.SrcDerived, Frags: 30, Kills: intp(32), Deaths: 20,
+						Efficiency: psShare(0.6154), MaxSpree: intp(7), MaxQuadSpree: intp(3)},
+					// Derived, and the KTX block above carries an acc set for
+					// this player — so this row exercises the wholesale swap
+					// and the per-weapon conventions it stamps.
+					Accuracy: &result.PlayerStatsAccuracy{Src: result.SrcDerived,
+						ByWeapon: map[string]result.PlayerStatsAcc{
+							"rl": {Attacks: 61, Hits: intp(24), HitsConvention: result.HitsAnyDamage},
+						}},
 					Hold: result.PlayerStatsHold{Src: result.SrcDerived,
 						Weapons: map[string]result.HoldStat{"rl": {Ms: 200000, Runs: 4, LongestMs: 90000, ShareAlive: 0.4, ShareMatch: 0.3333}},
 						Armor:   map[string]result.HoldStat{"ra": {Ms: 129000, Runs: 3, LongestMs: 60000, ShareAlive: 0.258, ShareMatch: 0.215}, "none": {Ms: 371000, Runs: 9, LongestMs: 80000, ShareAlive: 0.742, ShareMatch: 0.6183}},
@@ -210,8 +218,9 @@ func stubResult() *result.Result {
 				{
 					Name: "valla", Team: "red",
 					Window: result.PlayerStatsWindow{MatchMs: 600000, PresentMs: 600000, AliveMs: 480000, DeadMs: 120000},
-					Score:  result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: intp(21), Deaths: 30, Efficiency: psShare(0.4118)},
-					Hold:   result.PlayerStatsHold{Src: result.SrcDerived},
+					Score: result.PlayerStatsScore{Src: result.SrcDerived, Frags: 20, Kills: intp(21), Deaths: 30,
+						Efficiency: psShare(0.4118), MaxSpree: intp(4), MaxQuadSpree: intp(0)},
+					Hold: result.PlayerStatsHold{Src: result.SrcDerived},
 				},
 			},
 			Teams: []result.PlayerStatsRow{
@@ -271,6 +280,10 @@ func TestShotStreamEndpoints(t *testing.T) {
 		Sx: []float32{1}, Sy: []float32{2}, Sz: []float32{3},
 		Ex: []float32{4}, Ey: []float32{5}, Ez: []float32{6},
 	}
+	r.Streams.PointEffects = &result.PointEffectStreams{
+		T: []int32{4000, 4100}, Type: []int32{3, 12}, Count: []int32{0, 4},
+		X: []float32{1, 2}, Y: []float32{3, 4}, Z: []float32{5, 6},
+	}
 	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
 	defer srv.Close()
 
@@ -278,11 +291,54 @@ func TestShotStreamEndpoints(t *testing.T) {
 		{"/v1/demos/gameId:42/streams/projectiles", "projectiles"},
 		{"/v1/demos/gameId:42/streams/beams", "beams"},
 		{"/v1/demos/gameId:42/streams/nails", "nails"},
+		{"/v1/demos/gameId:42/streams/point-effects", "pointEffects"},
 	} {
 		resp := getJSON(t, srv.URL+c.path, 200)
 		if resp[c.key] == nil {
 			t.Errorf("%s: %q missing/null, body=%v", c.path, c.key, resp)
 		}
+	}
+}
+
+// TestPointEffects_LegendAndFilter pins the endpoint's two contracts: the
+// types legend covers the demo's codes even under a filter, and a filter
+// that matches something narrows the columns while one that matches
+// nothing returns empty columns (not null).
+func TestPointEffects_LegendAndFilter(t *testing.T) {
+	r := stubResult()
+	r.Streams.PointEffects = &result.PointEffectStreams{
+		T: []int32{4000, 4100, 4200}, Type: []int32{3, 12, 12}, Count: []int32{0, 4, 2},
+		X: []float32{1, 2, 3}, Y: []float32{4, 5, 6}, Z: []float32{7, 8, 9},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/streams/point-effects?types=explosion", 200)
+	legend, _ := resp["types"].(map[string]any)
+	if legend["3"] != "explosion" || legend["12"] != "blood" {
+		t.Errorf("legend should cover pre-filter codes, got %v", resp["types"])
+	}
+	pe, _ := resp["pointEffects"].(map[string]any)
+	if got := pe["t"].([]any); len(got) != 1 {
+		t.Errorf("types=explosion: want 1 row, got %v", pe["t"])
+	}
+
+	// Filter matching nothing: empty columns, not null.
+	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/streams/point-effects?types=teleport", 200)
+	pe, ok := resp["pointEffects"].(map[string]any)
+	if !ok || pe == nil {
+		t.Fatalf("no-match filter should return empty columns, got %v", resp["pointEffects"])
+	}
+	if got := pe["t"].([]any); len(got) != 0 {
+		t.Errorf("types=teleport: want 0 rows, got %v", pe["t"])
+	}
+
+	// Unknown type name: 400 invalid_param, not a silent no-match.
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/streams/point-effects?types=explsion")
+	if status != 400 {
+		t.Errorf("bad type: status = %d, want 400 (body=%s)", status, body)
+	} else if code := errBodyCode(t, body); code != "invalid_param" {
+		t.Errorf("bad type: code = %q, want invalid_param", code)
 	}
 }
 
@@ -294,6 +350,13 @@ func TestShotStreamEndpoints_Absent(t *testing.T) {
 	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/streams/projectiles", 200)
 	if resp["projectiles"] != nil {
 		t.Errorf("expected null projectiles, got %v", resp["projectiles"])
+	}
+	resp = getJSON(t, srv.URL+"/v1/demos/gameId:42/streams/point-effects", 200)
+	if resp["pointEffects"] != nil {
+		t.Errorf("expected null pointEffects, got %v", resp["pointEffects"])
+	}
+	if _, hasLegend := resp["types"]; hasLegend {
+		t.Errorf("expected types legend omitted on a demo with no point effects, got %v", resp["types"])
 	}
 }
 
@@ -613,7 +676,8 @@ func TestUnknownParam_Rejected(t *testing.T) {
 		"overview?extra=1", "metadata?extra=1", "demoinfo?extra=1",
 		"loc-graph?extra=1", "loc-table?extra=1", "shots?other=1",
 		"streams/projectiles?extra=1", "streams/beams?extra=1",
-		"streams/nails?extra=1", "airgibs?extra=1", "los?extra=1",
+		"streams/nails?extra=1", "streams/point-effects?extra=1",
+		"highlights?extra=1", "los?extra=1",
 		"artifacts/frag?extra=1",
 	}
 	for _, u := range urls {
@@ -1441,6 +1505,64 @@ func TestPlayerStats(t *testing.T) {
 	if sources["hold"] != "derived" {
 		t.Errorf("sources.hold = %v; want derived", sources["hold"])
 	}
+
+	// v74: the derived demoinfo fields have to reach the wire. All of them are
+	// omitempty, so nothing but an explicit assertion catches a projection
+	// that stopped serving them.
+	score, _ := bps["score"].(map[string]any)
+	if score["maxSpree"] != float64(7) || score["maxQuadSpree"] != float64(3) {
+		t.Errorf("score sprees = %v / %v; want 7 / 3", score["maxSpree"], score["maxQuadSpree"])
+	}
+	// bps's family is overlaid from the KTX block, so its conventions are
+	// KTX's — per weapon, which is the whole reason the marker exists.
+	bpsAcc, _ := bps["accuracy"].(map[string]any)
+	byWeapon, _ := bpsAcc["byWeapon"].(map[string]any)
+	rl, _ := byWeapon["rl"].(map[string]any)
+	if bpsAcc["src"] != "ktx" || rl["hitsConvention"] != "directImpact" {
+		t.Errorf("bps rl accuracy = src %v / %v; want ktx / directImpact", bpsAcc["src"], rl["hitsConvention"])
+	}
+}
+
+// The other half of the accuracy contract: the pre-instrumentation demo,
+// where there is no block to overlay and the family stays reconstructed. Its
+// hits answer a DIFFERENT question from the KTX row above — any damage path
+// rather than a direct impact — and `hitsConvention` is the only field that
+// says so, so it is pinned on the wire rather than only in the analyzer.
+func TestPlayerStats_ReconstructedAccuracyConvention(t *testing.T) {
+	r := stubResult()
+	r.DemoInfo = nil
+	for i := range r.PlayerStats.Players {
+		if r.PlayerStats.Players[i].Name != "bps" {
+			continue
+		}
+		r.PlayerStats.Players[i].Accuracy = &result.PlayerStatsAccuracy{
+			Src: result.SrcReconstructed,
+			ByWeapon: map[string]result.PlayerStatsAcc{
+				"rl": {Attacks: 88, Hits: intp(30), HitsConvention: result.HitsAnyDamage},
+				// Outside the aim recon tier: the withhold inherits, so
+				// neither the count nor the marker appears.
+				"sng": {Attacks: 40},
+			},
+		}
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	resp := getJSON(t, srv.URL+"/v1/demos/gameId:42/player-stats", 200)
+	players, _ := resp["players"].([]any)
+	bps, _ := players[0].(map[string]any)
+	acc, _ := bps["accuracy"].(map[string]any)
+	byWeapon, _ := acc["byWeapon"].(map[string]any)
+	rl, _ := byWeapon["rl"].(map[string]any)
+	sng, _ := byWeapon["sng"].(map[string]any)
+	if acc["src"] != "reconstructed" || rl["hitsConvention"] != "anyDamage" {
+		t.Errorf("rl accuracy = src %v / %v; want reconstructed / anyDamage", acc["src"], rl["hitsConvention"])
+	}
+	if _, ok := sng["hits"]; ok {
+		t.Error("sng carries hits — the recon tier withholds nails, and the withhold must inherit")
+	}
+	if _, ok := sng["hitsConvention"]; ok {
+		t.Error("sng carries a hitsConvention with no hits to describe")
+	}
 }
 
 // The endpoint must serve a demo with no KTX demoinfo block — that is the
@@ -1506,25 +1628,18 @@ func TestDemoInfo_Unavailable(t *testing.T) {
 	}
 }
 
-func TestAirgibs(t *testing.T) {
-	r := &result.Result{
-		SchemaVersion: result.CurrentSchemaVersion,
-		TimelineAnalysis: &result.TimelineAnalysisResult{
-			Airgibs: []result.AirgibEvent{{
-				Time: 60000, Attacker: "bps", Victim: "milton", Height: 120, Damage: 110,
-			}},
-		},
+// envelopeInt reads a top-level integer field off a JSON envelope.
+func envelopeInt(t *testing.T, body []byte, key string) int {
+	t.Helper()
+	var env map[string]json.RawMessage
+	if err := json.Unmarshal(body, &env); err != nil {
+		t.Fatalf("unmarshal envelope: %v (%s)", err, body)
 	}
-	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
-	defer srv.Close()
-	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
-	if status != 200 {
-		t.Fatalf("status = %d (%s)", status, body)
+	var n int
+	if err := json.Unmarshal(env[key], &n); err != nil {
+		t.Fatalf("unmarshal %q: %v (%s)", key, err, body)
 	}
-	arr := unitsList(t, body, "airgibs", "ms")
-	if len(arr) != 1 || arr[0]["attacker"] != "bps" {
-		t.Errorf("airgibs = %s; want one bps hit", body)
-	}
+	return n
 }
 
 // unitsList decodes a v56 {timeUnit, <key>: [...]} list envelope, checking the
@@ -1544,36 +1659,6 @@ func unitsList(t *testing.T, body []byte, key, wantUnit string) []map[string]any
 		t.Fatalf("unmarshal %q list: %v (%s)", key, err, body)
 	}
 	return arr
-}
-
-func TestAirgibs_EmptyWithoutBSP(t *testing.T) {
-	// TimelineAnalysis present but no airgibs (no clip hull → no heights):
-	// an empty list, not an error.
-	r := &result.Result{
-		SchemaVersion:    result.CurrentSchemaVersion,
-		TimelineAnalysis: &result.TimelineAnalysisResult{},
-	}
-	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
-	defer srv.Close()
-	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
-	if status != 200 {
-		t.Fatalf("status = %d (%s)", status, body)
-	}
-	if arr := unitsList(t, body, "airgibs", "ms"); len(arr) != 0 {
-		t.Errorf("body = %q; want an empty airgibs list", body)
-	}
-}
-
-func TestAirgibs_Unavailable(t *testing.T) {
-	store := &fakeStore{byID: map[string]*result.Result{
-		"gameId:42": {SchemaVersion: result.CurrentSchemaVersion}, // no TimelineAnalysis
-	}}
-	srv := newTestServer(t, store)
-	defer srv.Close()
-	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/airgibs")
-	if status != 422 {
-		t.Errorf("status = %d; want 422 (%s)", status, resp)
-	}
 }
 
 func TestShots(t *testing.T) {
@@ -3057,8 +3142,8 @@ func TestTopWindows_Unavailable(t *testing.T) {
 	}{
 		{"gameId:10", "shots", "this demo has no weapon-fire stream"},
 		{"gameId:10", "hits", "this demo has no weapon-fire stream"},
-		{"gameId:11", "damageGiven", "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"},
-		{"gameId:11", "netDamage", "this demo has no damage data (no KTX mvdhidden_dmgdone stream)"},
+		{"gameId:11", "damageGiven", "this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)"},
+		{"gameId:11", "netDamage", "this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)"},
 		{"gameId:12", "frags", "this demo has no frag log"},
 		{"gameId:12", "netFrags", "this demo has no frag log"},
 	} {
@@ -3611,4 +3696,158 @@ func keysOf(m map[string]any) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+// highlightsStore is a Result with a stored highlight catalogue: one
+// telefrag, one discharge, one airgib — plus the streams the airgib
+// recompute reads (an airborne victim so preMs=0 re-detects the hit).
+func highlightsStore() *fakeStore {
+	h := int16(118)
+	a := int16(180)
+	stack := 298
+	r := &result.Result{
+		SchemaVersion: result.CurrentSchemaVersion,
+		Streams: &result.Streams{Players: []result.PlayerStream{
+			{Name: "milton", Team: "red", Position: &result.PositionTrack{
+				T: []int32{59_800, 60_000}, X: []float32{0, 0}, Y: []float32{0, 0},
+				Z: []float32{180, 200}, H: []float32{120, 150},
+			}},
+			{Name: "bps", Team: "blue"},
+		}},
+		Frags: &result.FragResult{Frags: []result.FragEntry{{Time: 20000, Killer: "bps", Victim: "milton", Weapon: "tele"}}},
+		Damage: &result.DamageResult{Source: result.DamageSourceKTX, Events: []result.DamageEntry{
+			{Time: 60000, Attacker: "bps", Victim: "milton", Weapon: "rl", Damage: 110},
+		}},
+		TimelineAnalysis: &result.TimelineAnalysisResult{},
+		Highlights: &result.HighlightsResult{
+			Discharges: []result.HighlightEvent{{Kind: "discharge", Time: 1000, Sources: []string{"frags"},
+				Actor: result.HighlightPlayer{Name: "valla", Relation: "self", Killed: true}}},
+			Telefrags: []result.HighlightEvent{{Kind: "telefrag", Time: 20000, TeleKind: "telefrag", EnemyKills: 1, Sources: []string{"frags"},
+				Actor: result.HighlightPlayer{Name: "bps", Team: "blue", Relation: "self"},
+				Victims: []result.HighlightPlayer{{Name: "milton", Team: "red", Relation: "enemy", Killed: true,
+					Health: &h, Armor: &a, ArmorType: "ra", Stack: &stack, Weapons: []string{"rl"}, StateSource: "stream"}}}},
+			Airgibs: []result.HighlightEvent{{Kind: "airgib", Time: 60000, Height: 120, Damage: 110, Sources: []string{"damage"},
+				Actor:   result.HighlightPlayer{Name: "bps", Relation: "self"},
+				Victims: []result.HighlightPlayer{{Name: "milton", Relation: "enemy", Damage: 110}}}},
+		},
+	}
+	return &fakeStore{byID: map[string]*result.Result{"gameId:42": r}}
+}
+
+func highlightsBody(t *testing.T, body []byte) map[string]any {
+	t.Helper()
+	var env map[string]any
+	if err := json.Unmarshal(body, &env); err != nil {
+		t.Fatalf("unmarshal: %v (%s)", err, body)
+	}
+	return env
+}
+
+func TestHighlights(t *testing.T) {
+	srv := newTestServer(t, highlightsStore())
+	defer srv.Close()
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	env := highlightsBody(t, body)
+	if env["timeUnit"] != "ms" {
+		t.Errorf("timeUnit = %v", env["timeUnit"])
+	}
+	for _, k := range []string{"discharges", "quadbores", "telefrags", "airgibs"} {
+		if _, ok := env[k].([]any); !ok {
+			t.Errorf("%s missing or not a list: %v", k, env[k])
+		}
+	}
+	if n := len(env["telefrags"].([]any)); n != 1 {
+		t.Errorf("telefrags = %d, want 1", n)
+	}
+	if n := len(env["quadbores"].([]any)); n != 0 {
+		t.Errorf("quadbores = %d, want an empty list", n)
+	}
+	tf := env["telefrags"].([]any)[0].(map[string]any)
+	victim := tf["victims"].([]any)[0].(map[string]any)
+	if victim["stack"] != float64(298) || victim["armorType"] != "ra" || victim["relation"] != "enemy" {
+		t.Errorf("telefrag victim = %v", victim)
+	}
+	if kinds := env["kinds"].([]any); len(kinds) != 4 {
+		t.Errorf("kinds echo = %v, want all four", kinds)
+	}
+	if got := envelopeInt(t, body, "preMs"); got != view.DefaultAirgibPreMs {
+		t.Errorf("preMs = %d; want the default %d", got, view.DefaultAirgibPreMs)
+	}
+}
+
+func TestHighlights_KindsAndPlayersFilter(t *testing.T) {
+	srv := newTestServer(t, highlightsStore())
+	defer srv.Close()
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights?kinds=telefrag")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	env := highlightsBody(t, body)
+	if len(env["telefrags"].([]any)) != 1 || len(env["discharges"].([]any)) != 0 || len(env["airgibs"].([]any)) != 0 {
+		t.Errorf("kinds=telefrag: %s", body)
+	}
+	if kinds := env["kinds"].([]any); len(kinds) != 1 || kinds[0] != "telefrag" {
+		t.Errorf("kinds echo = %v", kinds)
+	}
+
+	// players= matches a victim as well as the actor.
+	body, status = getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights?players=valla")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	env = highlightsBody(t, body)
+	if len(env["discharges"].([]any)) != 1 || len(env["telefrags"].([]any)) != 0 {
+		t.Errorf("players=valla: %s", body)
+	}
+
+	body, status = getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights?kinds=bogus")
+	if status != 400 || errBodyCode(t, body) != "invalid_param" {
+		t.Errorf("kinds=bogus: status %d code %q (%s)", status, errBodyCode(t, body), body)
+	}
+	for _, q := range []string{"preMs=-1", "preMs=5000", "preMs=abc"} {
+		body, status = getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights?"+q)
+		if status != 400 || errBodyCode(t, body) != "invalid_param" {
+			t.Errorf("%s: status %d code %q (%s)", q, status, errBodyCode(t, body), body)
+		}
+	}
+}
+
+// A non-default preMs re-runs the airgib detection on the stored Result
+// and leaves the other lists as stored.
+func TestHighlights_PreMsRecomputesAirgibs(t *testing.T) {
+	srv := newTestServer(t, highlightsStore())
+	defer srv.Close()
+	body, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights?preMs=0")
+	if status != 200 {
+		t.Fatalf("status = %d (%s)", status, body)
+	}
+	env := highlightsBody(t, body)
+	if got := envelopeInt(t, body, "preMs"); got != 0 {
+		t.Errorf("preMs echo = %d, want 0", got)
+	}
+	ag := env["airgibs"].([]any)
+	if len(ag) != 1 {
+		t.Fatalf("recomputed airgibs = %s", body)
+	}
+	if h := ag[0].(map[string]any)["height"]; h != float64(150) {
+		t.Errorf("recomputed airgib height = %v, want 150 (the hit-sample rule), not the stored 120", h)
+	}
+	if len(env["telefrags"].([]any)) != 1 {
+		t.Errorf("stored telefrags must survive the recompute: %s", body)
+	}
+}
+
+func TestHighlights_Unavailable(t *testing.T) {
+	store := &fakeStore{byID: map[string]*result.Result{
+		"gameId:42": {SchemaVersion: result.CurrentSchemaVersion}, // no streams, no frag log → no section
+	}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights")
+	if status != 422 || errBodyCode(t, resp) != "highlights_unavailable" {
+		t.Errorf("status = %d code = %q; want 422 highlights_unavailable (%s)", status, errBodyCode(t, resp), resp)
+	}
 }

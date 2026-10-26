@@ -25,6 +25,7 @@ type MCPBackend interface {
 	GetBuckets(ctx context.Context, in GetBucketsInput) (any, error)
 	GetEvents(ctx context.Context, in GetEventsInput) (any, error)
 	GetStreamSlice(ctx context.Context, in GetStreamSliceInput) (any, error)
+	GetPointEffects(ctx context.Context, in GetPointEffectsInput) (any, error)
 	GetStateAt(ctx context.Context, in GetStateAtInput) (any, error)
 	GetLocTrails(ctx context.Context, in GetLocTrailsInput) (any, error)
 	GetLocTable(ctx context.Context, in GetLocTableInput) (any, error)
@@ -32,6 +33,7 @@ type MCPBackend interface {
 	GetTopWindows(ctx context.Context, in GetTopWindowsInput) (any, error)
 	GetTopKills(ctx context.Context, in GetTopKillsInput) (any, error)
 	GetLives(ctx context.Context, in GetLivesInput) (any, error)
+	GetHighlights(ctx context.Context, in GetHighlightsInput) (any, error)
 	ListArtifacts(ctx context.Context, in ListArtifactsInput) (any, error)
 	GetArtifact(ctx context.Context, in GetArtifactInput) (any, error)
 }
@@ -82,7 +84,7 @@ type GetEventsInput struct {
 	StartTime int32    `json:"startTime,omitempty"`
 	EndTime   int32    `json:"endTime,omitempty"`
 	Players   []string `json:"players,omitempty"`
-	Types     []string `json:"types,omitempty" jsonschema:"event types. Default set (when empty): frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, pause. Opt-in (pass explicitly): loc, health, armor, damage, telefrag, stomp. pickup = identity-rich takes: world takes detail{item, kind, entNum, loc?, source:'world'}, backpack/unknown grants detail{item, kind, source, entNum?, dropper?} (no loc); weapon/item = held-interval gain/lose (the holding story). spawn carries detail{loc} and includes the synthesized match-start spawn at t=0. demomark = a /demomark bookmark inserted during play, detail carries spectator:true when a spectator inserted it. airgib = direct enemy rocket hit on an airborne victim, player = attacker, detail{victim, height, damage, lethal?}. pause = game-clock freeze segment, no player (so a players= filter excludes it), detail{durationMs}. A damage event carries detail{victim, damage, weapon, isSplash?, ...} where damage is the UNBOUNDED wire value (e.g. squish 1000) and detail.bounded is the KTX-scoreboard value, present only when it differs (absent on midair/instagib/dmgfrags demos) — getDamage defaults to the bounded family, so cross-check against its bounded figures, not raw damage. telefrag/stomp carry detail{victim, isTeam?} with player = the killer (the kill is already in the frag feed, hence opt-in)"`
+	Types     []string `json:"types,omitempty" jsonschema:"event types. Default set (when empty): frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, discharge, quadbore, pause. Opt-in (pass explicitly): loc, health, armor, damage, telefrag, stomp. pickup = identity-rich takes: world takes detail{item, kind, entNum, loc?, source:'world'}, backpack/unknown grants detail{item, kind, source, entNum?, dropper?} (no loc); weapon/item = held-interval gain/lose (the holding story). spawn carries detail{loc} and includes the synthesized match-start spawn at t=0. demomark = a /demomark bookmark inserted during play, detail carries spectator:true when a spectator inserted it. airgib = direct enemy rocket hit on an airborne victim, player = attacker, detail{victim, height, damage, lethal?}. pause = game-clock freeze segment, no player (so a players= filter excludes it), detail{durationMs}. A damage event carries detail{victim, damage, weapon, isSplash?, ...} where damage is the UNBOUNDED wire value (e.g. squish 1000) and detail.bounded is the KTX-scoreboard value, present only when it differs (absent on midair/instagib/dmgfrags demos) — getDamage defaults to the bounded family, so cross-check against its bounded figures, not raw damage. telefrag/stomp carry detail{victim, isTeam?} with player = the killer (the kill is already in the frag feed, hence opt-in). discharge/quadbore are the highlight-catalogue lenses (getHighlights has the full rows): player = the actor, detail{victims: [names], enemyKills, teamKills, actorKilled?, damage?, team?} plus cells? on a discharge and weapon, quadHeldMs, quadFrags on a quadbore — opt-in for the same reason as telefrag"`
 	Loc       string   `json:"loc,omitempty" jsonschema:"loc-event representation: 'name' (default) or 'index' (raw LocTable index; decode via getLocTable)"`
 }
 
@@ -185,6 +187,18 @@ type GetTopKillsInput struct {
 	Dmg         string   `json:"dmg,omitempty" jsonschema:"damage family for the burst damage AND returnDamage: raw | bounded (default bounded, the KTX-scoreboard value); 'both' is rejected here"`
 }
 
+// GetHighlightsInput mirrors /v1/demos/{id}/highlights query params. PreMs is a
+// POINTER for the reason GetTopKillsInput documents: an omitted MCP integer
+// arrives as 0, and here 0 is a MEANINGFUL value (the airgib pre-hit gate
+// off), so unset must stay out of the query for the REST default (100) to
+// apply.
+type GetHighlightsInput struct {
+	DemoID  string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Kinds   []string `json:"kinds,omitempty" jsonschema:"restrict to these highlight kinds: discharge, quadbore, telefrag, airgib (default all four). The unrequested lists still come back, empty; kinds on the envelope echoes what applied. An unknown kind is rejected 400 invalid_param"`
+	Players []string `json:"players,omitempty" jsonschema:"keep only events whose ACTOR or one of whose VICTIMS is one of these names (case-sensitive display names)"`
+	PreMs   *int     `json:"preMs,omitempty" jsonschema:"airgib pre-hit look-back in integer MILLISECONDS (0..1000; omit for the default 100, 0 = the pre-hit airborne gate off). Only the airgibs list is recomputed; the other three are stored. The knob the airgib detector has always taken"`
+}
+
 // GetLivesInput mirrors /v1/demos/{id}/lives query params. Every INTEGER here
 // has 0 as its own REST default (no bound / keep every life), so an omitted
 // MCP argument arriving as 0 asks for exactly the default — no pointers
@@ -272,6 +286,13 @@ type GetChatInput struct {
 	Types     []string `json:"types,omitempty" jsonschema:"chat-event types: 'chat' (public say), 'teamsay'. Empty = both."`
 }
 
+// GetPointEffectsInput filters /v1/demos/{id}/streams/point-effects by
+// effect type.
+type GetPointEffectsInput struct {
+	DemoID string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
+	Types  []string `json:"types,omitempty" jsonschema:"restrict to these effect names: spike, superspike, gunshot, explosion, tarexplosion, wizspike, knightspike, lavasplash, teleport, blood, lightningblood, or te<code> for an unnamed code. Empty = every effect (blood usually dominates row count)."`
+}
+
 // GetBackpacksInput filters /v1/demos/{id}/backpacks.
 type GetBackpacksInput struct {
 	DemoID    string   `json:"demoId" jsonschema:"the demo id (gameId:N or sha:HEX)"`
@@ -336,7 +357,7 @@ type SearchGamesInput struct {
 	Matchtag string   `json:"matchtag,omitempty" jsonschema:"tournament/event tag, case-insensitive substring (e.g. qwsl)"`
 	From     string   `json:"from,omitempty"     jsonschema:"calendar date lower bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
 	To       string   `json:"to,omitempty"       jsonschema:"calendar date upper bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
-	Limit    *int     `json:"limit,omitempty"    jsonschema:"max rows. Omitted = server default 20; an explicit 0 is forwarded and rejected 400 invalid_param (omit it for the default instead); max 100, larger values rejected 400 invalid_param"`
+	Limit    *int     `json:"limit,omitempty"    jsonschema:"max rows per page. Omitted = server default 20; an explicit 0 is forwarded and rejected 400 invalid_param (omit it for the default instead); max 1000 (the hub's own page ceiling — page with offset against total for more), larger values rejected 400 invalid_param"`
 	Offset   int      `json:"offset,omitempty"   jsonschema:"pagination offset"`
 	Roster   bool     `json:"roster,omitempty"   jsonschema:"true = verbatim hub rows with full roster detail (per-player ping, color arrays, name_color). Default = compact rows: players projected to {name, team, frags}"`
 }

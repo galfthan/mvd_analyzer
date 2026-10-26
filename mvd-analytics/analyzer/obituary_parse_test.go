@@ -52,13 +52,31 @@ func TestParseObituaryLine(t *testing.T) {
 		{"gibbed rocket", "prey was gibbed by killa's rocket", "killa", "prey", "rl", false, false},
 		{"gibbed grenade", "prey was gibbed by killa's grenade", "killa", "prey", "gl", false, false},
 
-		// Phrasing teamkills carry the generic "teammate" placeholder.
+		// Phrasing teamkills carry the generic "teammate" placeholder. KTX's
+		// team branch tests three deathtypes by name before its random pick
+		// (ktx/src/client.c:5343-5410), so those three keep the real cause —
+		// including the one that names the KILLER, dtSQUISH — and only the
+		// random four carry the cause-less "teamkill".
 		{"tk killer-named", "killa loses another friend", "killa", "teammate", "teamkill", false, true},
 		{"tk other-team frag", "killa gets a frag for the other team", "killa", "teammate", "teamkill", true, true},
-		{"tk victim-named", "prey was telefragged by his teammate", "teammate", "prey", "teamkill", false, true},
+		{"tk squish killer-named", "killa squished a teammate", "killa", "teammate", "squish", false, true},
+		{"tk victim-named tele", "prey was telefragged by his teammate", "teammate", "prey", "tele", false, true},
+		{"tk victim-named stomp", "prey was jumped by his teammate", "teammate", "prey", "stomp", false, true},
+		{"tk victim-named crushed", "prey was crushed by her teammate", "teammate", "prey", "stomp", false, true},
 
 		// Satan's-power self-telefrag (infix suicide).
 		{"satan deflect", "Satan's power deflects nexus's telefrag", "nexus", "nexus", "tele", true, false},
+		// dtTELE3, the double-pentagram telefrag: shares the plain kill verb
+		// but KTX books it as the victim's own suicide (client.c:5228-5237).
+		{"satan double-666", "prey was telefragged by killa's Satan's power", "prey", "prey", "tele", true, false},
+		{"plain telefrag stays a kill", "prey was telefragged by killa", "killa", "prey", "tele", false, false},
+
+		// dtEXPLO_BOX carries the damage log's own token, not generic "world".
+		{"explo box", "nexus blew up", "nexus", "nexus", "explobox", true, false},
+		// dtTRIGGER_HURT / world catch-all share one string, so "world" is
+		// all the print establishes. LineEnd-anchored.
+		{"died", "nexus died", "nexus", "nexus", "world", true, false},
+		{"died inside a name stays a kill", "x died rides killa's rocket", "killa", "x died", "rl", false, false},
 
 		// SSG buckshot "ate N loads".
 		{"ate buckshot ssg", "prey ate 2 loads of killa's buckshot", "killa", "prey", "ssg", false, false},
@@ -106,6 +124,56 @@ func TestMessagesObituaryDriftFixed(t *testing.T) {
 			e := got[0]
 			if e.Type != "frag" || e.Player != tc.player || e.Victim != tc.victim || e.Weapon != tc.weapon {
 				t.Errorf("%q → %+v, want player=%q victim=%q weapon=%q", tc.msg, e, tc.player, tc.victim, tc.weapon)
+			}
+		})
+	}
+}
+
+// TestParseObituaryLine_Cause pins the sub-cause beneath Weapon: the LG
+// water discharge (both the self forms and the two kill prints, one of which
+// shares its marker with the ordinary shaft kill), the pentagram deflections
+// and the spawn telefrag. Weapon must stay the canonical code on every row —
+// the cause is additive, never a reclassification.
+func TestParseObituaryLine_Cause(t *testing.T) {
+	cases := []struct {
+		name   string
+		msg    string
+		killer string
+		victim string
+		weapon string
+		cause  string
+		other  string
+		sui    bool
+	}{
+		{"self water", "sCorp heats up the water", "sCorp", "sCorp", "lg", "discharge", "", true},
+		{"self water 2", "sCorp discharges into the water", "sCorp", "sCorp", "lg", "discharge", "", true},
+		{"self lava", "ung discharges into the lava", "ung", "ung", "lg", "discharge", "", true},
+		{"self slime", "ung discharges into the slime", "ung", "ung", "lg", "discharge", "", true},
+		{"self dmm4", "ung electrocutes himself", "ung", "ung", "lg", "discharge", "", true},
+		{"kill drains", "math drains ung's batteries", "ung", "math", "lg", "discharge", "", false},
+		{"kill accepts discharge", "clox accepts sCorp's discharge", "sCorp", "clox", "lg", "discharge", "", false},
+		{"kill accepts discharge s-name", "clox accepts xs' discharge", "xs", "clox", "lg", "discharge", "", false},
+		{"kill accepts shaft", "clox accepts sCorp's shaft", "sCorp", "clox", "lg", "", "", false},
+		{"deflect tele2", "Satan's power deflects nlk's telefrag", "nlk", "nlk", "tele", "deflect", "", true},
+		{"deflect tele3", "nlk was telefragged by apa's Satan's power", "nlk", "nlk", "tele", "deflect", "apa", true},
+		{"spawnicide", "nlk got too close to the baby factory", "nlk", "nlk", "tele", "spawnicide", "", true},
+		{"plain telefrag", "nlk was telefragged by apa", "apa", "nlk", "tele", "", "", false},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			o := parseObituaryLine(c.msg)
+			if o == nil {
+				t.Fatalf("%q: no match", c.msg)
+			}
+			if o.Killer != c.killer || o.Victim != c.victim || o.Weapon != c.weapon || o.Suicide != c.sui {
+				t.Fatalf("%q: got killer=%q victim=%q weapon=%q suicide=%v, want %q/%q/%q/%v",
+					c.msg, o.Killer, o.Victim, o.Weapon, o.Suicide, c.killer, c.victim, c.weapon, c.sui)
+			}
+			if o.Cause != c.cause {
+				t.Errorf("%q: cause %q, want %q", c.msg, o.Cause, c.cause)
+			}
+			if o.Other != c.other {
+				t.Errorf("%q: other %q, want %q", c.msg, o.Other, c.other)
 			}
 		})
 	}

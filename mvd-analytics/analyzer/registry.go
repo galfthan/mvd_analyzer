@@ -81,6 +81,15 @@ type Registry struct {
 	// WASM entry for the browser-console timing breakdown. Not part of
 	// the Result schema.
 	PhaseTimings []PhaseTiming
+
+	// Core is the CoreOutputs of the most recent analyzeSource run — the
+	// cross-analyzer scratch space that deliberately does NOT ride the
+	// Result. Per-run state exactly like PhaseTimings, and published for the
+	// same kind of caller: the evaluation harnesses, which need the wire
+	// evidence a post-processor consumed in order to re-run that post with
+	// its wire hint withheld (cmd/qw-backpack-eval reads Core.PackEntities).
+	// Nil before the first run.
+	Core *CoreOutputs
 }
 
 // ResultPostProcessor is a non-event node: it runs in the finalize pass,
@@ -251,10 +260,18 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 		FilePath:      filename,
 	}
 	if streamErr != nil {
-		result.Errors = append(result.Errors, "event stream aborted: "+streamErr.Error())
+		result.Errors = append(result.Errors, streamAbortedPrefix+streamErr.Error())
 	}
+	// The reader's own census of what it could not decode. Read once the
+	// stream is drained (the counts are complete only then) and carried
+	// verbatim onto the Result, so every consumer — CLI, REST, WASM —
+	// sees a protocol gap without opting into anything. Deliberately NOT
+	// folded into Errors: those are analyzer failures over events we did
+	// read, a different signal with different consequences.
+	result.ParseWarnings = parseWarningsOf(source)
 
 	co := &CoreOutputs{}
+	r.Core = co
 
 	// finalizeOne runs one analyser's Finalize with CoreOutputs plumbing:
 	// a CoreConsumer reads the running CoreOutputs before its Finalize, and
@@ -300,6 +317,51 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 	return result, nil
 }
 
+// parseWarningsOf lifts a source's parse-warning census onto the Result
+// shape, or returns nil when the parse was clean (or when the source
+// cannot report — a synthetic or replay source implements no
+// events.WarningReporter, which is "nothing to say", not "clean").
+//
+// A clean parse yields nil rather than a zeroed block: `parseWarnings`
+// is omitempty precisely so the overwhelming majority of demos, which
+// read without a single gap, do not carry an empty section in every
+// response.
+func parseWarningsOf(source events.Source) *resultpkg.ParseWarnings {
+	wr, ok := source.(events.WarningReporter)
+	if !ok {
+		return nil
+	}
+	s := wr.WarningSummary()
+	if s.Total == 0 {
+		return nil
+	}
+	pw := &resultpkg.ParseWarnings{
+		Total:           s.Total,
+		DroppedWarnings: s.DroppedWarnings,
+	}
+	if len(s.ByType) > 0 {
+		pw.ByType = make(map[string]int, len(s.ByType))
+		for k, v := range s.ByType {
+			pw.ByType[k] = v
+		}
+	}
+	for _, g := range s.Groups {
+		pw.Groups = append(pw.Groups, resultpkg.ParseWarningGroup{
+			Type:            g.Type,
+			Message:         g.Message,
+			Count:           g.Count,
+			FirstDemoTimeMs: g.FirstTimeMs,
+		})
+	}
+	return pw
+}
+
+// streamAbortedPrefix opens the Errors entry the event pass writes when the
+// source gave up mid-demo. It is a prefix two other places match on — the
+// canonical error sort below, and the no-match marker, which reports a
+// truncated read rather than concluding anything about the match from it.
+const streamAbortedPrefix = "event stream aborted: "
+
 // canonicalizeErrors sorts Result.Errors into a schedule-independent
 // order. The three sinks (event-pass stream abort, per-node Finalize
 // failures, the region-control post-processor) all *append* during
@@ -316,10 +378,9 @@ func canonicalizeErrors(errs []string) {
 	if len(errs) < 2 {
 		return
 	}
-	const abortPrefix = "event stream aborted: "
 	sort.SliceStable(errs, func(i, j int) bool {
-		ai := strings.HasPrefix(errs[i], abortPrefix)
-		aj := strings.HasPrefix(errs[j], abortPrefix)
+		ai := strings.HasPrefix(errs[i], streamAbortedPrefix)
+		aj := strings.HasPrefix(errs[j], streamAbortedPrefix)
 		if ai != aj {
 			return ai // abort entry first
 		}
@@ -390,9 +451,21 @@ func NewDefaultRegistry() *Registry {
 	// Aim reads Shots + Streams + Damage — all born with final team labels — and
 	// writes only Result.Aim; fire/position times are already match-relative.
 	r.RegisterPostProcessor(aimPost)
-	r.RegisterPostProcessor(airgibsPost)
+	// The highlight catalogue reads the final frag log, the streams and the
+	// final damage section — every input born
+	// match-relative — runs the airgib detector, and writes only
+	// Result.Highlights.
+	r.RegisterPostProcessor(highlightsPost)
 	r.RegisterPostProcessor(scoreboardStatsPost)
 	r.RegisterPostProcessor(locGraphPost)
+	// The no-match marker stamps the results that came out with no player
+	// streams. Wall clock binds it: on such a result there is no
+	// Streams.Global to carry the date markers, so they land on the marker.
+	r.RegisterPostProcessor(noMatchPost)
+	// Wall clock reads the clock's date markers, demoinfo's ktxstats date and
+	// metadata's serverinfo version keys, and writes the graded match-start
+	// anchor onto the Streams.Global block the timeline created.
+	r.RegisterPostProcessor(wallClockPost)
 	r.RegisterPostProcessor(regionControlPost)
 	r.RegisterPostProcessor(openingPost)
 	// Player stats join the corrected scoreboard, damage, pickups and the
@@ -400,6 +473,25 @@ func NewDefaultRegistry() *Registry {
 	// match:final / frags:final, so the DAG runs it after the two fix-up
 	// nodes.
 	r.RegisterPostProcessor(playerStatsPost)
+	// Damage reconstruction publishes `damage:final`; execution order comes
+	// from the DAG edges, not this list. player-stats aggregates per-player totals
+	// (the figures the reconstruction validates at ~1%), so it binds the
+	// `damage:final` artifact and its damage family carries
+	// src=reconstructed on old demos; aim binds it too, but only to feed the
+	// separately-named reconstructed hit tier — its measured counters stay
+	// gated on damage.source == ktx.
+	r.RegisterPostProcessor(damageReconPost)
+	// Backpack reconstruction fills the same `backpacks` section the KTX
+	// drop hints fill, on demos whose mod never emitted one. It reads the
+	// active-weapon / position streams, the frag log and the match settings,
+	// so the DAG runs it after timeline, frags-final and metadata.
+	r.RegisterPostProcessor(backpackReconPost)
+	// Backpack linkage reads each reconstructed drop's fate off the wire's
+	// backpack-entity track (co.PackEntities). It must see the finished
+	// drops, so it binds `backpacks:final`; it reads the position, liveness
+	// and RL/LG possession streams, and the item timeline for the world
+	// spawner positions that disqualify a weapon-bit tie-break.
+	r.RegisterPostProcessor(backpackLinkagePost)
 
 	// Declare each node's Requires/Provides (dag.go), validate the wiring,
 	// and derive the execution order from it — the DAG turns silent

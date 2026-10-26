@@ -62,7 +62,7 @@ var eagerArtifacts = map[string]eagerArtifact{
 	// unset default is the raw strip, which would silently delete the
 	// stored bounded family from an endpoint contracted to serve it.
 	"damage": {extract: func(r *result.Result) (any, error) { return view.Damage(r, view.DamageOptions{Dmg: "both"}) },
-		code: "damage_unavailable", msg: "this demo has no damage data (no KTX mvdhidden_dmgdone stream)", echoMs: true},
+		code: "damage_unavailable", msg: "this demo has no damage data (no wire KTX mvdhidden_dmgdone stream and no reconstructable section)", echoMs: true},
 	"shots": {extract: func(r *result.Result) (any, error) { return view.Shots(r) },
 		code: "shots_unavailable", msg: "this demo has no shot data (no weapon fires decoded)", echoMs: true},
 	"aim": {extract: func(r *result.Result) (any, error) { return view.Aim(r, view.AimOptions{}) },
@@ -80,13 +80,22 @@ var eagerArtifacts = map[string]eagerArtifact{
 	// Always-computable / list-shaped sections: 200 with the raw section (which
 	// may be null/empty), never 422 — the same convention the curated endpoints
 	// use for these.
-	"match":          {extract: func(r *result.Result) (any, error) { return r.Match, nil }, echoMs: true},
+	"match": {extract: func(r *result.Result) (any, error) { return r.Match, nil }, echoMs: true},
+	// no-match is null on every demo that produced an analyzable match —
+	// which is 98% of them — and that null IS the answer, so it belongs with
+	// the always-computable sections rather than behind a 422. The overview
+	// republishes the same block, so a consumer normally never fetches this.
+	"no-match":       {extract: func(r *result.Result) (any, error) { return r.NoMatch, nil }, echoMs: true},
 	"messages":       {extract: func(r *result.Result) (any, error) { return r.Messages, nil }, echoMs: true},
 	"timeline":       {extract: func(r *result.Result) (any, error) { return r.TimelineAnalysis, nil }, echoMs: true},
 	"items":          {extract: func(r *result.Result) (any, error) { return r.Items, nil }, echoMs: true},
 	"map-entities":   {extract: func(r *result.Result) (any, error) { return r.MapEntities, nil }},
 	"backpacks":      {extract: func(r *result.Result) (any, error) { return r.Backpacks, nil }, echoMs: true},
 	"weapon-pickups": {extract: func(r *result.Result) (any, error) { return r.WeaponPickups, nil }, echoMs: true},
+	// highlights is null on a demo with no streams / no frag log, which is
+	// the same "nothing to build from" the curated /highlights 422s on; the
+	// raw artifact serves the null like timeline does.
+	"highlights": {extract: func(r *result.Result) (any, error) { return r.Highlights, nil }, echoMs: true},
 	// player-stats is computed for every demo that produced player streams,
 	// so a missing KTX block never 422s (only a stream-less parse does). It routes
 	// through the view so the artifact carries the same KTX overlay the
@@ -254,7 +263,9 @@ func staticETag(kind string) string {
 }
 
 func (s *server) writeStaticCacheHeaders(w http.ResponseWriter, kind string) {
-	w.Header().Set("Cache-Control", "public, max-age=86400, immutable")
+	// no-cache + a schema-versioned ETag: revalidate every use so a deploy
+	// that bumps the schema is picked up immediately (see setCacheHeaders).
+	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("X-Schema-Version", fmt.Sprintf("%d", result.CurrentSchemaVersion))
 	w.Header().Set("ETag", staticETag(kind))
 }

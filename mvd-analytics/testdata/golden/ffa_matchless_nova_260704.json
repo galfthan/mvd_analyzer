@@ -1,0 +1,234 @@
+{
+  "match": {
+    "duration": 359983,
+    "gameDir": "qw",
+    "gameMode": {
+      "canonical": "ffa",
+      "sources": {
+        "canonical": "serverinfo",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
+    "map": "nova",
+    "mapTitle": "Nova -",
+    "mode": "FFA",
+    "players": [
+      {
+        "deaths": 20,
+        "frags": 3,
+        "kills": 3,
+        "name": "nexus",
+        "rawTeam": "'tro",
+        "suicides": 0,
+        "team": "nexus"
+      },
+      {
+        "deaths": 4,
+        "frags": 19,
+        "kills": 20,
+        "name": "SMOK",
+        "rawTeam": "rr",
+        "suicides": 1,
+        "team": "SMOK"
+      }
+    ],
+    "sources": {
+      "map": "serverinfo",
+      "mode": "finalscores",
+      "teams": "individual"
+    },
+    "teams": [
+      {
+        "frags": 3,
+        "name": "nexus"
+      },
+      {
+        "frags": 19,
+        "name": "SMOK"
+      }
+    ]
+  },
+  "streams": {
+    "global": {
+      "dateMarkers": [
+        {
+          "atMs": 631,
+          "kind": "matchStart",
+          "raw": "2026-07-04 15:56:31 UTC",
+          "source": "matchdate",
+          "tz": "UTC",
+          "unixMs": 1783180591000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Jul 04, 16:02",
+          "source": "finalscores",
+          "unixMs": 1783180920000,
+          "yearFrom": "epoch"
+        }
+      ],
+      "demoOffset": 631,
+      "demoStartAccuracyMs": 1000,
+      "demoStartSource": "epoch",
+      "demoStartUnixMs": 1783180591000,
+      "matchEnd": 359983,
+      "matchEndUnixMs": 1783180920000,
+      "matchStart": 0,
+      "matchStartAccuracyMs": 1000,
+      "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
+      "matchStartSource": "epoch",
+      "matchStartUnixMs": 1783180591631
+    }
+  },
+  "timelineAnalysis": {
+    "fragEvents": [
+      {
+        "delta": 1,
+        "player": "nexus",
+        "team": "nexus",
+        "time": 15542
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 65996
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 69166
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 80726
+      },
+      {
+        "delta": 1,
+        "player": "nexus",
+        "team": "nexus",
+        "time": 87880
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 90856
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 110714
+      },
+      {
+        "delta": 1,
+        "player": "nexus",
+        "team": "nexus",
+        "time": 110868
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 129453
+      },
+      {
+        "delta": -1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 165684
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 201798
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 206662
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 209066
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 240547
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 254515
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 256251
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 260727
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 271615
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 285563
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 293522
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 324770
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 328549
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 349665
+      },
+      {
+        "delta": 1,
+        "player": "SMOK",
+        "team": "SMOK",
+        "time": 352575
+      }
+    ]
+  }
+}

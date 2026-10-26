@@ -3,6 +3,7 @@ package analyzer
 import (
 	"testing"
 
+	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -19,7 +20,7 @@ func TestMatchAnalyzer_PostMatchFragResetIgnored(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 5000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 5000})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 34, TimeMs: 1197000})
 	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match is over\n", TimeMs: 1210000})
 	// Post-match reconnect: the server re-inits the slot's scoreboard.
@@ -50,7 +51,7 @@ func TestMatchAnalyzer_InMatchFragUpdatesApply(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 5000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 5000})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 16, TimeMs: 571000})
 	// Mid-match reconnect: re-init to 0, then the server restores.
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 0, TimeMs: 613000})
@@ -112,7 +113,7 @@ func TestMatchAnalyzer_DepartureFragsFromBroadcast(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(7, 4948, "shiva", "|l|", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 20000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 20000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 20100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 20, TimeMs: 1000000})
 	// Timeout: broadcast, then the slot is cleared, then the empty userinfo.
@@ -157,7 +158,7 @@ func TestMatchAnalyzer_DepartureBroadcastDoesNotBleedToAnotherOccupancy(t *testi
 
 	_ = a.OnEvent(matchUserInfo(1, 11, "bob", "aaa", 0))
 	_ = a.OnEvent(matchUserInfo(2, 12, "bob", "bbb", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 1, TimeMs: 1100})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 2, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 1, Frags: 3, TimeMs: 60000})
@@ -205,7 +206,7 @@ func TestMatchAnalyzer_OverlappingOccupanciesAreNotOneIdentity(t *testing.T) {
 
 	_ = a.OnEvent(matchUserInfo(1, 11, "player", "aaa", 0))
 	_ = a.OnEvent(matchUserInfo(2, 12, "player!", "bbb", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 1, TimeMs: 1100})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 2, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 1, Frags: 3, TimeMs: 60000})
@@ -258,7 +259,7 @@ func TestMatchAnalyzer_UnidentifiedOverlapIsNotASecondPlayer(t *testing.T) {
 			a.UseCoreOutputs(&CoreOutputs{Sessions: sessions})
 
 			_ = a.OnEvent(matchUserInfo(7, 8, "rusti", "jah", 0))
-			_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+			_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 			_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 1100})
 			_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 16, TimeMs: 60000})
 			// The ghost lands while slot 7's occupancy is still open.
@@ -288,6 +289,13 @@ func TestMatchAnalyzer_UnidentifiedOverlapIsNotASecondPlayer(t *testing.T) {
 // Backing out either conjunct of the veto splits rusti in two: without
 // rec.identified() the previous test fails, without w.identified this one
 // does.
+//
+// The overlap is what a real reconnect looks like on the wire: KTX removes
+// the ghost entity only once the restore has run (ent_remove at
+// ktx/src/client.c:1544), so the ghost row and the connection that
+// supersedes it are both live for an instant — and the restore that made
+// that happen is announced, which is what keeps the two stints from
+// summing.
 func TestMatchAnalyzer_UnidentifiedOverlapSeenFirstIsNotASecondPlayer(t *testing.T) {
 	a := NewMatchAnalyzer()
 	if err := a.Init(&Context{}); err != nil {
@@ -298,11 +306,12 @@ func TestMatchAnalyzer_UnidentifiedOverlapSeenFirstIsNotASecondPlayer(t *testing
 		7: {{StartMs: minInt32, EndMs: maxInt32, Name: "rusti", Team: "jah", IdentityKey: "id:0"}},
 	}})
 
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	// The ghost first, on the lower slot, carrying a copy of the frags.
 	_ = a.OnEvent(matchUserInfo(3, 0, "# rusti", "jah", 2000))
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 3, Frags: 16, TimeMs: 2000})
 	// Then the connection it shadows, still live at the same instant.
+	_ = a.OnEvent(&events.PlayerRejoinEvent{Prefix: "rusti", Frags: 16, FragsKnown: true, WithStats: true, TimeMs: 3000})
 	_ = a.OnEvent(matchUserInfo(7, 8, "rusti", "jah", 3000))
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 3100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 17, TimeMs: 60000})
@@ -320,7 +329,12 @@ func TestMatchAnalyzer_UnidentifiedOverlapSeenFirstIsNotASecondPlayer(t *testing
 }
 
 // The same identity key on two occupancies that do NOT overlap is one
-// human reconnecting, and stays one row carrying the later stint's score.
+// human reconnecting, and stays one row.
+//
+// Neither carry-over signal is present here — no userid-0 ghost row, no
+// "rejoins the game with N frags" — so the two stints add (16 + 19), the
+// same fold TestMatchAnalyzer_MatchlessRejoinKeepsAnnouncedFrags exercises.
+// What this test pins is the row identity: one human, one line.
 func TestMatchAnalyzer_DisjointOccupanciesStayOneIdentity(t *testing.T) {
 	a := NewMatchAnalyzer()
 	if err := a.Init(&Context{}); err != nil {
@@ -328,7 +342,7 @@ func TestMatchAnalyzer_DisjointOccupanciesStayOneIdentity(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(1, 11, "rusti", "jah", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 1, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 1, Frags: 16, TimeMs: 60000})
 	_ = a.OnEvent(departure("rusti", 16, 70000))
@@ -342,8 +356,8 @@ func TestMatchAnalyzer_DisjointOccupanciesStayOneIdentity(t *testing.T) {
 	if err := a.Finalize(&res); err != nil {
 		t.Fatal(err)
 	}
-	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 19 {
-		t.Errorf("match.players = %+v, want one rusti row on 19 (the later stint)", res.Match.Players)
+	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 35 {
+		t.Errorf("match.players = %+v, want one rusti row on 35 (16 + 19, neither stint carried over)", res.Match.Players)
 	}
 }
 
@@ -362,7 +376,7 @@ func TestMatchAnalyzer_PostMatchDepartureBroadcastIgnored(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(4, 35, "dilbert", "pys", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 0})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 0})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 21, TimeMs: 586894})
 	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match is over\n", TimeMs: 600009})
@@ -394,7 +408,7 @@ func TestMatchAnalyzer_AnonymousRecordAfterVacateIsNotTheDepartedPlayer(t *testi
 	}})
 
 	_ = a.OnEvent(matchUserInfo(7, 4948, "shiva", "|l|", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 26, TimeMs: 900000})
 	_ = a.OnEvent(departure("shiva", 26, 1000000))
@@ -423,7 +437,7 @@ func TestMatchAnalyzer_SpectatorFragSentinelIgnored(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(2, 77, "cam", "oc", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 2, Frags: -999, TimeMs: 60000})
 
 	var res Result
@@ -448,7 +462,7 @@ func TestMatchAnalyzer_SpectatorFragSentinelIgnoredInDepartureBroadcast(t *testi
 	}
 
 	_ = a.OnEvent(matchUserInfo(7, 4948, "shiva", "|l|", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 7, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 7, Frags: 26, TimeMs: 60000})
 	_ = a.OnEvent(departure("shiva", -999, 90000))
@@ -476,7 +490,7 @@ func TestMatchAnalyzer_DepartureResetRolledBack(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(1, 5, "test", "sdf", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 1, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 1, Frags: 5, TimeMs: 50000})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 1, Frags: 4, TimeMs: 60000}) // suicide
@@ -504,7 +518,7 @@ func TestMatchAnalyzer_PostMatchSpectatorKeepsRow(t *testing.T) {
 	}
 
 	_ = a.OnEvent(matchUserInfo(4, 35, "wd.dilbert", "pys", 0))
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 0})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 0})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 21, TimeMs: 586894})
 	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match is over\n", TimeMs: 600009})
@@ -535,7 +549,7 @@ func TestMatchAnalyzer_FFAEmptyTeamIsNotSpectator(t *testing.T) {
 	obs := matchUserInfo(6, 12, "adm<ego", "", 0)
 	obs.Player.Spectator = true
 	_ = a.OnEvent(obs)
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 3, TimeMs: 1100})
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 3, Frags: 8, TimeMs: 60000})
 	// A spectator that some mods publish with a large negative sentinel.
@@ -565,7 +579,7 @@ func TestMatchAnalyzer_ConnectionWithoutPlayIsNotAPlayer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_ = a.OnEvent(&events.PrintEvent{Level: 2, Message: "The match has begun!\n", TimeMs: 1000})
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
 	_ = a.OnEvent(matchUserInfo(13, 1315, "jOn", "oc", 702432))
 	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 13, Frags: 0, TimeMs: 702432})
 
@@ -575,5 +589,298 @@ func TestMatchAnalyzer_ConnectionWithoutPlayIsNotAPlayer(t *testing.T) {
 	}
 	if len(res.Match.Players) != 0 {
 		t.Errorf("match.players = %+v, want none — jOn never entered the game", res.Match.Players)
+	}
+}
+
+// ffaCore builds the CoreOutputs an FFA demo produces: no demoinfo block, a
+// serverinfo `mode` of "ffa", so the descriptor resolves individual.
+func ffaCore() *CoreOutputs {
+	gm := resolveGameMode(nil, nil, nil, map[string]string{"mode": "ffa", "deathmatch": "3"}, nil, nil)
+	return &CoreOutputs{Roster: &Roster{participants: map[string]struct{}{}, individual: true}, GameMode: &gm}
+}
+
+// The individual layout: one team per player, team == name, the raw userinfo
+// tag kept on rawTeam, and sources.teams naming the reason. This is the same
+// shape a duel produces, which is the point — a consumer needs no mode string
+// to render an individual scoreboard.
+func TestMatchAnalyzer_IndividualLayout(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	a.UseCoreOutputs(ffaCore())
+
+	// Three players, two of them wearing the SAME clan tag — the shape that
+	// used to produce a two-player "red" pseudo-team.
+	for i, p := range []struct {
+		slot  int
+		uid   int
+		name  string
+		team  string
+		frags int
+	}{
+		{2, 39, "toast", "red", 33},
+		{7, 43, ":f", "red", 35},
+		{8, 45, "SMOK", "rr", 35},
+	} {
+		_ = a.OnEvent(matchUserInfo(p.slot, p.uid, p.name, p.team, 0))
+		if i == 0 {
+			_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 600})
+		}
+		_ = a.OnEvent(&events.SpawnEvent{PlayerNum: p.slot, TimeMs: 1000})
+		_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: p.slot, Frags: p.frags, TimeMs: 60000})
+	}
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 3 {
+		t.Fatalf("match.players = %+v, want 3", res.Match.Players)
+	}
+	want := map[string]string{"toast": "red", ":f": "red", "SMOK": "rr"}
+	for _, p := range res.Match.Players {
+		if p.Team != p.Name {
+			t.Errorf("%s: team = %q, want the player's own name", p.Name, p.Team)
+		}
+		if p.RawTeam != want[p.Name] {
+			t.Errorf("%s: rawTeam = %q, want %q", p.Name, p.RawTeam, want[p.Name])
+		}
+	}
+	if len(res.Match.Teams) != 3 {
+		t.Errorf("match.teams = %+v, want one row per player", res.Match.Teams)
+	}
+	if res.Match.Sources.Teams != result.MatchSrcIndividual {
+		t.Errorf("sources.teams = %q, want %q", res.Match.Sources.Teams, result.MatchSrcIndividual)
+	}
+}
+
+// In an individual mode `//finalscores` names the top-two PLAYERS, not two
+// teams, so it must never be adopted as a team list — the invented-side bug
+// the layout exists to remove.
+func TestMatchAnalyzer_FinalScoresNotAdoptedAsTeamsInFFA(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	co := ffaCore()
+	co.FinalScores = &FinalScores{Mode: "FFA", Team1: ":f", Score1: 36, Team2: "SMOK", Score2: 35}
+	a.UseCoreOutputs(co)
+
+	// Nobody participated (a truncated recording), so the derived rows are
+	// empty and the old code would have filled them from //finalscores.
+	_ = a.OnEvent(matchUserInfo(2, 39, "toast", "red", 0))
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Teams) != 0 {
+		t.Errorf("match.teams = %+v, want none — //finalscores names players in FFA", res.Match.Teams)
+	}
+	if res.Match.Sources.Teams != "" {
+		t.Errorf("sources.teams = %q, want empty", res.Match.Sources.Teams)
+	}
+}
+
+// A live player going spectator is a departure: mvdsv's Cmd_Observe_f
+// (sv_user.c:2757-2830) calls the mod's ClientDisconnect — which broadcasts
+// "<name> left the game with N frags" (ktx/src/client.c:3022-3027) — then
+// zeroes old_frags and re-broadcasts the userinfo on the SAME slot and
+// userid. Measured on ffa-demos/ffa_1[tox]260818-1903.mvd at 263681 ms,
+// where nexus's 18 frags were served as 0.
+func TestMatchAnalyzer_MidMatchSpectateFreezesFrags(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+	a.UseCoreOutputs(ffaCore())
+
+	_ = a.OnEvent(matchUserInfo(4, 52, "nexus", "'tro", 0))
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 600})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 1000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 18, TimeMs: 200000})
+	_ = a.OnEvent(&events.PlayerDepartureEvent{Name: "nexus", Frags: 18, FragsKnown: true, TimeMs: 263681})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 0, TimeMs: 263681})
+	spec := matchUserInfo(4, 52, "nexus", "'tro", 263681)
+	spec.Player.Spectator = true
+	_ = a.OnEvent(spec)
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 1 {
+		t.Fatalf("match.players = %+v, want one row for nexus", res.Match.Players)
+	}
+	if got := res.Match.Players[0].Frags; got != 18 {
+		t.Errorf("frags = %d, want 18 (the announced score, frozen at the spectate)", got)
+	}
+}
+
+// A player who leaves and comes back on a server with no ghost keeps the
+// frags he announced on the way out. KTX makes no ghost in matchless mode
+// (MakeGhost returns at ktx/src/client.c:2897), so the second connection's
+// scoreboard row starts at zero and the "left the game with N frags"
+// broadcast is the only record of the first stint.
+//
+// Shape from ffa-demos/ffa_1[dm2]260116-2057.mvd: nexus leaves slot 4 (uid
+// 41) with 14 frags at 281.608 s, rejoins on slot 3 (uid 49) at 320.953 s
+// and leaves again with 0 at 326.443 s. Taking the latest stint reported 0
+// frags against 15 kills.
+func TestMatchAnalyzer_MatchlessRejoinKeepsAnnouncedFrags(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+
+	_ = a.OnEvent(matchUserInfo(4, 41, "nexus", "red", 0))
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourceMatchDate, TimeMs: 600})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 1000})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 14, TimeMs: 270000})
+	_ = a.OnEvent(departure("nexus", 14, 281608))
+	_ = a.OnEvent(matchVacate(4, 41, "nexus", "red", 281608))
+	// Back, on another slot, with a scoreboard row the server re-created.
+	_ = a.OnEvent(matchUserInfo(3, 49, "nexus", "red", 320953))
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 3, TimeMs: 321000})
+	_ = a.OnEvent(departure("nexus", 0, 326443))
+	_ = a.OnEvent(matchVacate(3, 49, "nexus", "red", 326443))
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 14 {
+		t.Errorf("match.players = %+v, want one nexus row on 14 (14 + a 0-frag second stint)", res.Match.Players)
+	}
+}
+
+// The other half of the same rule: a KTX ghost scoreboard row continues the
+// identity's total and must not be added on top of it. ghost2scores
+// republishes a departed player's frags on a spare slot the instant the
+// drop lands (ktx/src/g_utils.c:2272-2356), and the svc_updateuserinfo it
+// writes for that slot hardcodes userid 0 (:2318) — which is what tells the
+// fold this row is a copy rather than a second stint.
+//
+// Shape from hub 220637 (4on4_fu_mix…): rusti drops from slot 5 on 14 frags
+// at 630704 and the same 14 reappear on slot 10 in the same frame.
+func TestMatchAnalyzer_GhostRowContinuesTheScore(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+
+	_ = a.OnEvent(matchUserInfo(5, 37, "rusti (FU)", "-fu-", 0))
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 1000})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 5, TimeMs: 1100})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 5, Frags: 14, TimeMs: 600000})
+	_ = a.OnEvent(departure("rusti (FU)", 14, 630704))
+	_ = a.OnEvent(matchVacate(5, 37, "rusti (FU)", "-fu-", 630704))
+	_ = a.OnEvent(matchUserInfo(10, 0, "rusti (FU)", "-fu-", 630704))
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 10, TimeMs: 630704})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 10, Frags: 14, TimeMs: 630704})
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 14 {
+		t.Errorf("match.players = %+v, want one rusti row on 14 — the carried-over score is not a second stint", res.Match.Players)
+	}
+}
+
+// A server that DID restore the score announces it, and the announcement is
+// read per netname over the whole demo — because the restore can land on a
+// different scoreboard row from the departure it restores. Two occupancies
+// of one name that were live at the same instant are deliberately kept as
+// separate rows (rowForKey), which is exactly the shape archive
+// 2eb485602a7a… has: callen leaves with 3 frags at 101 930 ms, "callen
+// [liu] rejoins the game with 3 frags" lands at 141 997, and the 3 are then
+// inside his final 36. Summing would report 39 against a serverinfo `score`
+// key that says 36.
+func TestMatchAnalyzer_AnnouncedRestoreIsNotSummed(t *testing.T) {
+	a := NewMatchAnalyzer()
+	if err := a.Init(&Context{}); err != nil {
+		t.Fatal(err)
+	}
+
+	_ = a.OnEvent(matchUserInfo(0, 777, "callen", "liu", 0))
+	_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 0})
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 0, TimeMs: 100})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 0, Frags: 3, TimeMs: 90000})
+	_ = a.OnEvent(departure("callen", 3, 101930))
+	_ = a.OnEvent(matchVacate(0, 777, "callen", "liu", 101930))
+	_ = a.OnEvent(&events.PlayerRejoinEvent{Prefix: "callen [liu]", Frags: 3, FragsKnown: true, WithStats: true, TimeMs: 141997})
+	_ = a.OnEvent(matchUserInfo(4, 781, "callen", "liu", 141997))
+	_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 142000})
+	// The restore itself is re-broadcast, then he plays on to 36.
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 3, TimeMs: 142100})
+	_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: 36, TimeMs: 500000})
+
+	var res Result
+	if err := a.Finalize(&res); err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Match.Players) != 1 || res.Match.Players[0].Frags != 36 {
+		t.Errorf("match.players = %+v, want one callen row on 36 — the restored 3 are already in it", res.Match.Players)
+	}
+}
+
+// The ≤1 and negative boundary of the matchless rejoin, which the frag
+// values themselves cannot separate.
+//
+// onFragUpdate records a stint's first attested value only on a CHANGE from
+// the 0 cursor (the connect-time svc_updatefrags 0 is discarded), so a
+// freshly re-created scoreboard row's first attested value is its first kill
+// or suicide — 1 or -1. Comparing that against the identity's running total
+// therefore reads a continuation wherever the total is small or negative,
+// and the second stint silently replaces the first instead of adding to it.
+// Only the two value-free signals (a userid-0 ghost row, an announced
+// restore) can tell the two apart, and matchless has neither: MakeGhost
+// returns at ktx/src/client.c:2897.
+func TestMatchAnalyzer_MatchlessRejoinAtTheLowFragBoundary(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		leftWith   int
+		secondFrag int
+		want       int
+	}{
+		// Left on 1, came back and scored 5 more: the second row opens on
+		// 1 (its first kill), which is >= the running total of 1.
+		{"left on one frag", 1, 5, 6},
+		// Left on -2 (lava), came back and scored 3: the second row opens
+		// on 1, which is >= the running total of -2.
+		{"left on a negative score", -2, 3, 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			a := NewMatchAnalyzer()
+			if err := a.Init(&Context{}); err != nil {
+				t.Fatal(err)
+			}
+
+			_ = a.OnEvent(matchUserInfo(4, 41, "nexus", "", 0))
+			_ = a.OnEvent(&events.MatchStartEvent{Source: events.MatchStartSourceMatchDate, TimeMs: 600})
+			_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 4, TimeMs: 1000})
+			_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 4, Frags: tc.leftWith, TimeMs: 270000})
+			_ = a.OnEvent(departure("nexus", tc.leftWith, 281608))
+			_ = a.OnEvent(matchVacate(4, 41, "nexus", "", 281608))
+			// Back on another slot, on a scoreboard row the server
+			// re-created from zero — no ghost, no restore announcement.
+			_ = a.OnEvent(matchUserInfo(3, 49, "nexus", "", 320953))
+			_ = a.OnEvent(&events.SpawnEvent{PlayerNum: 3, TimeMs: 321000})
+			_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 3, Frags: 1, TimeMs: 322000})
+			_ = a.OnEvent(&events.FragUpdateEvent{PlayerNum: 3, Frags: tc.secondFrag, TimeMs: 400000})
+
+			var res Result
+			if err := a.Finalize(&res); err != nil {
+				t.Fatal(err)
+			}
+			if len(res.Match.Players) != 1 {
+				t.Fatalf("match.players = %+v, want one nexus row", res.Match.Players)
+			}
+			if got := res.Match.Players[0].Frags; got != tc.want {
+				t.Errorf("frags = %d, want %d (%d + %d)", got, tc.want, tc.leftWith, tc.secondFrag)
+			}
+		})
 	}
 }

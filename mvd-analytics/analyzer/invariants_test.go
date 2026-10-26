@@ -161,6 +161,13 @@ var eventSections = []eventSection{
 	{name: "backpacks", path: []string{"backpacks"}, ownerKey: "player"},
 	{name: "items.items[].phases", path: []string{"items", "items"}, nestedKey: "phases", ownerKey: "takenBy"},
 	{name: "aim.players", path: []string{"aim", "players"}, ownerKey: "player"},
+	// The highlight lists nest their participants (actor / victims), so no
+	// owner key; the time is the obituary / damage instant, in-match by
+	// construction of the frag and damage joins.
+	{name: "highlights.discharges", path: []string{"highlights", "discharges"}},
+	{name: "highlights.quadbores", path: []string{"highlights", "quadbores"}},
+	{name: "highlights.telefrags", path: []string{"highlights", "telefrags"}},
+	{name: "highlights.airgibs", path: []string{"highlights", "airgibs"}},
 }
 
 // TestEventSectionInvariants extends the A1 invariant beyond

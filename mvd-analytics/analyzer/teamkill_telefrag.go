@@ -38,7 +38,18 @@ const (
 // untouched (the victim's death is already counted from the protocol
 // DeathEvent); this only fills in the killer side.
 func recoverTelefragTeamkills(res *Result, co *CoreOutputs) {
-	if res.Frags == nil || res.Streams == nil || co == nil || len(co.VictimNamedTeamkills) == 0 {
+	if res.Frags == nil || co == nil || len(co.VictimNamedTeamkills) == 0 {
+		return
+	}
+	if res.Streams == nil {
+		// No position/score evidence at all: none of these can be recovered,
+		// but they still happened. Publish them unattributed.
+		for _, tk := range co.VictimNamedTeamkills {
+			entry := tk
+			entry.Time = co.Clock.ToMatch(tk.Time)
+			res.Frags.Unpaired = append(res.Frags.Unpaired, entry)
+		}
+		sortUnpaired(res.Frags)
 		return
 	}
 
@@ -76,6 +87,11 @@ func recoverTelefragTeamkills(res *Result, co *CoreOutputs) {
 			vTeam = co.Names.TeamForName(victim)
 		}
 		if vTeam == "" {
+			// No team for the victim means no candidate set at all; the
+			// obituary is still evidence of the death and its cause.
+			entry := tk
+			entry.Time = tkTime
+			res.Frags.Unpaired = append(res.Frags.Unpaired, entry)
 			continue
 		}
 
@@ -115,6 +131,19 @@ func recoverTelefragTeamkills(res *Result, co *CoreOutputs) {
 
 		killer := combineTeamkillSignals(posSet, deltaSet)
 		if killer == "" {
+			// Nobody named. The obituary still happened and still carries the
+			// CAUSE (tele / stomp), so publish it as an unpaired entry rather
+			// than dropping it: consumers that only tally per player skip
+			// Unpaired, while the damage reconstruction uses the cause to type
+			// the kill positionally instead of pricing the victim's whole
+			// corpse drop as team weapon damage. A team telefrag costs the
+			// killer no frag under default KTX rules (the −1 is gated on
+			// k_tp_tele_death, ktx/src/client.c:5348), so deltaSet is empty
+			// for most of them and a spawn pile can leave the position signal
+			// ambiguous — this branch is the normal residual, not an error.
+			entry := tk
+			entry.Time = tkTime
+			res.Frags.Unpaired = append(res.Frags.Unpaired, entry)
 			continue
 		}
 
@@ -136,6 +165,16 @@ func recoverTelefragTeamkills(res *Result, co *CoreOutputs) {
 		})
 		res.Frags.TotalFrags = len(res.Frags.Frags)
 	}
+	sortUnpaired(res.Frags)
+}
+
+// sortUnpaired restores time order after the two recoveries have each
+// appended their own leftovers (frag.go's killer-named pass runs first, on
+// the match clock already).
+func sortUnpaired(fr *result.FragResult) {
+	sort.SliceStable(fr.Unpaired, func(i, j int) bool {
+		return fr.Unpaired[i].Time < fr.Unpaired[j].Time
+	})
 }
 
 // combineTeamkillSignals resolves the killer from the position and

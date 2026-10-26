@@ -260,6 +260,10 @@ func filterFixture() *result.Result {
 				{Time: 4000, Killer: "alpha", Victim: "alpha", Weapon: "rl", IsSuicide: true},
 				{Time: 5000, Killer: "alpha", Victim: "charlie", Weapon: "rl", IsTeamKill: true},
 			},
+			Unpaired: []result.FragEntry{
+				{Time: 2500, Killer: "teammate", Victim: "bravo", Weapon: "tele", IsTeamKill: true},
+				{Time: 6000, Killer: "teammate", Victim: "charlie", Weapon: "stomp", IsTeamKill: true},
+			},
 		},
 		Damage: &result.DamageResult{
 			TotalDamage: 9999, // bogus vs log, to distinguish stored from recompute
@@ -277,6 +281,57 @@ func filterFixture() *result.Result {
 				{Time: 4000, Attacker: "alpha", Victim: "alpha", Weapon: "rl", Damage: 25, IsSelf: true},
 			},
 		},
+	}
+}
+
+// Unpaired teamkill obituaries (schema v74) take the SAME predicates as the
+// frag log so a scoped response stays internally consistent — but never join
+// any aggregate: the "teammate" placeholder is not a player, and totalFrags
+// counts the frag log only.
+func TestFrags_UnpairedFiltersWithTheLogButNeverAggregates(t *testing.T) {
+	r := filterFixture()
+
+	// Unfiltered: the stored pointer, unpaired intact.
+	if out, _ := Frags(r, FragOptions{}); len(out.Unpaired) != 2 {
+		t.Errorf("unfiltered unpaired = %d, want 2", len(out.Unpaired))
+	}
+
+	// Time window narrows unpaired the same way it narrows frags.
+	out, err := Frags(r, FragOptions{From: 1, To: 3000})
+	if err != nil {
+		t.Fatalf("Frags: %v", err)
+	}
+	if len(out.Unpaired) != 1 || out.Unpaired[0].Victim != "bravo" {
+		t.Errorf("windowed unpaired = %+v, want only the t=2500 entry", out.Unpaired)
+	}
+	// ...and contributes nothing to any tally.
+	if out.TotalFrags != 3 {
+		t.Errorf("totalFrags = %d, want 3 — unpaired must not be counted", out.TotalFrags)
+	}
+	if _, ok := out.ByPlayer["teammate"]; ok {
+		t.Errorf("byPlayer gained a %q row — a placeholder is not a player", "teammate")
+	}
+	if got := out.ByPlayer["bravo"]; got != nil && got.Deaths != 2 {
+		t.Errorf("bravo deaths = %d, want the 2 frag-log deaths only", got.Deaths)
+	}
+
+	// The players filter matches on the NAMED side; the placeholder never does.
+	out, _ = Frags(r, FragOptions{Players: []string{"teammate"}})
+	if len(out.Unpaired) != 0 {
+		t.Errorf("filtering on the placeholder must select nothing, got %+v", out.Unpaired)
+	}
+	out, _ = Frags(r, FragOptions{Players: []string{"charlie"}})
+	if len(out.Unpaired) != 1 || out.Unpaired[0].Weapon != "stomp" {
+		t.Errorf("players=charlie unpaired = %+v, want the stomp entry", out.Unpaired)
+	}
+
+	// Summary drops it with the log — it IS a log, not an aggregate.
+	out, _ = Frags(r, FragOptions{Summary: true})
+	if out.Unpaired != nil {
+		t.Errorf("summary must drop unpaired, got %+v", out.Unpaired)
+	}
+	if r.Frags.Unpaired == nil {
+		t.Errorf("summary mutated the shared stored Result (Unpaired nil'd)")
 	}
 }
 

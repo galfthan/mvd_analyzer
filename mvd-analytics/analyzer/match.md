@@ -7,7 +7,8 @@ parser), `IntermissionEvent`, `UserInfoEvent`, `FragUpdateEvent`,
 `SpawnEvent`, `DeathEvent`, `PlayerPositionEvent`
 **Reads from CoreOutputs:** `co.Sessions` (identity-resolved display names +
 identity keys), `co.Slots` (fallback for a slot that only ever had one
-occupant)
+occupant), `co.DemoInfo` / `co.ServerInfoMap` / `co.FinalScores` (the map,
+mode and scoreline sources)
 **Writes to Result:** `result.Match` (`*MatchResult`)
 
 ## What it does
@@ -23,21 +24,39 @@ consumers (web UI, CLI) read first.
    case-insensitive and shared across every analyser that needs it.
 2. Match duration is computed as `EndTime - StartTime` when both
    exist; otherwise falls back to `lastEvent - StartTime`.
-3. `map` is the canonical SHORT map name, resolved through
-   `CoreOutputs.EffectiveMap()` (demoinfo map, else the serverinfo
-   `map` key) — hence the node's `metadata` edge. `mapTitle` is the
-   display-only level title from `ctx.ServerData.LevelName`, passed
-   through `cleanLevelTitle` to strip the `.bsp` extension and
-   trailing author hints like ` by …`. The title backs `map` only
-   when neither shortname source named a map.
+3. `map` is the canonical SHORT map name: the demoinfo map, else the
+   serverinfo `map` key (the two `CoreOutputs.EffectiveMap()` resolves),
+   else the `//finalscores` map — hence the node's `metadata` edge.
+   `mapTitle` is the display-only level title from
+   `ctx.ServerData.LevelName`, passed through `cleanLevelTitle` to strip
+   the `.bsp` extension and trailing author hints like ` by …`. The title
+   backs `map` only when no shortname source named a map. `mode` resolves
+   the same way over a two-source chain — the demoinfo `mode`, else the
+   `//finalscores` mode, both KTX's own vocabulary, neither rewritten to
+   look like the other. Every one of those choices is reported in
+   `match.sources` (`ktx` / `serverinfo` / `finalscores` / `levelTitle`).
 4. **The scoreboard is built per slot *occupancy*, not per slot.** A wire
    slot is recycled — a client leaves, the next connection lands on the
    same index — so the analyser splits each slot with the shared
    [`occupancyTracker`](occupancy.go) and scores each occupancy
    separately. Occupancies that resolve to the same identity (a player who
-   reconnected onto another slot) collapse into one row carrying the
-   latest stint's score, which is the total the server restored and
-   re-asserted (`ktx/src/client.c:1464-1490`). Two occupancies that were
+   reconnected onto another slot) collapse into one row whose score is the
+   FOLD of every stint (`foldStintFrags`), not the latest one. A stint
+   REPLACES the running total when either of two value-free signals says the
+   server carried the score over: it is a KTX ghost scoreboard row — userid
+   0, which `ghost2scores` hardcodes and is the only writer of
+   (`ktx/src/g_utils.c:2318`) — or the server ANNOUNCED the restore
+   (`"<name> rejoins the game with N frags"`, `ktx/src/client.c:1513-1543`,
+   read per netname over the whole demo because a restore can land on a
+   different scoreboard row from the departure it restores). Every other
+   stint ADDS, because its scoreboard row restarted from zero: matchless
+   mode makes no ghost at all (`MakeGhost` returns at
+   `ktx/src/client.c:2897`), so a player who leaves and comes back there
+   keeps both stints' frags, the earlier one recovered from the departure
+   broadcast. The discriminator is deliberately value-free — comparing a
+   stint's first attested frag value against the running total misreads
+   every low or negative total, because the first value a re-created row
+   attests is its first kill or suicide (±1). Two occupancies that were
    *live at the same instant* never collapse, however good the identity
    key looks: without demoinfo, `*auth` or a KTX reconnect print the key
    degrades to the normalized netname, and two people called `Player` and
@@ -66,6 +85,19 @@ consumers (web UI, CLI) read first.
    frag updates: KTX guards its own print on `match_in_progress == 2`
    (`ktx/src/client.c:2841`) but the pre-KTX mods do not.
 7. Per-team stats are sorted by team name for byte-stable output.
+
+## `//finalscores` is a fallback and a cross-check, never an override
+
+KTX's end-of-match stuffcmd states the server's own final scoreline
+(`metadata.finalScores`, verbatim). This node adopts it for two rows only
+when the scoreboard produced none at all — `sources.teams` then reads
+`finalscores` instead of `derived` — and never corrects a derived row,
+because the two are not always the same quantity: on Clan Arena and
+Wipeout KTX's score is *rounds won* (`ktx/src/commands.c:6867-6886`), and
+even on a frag-scored mode KTX counts the kill that ends the match while
+this scoreboard freezes at the match-end latch. Both sides stay reported
+so a consumer can compare them; see RESULT_SCHEMA.md for the measured
+agreement rate.
 
 ## Limitations / known issues
 

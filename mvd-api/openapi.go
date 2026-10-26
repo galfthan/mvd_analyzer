@@ -56,11 +56,11 @@ var (
 	markedJSETag         = contentETag("marked", markedJS)
 )
 
-// serveEmbedded writes one embedded asset with revalidation. max-age is an
-// hour (not immutable — a redeploy changes the content under the same URL;
-// the ETag keeps revalidation cheap).
+// serveEmbedded writes one embedded asset with revalidation on every use
+// (no-cache) — a redeploy changes the content under the same URL, and the
+// content-derived ETag keeps revalidation a cheap 304.
 func serveEmbedded(w http.ResponseWriter, r *http.Request, contentType, etag string, body []byte) {
-	w.Header().Set("Cache-Control", "public, max-age=3600")
+	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("ETag", etag)
 	if match := r.Header.Get("If-None-Match"); match != "" && strings.Contains(match, etag) {
 		w.WriteHeader(http.StatusNotModified)

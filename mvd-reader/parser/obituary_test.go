@@ -34,11 +34,18 @@ func TestFindObituaryVictim(t *testing.T) {
 		// Infix-form: Satan's-power-deflect (KTX dtTELE2).
 		{"pent deflect", "Satan's power deflects nlk's telefrag\n", "nlk"},
 
-		// KTX dtTELE3 — pent vs pent double-666. Caught by the
-		// existing " was telefragged by " marker; the killer suffix
-		// "'s Satan's power" is handled by extractKillerName in
-		// mvd-analytics/analyzer/obituary.go.
+		// KTX dtTELE3 — pent vs pent double-666. Shares the " was
+		// telefragged by " verb with the ordinary kill but is a SUICIDE
+		// (client.c:5228-5237); the Suffix-discriminated suicide row wins.
 		{"pent vs pent", "nlk was telefragged by lakso's Satan's power\n", "nlk"},
+
+		// Explosive box (dtEXPLO_BOX).
+		{"explo box", "doberman blew up\n", "doberman"},
+
+		// dtTRIGGER_HURT / world catch-all (client.c:5775-5782). LineEnd-
+		// anchored, so a name containing the marker cannot steal a kill line.
+		{"died trigger", "doberman died\n", "doberman"},
+		{"died inside a name", "x died rides multibear's rocket\n", "x died"},
 
 		// KTX dtTELE4 — k_spawnicide random variants.
 		{"spawnicide 1", "doberman couldn't resist the shiny spawn point\n", "doberman"},
@@ -76,6 +83,112 @@ func TestFindObituaryVictim_TeammatePrefersTKPattern(t *testing.T) {
 	if !pat.TeamKill {
 		t.Errorf("expected TeamKill=true, got pattern %+v", pat)
 	}
+	if pat.Weapon != "tele" {
+		t.Errorf("weapon = %q, want tele: KTX prints this phrasing only for dtTELE1", pat.Weapon)
+	}
+}
+
+// KTX's dtTELE3 double-pentagram telefrag prints the ordinary " was
+// telefragged by " verb but books the death as the VICTIM's own suicide —
+// `targ->s.v.frags -= 1; logfrag(targ, targ)`, the surviving player is
+// credited nothing (ktx/src/client.c:5228-5237). The plain kill row must not
+// swallow the line and hand out a frag the server never gave.
+func TestSatanPowerTelefragIsASuicide(t *testing.T) {
+	_, pat := FindObituaryVictim("nlk was telefragged by lakso's Satan's power\n")
+	if pat == nil {
+		t.Fatalf("no pattern matched the dtTELE3 print")
+	}
+	if !pat.Suicide {
+		t.Errorf("Suicide = false; KTX logs this as logfrag(targ, targ)")
+	}
+	if pat.Weapon != "tele" {
+		t.Errorf("weapon = %q, want tele", pat.Weapon)
+	}
+	// The ordinary dtTELE1 telefrag must still be a kill.
+	_, kill := FindObituaryVictim("nlk was telefragged by lakso\n")
+	if kill == nil || kill.Suicide {
+		t.Errorf("plain telefrag lost its kill classification: %+v", kill)
+	}
+}
+
+// Every obituary marker must stamp the cause its engine deathtype carries in
+// the wire damage log's own vocabulary (mvd.DeathTypeToWeapon /
+// EnvironmentalDamageType), so a consumer filtering on a cause gets the
+// obituary rows and the damage rows alike.
+func TestObituaryCauseMatchesDamageVocabulary(t *testing.T) {
+	want := map[string]string{
+		" was squished":           "squish",   // dtSQUISH, world/self (client.c:5298, :5729)
+		" squishes ":              "squish",   // dtSQUISH, enemy      (client.c:5449)
+		" squished a teammate":    "squish",   // dtSQUISH, teamkill   (client.c:5364)
+		" blew up":                "explobox", // dtEXPLO_BOX          (client.c:5696)
+		" was hooked by ":         "hook",     // dtHOOK               (client.c:5590)
+		" cratered":               "fall",     // dtFALL
+		" turned into hot slag":   "lava",     // dtLAVA_DMG
+		" gulped a load of slime": "slime",    // dtSLIME_DMG
+	}
+	seen := 0
+	for _, p := range ObituaryPatterns {
+		w, ok := want[p.Marker]
+		if !ok {
+			continue
+		}
+		seen++
+		if p.Weapon != w {
+			t.Errorf("%q: weapon = %q, want %q", p.Marker, p.Weapon, w)
+		}
+	}
+	if seen != len(want) {
+		t.Errorf("matched %d of %d markers — the table lost one", seen, len(want))
+	}
+	// mvd.DeathTypeToWeapon must agree on the ones it can express.
+	for dt, w := range map[int]string{
+		mvd.DtSquish: "squish", mvd.DtExploBox: "explobox", mvd.DtHook: "hook",
+	} {
+		if got := mvd.DeathTypeToWeapon(dt); got != w {
+			t.Errorf("DeathTypeToWeapon(%d) = %q, want %q", dt, got, w)
+		}
+	}
+}
+
+// KTX's team branch tests three deathtypes by name before its random
+// phrasing pick (ktx/src/client.c:5343-5410): dtTELE1 (:5355), dtSQUISH
+// (:5362) and dtSTOMP (:5368). All three carry the real cause — dtSQUISH via
+// the one killer-named message in the set — and only the random four
+// (:5386-5408) are genuinely cause-less and keep the "teamkill" placeholder.
+// Downstream the difference decides whether the kill is priced on the damage
+// curve or folded as a positional instant kill (mvd-analytics/damagerecon).
+func TestTeamkillPatternsKeepTheirCause(t *testing.T) {
+	want := map[string]string{
+		" was telefragged by his teammate": "tele",
+		" was telefragged by her teammate": "tele",
+		" was crushed by his teammate":     "stomp",
+		" was crushed by her teammate":     "stomp",
+		" was jumped by his teammate":      "stomp",
+		" was jumped by her teammate":      "stomp",
+		" squished a teammate":             "squish",
+		" mows down a teammate":            "teamkill",
+		" checks his glasses":              "teamkill",
+		" checks her glasses":              "teamkill",
+		" loses another friend":            "teamkill",
+		" gets a frag for the other team":  "teamkill",
+	}
+	seen := 0
+	for _, p := range ObituaryPatterns {
+		w, ok := want[p.Marker]
+		if !ok {
+			continue
+		}
+		seen++
+		if !p.TeamKill {
+			t.Errorf("%q: TeamKill = false", p.Marker)
+		}
+		if p.Weapon != w {
+			t.Errorf("%q: weapon = %q, want %q", p.Marker, p.Weapon, w)
+		}
+	}
+	if seen != len(want) {
+		t.Errorf("matched %d of %d teamkill markers — the table lost one", seen, len(want))
+	}
 }
 
 // Obit-derived DeathEvent must NOT fire before the parser observes a
@@ -104,7 +217,7 @@ func TestObituaryDeath_GatedOnMatchStart(t *testing.T) {
 	}
 
 	// Match-start phrase flips the gate.
-	p.updateMatchStartedFromPrint(mvd.PrintHigh, "The match has begun!\n")
+	mustMatchStartFromPrint(t, p, mvd.PrintHigh, "The match has begun!\n")
 	if !p.matchStarted {
 		t.Fatalf("matchStarted gate did not flip on start phrase")
 	}
@@ -124,15 +237,20 @@ func TestObituaryDeath_GatedOnMatchStart(t *testing.T) {
 // opened this gate — the demo reported zero deaths and, because stream
 // sampling is gated on the same start, produced no streams at all.
 // Regression: 1on1_]apollyon[_vs_jogi_[dm4], t=10.022s.
+//
+// The other two entries are foreign-mod broadcasts with a named archive
+// population each (print.go): the CTF mod's "Match Started!" and the arena
+// mod's "Series begins in 10 seconds...".
 func TestMatchStartPatterns_ModeSpecificAnnouncements(t *testing.T) {
 	for _, msg := range []string{
 		"The match has begun!\n",
 		"The duel has begun!\n",
 		"The team match has begun!\n",
-		"Fight!\n",
+		"Match Started!\n",
+		"Series begins in 10 seconds...\n",
 	} {
 		p := NewParser(nil)
-		p.updateMatchStartedFromPrint(mvd.PrintHigh, msg)
+		mustMatchStartFromPrint(t, p, mvd.PrintHigh, msg)
 		if !p.matchStarted {
 			t.Errorf("matchStarted did not flip on %q", msg)
 		}
@@ -140,7 +258,7 @@ func TestMatchStartPatterns_ModeSpecificAnnouncements(t *testing.T) {
 
 	// A line that merely mentions the match must not open the gate.
 	p := NewParser(nil)
-	p.updateMatchStartedFromPrint(mvd.PrintHigh, "The match will begin when both players are ready\n")
+	mustMatchStartFromPrint(t, p, mvd.PrintHigh, "The match will begin when both players are ready\n")
 	if p.matchStarted {
 		t.Errorf("matchStarted flipped on a non-start line")
 	}
@@ -149,9 +267,29 @@ func TestMatchStartPatterns_ModeSpecificAnnouncements(t *testing.T) {
 	// "go go go!" would otherwise arm the obituary-death path for the
 	// whole demo.
 	chat := NewParser(nil)
-	chat.updateMatchStartedFromPrint(mvd.PrintChat, "lets go! the duel has begun i guess\n")
+	mustMatchStartFromPrint(t, chat, mvd.PrintChat, "lets go! the duel has begun i guess\n")
 	if chat.matchStarted {
 		t.Errorf("matchStarted flipped on a PRINT_CHAT line")
+	}
+
+	// Nor may a phrase that is merely a substring of a NAME. The table
+	// used to carry a bare "go!", which the whole-archive sweep found
+	// firing on nothing but obituary and scoreboard lines naming the E0
+	// player "RINGO!!!:::>>>>" — a false match start on 12 demos
+	// (.reports/vocab-sweep-2026-08-29, probe S1). Obituaries are
+	// PRINT_MEDIUM broadcasts, so the chat refusal above does not cover
+	// them; only the table's content does.
+	for _, msg := range []string{
+		"skii was gibbed by RINGO!!!:::>>>>\n",
+		"RINGO!!!:::>>>> rides skii's rocket\n",
+		"Fight!\n", // KTX's FIGHT! is a centerprint; a mod bprinting it names no match start
+		"latejoin................. join a team after the game started\n",
+	} {
+		p := NewParser(nil)
+		mustMatchStartFromPrint(t, p, mvd.PrintMedium, msg)
+		if p.matchStarted {
+			t.Errorf("matchStarted flipped on %q", msg)
+		}
 	}
 }
 
@@ -236,5 +374,33 @@ func TestParsePrint_ObituaryFiresDeathAndNextPlayerInfoFiresSpawn(t *testing.T) 
 	}
 	if deaths != 1 || spawns != 1 {
 		t.Errorf("deaths=%d spawns=%d, want 1/1", deaths, spawns)
+	}
+}
+
+// TestObituaryCauseRowsKeepTheirWeapon pins the Cause vocabulary and the
+// rule that a cause never replaces the weapon: every "discharge" row is an
+// "lg" row and every "deflect" / "spawnicide" row is a "tele" row, so the
+// per-weapon consumers see exactly what they saw before the field existed.
+func TestObituaryCauseRowsKeepTheirWeapon(t *testing.T) {
+	wantWeapon := map[string]string{"discharge": "lg", "deflect": "tele", "spawnicide": "tele"}
+	seen := map[string]int{}
+	for _, p := range ObituaryPatterns {
+		if p.Cause == "" {
+			continue
+		}
+		w, ok := wantWeapon[p.Cause]
+		if !ok {
+			t.Errorf("row %q: unknown cause %q", p.Marker, p.Cause)
+			continue
+		}
+		if p.Weapon != w {
+			t.Errorf("row %q: cause %q on weapon %q, want %q", p.Marker, p.Cause, p.Weapon, w)
+		}
+		seen[p.Cause]++
+	}
+	// Six self forms + " drains " (the " accepts " discharge is promoted by
+	// the analytics matcher off the suffix, so it is not a table row).
+	if seen["discharge"] != 7 || seen["deflect"] != 2 || seen["spawnicide"] != 3 {
+		t.Errorf("cause row counts %v, want discharge=7 deflect=2 spawnicide=3", seen)
 	}
 }

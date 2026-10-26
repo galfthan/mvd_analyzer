@@ -526,6 +526,16 @@ func (p *proxyBackend) GetStreamSlice(ctx context.Context, in GetStreamSliceInpu
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
+func (p *proxyBackend) GetPointEffects(ctx context.Context, in GetPointEffectsInput) (any, error) {
+	path, err := demoPath(in.DemoID, "/streams/point-effects")
+	if err != nil {
+		return nil, err
+	}
+	q := query{}
+	q.csv("types", in.Types)
+	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
+}
+
 func (p *proxyBackend) GetStateAt(ctx context.Context, in GetStateAtInput) (any, error) {
 	path, err := demoPath(in.DemoID, "/state-at")
 	if err != nil {
@@ -727,6 +737,20 @@ func (p *proxyBackend) GetTopKills(ctx context.Context, in GetTopKillsInput) (an
 	// (bounded, falling back to raw on a skipped:* demo rather than 422-ing a
 	// caller who never asked for the bounded family).
 	q.str("dmg", in.Dmg)
+	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
+}
+
+func (p *proxyBackend) GetHighlights(ctx context.Context, in GetHighlightsInput) (any, error) {
+	path, err := demoPath(in.DemoID, "/highlights")
+	if err != nil {
+		return nil, err
+	}
+	q := query{}
+	q.csv("kinds", in.Kinds)
+	q.csv("players", in.Players)
+	// preMs=0 is a real value (gate off), so unset stays out of the query
+	// and an explicit 0 is forwarded — the pointer convention.
+	q.intp("preMs", in.PreMs)
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 

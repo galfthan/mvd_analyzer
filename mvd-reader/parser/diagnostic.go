@@ -1,6 +1,9 @@
 package parser
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 // Warning represents a diagnostic issue found during parsing.
 type Warning struct {
@@ -13,31 +16,150 @@ func (w Warning) String() string {
 	return fmt.Sprintf("[%.1fs] %s: %s", w.Time, w.Type, w.Message)
 }
 
-// SetDiagnosticMode enables warning collection instead of silent error dropping.
-// Production code should never call this.
+// MaxWarningGroups caps how many distinct (type, message) groups the
+// always-on summary retains. The type vocabulary is a handful of
+// in-code constants, but a message embeds the failing svc name, the
+// error text and the abandoned byte count, so its cardinality is
+// bounded only by how creatively a demo is broken. Warnings past the cap
+// are still COUNTED (into WarningSummary.DroppedWarnings and into
+// ByType, which is exact regardless) — the cap bounds retention, never
+// the census. How many DISTINCT groups were left out is deliberately not
+// reported: tracking that needs the very unbounded key set the cap
+// exists to avoid, so the honest figure is the occurrence count.
+// Retention is first-encounter
+// order, so on a badly broken demo the table samples the distinct
+// messages rather than ranking them; ByType is where the shape of the
+// damage is read.
+const MaxWarningGroups = 64
+
+// WarningGroup is one distinct (type, message) pair the parser saw,
+// with how often it fired and when it first did.
+type WarningGroup struct {
+	Type        string
+	Message     string
+	Count       int
+	FirstTimeMs int32 // wire-native demo time of the first occurrence
+}
+
+// WarningSummary is the compact, always-collected census of parse
+// warnings. It is what production consumers get: exact totals, exact
+// per-type counts, and a capped table of first-occurrence samples with
+// their counts. The full instance list stays diagnostic-mode-only
+// (DiagnosticWarnings) — it is unbounded, and a summary answers every
+// operator question a list would ("what broke, how often, when first").
+type WarningSummary struct {
+	Total  int
+	ByType map[string]int // exact, never capped
+	Groups []WarningGroup // at most MaxWarningGroups, deterministically ordered
+	// DroppedWarnings counts the warnings that fell outside the retained
+	// groups — every occurrence of a (type, message) pair first seen after
+	// the cap was reached. It is an occurrence count, NOT a count of
+	// distinct messages: see MaxWarningGroups.
+	DroppedWarnings int
+}
+
+// SetDiagnosticMode opts into retaining every individual warning for
+// DiagnosticWarnings below. It no longer gates COLLECTION: the summary
+// counters (WarningSummary) run on every parse so production consumers
+// see protocol gaps without opting in. Only the unbounded per-instance
+// list is diagnostic-only.
 func (p *Parser) SetDiagnosticMode(enabled bool) {
 	p.diagnosticMode = enabled
 }
 
-// DiagnosticWarnings returns all warnings collected during parsing (only in diagnostic mode).
+// DiagnosticWarnings returns every individual warning collected during
+// parsing. Populated only in diagnostic mode (SetDiagnosticMode); use
+// WarningSummary for the always-available census.
 func (p *Parser) DiagnosticWarnings() []Warning {
 	return p.warnings
 }
 
-// warn records a diagnostic warning. In non-diagnostic mode this is a no-op.
-// timeMs is the canonical wire-native demo time; Warning.Time is the derived
-// float seconds view, kept for the human-readable diagnostic output only
-// (the parser cannot import events.Sec without an import cycle, so the
-// identical conversion is inlined here).
-func (p *Parser) warn(timeMs int32, typ, format string, args ...interface{}) {
-	if !p.diagnosticMode {
-		return
+// WarningSummary returns the parse-warning census for everything parsed
+// so far. Safe to call at any point; normally called after Parse /
+// the final ParseOne. Total == 0 means a clean parse.
+func (p *Parser) WarningSummary() WarningSummary {
+	s := WarningSummary{
+		Total:           p.warnTotal,
+		DroppedWarnings: p.warnDropped,
 	}
-	p.warnings = append(p.warnings, Warning{
-		Time:    float64(timeMs) * 0.001,
-		Type:    typ,
-		Message: fmt.Sprintf(format, args...),
+	if p.warnTotal == 0 {
+		return s
+	}
+	s.ByType = make(map[string]int, len(p.warnByType))
+	for k, v := range p.warnByType {
+		s.ByType[k] = v
+	}
+	s.Groups = make([]WarningGroup, 0, len(p.warnGroups))
+	for k, g := range p.warnGroups {
+		s.Groups = append(s.Groups, WarningGroup{
+			Type:        k.typ,
+			Message:     k.msg,
+			Count:       g.count,
+			FirstTimeMs: g.firstMs,
+		})
+	}
+	// Deterministic order: loudest first, then a stable lexicographic
+	// tie-break. Map iteration order must never reach a consumer — the
+	// summary rides the Result, whose "output is a pure function of the
+	// demo" property is test-enforced.
+	sort.Slice(s.Groups, func(i, j int) bool {
+		a, b := s.Groups[i], s.Groups[j]
+		if a.Count != b.Count {
+			return a.Count > b.Count
+		}
+		if a.Type != b.Type {
+			return a.Type < b.Type
+		}
+		return a.Message < b.Message
 	})
+	return s
+}
+
+// warn records a diagnostic warning. The counters are always updated —
+// they are the only operator-visible signal that the wire carried
+// something we could not read (the sv_bigcoords desync degraded 5% of
+// the archive for years precisely because this was test-only). The
+// per-instance list is kept only in diagnostic mode.
+//
+// timeMs is the canonical wire-native demo time; Warning.Time is the
+// derived float seconds view, kept for the human-readable diagnostic
+// output only (the parser cannot import events.Sec without an import
+// cycle, so the identical conversion is inlined here).
+func (p *Parser) warn(timeMs int32, typ, format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+
+	p.warnTotal++
+	if p.warnByType == nil {
+		p.warnByType = make(map[string]int, 4)
+		p.warnGroups = make(map[warnKey]*warnGroup, 8)
+	}
+	p.warnByType[typ]++
+	k := warnKey{typ: typ, msg: msg}
+	if g, ok := p.warnGroups[k]; ok {
+		g.count++
+	} else if len(p.warnGroups) < MaxWarningGroups {
+		p.warnGroups[k] = &warnGroup{count: 1, firstMs: timeMs}
+	} else {
+		p.warnDropped++
+	}
+
+	if p.diagnosticMode {
+		p.warnings = append(p.warnings, Warning{
+			Time:    float64(timeMs) * 0.001,
+			Type:    typ,
+			Message: msg,
+		})
+	}
+}
+
+// warnKey identifies a warning group: the category plus the fully
+// formatted message, so two different failing svc_* commands never
+// collapse into one row.
+type warnKey struct{ typ, msg string }
+
+type warnGroup struct {
+	count   int
+	firstMs int32
 }
 
 // svcName returns a human-readable name for an svc_* command byte.

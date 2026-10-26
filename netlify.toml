@@ -18,3 +18,12 @@
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
+    # no-cache = store, but revalidate on every use. index.html, app.js,
+    # worker.js and analyzer.wasm deploy as one unit under stable URLs, so a
+    # cached copy must be checked against the CDN ETag each time it is used —
+    # anything longer-lived leaves mixed old/new versions in people's caches
+    # after a deploy. Unchanged assets still answer as cheap 304s. app.js
+    # additionally verifies the wasm's embedded git hash against the
+    # build-stamped <meta name="build"> in index.html (belt for a deploy
+    # landing mid-session) and reloads once on mismatch.
+    Cache-Control = "no-cache"

@@ -2,9 +2,11 @@ package analyzer_test
 
 // Golden test harness for the full analyzer pipeline. Reads
 // qwanalytics/testdata/corpus.json (a list of hub.quakeworld.nu game
-// IDs), pulls each demo into the local cache (downloading on first run,
-// reusing on subsequent runs), runs the default registry, and pins
-// the JSON-serialised Result against a checked-in golden file.
+// IDs, plus optional local-only `file` entries for demos the hub
+// doesn't have), pulls each hub demo into the local cache (downloading
+// on first run, reusing on subsequent runs), runs the default registry,
+// and pins the JSON-serialised Result against a checked-in golden file.
+// File entries skip when the demo is absent on this machine.
 //
 // Usage:
 //   make test                            # normal run; downloads on cache miss
@@ -49,10 +51,32 @@ var updateGolden = flag.Bool("update-golden", false, "regenerate golden files in
 //
 //	checked, just there so a reader of corpus.json can see
 //	coverage at a glance.
+//
+// file    → optional path (relative to testdata/) naming a local-only
+//
+//	demo instead of a hub gameId. Demos are never committed
+//	(testdata/demos/ is gitignored); the entry SKIPS when the
+//	file is absent — per-machine coverage, same contract as the
+//	special-cases corpus. Used for pre-instrumentation archive
+//	demos the hub doesn't have.
+//
+// sha256  → provenance of a file entry: the demo archive's key (hash of
+//
+//	the uncompressed .mvd), so the demo can be re-obtained on
+//	request. Informational; not verified here.
+//
+// shotStreams → analyze with Registry.BuildShotStreams so projectile /
+//
+//	beam / point-effect streams are built and damage
+//	reconstruction runs on pre-instrumentation demos instead
+//	of standing down.
 type corpusEntry struct {
-	GameID int    `json:"gameId"`
-	Label  string `json:"label"`
-	Mode   string `json:"mode,omitempty"`
+	GameID      int    `json:"gameId,omitempty"`
+	Label       string `json:"label"`
+	Mode        string `json:"mode,omitempty"`
+	File        string `json:"file,omitempty"`
+	Sha256      string `json:"sha256,omitempty"`
+	ShotStreams bool   `json:"shotStreams,omitempty"`
 }
 
 func TestGoldenCorpus(t *testing.T) {
@@ -70,11 +94,21 @@ func TestGoldenCorpus(t *testing.T) {
 		t.Fatalf("create golden dir: %v", err)
 	}
 
+	// A BSP-skipped case is a golden comparison that did NOT happen. Left to
+	// t.Skip alone that is invisible without -v, so a misconfigured BSP dir
+	// reports a green suite over zero compared demos (a relative
+	// MVDA_BSP_DIR used to do exactly that). Collect them and say so once, on
+	// stderr, where a passing run still shows it.
+	var bspSkipped []string
+	var compared int
+
 	for _, entry := range corpus {
 		t.Run(entry.Label, func(t *testing.T) {
 			mvdPath := ensureCached(t, cacheDir, entry)
 
-			result, err := analyzer.NewDefaultRegistry().Analyze(mvdPath)
+			reg := analyzer.NewDefaultRegistry()
+			reg.BuildShotStreams = entry.ShotStreams
+			result, err := reg.Analyze(mvdPath)
 			if err != nil {
 				t.Fatalf("analyze %s: %v", entry.Label, err)
 			}
@@ -85,14 +119,14 @@ func TestGoldenCorpus(t *testing.T) {
 			// degrade or vanish, so a comparison fails for the wrong reason
 			// and an -update-golden would overwrite a good golden with
 			// gutted data. Skip the comparison and refuse to regenerate.
-			if result.DemoInfo != nil && result.DemoInfo.Map != "" &&
-				mapbsp.LoadBytes(result.DemoInfo.Map) == nil {
+			if m := result.EffectiveMap(); m != "" && mapbsp.LoadBytes(m) == nil {
 				msg := fmt.Sprintf("%s: BSP for map %q not resolvable — set MVDA_BSP_DIR to the full map set (lookup order: MVDA_BSP_DIR, ./bsps)",
-					entry.Label, result.DemoInfo.Map)
+					entry.Label, m)
 				if *updateGolden {
 					t.Fatalf("refusing to regenerate %s — %s; would write a golden missing height/liquid/loc", entry.Label, msg)
 				}
-				t.Skip(msg)
+				bspSkipped = append(bspSkipped, entry.Label+" ("+m+")")
+				t.Skipf("%s", msg)
 			}
 
 			// Line of sight is computed lazily (not by the default pipeline),
@@ -123,11 +157,27 @@ func TestGoldenCorpus(t *testing.T) {
 			if err != nil {
 				t.Fatalf("read golden %s: %v\nrun with -args -update-golden to create it", goldenPath, err)
 			}
+			compared++
 			if !bytes.Equal(expected, actual) {
 				t.Errorf("%s differs from golden — run with -args -update-golden if intended.\nfirst diff line: %s",
 					entry.Label, firstDiffLine(expected, actual))
 			}
 		})
+	}
+
+	if len(bspSkipped) == 0 {
+		return
+	}
+	summary := fmt.Sprintf("compared %d of %d demos — %d skipped, BSP not resolvable (MVDA_BSP_DIR=%q, lookup order: MVDA_BSP_DIR, ./bsps).\n  these demos were NOT checked against their goldens:\n  %s",
+		compared, len(corpus), len(bspSkipped),
+		os.Getenv("MVDA_BSP_DIR"), strings.Join(bspSkipped, "\n  "))
+	fmt.Fprintf(os.Stderr, "\nWARNING: TestGoldenCorpus %s\n  run `make bsps` to populate the repo-root bsps/ map set.\n\n", summary)
+	// An unpopulated repo-root bsps/ is a fresh-clone state: skip, as the
+	// README documents. A dir the caller ASKED for that resolves nothing is a
+	// misconfiguration, and reporting green over zero golden comparisons is
+	// the failure mode this check exists for.
+	if compared == 0 && bspDirExplicit {
+		t.Fatalf("no golden comparison ran: %s", summary)
 	}
 }
 
@@ -155,6 +205,14 @@ func loadCorpus(t *testing.T) []corpusEntry {
 // label without changing the underlying demo).
 func ensureCached(t *testing.T, cacheDir string, entry corpusEntry) string {
 	t.Helper()
+	if entry.File != "" {
+		p := filepath.Join("..", "testdata", entry.File)
+		if _, err := os.Stat(p); err != nil {
+			t.Skipf("local demo %s (%s) not present — per-machine coverage, skipping. Archive sha256 %s; ask a maintainer for the demo to enable it.",
+				entry.File, entry.Label, entry.Sha256)
+		}
+		return p
+	}
 	cachePath := filepath.Join(cacheDir, fmt.Sprintf("%d.mvd.gz", entry.GameID))
 	if _, err := os.Stat(cachePath); err == nil {
 		return cachePath
@@ -235,7 +293,10 @@ func canonicalJSON(v interface{}, label string) ([]byte, error) {
 		return nil, err
 	}
 	if paths, ok := partialGoldenDemos[label]; ok {
-		m = projectPaths(m, paths)
+		m, err = projectPaths(m, paths)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", label, err)
+		}
 		out, err := json.MarshalIndent(m, "", "  ")
 		if err != nil {
 			return nil, err
@@ -305,14 +366,84 @@ var partialGoldenDemos = map[string][]string{
 	// no other golden can pin.
 	"4on4_fu_mix_060626_dm2_rename_handover": {
 		"timelineAnalysis.playerUserIDs", "timelineAnalysis.fragStreaks",
-		"timelineAnalysis.powerupEvents", "timelineAnalysis.airgibs",
+		"timelineAnalysis.powerupEvents", "highlights.airgibs",
 		"match.players", "streams.global",
 		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
 	},
 	"4on4_blue_red_200626_e1m2_sameslot_rejoin": {
 		"timelineAnalysis.playerUserIDs", "timelineAnalysis.fragStreaks",
-		"timelineAnalysis.powerupEvents", "timelineAnalysis.airgibs",
+		"timelineAnalysis.powerupEvents", "highlights.airgibs",
 		"match.players", "streams.global",
+		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
+	},
+	// The 11-player FFA (schema v75). It pins what no other golden can: the
+	// individual match layout at scale (eleven one-player teams, nine
+	// distinct clan tags on match.players[].rawTeam, zero team kills), a
+	// spectator who JOINS mid-match on a slot he was already watching from
+	// (anus, uid 50, at 21926 ms — the player↔spectator occupancy split), and
+	// a slot handover on top of it (xuxi leaves slot 4 on 10 frags at 63290,
+	// SMOK takes it at 76007). Projected rather than full: the eleven streams
+	// would add ~15 MB the other FFA goldens already pin, and these are the
+	// rows the demo was added for.
+	"ffa_matchless_shifter_260119_spectate": {
+		"match.players", "match.teams", "match.sources", "match.gameMode",
+		"streams.global",
+		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
+	},
+	// The two-player matchless FFA on nova (nexus vs SMOK) — the
+	// two-participant end of the individual layout, the one the web lays
+	// out as a duel. Projected to the three things no other golden pins:
+	// `match` (the scoreboard this demo's frag fold produces),
+	// `streams.global`, and `timelineAnalysis.fragEvents` —
+	// the last for the post-match drop gate, where nexus quits 3.7 s past the
+	// match-over print and SV_DropClient's scoreboard zeroing
+	// (mvdsv/src/sv_main.c:419-428) must NOT reach the frag timeline
+	// (TestFragUpdate_AfterMatchEndNotRecorded pins the unit shape; this pins
+	// it on the wire). The full Result was 22 k lines of streams, playerStats
+	// and aim the other goldens already pin.
+	"ffa_matchless_nova_260704": {
+		"match", "streams.global", "timelineAnalysis.fragEvents",
+	},
+	// The 8-player matchless FFA with a mid-match leaver (Player36 at
+	// 85.7 s), a leave-and-rejoin on a different slot with a real player in
+	// between (nexus: slot 4 → xra → slot 3) and the frag fold that rejoin
+	// exercises (14 announced on leaving, 0 on the second stint, 14 on the
+	// row — MakeGhost returns in matchless mode, ktx/src/client.c:2897).
+	// Projected to the scoreboard, the sessions and the per-player windows:
+	// the eight full streams were 8 MB of what `nova` already pins.
+	//
+	// It is ALSO the corpus's only `shotStreams: true` entry with a WIRE
+	// (KTX) damage section, which makes it the only golden that can pin the
+	// gl touch classifier's shipped path: every other hub entry parses
+	// without the spatial streams and takes the WITHHELD branch, and the one
+	// other enriched entry (2on2_archive_dm4_qw240_recon) has reconstructed
+	// damage and so runs the reconstructed tier instead. The aim paths below
+	// therefore pin what `aim.players[].weapons[].direct` / `.splash` are on
+	// a modern demo the classifier RAN on — including their presence, which
+	// since v75 is the difference between a measured zero and a withhold
+	// (result.WeaponAim) — and `playerStats.players[].accuracy` pins the
+	// consequence: gl on KTX's own `directImpact` scale rather than the
+	// any-path fallback.
+	"ffa_matchless_dm2_260116_joiners": {
+		"match.players", "match.teams", "match.sources", "match.gameMode",
+		"streams.global",
+		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
+		"playerStats.players[].name", "playerStats.players[].score",
+		"playerStats.players[].window", "playerStats.players[].sessions",
+		"playerStats.players[].accuracy",
+		"frags.frags",
+		"aim.players[].player",
+		"aim.players[].weapons[].weapon", "aim.players[].weapons[].shots",
+		"aim.players[].weapons[].hits", "aim.players[].weapons[].direct",
+		"aim.players[].weapons[].splash", "aim.players[].weapons[].missed",
+	},
+	// The countdown-style FFA (`The match has begun!` at 10 s, KTX demoinfo
+	// block). It pins what the matchless ones cannot: the individual
+	// rewrite applied to demoInfo.players[].team / demoInfo.teams, and the
+	// locGraph occupancy keyed by player name rather than clan tag. Its
+	// streams / shots / aim are the same shape the 1on1 goldens pin.
+	"ffa_countdown_dm6_260106": {
+		"match", "demoInfo", "locGraph", "streams.global",
 		"streams.players[].name", "streams.players[].identity", "streams.players[].sessions",
 	},
 }
@@ -323,25 +454,41 @@ var partialGoldenDemos = map[string][]string{
 // A `[]` suffix maps the rest of the path over an array:
 // "streams.players[].identity" keeps one small object per player instead of
 // the megabytes of stream a bare "streams.players" would drag in.
-func projectPaths(m map[string]interface{}, paths []string) map[string]interface{} {
+//
+// A path that matches NOTHING is an error, not a silent omission: a
+// projection is the whole statement of what its golden pins, and a path that
+// quietly resolves to nothing pins nothing while reading as though it does.
+// Three of the FFA entries carried `playerStats.teams` that way — always
+// absent, because an individual layout publishes no team rows — so the
+// golden's silence about them was mistaken for a pinned null. (`streams.global`
+// on every projected entry is not redundant: TestTimelineInvariants reads its
+// demoOffset / matchEnd to bound every event time in the golden.)
+func projectPaths(m map[string]interface{}, paths []string) (map[string]interface{}, error) {
 	out := map[string]interface{}{}
 	for _, path := range paths {
-		projectInto(m, out, strings.Split(path, "."))
+		if !projectInto(m, out, strings.Split(path, ".")) {
+			return nil, fmt.Errorf("projection path %q matched nothing in the Result", path)
+		}
 	}
-	return out
+	return out, nil
 }
 
-func projectInto(src, dst map[string]interface{}, parts []string) {
+// projectInto copies one dotted path from src into dst, reporting whether the
+// path resolved to anything at all.
+func projectInto(src, dst map[string]interface{}, parts []string) bool {
 	key := parts[0]
 	if strings.HasSuffix(key, "[]") {
 		key = strings.TrimSuffix(key, "[]")
 		items, ok := src[key].([]interface{})
 		if !ok {
-			return
+			return false
 		}
-		if len(parts) == 1 {
+		// A present-but-empty array is a pinned value (`aim.players[]` on
+		// a demo where nobody fired), distinct from an absent key: it
+		// matches, and any suffix trivially matches over zero rows.
+		if len(parts) == 1 || len(items) == 0 {
 			dst[key] = items
-			return
+			return true
 		}
 		rows, _ := dst[key].([]interface{})
 		if rows == nil {
@@ -352,33 +499,36 @@ func projectInto(src, dst map[string]interface{}, parts []string) {
 			dst[key] = rows
 		}
 		if len(rows) != len(items) {
-			return
+			return false
 		}
+		matched := false
 		for i, item := range items {
 			in, okIn := item.(map[string]interface{})
 			row, okRow := rows[i].(map[string]interface{})
-			if okIn && okRow {
-				projectInto(in, row, parts[1:])
+			if okIn && okRow && projectInto(in, row, parts[1:]) {
+				matched = true
 			}
 		}
-		return
+		return matched
 	}
 	if len(parts) == 1 {
-		if v, ok := src[key]; ok {
-			dst[key] = v
+		v, ok := src[key]
+		if !ok {
+			return false
 		}
-		return
+		dst[key] = v
+		return true
 	}
 	next, ok := src[key].(map[string]interface{})
 	if !ok {
-		return
+		return false
 	}
 	sub, ok := dst[key].(map[string]interface{})
 	if !ok {
 		sub = map[string]interface{}{}
 		dst[key] = sub
 	}
-	projectInto(next, sub, parts[1:])
+	return projectInto(next, sub, parts[1:])
 }
 
 // dropPositionTracks removes streams.players[].pos — the dense

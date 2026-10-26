@@ -194,10 +194,13 @@ All paths under the base URL (default `http://localhost:8080`). The
 - `sha:HEX` — 64-char SHA-256 of a demo already in the local cache
   (mostly for bookmarking warm cache entries)
 
-Successful 2xx responses set `Cache-Control: public, max-age=86400,
-immutable`, `X-Schema-Version: <n>`, `X-Cache: HIT|WARM|MISS`, and
-`ETag: "<sha>-v<n>"` (where `<n>` is the current `CurrentSchemaVersion`).
-Send `If-None-Match` to get a cheap 304. `POST /v1/demos/{id}` (the
+Successful 2xx responses set `Cache-Control: no-cache` (store, but
+revalidate on every use), `X-Schema-Version: <n>`, `X-Cache:
+HIT|WARM|MISS`, and `ETag: "<sha>-v<n>"` (where `<n>` is the current
+`CurrentSchemaVersion`). Send `If-None-Match` to get a cheap 304; the
+schema-versioned ETag makes that mandatory revalidation a version check,
+so a schema-bumping deploy is picked up immediately instead of clients
+serving stale shapes out of cache. `POST /v1/demos/{id}` (the
 warm-up call) is not a cacheable resource: it carries `X-Cache` /
 `X-Schema-Version` but no `Cache-Control` / `ETag`. Every response also
 carries `X-Request-Id` (a per-request id echoed in the access log; a 500
@@ -205,7 +208,7 @@ body cites it instead of internal error detail) and permissive CORS
 headers (see API.md §2.6). The stream endpoints (`/shots`,
 `/aim`, `/streams/*`) are plain reads off the always-full base parse (phase 12
 bakes the projectile/beam/nail streams into every cached Result), so they carry
-the same immutable headers as everything else — the old `X-Shot-Streams:
+the same cache headers as everything else — the old `X-Shot-Streams:
 unavailable` degrade header is gone. The generic artifact endpoint uses a finer
 ETag `"<sha>-<name>@v<n>"`, and the static `/v1/artifacts` and `/v1/graph`
 key their ETag on the schema version alone (`"artifacts-v<n>"` /
@@ -220,8 +223,8 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/docs/result-schema` | — | RESULT_SCHEMA.md rendered standalone (vendored marked.js; raw markdown at `/docs/result-schema.md`; auth-exempt) |
 | POST | `/v1/demos` | — (raw `.mvd`/`.mvd.gz` request body) | `{demoId, sha256, fromCache, schemaVersion}` (`uploadDemo` — analyze a local demo file; REST-only, deliberately not an MCP tool) |
 | POST | `/v1/demos/{id}` | — | `{demoId, sha256, fromCache, schemaVersion}` (`loadDemo` — warms the cache) |
-| GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, players, playerUserIDs, analyzer `errors`) plus **`available`**, the per-demo capability manifest: one flag per detailed view, each mirroring that view's 422 predicate, so a consumer branches instead of probing. Includes `height` / `liquid` / `los`, which depend on the server's BSP provisioning and are otherwise undiscoverable. The inlined `topKills` / `topStreaks` / `topPowerups` lists were removed in v70 — fetch `/top-kills`, `/lives` or `/events` for those rows. |
-| GET | `/v1/demos/{id}/player-stats` | `players`, `teams` | `result.PlayerStatsResult` (canonical per-player + per-team row: corrected scoreboard, damage, accuracy, pickup tallies, and possession time — time with each weapon / armor type / **no armor**. Computed for every demo; each family carries `src`: "derived" or "ktx") |
+| GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, players, playerUserIDs, analyzer `errors`, reader `parseWarnings`, and **`noMatch`** — present only on the 2% of demos that yield no analyzable match, naming why so "no match here" is distinguishable from "the parse failed") plus **`available`**, the per-demo capability manifest: one flag per detailed view, each mirroring that view's 422 predicate, so a consumer branches instead of probing. Includes `height` / `liquid` / `los`, which depend on the server's BSP provisioning and are otherwise undiscoverable. The inlined `topKills` / `topStreaks` / `topPowerups` lists were removed in v70 — fetch `/top-kills`, `/lives` or `/events` for those rows. |
+| GET | `/v1/demos/{id}/player-stats` | `players`, `teams` | `result.PlayerStatsResult` (canonical per-player + per-team row: corrected scoreboard incl. `maxSpree` / `maxQuadSpree` — always derived, gated with `kills`, best-of-team on a team row — plus damage, accuracy, pickup tallies, and possession time — time with each weapon / armor type / **no armor**. Computed for every demo; each family carries `src`: "derived" / "ktx" / "derived:unbounded" (damage) / "reconstructed" (damage rebuilt for a pre-instrumentation demo, and accuracy whose `hits` come from the aim reconstruction tier)) |
 | GET | `/v1/demos/{id}/demoinfo` | — | `result.DemoInfoResult` (KTX scoreboard — per-player weapon accuracy, kills/deaths/TK, damage, sprees, item counts, RL/LG transfers) |
 | GET | `/v1/demos/{id}/metadata` | — | `result.MetadataResult` (full fullserverinfo cvars + KTX match settings: timelimit, fraglimit, spawnmodel, antilag, midair, instagib, …) |
 | GET | `/v1/demos/{id}/frags` | `players`, `weapons`, `from`, `to`, `summary` | `result.FragResult` (totalFrags + byPlayer + byWeapon + full kill log) |
@@ -230,7 +233,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/aim` | — | `result.AimResult` (per-player per-weapon effectiveness + crosshair-error samples (hitscan) + LG ramp; from the always-full base parse, so RL/GL direct/splash + the LG whiff split are always present) |
 | GET | `/v1/demos/{id}/loc-graph` | — | `result.LocGraphResult` (per-map loc adjacency + edge weights) |
 | GET | `/v1/demos/{id}/chat` | `from`, `to`, `players`, `types` | `{timeUnit, messages: []result.MatchEvent}` (chat + teamsay only; types defaults to both) |
-| GET | `/v1/demos/{id}/backpacks` | `players`, `weapons`, `from`, `to` | `{timeUnit, backpacks: []result.BackpackDrop}` (RL/LG drops via `//ktx drop`) |
+| GET | `/v1/demos/{id}/backpacks` | `players`, `weapons`, `from`, `to` | `{timeUnit, backpacks: []result.BackpackDrop}` (RL/LG drops; `source` is `ktx` from `//ktx drop`, or `reconstructed` on demos older than that hint) |
 | GET | `/v1/demos/{id}/items` | `items`, `players`, `kinds` | `result.ItemsResult` (per-item pickup/respawn timeline) |
 | GET | `/v1/demos/{id}/weapon-pickups` | `players`, `weapons`, `source`, `from`, `to` | `{timeUnit, pickups: []result.WeaponPickup}` (kills-before-next-death; joins to backpacks via `backpackEnt`) |
 | GET | `/v1/demos/{id}/buckets` | `windowMs`, `from`, `to`, `players`, `fields`, `reducers`, `includeTeam`, `loc`, `layout` | `view.ColumnarBuckets` (`layout=column`, default) or `view.BucketsView` (`layout=row`) |
@@ -241,10 +244,11 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/streams/projectiles` | — | `{ "projectiles": ProjectileStreams\|null }` — rocket/grenade flights, from the always-full base parse |
 | GET | `/v1/demos/{id}/streams/beams` | — | `{ "beams": BeamStreams\|null }` — LG bolts, from the always-full base parse |
 | GET | `/v1/demos/{id}/streams/nails` | — | `{ "nails": ProjectileStreams\|null }` — ng/sng spike flights, from the always-full base parse |
+| GET | `/v1/demos/{id}/streams/point-effects` | `types` | `{ "types": legend, "pointEffects": PointEffectStreams\|null }` — temp-entity point effects (explosion / blood / lightningblood / …), from the always-full base parse |
 | GET | `/v1/demos/{id}/loc-trails` | `from`, `to`, `players`, `minDwellMs`, `loc` | `view.LocTrailsView` |
 | GET | `/v1/demos/{id}/loc-table` | — | `{ "locTable": []string }` (decoder for `loc=index`; index 0 = "" no-loc) |
 | GET | `/v1/demos/{id}/region-control` | `windowMs, from, to, regions` | `result.RegionControlResult` |
-| GET | `/v1/demos/{id}/airgibs` | — | `{timeUnit, airgibs: []result.AirgibEvent}` (Key Moments: direct rocket hits on airborne victims, height-sorted; empty without the map BSP) |
+| GET | `/v1/demos/{id}/highlights` | `kinds`, `players`, `preMs` | `view.HighlightsEnvelope` — `{timeUnit, kinds, preMs, discharges, quadbores, telefrags, airgibs}`, the stored highlight catalogue (`highlights`): every LG water discharge, quadbore (self-kill by own rl/gl while holding quad), telefrag (incl. pentagram deflections / spawnicides) and airgib as four lists of one `HighlightEvent` shape — `actor`, `victims[]`, `enemyKills`, `teamKills`, `damage`, `sources`, plus per kind `cells`, `weapon` + `quadHeldMs` + `quadFrags`, `teleKind`, `height` + `heightAboveAttacker`; every participant carries relation to the actor, health / armor / armorType / stack read one ms before the event, weapons, activeWeapon, powerups, loc and `stateSource`. All four lists always present (`[]` when none / excluded by `kinds`); `players` matches actor or victim; `preMs` recomputes the airgib list only. 422 `highlights_unavailable` without match streams or a frag log |
 | GET | `/v1/demos/{id}/top-windows` | `metric`, `mode`, `windowMs`, `gapMs`, `limit`, `perPlayer`, `players`, `weapons`, `from`, `to`, `dmg`, `minScore` | `view.TopWindowsView` — each player's best stretches, ranked by a summable metric (`frags`/`deaths`/`netFrags`/`damageGiven`/`damageTaken`/`netDamage`/`shots`/`hits`); one flat list, `scoredBy` on the envelope; ties on `score` (the common case) break on a fixed complementary metric — `damageGiven` ↔ `frags`, `damageTaken` ↔ `deaths` — summed unscoped in the response's damage family, so it equals the row's own stats field; `limit` and `perPlayer` share one rule — default on omit, negative = uncapped, explicit `0` a 400 (`limit` also caps at 200); `mode` picks the segmentation — `fixed` (default, every window `windowMs` long) or `gap` (a maximal run of scoring events no more than `gapMs` apart, scored by their sum), each rejecting the other's knob with a 400 and `gapMs` REQUIRED under `gap` with no default (start ~10000 on the frag metrics, ~3000 on damage/shots); both knobs are bounded to `[1, match duration]` |
 | GET | `/v1/demos/{id}/top-kills` | `gapMs`, `contestedMs`, `limit`, `players`, `weapons`, `minDamage`, `from`, `to`, `dmg` | `view.TopKillsView` — the match's hardest kill BURSTS, ranked by burst damage: for each enemy kill, the contiguous run of KILLING-WEAPON hits leading up to it (clipped by the victim's current life start), as `{rank, killer, victim, team, time, weapon, damage, hits, spanMs, maxGapMs, victimWep, returnDamage}`. `gapMs` is a CAPTURE gap (default 3000, max 5000) — narrow client-side by keeping rows with `maxGapMs <= your gap`, which reproduces the tighter walk exactly; `spanMs` is the display figure. Positional kills (telefrag/stomp) produce no row; kills by an already-dead killer stay in. Out-of-range `gapMs`/`contestedMs`/`limit` are 400s naming the range, never clamps |
 | GET | `/v1/demos/{id}/lives` | `players`, `from`, `to`, `minMs`, `dmg`, `summary` | `view.LivesView` — one row per spawn-to-death life (segmented by `streams.players[].alive`), with `endReason`, `spawnLoc`/`deathLoc`, `killedBy`, `itemsTaken`, `weaponsHeld` and the same per-interval stats block `/top-windows` uses; lives partition the match, so unfiltered per-life sums reconcile with the per-event LOGS (`/frags` `frags[]`, `/damage` `events[]`) — not necessarily with the KTX-sourced `byPlayer` scoreboards; `summary=1` keeps every row and drops the per-row collections |
@@ -331,9 +335,10 @@ All three are empty on an auth-exempt path (`/healthz`, `/v1/version`,
 resolve a key, so they are genuinely unattributable. A valid key sent to an
 exempt path is *not* recorded: the auth middleware never runs there.
 
-## Map BSPs (needed for `/los` and `/airgibs`)
+## Map BSPs (needed for `/los` and the `/highlights` airgib list)
 
-Line of sight and airgibs are BSP-derived: without the map's `.bsp` the
+Line of sight and airgibs (`highlights.airgibs`) are
+BSP-derived: without the map's `.bsp` the
 server cannot trace sightlines. **There is no `-bsp-dir` flag.** `mapbsp`
 looks in exactly two places at runtime:
 

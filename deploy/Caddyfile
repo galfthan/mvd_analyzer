@@ -87,8 +87,16 @@
 	# API clients negotiate with mvd-api directly.
 	# If /opt/mvd/web is absent this block 404s; the API above is
 	# unaffected.
+	# Cache-Control: no-cache = store, but revalidate on every use. Without
+	# it file_server sends NO cache header and browsers apply heuristic
+	# caching, so a publish leaves mixed old/new index.html / app.js /
+	# analyzer.wasm in visitors' caches. file_server emits an ETag +
+	# Last-Modified, so revalidating an unchanged asset is a cheap 304;
+	# app.js additionally compares the wasm's embedded git hash against the
+	# build-stamped <meta name="build"> and reloads once on mismatch.
 	handle {
 		root * /opt/mvd/web
+		header Cache-Control no-cache
 		encode zstd gzip
 		file_server
 	}

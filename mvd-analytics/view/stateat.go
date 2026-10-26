@@ -87,6 +87,8 @@ type PlayerStateAt struct {
 	Nails   *int16 `json:"nl,omitempty"`
 	Rockets *int16 `json:"rk,omitempty"`
 	Cells   *int16 `json:"cl,omitempty"`
+	// ActiveWeapon is the wielded weapon's IT_* bit (opt-in field `aw`).
+	ActiveWeapon *int16 `json:"aw,omitempty"`
 }
 
 // Position3D is the JSON-friendly companion to PositionTrack for
@@ -207,6 +209,12 @@ func StateAt(r *result.Result, opts StateAtOptions) (*StateAtView, error) {
 			if idx := indexI16AtOrBefore(p.Cells, tMs); idx >= 0 {
 				v := p.Cells[idx].V
 				ps.Cells = &v
+			}
+		}
+		if requested[FieldActiveWeapon] {
+			if idx := indexI16AtOrBefore(p.ActiveWeapon, tMs); idx >= 0 {
+				v := p.ActiveWeapon[idx].V
+				ps.ActiveWeapon = &v
 			}
 		}
 

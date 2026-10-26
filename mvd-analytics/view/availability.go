@@ -98,7 +98,11 @@ func Aim(r *result.Result, opts AimOptions) (*result.AimResult, error) {
 		if len(players) == 0 {
 			base = r.Aim
 		} else {
-			base = &result.AimResult{}
+			// Carry HitsMeasured/HitsSource: dropping them would claim "not
+			// measured" on a wire-damage demo whose copied rows still hold
+			// real hits, and would leave the copied `recon` blocks on an
+			// old demo with nothing naming their provenance.
+			base = &result.AimResult{HitsMeasured: r.Aim.HitsMeasured, HitsSource: r.Aim.HitsSource}
 			for i := range r.Aim.Players {
 				if players[r.Aim.Players[i].Player] {
 					base.Players = append(base.Players, r.Aim.Players[i])
@@ -137,7 +141,11 @@ func Aim(r *result.Result, opts AimOptions) (*result.AimResult, error) {
 
 	// Summary: drop the big per-fire sample blocks, keep the aggregates. Copy
 	// each PlayerAim so the shared stored values are never mutated.
-	out := &result.AimResult{Players: make([]result.PlayerAim, len(base.Players))}
+	out := &result.AimResult{
+		Players:      make([]result.PlayerAim, len(base.Players)),
+		HitsMeasured: base.HitsMeasured,
+		HitsSource:   base.HitsSource,
+	}
 	for i := range base.Players {
 		pa := base.Players[i]
 		pa.Crosshair = nil
@@ -145,21 +153,6 @@ func Aim(r *result.Result, opts AimOptions) (*result.AimResult, error) {
 		out.Players[i] = pa
 	}
 	return out, nil
-}
-
-// Airgibs returns the Key Moments airgib list. Availability tracks the
-// timeline-analysis pass, not the map's clip hull: ErrUnavailable only
-// when there is no TimelineAnalysis at all. A present-but-BSP-less demo
-// returns an empty (non-nil) list — an airgib-less map is a 200 [], not
-// a 422.
-func Airgibs(r *result.Result) ([]result.AirgibEvent, error) {
-	if r.TimelineAnalysis == nil {
-		return nil, ErrUnavailable
-	}
-	if r.TimelineAnalysis.Airgibs == nil {
-		return []result.AirgibEvent{}, nil
-	}
-	return r.TimelineAnalysis.Airgibs, nil
 }
 
 // RegionControlAvailable reports ErrUnavailable when the demo has no

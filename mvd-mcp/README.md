@@ -85,6 +85,7 @@ description says so.
 | `getBuckets` | `mvd-api` `GET /v1/demos/{id}/buckets` |
 | `getEvents` | `mvd-api` `GET /v1/demos/{id}/events` |
 | `getStreamSlice` | `mvd-api` `GET /v1/demos/{id}/stream-slice` |
+| `getPointEffects` | `mvd-api` `GET /v1/demos/{id}/streams/point-effects` |
 | `getStateAt` | `mvd-api` `GET /v1/demos/{id}/state-at` |
 | `getLocTrails` | `mvd-api` `GET /v1/demos/{id}/loc-trails` |
 | `getLocTable` | `mvd-api` `GET /v1/demos/{id}/loc-table` |
@@ -92,6 +93,7 @@ description says so.
 | `getTopWindows` | `mvd-api` `GET /v1/demos/{id}/top-windows` |
 | `getTopKills` | `mvd-api` `GET /v1/demos/{id}/top-kills` |
 | `getLives` | `mvd-api` `GET /v1/demos/{id}/lives` |
+| `getHighlights` | `mvd-api` `GET /v1/demos/{id}/highlights` |
 | `listArtifacts` | `mvd-api` `GET /v1/artifacts` |
 | `getArtifact` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` |
 
@@ -125,7 +127,8 @@ recover (e.g. by calling `loadDemo` first).
 ### REST endpoints without an MCP tool
 
 A few `mvd-api` REST endpoints have **no** curated MCP tool yet:
-`/los`, `/shots`, `/streams/*`, and `/airgibs`. This asymmetry is
+`/los`, `/shots`, and `/streams/*` (the airgib list's only home is
+`getHighlights` with `kinds: ["airgib"]`). This asymmetry is
 deliberate for now — those views are large or specialised, and adding
 tools is deferred (they can still be fetched at the REST layer, and
 `/los` is reachable generically via `getArtifact name=los`). See
@@ -215,8 +218,9 @@ infers their JSON Schemas from struct tags and exposes them via
 
 Every tool that maps to a demo endpoint (getOverview, getFrags,
 getDamage, getAim, getChat, getBackpacks, getItems, getWeaponPickups,
-getBuckets, getRegionControl, getEvents, getStreamSlice, getStateAt,
-getLocTrails, getLocGraph, getTopWindows, getTopKills, getLives) and carries
+getBuckets, getRegionControl, getEvents, getStreamSlice, getPointEffects,
+getStateAt, getLocTrails, getLocGraph, getTopWindows, getTopKills,
+getLives) and carries
 match-position time echoes a
 top-level constant `timeUnit` (`"ms"`) — every time value in the API is
 int32 ms (pure-ms model). getLocGraph is on that list because
@@ -245,7 +249,7 @@ All fields optional; an empty filter returns the most recent matches.
 | `matchtag` | `string`   | — | Tournament/event tag, case-insensitive substring (e.g. `qwsl`) |
 | `from`     | `string`   | — | ISO date lower bound, inclusive (YYYY-MM-DD) |
 | `to`       | `string`   | — | ISO date upper bound, inclusive (YYYY-MM-DD) |
-| `limit`    | `int`      | 20 | Max rows; capped at 100. Omit for the default; an explicit `0` is rejected `400 invalid_param` |
+| `limit`    | `int`      | 20 | Max rows per page; capped at 1000 (the hub's own page ceiling). Omit for the default; an explicit `0` is rejected `400 invalid_param` |
 | `offset`   | `int`      | 0 | Pagination offset |
 | `roster`   | `bool`     | `false` | `true` = verbatim hub rows with full roster detail (per-player `ping`, `color` arrays, `name_color`, `team_color`, `is_bot`). Default = compact rows: `players` projected to `{name, team, frags}`. |
 
@@ -283,6 +287,20 @@ every subsequent per-demo tool expects.
 
 Output: `Overview` —
 see [`../mvd-api/README.md`](../mvd-api/README.md#rest-endpoints).
+Carries the per-demo capability manifest (`available`), the
+`timing.matchStart*` anchor family that answers "when was this match
+played" (schema v72 — always read `matchStartConfidence` with the value),
+and THREE signals about the health of the result, deliberately separate:
+`errors` (analyzer level), `parseWarnings` (reader level, omitted on a
+clean parse) and `noMatch` (schema v74) on the 2% of the archive that
+yields no analyzable match. `noMatch` is present exactly when the `streams`
+block is absent, and names the reason (`midMatchRecording` /
+`matchStartUnannounced` / `noMatchDeclared` / `noPlayRecorded` /
+`demoUnreadable`) with the wire evidence behind it, so "no match here" is
+distinguishable from "the parse failed" without guessing. Read it FIRST —
+it decides whether the other two describe a partial match or nothing at
+all, and `demoUnreadable` is the one reason that means both. Such a demo
+is not a failed parse: do not report it as one and do not retry it.
 
 #### `getDemoInfo({demoId})`
 
@@ -311,22 +329,106 @@ demoinfo block.
 | `teams` | `string[]` | restrict to these teams |
 
 Output: `result.PlayerStatsResult` — per row `score` (corrected
-frags/kills/deaths/suicides/teamKills + `efficiency`), `damage`,
-`accuracy`, `pickups.byKind`, and `hold` (`weapons` / `armor` /
-`powerups`), plus a `window` carrying the denominators
-(`matchMs` / `presentMs` / `aliveMs` / `deadMs`).
+frags/kills/deaths/suicides/teamKills + `efficiency`, plus `maxSpree` /
+`maxQuadSpree`), `damage`, `accuracy`, `pickups.byKind`, and `hold`
+(`weapons` / `armor` / `powerups`), plus a `window` carrying the
+denominators (`matchMs` / `presentMs` / `aliveMs` / `deadMs`).
 
-Every family carries `src` (`"derived"` | `"ktx"`), with a `sources`
-roll-up — `getDemoInfo` stays the verbatim KTX block to diff against.
+Every family carries `src` (`"derived"` | `"ktx"` |
+`"derived:unbounded"` on damage | `"reconstructed"` on damage rebuilt
+for a pre-instrumentation demo, and on `accuracy` whose `hits` come from
+the aim reconstruction tier), with a `sources` roll-up — `getDemoInfo` stays the verbatim KTX block to diff against.
 The response keeps the same shape regardless of demo age: on a demo with
-no KTX block, `accuracy` is reconstructed from the decoded fire stream
-(trigger pulls, not KTX's pellets — check `src` before comparing across
-demos), `damage.takenEnemy` / `takenToDie` come from the per-hit log, and
+no KTX block, `accuracy` is derived from the decoded fire stream — linked
+to the wire damage log where the demo carries one (`src: "derived"`, on
+KTX's own convention per weapon since schema v75), rebuilt from the
+reconstruction where it does not (`src: "reconstructed"`, whose `sg`/`ssg`
+count trigger pulls rather than KTX's pellets); read
+`accuracy.byWeapon[].hitsConvention`, not `src`, before comparing across
+demos, `damage.takenEnemy` / `takenToDie` come from the per-hit log, and
 `login` from the `*auth` userinfo key. A value that cannot be measured
 stays ABSENT rather than becoming a zero — notably
-`accuracy.byWeapon[].hits` when the demo has no damage stream.
+`accuracy.byWeapon[].hits` on a demo with no WIRE damage stream for the
+weapons the aim reconstruction tier does not cover (see below).
 `efficiency`, `shareAlive` and `shareMatch` are RATIOS in [0,1], not
 percentages.
+
+**Reconstructed accuracy hits.** On a demo whose damage section is
+itself `reconstructed` (no wire `mvdhidden_dmgdone` stream),
+`accuracy.byWeapon[].hits` is FILLED from the published aim
+reconstruction tier — the same counts `getAim` publishes as
+`weapons[].recon.hits` — instead of being withheld, and the family's
+`src` becomes `"reconstructed"` to mark the evidence grade. Only the
+weapons that tier validated carry a number: `lg`, `sg`, `ssg`, `axe`,
+`rl`, `gl`. `ng` / `sng` keep `hits` ABSENT — the tier validated no nail
+recovery, so the withhold inherits; read that absence as "not recovered
+for this weapon", never as "no hits". A family whose weapons all fall
+outside the tier stays `src: "derived"`, `attacks` being shot-derived
+either way. Grade the numbers before diffing against KTX: on a
+`reconstructed` family `lg` agrees to 0.9% in aggregate and so do `rl`
+(1.25%, 46.5% of rows exact) and `gl` (3.55% aggregate but 89.6% of rows
+exact, one-sided by design), because since schema v74 those two publish
+KTX's OWN direct-impact count. A `derived` family publishes it too since
+v75 — `rl` off the wire's own splash flag (99.8% of 632 rows exact at
+0.02%) and `gl` off the same flight-geometry classifier the
+reconstruction uses (92.0% of 424 rows at 3.79%), because the wire log
+records no grenade touch at all: the touch detonates the grenade and
+every damage row the server then writes is flagged splash. `attacks`
+matches KTX to the row on every single-projectile weapon (98–100%
+exact). The `gl` classification needs the projectile streams, which
+mvd-api always builds — a payload that lacks them says so, publishing
+`anyDamage`, which reads ~1.5x above KTX's touch counter
+(`ktx/src/weapons.c:994`, `:1329`).
+
+**`hitsConvention` is the machine-readable form of that warning**, and
+the field to gate a cross-demo comparison on — `src` states the evidence
+GRADE and says nothing about what is counted. It sits on every weapon
+that carries `hits`: `anyDamage` (a fire that landed damage by any path;
+`lg` / `ng` / `sng` / `axe` on every source, plus `sg` / `ssg` on a
+`reconstructed` family and `gl` on a `derived` one whose parse lacked the
+projectile streams its touch classifier reads), `directImpact` (the
+projectile TOUCHED a player: KTX's `rl` / `gl`, a `reconstructed`
+family's `rl` / `gl` since v74, and a `derived` family's `rl` and `gl`
+since v75) or `pellets`
+(KTX's `sg` / `ssg` and, since v75, a `derived` family's — the one
+convention where `attacks` counts pellets too). Per WEAPON, because
+one `src: "ktx"` row uses all three at once. Two rows are comparable
+exactly when weapon AND convention match; absent beside a present `hits`
+only on a `src: "mixed"` team row. Deriving KTX's own convention on an
+old demo took two attempts: the wire damage log's splash flag reproduces
+KTX's `rl` count on every row, the pre-instrumentation half carries no
+such flag, and the first substitute — an explosion endpoint within 48
+units — answered `gl` and not `rl` (+80%). v74 replaces it with the
+flight's trajectory against the player hull plus the flat-110
+direct-damage constant, at 1.25% / 3.55% aggregate (46.5% / 89.6% of
+rows exact).
+
+**Sprees.** `score.maxSpree` is the longest run of kills between deaths;
+`score.maxQuadSpree` the longest run of kills made while holding the
+quad (it resets on death *and* on a fresh quad pickup, mirroring KTX
+`items.c:2180`). They are the derived equivalent of the KTX demoinfo
+block's `spree.max` / `spree.quad`, which 54% of the archive has no
+block to carry — always derived, never overlaid from KTX. They ride
+`score.kills`' `killsMeasured` gate, i.e. they are present and absent
+together with `kills` / `suicides` / `teamKills` / `efficiency` /
+`byWeapon` / `byEnemyWeapon` / `byWeaponVsEnemyWeapon`, so a `0` inside a
+present family is an observed zero. A team
+row carries the BEST any member ran, never a sum. One deliberate
+divergence from KTX: its increment gate is `strneq(attackerteam,
+targteam) || !tp_num()` (`ktx/src/client.c:4865`), so wherever teamplay
+is OFF — every duel, every FFA — a player's own SUICIDE bumps their
+streak in the same call that latches it. Ours counts only the kills
+`score.kills` counts, so a duel with self-kills reads exactly 1 lower
+per affected streak. Withheld-and-compared against the verbatim KTX
+block on 188 archive demos / 665 player rows: `maxQuadSpree` 99.8%
+exact, `maxSpree` 92.9% overall, 96.5% on rows whose `kills` already
+agrees with KTX, and 99.6% on rows where kills agree and the player
+never suicided. The large disagreements have an observable signature:
+`kills: 0` beside a large positive `frags` means the streak inherited
+the kill side's gap and is unknown, not zero. A reconnect does NOT reset
+the streak (KTX restores the whole stats struct from its ghost entity,
+`ktx/src/client.c:1515`), and a mid-match team switch cannot happen —
+KTX refuses one while a match is in progress.
 
 **Possession time is unique to this tool.** KTX never writes weapon hold
 time into the demoinfo block, and its armor hold time overcounts (the
@@ -351,7 +453,10 @@ Output: `result.MetadataResult` — `serverInfo` (map of cvar →
 value), `matchSettings` (mode, timelimit, fraglimit, antilag,
 spawnmodel/spawnK, midair, instagib, overtime, powerups, vwep,
 noweapon, matchtag, …), `countdownText` (raw KTX
-countdown centerprint).
+countdown centerprint) and `finalScores` (KTX's `//finalscores`
+end-of-match scoreline, verbatim: date without a year, mode, map and
+the two sides — present on 64% of demos against demoinfo's 46%, and
+counting ROUNDS rather than frags on Clan Arena / Wipeout).
 
 #### `getFrags({demoId, ...})`
 
@@ -378,8 +483,11 @@ Output: `result.FragResult` —
 
 #### `getDamage({demoId, ...})`
 
-Per-hit damage aggregates + log, reconstructed from the KTX
-`mvdhidden_dmgdone` stream. Cheaper than aggregating
+Per-hit damage aggregates + log — decoded from the wire KTX
+`mvdhidden_dmgdone` stream (`source: "ktx"`), or rebuilt from
+spectator-visible state on pre-instrumentation demos
+(`source: "reconstructed"`; ~1% match-total estimates). Cheaper than
+aggregating
 `getEvents(types:["damage"])` client-side; use that for the raw
 time-ordered per-hit log.
 
@@ -421,9 +529,24 @@ scoreboard — see `scoreboard` for the cross-check.
 
 #### `getAim({demoId, players?, startTime?, endTime?, summary?})`
 
-Per-player aim analysis. Start with `players[].weapons` (per-weapon
-shots/hits, SG/SSG pellet stats + full/partial/miss fires, RL/GL
-direct/splash/missed, the LG miss/blocked/out-of-range whiff split); the
+Per-player aim analysis. Check the top-level `hitsMeasured` flag first:
+when false (reconstructed/absent damage — most old demos) every
+hit-derived counter is withheld rather than fabricated as zero, and
+only shots, crosshair error and ramp timing remain. `hitsSource` says
+which evidence there was (`ktx` / `reconstructed` / absent): on a
+`reconstructed` demo the measured counters stay withheld, but a
+recovered hit count is published separately as
+`weapons[].recon.hits` — accuracy is `recon.hits / shots`, for
+`lg`/`sg`/`ssg`/`axe` and (schema v74) `rl`/`gl`, never for `ng`/`sng`,
+and never merged into `hits`. Start with
+`players[].weapons` (per-weapon shots/hits, SG/SSG pellet stats +
+full/partial/miss fires, RL/GL direct/splash/missed, the LG
+miss/blocked/out-of-range whiff split). RL/GL `direct` and `splash` are
+emitted together and **absent means "not classified", never zero** — a
+present `0` is a measured "touched nobody", while an absence (a payload
+parsed without the projectile streams the GL touch classifier reads, or
+a demo whose linker resolved no RL/GL fire at all) must be rendered as
+withheld; the
 columnar `crosshair` (per-hitscan-fire angular error, normalized so ±1 =
 the hitbox edge, with hit + attributed target) and `lgRamp` (per-LG-cell
 hit vs ms since the shaft opened) blocks are large — reach for them only
@@ -494,9 +617,43 @@ ezQuake markup), `messageClean` (markup stripped). Cleaner shape than
 
 Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
 `player` (dropper), `team`, `weapon` (`rl`/`lg`), `origin` (XYZ), `loc`
-(resolved name), `entNum` (server edict — joins to
-`weapon-pickups[].backpackEnt`). (REST returns a `{timeUnit, backpacks}`
-envelope; the MCP tool passes it through.)
+(resolved name), `entNum` (server edict) and `source` (schema v72); a
+`reconstructed` row additionally carries `fate` and its companions below,
+and a `ktx` row carries `fate: "expired"` when KTX announced the timeout.
+(REST returns a `{timeUnit, backpacks}` envelope; the MCP tool passes it
+through.)
+
+`source` is `ktx` on demos that carried KTX's `//ktx drop` hint (KTX
+≥ 1.38, 49% of the archive) and `reconstructed` on older demos, where the
+pipeline replays KTX's own `DropBackpack` rule instead — validated at
+99.97% precision and recall against the hints. **The two provenances carry
+the pickup side differently**:
+
+- A `ktx` row's `entNum` is the hinted edict and joins to
+  `weapon-pickups[].backpackEnt`, which is where its pickup lives.
+  `picker` / `pickerTeam` / `pickupTime` are absent. `fate` appears only
+  as `expired`, and only when KTX announced the 120 s removal in its third
+  backpack directive `//ktx expire` — the one statement the pickup join
+  cannot make. An ABSENT `fate` on a `ktx` row means "ask
+  `getWeaponPickups`", never "nobody took it": across the archive only
+  half the drops with no pickup row carry the expiry hint, the rest being
+  packs the recording ended on top of.
+- A `reconstructed` row has no pickup hint to join to, so the pickup side
+  is on the row itself (schema v72): `fate` (`picked` / `expired` /
+  `unobserved`), plus `pickupTime` and `picker` / `pickerTeam` when the
+  wire named exactly one player, read off the bound backpack-entity track.
+  Its `entNum` is that bound entity — no longer 0, but still joining to no
+  pickup row. Measured against the `//ktx bp` hints with both hints
+  withheld: 100% precision, 96.1% recall on picked-vs-not, 99.98% of named
+  pickers correct. Read `unobserved` as "the wire did not answer", not as
+  "nobody took it"; a `picked` row with no `picker` means two players were
+  on the pack and nothing separated them.
+
+An absent section is AMBIGUOUS: it means either that no RL/LG pack dropped
+or that the pass stood down rather than guess, and the wire shape does not
+distinguish the two. `origin` is the pack's own position — the victim's
+origin less the 24 units KTX drops it by (`ktx/src/items.c:2703-2704`) —
+on both provenances.
 
 #### `getItems({demoId, ...})`
 
@@ -564,7 +721,7 @@ Output: `view.ColumnarBuckets` (default) or `view.BucketsView` (`layout=row`)
 | `startTime` | `integer` | match start | Match-relative milliseconds |
 | `endTime`   | `integer` | match end | Match-relative milliseconds |
 | `players`   | `string[]` | all | — |
-| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, pause` (default), opt-in: `loc, health, armor, damage, telefrag, stomp` |
+| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, discharge, quadbore, pause` (default), opt-in: `loc, health, armor, damage, telefrag, stomp, discharge, quadbore` (the last two are the highlight-catalogue lenses — `getHighlights` has the full rows) |
 
 Output: `view.EventsView` —
 `{ events: [{ time, type, player, detail }, …] }`. Per-type `detail`
@@ -587,6 +744,25 @@ the canonical stored lives clamped to the window — read it instead of
 re-deriving liveness from the `sp`/`d` markers. It is not field-gated and
 has three states: `null` liveness not measurable, `[]` measured but never
 alive in this window, `[…]` the lives.
+
+#### `getPointEffects({demoId, types?})`
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `demoId` | `string` (required) | — | — |
+| `types`  | `string[]` | all | Effect names to keep: `spike`, `superspike`, `gunshot`, `explosion`, `tarexplosion`, `wizspike`, `knightspike`, `lavasplash`, `teleport`, `blood`, `lightningblood`, or `te<code>` for an unnamed code. Blood usually dominates row count — filter to keep the payload small. |
+
+Output: the point-effect temp-entity stream (schema v71) as columnar
+parallel arrays `t`/`ty`/`c`/`x`/`y`/`z`, plus a `types` legend mapping
+the TE codes present in the demo to names (kept whole under a filter,
+so a filtered response still shows what else it could ask for).
+`explosion` is the exact rocket/grenade detonation point, `blood` is
+hitscan damage striking a player, `lightningblood` an LG cell
+connecting — the wire evidence the damage reconstruction consumes on
+pre-instrumentation demos. The `c` count byte's packaging varies per
+server generation; never read it as a damage magnitude (`getDamage` is
+the damage answer). `pointEffects: null` means the demo carried no
+point effects; a filter matching nothing returns empty columns.
 
 #### `getStateAt({demoId, time, ...})`
 
@@ -850,6 +1026,35 @@ claim from "we could not tell". The envelope's `measured.liveness`
 carries the same fact on the responses that do get served, so it is only
 ever `false` on `getTopWindows`. A demo with no damage stream still
 yields lives.
+
+#### `getHighlights({demoId, kinds?, players?, preMs?})`
+
+`GET /v1/demos/{id}/highlights` — the stored highlight catalogue: every
+**discharge** (LG fired in water), **quadbore** (self-kill by own rl/gl
+while holding quad), **telefrag** (incl. the pentagram deflections and
+spawnicides) and **airgib**, as four lists of one row shape.
+
+| Param | Type | Default | Notes |
+|---|---|---|---|
+| `demoId`  | `string` (required) | — | — |
+| `kinds`   | `string[]` | all four | `discharge`, `quadbore`, `telefrag`, `airgib`. The unrequested lists still come back, empty; the envelope's `kinds` echoes what applied. Unknown kind → `400 invalid_param`. |
+| `players` | `string[]` | all | Keep rows whose **actor or a victim** is named. |
+| `preMs`   | `integer` | `100` | Airgib pre-hit look-back (0..1000; `0` = gate off). Recomputes the airgib list only. Omit for the default — an explicit `0` is forwarded. |
+
+Output: `view.HighlightsEnvelope` — `{timeUnit, kinds, preMs, discharges,
+quadbores, telefrags, airgibs}`. Each row is `{kind, time, actor,
+victims[], enemyKills, teamKills, damage?, sources}` plus per kind `cells`
+(discharge — 35 × cells radius damage), `weapon` + `quadHeldMs` +
+`quadFrags` (quadbore — KTX quad lasts 30 000 ms), `teleKind` (`telefrag |
+deflect | spawnicide`), `height` + `heightAboveAttacker` (airgib). Every
+participant carries `relation` (`self | team | enemy`), `killed?`,
+`survived?` (the pent holder on a deflect), `damage?`, `health`, `armor`,
+`armorType`, `stack`, `weapons`, `activeWeapon`, `powerups`, `loc` and
+`stateSource` (`stream`, or `spawn` when the player had only just
+spawned). Toplists are a sort: discharges by `enemyKills`/`damage`/`cells`,
+quadbores by `quadHeldMs` ascending, telefrags by `victims[0].stack`,
+airgibs by `heightAboveAttacker`. `422 highlights_unavailable` when the
+demo has no match streams or no frag log.
 
 #### `listArtifacts({})`
 

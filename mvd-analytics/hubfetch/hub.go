@@ -51,8 +51,9 @@ var maxDownloadBytes int64 = 64 << 20
 
 // maxCatalogBytes caps how many bytes a catalog metadata response (Resolve
 // and Search) may read before the client rejects it. These are small JSON
-// payloads — a single game row for Resolve, a page of at most 100 rows for
-// Search — so the cap is far below the demo cap: a compromised or buggy hub
+// payloads — a single game row for Resolve, a page of at most MaxSearchLimit
+// rows for Search (a full 1000-row page measures ~0.9 MiB on the wire) — so
+// the cap is far below the demo cap: a compromised or buggy hub
 // (or a MITM of HUB_SUPABASE_URL) must not be able to OOM the API host with
 // an oversized metadata body (a single Search was observed allocating
 // ~900 MiB from an unbounded read). 16 MiB is well above any legitimate

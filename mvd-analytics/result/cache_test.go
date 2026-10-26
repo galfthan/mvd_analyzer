@@ -60,6 +60,7 @@ func TestCacheRoundTripPreservesMeasuredZeros(t *testing.T) {
 		PlayerStats: &PlayerStatsResult{Players: []PlayerStatsRow{{
 			Name:      "p",
 			ControlMs: z32(),
+			Score:     PlayerStatsScore{Kills: z(), MaxSpree: z(), MaxQuadSpree: z()},
 			Speed:     &PlayerStatsSpeed{},
 			Damage: &PlayerStatsDamage{
 				Taken: z(), TakenEnemy: z(), TakenToDie: z(), TeamWeapons: z(),
@@ -94,6 +95,8 @@ func TestCacheRoundTripPreservesMeasuredZeros(t *testing.T) {
 		{"damage.events[0].bounded", out.Damage.Events[0].Bounded},
 		{"damage.telefrags[0].bounded", out.Damage.Telefrags[0].Bounded},
 		{"playerStats.players[0].controlMs", row.ControlMs},
+		{"playerStats…score.maxSpree", row.Score.MaxSpree},
+		{"playerStats…score.maxQuadSpree", row.Score.MaxQuadSpree},
 		{"playerStats.players[0].speed", row.Speed},
 		{"playerStats…damage.taken", row.Damage.Taken},
 		{"playerStats…damage.takenEnemy", row.Damage.TakenEnemy},

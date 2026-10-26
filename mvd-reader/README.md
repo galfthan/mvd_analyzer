@@ -78,11 +78,15 @@ The concrete event list, in stable order:
 | `DeathEvent` | Player died — deduplicated across `StatHealth` edges, the `DF_DEAD` playerinfo bit, and obituary corroboration |
 | `SpawnEvent` | Player spawned — deduplicated across `StatHealth` edges and the `DF_DEAD` playerinfo bit clearing |
 | `ItemSpawnEvent` | Item entity observed — baseline known (kind, position) |
-| `ItemStateEvent` | Item became taken or respawned — from entity modelindex transitions |
+| `ItemStateEvent` | Item became taken or respawned — from entity modelindex transitions. Carries the entity origin at the transition (the new one when it appeared, the last visible one when it went away) |
+| `ItemMoveEvent` | A **visible** item entity's origin changed. Map items never move, so on a normal demo this fires only for dropped backpacks, which are tossed with MOVETYPE_TOSS and fall to wherever they land |
 | `BackpackDropHintEvent` | KTX `//ktx drop` stuffcmd: `(BackpackEnt, ItemFlags, PlayerEnt)` for RL/LG drops only |
 | `ItemPickupHintEvent` | KTX `//ktx took` stuffcmd: `(ItemEnt, RespawnSec, PlayerEnt)` — authoritative pickup attribution for every MH / armor / weapon / powerup touch |
 | `BackpackPickupHintEvent` | KTX `//ktx bp` stuffcmd: `(BackpackEnt, PlayerEnt)` — symmetric to `//ktx drop`, fires only for RL/LG packs |
+| `BackpackExpireHintEvent` | KTX `//ktx expire` stuffcmd: `(BackpackEnt)` — `SUB_Remove` took an RL/LG pack off the map untaken, at `DropBackpack`'s 120 s timeout. Stuffed at `world`, so no player argument. The only positive wire evidence that a pack was *not* picked up |
 | `DemoMarkEvent` | KTX `//demomark[ <args>]` stufftext: `(PlayerSlot, Label)` — player-inserted bookmark. Slot is the dem_single block target (the only attribution channel), -1 if not slot-addressed; `Label` is the optional HoonyMode argument tail. Fires even out of match; not deduped |
+| `MatchStartEvent` | The match went live — emitted **once per demo**, at the first of four wire signals: KTX's `matchdate:` broadcast (`ktx/src/match.c:1291`), a match-start print (`MatchStartPatterns`, e.g. `"The match has begun!"` at `match.c:1296`), the `//ktx matchstart` stuffcmd (`match.c:1372`) or a serverinfo `status` transition into a running clock (`match.c:1337`). `Source` names which one; all four land in the same server frame on modern KTX. The three non-print signals are what make **matchless** servers (`k_matchless 1`, FFA/CTF continuous play) analyzable at all — they never print the start line. See [MVD_FORMAT.md](MVD_FORMAT.md#match-start-detection) |
+| `FinalScoresEvent` | KTX `//finalscores "<date>" "<mode>" "<map>" "<team1>" <s1> "<team2>" <s2>` stufftext, stuffed once at match end (`ktx/src/commands.c:6969`) — the server's own mode, map and final scoreline. `Date` has no year (`%b %d, %H:%M`); the score is **rounds won**, not frags, on Clan Arena / Wipeout. Team names normalised; a line failing the shape check is dropped with a `parse_error` warning |
 | `ItemPickupPrintEvent` | Per-client `svc_print` "You got the X" / "You receive N health" — covers ammo boxes and H15/H25 that `//ktx took` misses. **Subject to per-client `msg` cvar filter; frequently absent in competitive demos.** |
 | `PlayerDepartureEvent` | KTX/kmod broadcast `<name> left the game with N frags`: `(Name, Frags, FragsKnown)`. The only place the wire states a departing player's final score — the drop that follows zeroes the slot. `FragsKnown` is false when print fragmentation cut the number mid-digits |
 | `PlayerRejoinEvent` | KTX/kmod broadcast `<name> [<team>] rejoins the game with N frags` (`WithStats` true) or `reenters the game without stats` (false): `(Prefix, Frags, FragsKnown, WithStats)`. `Prefix` is the raw leading text — it includes the `[team]` bracket, so resolve it against known netnames by longest prefix |
@@ -94,6 +98,7 @@ The concrete event list, in stable order:
 | `ProjectileSpawnEvent` | A rocket (`progs/missile.mdl`) or grenade (`progs/grenade.mdl`) entity first observed — kind + muzzle origin. The entnum brackets the flight; the `shots` analyzer attributes it to the same-frame RL/GL fire |
 | `ProjectileDespawnEvent` | A tracked projectile left the wire (impact / timeout) — last origin. Co-locates with the explosion + `mvdhidden_dmgdone` damage, so the launching shot links to that impact |
 | `BeamEvent` | `svc_temp_entity` lightning beam (`TE_LIGHTNING1/2/3`) — firing entity + start/end coords. `TE_LIGHTNING2` is the player LG bolt (one per fire tick), the authoritative per-shot LG signal for the `shots` analyzer |
+| `PointEffectEvent` | `svc_temp_entity` point effect — raw TE type, origin, and the count byte where the type carries one (`TE_GUNSHOT`/`TE_BLOOD`). `TE_BLOOD` (hitscan damage on a player, count = pellet hits per volley on modern KTX) and `TE_LIGHTNINGBLOOD` (LG hit) are per-hit damage telemetry present on every demo generation; `TE_EXPLOSION` is the exact rocket/grenade detonation point — see [MVD_FORMAT.md](MVD_FORMAT.md#svc_temp_entity-23---temporary-entity) for the per-generation count-byte semantics |
 | `NailsFrameEvent` | `svc_nails` / `svc_nails2` — the full live nail set for one frame (ids + origins). Emitted only when nail decoding is enabled (`Parser.SetDecodeNails`); high volume, off by default. Note most modern servers (`sv_nailhack`) send nails as packet entities (spike models) instead, so this fires only on non-nailhack servers |
 
 `PrintEvent` carries a whole console line, not one wire message. QuakeC
@@ -144,6 +149,22 @@ parsing, not a protocol signal — so the derivation logic stays in
 mvd-analytics, but there is now a single shared table, not two drifting
 copies).
 
+**A teamkill obituary hides a name, not always the cause.** KTX's team
+branch (`ktx/src/client.c:5343-5410`) tests three death types by name before
+falling through to a random pick of four generic phrasings, so seven of the
+eight teamkill markers in the table are cause-carrying and three of them are:
+`dtTELE1` → `"X was telefragged by his teammate"` (weapon `tele`), `dtSQUISH`
+→ `"X squished a teammate"` (weapon `squish`, the one that names the KILLER
+instead), `dtSTOMP` → `"X was jumped/crushed by his teammate"` (weapon
+`stomp`). Each uses the SAME cause token as its non-team sibling, so
+filtering on a cause returns both spellings. Only the random four ("checks
+his glasses", "loses another friend", "mows down a teammate", "gets a frag
+for the other team") carry the placeholder weapon `teamkill`, which means
+*the phrasing had no cause in it* — `TeamKill` is the flag that says a
+teamkill happened. The table in
+[`MVD_FORMAT.md`](MVD_FORMAT.md#obituary-messages-frag-detection) lists all eight
+with their KTX line numbers.
+
 `ItemSpawnEvent` and `ItemStateEvent` are derived events synthesised
 from the entity-state stream (`svc_spawnbaseline`,
 `svc_packetentities`, `svc_deltapacketentities` — see
@@ -152,11 +173,28 @@ when the demo first makes it observable, carrying the classified kind
 (`ra`, `mh`, `rl`, ...) and world origin. `ItemStateEvent` fires on
 every visibility transition: `Taken=true` when the entity's
 modelindex drops to 0 (server set `self->model = ""` on pickup),
-`Taken=false` when it reappears (`SUB_regen` restored the model).
+`Taken=false` when it reappears (`SUB_regen` restored the model), each
+carrying the entity's origin at that moment. `ItemMoveEvent` fires on every
+origin change of a visible item, on the same hold-last convention as
+`MoverStateEvent`.
 Classification uses standard Quake 1 item model paths (armor.mdl +
 skin for GA/YA/RA; maps/b_bh*.bsp for health; progs/g_*.mdl for
 weapons; progs/{quaddama,invulner,invisibl}.mdl for powerups) —
 protocol-level, not KTX-specific.
+
+An item entity's classification is **cached only while the wire cannot speak
+for itself**. A taken item is on the wire with modelindex 0, so nothing but
+the cache can name it until it respawns; but whenever the entity is visible
+the model index is re-read, and a changed kind ends the old item and begins
+a new one (a fresh `ItemSpawnEvent`, and a `Taken=true` for the old kind at
+its own last origin). This matters for backpacks and nothing else: map-item
+edicts are allocated at map load and never freed, while KTX `spawn()`s and
+`ent_remove()`s packs, so a pack edict is handed on to a rocket, a gib or
+the next pack within seconds. A cache that outlived the pack reported every
+later tenant's appearance as that pack flickering — the "16.4 visibility
+flips per real pack" this repo used to measure. mvdsv refuses to reallocate
+an edict freed less than half a second ago (`pr_edict.c:123`), so the
+handover is always separated by the pack's own disappearance.
 
 `MoverSpawnEvent` and `MoverStateEvent` are synthesised from the same
 entity-state stream for inline brush-model entities — entities whose
@@ -189,6 +227,20 @@ symmetric to the existing `//ktx drop` hint. Both are
 **KTX-specific**: a non-KTX server (ktpro, CustomTF, or vanilla)
 will not emit them, in which case consumers fall back to
 `ItemStateEvent` + heuristics or to per-player stats deltas.
+
+`BackpackExpireHintEvent` closes that family. `//ktx expire`
+(`ktx/src/g_spawn.c:196-210`) fires from `SUB_Remove` for an RL/LG pack
+the server deletes untaken — which, for a dropped pack, is
+`DropBackpack`'s 120 s timeout (`items.c:2870-2872`). A pack that runs
+its course on the wire therefore accounts for itself in exactly one of
+`//ktx bp` or `//ktx expire` — but a pack the recording ends on top of
+emits neither (measured: 1.8% of drops across a 223-demo archive
+sample, see `mvd-analytics/analyzer/BACKPACKS.md`). `//ktx expire` is
+still the only signal on the wire that positively says a pack was
+*not* taken: a demo can carry `//ktx drop` and no `//ktx bp` at all
+(measured: 107 of 330 archive demos), so the absence of a pickup hint
+proves nothing. Backpack edicts are recycled within a match, so consumers
+must join it on `(BackpackEnt, time)` and not on the edict alone.
 
 `ItemPickupPrintEvent` complements the hints by parsing KTX's
 per-client pickup prints (`"You got the Red Armor"`,
@@ -239,12 +291,46 @@ treats `io.EOF` as success and any other error as a partial/failed parse
 `svc_disconnect` carrying any text other than `"EndOfDemo"` is treated as a
 non-standard / inter-map disconnect and parsing continues past it.
 
+## Parse warnings
+
+Everything the reader cannot decode — an unknown `svc_*` command byte, an
+unknown temp-entity or MVD hidden-message type, a payload that fails to
+parse — raises a **warning** and abandons the rest of that payload.
+Warnings are sub-fatal by construction: parsing continues, and the
+consumer gets a result that is complete apart from what those bytes held.
+
+Collection is **unconditional**, on every parse (it used to happen only
+under `SetDiagnosticMode`, so production runs dropped every warning
+silently — which is how the `sv_bigcoords` angle desync degraded ~5% of
+the archive unnoticed for years). The parser never prints anything
+itself; it exposes a census:
+
+- `Parser.WarningSummary()` — exact `Total`, exact `ByType` counts, and a
+  capped table of distinct `(type, message)` groups with each one's count
+  and first occurrence. The cap (`parser.MaxWarningGroups`) bounds the
+  SAMPLE table only, and what it left out is reported in
+  `DroppedWarnings` — warnings beyond the 64-group retention cap, an
+  occurrence count rather than a distinct-message count, because past the
+  cap the reader stops retaining keys. A count here is never silently
+  truncated. Groups are retained in first-encounter order, so on a very
+  broken demo the table is a sample of the distinct messages rather than
+  the top-k.
+- `events.WarningReporter` — the optional `Source` capability
+  (`WarningSummary() events.WarningSummary`) that `source/mvd.Source`
+  implements. The analytics registry type-asserts for it after draining
+  the stream and publishes the census as `result.parseWarnings`, so every
+  downstream consumer sees a protocol gap without opting in.
+
+`SetDiagnosticMode(true)` now means only "also retain every INDIVIDUAL
+warning", for `DiagnosticWarnings()` — an unbounded list the diagnostic
+harness wants and production does not.
+
 ## Pure parser access (no Source wrapper)
 
-For tools that need to drive the parser directly — the diagnostic harness
-flips it into warning-collection mode — `mvd-reader/parser` exposes `Parser`,
-`NewParser(decoder)`, `OnEvent(handler)`, `Parse()`, `ParseOne()`, and
-`SetDiagnosticMode(true)`.
+For tools that need to drive the parser directly, `mvd-reader/parser`
+exposes `Parser`, `NewParser(decoder)`, `OnEvent(handler)`, `Parse()`,
+`ParseOne()`, `WarningSummary()`, and `SetDiagnosticMode(true)` +
+`DiagnosticWarnings()`.
 
 ## Running tests
 

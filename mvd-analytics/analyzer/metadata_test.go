@@ -1,7 +1,10 @@
 package analyzer
 
 import (
+	"strings"
 	"testing"
+
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 func TestParseFullserverinfo(t *testing.T) {
@@ -205,5 +208,138 @@ func TestCollapseSpaces(t *testing.T) {
 		if got := collapseSpaces(in); got != want {
 			t.Errorf("collapseSpaces(%q) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+// KTX broadcasts "Fairpacks setting: <ruleset>" beside the countdown
+// centerprint and ONLY when k_frp is non-default (ktx/src/match.c:2086-2107),
+// so capturing the row is how the pipeline learns the pack rules changed.
+// The value is redtext, i.e. high-bit characters, exactly as on the wire.
+func TestMetadataFairpacksBroadcast(t *testing.T) {
+	redtext := func(s string) string {
+		b := []byte(s)
+		for i := range b {
+			b[i] |= 0x80
+		}
+		return string(b)
+	}
+	for _, tc := range []struct{ name, msg, want string }{
+		{"best weapon", "Fairpacks setting: " + redtext("best weapon") + "\n", "best weapon"},
+		{"last fired", "Fairpacks setting: " + redtext("last weapon fired") + "\n", "last weapon fired"},
+		{"plain text", "Fairpacks setting: best weapon\n", "best weapon"},
+		{"unrelated print", "gnu killed dad with a rocket\n", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			a := NewMetadataAnalyzer()
+			_ = a.OnEvent(&events.PrintEvent{Level: events.PrintHigh, Message: tc.msg, TimeMs: 1000})
+			r := &Result{}
+			_ = a.Finalize(r)
+			got := ""
+			if r.Metadata != nil && r.Metadata.MatchSettings != nil {
+				got = r.Metadata.MatchSettings.Fairpacks
+			}
+			if got != tc.want {
+				t.Errorf("Fairpacks = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// The Fairpacks row stands the whole backpack reconstruction down
+// (backpackSkipModeReason), so nothing a player can type may forge it. KTX
+// emits it as G_bprint(2, "Fairpacks setting: %s\n", …) from
+// ShowMatchSettings during the countdown (match.c:2107) — PRINT_HIGH,
+// line-initial, pre-match. Everything else is refused.
+func TestMetadataFairpacksBroadcastIsNotForgeable(t *testing.T) {
+	const row = "Fairpacks setting: best weapon\n"
+	for _, tc := range []struct {
+		name    string
+		prints  []events.Event
+		wantSet bool
+	}{
+		{"the real broadcast", []events.Event{
+			&events.PrintEvent{Level: events.PrintHigh, Message: row, TimeMs: 1000},
+		}, true},
+		{"chat line quoting it", []events.Event{
+			&events.PrintEvent{Level: events.PrintChat, Message: row, TimeMs: 1000},
+		}, false},
+		{"chat line embedding it", []events.Event{
+			&events.PrintEvent{Level: events.PrintChat, Message: "gnu: lol Fairpacks setting: best weapon\n", TimeMs: 1000},
+		}, false},
+		{"a bprint that merely mentions it", []events.Event{
+			&events.PrintEvent{Level: events.PrintHigh, Message: "gnu changed Fairpacks setting: best weapon\n", TimeMs: 1000},
+		}, false},
+		{"after the match started", []events.Event{
+			&events.MatchStartEvent{Source: events.MatchStartSourcePrint, TimeMs: 500},
+			&events.PrintEvent{Level: events.PrintHigh, Message: row, TimeMs: 1000},
+		}, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			a := NewMetadataAnalyzer()
+			for _, p := range tc.prints {
+				_ = a.OnEvent(p)
+			}
+			r := &Result{}
+			_ = a.Finalize(r)
+			got := ""
+			if r.Metadata != nil && r.Metadata.MatchSettings != nil {
+				got = r.Metadata.MatchSettings.Fairpacks
+			}
+			if (got != "") != tc.wantSet {
+				t.Errorf("Fairpacks = %q, wantSet = %v", got, tc.wantSet)
+			}
+		})
+	}
+}
+
+// A hoony duel's last three countdown frames are PersonalisedCountdown
+// (ktx/src/match.c:1498-1503, :1393-1447): no table — at most a `Next
+// <spawn>` / `Duration` / `Draw` row, and on a series' first point (archive
+// 0543ac01…, frames 7–9 s) just the "Countdown: N" header. The settings
+// must come from the last frame that carried the table, not from the last
+// frame, which is what the old latch kept. Frames 5–4 are 0543ac01's;
+// the three tails cover the header-only and the later-point forms.
+func TestMetadata_CountdownKeepsTheFrameWithTheTable(t *testing.T) {
+	a := NewMetadataAnalyzer()
+	frames := []string{
+		"Countdown:  5\n\n\nDeathmatch  3\nMode    Hoony\nRespawns  KTX\nTimelimit  10\n",
+		"Countdown:  4\n\n\nDeathmatch  3\nMode    Hoony\nRespawns  KTX\nTimelimit  10\n",
+		"Countdown:  3\n\n\n",
+		"Countdown:  2\n\n\nNext   low rl\nDuration  90s\n",
+		"Countdown:  1\n\n\n",
+	}
+	for _, f := range frames {
+		if err := a.OnEvent(&events.CenterPrintEvent{Message: f}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var r Result
+	if err := a.Finalize(&r); err != nil {
+		t.Fatal(err)
+	}
+	if r.Metadata.MatchSettings == nil || r.Metadata.MatchSettings.Mode != "Hoony" {
+		t.Fatalf("matchSettings = %+v, want Mode Hoony from the 4-second frame", r.Metadata.MatchSettings)
+	}
+	if r.Metadata.MatchSettings.Timelimit != 10 || r.Metadata.MatchSettings.Deathmatch != 3 {
+		t.Errorf("settings = %+v, want the full table", r.Metadata.MatchSettings)
+	}
+	if !strings.HasPrefix(r.Metadata.CountdownText, "Countdown:  4") {
+		t.Errorf("countdownText is %q, want the frame the settings came from", r.Metadata.CountdownText)
+	}
+}
+
+// A pre-KTX countdown table keys the row `Mode:` — three E0 archive demos
+// (75e18f801f654a92…). The key split takes the first whitespace run, so the
+// colon rode along and the row was dropped as unrecognised.
+func TestParseCountdownCenterprint_ColonKeyedMode(t *testing.T) {
+	got := parseCountdownCenterprint("Countdown: 5\nMode:      Duel\nTimelimit  10\n")
+	if got == nil {
+		t.Fatal("parseCountdownCenterprint returned nil")
+	}
+	if got.Mode != "Duel" {
+		t.Errorf("Mode = %q, want Duel", got.Mode)
+	}
+	if got.Timelimit != 10 {
+		t.Errorf("Timelimit = %d, want 10", got.Timelimit)
 	}
 }

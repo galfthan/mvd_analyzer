@@ -9,6 +9,27 @@
 // matching --team-a / --armor-* / --accent-cyan declarations in styles.css).
 const TEAM_PALETTE = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
 
+// Per-PLAYER palette, used in individual modes with more than two players
+// (FFA, race) where every player is their own side and there is no team to
+// name a colour after. It is deliberately NOT the team palette: that one is
+// four entries, which runs out after four of a field of eleven.
+//
+// It is assigned exactly the way TEAM_PALETTE is — by NAME, in sort order
+// (assignPlayerColors) — so CLAUDE.md's stability property holds here too: a
+// player keeps the same colour in every demo of the same field regardless of
+// who won. Assigning by frag RANK instead (which this briefly did) recoloured
+// the whole scoreboard when the result changed. A DUEL is not routed here at
+// all: two players are a matchup, and it keeps the team palette so the
+// familiar red/blue reading of a 1v1 is unchanged.
+//
+// Twelve hues, ordered so adjacent entries stay distinguishable, and chosen to
+// read against the dark panel background.
+const PLAYER_PALETTE = [
+    '#ff5050', '#50a0ff', '#4ecdc4', '#ffc107',
+    '#c084fc', '#7ee787', '#ff8fab', '#f97316',
+    '#38bdf8', '#a3e635', '#e879f9', '#94a3b8',
+];
+
 // Per-match team colours. TEAM_COLORS[i] is the colour of
 // timelineState.teams[i] — the winner-first index convention every call site
 // uses — but WHICH palette entry lands at each index is decided by team NAME
@@ -48,13 +69,36 @@ function assignTeamColors(teams) {
     return colors;
 }
 
+// The player-palette twin of assignTeamColors: entries are handed out in
+// code-unit sort order of the player NAMES, and the returned array is aligned
+// with the caller's (frag-sorted) `players` order, so TEAM_COLORS keeps its
+// index convention while a player's colour depends only on who is in the
+// game. Beyond the palette's length it wraps — twelve distinct hues is the
+// practical limit of a legend anyway.
+function assignPlayerColors(players) {
+    const byName = players.map((_, i) => i)
+        .sort((a, b) => (players[a] < players[b] ? -1 : players[a] > players[b] ? 1 : 0));
+    const colors = new Array(players.length);
+    byName.forEach((idx, rank) => {
+        colors[idx] = PLAYER_PALETTE[rank % PLAYER_PALETTE.length];
+    });
+    return colors;
+}
+
 // Single entry point for the canonical team order: every path that decides
 // the order goes through here, so timelineState.teams, TEAM_COLORS and the
 // CSS mirror (--team-a..--team-d — .team-item:nth-child stripes, the topbar
 // "A vs B" spans, anything on var(--team-*)) can never disagree.
-function setCanonicalTeams(teams) {
+function setCanonicalTeams(teams, perPlayer = false) {
     timelineState.teams = teams;
-    TEAM_COLORS = assignTeamColors(teams);
+    // In an individual mode `teams` is the frag-sorted PLAYER list. The
+    // four-entry team palette cannot cover it, so the wider player palette is
+    // handed out instead — by NAME sort order, never by rank, so the colours
+    // do not move when the scoreline does. Same array, same index convention,
+    // so every call site is unchanged.
+    TEAM_COLORS = perPlayer
+        ? assignPlayerColors(teams)
+        : assignTeamColors(teams);
     // The map component keeps its own palette reference (it never reads app
     // globals); re-point it so the canvas layers repaint in the same colours
     // the DOM shows. mapView exists before any demo load (module bootstrap).
@@ -211,6 +255,36 @@ function hideLoadingOverlay() {
     if (overlay) overlay.style.display = 'none';
 }
 
+// Version handshake: `make build` stamps <meta name="build"> in index.html
+// with the git hash, and the wasm reports the hash it was built from. Both
+// deploy as one unit, so a mismatch means the browser is running mixed
+// cached versions (a deploy landed between fetching the page and the wasm,
+// or a cache served a stale asset). Reload once — assets are served
+// Cache-Control: no-cache, so the reload revalidates everything — and if
+// the mismatch survives the reload (deploy still propagating), just flag it
+// in the version tag instead of looping.
+function checkBuildCoherence(v) {
+    const meta = document.querySelector('meta[name="build"]');
+    const pageBuild = meta ? meta.content : '';
+    const wasmBuild = v && v.hash ? v.hash : '';
+    if (!pageBuild || pageBuild === 'dev') return;
+    if (!wasmBuild || wasmBuild === 'dev' || wasmBuild === 'unknown') return;
+    if (pageBuild === wasmBuild) return;
+
+    const guard = 'mvd-build-reload';
+    const attempted = (() => { try { return sessionStorage.getItem(guard); } catch { return null; } })();
+    const key = `${pageBuild}:${wasmBuild}`;
+    if (attempted !== key) {
+        try { sessionStorage.setItem(guard, key); } catch {}
+        location.reload();
+        return;
+    }
+    const tag = document.getElementById('version-tag');
+    if (tag) {
+        tag.appendChild(document.createTextNode(' — new version available, reload the page'));
+    }
+}
+
 function setLoadingOverlayMessage(text) {
     const overlay = document.getElementById('wasm-loading');
     if (!overlay) return;
@@ -244,6 +318,7 @@ worker.onmessage = (e) => {
             tag.appendChild(a);
             tag.appendChild(document.createTextNode(`) — ${v.date}`));
         }
+        checkBuildCoherence(v);
     } else if (e.data.type === 'buckets') {
         // Deferred 50ms bucket + region-control payload — arrives a few
         // seconds after 'result'. Stash it and render the Timeline/Map
@@ -454,12 +529,18 @@ async function fetchGameFromHub(gameId) {
 const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 'to'];
 const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url,server_hostname';
 
-async function searchHub(filters) {
+// Page size for the search tab. The hub itself pages at 1000 (PostgREST
+// max-rows); 100 keeps a single response light (~90 KB) while "Load more"
+// walks offset pages until every match is shown.
+const SEARCH_PAGE_SIZE = 100;
+
+async function searchHub(filters, offset = 0) {
     const parts = [
         `select=${encodeURIComponent(SEARCH_SELECT)}`,
         `order=timestamp.desc`,
-        `limit=20`,
+        `limit=${SEARCH_PAGE_SIZE}`,
     ];
+    if (offset > 0) parts.push(`offset=${offset}`);
     if (filters.player) parts.push(`players_fts=fts.'${encodeURIComponent(filters.player)}'`);
     if (filters.team)   parts.push(`team_names=cs.{${encodeURIComponent(filters.team)}}`);
     if (filters.map)    parts.push(`map=eq.${encodeURIComponent(filters.map)}`);
@@ -472,11 +553,23 @@ async function searchHub(filters) {
         headers: {
             'apikey': SUPABASE_API_KEY,
             'Authorization': `Bearer ${SUPABASE_API_KEY}`,
-            'accept-profile': 'public'
+            'accept-profile': 'public',
+            // Ask PostgREST for the exact total (Content-Range: 0-99/1234) so
+            // the UI can say "N of M" and know when every match is shown. With
+            // a count preference a partial page answers 206 — still resp.ok.
+            'Prefer': 'count=exact'
         }
     });
     if (!resp.ok) throw new Error(`Hub API error: ${resp.status}`);
-    return await resp.json();
+    const games = await resp.json();
+    let total = null;
+    const cr = resp.headers.get('content-range') || '';
+    const slash = cr.lastIndexOf('/');
+    if (slash >= 0 && cr.slice(slash + 1) !== '*') {
+        const n = parseInt(cr.slice(slash + 1), 10);
+        if (!isNaN(n)) total = n;
+    }
+    return { games, total };
 }
 
 async function downloadDemoFromHub(game) {
@@ -790,6 +883,21 @@ function setupTabs() {
 
 // ─── File Upload (via WASM Worker) ──────────────────────────────────────────
 
+// The load-status line after a successful analyse. A demo the marker calls
+// match-less analysed fine, so it is not an error (the red `status error` is
+// reserved for a load or parse that failed) — but "Analysis complete!" over a
+// Summary tab with no scoreboard reads as a bug, so it says what happened and
+// points at the panel that explains it.
+function setAnalysisStatus(status, result) {
+    if (result.noMatch) {
+        status.textContent = 'Analysed — this recording holds no match (see Summary).';
+        status.className = 'status';
+        return;
+    }
+    status.textContent = 'Analysis complete!';
+    status.className = 'status success';
+}
+
 async function uploadFile(file) {
     const status = document.getElementById('upload-status');
     status.textContent = 'Analyzing...';
@@ -804,8 +912,7 @@ async function uploadFile(file) {
         const result = await analyzeInWorker(bytes, file.name);
         if (result.error) throw new Error(result.error);
 
-        status.textContent = 'Analysis complete!';
-        status.className = 'status success';
+        setAnalysisStatus(status, result);
         currentResult = result;
         displayResults(result);
     } catch (error) {
@@ -877,8 +984,7 @@ async function loadGameFromHub(game) {
     const result = await analyzeInWorker(demoBytes, filename);
     if (result.error) throw new Error(result.error);
 
-    status.textContent = 'Analysis complete!';
-    status.className = 'status success';
+    setAnalysisStatus(status, result);
     currentResult = result;
 
     currentResult.hubInfo = {
@@ -915,14 +1021,32 @@ function writeSearchFiltersToForm(filters) {
 }
 
 function setupSearch() {
+    // The mode facet list lives in ONE place — SEARCH_MODE_LABELS, which also
+    // labels the result rows. index.html ships only the "Any" option and this
+    // fills the rest, so a facet cannot be offered in the dropdown and render
+    // as a raw token in the rows below it.
+    const modeSel = document.getElementById('search-mode');
+    if (modeSel) {
+        for (const [value, label] of Object.entries(SEARCH_MODE_LABELS)) {
+            const opt = document.createElement('option');
+            opt.value = value;
+            opt.textContent = label;
+            modeSel.appendChild(opt);
+        }
+    }
     document.getElementById('search-form').addEventListener('submit', (e) => {
         e.preventDefault();
         runSearch();
     });
 }
 
-async function runSearch() {
-    const filters = readSearchFilters();
+// Paging state for the search tab: the filters the shown results belong to,
+// how many rows are rendered, and the hub-reported total (null = unknown).
+let searchPaging = { filters: null, shown: 0, total: null };
+
+async function runSearch(loadMore = false) {
+    const filters = loadMore && searchPaging.filters ? searchPaging.filters : readSearchFilters();
+    const offset = loadMore ? searchPaging.shown : 0;
     const status = document.getElementById('search-status');
     const submit = document.getElementById('search-submit');
     const resultsEl = document.getElementById('search-results');
@@ -932,19 +1056,51 @@ async function runSearch() {
     submit.disabled = true;
 
     try {
-        const games = await searchHub(filters);
+        const { games, total } = await searchHub(filters, offset);
         status.textContent = '';
         status.className = 'status';
-        renderSearchResults(games);
+        renderSearchResults(games, loadMore);
+        searchPaging = {
+            filters,
+            shown: offset + games.length,
+            total: total !== null ? total : searchPaging.total,
+        };
+        renderSearchPager();
         lastExecutedSearch = filters;
         updateUrlState();
     } catch (err) {
         status.textContent = 'Error: ' + err.message;
         status.className = 'status error';
-        resultsEl.innerHTML = '';
+        if (!loadMore) resultsEl.innerHTML = '';
     } finally {
         submit.disabled = false;
     }
+}
+
+// Footer under the result list: "N of M matches" plus a Load-more button
+// while the hub reports more pages. Rebuilt after every page.
+function renderSearchPager() {
+    const el = document.getElementById('search-results');
+    const old = el.querySelector('.search-pager');
+    if (old) old.remove();
+    const { shown, total } = searchPaging;
+    if (!shown) return;
+
+    const pager = document.createElement('div');
+    pager.className = 'search-pager';
+    const label = document.createElement('span');
+    label.className = 'search-pager-count';
+    label.textContent = total !== null ? `${shown} of ${total} matches` : `${shown} matches`;
+    pager.appendChild(label);
+    if (total !== null && shown < total) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'search-submit search-pager-more';
+        btn.textContent = 'Load more';
+        btn.addEventListener('click', () => runSearch(true));
+        pager.appendChild(btn);
+    }
+    el.appendChild(pager);
 }
 
 const SEARCH_MODE_LABELS = {
@@ -954,6 +1110,14 @@ const SEARCH_MODE_LABELS = {
     'ffa':  'FFA',
     'ctf':  'CTF',
 };
+
+// Which of those hub facets name a mode with no teams. This is the HUB's
+// vocabulary on a HUB search row — not a Result — so it cannot read
+// match.gameMode: the row is a listing from hub.quakeworld.nu carrying its
+// own `mode` string, and no demo has been analysed at that point. It lives
+// here beside the facet table so the pair stays in step (it used to be an
+// inline `mode !== '1on1' && mode !== 'ffa'` at the one call site).
+const SEARCH_INDIVIDUAL_MODES = new Set(['1on1', 'ffa']);
 
 function escapeHtml(s) {
     if (s == null) return '';
@@ -1062,20 +1226,171 @@ function holdCell(stat, win) {
     return `<td data-sort-value="${stat.ms}" title="${title}">${Math.round(stat.ms / 1000)}s</td>`;
 }
 
-// Accuracy cell from a playerStats accuracy entry. `hits` is ABSENT (not
-// zero) when the demo has no damage stream to link fires against, so an
-// entry with attacks but no hits renders the attack count alone rather
-// than a fabricated 0%.
-function formatAccuracyCell(entry) {
-    if (!entry || !entry.attacks) return '-';
-    if (entry.hits == null) return `<span class="stat-muted" title="No damage stream to link fires against — attacks only">${entry.attacks} atk</span>`;
-    const pct = ((entry.hits / entry.attacks) * 100).toFixed(1);
-    return `<span class="${getAccuracyClass(parseFloat(pct))}">${pct}%</span>`;
+// What a hits count counts, keyed by playerStats `hitsConvention`. The same
+// weapon's percentage is on a different scale under each, which is why the
+// cell says so instead of leaving the reader to compare a KTX shotgun figure
+// with a fire-counted one six times smaller.
+const HITS_CONVENTION_TITLES = {
+    anyDamage: 'Hits = fires that landed damage by any path (splash included) — KTX\'s own convention for LG, NG/SNG and the axe',
+    directImpact: 'Hits = projectiles that touched a player (KTX\'s own RL/GL convention) — reads far lower than an any-path count',
+    pellets: 'Hits and attacks are PELLET counts (6 per SG fire, 14 per SSG), KTX\'s own unit for the shotguns',
+};
+
+// What KTX's OWN hits counter counts for one weapon. The mirror of
+// view.ktxHitsConvention (mvd-analytics/view/player_stats.go), the function
+// that stamps `hitsConvention` on the KTX-overlaid rows this UI renders — the
+// WASM entry point applies that overlay (cmd/wasm/main.go), so both scales
+// reach this table, one demo at a time.
+//
+// The block is not uniform, which is why the marker below is per-weapon:
+// sg/ssg advance per PELLET on both sides of the ratio, rl/gl only when the
+// projectile touches a player, and everything else once per fire that
+// damaged — the same event as a direct hit for a weapon with one damage path.
+function ktxHitsConvention(weapon) {
+    if (weapon === 'sg' || weapon === 'ssg') return 'pellets';
+    if (weapon === 'rl' || weapon === 'gl') return 'directImpact';
+    return 'anyDamage';
 }
 
-// The kill side of a score row — kills, suicides, teamKills, efficiency and
-// the by-weapon split — is ABSENT (not zero) on a demo whose obituary log
-// yielded nothing while deaths were still counted from the death stream:
+// The mark an Acc cell wears when its convention is not the one the server's
+// own counter uses for that weapon — so a reader who has seen this weapon's
+// number on a scoreboard, on the hub or in a screenshot of another demo is
+// looking at a different quantity here, not a better or worse player. It is
+// in the TEXT rather than only in the tooltip for the reason the "~" on a
+// hedged date is: this is a figure people screenshot.
+//
+// A KTX-overlaid family (every demo with a demoinfo block) matches by
+// construction and wears nothing. Since schema v75 both computed tiers match
+// on every weapon but one, and that one is a place where the tier's evidence
+// genuinely cannot answer KTX's question, not a place where it declined to:
+//
+//   - SG/SSG on a RECONSTRUCTED row. The recon tier counts fires, not
+//     pellets: a reconstructed delta merges every hit landing on one instant,
+//     so dividing its magnitude would credit one shooter with another's
+//     pellets. (Its rl/gl publish KTX's direct-impact count, schema v74.)
+//
+//   - RL/GL on a DERIVED row whose direct/splash split never ran — a payload
+//     parsed without the spatial projectile streams (gl, whose touch
+//     classifier reads them) or one where the linker resolved no rl/gl fire
+//     at all. The row falls back to the any-path count, which is a DIFFERENT
+//     quantity from KTX's touch count and about 4x larger on rl.
+//
+// So the mark's explanation is per weapon, not one sentence: what the
+// server's own counter counts differs between the two families above, and a
+// note that named only pellets would be false on every rl/gl cell wearing it.
+//
+// GL on a DERIVED (wire-linked) row wore the mark until v75 and no longer
+// does. The wire log genuinely holds no record of a grenade touch — the touch
+// detonates the grenade and every row the server then writes is flagged splash
+// — so that count is not read off the wire at all: it is re-derived from the
+// flight geometry and the 2.5 s fuse by the same classifier a reconstructed
+// row uses (92.0% of 424 archive player rows exact against the verbatim KTX
+// block). This UI's parse always builds the projectile streams that classifier
+// reads, so a gl cell here is always on KTX's scale; a payload from a parse
+// without them says so in `hitsConvention` and is marked like any other cell.
+const ACC_OFF_SCALE_MARK = '≠';
+// What one hit COUNTS under each convention, in the reader's terms. Both
+// halves of the mark's sentence are looked up here — ours from the row's own
+// `hitsConvention`, the server's from ktxHitsConvention(weapon) — so the note
+// states the actual disagreement for the actual weapon instead of naming one
+// family's.
+const HITS_CONVENTION_PHRASES = {
+    anyDamage: 'any fire that landed damage, splash included',
+    directImpact: 'only a projectile that TOUCHED a player',
+    pellets: 'a PELLET (6 per SG fire, 14 per SSG), on both sides of the ratio',
+};
+function accOffScaleNote(entry, wn) {
+    const ours = HITS_CONVENTION_PHRASES[entry.hitsConvention];
+    const theirs = HITS_CONVENTION_PHRASES[ktxHitsConvention(wn)];
+    const what = (ours && theirs) ? `a hit here is ${ours}, where KTX counts ${theirs}. ` : '';
+    return 'Not on the server\'s own scale for this weapon: ' + what +
+        'Comparable with another marked figure for the same weapon — not with a KTX scoreboard\'s.';
+}
+// The same statement as the table's footnote, which is where a reader who
+// cannot hover — anyone looking at a screenshot of this panel — meets it. One
+// line stands under a table of several weapons, so it names both scales the
+// mark can be measured against rather than one, and sends the reader to the
+// cell for which of them applies.
+const ACC_OFF_SCALE_FOOTNOTE = `${ACC_OFF_SCALE_MARK} — counted on a different scale from the server's own for that weapon ` +
+    '(hover the cell for which): KTX counts PELLETS on SG/SSG and only projectiles that TOUCHED a player on RL/GL, ' +
+    'where a marked figure counts fires that landed damage by any path. ' +
+    'Two accuracies are comparable when the weapon AND the convention match, so a marked figure and a KTX scoreboard\'s are not.';
+
+// Shared by the Summary accuracy cells and the Aim tab's recovered Hits: what
+// a reconstructed hit count is, and the one caveat that comes with it.
+const RECON_ACCURACY_NOTE = 'Hits RECONSTRUCTED — this demo carries no wire damage log, ' +
+    'so the hits were recovered from the rebuilt one. As complete as the damage evidence (see the note above the table).';
+
+// A reconstructed demo publishes TWO rl/gl hit counts on purpose — this tab's
+// any-path one (it stands in for the withheld MEASURED counter, which counts
+// that way) and the Summary's direct-impact one (KTX's own question). They
+// differ by a lot, so the reader who has both on screen gets the
+// reconciliation in the cell rather than only in the source.
+const RECON_ANYDAMAGE_NOTE = 'Counted as ANY fire that landed damage, splash included — ' +
+    'the convention of the measured counter this cell stands in for. The Summary tab\'s Acc column answers ' +
+    'KTX\'s question instead — projectiles that TOUCHED a player — which runs about 4x smaller on RL and 1.5x on GL.';
+
+// Accuracy cell from a playerStats accuracy family. `hits` is ABSENT (not
+// zero) when neither the wire nor the reconstruction could link fires to
+// damage, so an entry with attacks but no hits renders the attack count alone
+// rather than a fabricated 0%.
+//
+// `src` is the family's evidence grade and is taken from the family, not the
+// weapon row: `ktx` is the server's own block, `derived` our own count off a
+// wire damage stream, and `reconstructed` (schema v74) a figure recovered
+// from the rebuilt damage log on a demo that carries no such stream. The last
+// is MARKED — a recon accuracy is only as complete as damage.coverage, which
+// the panel banner above the table states — while the first two, both
+// measured off the wire, render plainly. Grade is not the same question as
+// what the number counts: since schema v75 all three sources answer KTX's
+// question on most weapons (the two that still cannot are marked, below), and
+// the convention rides the tooltip either way — two accuracies are comparable
+// exactly when weapon and hitsConvention match.
+//
+// An entry with attacks and no hits is a WITHHELD count, not a zero: nailgun
+// rows carry one whenever the demo was parsed without nail decoding, which is
+// the only way ng/sng fires can be linked to their damage.
+function formatAccuracyCell(accuracy, wn) {
+    const entry = accuracy?.byWeapon?.[wn];
+    if (!entry || !entry.attacks) return '-';
+    if (entry.hits == null) return `<span class="stat-muted" title="No linked damage to count hits against — attacks only">${entry.attacks} atk</span>`;
+    const pct = ((entry.hits / entry.attacks) * 100).toFixed(1);
+    const notes = [];
+    if (HITS_CONVENTION_TITLES[entry.hitsConvention]) notes.push(HITS_CONVENTION_TITLES[entry.hitsConvention]);
+    const offScale = accOffKtxScale(entry, wn);
+    if (offScale) notes.push(accOffScaleNote(entry, wn));
+    const recon = accuracy.src === 'reconstructed';
+    if (recon) notes.push(RECON_ACCURACY_NOTE);
+    const attr = notes.length ? ` title="${escapeHtml(notes.join(' · '))}"` : '';
+    const mark = offScale ? `<sup class="acc-off-scale">${ACC_OFF_SCALE_MARK}</sup>` : '';
+    const cell = `<span class="${getAccuracyClass(parseFloat(pct))}"${attr}>${pct}%${mark}</span>`;
+    return recon ? `<span class="stat-recon">${cell}</span>` : cell;
+}
+
+// One Acc entry against the server's own scale for its weapon. A row with no
+// published convention is not marked: the field is present whenever `hits` is
+// (RESULT_SCHEMA, PlayerStatsAcc), so its absence means there is no number to
+// put on a scale, not that the scale agrees.
+function accOffKtxScale(entry, wn) {
+    return !!entry.hitsConvention && entry.hitsConvention !== ktxHitsConvention(wn);
+}
+
+// Whether any RENDERED cell wears the mark, which decides whether the
+// footnote explaining it appears. Same rows, same weapon list and same
+// has-a-number test the cells use, so the note cannot appear over an unmarked
+// table (an axe or nailgun entry the table does not show) or go missing under
+// a marked one.
+function anyAccOffKtxScale(rows) {
+    return rows.some(r => HOLD_WEAPON_NAMES.some(wn => {
+        const e = r.accuracy?.byWeapon?.[wn];
+        return !!e && !!e.attacks && e.hits != null && accOffKtxScale(e, wn);
+    }));
+}
+
+// The kill side of a score row — kills, suicides, teamKills, efficiency, the
+// by-weapon split and the two spree maxima (schema v74) — is ABSENT (not
+// zero) on a demo whose obituary log yielded nothing while deaths were still
+// counted from the death stream:
 // old kmod/qwe servers print obituaries in a shape the frag log never
 // matches. Deaths and frags are measured there and stay; printing 0 for the
 // rest made a 230-frag team read as one that never killed anybody. Zero is
@@ -1105,6 +1420,253 @@ function enemyWeaponKillCell(score, weapon) {
     return (m[weapon] || 0) + (m.both || 0);
 }
 
+// ─── Match wall clock (streams.global, schema v72) ─────────────────────────
+//
+// The anchors are Unix epoch MILLISECONDS. The schema publishes no local-time
+// field on purpose: the stamp a demo carries was written in whatever zone the
+// server ran in, and on the pre-2005 half it carries no zone at all (the
+// marker is read as UTC, `assumedUtc`, accuracy ±14 h). Rendering it in the
+// VIEWER's zone would therefore invent a precision the anchor does not have
+// and would move the date under a reader in Auckland, so this UI renders
+// **UTC** and says so in the text. See RESULT_SCHEMA.md, GlobalStream.
+// `accuracyMs` (the anchor's ±, absent where the caller has none) sets the
+// PRECISION PRINTED, by magnitude rather than by grade name — the same rule
+// formatAccuracyMs formats by. An hour-scale anchor does not name a minute:
+// the ±14 h `assumedUtc` grade puts the true instant anywhere in a 28-hour
+// window, so printing "11:44" claims a minute the stamp does not have. Those
+// print the day plus the ± in the TEXT; everything second-scale or tighter
+// keeps the minute.
+function formatUtcStamp(unixMs, accuracyMs) {
+    // toISOString is UTC by definition: "2002-08-04T11:44:55.000Z".
+    const iso = new Date(unixMs).toISOString();
+    if (accuracyMs >= 3600000) return `${iso.slice(0, 10)} UTC ±${formatAccuracyMs(accuracyMs)}`;
+    return `${iso.slice(0, 10)} ${iso.slice(11, 16)} UTC`;
+}
+
+// The accuracy ladder is 1 ms / 1 s / 1 h / 14 h, but this formats the number
+// rather than switching on those four values, so a new rung reads correctly
+// without a change here.
+function formatAccuracyMs(ms) {
+    if (ms >= 3600000) return `${Math.round(ms / 3600000)} h`;
+    if (ms >= 1000) return `${Math.round(ms / 1000)} s`;
+    return `${ms} ms`;
+}
+
+// matchWallClock projects the graded match-start anchor onto {html, text} for
+// a cell, or null when the demo carries none (then the caller shows whatever
+// it showed before — never a placeholder).
+//
+// `exact` is served plainly. Every other grade is HEDGED IN THE TEXT with a
+// leading "~", not only in a tooltip: a ±14 h tz-unknown stamp rendered as a
+// plain date is the one way this field misleads. The anchor is never dropped
+// or coerced — the schema grades it rather than withholding it, and so does
+// this; the grade, the source, the ± and the note all ride the tooltip.
+function matchWallClock(result) {
+    const g = result?.streams?.global;
+    if (!g || !g.matchStartUnixMs) return null;
+    const text = formatUtcStamp(g.matchStartUnixMs, g.matchStartAccuracyMs);
+    const bits = [`Match start, read off the demo's own wall-clock marker (${g.matchStartSource || 'unknown source'})`];
+    if (g.matchStartAccuracyMs) bits.push(`accurate to ±${formatAccuracyMs(g.matchStartAccuracyMs)}`);
+    if (g.matchStartConfidence) bits.push(`confidence: ${g.matchStartConfidence}`);
+    if (g.matchStartNote) bits.push(g.matchStartNote);
+    const title = escapeHtml(bits.join(' · '));
+    if (g.matchStartConfidence === 'exact') {
+        return { html: `<span title="${title}">${text}</span>`, text };
+    }
+    // `unverified` (something unpinned) and `contradicted` (a hard check
+    // failed) are both hedged; the second is coloured as a warning because it
+    // is the grade that says another signal disagrees with this stamp — and
+    // it says "(disputed)" in the TEXT too, for the same reason the "~" is in
+    // the text: the two grades must not differ by colour alone, which neither
+    // a screenshot in a channel nor a colour-blind reader can tell apart.
+    const disputed = g.matchStartConfidence === 'contradicted';
+    const cls = disputed ? 'date-contradicted' : 'date-unverified';
+    const shown = disputed ? `~${text} (disputed)` : `~${text}`;
+    return { html: `<span class="${cls}" title="${title}">${shown}</span>`, text: shown };
+}
+
+// displayMatchDate fills the Summary "Date" cell. KTX's own demoinfo `date`
+// wins where the block exists — it is the server's stamp, to the second, with
+// its zone printed. The graded anchor fills the half of the archive that has
+// no block at all, which used to render "-".
+function displayMatchDate(result) {
+    const el = document.getElementById('match-date');
+    if (!el) return;
+    const ktxDate = result?.demoInfo?.date;
+    if (ktxDate) {
+        el.textContent = ktxDate;
+        return;
+    }
+    const wc = matchWallClock(result);
+    el.innerHTML = wc ? wc.html : '-';
+}
+
+// ─── result.noMatch (schema v74) ───────────────────────────────────────────
+//
+// A recording that holds no analyzable match used to arrive here as a result
+// with no `streams` and an EMPTY `errors[]`, and the UI showed the same thing
+// it shows for a race demo: tables with headers and nothing under them. The
+// marker is present exactly when `streams` is absent, and its five reasons
+// are a total partition, so this switch is exhaustive by contract.
+//
+// Read it BEFORE `errors[]`: it decides whether a reader error describes a
+// partial match or nothing at all, and `demoUnreadable` is the one reason
+// that means both — which is why that reason (and only that one) also prints
+// the reader's own message.
+const NO_MATCH_TITLES = {
+    demoUnreadable: 'This recording could not be read to the end',
+    midMatchRecording: 'This recording starts mid-match',
+    matchStartUnannounced: 'No analyzable match came out of this recording',
+    noMatchDeclared: 'No match was declared in this recording',
+    noPlayRecorded: 'This recording holds no match',
+};
+
+// `detail` states the finding in the pipeline's vocabulary (`status` keys,
+// match-start announcements). These say what it MEANS for the person holding
+// the file, and name an action where one honestly exists — which is only for
+// `demoUnreadable`: of the 20 such demos in the archive sweep, 16 abort
+// within the first 16 bytes on a "block size" that is plainly ASCII text
+// (`us\0C`, `rdem`), 2 on a `dem_cmd` no MVD carries and 2 on an unexpected
+// EOF — so the file is either not an MVD or a truncated one, and a fresh copy
+// is a real fix. Nothing the reader can do makes a recording that started
+// mid-match contain its own start, so the other four translate and stop.
+//
+// The pipeline's own detail strings are untouched — they are the finding, and
+// display-only by contract either way.
+const NO_MATCH_ACTIONS = {
+    demoUnreadable: 'The file may be truncated, or not an MVD at all — try downloading it again.',
+    midMatchRecording: 'Nothing is wrong with the file; it simply began after the match did. Per-match stats need a recording that covers the match start.',
+    matchStartUnannounced: 'The server started a match here, but nothing this tool could measure came out of the window it opened — usually a server mod whose match state we do not model.',
+    noMatchDeclared: 'People were playing, but no managed match was declared — there is no start, no end and no scoreboard to measure between.',
+    noPlayRecorded: 'There is nothing to measure here: no match declared and no kills in the frag log. Usually an idle server or an aborted recording.',
+};
+
+// The gamedir reading, which rides the demo rather than the reason: 165 of
+// the 170 `noMatchDeclared` demos in the sweep are a foreign gamedir
+// (`fortress` alone is 148), and the same mods turn up under three of the
+// other reasons. "qw" is the stock deathmatch dir and says nothing.
+function noMatchGameDirNote(nm) {
+    if (!nm.gameDir || nm.gameDir === 'qw') return '';
+    return `This looks like a ${nm.gameDir} demo; this tool analyzes KTX-style QuakeWorld matches.`;
+}
+
+// The evidence beside the prose. Every fact `detail` states is a structured
+// field, and these are those fields — `detail` is display-only by contract
+// (unstable wording, never parsed), so it is rendered verbatim and nothing is
+// read back out of it.
+function noMatchEvidence(nm) {
+    const items = [];
+    // Absent when the opening fullserverinfo dump carried no `status` key at
+    // all, which is a different reading from any value it could have had.
+    items.push(['Status at demo open', nm.statusAtOpen || 'not sent']);
+    items.push(['Match clock ever seen running', nm.statusRunningSeen ? 'yes' : 'no']);
+    if (nm.gameDir) items.push(['Game dir', nm.gameDir]);
+    // 0 is the reading that defines noPlayRecorded, so it always prints.
+    items.push(['Kills in the frag log', String(nm.kills || 0)]);
+    // The date markers ride here rather than on streams.global, which this
+    // result does not have. A finalscores stamp whose year could not be
+    // completed carries unixMs 0 and is skipped — it names no instant.
+    const marker = (nm.dateMarkers || []).find(m => m.unixMs);
+    if (marker) items.push(['Date marker on the wire', `${formatUtcStamp(marker.unixMs)} (${marker.source})`, marker.raw]);
+    return items;
+}
+
+function displayNoMatch(result) {
+    const panel = document.getElementById('no-match-panel');
+    if (!panel) return;
+    const nm = result.noMatch;
+    document.body.classList.toggle('no-match', !!nm);
+    panel.style.display = nm ? '' : 'none';
+    // The Teams box is fed from the frag log, which some match-less
+    // recordings still carry (a mid-match recording has a scoreline) and
+    // others do not — hidden only in the second case, since the .no-match
+    // CSS cannot tell them apart. Clearing the inline value hands the panel
+    // back to the duel-mode / no-team-rows rules.
+    const teams = document.getElementById('teams-panel');
+    if (teams) teams.style.display = (nm && !(result.match?.teams || []).length) ? 'none' : '';
+    if (!nm) return;
+
+    document.getElementById('no-match-title').textContent =
+        NO_MATCH_TITLES[nm.reason] || 'This recording holds no analyzable match';
+    document.getElementById('no-match-detail').textContent = nm.detail || '';
+    // The plain reading under the finding: the reason's translation, then the
+    // gamedir's where the demo has one to give.
+    const reading = document.getElementById('no-match-reading');
+    const lines = [NO_MATCH_ACTIONS[nm.reason] || '', noMatchGameDirNote(nm)].filter(Boolean);
+    reading.style.display = lines.length ? '' : 'none';
+    reading.textContent = lines.join(' ');
+    document.getElementById('no-match-evidence').innerHTML = noMatchEvidence(nm).map(([label, value, title]) =>
+        `<div class="summary-item"><label>${escapeHtml(label)}</label>` +
+        `<span${title ? ` title="${escapeHtml(title)}"` : ''}>${escapeHtml(value)}</span></div>`
+    ).join('');
+
+    // errors[] means the pipeline failed at something; the marker means the
+    // demo holds no match. They coincide on exactly one reason, and there the
+    // reader's own message is the evidence.
+    const errEl = document.getElementById('no-match-errors');
+    const errs = result.errors || [];
+    const show = nm.reason === 'demoUnreadable' && errs.length > 0;
+    errEl.style.display = show ? '' : 'none';
+    errEl.textContent = show ? `Reader: ${errs.join(' · ')}` : '';
+}
+
+// ─── Damage-evidence provenance (damage.source / damage.coverage, v74) ─────
+//
+// Everything that rides the reconstructed damage section — the Basic Stats
+// damage columns, Weapon Stats' Dmg and Acc, the Aim tab's Dmg and its recon
+// hits — inherits its evidence grade from this one field rather than carrying
+// a copy, so one renderer states it above each of those tables.
+//
+// `coverage.ratio` is published as a MAGNITUDE, not a flag: the pipeline has
+// no threshold and neither does this. The number is printed as it comes; the
+// only comparison here is against 1, which is the definition of a complete
+// section rather than a cutoff picked by the UI.
+function damageProvenanceHtml(result) {
+    if (result?.damage?.source !== 'reconstructed') return null;
+    const lead = 'Damage on this demo is <strong>reconstructed</strong>: it predates the server\'s damage log, ' +
+        'so every damage figure below is rebuilt from the health/armor streams rather than measured.';
+    const cov = result.damage.coverage;
+    // Absent coverage on a reconstructed section means the frag log named no
+    // scoreable kill, so completeness was never assessed — a different
+    // statement from "complete", and silence would read as the latter.
+    if (!cov) {
+        return { html: `${lead} The frag log named no scoreable kill, so how much of the match the evidence covers was not assessed.`, warn: false };
+    }
+    if (cov.ratio >= 1) {
+        return { html: `${lead} The evidence accounts for all ${cov.kills} of the match's scoreable kills.`, warn: false };
+    }
+    return {
+        html: `${lead} <strong>Damage evidence covers ${coveragePct(cov.ratio)}% of this match's kills</strong> ` +
+            `(${cov.covered} of ${cov.kills} scoreable kills) — the figures below are floors, not measurements.`,
+        warn: true,
+    };
+}
+
+// The coverage percentage for the INCOMPLETE banner. Rounding only — one
+// decimal below 10% so a 5.1% reading does not collapse to "5%" — with one
+// hard rule: the printed figure must never reach 100 while the ratio is below
+// it. A ratio in [0.995, 1) rounds up to a bold "100%" inside the sentence
+// that exists to say the section is incomplete. That window opens on the big
+// team games — one uncovered kill out of 200+ — and those are real: 10 of the
+// 60 reconstructed demos in a 120-demo archive sample carry 200 or more
+// scoreable kills, the largest 843. There it truncates to two decimals
+// instead, which cannot reach 100 from below.
+function coveragePct(ratio) {
+    const pct = ratio * 100;
+    const rounded = pct.toFixed(ratio < 0.1 ? 1 : 0);
+    if (parseFloat(rounded) < 100) return rounded;
+    return (Math.floor(pct * 100) / 100).toFixed(2);
+}
+
+// setPanelProvenance writes (or hides) one panel's evidence banner.
+function setPanelProvenance(id, note) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = note ? '' : 'none';
+    el.className = note && note.warn ? 'panel-provenance warn' : 'panel-provenance';
+    el.innerHTML = note ? note.html : '';
+}
+
 function updateTopbarDemoInfo(result) {
     const el = document.getElementById('topbar-demo-info');
     if (!el) return;
@@ -1114,6 +1676,10 @@ function updateTopbarDemoInfo(result) {
     // maps. `match.mapTitle` is available for surfaces that want the long
     // level title; the topbar is not one of them. Never a key.
     const map = demoInfo?.map || result?.match?.map || '';
+    // Same precedence as the Summary "Date" cell (displayMatchDate): KTX's
+    // own stamp where the demoinfo block exists, the graded wall-clock anchor
+    // where it does not.
+    const wallClock = demoInfo?.date ? null : matchWallClock(result);
     const date = demoInfo?.date || '';
 
     let teams = (timelineState.teams && timelineState.teams.length >= 2)
@@ -1136,7 +1702,19 @@ function updateTopbarDemoInfo(result) {
     }
 
     const parts = [];
-    if (teams.length >= 2) {
+    // An individual match with more than two players is not a matchup, and
+    // "toast vs SMOK" over a field of eight reads as one. Name the leader and
+    // the size of the field instead; a two-player one (a duel, or a 1v1 FFA)
+    // still renders as "A vs B" below, which is what it is.
+    const individualField = isMultiPlayerIndividual(result);
+    if (individualField) {
+        const a = teams[0];
+        parts.push(
+            `<span class="topbar-team-a">${escapeHtml(a)}</span>` +
+            (a in teamScores ? ` <span class="topbar-score">${teamScores[a]}</span>` : '')
+        );
+        parts.push(`<span class="topbar-field">${teams.length} players</span>`);
+    } else if (teams.length >= 2) {
         const a = teams[0];
         const b = teams[1];
         parts.push(
@@ -1154,21 +1732,23 @@ function updateTopbarDemoInfo(result) {
     }
     if (map) parts.push(`<span class="topbar-map">${escapeHtml(map)}</span>`);
     if (date) parts.push(`<span class="topbar-date">${escapeHtml(date)}</span>`);
+    else if (wallClock) parts.push(`<span class="topbar-date">${wallClock.html}</span>`);
 
     el.innerHTML = parts.join('<span class="topbar-sep">·</span>');
 
     const titleParts = [];
-    if (teams.length >= 2) titleParts.push(`${teams[0]} ${teams[1]}`);
+    if (individualField) titleParts.push(teams[0]);
+    else if (teams.length >= 2) titleParts.push(`${teams[0]} ${teams[1]}`);
     if (map) titleParts.push(map);
     document.title = titleParts.length
         ? `MVD | ${titleParts.join(' ')}`
         : 'MVD Analyzer';
 }
 
-function renderSearchResults(games) {
+function renderSearchResults(games, append = false) {
     const el = document.getElementById('search-results');
-    el.innerHTML = '';
-    if (!games || games.length === 0) {
+    if (!append) el.innerHTML = '';
+    if ((!games || games.length === 0) && !append) {
         el.innerHTML = '<div class="search-empty">No demos match these filters.</div>';
         return;
     }
@@ -1183,7 +1763,7 @@ function renderSearchResults(games) {
         const dateText = (game.timestamp || '').slice(0, 10);
 
         // Pick contestants: top-2 teams for team modes, top-2 players otherwise.
-        const isTeamMode = game.mode && game.mode !== '1on1' && game.mode !== 'ffa';
+        const isTeamMode = !!game.mode && !SEARCH_INDIVIDUAL_MODES.has(game.mode);
         let contestants = '—';
         if (isTeamMode && Array.isArray(game.teams) && game.teams.length >= 2) {
             const t = [...game.teams].sort((a, b) => (b.frags || 0) - (a.frags || 0));
@@ -1241,6 +1821,11 @@ function displayResults(result) {
 
     const demoInfo = result.demoInfo;
 
+    // Before anything that reads `streams`: the marker decides whether the
+    // panels below describe a match at all. Unconditional so the body class
+    // and the panel clear on the next demo.
+    displayNoMatch(result);
+
     // Match info from demoInfo. demoInfo.duration is verbatim from the
     // KTX JSON (integer seconds, untransformed by design); result.match
     // .duration flipped to int32 ms in schema v8 — convert to seconds for
@@ -1256,7 +1841,6 @@ function displayResults(result) {
         document.getElementById('duration').textContent = formatDuration(demoInfo.duration || ((result.match?.duration || 0) * 0.001));
         document.getElementById('mode').textContent = demoInfo.mode || '-';
         document.getElementById('hostname').textContent = demoInfo.hostname || '-';
-        document.getElementById('match-date').textContent = demoInfo.date || '-';
     } else if (result.match) {
         const mapCell = document.getElementById('map-name');
         mapCell.textContent = result.match.map || '-';
@@ -1265,6 +1849,12 @@ function displayResults(result) {
     }
 
     // Match settings + server info from the new metadata analyzer.
+    // Date: KTX's own stamp where the demoinfo block exists, otherwise the
+    // graded wall-clock anchor (schema v72) that fills the half of the
+    // archive without one. Outside the demoInfo branch above because the
+    // anchor is exactly what that branch does NOT have.
+    displayMatchDate(result);
+
     displayMatchSettings(result.metadata?.matchSettings);
     displayServerInfo(result.metadata?.serverInfo);
 
@@ -1287,23 +1877,39 @@ function displayResults(result) {
     // exists on demos with no KTX block at all), with demoInfo/match retained
     // only to enumerate the team NAMES.
     {
+        const individual = isIndividualLayout(result);
         const psTeams = playerStatsTeamRows(result);
         let teams = [];
-        if (psTeams.length) {
+        if (individual) {
+            // One side per player. playerStats carries the corrected net
+            // score, so the frag-sorted PLAYER list is the canonical order —
+            // and since every row's `team` IS its name, every existing
+            // `teamOrder.indexOf(row.team)` colour lookup resolves to the
+            // player's rank without a second mapping.
+            teams = sortByFragsDesc(playerStatsRows(result)).map(p => p.name);
+            if (!teams.length && result.match?.players) {
+                teams = [...result.match.players]
+                    .sort((a, b) => (b.frags || 0) - (a.frags || 0))
+                    .map(p => p.name);
+            }
+        } else if (psTeams.length) {
             teams = psTeams.map(t => t.name);
         } else if (demoInfo?.teams) {
             teams = [...demoInfo.teams];
         } else if (result.match?.teams) {
             teams = result.match.teams.map(t => t.name);
         }
-        if (teams.length >= 2) {
+        if (!individual && teams.length >= 2) {
             const rows = playerStatsRows(result);
             const teamFrags = psTeams.length
                 ? Object.fromEntries(psTeams.map(t => [t.name, fragsOfRow(t)]))
                 : teamFragTotals(rows.length ? rows : demoInfo?.players);
             teams.sort((a, b) => (teamFrags[b] || 0) - (teamFrags[a] || 0));
         }
-        setCanonicalTeams(teams);
+        // Duels keep the team palette (isMultiPlayerIndividual is false at
+        // two participants), so a 1v1 colours exactly as it did before
+        // individual modes existed.
+        setCanonicalTeams(teams, isMultiPlayerIndividual(result));
     }
 
     // Teams summary box. Rows come from playerStats where it exists so the
@@ -1328,8 +1934,22 @@ function displayResults(result) {
     // section at all is a parse that produced no player streams (a race
     // demo has no match), and that renders as empty tables.
     {
+        // The damage-evidence banner goes above every Summary table whose
+        // figures ride the damage section — the Basic Stats damage columns,
+        // and Weapon Stats' Dmg and (on a reconstructed demo) its Acc.
+        const dmgNote = damageProvenanceHtml(result);
+        setPanelProvenance('players-provenance', dmgNote);
+        setPanelProvenance('weapons-provenance', dmgNote);
         const rows = playerStatsRows(result);
         const teamRows = playerStatsTeamRows(result);
+        // The Acc marker's footnote. It appears exactly when a cell below
+        // wears the mark, so it never explains something that is not there.
+        const convNote = document.getElementById('weapons-convention-note');
+        if (convNote) {
+            const marked = anyAccOffKtxScale(rows) || anyAccOffKtxScale(teamRows);
+            convNote.style.display = marked ? '' : 'none';
+            convNote.textContent = marked ? ACC_OFF_SCALE_FOOTNOTE : '';
+        }
         displayPlayerStatsTeams(teamRows);
         displayPlayerStats(rows);
         displayWeaponStatsTeamsTable(teamRows);
@@ -1588,7 +2208,7 @@ function displayPlayerStats(rows) {
         const handicapCell = `<td class="handicap-col"${showHandicap ? '' : ' style="display: none;"'}>${player.handicap || '-'}</td>`;
         return `
             <td>${escapeHtml(player.name)}${botBadge}</td>
-            <td>${escapeHtml(player.team || '')}</td>
+            <td class="team-col">${escapeHtml(player.team || '')}</td>
             ${handicapCell}
             <td>${s.frags || 0}</td>
             <td>${effPct(s)}</td>
@@ -1596,10 +2216,12 @@ function displayPlayerStats(rows) {
             <td>${enemyWeaponKillCell(s, 'rl')}</td>
             <td>${enemyWeaponKillCell(s, 'lg')}</td>
             <td>${s.deaths || 0}</td>
-            <td>${s.teamKills ?? '-'}</td>
+            <td class="team-col">${s.teamKills ?? '-'}</td>
             <td>${s.suicides ?? '-'}</td>
+            <td>${s.maxSpree ?? '-'}</td>
+            <td>${s.maxQuadSpree ?? '-'}</td>
             <td>${d?.given ?? '-'}</td>
-            <td>${d?.givenTeam ?? '-'}</td>
+            <td class="team-col">${d?.givenTeam ?? '-'}</td>
             <td>${d?.taken ?? '-'}</td>
             <td>${d?.enemyWeapons ?? '-'}</td>
             <td>${d?.takenToDie ?? '-'}</td>
@@ -1629,18 +2251,145 @@ function isDuel(result) {
     return players.length === 2 && players.every(p => p.team === p.name);
 }
 
+// The frontend asks TWO different questions about teams, and they have two
+// different answers on the same demo. Keep them apart:
+//
+//   isIndividualLayout — "is every player their own side here?" It decides
+//     LAYOUT: which panels exist, which colour palette is handed out, whether
+//     the scoreboard is per player. It is a property of the RESULT, so it
+//     reads the layout the Go side actually applied: match.sources.teams ===
+//     'individual' (rebuildIndividualMatch's own stamp).
+//
+//   isTeamBasedMode — "was the teamplay ruleset in force?" It decides team
+//     SEMANTICS: whether a team kill or a team-damage figure is a thing that
+//     can happen. It reads match.gameMode.teamBased, the resolved descriptor.
+//
+// They disagree on a 1v1 played on a teamplay server (a CTF server's duel,
+// archive 2a2ed2e9ca…): the layout is individual — two participants, one side
+// each — while the ruleset genuinely was teamplay. Deriving either from the
+// other is what put a meaningless Team filter on an FFA aim tab and, in the
+// other direction, would put team colours on a duel.
+function isIndividualLayout(result) {
+    return result?.match?.sources?.teams === 'individual';
+}
+
+// isTeamBasedMode reports the resolved ruleset: teamplay in force, so a team
+// tag names a side.
+function isTeamBasedMode(result) {
+    return result?.match?.gameMode?.teamBased === true;
+}
+
+// hasTeammates reports whether any player in this demo has a team-mate: the
+// ruleset was teamplay AND the match is not laid out one side per player.
+// Everything that renders a same-team quantity (team kills, team damage, the
+// aim tab's Team victim filter) is empty without it.
+function hasTeammates(result) {
+    return isTeamBasedMode(result) && !isIndividualLayout(result);
+}
+
+// isMultiPlayerIndividual reports whether this demo is laid out one side per
+// player with MORE than two of them — a field rather than a matchup. Every
+// two-sided surface reads it: the "Team A ↑ / Team B ↓" timeline graphs, the
+// Chat tab's per-side say columns, region control, and the colour palette
+// (per-player rather than the four-entry team one — see PLAYER_PALETTE and
+// CLAUDE.md's team-colour rule). None of them has a pair of sides to name
+// here: the top two players are not a matchup and everyone else does not
+// appear at all. A two-participant match (a duel, or a 1v1 FFA) IS the
+// two-sided view and keeps every one of them. The test is "not a duel"
+// rather than "more than two": isDuel needs exactly two playerStats rows,
+// so an individual layout with fewer (one player alone on a server) takes
+// the field layout too — it has no pair of sides to show either.
+//
+// It was four copies of this expression under four names. They answered
+// different questions in the prose and the same one in the code, and a
+// consumer reading one of them could not tell which.
+function isMultiPlayerIndividual(result) {
+    return isIndividualLayout(result) && !isDuel(result);
+}
+
+// individualFieldActive reports the layout currently applied. The render paths
+// read the body class rather than re-deriving from the result so the DOM, the
+// row grouping and the row heights can never disagree — and displayTimeline-
+// Analysis's title write runs again from applyDeferredBuckets long after
+// applyDuelModeUI, where the class is what survives.
+function individualFieldActive() {
+    return document.body.classList.contains('individual-field');
+}
+
+// The three per-player drill-downs and where each lives in the two layouts:
+// `node` is the content that MOVES, `home` the <details> it sits in under its
+// team graph, `host` the body of the panel it is promoted into. The node is
+// re-parented, never cloned — it owns live canvases plus the `_sig` / `_cells`
+// rebuild cache, and a second copy would render into a detached tree.
+const PER_PLAYER_VIEWS = [
+    { node: 'frags-per-player',        home: 'frags-per-player-details',   host: 'frags-per-player-host',   panel: 'frags-per-player-panel'   },
+    { node: 'weapons-per-player-rows', home: 'weapons-per-player-details', host: 'weapons-per-player-host', panel: 'weapons-per-player-panel' },
+    { node: 'ha-per-player',           home: 'ha-per-player-details',      host: 'ha-per-player-host',      panel: 'ha-per-player-panel'      },
+];
+
+// setIndividualFieldLayout switches every two-sided surface between its two
+// forms, off one body class.
+//
+// Timeline: hide the A-vs-B graphs and promote the three per-player views to
+// panels of their own. Chat: collapse the two say columns into a single "Chat"
+// column carrying every line, the second column and its header hidden by CSS
+// off the class — the columns are flex:1, so the two survivors split the width
+// with no empty third. No chat node is moved or cloned: the same three
+// containers persist and buildFullChat fills whichever the layout uses.
+function setIndividualFieldLayout(on) {
+    document.body.classList.toggle('individual-field', on);
+    for (const v of PER_PLAYER_VIEWS) {
+        const panel = document.getElementById(v.panel);
+        if (panel) panel.style.display = on ? '' : 'none';
+        const node = document.getElementById(v.node);
+        const target = document.getElementById(on ? v.host : v.home);
+        if (!node || !target || node.parentElement === target) continue;
+        target.appendChild(node);
+    }
+    // The selected-range suffix rides along: its only home is the Weapons
+    // heading, which this layout hides.
+    const rangeLabel = document.getElementById('time-range-label');
+    const rangeHome = document.getElementById(on ? 'weapons-per-player-heading' : 'weapons-timeline-heading');
+    if (rangeLabel && rangeHome && rangeLabel.parentElement !== rangeHome) rangeHome.appendChild(rangeLabel);
+    if (!on) return;
+    const chatTitle = document.getElementById('team-a-chat-title');
+    if (chatTitle) chatTitle.textContent = 'Chat';
+}
+
+// Row heights for the per-player views. The compact pair is what a collapsed
+// drill-down under a team graph uses; promoted to a panel of their own these
+// rows carry the tab, with no team graph above them competing for the fold, so
+// they get more pixels each.
+function ppMiniHeight() {
+    return individualFieldActive() ? 60 : 44;
+}
+
+function ppSpanRowHeight() {
+    return individualFieldActive() ? 28 : RC_ROW_H;
+}
+
 function applyDuelModeUI(result) {
     // Toggle a class on <body> so CSS can drive the hiding. Using a
     // class (instead of inline style writes) means the UI can re-render
     // cleanly on demo reload without leaking stale display:none values
     // onto unrelated elements.
     document.body.classList.toggle('duel-mode', isDuel(result));
+    // FFA and friends: no teams anywhere, so every team surface goes — the
+    // Teams box, the per-team aggregates, the Team / TK / TDmg scoreboard
+    // columns (structurally 0 when nobody has a teammate), and the team
+    // colour legends. Region control needs a binary side layout; its panels
+    // are hidden by initRegionControl, NOT by a missing-data gate — the
+    // result ships `timelineAnalysis.regionControl.regions` for every map.
+    document.body.classList.toggle('individual-mode', isIndividualLayout(result));
     // FFA has no teams at all, so playerStats omits the section and the
     // three Summary "Per Team" tables rendered as headers over nothing —
     // duel mode was the only thing hiding them, and it does not fire at
     // five players. Drive it off the rows themselves, which covers every
     // demo class with nothing to aggregate.
     document.body.classList.toggle('no-team-rows', playerStatsTeamRows(result).length === 0);
+    // Timeline and Chat: the A-vs-B graphs and the two say columns both
+    // describe a matchup an FFA does not have.
+    setIndividualFieldLayout(isMultiPlayerIndividual(result));
 }
 
 // Long-form names for KTX spawn algorithms (k_spw values). Mirrors
@@ -1803,7 +2552,7 @@ function displayWeaponStatsTable(rows) {
 // damage from `damage.byWeapon`, and eK from `score.byWeaponVsEnemyWeapon`.
 // A weapon the player never touched shows '-' in all four rather than zeros.
 function formatWeaponCells(player, wn) {
-    const acc = formatAccuracyCell(player.accuracy?.byWeapon?.[wn]);
+    const acc = formatAccuracyCell(player.accuracy, wn);
     const kills = player.score?.byWeapon?.[wn] || 0;
     const dmg = player.damage?.byWeapon?.[wn] || 0;
     return `<td>${acc}</td><td>${kills || '-'}</td><td>${dmg || '-'}</td>${enemyKillCell(player, wn)}`;
@@ -1959,6 +2708,8 @@ function displayPlayerStatsTeams(teamRows) {
             <td>${s.deaths || 0}</td>
             <td>${s.teamKills ?? '-'}</td>
             <td>${s.suicides ?? '-'}</td>
+            <td>${s.maxSpree ?? '-'}</td>
+            <td>${s.maxQuadSpree ?? '-'}</td>
             <td>${d?.given ?? '-'}</td>
             <td>${d?.givenTeam ?? '-'}</td>
             <td>${d?.taken ?? '-'}</td>
@@ -2126,6 +2877,16 @@ function renderPowerupRuns(result) {
 function displayKeyMoments(result) {
     renderPowerupRuns(result);
 
+    // The three tables on this tab that rank on damage read the same
+    // reconstructed section the Summary and Aim tabs do — the bounded damage
+    // of a window, a kill burst's Dmg / Hits / Return — so they carry the
+    // same banner, from the same renderer. Powerup runs and frag streaks are
+    // frag-log-only and carry none.
+    const dmgNote = damageProvenanceHtml(result);
+    for (const id of ['topdmg-provenance', 'toprl-provenance', 'toplg-provenance']) {
+        setPanelProvenance(id, dmgNote);
+    }
+
     // Get hub info for viewer links (from currentResult which may have hubInfo set)
     const hubInfo = currentResult?.hubInfo;
 
@@ -2233,8 +2994,11 @@ function displayKeyMoments(result) {
         });
     }
 
-    // Airborne rocket gibs (sortable table, default by height).
+    // Direct rocket air hits (sortable table, default by height).
     displayAirgibs(result);
+
+    // The highlight catalogue: discharges, quadbores, telefrags.
+    displayHighlights(result);
 
     // Top frag runs / top RL / top LG kills — view queries, so they fill in
     // asynchronously and independently of everything above.
@@ -2413,7 +3177,8 @@ function renderTopKills(key, v, hubInfo, playerUserIDs) {
     }
 }
 
-// Render the airborne-rocket-gib table. Default view is height-above-shooter
+// Render the direct-rocket-air-hit table (lethal or not; the Lethal column
+// badges the ones that gibbed). Default view is height-above-shooter
 // descending — the vertical gap the rocket climbed is what makes a hit look
 // spectacular (the analyzer ships the list ordered by floor height). The table
 // is re-sortable by any column through the shared makeSortable machinery: the
@@ -2427,8 +3192,16 @@ function displayAirgibs(result) {
     if (!table || !body) return;
 
     const hubInfo = currentResult?.hubInfo || null;
-    // `t` is int32 ms on the raw result; keep a seconds copy for seek/hub.
-    const data = (result.timelineAnalysis?.airgibs || []).map(a => ({ ...a, timeSec: a.time * 0.001 }));
+    // `time` is int32 ms on the raw result; keep a seconds copy for seek/hub.
+    // Rows are highlights.airgibs (schema v76, the list's only home):
+    // HighlightEvent — actor / victims[0], the victim row carrying the state.
+    const data = (result.highlights?.airgibs || []).map(h => ({
+        time: h.time, timeSec: h.time * 0.001,
+        height: h.height, heightAboveAttacker: h.heightAboveAttacker,
+        attacker: h.actor?.name, attackerUserID: h.actor?.userId,
+        victim: h.victims?.[0]?.name, lethal: !!h.victims?.[0]?.killed,
+        loc: h.victims?.[0]?.loc, state: h.victims?.[0] || null,
+    }));
 
     if (data.length === 0) {
         body.innerHTML = '';
@@ -2453,16 +3226,6 @@ function displayAirgibs(result) {
     for (const a of data) {
         const tr = document.createElement('tr');
 
-        let watchCell = '-';
-        if (hubInfo && hubInfo.gameId) {
-            const demoOff = timelineState.demoOffset || 0;
-            const fromTime = Math.max(0, Math.floor(a.timeSec + demoOff) - 5);
-            const toTime = Math.floor(a.timeSec + demoOff) + 3;
-            const trackId = a.attackerUserID || 0; // shooter perspective
-            const viewerUrl = hubReplayUrl({ gameId: hubInfo.gameId, from: fromTime, to: toTime, track: trackId });
-            watchCell = `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
-        }
-
         const lethalCell = a.lethal ? '<span class="airgib-lethal">gib</span>' : '';
         const aboveShooter = a.heightAboveAttacker ?? 0;
 
@@ -2473,14 +3236,227 @@ function displayAirgibs(result) {
             <td>${escapeHtml(a.victim || 'Unknown')}</td>
             <td>${escapeHtml(a.loc || '-')}</td>
             <td data-sort-value="${a.lethal ? 1 : 0}">${lethalCell}</td>
+            <td>${a.state ? highlightStateCell(a.state) : ''}</td>
             <td class="time-cell time-link" data-sort-value="${a.time}">${formatDuration(a.timeSec)}</td>
-            <td>${watchCell}</td>
+            <td>${highlightWatchCell(hubInfo, a.timeSec, a.attackerUserID)}</td>
         `;
         tr.querySelector('.time-link').addEventListener('click', () => setCurrentTime(a.timeSec));
         body.appendChild(tr);
     }
 
     makeSortable(table);
+}
+
+// ─── Highlight catalogue (discharges / quadbores / telefrags) ───────────────
+//
+// result.highlights (schema v76) is the stored catalogue: one row shape for
+// every kind — an actor, the victims it touched, kill counters — with each
+// participant's state read just before the instant (health/armor/stack,
+// weapons, powerups, loc). The tables below are plain renderings of those
+// lists; the toplist IS the sort, which makeSortable hands to the viewer.
+
+// highlightWatchCell builds the Hub replay link from the actor's userid
+// (the JSON key is `userId` on HighlightPlayer).
+function highlightWatchCell(hubInfo, timeSec, trackId) {
+    if (!hubInfo || !hubInfo.gameId) return '-';
+    const demoOff = timelineState.demoOffset || 0;
+    const fromTime = Math.max(0, Math.floor(timeSec + demoOff) - 5);
+    const toTime = Math.floor(timeSec + demoOff) + 3;
+    const viewerUrl = hubReplayUrl({ gameId: hubInfo.gameId, from: fromTime, to: toTime, track: trackId || 0 });
+    return `<a href="${viewerUrl}" target="_blank" class="viewer-link">Hub</a>`;
+}
+
+// highlightStack renders "health/armor+type" ("118/180ra", "100/0"); "?"
+// when the streams never recorded the player (stateSource "").
+function highlightStack(p) {
+    if (!p || p.health == null) return '?';
+    const armor = p.armor ?? 0;
+    const at = armor > 0 && p.armorType ? p.armorType : '';
+    const spawn = p.stateSource === 'spawn' ? ' <span class="hl-spawn">(spawn)</span>' : '';
+    // Armor value + type carry the timeline's armor colors and caps ("180 RA").
+    const armorStr = at
+        ? `<span class="armor-${escapeHtml(at)}">${armor} ${escapeHtml(at.toUpperCase())}</span>`
+        : `${armor}`;
+    return `<span class="hl-stack">${p.health}/${armorStr}</span>${spawn}`;
+}
+
+// highlightHad renders the tracked inventory and powerups: "RL LG · Quad".
+// Weapons take the timeline's weapon colors and caps; powerups render
+// exactly as the powerup list does (getPowerupDisplay + .powerup-cell
+// colors), full size — a quad is the headline of the row.
+function highlightHad(p) {
+    if (!p) return '';
+    const weapons = (p.weapons || [])
+        .map(w => `<span class="wep-${escapeHtml(w)}">${escapeHtml(w.toUpperCase())}</span>`).join(' ');
+    const pus = (p.powerups || [])
+        .map(x => `<span class="powerup-cell ${escapeHtml(x)}">${escapeHtml(getPowerupDisplay(x))}</span>`).join(' ');
+    const weps = weapons ? `<span class="hl-had">${weapons}</span>` : '';
+    return `${weps}${weapons && pus ? ' ' : ''}${pus}`;
+}
+
+// highlightStateCell is the shared "what they had" cell: stack + had.
+function highlightStateCell(p) {
+    const had = highlightHad(p);
+    return `${highlightStack(p)}${had ? ' ' + had : ''}`;
+}
+
+function highlightRelationBadge(rel) {
+    const r = rel === 'team' || rel === 'self' ? rel : 'enemy';
+    return `<span class="hl-badge hl-${r}">${r}</span>`;
+}
+
+// highlightVictimLine renders one victim as its own line, no relation badge
+// (the column already says the side): name, stack, had, damage taken.
+// Hurt-not-killed victims are dimmed.
+function highlightVictimLine(v) {
+    const cls = v.killed || v.survived ? 'hl-vline' : 'hl-vline hl-hurt';
+    return `<span class="${cls}"><span class="hl-name">${escapeHtml(v.name || '?')}</span> ${highlightStateCell(v)}</span>`;
+}
+
+// highlightVictimChip renders one victim: relation badge, name, stack, had.
+// Hurt-not-killed victims (damage-log only) are dimmed; a deflect's
+// surviving pentagram holder gets its own badge.
+function highlightVictimChip(v) {
+    const badge = v.survived ? '<span class="hl-badge hl-survived">survived</span>' : highlightRelationBadge(v.relation);
+    const cls = v.killed || v.survived ? 'hl-chip' : 'hl-chip hl-hurt';
+    const dmg = v.damage ? ` <span class="hl-stack">−${v.damage}</span>` : '';
+    return `<span class="${cls}">${badge}<span class="hl-name">${escapeHtml(v.name || '?')}</span> ${highlightStateCell(v)}${dmg}</span>`;
+}
+
+// highlightSetup clears a table, resets its header indicators to `defaultSort`
+// and toggles the empty state; returns the tbody or null when there is
+// nothing to render.
+function highlightSetup(id, rows, defaultSort) {
+    const table = document.getElementById(`${id}-table`);
+    const body = document.getElementById(`${id}-body`);
+    const empty = document.getElementById(`${id}-empty`);
+    if (!table || !body) return null;
+    if (rows.length === 0) {
+        body.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return null;
+    }
+    if (empty) empty.style.display = 'none';
+    table.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc', 'sort-desc', 'sort-active'));
+    const th = table.querySelector(`thead th[data-sort="${defaultSort}"]`);
+    if (th) th.classList.add('sort-desc');
+    body.innerHTML = '';
+    return { table, body };
+}
+
+function highlightAppendRow(t, html, timeSec) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = html;
+    const link = tr.querySelector('.time-link');
+    if (link) link.addEventListener('click', () => setCurrentTime(timeSec));
+    t.body.appendChild(tr);
+}
+
+const KTX_QUAD_MS = 30000; // KTX quad duration; quadHeldMs is measured, the remainder is derived here
+
+function displayHighlights(result) {
+    const hubInfo = currentResult?.hubInfo || null;
+    const h = result.highlights || {};
+    const withSec = list => (list || []).map(e => ({ ...e, timeSec: e.time * 0.001 }));
+    const timeCell = e => `<td class="time-cell time-link" data-sort-value="${e.time}">${formatDuration(e.timeSec)}</td>`;
+    const locOf = e => e.actor?.loc || e.victims?.[0]?.loc || '';
+
+    // Discharges — ranked by kill VALUE: killed enemies holding RL or LG,
+    // +1 more per killed enemy with quad (armed kills over respawn
+    // fodder); ties by enemy kills, then bounded enemy damage.
+    const dischargeValue = e => (e.victims || []).reduce((n, v) => {
+        if (!v.killed || v.relation === 'team') return n;
+        const armed = (v.weapons || []).some(w => w === 'rl' || w === 'lg');
+        const quad = (v.powerups || []).includes('quad');
+        return n + (armed ? 1 : 0) + (quad ? 1 : 0);
+    }, 0);
+    const discharges = withSec(h.discharges).map(e => ({ ...e, value: dischargeValue(e) }));
+    discharges.sort((a, b) => (b.value - a.value) || (b.enemyKills - a.enemyKills)
+        || ((b.damageEnemy || 0) - (a.damageEnemy || 0)) || ((b.damage || 0) - (a.damage || 0)) || (a.time - b.time));
+    let t = highlightSetup('discharges', discharges, 'value');
+    if (t) {
+        for (const e of discharges) {
+            const enemy = e.enemyKills || 0;
+            const team = e.teamKills || 0;
+            const self = e.actor?.killed ? 1 : 0;
+            // KTX scores an enemy kill +1, a teamkill −1, a suicide −1.
+            const delta = enemy - team - self;
+            const enemyV = (e.victims || []).filter(v => v.relation !== 'team').map(highlightVictimLine).join('');
+            const teamV = (e.victims || []).filter(v => v.relation === 'team').map(highlightVictimLine).join('');
+            highlightAppendRow(t, `
+                ${timeCell(e)}
+                <td data-sort-value="${escapeHtml(e.actor?.name || '')}">${escapeHtml(e.actor?.name || 'Unknown')} ${highlightStateCell(e.actor)}</td>
+                <td data-sort-value="${e.cells ?? -1}">${e.cells ?? '?'}</td>
+                <td data-sort-value="${e.value}">${e.value || '-'}</td>
+                <td data-sort-value="${enemy}">${enemy || '-'}</td>
+                <td data-sort-value="${team}">${team || '-'}</td>
+                <td data-sort-value="${self}">${self || '-'}</td>
+                <td data-sort-value="${delta}">${delta > 0 ? '+' + delta : delta}</td>
+                <td data-sort-value="${e.damageEnemy || 0}">${e.damageEnemy || '-'}</td>
+                <td data-sort-value="${e.damageTeam || 0}">${e.damageTeam || '-'}</td>
+                <td>${enemyV || '-'}</td>
+                <td>${teamV || '-'}</td>
+                <td>${escapeHtml(locOf(e) || '-')}</td>
+                <td>${highlightWatchCell(hubInfo, e.timeSec, e.actor?.userId)}</td>
+            `, e.timeSec);
+        }
+        makeSortable(t.table);
+    }
+
+    // Quadbores — most quad thrown away first.
+    const quadbores = withSec(h.quadbores).map(e => ({ ...e, quadLeft: Math.max(0, KTX_QUAD_MS - (e.quadHeldMs || 0)) }));
+    quadbores.sort((a, b) => (b.quadLeft - a.quadLeft) || (a.time - b.time));
+    t = highlightSetup('quadbores', quadbores, 'quadLeft');
+    if (t) {
+        for (const e of quadbores) {
+            const victims = (e.victims || []).map(highlightVictimChip).join('');
+            highlightAppendRow(t, `
+                ${timeCell(e)}
+                <td data-sort-value="${escapeHtml(e.actor?.name || '')}">${escapeHtml(e.actor?.name || 'Unknown')}${victims ? ' <span class="hl-had">took</span> ' + victims : ''}</td>
+                <td>${escapeHtml(e.weapon || '?')}</td>
+                <td data-sort-value="${e.quadLeft}">${(e.quadLeft / 1000).toFixed(1)} s</td>
+                <td data-sort-value="${e.quadFrags || 0}">${e.quadFrags || 0}</td>
+                <td data-sort-value="${e.actor?.stack ?? -1}">${highlightStack(e.actor)}</td>
+                <td>${highlightHad(e.actor) || '-'}</td>
+                <td>${escapeHtml(locOf(e) || '-')}</td>
+                <td>${highlightWatchCell(hubInfo, e.timeSec, e.actor?.userId)}</td>
+            `, e.timeSec);
+        }
+        makeSortable(t.table);
+    }
+
+    // Telefrags — most stacked victim first; rows with no killed victim (a
+    // deflect / spawnicide: the teleporter died) sort last.
+    const telefrags = withSec(h.telefrags).map(e => {
+        const victim = (e.victims || []).find(v => v.killed) || null;
+        const survivor = (e.victims || []).find(v => v.survived) || null;
+        return { ...e, victim, survivor, stack: victim?.stack ?? -1 };
+    });
+    telefrags.sort((a, b) => (b.stack - a.stack) || (a.time - b.time));
+    t = highlightSetup('telefrags', telefrags, 'stack');
+    if (t) {
+        for (const e of telefrags) {
+            const kind = e.teleKind || 'telefrag';
+            const subject = e.victim || e.survivor;
+            const relation = e.victim ? highlightRelationBadge(e.victim.relation)
+                : (e.survivor ? '<span class="hl-badge hl-survived">survived</span>' : '-');
+            const victimName = e.victim ? e.victim.name : (e.survivor ? e.survivor.name : '-');
+            // On a deflect / spawnicide the actor is the one who died; say so.
+            const actorCell = `${escapeHtml(e.actor?.name || 'Unknown')}${e.actor?.killed ? ' <span class="hl-badge hl-self">died</span>' : ''}`;
+            highlightAppendRow(t, `
+                ${timeCell(e)}
+                <td data-sort-value="${escapeHtml(e.actor?.name || '')}">${actorCell}</td>
+                <td data-sort-value="${escapeHtml(victimName)}">${escapeHtml(victimName)}</td>
+                <td data-sort-value="${escapeHtml(e.victim?.relation || (e.survivor ? 'survived' : ''))}">${relation}</td>
+                <td data-sort-value="${e.stack}">${subject ? highlightStack(subject) : '-'}</td>
+                <td>${subject ? (highlightHad(subject) || '-') : '-'}</td>
+                <td data-sort-value="${kind}"><span class="hl-badge hl-kind">${kind}</span></td>
+                <td>${escapeHtml(locOf(e) || '-')}</td>
+                <td>${highlightWatchCell(hubInfo, e.timeSec, e.actor?.userId)}</td>
+            `, e.timeSec);
+        }
+        makeSortable(t.table);
+    }
 }
 
 function getPowerupDisplay(type) {
@@ -2494,16 +3470,58 @@ function getPowerupDisplay(type) {
 
 // Pack Drops table — joins result.backpacks (the drop side from
 // //ktx drop) with the backpack-sourced entries in result.weaponPickups
-// (the pickup side from //ktx bp) by (backpackEnt, dropTime). A drop
-// with no matching pickup is shown as "expired" — the pack despawned
-// or fell into a lava pit before anyone touched it. The filter row
-// above the table narrows rows by dropper team, picker team, or
-// status label; filter state lives in the select elements themselves
+// (the pickup side from //ktx bp) by (backpackEnt, dropTime). A drop with
+// no matching pickup is shown as "expired" only when KTX said so in
+// //ktx expire (published as the drop row's own `fate`); otherwise it is
+// "unobserved", because a pack the recording ended on top of also has no
+// pickup row.
+//
+// RECONSTRUCTED drops (backpacks[].source === 'reconstructed', demos older
+// than the //ktx drop hint) have no `//ktx bp` to join to, so their pickup
+// side rides the drop row itself: `fate` / `picker` / `pickerTeam` /
+// `pickupTime`, read off the wire's backpack-ENTITY track (schema v72).
+// packDropPickup below turns those fields into the same row shape the join
+// produces, so one renderer serves both provenances.
+//
+// The filter row above the table narrows rows by dropper team, picker team,
+// or status label; filter state lives in the select elements themselves
 // so switching tabs and coming back preserves the view.
 const packDropsState = { rows: [], hubInfo: null, playerUserIDs: null };
 
+// packDropPickup adapts a reconstructed drop's own fate fields to the pickup
+// row shape. `kills` is null rather than 0: kill credit needs the `//ktx bp`
+// hint's HadBefore, which no reconstructed row has, and printing 0 would
+// claim the picker scored nothing with it.
+function packDropPickup(drop) {
+    if (drop.source !== 'reconstructed' || drop.fate !== 'picked' || !drop.picker) return null;
+    return {
+        player: drop.picker,
+        team: drop.pickerTeam || '',
+        time: (drop.pickupTime || 0) * 0.001,
+        nextDeathTime: 0,
+        kills: null,
+    };
+}
+
 function packDropStatusFor(drop, pickup) {
-    if (!pickup) return { label: 'expired', cls: 'status-expired' };
+    // A RECONSTRUCTED drop's fate comes from the entity track, not from a
+    // pickup row. Three outcomes, and `unobserved` is deliberately not
+    // `expired`: "we could not see the pickup side" is a different fact from
+    // "nobody took it".
+    if (drop.source === 'reconstructed') {
+        if (drop.fate === 'picked') return { label: 'picked', cls: 'status-picked' };
+        if (drop.fate === 'expired') return { label: 'expired', cls: 'status-expired' };
+        return { label: 'unobserved', cls: 'status-unobserved' };
+    }
+    // A KTX row with no pickup row is NOT automatically expired, and this
+    // used to say it was. KTX states an expiry outright in `//ktx expire`,
+    // which the pipeline stamps as `fate: "expired"`; over the archive that
+    // hint accounts for only half the pickup-less drops, the rest being packs
+    // the recording ended on top of. Those get `unobserved`.
+    if (!pickup) {
+        if (drop.fate === 'expired') return { label: 'expired', cls: 'status-expired' };
+        return { label: 'unobserved', cls: 'status-unobserved' };
+    }
     const sameTeam = pickup.team && drop.team && pickup.team === drop.team;
     const weaponUpper = drop.weapon.toUpperCase();
     if (sameTeam) {
@@ -3039,7 +4057,7 @@ function displayPackDrops(result) {
             time: rawPickup.time * 0.001,
             nextDeathTime: (rawPickup.nextDeathTime || 0) * 0.001,
             dropTime: (rawPickup.dropTime || 0) * 0.001,
-        } : null;
+        } : packDropPickup(rawDrop);
         return { drop, pickup, status: packDropStatusFor(drop, pickup) };
     });
 
@@ -3130,9 +4148,11 @@ function renderPackDropRows() {
             runHub = hubAnchor(pickup.time - 3, endTime, pickup.player);
             pickerLabel = escapeHtml(pickup.player || '?');
             pickTeamLabel = escapeHtml(pickup.team || '-');
-            killsCell = pickup.hadBefore
-                ? `<span class="kills-redundant">${pickup.kills}</span>`
-                : String(pickup.kills);
+            killsCell = pickup.kills === null
+                ? '-'
+                : (pickup.hadBefore
+                    ? `<span class="kills-redundant">${pickup.kills}</span>`
+                    : String(pickup.kills));
         }
 
         const statusCell = `<span class="pack-status ${r.status.cls}">${escapeHtml(r.status.label)}</span>`;
@@ -3353,6 +4373,13 @@ function resetUIToCleanState() {
     // Teams
     setHTML('teams-list', '');
 
+    // noMatch marker + the damage-evidence banners
+    hide('no-match-panel');
+    setHTML('no-match-evidence', '');
+    hide('players-provenance');
+    hide('weapons-provenance');
+    hide('aim-provenance');
+
     // Player / weapon / item tables (per-team + per-player)
     for (const id of [
         'player-stats-team-body', 'scoreboard-body',
@@ -3374,6 +4401,11 @@ function resetUIToCleanState() {
     }
     hide('powerup-timeline-panel');
     hide('region-control-timeline-panel');
+    // Two-sided default for the timeline AND the chat columns: the
+    // per-player views return to their <details> under the team graphs.
+    // applyDuelModeUI re-applies the individual field layout below if this
+    // demo wants it.
+    setIndividualFieldLayout(false);
     hide('unified-timeline');
     setText('time-range-label', '');
     setHTML('team-status-a', '');
@@ -3456,11 +4488,13 @@ function resetUIToCleanState() {
     hide('pickups-empty');
     // pickups-items-panel is shown by displayPickupsTab when item data exists
 
-    // Body classes — duel-mode / no-team-rows collapse some panels via CSS;
-    // clear them so a teamplay demo loaded after a duel or an FFA doesn't
-    // inherit the layout.
+    // Body classes — duel-mode / individual-mode / no-team-rows / no-match
+    // collapse some panels via CSS; clear them so a teamplay demo loaded after
+    // a duel, an FFA or a match-less recording doesn't inherit the layout.
     document.body.classList.remove('duel-mode');
+    document.body.classList.remove('individual-mode');
     document.body.classList.remove('no-team-rows');
+    document.body.classList.remove('no-match');
 
     // JS-side state objects that hold per-demo data
     mapState.locations = [];
@@ -3559,10 +4593,11 @@ function displayTimelineAnalysis(result) {
 
     // Teams already set (frag-sorted) in displayResults; only set if missing
     if (!timelineState.teams || timelineState.teams.length === 0) {
-        if (demoInfo?.teams) {
-            setCanonicalTeams([...demoInfo.teams]);
+        const individual = isIndividualLayout(result);
+        if (!individual && demoInfo?.teams) {
+            setCanonicalTeams([...demoInfo.teams], false);
         } else if (result.match?.teams) {
-            setCanonicalTeams(result.match.teams.map(t => t.name));
+            setCanonicalTeams(result.match.teams.map(t => t.name), isMultiPlayerIndividual(result));
         }
     }
     const teams = timelineState.teams;
@@ -3591,7 +4626,7 @@ function displayTimelineAnalysis(result) {
     timelineState.fragEvents = (timeline?.fragEvents || []).map(f => ({ ...f, time: f.time * 0.001 })).sort((a, b) => a.time - b.time); // Frag events from stat tracking
     timelineState.deathEvents = (timeline?.deathEvents || []).map(d => ({ ...d, time: d.time * 0.001 })); // Per-player deaths (every death) for the frags/deaths drill-down
     timelineState.killEvents = (timeline?.killEvents || []).map(k => ({ ...k, time: k.time * 0.001 })); // Per-player enemy kills (killer-keyed) for the frags/deaths drill-down
-    timelineState.backpacks = (result.backpacks || []).map(d => ({ ...d, time: d.time * 0.001 })); // RL/LG drops from KTX hint
+    timelineState.backpacks = (result.backpacks || []).map(d => ({ ...d, time: d.time * 0.001 })); // RL/LG drops (KTX hint or reconstructed — see d.source)
     timelineState.powerupEvents = (timeline?.powerupEvents || []).map(ev => ({ // per-run records: player, team, frags, duration
         ...ev,
         time: ev.time * 0.001,
@@ -3608,8 +4643,13 @@ function displayTimelineAnalysis(result) {
     // Update legend team names
     if (teams.length >= 2) {
         const setTextIfExists = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-        setTextIfExists('team-a-chat-title', `${teams[0]} Chat`);
-        setTextIfExists('team-b-chat-title', `${teams[1]} Chat`);
+        // The single-column layout owns both chat titles
+        // (setIndividualFieldLayout set the one visible column to "Chat");
+        // teams[0]/[1] are two players out of the field there, not sides.
+        if (!individualFieldActive()) {
+            setTextIfExists('team-a-chat-title', `${teams[0]} Chat`);
+            setTextIfExists('team-b-chat-title', `${teams[1]} Chat`);
+        }
         setTextIfExists('legend-health-team-a', teams[0] + ' ↑');
         setTextIfExists('legend-health-team-b', teams[1] + ' ↓');
         setTextIfExists('legend-weapons-team-a', teams[0] + ' ↑');
@@ -4035,29 +5075,37 @@ function buildHASegments(td) {
 // (timelineState.bucketView.players[name], read via playerValAt/playerAliveAt)
 // plus timelineState.backpacks for weapon-drop dots — no extra data fetch.
 
-// Group the bucket-view players into [teamAPlayers, teamBPlayers] following
-// timelineState.teams order. Team membership mirrors updateTeamStatus: prefer
-// demoInfo.players, fall back to the map's playerSymbols. Players whose team
-// can't be resolved (spectators, mid-game joiners) are dropped.
+// Group the bucket-view players by side, following timelineState.teams order,
+// so group index == TEAM_COLORS index. Team membership mirrors updateTeamStatus:
+// prefer demoInfo.players, fall back to the map's playerSymbols. Players whose
+// team can't be resolved (spectators, mid-game joiners) are dropped.
+//
+// In the individual layout every player IS a side, so there is one group per
+// entry in timelineState.teams (the frag-sorted player list) and a player's
+// side is their own name — no roster lookup needed. Before this, the grouping
+// hard-coded two sides and resolved everyone to teams[0] / teams[1], so an
+// FFA drill-down drew two rows of N. The two-sided panels keep exactly two
+// groups, so a team demo is unchanged.
 function timelinePlayersByTeam() {
     const teams = timelineState.teams;
     const view = timelineState.bucketView;
-    const out = [[], []];
+    const individual = individualFieldActive();
+    const groupCount = individual ? Math.max(2, teams.length) : 2;
+    const out = Array.from({ length: groupCount }, () => []);
     if (teams.length < 2 || !view || !view.players) return out;
     const demoPlayers = currentResult?.demoInfo?.players || [];
     const teamOf = (name) => {
+        if (individual) return name;
         const dp = demoPlayers.find(p => p.name === name);
         if (dp?.team) return dp.team;
         return mapState.playerSymbols?.[name]?.team;
     };
     for (const name of Object.keys(view.players)) {
-        const t = teamOf(name);
-        const ti = t === teams[0] ? 0 : t === teams[1] ? 1 : -1;
-        if (ti < 0) continue;
+        const ti = teams.indexOf(teamOf(name));
+        if (ti < 0 || ti >= out.length) continue;
         out[ti].push(name);
     }
-    out[0].sort();
-    out[1].sort();
+    for (const group of out) group.sort();
     return out;
 }
 
@@ -4145,7 +5193,7 @@ function renderHealthArmorPerPlayer(startTime, endTime) {
     if (container._sig !== sig) {
         container.innerHTML = '';
         container._cells = [];
-        for (let ti = 0; ti < 2; ti++) {
+        for (let ti = 0; ti < grouped.length; ti++) {
             grouped[ti].forEach((name, idx) => {
                 const cid = `ha-pp-${ti}-${idx}`;
                 const cell = document.createElement('div');
@@ -4190,7 +5238,7 @@ function renderHealthArmorPerPlayer(startTime, endTime) {
     for (const { name, cid } of container._cells) {
         const cv = document.getElementById(cid);
         if (cv) cv.style.width = ''; // let the cell reflow on resize
-        renderMiniStack(cid, { startTime, endTime, points: prepped[name] || [], maxValue: maxVal, height: 44 });
+        renderMiniStack(cid, { startTime, endTime, points: prepped[name] || [], maxValue: maxVal, height: ppMiniHeight() });
     }
     renderSharedTimeAxis(container, startTime, endTime);
 }
@@ -4333,7 +5381,7 @@ function renderFragsPerPlayer(startTime, endTime) {
     if (container._sig !== sig) {
         container.innerHTML = '';
         container._cells = [];
-        for (let ti = 0; ti < 2; ti++) {
+        for (let ti = 0; ti < grouped.length; ti++) {
             grouped[ti].forEach((name, idx) => {
                 const cid = `fd-pp-${ti}-${idx}`;
                 const cell = document.createElement('div');
@@ -4375,7 +5423,7 @@ function renderFragsPerPlayer(startTime, endTime) {
         const cv = document.getElementById(cid);
         if (cv) cv.style.width = '';
         // Per-player max (symmetric about 0): each row uses its full height.
-        renderMiniDiverging(cid, { startTime, endTime, points: d.points, maxValue: d.max, height: 44 });
+        renderMiniDiverging(cid, { startTime, endTime, points: d.points, maxValue: d.max, height: ppMiniHeight() });
     }
     updateFragsPerPlayerStats();
     renderSharedTimeAxis(container, startTime, endTime);
@@ -4441,7 +5489,7 @@ function renderWeaponsPerPlayer(startTime, endTime) {
     const grouped = timelinePlayersByTeam();
     const rows = [];
     const rowPlayers = [];
-    for (let ti = 0; ti < 2; ti++) {
+    for (let ti = 0; ti < grouped.length; ti++) {
         for (const name of grouped[ti]) {
             rows.push({
                 name,
@@ -4466,7 +5514,7 @@ function renderWeaponsPerPlayer(startTime, endTime) {
     }
 
     renderSpansTimeline('weapons-per-player-canvas', 'weapons-per-player-labels', {
-        startTime, endTime, rows,
+        startTime, endTime, rows, rowH: ppSpanRowHeight(),
         stateColors: { rl: GRAPH_COLORS.RL, lg: GRAPH_COLORS.LG, rllg: GRAPH_COLORS.RLLG },
         dropMarks,
     });
@@ -5155,6 +6203,12 @@ function buildFullChat() {
     // match window.
     const events = (timelineState.events || []).filter(e => e.time >= 0 && e.time <= duration);
 
+    // Individual field: one chat column for everybody. Column A is that
+    // column (the B one is hidden by CSS and stays empty), and its rows get a
+    // speaker name — with two sides the column heading said who was talking,
+    // with eight players nothing else does.
+    const single = individualFieldActive();
+
     const killEvents = [];
     const teamAEvents = [];
     const teamBEvents = [];
@@ -5163,16 +6217,19 @@ function buildFullChat() {
         if (event.type === 'frag') {
             killEvents.push(event);
         } else if (event.type === 'teamsay' || event.type === 'chat') {
-            // "Hide team chat" is a display filter over the two say columns
-            // only; frags and public say keep their rows.
+            // "Hide team chat" is a display filter over the say columns only;
+            // frags and public say keep their rows. It filters on message TYPE,
+            // not on side, so it keeps its meaning in an individual field: an
+            // FFA's say_team still goes only to same-tag players.
             if (chatHideTeam && event.type === 'teamsay') continue;
-            if (event.team === teams[0]) teamAEvents.push(event);
+            if (single) teamAEvents.push(event);
+            else if (event.team === teams[0]) teamAEvents.push(event);
             else if (event.team === teams[1]) teamBEvents.push(event);
         }
     }
 
     renderChatColumnFull(killContainer, killEvents);
-    renderChatColumnFull(teamAContainer, teamAEvents);
+    renderChatColumnFull(teamAContainer, teamAEvents, single);
     renderChatColumnFull(teamBContainer, teamBEvents);
 
     if (axisContainer) {
@@ -5251,10 +6308,25 @@ function renderChatTimeAxisFull(container) {
     container.appendChild(inner);
 }
 
-function renderChatColumnFull(container, events) {
+// Speaker colour for the single chat column. CLAUDE.md's team-colour rule:
+// TEAM_COLORS indexed by position in timelineState.teams, which in an
+// individual layout is one entry per player — so a name here is the same
+// colour it carries on the scoreboard, the map and the timeline.
+function chatSpeakerColor(name) {
+    const idx = timelineState.teams.indexOf(name);
+    return (idx >= 0 && idx < TEAM_COLORS.length) ? TEAM_COLORS[idx] : '#ccc';
+}
+
+function renderChatColumnFull(container, events, withSpeaker = false) {
     const inner = document.createElement('div');
     inner.style.position = 'relative';
     inner.style.height = `${chatContentHeight}px`;
+    // Attached before the rows go in so each row's rendered height is
+    // measurable: `.chat-time-marker-msg` wraps (white-space: normal), and a
+    // wrapped row is taller than CHAT_ITEM_HEIGHT — stacking the next event
+    // at the constant would draw it over the second line. The constant stays
+    // the floor, and is all there is when the tab is not laid out (offsetHeight 0).
+    container.appendChild(inner);
 
     let lastBottom = -Infinity;
 
@@ -5272,18 +6344,23 @@ function renderChatColumnFull(container, events) {
         marker.style.top = `${topPx}px`;
 
         const prefix = displaced ? '<span class="chat-displaced-dots">...</span>' : '';
-        marker.innerHTML = `${prefix}<span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
+        const speaker = withSpeaker && event.player
+            ? `<span class="chat-speaker" style="color: ${chatSpeakerColor(event.player)}">${escapeHtml(event.player)}</span>`
+            : '';
+        marker.innerHTML = `${prefix}${speaker}<span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
 
         inner.appendChild(marker);
-        lastBottom = topPx + CHAT_ITEM_HEIGHT;
+        lastBottom = topPx + Math.max(CHAT_ITEM_HEIGHT, marker.offsetHeight || 0);
     }
-
-    container.appendChild(inner);
 }
 
 function updateDetailGraph(startTime, endTime) {
     const teams = timelineState.teams;
     if (teams.length < 2) return;
+    // Individual layout: the A↑/B↓ graph is hidden and the per-player view is
+    // a panel of its own, so render that and skip the series prep for a
+    // display:none canvas — this runs on every pan/zoom frame.
+    if (individualFieldActive()) { renderWeaponsPerPlayer(startTime, endTime); return; }
     const { points, max } = prepWeaponsData(startTime, endTime, teams);
     const dropMarks = computeBackpackDrops(startTime, endTime, teams);
     const legendA = document.getElementById('legend-weapons-team-a');
@@ -5393,6 +6470,7 @@ ${locLine}<div>Time: ${formatDuration(d.time)}</div>`;
 function updateHealthArmorGraph(startTime, endTime) {
     const teams = timelineState.teams;
     if (teams.length < 2) return;
+    if (individualFieldActive()) { renderHealthArmorPerPlayer(startTime, endTime); return; }
     const { points, max } = prepHealthArmorData(startTime, endTime, teams);
     const legendA = document.getElementById('legend-health-team-a');
     const legendB = document.getElementById('legend-health-team-b');
@@ -5411,6 +6489,7 @@ function updateHealthArmorGraph(startTime, endTime) {
 function updateScoreTimeline(startTime, endTime) {
     const teams = timelineState.teams;
     if (teams.length < 2) return;
+    if (individualFieldActive()) { renderFragsPerPlayer(startTime, endTime); return; }
     const { points, max } = prepScoreData(startTime, endTime, teams);
     const legendA = document.getElementById('legend-score-team-a');
     const legendB = document.getElementById('legend-score-team-b');
@@ -5485,14 +6564,18 @@ function prepRegionControlData(startTime, endTime, teams) {
 // dropMarks (optional): [{row, time, color}] — small dots painted in a
 // row, e.g. weapon-drop events on the per-player weapons timeline. Callers
 // that don't pass it (powerups, region control) render unchanged.
-function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, stateColors, dropMarks }) {
+function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, stateColors, dropMarks, rowH }) {
     const labelsEl = document.getElementById(labelsId);
     if (!labelsEl) return;
-    const setup = setupGraphCanvas(canvasId, rows.length * RC_ROW_H + RC_AXIS_H);
+    // rowH lets a caller stretch the rows (the per-player weapons view does in
+    // the individual layout); the region-control and powerup rows take RC_ROW_H,
+    // which their hover hit-tests assume.
+    const ROW_H_CSS = rowH || RC_ROW_H;
+    const setup = setupGraphCanvas(canvasId, rows.length * ROW_H_CSS + RC_AXIS_H);
     if (!setup) return;
     const { ctx, Wcss, W, dpr } = setup;
 
-    const ROW_H = Math.round(RC_ROW_H * dpr);
+    const ROW_H = Math.round(ROW_H_CSS * dpr);
     const ROW_PAD = Math.max(1, Math.round(dpr));
 
     // Label column, one DOM element per row, sized to match the canvas
@@ -5501,8 +6584,8 @@ function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, sta
     for (const r of rows) {
         const lab = document.createElement('div');
         lab.className = 'region-timeline-label';
-        lab.style.height = RC_ROW_H + 'px';
-        lab.style.lineHeight = RC_ROW_H + 'px';
+        lab.style.height = ROW_H_CSS + 'px';
+        lab.style.lineHeight = ROW_H_CSS + 'px';
         if (r.color) lab.style.color = r.color;
         lab.textContent = r.name;
         lab.title = r.name;
@@ -5610,6 +6693,11 @@ function updatePowerupTimeline(startTime, endTime) {
     if (!panel) return;
     const teams = timelineState.teams;
     if (teams.length < 2) { panel.style.display = 'none'; return; }
+    // The rows are per powerup TYPE coloured by which of two TEAMS holds it,
+    // so an individual layout with more than two players paints the top two
+    // and greys every other run as 'other'. Hidden rather than recoloured —
+    // same call initRegionControl makes for the same reason.
+    if (individualFieldActive()) { panel.style.display = 'none'; return; }
 
     const data = prepPowerupRowsData(startTime, endTime, teams);
     if (!data) { panel.style.display = 'none'; return; }
@@ -5760,6 +6848,14 @@ function updateTeamStatus() {
     const containerA = document.getElementById('team-status-a');
     const containerB = document.getElementById('team-status-b');
     if (!containerA || !containerB) return;
+
+    // Individual layout: the two-sided status panel is hidden, so don't
+    // rebuild its rows on every playhead tick.
+    if (individualFieldActive()) {
+        containerA.innerHTML = '';
+        containerB.innerHTML = '';
+        return;
+    }
 
     const teams = timelineState.teams;
     const view = timelineState.bucketView;
@@ -6241,7 +7337,15 @@ function initRegionControl(result) {
     const rc = result.timelineAnalysis?.regionControl;
     const panel = document.getElementById('region-control-panel');
     const statusPanel = document.getElementById('region-status-panel');
-    if (!rc || !rc.regions || rc.regions.length === 0) {
+    // Region control is a two-SIDES display: the map tint, the legend and the
+    // stats table are all "team A vs team B" (view/region_control.go builds
+    // buckets only for exactly two labels). An individual layout with more
+    // than two players has no such pair — the Go side ships `regions` for it
+    // all the same, because the region GEOMETRY is a property of the map, and
+    // the editor rendered from it had an Apply button whose only effect was a
+    // console warning. A two-participant match (a duel, a 1v1 FFA) does have
+    // two sides and keeps the panels.
+    if (!rc || !rc.regions || rc.regions.length === 0 || isMultiPlayerIndividual(result)) {
         if (panel) panel.style.display = 'none';
         if (statusPanel) statusPanel.style.display = 'none';
         mapState.controlRegions = null;
@@ -8781,9 +9885,16 @@ function renderLocHeatmap() {
     const noData = document.getElementById('locheatmap-no-data');
     if (!data) {
         // Clear any stale table from a previous metric so the empty-state
-        // isn't shown alongside an outdated grid.
-        setHTML('locheatmap-thead-row', '');
-        setHTML('locheatmap-body', '');
+        // isn't shown alongside an outdated grid. (setHTML is a local of
+        // resetUIToCleanState and was never in scope here — reaching this
+        // branch threw a ReferenceError out of displayResults, which then
+        // skipped the Aim tab, applyUrlState and hideLoadingOverlay. Any
+        // demo with no loc-heatmap data hits it, a match-less recording
+        // always does.)
+        for (const id of ['locheatmap-thead-row', 'locheatmap-body']) {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = '';
+        }
         const hasGraph = !!(locGraphState.graph && locGraphState.graph.locs && locGraphState.graph.locs.length);
         panel.style.display = hasGraph ? '' : 'none';
         if (noData) noData.style.display = hasGraph ? 'block' : 'none';
@@ -8891,6 +10002,9 @@ let aimVictimFilter = 'all';
 function initAimStatsView(result) {
     aimPlayer = null;
     aimVictimFilter = 'all';
+    // Unconditional: the setter hides the banner on a demo with a wire damage
+    // log, so a reconstructed demo's note cannot survive into the next load.
+    setPanelProvenance('aim-provenance', damageProvenanceHtml(result));
     buildAimChips(result);
     buildAimVictimToggle(result);
     renderAimWeaponTables(result);
@@ -8934,16 +10048,21 @@ function buildAimChips(result) {
 }
 
 // buildAimVictimToggle wires the Enemy/Team/Self/All filter buttons (static
-// in the HTML) and hides the Team option in duels — there are no teammates,
-// while Enemy vs All still differ via RL/GL self-splash.
+// in the HTML) and hides the Team option wherever nobody has a team-mate —
+// every duel and every FFA. Enemy vs All still differ there via RL/GL
+// self-splash, so the rest of the toggle stays.
+//
+// The verdict comes from the mode descriptor (hasTeammates), not from the aim
+// rows' own `mode` field: that field says "team" on an FFA — it names the
+// enemy-set rule the aim join applied, not the ruleset — so keying on it put
+// a filter that can never match anything on every FFA aim tab.
 function buildAimVictimToggle(result) {
     const box = document.getElementById('aim-victim-toggle');
     if (!box) return;
-    const players = (result && result.aim && result.aim.players) || [];
-    const duel = players.length > 0 && players.every(p => p.mode === 'duel');
+    const teamless = !hasTeammates(result);
     const teamBtn = box.querySelector('.aim-chip[data-kind="team"]');
-    if (teamBtn) teamBtn.style.display = duel ? 'none' : '';
-    if (duel && aimVictimFilter === 'team') aimVictimFilter = 'all';
+    if (teamBtn) teamBtn.style.display = teamless ? 'none' : '';
+    if (teamless && aimVictimFilter === 'team') aimVictimFilter = 'all';
     if (!box._aimWired) {
         box.querySelectorAll('.aim-chip').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -8995,14 +10114,44 @@ function renderAimMode(pa) {
 // Player column is prepended automatically (with the team-coloured stripe).
 // Every count column has a share-of-fires % twin: counts depend on how much a
 // player fired, so the percentages are what compare across players. hit% keeps
-// the accuracy colour classes; the miss-type shares stay plain (high ≠ good
-// is weapon-dependent).
+// the accuracy colour classes; the miss-type shares stay plain, since whether
+// a high share is good depends on the weapon.
 const pctCell = p => `<span class="${getAccuracyClass(p)}">${p.toFixed(1)}%</span>`;
 const pctPlain = p => `${p.toFixed(1)}%`;
 const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
+
+// The RL/GL direct/splash pair is withheld PER ROW, not per demo — the one
+// measured-only column that is, which is why it cannot ride aimCol's
+// whole-demo swap below. The analyzer publishes it as a nullable field
+// (result.WeaponAim: nil = the split never ran, 0 = it ran and counted none).
+// The reachable case is aimcore's `projLinked` gate (aimcore/aim.go): no rl or
+// gl fire anywhere in the demo linked to a projectile, so there is no evidence
+// to split. It is rare where this cell renders at all: the split columns are
+// measured-only, so of the 1 800 demos in the 3 123-demo reach audit that
+// fired rl/gl and linked no projectile, the 1 793 without a damage stream
+// never reach it (aimCol swaps those columns for AIM_MEASURED_ONLY_NOTE
+// first); the other 7 have hitsMeasured and still no linked rl/gl fire, and
+// they are what this note is for (probe P18). Rendering the null as 0 would
+// publish "no rocket or grenade ever touched anybody" as a measurement.
+const AIM_SPLIT_WITHHELD_NOTE = 'Not classified on this demo: no rocket or grenade fire ' +
+    'linked to a projectile, so there is nothing to split into direct hits and splash. ' +
+    'Not a zero — the fires were simply never classified.';
+function aimSplitCell(v, fmt) {
+    if (v === null || v === undefined) {
+        return `<span class="aim-na" title="${escapeHtml(AIM_SPLIT_WITHHELD_NOTE)}">—</span>`;
+    }
+    return fmt(v);
+}
+const aimSplitSort = v => (v === null || v === undefined) ? -1 : v;
+
 const AIM_COL = {
     shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
-    hits: { h: 'Hits', t: 'Fires that connected', cell: w => w.hits },
+    hits: {
+        h: 'Hits',
+        t: 'Fires that connected. Measured off the wire damage stream where the demo carries one; recovered from the reconstructed damage log (marked) where it does not; — where neither could answer',
+        cell: w => aimHitsCell(w, n => String(n)),
+        sort: w => { const v = aimHitsValue(w); return v ? v.n : -1; },
+    },
     // Joined in from playerStats.damage's three per-weapon maps, which
     // follow the Enemy/Team/Self victim toggle above (see aimDamageCell for
     // the measuredness rules). The cell carries a {n, lower, note} object,
@@ -9013,30 +10162,72 @@ const AIM_COL = {
         cell: w => aimDamageText(w.dmg),
         sort: w => (w.dmg && w.dmg.n !== null) ? w.dmg.n : -1,
     },
-    hitPct: { h: 'Hit %', t: 'Share of fires that connected', cell: w => pctCell(w.shots ? w.hits / w.shots * 100 : 0) },
-    fired: { h: 'Pellets Fired', t: 'Pellets fired (6 SG / 14 SSG per shot)', cell: w => w.pellets || 0 },
-    pHit: { h: 'Pellets Hit', t: 'Pellets that hit (matches the server)', cell: w => w.pelletHits || 0 },
-    pAcc: { h: 'Pellet %', t: 'Per-pellet accuracy', cell: w => pctCell(w.pellets ? (w.pelletHits || 0) / w.pellets * 100 : 0) },
-    full: { h: 'Full', t: 'Fires where every pellet hit', cell: w => w.full || 0 },
-    partial: { h: 'Partial', t: 'Fires where some but not all pellets hit', cell: w => w.partial || 0 },
-    miss: { h: 'Miss', t: 'Fires where no pellet hit', cell: w => w.miss || 0 },
-    fullPct: { h: 'Full %', t: 'Share of fires where every pellet hit', cell: w => shotShare(w.full, w) },
-    partialPct: { h: 'Partial %', t: 'Share of fires where some but not all pellets hit', cell: w => shotShare(w.partial, w) },
-    missPct: { h: 'Miss %', t: 'Share of fires where no pellet hit', cell: w => shotShare(w.miss, w) },
-    direct: { h: 'Direct', t: 'Direct contacts (matches the server)', cell: w => w.direct || 0 },
-    splash: { h: 'Splash', t: 'Hits from splash only', cell: w => w.splash || 0 },
-    missed: { h: 'Missed', t: 'Fires that hit nothing', cell: w => w.missed || 0 },
-    directPct: { h: 'Direct %', t: 'Share of fires that hit directly', cell: w => shotShare(w.direct, w) },
-    splashPct: { h: 'Splash %', t: 'Share of fires that hit via splash only', cell: w => shotShare(w.splash, w) },
-    missedPct: { h: 'Missed %', t: 'Share of fires that hit nothing', cell: w => shotShare(w.missed, w) },
-    blocked: { h: 'Blocked', t: 'Miss — the beam would have hit an enemy in range, but an object stopped it short', cell: w => w.blocked || 0 },
-    lgMiss: { h: 'Miss', t: 'Miss — aim error, no enemy on the beam\'s line', cell: w => w.miss || 0 },
-    far: { h: 'Far', t: 'Miss — the enemy was on the beam\'s line but beyond its ~600u reach', cell: w => w.outOfRange || 0 },
-    unres: { h: 'Unresolved', t: 'Miss that could not be classified — no beam matched this fire (needs the beam stream / shooter position at fire time)', cell: w => w.unresolved || 0 },
-    blockedPct: { h: 'Blocked %', t: 'Share of fires denied by an object in the way', cell: w => shotShare(w.blocked, w) },
-    lgMissPct: { h: 'Miss %', t: 'Share of fires missed on aim', cell: w => shotShare(w.miss, w) },
-    farPct: { h: 'Far %', t: 'Share of fires denied by beam range', cell: w => shotShare(w.outOfRange, w) },
+    hitPct: {
+        h: 'Hit %',
+        t: 'Share of fires that connected, over the same hit count as the Hits column beside it — measured, reconstructed (marked) or —',
+        cell: w => aimHitsCell(w, n => pctCell(w.shots ? n / w.shots * 100 : 0)),
+        sort: w => { const v = aimHitsValue(w); return (v && w.shots) ? v.n / w.shots : -1; },
+    },
+    // `measured: true` marks a column that exists only where the wire damage
+    // log linked fires to damage. The analyzer WITHHOLDS those fields on a
+    // demo without one (see the shapes above: a reconstructed weapon carries
+    // shots + recon and nothing else), so their `|| 0` fallbacks would print
+    // a fabricated zero — and beside a recovered Hit % of 22% a "0.0% miss"
+    // reads as a measurement that contradicts it. aimCol swaps them for "—".
+    fired: { h: 'Pellets Fired', t: 'Pellets fired (6 SG / 14 SSG per shot)', measured: true, cell: w => w.pellets || 0 },
+    pHit: { h: 'Pellets Hit', t: 'Pellets that hit (matches the server)', measured: true, cell: w => w.pelletHits || 0 },
+    pAcc: { h: 'Pellet %', t: 'Per-pellet accuracy', measured: true, cell: w => pctCell(w.pellets ? (w.pelletHits || 0) / w.pellets * 100 : 0) },
+    full: { h: 'Full', t: 'Fires where every pellet hit', measured: true, cell: w => w.full || 0 },
+    partial: { h: 'Partial', t: 'Fires where some but not all pellets hit', measured: true, cell: w => w.partial || 0 },
+    miss: { h: 'Miss', t: 'Fires where no pellet hit', measured: true, cell: w => w.miss || 0 },
+    fullPct: { h: 'Full %', t: 'Share of fires where every pellet hit', measured: true, cell: w => shotShare(w.full, w) },
+    partialPct: { h: 'Partial %', t: 'Share of fires where some but not all pellets hit', measured: true, cell: w => shotShare(w.partial, w) },
+    missPct: { h: 'Miss %', t: 'Share of fires where no pellet hit', measured: true, cell: w => shotShare(w.miss, w) },
+    direct: {
+        h: 'Direct',
+        t: 'Projectiles that TOUCHED a player — KTX\'s own RL/GL hits counter. RL is the server\'s own flag; GL is re-derived from the grenade\'s flight and its 2.5s fuse, since a grenade that touches explodes and every row of its damage is flagged splash (92% of archive player rows exact against the KTX block). A GL Direct can exceed its Hits: a touch whose fire the linker missed is still a touch',
+        measured: true, cell: w => aimSplitCell(w.direct, n => String(n)), sort: w => aimSplitSort(w.direct),
+    },
+    splash: {
+        h: 'Splash', t: 'Hits from splash only',
+        measured: true, cell: w => aimSplitCell(w.splash, n => String(n)), sort: w => aimSplitSort(w.splash),
+    },
+    missed: { h: 'Missed', t: 'Fires that hit nothing', measured: true, cell: w => w.missed || 0 },
+    directPct: {
+        h: 'Direct %', t: 'Share of fires that hit directly',
+        measured: true, cell: w => aimSplitCell(w.direct, n => shotShare(n, w)), sort: w => aimSplitSort(w.direct),
+    },
+    splashPct: {
+        h: 'Splash %', t: 'Share of fires that hit via splash only',
+        measured: true, cell: w => aimSplitCell(w.splash, n => shotShare(n, w)), sort: w => aimSplitSort(w.splash),
+    },
+    missedPct: { h: 'Missed %', t: 'Share of fires that hit nothing', measured: true, cell: w => shotShare(w.missed, w) },
+    blocked: { h: 'Blocked', t: 'Miss — the beam would have hit an enemy in range, but an object stopped it short', measured: true, cell: w => w.blocked || 0 },
+    lgMiss: { h: 'Miss', t: 'Miss — aim error, no enemy on the beam\'s line', measured: true, cell: w => w.miss || 0 },
+    far: { h: 'Far', t: 'Miss — the enemy was on the beam\'s line but beyond its ~600u reach', measured: true, cell: w => w.outOfRange || 0 },
+    unres: { h: 'Unresolved', t: 'Miss that could not be classified — no beam matched this fire (needs the beam stream / shooter position at fire time)', measured: true, cell: w => w.unresolved || 0 },
+    blockedPct: { h: 'Blocked %', t: 'Share of fires denied by an object in the way', measured: true, cell: w => shotShare(w.blocked, w) },
+    lgMissPct: { h: 'Miss %', t: 'Share of fires missed on aim', measured: true, cell: w => shotShare(w.miss, w) },
+    farPct: { h: 'Far %', t: 'Share of fires denied by beam range', measured: true, cell: w => shotShare(w.outOfRange, w) },
 };
+
+// What a withheld measured-only column says when hovered. The hit COUNT may
+// still be recoverable (that is what the Hits column does); the breakdown of
+// how a fire hit or missed is not — nothing in the reconstruction classifies
+// a pellet spread or an LG whiff.
+const AIM_MEASURED_ONLY_NOTE = 'Not measured on this demo: it carries no wire damage log, ' +
+    'and the reconstruction recovers hit COUNTS only — never the pellet, direct/splash or miss-type breakdown.';
+
+// aimCol resolves one column descriptor against the demo's hit measuredness,
+// so the cell functions themselves stay demo-agnostic.
+function aimCol(c, hitsMeasured) {
+    if (hitsMeasured || !c.measured) return c;
+    return {
+        ...c,
+        cell: () => `<span class="aim-na" title="${escapeHtml(AIM_MEASURED_ONLY_NOTE)}">—</span>`,
+        sort: () => -1,
+    };
+}
 // Per-weapon column order: counts first, then the share-of-fires block.
 // SG/SSG lead with the pellet stats.
 const AIM_TABLE_COLS = {
@@ -9051,6 +10242,10 @@ const AIM_TABLE_COLS = {
     // no direct/splash/pellet split, which nails don't carry.
     ng: ['shots', 'hits', 'dmg', 'hitPct'],
     sng: ['shots', 'hits', 'dmg', 'hitPct'],
+    // The axe carries the same four: one swing sound per attack (schema v71),
+    // linked to damage at the traceline's real +200 ms delay, and no spread,
+    // splash or beam to classify a miss by.
+    axe: ['shots', 'hits', 'dmg', 'hitPct'],
 };
 // Two-row header: [label, span] pairs in column order, spans summing to the
 // weapon's AIM_TABLE_COLS length. Not a counts-vs-% split — sg/ssg interleave
@@ -9064,7 +10259,12 @@ const AIM_TABLE_GROUPS = {
     rl: [['Shots', 6], ['%', 4]],
     gl: [['Shots', 6], ['%', 4]],
 };
-const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl', 'ng', 'sng'];
+// Weapon tables, in the order they appear. The axe is last because it is the
+// least of them, not because it is optional: the shot stream has carried axe
+// swings since schema v71 and the recon tier recovers its hits, and its
+// absence from this list was silently dropping every one of them — 107 swings
+// on one player in the committed corpus, with no table anywhere to show them.
+const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl', 'ng', 'sng', 'axe'];
 
 // aimWeaponView projects a WeaponAim onto the active victim filter so the
 // AIM_COL cell functions stay bucket-agnostic. The analyzer emits the enemy
@@ -9078,18 +10278,88 @@ const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl', 'ng', 'sng'];
 // the pellet projection below).
 function aimWeaponView(w) {
     if (!w || aimVictimFilter === 'all') return w;
-    if (aimVictimFilter === 'enemy' && !w.enemy) return w;
+    // "No enemy split" means enemy == all for the MEASURED counters, which is
+    // why they ride through untouched — but it says nothing about the recon
+    // tier, which never carries a split at all (so on a reconstructed demo
+    // this branch is the one every weapon takes). Dropping `recon` here is
+    // what stops a whole-match count — team and self hits included — from
+    // being served under the Enemy heading; the Hits cell then says so.
+    if (aimVictimFilter === 'enemy' && !w.enemy) return { ...w, recon: null };
     const s = (aimVictimFilter === 'enemy' ? w.enemy
         : aimVictimFilter === 'team' ? w.team : w.self) || {};
-    const hits = s.hits || 0, direct = s.direct || 0;
+    // The bucket's direct carries the same nil-is-not-zero rule as the
+    // top-level one, and the derived splash rides on it: with no classified
+    // direct there is no "hits that were splash-only" either, so both stay
+    // null and both cells say withheld. An ABSENT bucket is not the same
+    // absence — it means that victim class never connected, i.e. zeros — so
+    // it reads 0 wherever the weapon's split ran at all, and only inherits
+    // the withhold when it did not.
+    const hits = s.hits || 0;
+    const classified = w.direct !== null && w.direct !== undefined;
+    const direct = ('direct' in s) ? s.direct : (classified ? 0 : null);
     return {
-        ...w, hits, direct,
+        // The recon tier is a single whole-match hit count with no victim
+        // splits (RESULT_SCHEMA, WeaponAimRecon), so it cannot ride a
+        // projection — dropping it here is what makes the Hits cell say
+        // "no victim split" instead of serving an all-victims number under
+        // an Enemy/Team/Self heading.
+        ...w, hits, direct, recon: null,
         pelletHits: s.pelletHits || 0,
         full: s.full || 0, partial: s.partial || 0,
         miss: w.weapon === 'lg' ? (w.miss || 0) : (s.miss || 0),
-        splash: Math.max(0, hits - direct),
+        splash: direct === null ? null : Math.max(0, hits - direct),
         missed: (w.shots || 0) - hits,
     };
+}
+
+// The Hits / Hit % pair serves three states, and the third is the v73/v74
+// recon tier. `hits` is the MEASURED counter, withheld (never zeroed) on a
+// demo with no wire damage log; `recon.hits` is the reconstruction's
+// recovered count over that same fire set — same definition, same question,
+// so it divides by the same `shots`. A block's ABSENCE means the weapon was
+// not recovered (ng/sng never are), while `hits: 0` inside a present block is
+// a real "linked nothing" and prints as 0.
+//
+// Deliberately NOT `recon.directHits`, the v74 companion for rl/gl. That one
+// answers KTX's question — projectiles that touched a player — and is what
+// the Summary's Acc column publishes on a reconstructed demo, which is why an
+// RL figure here reads higher than the one there. This tab is the aim tier
+// and stands in for the MEASURED counter beside it, which is an any-path
+// count; swapping the definition under it would make the two states of this
+// same cell incomparable.
+//
+// Returns {n, recon} or null for "no answer on this demo".
+function aimHitsValue(w) {
+    if (w.hitsMeasured !== false) return { n: w.hits || 0, recon: false };
+    if (w.recon) return { n: w.recon.hits, recon: true };
+    return null;
+}
+
+// Why a cell has no number, in the reader's terms. Both branches are
+// reachable on a reconstructed demo: the tier covers lg/sg/ssg/axe/rl/gl and
+// stops there, and it carries no victim split for the toggle above to slice.
+function aimHitsNote(w) {
+    if (!w.reconTier) {
+        return 'This demo carries no damage log to measure hits against, and none could be reconstructed from it.';
+    }
+    return aimVictimFilter === 'all'
+        ? 'Hits were not recovered for this weapon — the reconstruction covers LG, SG, SSG, axe, RL and GL only.'
+        : 'The reconstructed hit count is a whole-match figure with no victim split — set Victims to All to see it.';
+}
+
+// aimHitsCell renders one hit-derived cell. `fmt` turns the count into the
+// column's own text (a bare number, or a coloured percentage), so both
+// columns share one measured/reconstructed/absent decision.
+function aimHitsCell(w, fmt) {
+    const v = aimHitsValue(w);
+    if (!v) return `<span class="aim-na" title="${escapeHtml(aimHitsNote(w))}">—</span>`;
+    if (!v.recon) return fmt(v.n);
+    const notes = [RECON_ACCURACY_NOTE];
+    // rl/gl are the two weapons whose recovered count has a published rival on
+    // the Summary tab (recon.directHits, the KTX convention); everywhere else
+    // the two conventions coincide and the sentence would invent a difference.
+    if (w.weapon === 'rl' || w.weapon === 'gl') notes.push(RECON_ANYDAMAGE_NOTE);
+    return `<span class="stat-recon" title="${escapeHtml(notes.join(' · '))}">${fmt(v.n)}</span>`;
 }
 
 // aimDamageCell resolves the Dmg cell for one player + weapon under the
@@ -9149,6 +10419,12 @@ function renderAimWeaponTables(result) {
     container.innerHTML = '';
     const players = (result && result.aim && result.aim.players) || [];
     if (!players.length) return;
+    // hitsMeasured=false: the demo carried no wire damage stream, so the
+    // measured hit counters are withheld server-side. hitsSource then says
+    // whether the reconstruction could recover them anyway (schema v73/v74) —
+    // the per-weapon `recon` blocks the Hits / Hit % cells fall back to.
+    const hitsMeasured = result.aim.hitsMeasured !== false;
+    const reconTier = result.aim.hitsSource === 'reconstructed';
     const teamOrder = getTeamOrder([]); // canonical frag-sorted order (= Summary)
     // result.aim carries no damage, so the Dmg column is joined by player
     // name from playerStats — the same source (and the same weapon keys) the
@@ -9159,12 +10435,12 @@ function renderAimWeaponTables(result) {
 
     for (const wn of AIM_WEAPON_ORDER) {
         const colKeys = AIM_TABLE_COLS[wn] || [];
-        const cols = colKeys.map(k => AIM_COL[k]);
+        const cols = colKeys.map(k => aimCol(AIM_COL[k], hitsMeasured));
         const rows = players.map(pa => {
             const w = aimWeaponView((pa.weapons || []).find(x => x.weapon === wn) || null);
             return {
                 player: pa.player, team: pa.team,
-                w: w ? { ...w, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn) } : null,
+                w: w ? { ...w, hitsMeasured, reconTier, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn) } : null,
             };
         });
         if (!rows.some(r => r.w)) continue; // weapon nobody fired → no table
@@ -9312,7 +10588,7 @@ function drawAimDensity(canvas, c, idx) {
         const hxi = aimClampIndex(Math.floor((x + AIM_X_HALF) / AIM_HOVER_BIN), hx);
         const hyi = aimClampIndex(Math.floor((AIM_Y_HALF - y) / AIM_HOVER_BIN), hy);
         hShots[hyi * hx + hxi]++;
-        if (c.hit[i]) hHits[hyi * hx + hxi]++;
+        if (c.hit && c.hit[i]) hHits[hyi * hx + hxi]++;
     }
 
     // Separable gaussian blur, kernel normalized to sum 1 so values keep the
@@ -9435,7 +10711,7 @@ function drawAimDensity(canvas, c, idx) {
     ctx.fillText('0', bx + CB + 4, MT + PH - 3);
 
     // Hover read-out: shot/hit counts in the coarse bin under the cursor.
-    canvas._aimHover = { hShots, hHits, hx, hy, ML, MT, PW, PH, W, H };
+    canvas._aimHover = { hShots, hHits, hx, hy, ML, MT, PW, PH, W, H, hitsKnown: !!c.hit };
     if (!canvas._aimWired) {
         canvas.addEventListener('mousemove', e => {
             const d = canvas._aimHover;
@@ -9459,7 +10735,8 @@ function drawAimDensity(canvas, c, idx) {
             const yhi = AIM_Y_HALF - yi * AIM_HOVER_BIN;
             const range = `x ${fmt(xlo)}…${fmt(xlo + AIM_HOVER_BIN)} qu, y ${fmt(yhi - AIM_HOVER_BIN)}…${fmt(yhi)} qu`;
             canvas.title = s
-                ? `${range}: ${s} shot${s === 1 ? '' : 's'}, ${h} hit (${Math.round(h / s * 100)}%)`
+                ? `${range}: ${s} shot${s === 1 ? '' : 's'}` +
+                    (d.hitsKnown ? `, ${h} hit (${Math.round(h / s * 100)}%)` : '')
                 : `${range}: no shots`;
         });
         canvas._aimWired = true;
@@ -9484,7 +10761,9 @@ function renderAimHistRow(prefix, c, idx, ramp) {
         AIM_X_HALF, AIM_HIST_BIN, i => aimOffX(c, i), c, idx, AIM_HULL_HALF_W));
     row.appendChild(buildAimHist('Pitch', 'enemy below ← → above', 'qu',
         AIM_Y_HALF, AIM_HIST_BIN, i => aimOffY(c, i), c, idx, AIM_HULL_HALF_H));
-    if (ramp && ramp.since && ramp.since.length) row.appendChild(buildAimRampHist(ramp));
+    // The ramp panel is hit-% by construction — without a measured hit
+    // column (aim.hitsMeasured false) it would read a fabricated flat 0%.
+    if (ramp && ramp.since && ramp.since.length && ramp.hit) row.appendChild(buildAimRampHist(ramp));
 }
 
 function buildAimHist(name, dirNote, unit, half, w, val, c, idx, bandHalf) {
@@ -9499,7 +10778,7 @@ function buildAimHist(name, dirNote, unit, half, w, val, c, idx, bandHalf) {
     for (const i of idx) {
         const b = bins[binOf(val(i))];
         b.shots++;
-        if (c.hit[i]) b.hits++;
+        if (c.hit && c.hit[i]) b.hits++;
         if (b.shots > max) max = b.shots;
     }
 
@@ -9530,7 +10809,7 @@ function buildAimHist(name, dirNote, unit, half, w, val, c, idx, bandHalf) {
         const lo = (bi - mid) * w - w / 2;
         col.title = `${lo.toFixed(0)} … ${(lo + w).toFixed(0)} ${unit}: ` +
             `${b.shots} shot${b.shots === 1 ? '' : 's'}` +
-            (b.shots ? `, ${b.hits} hit (${Math.round(b.hits / b.shots * 100)}%)` : '');
+            (b.shots && c.hit ? `, ${b.hits} hit (${Math.round(b.hits / b.shots * 100)}%)` : '');
         const fill = document.createElement('div');
         fill.className = 'aim-hist-fill';
         fill.style.height = `${max ? (b.shots / max) * 100 : 0}%`;

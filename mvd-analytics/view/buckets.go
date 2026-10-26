@@ -875,6 +875,8 @@ func streamI16(p *result.PlayerStream, field string) []result.ChangeI16 {
 		return p.Rockets
 	case FieldCells:
 		return p.Cells
+	case FieldActiveWeapon:
+		return p.ActiveWeapon
 	}
 	return nil
 }

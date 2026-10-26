@@ -106,7 +106,7 @@ func shiftAndFilterInts(stream []int32, matchStartMs int32) []int32 {
 // the survivors. Mutates pt in place. Every column that is sample-
 // aligned with T (X/Y/Z always, Li/H/Lq/VP/VYa/VX/VY/VZ when present)
 // must be trimmed by the same keepFrom — consumers (BuildLocGraph,
-// view.RegionControl, airgibsPost) guard on `len(col) == len(pt.T)` and
+// view.RegionControl, view.ComputeAirgibs) guard on `len(col) == len(pt.T)` and
 // will silently skip the player if the lengths drift. All time
 // arithmetic is int32 ms.
 //

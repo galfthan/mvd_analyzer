@@ -195,6 +195,8 @@ type (
 	DemoMarkerEvent        = result.DemoMarkerEvent
 	MetadataResult         = result.MetadataResult
 	MatchSettings          = result.MatchSettings
+	FinalScores            = result.FinalScores
+	MatchSources           = result.MatchSources
 	LocGraphResult         = result.LocGraphResult
 	LocNode                = result.LocNode
 	LocWeights             = result.LocWeights
@@ -222,6 +224,7 @@ type (
 	ShotsDelta             = result.ShotsDelta
 	ProjectileStreams      = result.ProjectileStreams
 	BeamStreams            = result.BeamStreams
+	PointEffectStreams     = result.PointEffectStreams
 	AimResult              = result.AimResult
 	PlayerAim              = result.PlayerAim
 	CrosshairSamples       = result.CrosshairSamples
@@ -233,6 +236,28 @@ type (
 	Bounds                 = result.Bounds
 	Streams                = result.Streams
 	GlobalStream           = result.GlobalStream
+	WallClockMarker        = result.WallClockMarker
+	NoMatchResult          = result.NoMatchResult
 	BackpackDrop           = result.BackpackDrop
 	WeaponPickup           = result.WeaponPickup
+)
+
+// NoMatchResult.Reason vocabulary, re-exported like the type aliases above.
+const (
+	NoMatchDemoUnreadable    = result.NoMatchDemoUnreadable
+	NoMatchMidMatchRecording = result.NoMatchMidMatchRecording
+	NoMatchStartUnannounced  = result.NoMatchStartUnannounced
+	NoMatchNoMatchDeclared   = result.NoMatchNoMatchDeclared
+	NoMatchNoPlayRecorded    = result.NoMatchNoPlayRecorded
+)
+
+// MatchResult.Sources provenance values, re-exported for the same reason as
+// the type aliases above — match.go's Finalize takes a parameter named
+// `result`, so the qualified form is not spellable there.
+const (
+	MatchSrcKTX         = result.MatchSrcKTX
+	MatchSrcServerInfo  = result.MatchSrcServerInfo
+	MatchSrcFinalScores = result.MatchSrcFinalScores
+	MatchSrcLevelTitle  = result.MatchSrcLevelTitle
+	MatchSrcDerived     = result.MatchSrcDerived
 )

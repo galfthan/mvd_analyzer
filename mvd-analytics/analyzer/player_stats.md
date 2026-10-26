@@ -2,12 +2,17 @@
 
 **Phase:** Post-processor (non-event)
 **Inputs (artifacts):** `clock`, `identity`, `roster`, `timeline` (for
-            `Streams`), `match:final`, `frags:final`, `damage`, `shots`,
-            `items`, `weapon-pickups`, `backpacks`, `metadata`
+            `Streams`), `match:final`, `frags:final`, `damage:final`,
+            `shots`, `items`, `weapon-pickups`, `backpacks:final`,
+            `metadata`, `aim`
             — `identity` supplies the `*auth` login, `shots` the fire
-            stream the derived accuracy is reconstructed from
+            stream the derived accuracy is reconstructed from, and `aim`
+            both hit tiers: the reconstructed one that fills
+            `accuracy.hits` on demos with no wire damage stream, and
+            (v75) the measured pellet / direct-impact counters the
+            wire-linked branch publishes on the demos that have one
 **Writes to Result:** `result.PlayerStats` (`*PlayerStatsResult`),
-            schema v62
+            schema v75
 
 ## What it does
 
@@ -61,7 +66,8 @@ golden corpus always say what this pipeline actually computed.
    into per-type intervals (`armorRuns`); `armor.none` is the
    alive-time complement.
 3. **Score / damage.** Read from `match:final` (frag-log-corrected
-   kills/deaths/suicides), `frags:final` (team-kills) and the damage
+   kills/deaths/suicides), `frags:final` (team-kills, and the kill
+   stream `spree.go` replays into `maxSpree` / `maxQuadSpree`) and the damage
    reconstruction's **bounded** family — bounded is KTX-scoreboard
    semantics, which is what the KTX overlay replaces it with.
    `takenEnemy` is re-summed from the per-hit log over enemy hits only
@@ -71,7 +77,11 @@ golden corpus always say what this pipeline actually computed.
    `takenToDie` is that divided by the corrected death count.
 4. **Accuracy / login.** Accuracy from the fire stream, login from the
    `*auth` userinfo key — both so a demo with no KTX block degrades to a
-   rougher number rather than to a missing field.
+   rougher number rather than to a missing field. On a demo whose damage
+   section is itself reconstructed, `hits` is lifted from the published
+   `aim` recon tier and the family says `src: "reconstructed"`; reading
+   the tier rather than re-running its join is what makes its
+   weapon-level withholds (`ng`/`sng`) inherit here by construction.
 5. **Pickups.** Non-weapon kinds from the item timeline; weapons from
    `weaponPickups` (a weapon can also arrive in a backpack, which the
    item timeline never sees); `dropped` from `backpacks`; transfers
@@ -141,11 +151,57 @@ taken by someone on the dropper's team, in teamplay only (`isTeam()`).
   first.
 - **Derived `accuracy` is only as good as the shot attribution.** With
   no KTX block the family is reconstructed from the decoded fire stream
-  (`src: "derived"`), which counts trigger pulls rather than KTX's
-  pellets and inherits `/shots`' own attribution limits — on gameId
-  71035 one player's 552 fires are all labelled `sg`. `hits` is omitted
-  entirely when the demo has no damage stream to link fires against,
-  since a zero there would read as "shot and never hit".
+  (`src: "derived"`), which inherits `/shots`' own attribution limits —
+  on gameId 71035 one player's 552 fires are all labelled `sg`. `hits`
+  is omitted entirely when nothing could count it — no wire damage
+  stream AND no recovery from the aim recon tier for that weapon, or
+  (v75) a nailgun row on a parse without `-include nails`, the only way
+  a nail fire links to its damage — since a zero there would read as
+  "shot and never hit".
+- **Both tiers now answer KTX's question on every weapon but one, and
+  that one is named.** Every weapon carrying `hits` also carries
+  `hitsConvention` (`anyDamage` | `directImpact` | `pellets`), per
+  weapon, because one `src: "ktx"` row uses all three at once (v74). v74
+  put the RECONSTRUCTED tier on KTX's rl/gl direct-impact convention;
+  v75 does the same for the WIRE-linked one by reading the aim section's
+  measured counters — `pellets`/`pelletHits` for sg/ssg, `direct` for
+  rl and gl — instead of recomputing them. Measured against the verbatim
+  block on 186 instrumented archive demos (`cmd/qw-demoinfo-eval`, the
+  `/measured` columns): sg/ssg `attacks` AND `hits` 100.0% row-exact at
+  0.00% aggregate on both weapons, `rl.hits` 99.8% / 0.02%, `gl.hits`
+  92.0% / 3.79%. The shotgun
+  `hits` are an estimate — a fire's same-frame damage sum over the 4 a
+  pellet does, or the 16 it does under the shooter's quad — and dividing
+  by the quad state at fire time is what closed their last residual.
+  `gl`'s is not a wire reading at all: KTX counts a grenade that
+  TOUCHED a player (`ktx/src/weapons.c:1331`) and the touch detonates it,
+  so every damage row the server writes is splash-flagged and the wire
+  holds no record of the touch — counting non-splash gl rows off the wire
+  reproduces 0.00% of the block's total. The touch is re-derived from the
+  grenade's tracked flight, its detonation point against the victim's
+  hull and the 2.5 s fuse, by the same classifier a reconstructed row
+  uses (`damagerecon/direct.go`, fed the wire rows by
+  `damagerecon.WireDirectTouches`) — which is why it is CONDITIONAL on
+  the spatial shot streams (`Registry.BuildShotStreams`): without them
+  the row falls back to the any-path count and says `anyDamage`. The
+  condition is read off the AIM ROW ITSELF — `WeaponAim.Direct` is an
+  `*int` and is nil exactly where the split did not run — not re-derived
+  from `Streams.ShotStreamsComputed`, so the two cannot disagree about
+  what was measured. `sg`/`ssg` keep `anyDamage` on a
+  RECONSTRUCTED row for the mirror reason to gl's wire problem: a
+  reconstructed delta merges every hit on one instant, so its magnitude
+  cannot be split into pellets (`result.WeaponAimRecon`). `ng`/`sng` are
+  on KTX's scale but the linker recovers only 68-77% of the nails that
+  connected. See `damagerecon/ACCURACY.md` §"The wire-linked accuracy
+  family vs the verbatim block".
+- **`maxSpree` inherits the kill side's residual.** The streak replay is
+  exact where the underlying kill attribution is (99.6% of rows whose
+  `kills` already agrees with KTX and whose player never suicided); 16 of
+  the 17 large disagreements in the eval sat on a row the frag log had
+  already credited 0 kills against KTX's 8-47, which is the observable
+  signature to read it by — `kills: 0` beside a large positive `frags`
+  means inherited-unknown, not a measured zero. Suicide rows read exactly
+  1 low by design — see RESULT_SCHEMA "The derived spree".
 - **`ping`, `handicap` and `bot` stay KTX-only.** `handicap` and `bot`
   are server-side state with no wire signal. `ping` IS on the wire
   (`svc_updateping`) but the parser skips it

@@ -10,9 +10,9 @@
 // data is produced on demand by view.Buckets, accessible via the
 // -view buckets flag below. Other views (events, stream-slice,
 // state-at, trails, region-control, top-kills, top-windows, lives,
-// items, items-summary, airgibs, frags, damage, aim, chat, backpacks,
-// weapon-pickups, player-stats, shots, loc-graph, loc-table, metadata,
-// demoinfo) are also available — the full mvd-api view surface.
+// items, items-summary, highlights, frags, damage, aim, chat,
+// backpacks, weapon-pickups, player-stats, shots, loc-graph, loc-table,
+// metadata, demoinfo) are also available — the full mvd-api view surface.
 //
 // -view player-stats is NOT -view full's playerStats: the view applies
 // the KTX overlay at read time (ping, speed, controlMs), where the
@@ -23,12 +23,20 @@
 // `hits` for those weapons without it — omitted, not zeroed — and a
 // stderr warning says so. mvd-api always builds them.
 //
+// gl accuracy needs -include projectiles for the same reason one step
+// further: KTX counts a grenade that TOUCHED a player and the wire log
+// records no such event, so the touch is re-derived from the grenade's
+// tracked flight. Without the spatial streams there is no flight, and
+// playerStats.accuracy.byWeapon.gl publishes the any-path count under
+// hitsConvention "anyDamage" instead of KTX's directImpact — honest, but a
+// different number from the same demo over REST. Warned about on stderr.
+//
 // The derived views (top-kills, top-windows, lives) take a -dmg damage
 // family whose default is the VIEW default, raw. mvd-api substitutes
 // bounded on the same queries, so an unset -dmg does not reproduce the
 // REST response; pass -dmg bounded for that.
 //
-// On those views and items-summary/airgibs, a flag belonging to a
+// On those views and items-summary/highlights, a flag belonging to a
 // different view is rejected rather than ignored — the CLI analogue of
 // mvd-api's unknown-query-param rejection. The seven original views
 // predate the check and keep their existing leniency.
@@ -59,8 +67,8 @@
 //	qw-analyze -view top-windows -mode gap -gap 8s demo.mvd.gz
 //	qw-analyze -view lives -players alice -min-life 5s demo.mvd.gz
 //	qw-analyze -view items-summary -kinds armor demo.mvd.gz
-//	qw-analyze -view airgibs demo.mvd.gz
-//	qw-analyze -view top-kills,airgibs demo.mvd.gz       # both, one analysis pass
+//	qw-analyze -view highlights demo.mvd.gz             # discharges, quadbores, telefrags, airgibs
+//	qw-analyze -view top-kills,highlights demo.mvd.gz       # both, one analysis pass
 //	qw-analyze -view player-stats demo.mvd.gz            # canonical KTX-overlaid rows
 //	qw-analyze -view damage -summary -weapons rl demo.mvd.gz
 //	qw-analyze -view aim -from 2m -to 3m30s demo.mvd.gz  # windowed aim RECOMPUTE
@@ -87,6 +95,7 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/config"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
+	"github.com/mvd-analyzer/mvd-reader/events"
 	mvdsource "github.com/mvd-analyzer/mvd-reader/source/mvd"
 )
 
@@ -150,7 +159,7 @@ var derivedViewFlags = map[string]map[string]bool{
 	"lives":          {"min-life": true, "dmg": true, "summary": true, "players": true, "from": true, "to": true},
 	"items-summary":  {"items": true, "kinds": true, "players": true, "from": true, "to": true},
 	"items":          {"items": true, "kinds": true, "players": true, "from": true, "to": true},
-	"airgibs":        {}, // view.Airgibs takes no options at all
+	"highlights":     {}, // the stored catalogue, unfiltered; kinds/players/preMs are REST-only knobs
 	"frags":          {"players": true, "weapons": true, "from": true, "to": true, "summary": true},
 	"damage":         {"players": true, "weapons": true, "from": true, "to": true, "summary": true, "dmg": true},
 	"aim":            {"players": true, "from": true, "to": true, "summary": true, "include": true},
@@ -240,7 +249,7 @@ var derivedOnlyFlags = []string{
 // whatever is being produced. The applicability check consults this list to
 // decide whether an unrecognised-for-this-view flag is its business: the
 // legacy eight belong to specific original views, so they are just as wrong
-// on -view airgibs as -metric is, and get the same rejection.
+// on -view highlights as -metric is, and get the same rejection.
 var viewScopedFlags = append([]string{
 	"players", "from", "to",
 	"bucket", "fields", "reducer", "event-types", "min-dwell", "time",
@@ -255,7 +264,7 @@ func main() {
 	regionsPath := flag.String("regions", "", "path to a regions JSON ({\"regions\":[{\"name\":...,\"locs\":[...]}]}) to override the embedded per-map regions for the analyzed demo")
 	parallel := flag.Bool("parallel", false, "use goroutines inside heavy analysis passes (opt-in: leave off when running many analyses concurrently)")
 
-	viewName := flag.String("view", "full", "view(s), comma-separated: full | buckets | events | trails | stream-slice | state-at | region-control | top-kills | top-windows | lives | items | items-summary | airgibs | frags | damage | aim | chat | backpacks | weapon-pickups | player-stats | shots | loc-graph | loc-table | metadata | demoinfo. Several views share one analysis pass and come back in an object keyed by view name, in the order listed; a single view is returned bare")
+	viewName := flag.String("view", "full", "view(s), comma-separated: full | buckets | events | trails | stream-slice | state-at | region-control | top-kills | top-windows | lives | items | items-summary | highlights | frags | damage | aim | chat | backpacks | weapon-pickups | player-stats | shots | loc-graph | loc-table | metadata | demoinfo. Several views share one analysis pass and come back in an object keyed by view name, in the order listed; a single view is returned bare")
 	bucketStr := flag.String("bucket", "50ms", "bucket duration for -view buckets / region-control (e.g. 50ms, 1s, 10s)")
 	fieldsStr := flag.String("fields", "", "comma-separated field codes (see mvd-analytics/view docs)")
 	reducerArgs := stringListFlag("reducer", "field=name reducer override; repeatable (e.g. -reducer h=min)")
@@ -290,12 +299,14 @@ func main() {
 	regionDetail := flag.String("region-detail", "", "region list detail for -view region-control: full (default) | summary (drop polygon points) | none")
 	graphFmt := flag.String("graph", "", "print the analyzer dependency graph (mermaid | json) and exit; no demo argument needed")
 	artifactsMD := flag.Bool("artifacts-md", false, "print the generated artifact catalog (ARTIFACTS.md) and exit; no demo argument needed")
+	warnFlag := flag.Bool("warn", false, "print the full parser-warning table to stderr (per distinct message: count + first occurrence). A one-line summary always prints when a demo raises any; -format json also carries the whole census in the result's parseWarnings")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: qw-analyze [options] <demo.mvd | demo.mvd.gz | directory>\n\n")
 		flag.PrintDefaults()
 	}
 	flag.Parse()
+	warnDetail = *warnFlag
 
 	// -graph dumps the pipeline's dependency DAG and exits; it needs no demo.
 	if *graphFmt != "" {
@@ -739,8 +750,9 @@ type analyzeOptions struct {
 // The shots rows are honest about it — Hits is omitted rather than zeroed —
 // but "the key is absent" is only a signal to a reader who knows to look, and
 // a consumer doing `.hits // 0` silently reads it as perfect inaccuracy.
-// mvd-api always builds nails (democache sets BuildNails), so this is also
-// the one place default CLI output diverges from the same demo over REST.
+// mvd-api always builds nails (democache sets BuildNails), so this is one of
+// the two places default CLI output diverges from the same demo over REST
+// (warnUnclassifiedGrenades is the other).
 func warnUnlinkedNails(res *result.Result, w io.Writer) {
 	if res == nil || res.Shots == nil {
 		return
@@ -758,6 +770,90 @@ func warnUnlinkedNails(res *result.Result, w io.Writer) {
 	}
 	if shots > 0 {
 		fmt.Fprintf(w, "qw-analyze: %d ng/sng fires have no hit attribution — pass -include nails for nailgun accuracy (mvd-api always builds it, so this run differs from the same demo over REST)\n", shots)
+	}
+}
+
+// warnUnclassifiedGrenades reports gl fires on a demo whose wire damage log
+// this run could not put on KTX's scale, which is what a run without
+// -include projectiles produces: gl's direct-impact count is re-derived from
+// the grenade's tracked flight (result.WeaponAim), and without the spatial
+// shot streams there is no flight to read. The row stays honest, publishing
+// the any-path count under hitsConvention "anyDamage", but that is a
+// DIFFERENT number from the one the same demo returns over REST, which is
+// the same reason the nail warning above exists.
+func warnUnclassifiedGrenades(res *result.Result, w io.Writer) {
+	if res == nil || res.Shots == nil || res.Damage == nil ||
+		res.Damage.Source != result.DamageSourceKTX {
+		return
+	}
+	var shots int
+	for _, p := range res.Shots.ByPlayer {
+		for _, wp := range p.ByWeapon {
+			if wp.Weapon == "gl" {
+				shots += wp.Shots
+			}
+		}
+	}
+	if shots > 0 {
+		fmt.Fprintf(w, "qw-analyze: %d gl fires carry the any-path hit count — pass -include projectiles for KTX's grenade touch count (mvd-api always builds it, so this run differs from the same demo over REST)\n", shots)
+	}
+}
+
+// warnDetail is the -warn flag: print the whole parse-warning table
+// rather than the one-line summary. Package-level because every output
+// path funnels through analyzePath, including dumpMarkdown, which takes
+// no view options to hang it off.
+var warnDetail bool
+
+// reportParseWarnings prints the reader's parse-warning census to
+// stderr. The one-liner is unconditional — the whole point of the
+// Result-carried census is that the next protocol gap is visible on a
+// normal run, and an operator reading -format md or piping JSON to a
+// file would otherwise never see it. -warn adds the per-message table.
+//
+// The full detail is also in the JSON (`parseWarnings`) for -format
+// json, but NOT in -view output or -format md, which is why the flag
+// exists rather than "just read the JSON".
+func reportParseWarnings(path string, res *result.Result, w io.Writer) {
+	if res == nil || res.ParseWarnings == nil || res.ParseWarnings.Total == 0 {
+		return
+	}
+	pw := res.ParseWarnings
+
+	// Loudest category first, name as tie-break — the same rule the
+	// groups table uses, so the two read consistently.
+	types := make([]string, 0, len(pw.ByType))
+	for t := range pw.ByType {
+		types = append(types, t)
+	}
+	sort.Slice(types, func(i, j int) bool {
+		if pw.ByType[types[i]] != pw.ByType[types[j]] {
+			return pw.ByType[types[i]] > pw.ByType[types[j]]
+		}
+		return types[i] < types[j]
+	})
+	parts := make([]string, 0, len(types))
+	for _, t := range types {
+		parts = append(parts, fmt.Sprintf("%s %d", t, pw.ByType[t]))
+	}
+
+	fmt.Fprintf(w, "qw-analyze: %s: %d parse warnings (%s) — wire data this reader could not decode; sections below it may be thin\n",
+		filepath.Base(path), pw.Total, strings.Join(parts, ", "))
+	if !warnDetail {
+		if len(pw.Groups) > 0 {
+			g := pw.Groups[0]
+			fmt.Fprintf(w, "qw-analyze:   loudest: %s: %s (x%d, first at %.1fs) — pass -warn for the full table\n",
+				g.Type, g.Message, g.Count, float64(g.FirstDemoTimeMs)*0.001)
+		}
+		return
+	}
+	for _, g := range pw.Groups {
+		fmt.Fprintf(w, "qw-analyze:   x%-6d [first %7.1fs] %s: %s\n",
+			g.Count, float64(g.FirstDemoTimeMs)*0.001, g.Type, g.Message)
+	}
+	if pw.DroppedWarnings > 0 {
+		fmt.Fprintf(w, "qw-analyze:   (+%d warnings beyond the %d-group retention cap; the counts above are still exact)\n",
+			pw.DroppedWarnings, events.MaxWarningGroups)
 	}
 }
 
@@ -789,6 +885,7 @@ func analyzePath(path string, regionsOverride []config.MapRegionOverride, opts a
 	if err != nil {
 		return nil, err
 	}
+	reportParseWarnings(path, res, os.Stderr)
 	// Line of sight is computed lazily (the heaviest position-derived pass);
 	// the same pass also fills the PVS tracks, so los and pvs appear together.
 	// A map with no usable visibility BSP yields ErrNoBSP — warn and continue
@@ -815,6 +912,9 @@ func dumpJSON(path string, w io.Writer, pretty bool, regionsOverride []config.Ma
 	}
 	if !opts.buildNails {
 		warnUnlinkedNails(res, os.Stderr)
+	}
+	if !opts.buildShotStreams {
+		warnUnclassifiedGrenades(res, os.Stderr)
 	}
 
 	// Position-track columns are opt-in: by default strip the whole
@@ -876,8 +976,13 @@ func dumpView(path string, w io.Writer, regionsOverride []config.MapRegionOverri
 	if err != nil {
 		return err
 	}
-	if !opts.buildNails && (slices.Contains(vopts.views, "shots") || slices.Contains(vopts.views, "aim") || slices.Contains(vopts.views, "full")) {
+	accViews := slices.Contains(vopts.views, "shots") || slices.Contains(vopts.views, "aim") ||
+		slices.Contains(vopts.views, "player-stats") || slices.Contains(vopts.views, "full")
+	if !opts.buildNails && accViews {
 		warnUnlinkedNails(res, os.Stderr)
+	}
+	if !opts.buildShotStreams && accViews {
+		warnUnclassifiedGrenades(res, os.Stderr)
 	}
 
 	enc := json.NewEncoder(w)
@@ -1136,12 +1241,16 @@ func renderQueryView(res *result.Result, name string, vopts *viewOptions) (any, 
 		sv.TimeUnit = view.UnitMs
 		return sv, nil
 
-	case "airgibs":
-		airgibs, err := view.Airgibs(res)
+	case "highlights":
+		h, err := view.Highlights(res)
 		if err != nil {
-			return nil, fmt.Errorf("airgibs unavailable for this demo (no timeline analysis): %w", err)
+			return nil, fmt.Errorf("highlights unavailable for this demo (no match streams or frag log): %w", err)
 		}
-		return view.AirgibsEnvelope{TimeUnit: view.UnitMs, Airgibs: airgibs}, nil
+		// The stored catalogue, every kind, the default airgib look-back —
+		// what the post-processor baked in. Options are empty by
+		// construction, so the validation error cannot fire.
+		env, _ := view.FilterHighlights(h, view.HighlightsOptions{}, view.DefaultAirgibPreMs)
+		return env, nil
 
 	case "region-control":
 		ta := res.TimelineAnalysis

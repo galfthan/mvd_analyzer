@@ -1099,8 +1099,233 @@ package result
 //   - A drift test pins the manifest to the 422 table, which is what the
 //     removed ad-hoc has* fields never had and why they went stale.
 //
+// v71 — reconstructed damage for pre-instrumentation demos + damage
+// provenance.
+//   - ADDED: DamageResult.Source ("ktx" | "reconstructed") — where the
+//     damage log came from. The KTX analyzer stamps "ktx" on every demo it
+//     decodes (a stored-Result change: goldens move); the new damage-recon
+//     post-processor stamps "reconstructed".
+//   - ADDED: the damage-recon DAG node (package mvd-analytics/damagerecon).
+//     On demos whose wire carried no mvdhidden_dmgdone stream (~45% of the
+//     archive: res.Damage was absent and /damage 422'd), the damage section
+//     is now reconstructed from the health/armor change streams + LG beams,
+//     projectile flights, fire sounds, position/velocity tracks and the
+//     frag log — raw AND bounded families, same shapes, same match window.
+//     Wire-measured sections are never touched; consumers distinguish the
+//     two by `source`. Validation against KTX ground truth on modern demos:
+//     see mvd-analytics/damagerecon/ACCURACY.md.
+//
+// v72 — match-start wall-clock anchor from the wire date markers.
+//   - ADDED on `streams.global`: `matchStartUnixMs`, `matchStartAccuracyMs`,
+//     `matchStartSource`, `matchStartConfidence`, `matchStartNote`,
+//     `matchEndUnixMs`, `dateMarkers[]`, and `demoStartSource`. The anchor is
+//     resolved by the new `wall-clock` DAG node from the `matchdate:` /
+//     `matchkey:` broadcast prints, the ktxstats `date` string, and the
+//     serverinfo version keys.
+//   - CHANGED: `demoStartUnixMs` / `demoStartAccuracyMs` are now also derived
+//     from a date marker (back-shifted by `demoOffset`) on demos that carry no
+//     mvdhidden 0x000B block and no `epoch` cvar — which lifts wall-clock
+//     coverage from ~25% of the archive to ~98%. `demoStartSource` says which
+//     source a given result used, and `demoStartAccuracyMs` states the cost:
+//     50 400 000 when the marker named no timezone.
+//   - Anchors are never dropped on a failed trust check: `matchStartConfidence`
+//     grades them ("exact" / "unverified" / "contradicted") and
+//     `matchStartNote` names the check. Only a "contradicted" stamp is kept out
+//     of `demoStartUnixMs`.
+//   - ADDED at the top level: `parseWarnings` — the reader's own census of
+//     what it could not decode off the wire (unknown svc_* / temp-entity /
+//     hidden-message types, failed payloads). Collected on every run now,
+//     not just in the diagnostic harness, and omitted when the parse was
+//     clean. Distinct from `errors[]`, which reports analyzer-level failures
+//     over events we DID read. See ParseWarnings.
+//
+// v73 — airgib detection gates on pre-impact evidence (a correctness
+// fix: entries move in and out of `timelineAnalysis.airgibs`, no field
+// is added, removed or retyped) plus a `preMs` echo on the /airgibs
+// envelope.
+//   - KTX writes the damage message inline in T_Damage; measured over 410
+//     direct rocket hits, the stamp lands in the same wire frame as the
+//     first knockback-visible position sample 82% of the time and up to
+//     two frames (+28ms) late 6% — so samples near the stamp can already
+//     carry the rocket's own knockback. Measured case (hub 232925, dm2
+//     4on4): a player riding the dm2 func_train (top at z=319) took a quad
+//     direct rocket that blasted him off it and the hit-time sample read
+//     303 units of air — published as the match's biggest airgib.
+//   - A hit now qualifies when every position sample in the look-back
+//     window [hit - preMs, hit - 40ms] (default 100ms) reads >= the
+//     96-unit threshold — the preceding tick deciding when the window
+//     holds no sample (old coarse-tick demos, recording holes) — and no
+//     sample beside the hit reads ground contact. Contamination is
+//     one-sided: knockback over-reports height but cannot fake a grounded
+//     reading, so a victim who landed just before the rocket rejects
+//     while one knocked laterally over a higher floor is kept. The 100ms
+//     default is aesthetic: floor-relative height is a step function at
+//     ledge edges, so longer windows measure time-since-the-edge and
+//     drop genuine 300+-unit ledge-drop events. Reported `height`, `loc`
+//     and `heightAboveAttacker` come from the latest PRE-IMPACT sample.
+//   - Detection moves from the analyzer post-processor into
+//     `view.ComputeAirgibs`, a pure function of the assembled Result (the
+//     regionControlPost / view.RegionControl staging). The post-processor
+//     bakes the default-options run into the stored Result; mvd-api's
+//     /airgibs re-runs it per request with `?preMs=` (0..1000, 0 = the
+//     pre-v73 hit-sample-only rule) and echoes the effective value as
+//     `preMs` on the response envelope.
+//   - Per-hit userids now resolve against the PUBLISHED per-stream session
+//     table (`streams.players[].sessions`) rather than an analyzer-internal
+//     index; same answers, one clock.
+//   - Airgibs now consume reconstructed damage too (the DAG node binds
+//     `damage:final`), superseding v71's wire-measured-only gate for this
+//     view: recon's direct/splash split is geometric (explosion endpoint
+//     within 48 units of the victim) and frame-accurate, the fidelity the
+//     verdict needs. Aim keeps the ktx-only gate. `damage.source` says
+//     which evidence a demo's list rests on. (The 48-unit endpoint rule
+//     named here was replaced in v74 by the trajectory classifier — see
+//     that block below; airgibs consume whatever the split says.)
+//
+// v74 — the fire→flight association reaches the Result, and with it rl/gl
+// hit recovery on reconstructed demos.
+//   - ADDED on `shots.shots[]`: `flightEnd` — the match-relative time at
+//     which the tracked rocket/grenade/nail a fire launched died. The shots
+//     analyzer has always bracketed those flights (it is how `hit` is
+//     decided for a projectile), then discarded the association; it is now
+//     published. Absent on hitscan fires and on a projectile fire whose
+//     entity was never broadcast (or, for ng/sng, on a parse without nail
+//     decoding), which is exactly the state the measured counter reads as a
+//     miss.
+//   - CHANGED: the reconstructed aim tier covers `rl` and `gl` —
+//     `aim.players[].weapons[].recon.hits` now appears for them on demos
+//     whose damage section is reconstructed. The join follows the measured
+//     definition through `flightEnd` (flight impact instant → reconstructed
+//     damage of that attacker+weapon) instead of counting impacts, which is
+//     what made the two conventions differ by ~7pp on rl in v73. Measured
+//     over 53 dm2/dm3 demos carrying the KTX log: mean accuracy error
+//     rl 0.6pp / gl 0.3pp vs the measured counter, with the join-on-wire
+//     control at 0.4pp / 0.1pp — rl 0.5pp / gl 0.4pp once the direct-impact
+//     and radius-damage entries below moved the damage model;
+//     lg/sg/ssg/axe unchanged. ng/sng stay
+//     withheld — nail linking is opt-in, so there is no measured baseline to
+//     validate a recovery against. See damagerecon/ACCURACY.md §"Aim hit
+//     recovery".
+//   - ADDED on `aim.players[].weapons[].recon`: `directHits` (rl/gl only)
+//     — the projectiles the reconstruction says TOUCHED a player, which is
+//     the only thing KTX's own `acc.rl.hits` / `acc.gl.hits` increments on
+//     (ktx/src/weapons.c:994, :1329), and therefore what
+//     `playerStats.accuracy.byWeapon[rl|gl].hits` publishes on a
+//     `reconstructed` row (`hitsConvention: "directImpact"`). NOT a subset
+//     of `hits` and not the same join: it counts damage ROWS, since one
+//     projectile touches at most one player. Scoped to a windowed query
+//     like every other figure in the block.
+//   - ADDED on `damage`: `rocketDirectDamage` (the server's direct rocket
+//     constant where this demo's own hits established it — 110 on every
+//     KTX since 1.36) and `rocketDirectRegime`, a three-value total
+//     partition of every reconstructed section saying WHICH verdict was
+//     reached: `fixed` | `spread` (enough near-direct hits to test, and
+//     they did not cluster — evidence against the constant) |
+//     `unestablished`. The classifier behind `directHits` leans on the
+//     constant, and the three populations score differently against a
+//     verbatim KTX block, so the verdict is published rather than implied
+//     by the constant's absence.
+//   - CHANGED on `damage.events[]`: `isSplash` for rl/gl now comes from
+//     the flight's trajectory against the victim's 32x32x56 hull plus the
+//     magnitude prior (and, for gl, the spent 2.5s fuse), replacing an
+//     explosion-endpoint-within-48-units rule that over-counted rl touches
+//     by 80%; an obituary-anchored rocket kill takes the same verdict
+//     instead of keeping its zero value. Rocket SPLASH is modelled on the
+//     engine's 120 base rather than on the direct constant.
+//   - ADDED top-level `noMatch`: the explicit marker on a result that
+//     carries no analyzable match, replacing the silent empty result that
+//     2.0% of the archive (1 032 of 50 951) produced. It names WHY —
+//     `midMatchRecording` / `matchStartUnannounced` / `noMatchDeclared` /
+//     `noPlayRecorded` / `demoUnreadable` — with the wire evidence behind
+//     the verdict (`statusAtOpen`, `statusRunningSeen`, `gameDir`,
+//     `kills`), and carries the wall-clock anchor + `dateMarkers` that
+//     `streams.global` has no home for on such a result. Present exactly
+//     when `streams` is absent; `/overview` republishes it beside
+//     `errors[]`.
+//
+// v74 — the teamkill obituaries the recoveries could not complete stop being
+// dropped.
+//   - ADDED on `frags`: `unpaired[]` — teamkill obituaries that name only one
+//     party (the other is the placeholder "teammate") and whose missing side
+//     neither recovery could identify. They cannot join `frags[]`, whose
+//     entries all name both sides, but the obituary is on the wire and
+//     dropping it lost a real death. Per-player tallies must skip them; the
+//     value is the CAUSE, which the victim-named forms carry (`tele` /
+//     `stomp`), and which lets the damage reconstruction type such a kill
+//     positionally instead of pricing the victim's corpse drop as team
+//     weapon damage.
+//   - CHANGED on `frags[].weapon`: `squish` on the teamkill phrasing
+//     "X squished a teammate" — the third deathtype-tested message in KTX's
+//     team branch (dtSQUISH, ktx/src/client.c:5362), previously flattened to
+//     the cause-less `teamkill`. Same cause token its non-teamkill siblings
+//     already use ("X squishes Y", "X was squished"), so a consumer
+//     filtering `squish` now gets all three forms.
+//
+// v75 — the match boundary becomes a Layer-1 event, and KTX matchless
+// servers (FFA / CTF with `k_matchless 1`) get an analyzable result at all.
+//   - ADDED on `streams.global`: `matchStartSignal` — which wire signal the
+//     match start was detected from: `ktx-matchstart` | `print` |
+//     `matchdate` | `status`. The parser now raises the start on any of the
+//     four (mvd-reader/parser/matchstart.go) instead of on a match-start
+//     print alone, because a matchless KTX server never prints one
+//     (ktx/src/match.c:1294-1297 gates "The match has begun!" on
+//     `!k_matchLess`) while still printing `matchdate:` (:1291), stuffing
+//     `//ktx matchstart` (:1372) and moving `status` to a running clock
+//     (:1337).
+//   - CHANGED: demos that previously came out with `noMatch.reason =
+//     matchStartUnannounced` and no `streams` now carry a full result.
+//     Measured over the 138 such demos in the 50 951-demo archive sweep,
+//     all 138 gained streams (104 on `matchdate`, 34 on `status`) —
+//     per-demo output in
+//     `.reports/nomatch-marker/recensus-v75-unannounced-138.csv`, beside
+//     the probe that wrote it (`recensus-v75-probe.go.txt`, whose header
+//     carries the rerun recipe). The
+//     reason keeps its name and now means "the server moved `status` to a
+//     running clock and no analyzable player stream came out".
+//   - FIXED: `timelineAnalysis.fragEvents` no longer carries the scoreboard
+//     zeroing that `SV_DropClient` broadcasts when a player quits AFTER the
+//     match ended (the timeline recorded frag updates on "started" alone,
+//     never on "not ended"). Needs a recording that runs past match end,
+//     which is normal on a matchless server; no existing golden moves.
+//   - UNCHANGED: match-relative timestamps on every existing demo. All four
+//     signals land in the same server frame on modern KTX; measured across
+//     the golden corpus and the 1 500-demo healthy archive control
+//     (`.reports/nomatch-marker/recensus-v75-healthy-1500.csv`), no demo's
+//     match start moved and no demo lost its streams.
+//
+// v76 — the highlight catalogue: discharges, quadbores, telefrags and
+// airgibs as one stored section, each row carrying what everyone involved
+// had.
+//   - ADDED top-level `highlights` (HighlightsResult): four lists of
+//     HighlightEvent — `discharges`, `quadbores`, `telefrags`, `airgibs` —
+//     sharing one shape: an `actor`, the `victims`, enemy/team kill counters,
+//     the damage-log figure, the evidence `sources`, and per kind the cells
+//     dumped, the quad held / its frags, the telefrag sub-kind, the airgib
+//     heights. Every participant is a HighlightPlayer: relation to the
+//     actor, health / armor / armor type / stack read from the streams one
+//     millisecond BEFORE the event (the death frame already carries the
+//     corpse; a sample older than the player's latest spawn is the previous
+//     life's and reads as the spawn state, `stateSource: "spawn"`), the
+//     tracked weapons, the wielded weapon, the powerups and the loc. Built
+//     by the `highlights` post-processor (servable artifact) from the final
+//     frag log, the streams and the damage log when present; absent when
+//     the demo has no streams or no frag log.
+//   - ADDED on `frags.frags[]` / `frags.unpaired[]`: `cause` — the
+//     obituary's sub-cause beneath `weapon` for the deathtypes KTX prints
+//     distinctly but books under an ordinary weapon: "discharge" (weapon
+//     stays "lg", as KTX's own per-weapon stats count it), "deflect" (the
+//     pentagram telefrag deflections, weapon "tele", a suicide) and
+//     "spawnicide" (weapon "tele", a suicide). `deflector` names the
+//     surviving pentagram holder when the print names them (dtTELE3).
+//     `byWeapon` and every per-weapon consumer are unchanged.
+//   - MOVED: the airgib list — `timelineAnalysis.airgibs` is REMOVED and
+//     `GET /airgibs` retired; the same detector's rows live at
+//     `highlights.airgibs` with the victim's state added
+//     (`/highlights?kinds=airgib&preMs=` replaces the endpoint). The
+//     `airgib` /events kind reads the new list with the same detail keys.
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 70
+const CurrentSchemaVersion = 76
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields
@@ -1130,7 +1355,225 @@ type Result struct {
 	Opening          *OpeningResult          `json:"opening,omitempty"`
 	PlayerStats      *PlayerStatsResult      `json:"playerStats,omitempty"`
 	Streams          *Streams                `json:"streams,omitempty"`
+	Highlights       *HighlightsResult       `json:"highlights,omitempty"`
+	NoMatch          *NoMatchResult          `json:"noMatch,omitempty"`
 	Errors           []string                `json:"errors,omitempty"`
+	ParseWarnings    *ParseWarnings          `json:"parseWarnings,omitempty"`
+}
+
+// NoMatch reason vocabulary. Exactly one is set on NoMatchResult.Reason;
+// the set is a total partition of "this demo produced no player streams",
+// so a consumer can switch on it exhaustively. Every value is grounded in
+// wire evidence carried alongside it in the same struct — see the field
+// docs on NoMatchResult and the derivation in
+// mvd-analytics/analyzer/nomatch.go.
+const (
+	// NoMatchDemoUnreadable: the event stream aborted, so the demo was
+	// never read to the end. errors[] carries the reader's reason. No
+	// conclusion about the match is possible — the match-start
+	// announcement may simply sit past the truncation point — so this
+	// reason reports the truncation instead of guessing.
+	NoMatchDemoUnreadable = "demoUnreadable"
+	// NoMatchMidMatchRecording: the serverinfo `status` key already named
+	// a running game when the recording opened ("13 min left"), i.e. the
+	// match-start announcement happened before the first demo frame. The
+	// recorded window is real play; this pipeline just has no match
+	// origin to rebase it onto. Weak corner: running-at-open with
+	// Kills == 0 (1 of the 68 in the archive sweep) — see the reason
+	// table in RESULT_SCHEMA.md.
+	NoMatchMidMatchRecording = "midMatchRecording"
+	// NoMatchStartUnannounced: `status` was not running at demo open but
+	// became running during the recording, and still no analyzable player
+	// stream came out. The name is historical — before schema v75 this
+	// reason did mean "none of the match-start signals fired", because the
+	// only signal was the match-start print. The `status` transition is now
+	// itself one of the four Layer-1 signals (see
+	// mvd-reader/parser/matchstart.go), so what reaches this reason is one
+	// of two residues: a start signal that DID fire and opened a window
+	// holding no play `buildStreamsResult` could reconstruct, or a running
+	// clock that only ever arrived in a bulk `fullserverinfo` dump — a
+	// statement of the server's state rather than a transition, which
+	// cannot raise the event (parser.observeServerInfoStatus).
+	//
+	// Schema v75 narrowed this reason to near-nothing. Re-running the
+	// 138 demos that carried it in the 50 951-demo archive sweep, ALL 138
+	// now detect a match start and produce a full result: 104 from the
+	// `matchdate:` stamp (the KTX matchless FFA servers, which skip the
+	// "The match has begun!" broadcast — ktx/src/match.c:1294-1297 gates
+	// it on `!k_matchLess`) and 34 from the `status` transition alone
+	// (the ktx 1.38 / 1.40-beta demos, and every one of the 24 `fortress`
+	// + 8 `ctf` demos, whose mods write their own running clock into the
+	// key). Per-demo output:
+	// `.reports/nomatch-marker/recensus-v75-unannounced-138.csv`, written
+	// by the probe kept beside it as `recensus-v75-probe.go.txt` (rerun
+	// recipe in its header). What is left for this reason is a server that
+	// moves `status` to a running clock and yet yields no player stream at
+	// all.
+	NoMatchStartUnannounced = "matchStartUnannounced"
+	// NoMatchNoMatchDeclared: no match declaration this pipeline can see —
+	// the `status` key never named a running game — yet the frag log
+	// parsed kills. Usually unmanaged play (a mod with no match state, or
+	// free play on an idle server), but read it as an ABSENCE OF
+	// EVIDENCE, not as proof: 168 of the 170 demos here send no `status`
+	// key at all, and the running vocabulary this pipeline reads is KTX's,
+	// so a managed match on a mod that declares itself some other way
+	// lands here too. GameDir names the mod where the server stated one.
+	NoMatchNoMatchDeclared = "noMatchDeclared"
+	// NoMatchNoPlayRecorded: no match declaration this pipeline can see
+	// and no kills in the parsed frag log. Usually an idle or aborted
+	// server — most of these are a few seconds long — with the same
+	// caveat as noMatchDeclared on both halves: neither the declaration
+	// nor the obituaries of a foreign mod are readable here.
+	NoMatchNoPlayRecorded = "noPlayRecorded"
+)
+
+// NoMatchResult is the explicit marker on a Result that carries no
+// analyzable match: `streams` is absent, so every stream-derived section
+// (buckets, damage, playerStats, locGraph, …) is absent with it.
+//
+// It exists because absence alone is ambiguous. Before schema v74 a
+// consumer facing an empty result could not tell "this demo holds no
+// match" from "the recording starts mid-game" from "the parse failed" —
+// 1 032 of the 50 951-demo archive sweep (2.0%) produced empty streams
+// and an EMPTY errors[], because the v52 `timeBase:"demo"` fallback is
+// itself gated on `streams` existing (analyzer/timeline_finalize.go
+// flagDemoTimeBase) and so never fired. This section is present exactly
+// when the `streams` block is absent — ONE predicate, not two: `streams`
+// is written only when it holds at least one player stream
+// (analyzer/timeline_streams.go buildStreamsResult returns nil otherwise),
+// so "no streams block" and "no player streams" are the same state, and a
+// result carrying both `streams` and `noMatch` is not constructible.
+//
+// It is deliberately NOT an errors[] entry: errors[] means the pipeline
+// failed at something, and "this recording holds no match" is a fact
+// about the demo, not a failure. The one reason that IS a failure,
+// demoUnreadable, says so by name and leaves the detail in errors[].
+type NoMatchResult struct {
+	// Reason is one of the NoMatch* constants above.
+	Reason string `json:"reason"`
+	// Detail is the same verdict as one human-readable sentence, naming
+	// the evidence (the verbatim status string, the gamedir, the kill
+	// count). It is what a text-oriented consumer — an /overview reader,
+	// an agent — should show beside the reason code.
+	//
+	// UNSTABLE, DISPLAY ONLY: do not parse it, match on it or key logic
+	// off it. The wording changes without a schema bump, and it needs no
+	// parsing — every fact it states appears as a structured field beside
+	// it (Reason, StatusAtOpen, StatusRunningSeen, GameDir, Kills).
+	Detail string `json:"detail"`
+	// StatusAtOpen is the serverinfo `status` value as it stood in the
+	// `fullserverinfo` dump at demo open, verbatim. It is the wire's own
+	// statement of the game state at the first frame, and the evidence
+	// behind midMatchRecording. Distinct from ServerInfo["status"] in
+	// `metadata`, which is last-write-wins and so names the state at demo
+	// END. Empty when the server sent no `status` key at all (pre-KTX
+	// servers, and mods that never set it).
+	//
+	// The running-game spellings observed across the archive are KTX's
+	// "%d min left" (ktx/src/match.c:596,723,1330) and a "%d:%02d left"
+	// variant from an older mod; the idle/pre-match ones are "Standby"
+	// (world.c:543), "Countdown" (match.c:2475), "Forcestart"
+	// (admin.c:693) and a mod-specific "Normal".
+	StatusAtOpen string `json:"statusAtOpen,omitempty"`
+	// StatusRunningSeen is set when `status` named a running game at any
+	// point in the recording — at open or in a later svc_serverinfo
+	// update. It separates matchStartUnannounced (the server did start a
+	// match) from noMatchDeclared / noPlayRecorded (it never did).
+	StatusRunningSeen bool `json:"statusRunningSeen,omitempty"`
+	// GameDir is the serverinfo `*gamedir` key: the mod the server ran.
+	// "qw" is the stock deathmatch gamedir; anything else ("fortress",
+	// "ctf", "jteams", "runes", …) is a mod with rules this pipeline does
+	// not model. It is reported as evidence, never as a reason of its own
+	// — a foreign gamedir can still run a managed match, and a "qw"
+	// server can still record nothing.
+	GameDir string `json:"gameDir,omitempty"`
+	// Kills is the length of the frag log (`frags.frags`): the kills whose
+	// obituaries THIS PIPELINE RECOGNISES, which is how much play the
+	// recorded window is known to have held — a floor, not a census. The
+	// obituary table is id1/KTX vocabulary, so a foreign mod's own death
+	// messages (a TeamFortress sentry gun, a mod-specific environmental
+	// kill) are invisible to it, and 51 of the 636 noPlayRecorded demos in
+	// the archive sweep ran a foreign gamedir. Zero here means "the frag
+	// log parsed nothing", not "nobody died".
+	//
+	// Non-zero with any reason except noPlayRecorded, which is defined by
+	// it being zero.
+	Kills int `json:"kills,omitempty"`
+
+	// DateMarkers lists every date stamp the wire carried, verbatim and in
+	// the order seen — the same []WallClockMarker
+	// `streams.global.dateMarkers` carries, given a home here because
+	// there is no GlobalStream on this result (schema v74). Before v74
+	// these were read off the wire and then dropped on the floor: 73 of
+	// the 877 stream-less demos in the archive sweep printed a
+	// `matchdate:` and published nothing, while `metadata.finalScores`
+	// (which does not live under `streams`) survived.
+	//
+	// The markers are published RAW, and deliberately without the graded
+	// `matchStartUnixMs` anchor GlobalStream carries beside them. That
+	// anchor is a PROJECTION — a match-start print is projected as
+	// `stamp - print's demo time + DemoOffset`, a match-end stamp as
+	// `stamp - match length` — and both terms are the match window, which
+	// is exactly what this result does not have. Publishing the
+	// projection against a zero window would state an instant off by the
+	// recording's own offset and label it "match start". Resolving it
+	// properly means establishing a match origin on the demo clock, which
+	// is salvage: plan-archive-features.md §8 stage (b). Until then the
+	// stamps stand on their own — `kind` says which instant each one
+	// names, and `metadata.finalScores` still carries KTX's own record.
+	DateMarkers []WallClockMarker `json:"dateMarkers,omitempty"`
+}
+
+// ParseWarnings is the census of what the WIRE carried but the reader
+// could not decode: unknown svc_* commands, unknown temp-entity or
+// hidden-message types, and payloads that failed to parse. It is a
+// distinct signal from Errors — those are analyzer-level failures over
+// events we did read — and it is sub-fatal by construction: the reader
+// abandons the rest of the offending payload and carries on, so the
+// result is complete apart from whatever that payload held.
+//
+// It exists because silence is not evidence of correctness. The
+// sv_bigcoords angle desync degraded ~5% of the archive for years with
+// no operator-visible signal, because parse warnings lived only in a
+// test harness. A non-zero total here means the reader has a gap on
+// this demo and the sections downstream of it may be thin.
+//
+// Omitted entirely when the parse was clean (Total == 0), which is the
+// case for the overwhelming majority of modern demos.
+type ParseWarnings struct {
+	// Total is the exact number of warnings raised, never capped.
+	Total int `json:"total"`
+	// ByType is the exact per-category count. Categories are a small
+	// fixed vocabulary: "parse_error", "unknown_svc", "unknown_te",
+	// "unknown_hidden".
+	ByType map[string]int `json:"byType,omitempty"`
+	// Groups is a capped table of distinct (type, message) rows, loudest
+	// first, each with its count and the demo time it first fired. It is
+	// the sample set — the counts above stay exact even when a group is
+	// dropped.
+	Groups []ParseWarningGroup `json:"groups,omitempty"`
+	// DroppedWarnings accounts for the retention cap
+	// (parser.MaxWarningGroups distinct messages): how many warnings fell
+	// outside the retained groups and are therefore missing from Groups.
+	// Zero in every normal case. It is an OCCURRENCE count, not a count of
+	// distinct messages — the reader deliberately does not track the
+	// distinct key set past the cap, since holding it is exactly the
+	// unbounded memory the cap exists to avoid.
+	DroppedWarnings int `json:"droppedWarnings,omitempty"`
+}
+
+// ParseWarningGroup is one distinct warning message with its count and
+// first occurrence.
+type ParseWarningGroup struct {
+	Type    string `json:"type"`
+	Message string `json:"message"`
+	Count   int    `json:"count"`
+	// FirstDemoTimeMs is RAW DEMO time (the wire clock), not the
+	// match-relative base every other ms field in this schema uses: the
+	// reader has no clock, and a warning can fire before the match
+	// starts (or on a demo with no match at all), where a rebased value
+	// would be meaningless.
+	FirstDemoTimeMs int32 `json:"firstDemoTimeMs"`
 }
 
 // EffectiveMap resolves which map (hence which BSP / loc corpus) this demo was

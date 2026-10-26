@@ -301,6 +301,8 @@ func DeathTypeToWeapon(dt int) string {
 		return "rl"
 	case DtLGBeam, DtLGDischarge, DtLGDischargeSelf:
 		return "lg"
+	case DtHook:
+		return "hook"
 	case DtStomp:
 		return "stomp"
 	case DtTele1, DtTele2, DtTele3, DtTele4:

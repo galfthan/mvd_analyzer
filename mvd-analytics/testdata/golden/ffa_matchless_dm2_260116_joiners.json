@@ -1,0 +1,2375 @@
+{
+  "aim": {
+    "players": [
+      {
+        "player": ":f",
+        "weapons": [
+          {
+            "hits": 32,
+            "shots": 75,
+            "weapon": "sg"
+          },
+          {
+            "hits": 5,
+            "shots": 5,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 12,
+            "hits": 51,
+            "missed": 57,
+            "shots": 108,
+            "splash": 39,
+            "weapon": "rl"
+          },
+          {
+            "direct": 1,
+            "hits": 1,
+            "missed": 25,
+            "shots": 26,
+            "splash": 0,
+            "weapon": "gl"
+          }
+        ]
+      },
+      {
+        "player": "Amr",
+        "weapons": [
+          {
+            "hits": 55,
+            "shots": 113,
+            "weapon": "sg"
+          },
+          {
+            "hits": 4,
+            "shots": 6,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 13,
+            "hits": 61,
+            "missed": 68,
+            "shots": 129,
+            "splash": 48,
+            "weapon": "rl"
+          },
+          {
+            "shots": 15,
+            "weapon": "ng"
+          }
+        ]
+      },
+      {
+        "player": "Myagi",
+        "weapons": [
+          {
+            "hits": 18,
+            "shots": 68,
+            "weapon": "sg"
+          },
+          {
+            "hits": 2,
+            "shots": 12,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 12,
+            "hits": 21,
+            "missed": 81,
+            "shots": 102,
+            "splash": 9,
+            "weapon": "rl"
+          },
+          {
+            "shots": 177,
+            "weapon": "ng"
+          }
+        ]
+      },
+      {
+        "player": "Player36",
+        "weapons": [
+          {
+            "hits": 1,
+            "shots": 8,
+            "weapon": "sg"
+          },
+          {
+            "direct": 4,
+            "hits": 16,
+            "missed": 13,
+            "shots": 29,
+            "splash": 12,
+            "weapon": "rl"
+          },
+          {
+            "shots": 2,
+            "weapon": "axe"
+          }
+        ]
+      },
+      {
+        "player": "SMOK",
+        "weapons": [
+          {
+            "hits": 21,
+            "shots": 69,
+            "weapon": "sg"
+          },
+          {
+            "hits": 3,
+            "shots": 3,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 13,
+            "hits": 65,
+            "missed": 52,
+            "shots": 117,
+            "splash": 52,
+            "weapon": "rl"
+          },
+          {
+            "shots": 25,
+            "weapon": "ng"
+          }
+        ]
+      },
+      {
+        "player": "aj-reprogramming",
+        "weapons": [
+          {
+            "hits": 25,
+            "shots": 92,
+            "weapon": "sg"
+          },
+          {
+            "hits": 7,
+            "shots": 13,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 6,
+            "hits": 32,
+            "missed": 58,
+            "shots": 90,
+            "splash": 26,
+            "weapon": "rl"
+          }
+        ]
+      },
+      {
+        "player": "nexus",
+        "weapons": [
+          {
+            "hits": 41,
+            "shots": 92,
+            "weapon": "sg"
+          },
+          {
+            "hits": 1,
+            "shots": 1,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 10,
+            "hits": 21,
+            "missed": 25,
+            "shots": 46,
+            "splash": 11,
+            "weapon": "rl"
+          },
+          {
+            "direct": 3,
+            "hits": 5,
+            "missed": 8,
+            "shots": 13,
+            "splash": 2,
+            "weapon": "gl"
+          }
+        ]
+      },
+      {
+        "player": "toast",
+        "weapons": [
+          {
+            "hits": 32,
+            "shots": 84,
+            "weapon": "sg"
+          },
+          {
+            "hits": 1,
+            "shots": 1,
+            "weapon": "ssg"
+          },
+          {
+            "direct": 10,
+            "hits": 49,
+            "missed": 44,
+            "shots": 93,
+            "splash": 39,
+            "weapon": "rl"
+          },
+          {
+            "direct": 2,
+            "hits": 5,
+            "missed": 27,
+            "shots": 32,
+            "splash": 3,
+            "weapon": "gl"
+          },
+          {
+            "shots": 2,
+            "weapon": "axe"
+          }
+        ]
+      }
+    ]
+  },
+  "frags": {
+    "frags": [
+      {
+        "isSuicide": true,
+        "killer": "Amr",
+        "time": 5153,
+        "victim": "Amr",
+        "weapon": "lava"
+      },
+      {
+        "isSuicide": true,
+        "killer": "aj-reprogramming",
+        "time": 8602,
+        "victim": "aj-reprogramming",
+        "weapon": "lava"
+      },
+      {
+        "killer": "Myagi",
+        "time": 12167,
+        "victim": "Player36",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 14585,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "Amr",
+        "time": 14585,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 15627,
+        "victim": "aj-reprogramming",
+        "weapon": "sg"
+      },
+      {
+        "killer": "SMOK",
+        "time": 16594,
+        "victim": "Player36",
+        "weapon": "tele"
+      },
+      {
+        "killer": "nexus",
+        "time": 16731,
+        "victim": "SMOK",
+        "weapon": "gl"
+      },
+      {
+        "killer": "toast",
+        "time": 16859,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 17978,
+        "victim": "Amr",
+        "weapon": "sg"
+      },
+      {
+        "killer": "toast",
+        "time": 20136,
+        "victim": "SMOK",
+        "weapon": "sg"
+      },
+      {
+        "killer": ":f",
+        "time": 21419,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 22240,
+        "victim": "Myagi",
+        "weapon": "gl"
+      },
+      {
+        "killer": "toast",
+        "time": 24094,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Player36",
+        "time": 25534,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 26674,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 27290,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 28589,
+        "victim": "Player36",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 29288,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 29679,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 30235,
+        "victim": "Myagi",
+        "weapon": "gl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 32042,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 32149,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Player36",
+        "time": 33466,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 35418,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 35817,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 35817,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 37548,
+        "victim": "Player36",
+        "weapon": "ng"
+      },
+      {
+        "killer": ":f",
+        "time": 39948,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 40757,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 41483,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 42302,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 42330,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Player36",
+        "time": 42388,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 45212,
+        "victim": ":f",
+        "weapon": "tele"
+      },
+      {
+        "killer": "toast",
+        "time": 45622,
+        "victim": "Amr",
+        "weapon": "gl"
+      },
+      {
+        "killer": "Player36",
+        "time": 48113,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 51407,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 51594,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 52375,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 54272,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "SMOK",
+        "time": 55029,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 55997,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 56355,
+        "victim": "aj-reprogramming",
+        "weapon": "gl"
+      },
+      {
+        "killer": "Player36",
+        "time": 59251,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 62288,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 63048,
+        "victim": "SMOK",
+        "weapon": "sg"
+      },
+      {
+        "killer": "Player36",
+        "time": 63556,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 65691,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 65735,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 65735,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 68638,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Player36",
+        "time": 68726,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 69732,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 74026,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 75617,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Player36",
+        "time": 76324,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Player36",
+        "time": 76324,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 77483,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "SMOK",
+        "time": 78330,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 80295,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 81272,
+        "victim": "Player36",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Player36",
+        "time": 81302,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 83834,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 86563,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 86844,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "Myagi",
+        "time": 86844,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 89339,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 91667,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 92494,
+        "victim": "SMOK",
+        "weapon": "ssg"
+      },
+      {
+        "killer": ":f",
+        "time": 94341,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 96227,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 99980,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 100538,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 100649,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 101993,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 106772,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 107451,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 112266,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 113199,
+        "victim": "SMOK",
+        "weapon": "sg"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 114094,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 114844,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 114844,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 118656,
+        "victim": "SMOK",
+        "weapon": "sg"
+      },
+      {
+        "killer": "Amr",
+        "time": 119024,
+        "victim": "nexus",
+        "weapon": "sg"
+      },
+      {
+        "killer": "toast",
+        "time": 119396,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 121461,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 123005,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 124925,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 124967,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 127186,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 131964,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 134471,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 134626,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "Myagi",
+        "time": 134626,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 136240,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 137709,
+        "victim": "toast",
+        "weapon": "sg"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 138331,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 141656,
+        "victim": "SMOK",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 144917,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 145957,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "Myagi",
+        "time": 145957,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 153125,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 154018,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "aj-reprogramming",
+        "time": 154018,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 156222,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 156775,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 156834,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 156997,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 158041,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 158422,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 160099,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 160900,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 162034,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 166712,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 167290,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 168048,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "aj-reprogramming",
+        "time": 168048,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 171946,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 172838,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 173621,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 174205,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 176242,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 176242,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "Amr",
+        "time": 176242,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 178719,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 180057,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 181631,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 182997,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "aj-reprogramming",
+        "time": 187086,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 193372,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 195512,
+        "victim": "aj-reprogramming",
+        "weapon": "gl"
+      },
+      {
+        "killer": "nexus",
+        "time": 198014,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Myagi",
+        "time": 198099,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 199998,
+        "victim": "aj-reprogramming",
+        "weapon": "sg"
+      },
+      {
+        "killer": "toast",
+        "time": 201574,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 206657,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "nexus",
+        "time": 206814,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 207359,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 209241,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 212032,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 212462,
+        "victim": "Myagi",
+        "weapon": "sg"
+      },
+      {
+        "killer": "SMOK",
+        "time": 214083,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 214501,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 215753,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "toast",
+        "time": 215753,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 215753,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 217823,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 219580,
+        "victim": "nexus",
+        "weapon": "sg"
+      },
+      {
+        "killer": "Myagi",
+        "time": 221049,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 221396,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 225306,
+        "victim": "Myagi",
+        "weapon": "ssg"
+      },
+      {
+        "killer": "nexus",
+        "time": 226003,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 230800,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 232177,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "nexus",
+        "time": 234021,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 236489,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 238480,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 239697,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 242166,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 245048,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 245241,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 247658,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 248069,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "isSuicide": true,
+        "killer": "Amr",
+        "time": 248069,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 255788,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 256788,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 257561,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 258933,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 261983,
+        "victim": "Amr",
+        "weapon": "sg"
+      },
+      {
+        "killer": "toast",
+        "time": 264873,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 266426,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 268653,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 268981,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 275232,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 276321,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 276749,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 279944,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 281098,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 286464,
+        "victim": "toast",
+        "weapon": "sg"
+      },
+      {
+        "killer": "Amr",
+        "time": 290031,
+        "victim": "Myagi",
+        "weapon": "sg"
+      },
+      {
+        "killer": "Amr",
+        "time": 291010,
+        "victim": ":f",
+        "weapon": "sg"
+      },
+      {
+        "killer": "Amr",
+        "time": 292646,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 292745,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 293444,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 295986,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 296596,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 297914,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 298958,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 303396,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "aj-reprogramming",
+        "time": 304925,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 307434,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 310107,
+        "victim": "toast",
+        "weapon": "sg"
+      },
+      {
+        "killer": "Amr",
+        "time": 310224,
+        "victim": ":f",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 312187,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 322647,
+        "victim": "nexus",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 323306,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 323306,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 327492,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 329504,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 330303,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 334304,
+        "victim": "aj-reprogramming",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 337436,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 344072,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 347396,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "Amr",
+        "time": 350122,
+        "victim": "Myagi",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 352336,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "toast",
+        "time": 356182,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": "SMOK",
+        "time": 358305,
+        "victim": "Amr",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 358551,
+        "victim": "toast",
+        "weapon": "rl"
+      },
+      {
+        "killer": ":f",
+        "time": 362773,
+        "victim": "Myagi",
+        "weapon": "rl"
+      }
+    ]
+  },
+  "match": {
+    "gameMode": {
+      "canonical": "ffa",
+      "sources": {
+        "canonical": "serverinfo",
+        "teamBased": "mode"
+      },
+      "teamBased": false
+    },
+    "players": [
+      {
+        "deaths": 21,
+        "frags": 33,
+        "kills": 34,
+        "name": "toast",
+        "rawTeam": "red",
+        "suicides": 1,
+        "team": "toast"
+      },
+      {
+        "deaths": 34,
+        "frags": 14,
+        "kills": 15,
+        "name": "nexus",
+        "rawTeam": "'tro",
+        "suicides": 1,
+        "team": "nexus"
+      },
+      {
+        "deaths": 5,
+        "frags": 10,
+        "kills": 10,
+        "name": "Player36",
+        "suicides": 0,
+        "team": "Player36"
+      },
+      {
+        "deaths": 21,
+        "frags": 35,
+        "kills": 36,
+        "name": ":f",
+        "rawTeam": "red",
+        "suicides": 0,
+        "team": ":f"
+      },
+      {
+        "deaths": 19,
+        "frags": 35,
+        "kills": 37,
+        "name": "SMOK",
+        "rawTeam": "rr",
+        "suicides": 2,
+        "team": "SMOK"
+      },
+      {
+        "deaths": 48,
+        "frags": 11,
+        "kills": 14,
+        "name": "Myagi",
+        "rawTeam": "dojo",
+        "suicides": 3,
+        "team": "Myagi"
+      },
+      {
+        "deaths": 30,
+        "frags": 14,
+        "kills": 18,
+        "name": "aj-reprogramming",
+        "rawTeam": "coop",
+        "suicides": 4,
+        "team": "aj-reprogramming"
+      },
+      {
+        "deaths": 33,
+        "frags": 28,
+        "kills": 32,
+        "name": "Amr",
+        "rawTeam": "red",
+        "suicides": 4,
+        "team": "Amr"
+      }
+    ],
+    "sources": {
+      "map": "serverinfo",
+      "mode": "finalscores",
+      "teams": "individual"
+    },
+    "teams": [
+      {
+        "frags": 33,
+        "name": "toast"
+      },
+      {
+        "frags": 14,
+        "name": "nexus"
+      },
+      {
+        "frags": 10,
+        "name": "Player36"
+      },
+      {
+        "frags": 35,
+        "name": ":f"
+      },
+      {
+        "frags": 35,
+        "name": "SMOK"
+      },
+      {
+        "frags": 11,
+        "name": "Myagi"
+      },
+      {
+        "frags": 14,
+        "name": "aj-reprogramming"
+      },
+      {
+        "frags": 28,
+        "name": "Amr"
+      }
+    ]
+  },
+  "playerStats": {
+    "players": [
+      {
+        "accuracy": {
+          "byWeapon": {
+            "axe": {
+              "attacks": 2,
+              "hits": 0,
+              "hitsConvention": "anyDamage"
+            },
+            "gl": {
+              "attacks": 32,
+              "hits": 2,
+              "hitsConvention": "directImpact"
+            },
+            "rl": {
+              "attacks": 93,
+              "hits": 10,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 504,
+              "hits": 153,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 14,
+              "hits": 10,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
+        "name": "toast",
+        "score": {
+          "byEnemyWeapon": {
+            "rl": 11,
+            "sg": 23
+          },
+          "byWeapon": {
+            "gl": 2,
+            "rl": 27,
+            "sg": 4,
+            "ssg": 1
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "sg": 2
+            },
+            "rl": {
+              "rl": 10,
+              "sg": 17
+            },
+            "sg": {
+              "sg": 4
+            },
+            "ssg": {
+              "rl": 1
+            }
+          },
+          "deaths": 21,
+          "efficiency": 0.6182,
+          "frags": 33,
+          "kills": 34,
+          "maxQuadSpree": 9,
+          "maxSpree": 13,
+          "src": "derived",
+          "suicides": 1,
+          "teamKills": 0
+        },
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": "toast",
+            "slot": 2,
+            "startMs": -810,
+            "userId": 39
+          }
+        ],
+        "window": {
+          "aliveMs": 341729,
+          "deadMs": 21030,
+          "matchMs": 362773,
+          "presentMs": 362759
+        }
+      },
+      {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 13,
+              "hits": 3,
+              "hitsConvention": "directImpact"
+            },
+            "rl": {
+              "attacks": 46,
+              "hits": 10,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 552,
+              "hits": 191,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 14,
+              "hits": 4,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
+        "name": "nexus",
+        "score": {
+          "byEnemyWeapon": {
+            "rl": 5,
+            "sg": 10
+          },
+          "byWeapon": {
+            "gl": 3,
+            "rl": 10,
+            "sg": 2
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "rl": 1,
+              "sg": 2
+            },
+            "rl": {
+              "rl": 4,
+              "sg": 6
+            },
+            "sg": {
+              "sg": 2
+            }
+          },
+          "deaths": 34,
+          "efficiency": 0.3061,
+          "frags": 14,
+          "kills": 15,
+          "maxQuadSpree": 0,
+          "maxSpree": 3,
+          "src": "derived",
+          "suicides": 1,
+          "teamKills": 0
+        },
+        "sessions": [
+          {
+            "endMs": 280798,
+            "name": "nexus",
+            "slot": 4,
+            "startMs": -810,
+            "userId": 41
+          },
+          {
+            "endMs": 325633,
+            "name": "nexus",
+            "slot": 3,
+            "startMs": 320953,
+            "userId": 49
+          }
+        ],
+        "window": {
+          "aliveMs": 298977,
+          "deadMs": 26317,
+          "matchMs": 362773,
+          "presentMs": 325294
+        }
+      },
+      {
+        "accuracy": {
+          "byWeapon": {
+            "axe": {
+              "attacks": 2,
+              "hits": 0,
+              "hitsConvention": "anyDamage"
+            },
+            "rl": {
+              "attacks": 29,
+              "hits": 4,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 48,
+              "hits": 4,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
+        "name": "Player36",
+        "score": {
+          "byEnemyWeapon": {
+            "rl": 4,
+            "sg": 6
+          },
+          "byWeapon": {
+            "rl": 10
+          },
+          "byWeaponVsEnemyWeapon": {
+            "rl": {
+              "rl": 4,
+              "sg": 6
+            }
+          },
+          "deaths": 5,
+          "efficiency": 0.6667,
+          "frags": 10,
+          "kills": 10,
+          "maxQuadSpree": 0,
+          "maxSpree": 7,
+          "src": "derived",
+          "suicides": 0,
+          "teamKills": 0
+        },
+        "sessions": [
+          {
+            "endMs": 85721,
+            "name": "Player36",
+            "slot": 5,
+            "startMs": -810,
+            "userId": 36
+          }
+        ],
+        "window": {
+          "aliveMs": 80030,
+          "deadMs": 3029,
+          "matchMs": 362773,
+          "presentMs": 83059
+        }
+      },
+      {
+        "accuracy": {
+          "byWeapon": {
+            "gl": {
+              "attacks": 26,
+              "hits": 1,
+              "hitsConvention": "directImpact"
+            },
+            "rl": {
+              "attacks": 108,
+              "hits": 12,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 450,
+              "hits": 148,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 70,
+              "hits": 20,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
+        "name": ":f",
+        "score": {
+          "byEnemyWeapon": {
+            "mid": 9,
+            "rl": 16,
+            "sg": 11
+          },
+          "byWeapon": {
+            "gl": 1,
+            "rl": 32,
+            "sg": 3
+          },
+          "byWeaponVsEnemyWeapon": {
+            "gl": {
+              "sg": 1
+            },
+            "rl": {
+              "mid": 8,
+              "rl": 15,
+              "sg": 9
+            },
+            "sg": {
+              "mid": 1,
+              "rl": 1,
+              "sg": 1
+            }
+          },
+          "deaths": 21,
+          "efficiency": 0.6316,
+          "frags": 35,
+          "kills": 36,
+          "maxQuadSpree": 6,
+          "maxSpree": 15,
+          "src": "derived",
+          "suicides": 0,
+          "teamKills": 0
+        },
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": ":f",
+            "slot": 7,
+            "startMs": -810,
+            "userId": 43
+          }
+        ],
+        "window": {
+          "aliveMs": 343694,
+          "deadMs": 16207,
+          "matchMs": 362773,
+          "presentMs": 359901
+        }
+      },
+      {
+        "accuracy": {
+          "byWeapon": {
+            "ng": {
+              "attacks": 25
+            },
+            "rl": {
+              "attacks": 117,
+              "hits": 13,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 414,
+              "hits": 84,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 42,
+              "hits": 13,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
+        "name": "SMOK",
+        "score": {
+          "byEnemyWeapon": {
+            "mid": 9,
+            "rl": 18,
+            "sg": 10
+          },
+          "byWeapon": {
+            "rl": 35,
+            "tele": 2
+          },
+          "byWeaponVsEnemyWeapon": {
+            "rl": {
+              "mid": 9,
+              "rl": 18,
+              "sg": 8
+            },
+            "tele": {
+              "sg": 2
+            }
+          },
+          "deaths": 19,
+          "efficiency": 0.6607,
+          "frags": 35,
+          "kills": 37,
+          "maxQuadSpree": 1,
+          "maxSpree": 30,
+          "src": "derived",
+          "suicides": 2,
+          "teamKills": 0
+        },
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": "SMOK",
+            "slot": 8,
+            "startMs": -810,
+            "userId": 45
+          }
+        ],
+        "window": {
+          "aliveMs": 349373,
+          "deadMs": 12953,
+          "matchMs": 362773,
+          "presentMs": 362326
+        }
+      },
+      {
+        "accuracy": {
+          "byWeapon": {
+            "ng": {
+              "attacks": 177
+            },
+            "rl": {
+              "attacks": 102,
+              "hits": 12,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 408,
+              "hits": 79,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 168,
+              "hits": 3,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
+        "name": "Myagi",
+        "score": {
+          "byEnemyWeapon": {
+            "rl": 9,
+            "sg": 5
+          },
+          "byWeapon": {
+            "ng": 1,
+            "rl": 13
+          },
+          "byWeaponVsEnemyWeapon": {
+            "ng": {
+              "rl": 1
+            },
+            "rl": {
+              "rl": 8,
+              "sg": 5
+            }
+          },
+          "deaths": 48,
+          "efficiency": 0.2258,
+          "frags": 11,
+          "kills": 14,
+          "maxQuadSpree": 2,
+          "maxSpree": 7,
+          "src": "derived",
+          "suicides": 3,
+          "teamKills": 0
+        },
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": "Myagi",
+            "slot": 9,
+            "startMs": -810,
+            "userId": 46
+          }
+        ],
+        "window": {
+          "aliveMs": 327903,
+          "deadMs": 34734,
+          "matchMs": 362773,
+          "presentMs": 362637
+        }
+      },
+      {
+        "accuracy": {
+          "byWeapon": {
+            "rl": {
+              "attacks": 90,
+              "hits": 6,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 552,
+              "hits": 130,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 182,
+              "hits": 26,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
+        "name": "aj-reprogramming",
+        "score": {
+          "byEnemyWeapon": {
+            "rl": 4,
+            "sg": 14
+          },
+          "byWeapon": {
+            "rl": 16,
+            "sg": 1,
+            "ssg": 1
+          },
+          "byWeaponVsEnemyWeapon": {
+            "rl": {
+              "rl": 3,
+              "sg": 13
+            },
+            "sg": {
+              "sg": 1
+            },
+            "ssg": {
+              "rl": 1
+            }
+          },
+          "deaths": 30,
+          "efficiency": 0.375,
+          "frags": 14,
+          "kills": 18,
+          "maxQuadSpree": 1,
+          "maxSpree": 6,
+          "src": "derived",
+          "suicides": 4,
+          "teamKills": 0
+        },
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": "aj-reprogramming",
+            "slot": 10,
+            "startMs": -810,
+            "userId": 47
+          }
+        ],
+        "window": {
+          "aliveMs": 346220,
+          "deadMs": 16274,
+          "matchMs": 362773,
+          "presentMs": 362494
+        }
+      },
+      {
+        "accuracy": {
+          "byWeapon": {
+            "ng": {
+              "attacks": 15
+            },
+            "rl": {
+              "attacks": 129,
+              "hits": 13,
+              "hitsConvention": "directImpact"
+            },
+            "sg": {
+              "attacks": 678,
+              "hits": 271,
+              "hitsConvention": "pellets"
+            },
+            "ssg": {
+              "attacks": 84,
+              "hits": 46,
+              "hitsConvention": "pellets"
+            }
+          },
+          "src": "derived"
+        },
+        "name": "Amr",
+        "score": {
+          "byEnemyWeapon": {
+            "rl": 13,
+            "sg": 19
+          },
+          "byWeapon": {
+            "rl": 26,
+            "sg": 6
+          },
+          "byWeaponVsEnemyWeapon": {
+            "rl": {
+              "rl": 10,
+              "sg": 16
+            },
+            "sg": {
+              "rl": 3,
+              "sg": 3
+            }
+          },
+          "deaths": 33,
+          "efficiency": 0.4923,
+          "frags": 28,
+          "kills": 32,
+          "maxQuadSpree": 5,
+          "maxSpree": 7,
+          "src": "derived",
+          "suicides": 4,
+          "teamKills": 0
+        },
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": "Amr",
+            "slot": 11,
+            "startMs": -810,
+            "userId": 35
+          }
+        ],
+        "window": {
+          "aliveMs": 337787,
+          "deadMs": 23891,
+          "matchMs": 362773,
+          "presentMs": 361678
+        }
+      }
+    ]
+  },
+  "streams": {
+    "global": {
+      "dateMarkers": [
+        {
+          "atMs": 810,
+          "kind": "matchStart",
+          "raw": "2026-01-16 20:57:38 UTC",
+          "source": "matchdate",
+          "tz": "UTC",
+          "unixMs": 1768597058000
+        },
+        {
+          "assumedUtc": true,
+          "kind": "matchEnd",
+          "raw": "Jan 16, 21:03",
+          "source": "finalscores",
+          "unixMs": 1768597380000,
+          "yearFrom": "epoch"
+        }
+      ],
+      "demoOffset": 810,
+      "demoStartAccuracyMs": 1000,
+      "demoStartSource": "epoch",
+      "demoStartUnixMs": 1768597058000,
+      "matchEnd": 362773,
+      "matchEndUnixMs": 1768597380000,
+      "matchStart": 0,
+      "matchStartAccuracyMs": 1000,
+      "matchStartConfidence": "exact",
+      "matchStartSignal": "matchdate",
+      "matchStartSource": "epoch",
+      "matchStartUnixMs": 1768597058810
+    },
+    "players": [
+      {
+        "identity": "s2u39",
+        "name": "toast",
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": "toast",
+            "slot": 2,
+            "startMs": -810,
+            "userId": 39
+          }
+        ]
+      },
+      {
+        "identity": "s4u41",
+        "name": "nexus",
+        "sessions": [
+          {
+            "endMs": 280798,
+            "name": "nexus",
+            "slot": 4,
+            "startMs": -810,
+            "userId": 41
+          },
+          {
+            "endMs": 325633,
+            "name": "nexus",
+            "slot": 3,
+            "startMs": 320953,
+            "userId": 49
+          }
+        ]
+      },
+      {
+        "identity": "s5u36",
+        "name": "Player36",
+        "sessions": [
+          {
+            "endMs": 85721,
+            "name": "Player36",
+            "slot": 5,
+            "startMs": -810,
+            "userId": 36
+          }
+        ]
+      },
+      {
+        "identity": "s7u43",
+        "name": ":f",
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": ":f",
+            "slot": 7,
+            "startMs": -810,
+            "userId": 43
+          }
+        ]
+      },
+      {
+        "identity": "s8u45",
+        "name": "SMOK",
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": "SMOK",
+            "slot": 8,
+            "startMs": -810,
+            "userId": 45
+          }
+        ]
+      },
+      {
+        "identity": "s9u46",
+        "name": "Myagi",
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": "Myagi",
+            "slot": 9,
+            "startMs": -810,
+            "userId": 46
+          }
+        ]
+      },
+      {
+        "identity": "s10u47",
+        "name": "aj-reprogramming",
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": "aj-reprogramming",
+            "slot": 10,
+            "startMs": -810,
+            "userId": 47
+          }
+        ]
+      },
+      {
+        "identity": "s11u35",
+        "name": "Amr",
+        "sessions": [
+          {
+            "endMs": 362773,
+            "name": "Amr",
+            "slot": 11,
+            "startMs": -810,
+            "userId": 35
+          }
+        ]
+      }
+    ]
+  }
+}

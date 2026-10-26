@@ -14,6 +14,13 @@ dist/
 # on first run and cached here. Bytes themselves are never committed.
 mvd-analytics/testdata/cache/
 
+# Local-only golden demos (corpus.json `file` entries) — demos the hub
+# doesn't have (pre-instrumentation archive era). Never committed; the
+# golden and order tests skip an entry when its demo is absent. The
+# committed golden JSON stays; provenance (archive sha256) lives in
+# corpus.json so the demo can be re-obtained on request.
+mvd-analytics/testdata/demos/
+
 # Emacs autosave / lock files.
 **/#*#
 **/.#*

@@ -94,12 +94,38 @@ type ItemStateEvent struct {
 	EntNum int
 	Kind   string
 	Taken  bool
+	// Origin is the entity origin at the transition, on the same
+	// convention as MoverStateEvent: the new origin when the item became
+	// visible, the LAST visible origin when it went away. Static map items
+	// repeat their spawn point here; a dropped backpack does not — it is
+	// tossed with an upward velocity (ktx/src/items.c:2856-2858) and comes
+	// to rest wherever it lands, which is the whole reason this field
+	// exists (analyzer/backpack_linkage.go).
+	Origin [3]float32
 	TimeMs int32
 }
 
 func (e *ItemStateEvent) EventType() EventType { return EventItemState }
 func (e *ItemStateEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
 func (e *ItemStateEvent) EventTimeMs() int32   { return e.TimeMs }
+
+// ItemMoveEvent fires when a VISIBLE tracked item entity's origin changes,
+// exactly as MoverStateEvent does for a travelling lift: MVD deltas only
+// re-send a changed origin, so between events the position is the last
+// value. Map items never move, so on a normal demo this event is emitted
+// only for backpacks — KTX gives a dropped pack `velocity[2] = 300` plus a
+// random horizontal kick and MOVETYPE_TOSS (ktx/src/items.c:2856-2861), so
+// it falls off ledges and rides lifts before settling.
+type ItemMoveEvent struct {
+	EntNum int
+	Kind   string
+	Origin [3]float32
+	TimeMs int32
+}
+
+func (e *ItemMoveEvent) EventType() EventType { return EventItemMove }
+func (e *ItemMoveEvent) EventTime() float64   { return float64(e.TimeMs) * 0.001 }
+func (e *ItemMoveEvent) EventTimeMs() int32   { return e.TimeMs }
 
 // MoverSpawnEvent fires once per inline brush-model entity — an entity
 // whose model is a "*N" submodel of the map BSP (func_plat, func_door,
@@ -394,7 +420,7 @@ func (p *Parser) parseSpawnBaseline(r *mvd.BufferReader, timeMs int32, floatCoor
 	if err != nil {
 		return err
 	}
-	state, err := readBaselineBody(r, floatCoords)
+	state, err := readBaselineBody(r, floatCoords, p.msgWide)
 	if err != nil {
 		return err
 	}
@@ -408,7 +434,20 @@ func (p *Parser) parseSpawnBaseline(r *mvd.BufferReader, timeMs int32, floatCoor
 // implementation of the layout for both the parse and the
 // decode-and-discard (skipCommand) callers. Mirrors ezquake
 // CL_ParseBaseline (cl_parse.c:1817).
-func readBaselineBody(r *mvd.BufferReader, floatCoords bool) (*EntityState, error) {
+// angleSize is the wire width of one entity angle: 1 byte normally, a
+// 2-byte short when sv_bigcoords raised msg_anglesize — advertised as
+// FTE_PEXT_FLOATCOORDS. Callers must pass the FTE-only msgWide flag, NOT
+// the combined floatCoords: MVD_PEXT1_FLOATCOORDS widens entity-delta
+// origins only, its angles stay 1 byte (mvdsv sv_ents.c writes them with
+// the plain MSG_WriteAngle).
+func angleSize(msgWide bool) int {
+	if msgWide {
+		return 2
+	}
+	return 1
+}
+
+func readBaselineBody(r *mvd.BufferReader, floatCoords, msgWide bool) (*EntityState, error) {
 	modelIdx, err := r.ReadByte()
 	if err != nil {
 		return nil, err
@@ -435,8 +474,13 @@ func readBaselineBody(r *mvd.BufferReader, floatCoords bool) (*EntityState, erro
 		if err != nil {
 			return nil, err
 		}
-		// angle follows each coord — read and discard.
-		if _, err := r.ReadByte(); err != nil {
+		// angle follows each coord — discard. Its width follows the
+		// FTE_PEXT_FLOATCOORDS negotiation like the coords: sv_bigcoords
+		// servers set msg_anglesize = 2 alongside msg_coordsize = 4
+		// (mvdsv/src/sv_init.c:326-336; client mirror ezquake
+		// com_msg.c MSG_ReadAngle), so a fixed 1-byte read desyncs
+		// every entity on those demos.
+		if err := r.Skip(angleSize(msgWide)); err != nil {
 			return nil, err
 		}
 	}
@@ -753,7 +797,9 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, st
 		}
 		state.Effects = int(b)
 	}
-	// Origin + angles are paired per axis (origin N + angle N).
+	// Origin + angles are paired per axis (origin N + angle N). Angle
+	// width follows FTE_PEXT_FLOATCOORDS like the coord width — see
+	// readBaselineBody.
 	readCoord := func() (float32, error) {
 		if floatCoords {
 			return r.ReadFloatCoord()
@@ -768,7 +814,7 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, st
 		state.Origin[0] = v
 	}
 	if bits&uAngle1 != 0 {
-		if _, err := r.ReadByte(); err != nil {
+		if err := r.Skip(angleSize(p.msgWide)); err != nil {
 			return err
 		}
 	}
@@ -780,7 +826,7 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, st
 		state.Origin[1] = v
 	}
 	if bits&uAngle2 != 0 {
-		if _, err := r.ReadByte(); err != nil {
+		if err := r.Skip(angleSize(p.msgWide)); err != nil {
 			return err
 		}
 	}
@@ -792,7 +838,7 @@ func (p *Parser) applyDeltaFields(r *mvd.BufferReader, bits, morebits uint32, st
 		state.Origin[2] = v
 	}
 	if bits&uAngle3 != 0 {
-		if _, err := r.ReadByte(); err != nil {
+		if err := r.Skip(angleSize(p.msgWide)); err != nil {
 			return err
 		}
 	}
@@ -981,33 +1027,84 @@ func (p *Parser) diffProjectileEntity(ent int, s, o *EntityState, timeMs int32) 
 	return nil
 }
 
-// diffItemEntity emits the item spawn / state events for one entity of
-// a frame diff. Resolve current kind preferring whatever state exists
+// diffItemEntity emits the item spawn / state / move events for one entity
+// of a frame diff. Resolve current kind preferring whatever state exists
 // now, so baselines that landed before the model list still get an
 // ItemSpawnEvent once we can name the model.
+//
+// The cached kind (p.spawnedItems) is what keeps a TAKEN item nameable: a
+// picked-up item is on the wire with modelindex 0, so its own state cannot
+// say what it is until it respawns. But the cache must never outrank a
+// model index the wire is currently sending: KTX `spawn()`s and
+// `ent_remove()`s backpacks (items.c:2701, 2489), so a pack's edict is
+// recycled — as another pack, as a rocket, as a gib — and a stale
+// "backpack" cache reported every later tenant's appearance and
+// disappearance as that pack fluttering. Whenever the entity is visible,
+// the model is therefore re-read and a changed kind ends the old item's
+// life and begins the new one's. Map-item edicts are allocated at map load
+// and never freed, so nothing there changes.
 func (p *Parser) diffItemEntity(ent int, s, o *EntityState, timeMs int32) error {
+	oldVisible := o != nil && o.Present && o.ModelIndex != 0
+	newVisible := s != nil && s.Present && s.ModelIndex != 0
+
 	kind := p.spawnedItems[ent]
-	if kind == "" {
-		src := s
-		if src == nil {
-			src = o
+	// What the entity IS now: the model index while it is visible, the cached
+	// classification while it is not (a taken item is on the wire with
+	// modelindex 0 and cannot name itself), and — for an entity that became
+	// nameable only as it left — its own last visible model.
+	cur := kind
+	switch {
+	case newVisible:
+		cur = p.itemKindOf(s.ModelIndex, s.SkinNum)
+	case kind == "" && o != nil:
+		cur = p.itemKindOf(o.ModelIndex, o.SkinNum)
+	}
+	if cur != kind {
+		// The edict changed hands. Close the previous tenant at its own last
+		// visible origin before opening the new one; the two are different
+		// objects that happen to share an edict number.
+		if kind != "" && oldVisible {
+			if err := p.emit(&ItemStateEvent{
+				EntNum: ent,
+				Kind:   kind,
+				Taken:  true,
+				Origin: o.Origin,
+				TimeMs: timeMs,
+			}); err != nil {
+				return err
+			}
 		}
-		if src != nil {
-			kind = p.itemKindOf(src.ModelIndex, src.SkinNum)
-			if kind != "" {
-				p.spawnedItems[ent] = kind
-				origin := src.Origin
+		oldVisible = false
+		p.spawnedItems[ent] = cur
+		kind = cur
+		if cur != "" {
+			// The baseline is an item's designed spawn point and is preferred
+			// for an entity we can only see through its PAST state. When the
+			// entity is visible right now the wire is saying where it is —
+			// and for a recycled edict (a dropped backpack landing on a slot
+			// some map-load entity once baselined) the baseline names a
+			// different object entirely. Exactly one of s / o can be nil here
+			// (diffEntity skips an entity absent from both frames): s on the
+			// PAST-state path — the `kind == "" && o != nil` arm above, an
+			// entity that became nameable only as it left the frame, which
+			// archive demo 1a78d75f8bd12340… reaches and crashed the parser
+			// on when s was read first — and o on a first appearance.
+			var origin [3]float32
+			if s != nil {
+				origin = s.Origin
+			} else {
+				origin = o.Origin
 				if p.baselineValid[ent] {
 					origin = p.baselines[ent].Origin
 				}
-				if err := p.emit(&ItemSpawnEvent{
-					EntNum: ent,
-					Kind:   kind,
-					Origin: origin,
-					TimeMs: timeMs,
-				}); err != nil {
-					return err
-				}
+			}
+			if err := p.emit(&ItemSpawnEvent{
+				EntNum: ent,
+				Kind:   cur,
+				Origin: origin,
+				TimeMs: timeMs,
+			}); err != nil {
+				return err
 			}
 		}
 	}
@@ -1015,15 +1112,28 @@ func (p *Parser) diffItemEntity(ent int, s, o *EntityState, timeMs int32) error 
 		return nil
 	}
 
-	oldVisible := o != nil && o.Present && o.ModelIndex != 0
-	newVisible := s != nil && s.Present && s.ModelIndex != 0
 	if oldVisible == newVisible {
+		if newVisible && s.Origin != o.Origin {
+			return p.emit(&ItemMoveEvent{
+				EntNum: ent,
+				Kind:   kind,
+				Origin: s.Origin,
+				TimeMs: timeMs,
+			})
+		}
 		return nil
+	}
+	origin := [3]float32{}
+	if newVisible {
+		origin = s.Origin
+	} else if o != nil {
+		origin = o.Origin
 	}
 	return p.emit(&ItemStateEvent{
 		EntNum: ent,
 		Kind:   kind,
 		Taken:  !newVisible,
+		Origin: origin,
 		TimeMs: timeMs,
 	})
 }
