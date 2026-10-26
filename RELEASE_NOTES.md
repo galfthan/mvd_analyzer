@@ -20,6 +20,18 @@ A sound toggle unmutes it, and seeking or pressing play after the demo has
 run out restarts it instead of leaving the player stuck (hub's player has
 the same dead end).
 
+Beside the player, a column of panes follows its clock and POV — the map
+(following whoever you watch; click a player to switch to them), a rolling
+health/armor strip per player, and a frag feed (click a frag to watch it
+from the killer's view) — added, closed and reordered at will. Under it, a
+**playlist** of clips: mark In/Out and add from the current POV, or
+generate quad runs, frag streaks, quadbores, airgibs, telefrags, discharges
+or one player's frags; play the list right there as a script (across hub
+demos too), or export it as one hub link (hub's multi-clip format) or a
+share link to this page. Every hub link on the other tabs now plays its
+clip in the Player tab; shift-click adds it to the playlist, ctrl-click
+still opens hub.
+
 ## unreleased (gl-map) — the map renders entirely through WebGL2
 
 No schema change; web UI only. Supersedes the hybrid described in the entry

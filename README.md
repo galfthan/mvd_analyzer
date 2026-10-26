@@ -858,7 +858,7 @@ mvd-analyzer/
     No mvd-analytics import — outputs are opaque JSON pass-through
 
   mvd-web/                 Module: browser UX + WASM glue (Layer 3, frontend)
-    static/                index.html, app.js, worker.js, styles.css, maps/
+    static/                index.html, app.js, playlist.js, worker.js, styles.css, maps/
     cmd/wasm/              WASM entry (exports analyzeMVD to JS)
 
   mvd-fte-player/          ESM: FTE demo player page for the Player tab (port of hub's, MIT)

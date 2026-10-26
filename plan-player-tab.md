@@ -2,7 +2,8 @@
 
 Branch: `player-tab`, stacked on `gl-map` (which stacks on
 `map-view-extract`). Merge order: `gl-map` PR first, then this.
-Status: **sketch** — to be refined with the owner before code lands.
+Status: **PoC** — phases 1–4 and most of 5 built as a proof of concept
+(2026-10-26/27) to discuss; see "PoC status" at the end.
 
 ## Goal
 
@@ -125,14 +126,18 @@ place to change. Proposal:
 ## Phases
 
 1. **Engine + sync** — DONE: `mvd-fte-player` port, Player tab, two-way
-   clock with the unified timeline, speed buttons, POV bar.
-2. **Panes**: pane registry + column (add/close/move/persist), Map pane,
-   per-player stack pane.
-3. **Playlist**: add/edit/reorder/persist, rerouted hub links, single-demo
-   `clip=` export, in-page playback.
-4. **Generated playlists** from the current demo.
-5. **Multi-demo** playlists + share fragment; cross-demo generated sets
-   via mvd-api.
+   clock with the unified timeline, speed buttons, POV bar, sound toggle,
+   recovery after the demo ends.
+2. **Panes** — PoC: registry + column (add/close/drag/persist), Map pane
+   (borrowed canvas, follows POV, click-to-POV), Health / armor pane,
+   Frag feed pane.
+3. **Playlist** — PoC: In/Out marks, add/edit/reorder/persist, rerouted
+   hub links, single-demo `clip=` export, in-page scripted playback.
+4. **Generated playlists** — PoC: quad runs, best quad runs, frag streaks,
+   quadbores, airgibs, telefrags, discharges, one player's frags.
+5. **Multi-demo** — PoC: a run crosses hub demos (loads the next one);
+   share link with the playlist in `#playlist=`. Not done: cross-demo
+   generated sets via mvd-api.
 
 Docs to touch as phases land: `mvd-web/README.md` (tab + panes + playlist),
 `RELEASE_NOTES.md` (unreleased entry), top-level README tab list.
@@ -151,3 +156,35 @@ to main.
 - Multi-demo playlists: in scope for the first PR, or phase 5 later?
 - Mirror the engine + Quake assets ourselves (licence check), or keep
   depending on `a.quake.world`?
+
+## PoC status (2026-10-27) — to discuss
+
+What is built is described in [`mvd-web/README.md`](mvd-web/README.md#player-tab).
+Decisions taken for the PoC that are worth revisiting:
+
+- **Map pane borrows the Map tab's canvas** instead of a second `MvdMap`.
+  Cheap and it works, but the pane and the Map tab share one camera and
+  follow target (the follow target is restored on leaving). A second
+  instance would need every field `initMapView` and the async loaders push
+  routed to both — worth it if the pane stays.
+- **Link mapping**: plain click = play here, shift = add, ctrl/middle =
+  hub. The links still read "Hub"; they could read "▶" now.
+- **Local files have no hub links** (no gameId), so nothing to reroute or
+  export as a hub link there. The in-page playlist and share link work
+  for them, but a share link cannot carry the file.
+- **Times in storage are demo-relative**, the clock hub and the engine
+  share; the match clock is derived per clip from `demo.offset`.
+- **Generated clip windows** are fixed pads (quad run −3 s/+2 s, highlight
+  −6 s/+3 s, frag −5 s/+2 s). Hub caps `clip=` at 20.
+- **Persistence** is `localStorage` only: one working playlist per
+  browser. Named / multiple playlists, or server-side ones, are open.
+
+Open questions:
+
+- Which panes next (frags/weapons per player, region control, chat,
+  key-moment list)? Resizable column / panes?
+- Should a clip from another local file prompt for the file instead of
+  being skipped?
+- Cross-demo generated sets ("milton's quad runs this season") need
+  mvd-api — in scope?
+- Mirror the engine + Quake assets ourselves, or keep `a.quake.world`?

@@ -834,8 +834,67 @@ reloads of a hub embed.
   seek restarts the demo and jumps (the cursor holds still meanwhile), and
   play restarts from the match start.
 
-The direction (panes beside the player, a clip playlist, rerouted hub
-links) is sketched in [`plan-player-tab.md`](../plan-player-tab.md).
+### Panes
+
+A column beside the player (`#player-panes`), mounted while the tab is
+active and unmounted when it is left. A pane type in `PLAYER_PANE_TYPES` is
+`{ title, mount(body, head), unmount(), update(t) }`; `setCurrentTime`
+schedules one `update` per animation frame. Which panes are open, and their
+order, is a per-viewer convenience in `localStorage` (`mvd.playerPanes.v1`,
+default Map / Health / armor / Frag feed); headers drag to reorder, ↑ ↓ ×
+move and close, "+ Add pane…" reopens.
+
+- **Map** borrows the Map tab's `#map-canvas` — the one `MvdMap` — while the
+  tab is active (sized by `sizeMapPane` from a `ResizeObserver`;
+  `resizeMapCanvas` defers to it) and hands it back, size and follow target
+  restored, on leaving. *follow POV* keeps the camera on the watched
+  player; clicking a player on the map switches the POV to them.
+- **Health / armor**: one row per player in canonical team order and
+  colour — a rolling strip (45 s back, 15 s ahead, `renderMiniStack`, fixed
+  0–300 scale) with the playhead, and the values at it. Click a name to
+  watch them.
+- **Frag feed**: the last 12 frags up to the playhead, newest first, the
+  last 4 s lit. Click one to watch it from the killer's view.
+
+### Clips and the playlist
+
+`playlist.js` (ESM, `window.Playlist` via the module bootstrap; node tests
+in `mvd-web/test/`) holds the pure parts; `app.js` the glue. A clip is
+`{ from, to, track, who, label, demo }` with `from`/`to` in
+**demo-relative** whole seconds — the engine's and hub's clock — and
+`demo = { key, gameId, title, offset }` (`hub:<gameId>` or
+`file:<name>`; `offset` converts to match time for display).
+
+- **Make**: ⟦ In / Out ⟧ mark the player's time (keys `i` / `o`), *+ Add
+  clip* (`c`) adds In→Out from the current POV (no marks: the last 10 s).
+- **Generate** from the loaded demo's Result: quad runs, best quad runs,
+  frag streaks, quadbores, airgibs, telefrags, discharges, one player's
+  frags (merged when 5 s apart or less).
+- **Edit**: label inline, drag or ↑ ↓ to reorder, × to remove. The list
+  persists in `localStorage` (`mvd.playlist.v1`).
+- **Play all / ▶ on a row**: a scripted run — seek, POV, play; advance when
+  playback crosses the clip's `to` (not on a seek past it), follow a manual
+  seek into another clip (hub's `useClipListPlayback` rules,
+  `playlistStep`). A clip of another hub demo loads that demo
+  (`loadGameFromHub`) and carries on; a clip of another local file is
+  skipped with a note.
+- **Copy hub link**: one `hub.quakeworld.nu/games/?gameId=…&clip=F-T:U…`
+  link (hub's own multi-clip format) when every clip is from one hub demo;
+  hub reads the first 20.
+- **Copy share link**: this page with `?gameId=<first hub clip>&tab=player`
+  and the whole playlist in `#playlist=<base64url JSON>`; opening it appends
+  the clips not already in the viewer's list.
+
+### Hub links on the other tabs
+
+Every hub link built by `hubReplayUrl` (`.viewer-link`, `.hub-watch-link`)
+for the **loaded** demo is rerouted by one capture-phase click handler:
+plain click plays that clip in the Player tab (a one-clip run that stops at
+`to`), shift-click adds it to the playlist, ctrl/cmd-click and middle-click
+keep the browser's "open hub in a new tab". Links exist only for hub demos
+(they need a gameId) — a locally loaded file has none.
+
+The plan and the open questions are in [`plan-player-tab.md`](../plan-player-tab.md).
 
 ## Demo search
 
