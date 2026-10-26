@@ -7050,6 +7050,7 @@ const playerState = {
     seekTarget: null,   // demo time of the last jump, until the engine reaches it
     seekIssuedAt: 0,
     lastTrack: null,
+    lastEnded: false,
 };
 
 // snapshotPlayerDemo copies the demo bytes for the Player tab. Must run
@@ -7126,7 +7127,7 @@ function teardownPlayer() {
     if (playerState.blobUrl) URL.revokeObjectURL(playerState.blobUrl);
     Object.assign(playerState, {
         blobUrl: null, iframe: null, fte: null, seekTimer: null,
-        pendingSeek: null, seekTarget: null, lastTrack: null,
+        pendingSeek: null, seekTarget: null, lastTrack: null, lastEnded: false,
     });
     const bar = document.getElementById('player-pov-bar');
     if (bar) bar.innerHTML = '';
@@ -7146,6 +7147,12 @@ function playerSyncTick() {
     const fte = playerState.fte;
     if (!fte) return;
     const demoT = fte.getDemoElapsedTime();
+    // A seek after the demo ended restarts it from 0 before jumping; keep
+    // the cursor where the user put it until the jump has been sent.
+    if (fte.isRestarting()) {
+        playerState.seekIssuedAt = performance.now();
+        return;
+    }
     if (playerState.seekTarget != null) {
         const arrived = Math.abs(demoT - playerState.seekTarget) < 1.5;
         if (arrived || performance.now() - playerState.seekIssuedAt > PLAYER_SEEK_SETTLE_MS) {
@@ -7158,6 +7165,10 @@ function playerSyncTick() {
             playerState.syncing = true;
             try { setCurrentTime(t); } finally { playerState.syncing = false; }
         }
+    }
+    if (fte.hasEnded() !== playerState.lastEnded) {
+        playerState.lastEnded = fte.hasEnded();
+        updatePlaybackButtons();
     }
     const track = fte.getTrackUserid();
     if (track !== playerState.lastTrack) {
@@ -7190,6 +7201,8 @@ function playerSetSpeed(speed) {
     const fte = playerState.fte;
     if (speed < 0) return;
     const pct = Math.round(speed * 100);
+    // Play after the demo ran out starts over at the match start.
+    if (fte.hasEnded()) issuePlayerJump(0);
     if (fte.isPlaying() && fte.getDemoSpeed() === pct) fte.pause();
     else fte.setDemoSpeed(pct);
     updatePlaybackButtons();
@@ -7226,6 +7239,20 @@ function renderPovBar() {
     add('Auto', 'auto', null);
     for (const name of names) add(name, String(ids[name]), TEAM_COLORS[teamIdx(name)]);
     markActivePov();
+
+    const sound = document.createElement('button');
+    sound.className = 'player-pov-btn player-sound-btn';
+    const label = () => {
+        const muted = !playerState.fte || playerState.fte.isMuted();
+        sound.textContent = muted ? '🔇 Sound off' : '🔊 Sound on';
+    };
+    sound.addEventListener('click', () => {
+        if (!playerState.fte) return;
+        playerState.fte.toggleMute();
+        label();
+    });
+    label();
+    bar.appendChild(sound);
 }
 
 // "Auto" lights while autotrack is on; the followed player lights either

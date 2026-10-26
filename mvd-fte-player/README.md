@@ -21,7 +21,7 @@ the whole point — mvd-web calls the controller through
 |---|---|
 | `player.html` | The page FTE runs in. Exposes `window.mvdFte.start(opts)` → `Promise<FteController>`. One engine per page load. |
 | `src/loader.js` | `startFte()` — builds the Emscripten `Module` config (canvas, manifest, virtual-FS file map), injects `ftewebgl.js`, resolves when `Module.getClientState` exists. |
-| `src/fte-controller.js` | `FteController` — console commands (`FTEC.cbufadd`), demo clock, `demoJump` (re-applies track + speed after a rewind), speed / pause, autotrack / `track`, volume. |
+| `src/fte-controller.js` | `FteController` — console commands (`FTEC.cbufadd`), demo clock, `demoJump` (re-applies track + speed after a rewind; restarts the demo after it ended), speed / pause, autotrack / `track`, volume. |
 | `src/assets.js` | The engine's asset manifest: 450 paths under `a.quake.world/fte/`, the map BSP from `assets.quake.world/maps/`, our `config.cfg`, and the demo. |
 | `config.cfg` | Hub's `config_v5.cfg`, verbatim: HUD, rendering, and the closing `playdemo match`. |
 | `test/` | Node tests (`make test`) against a fake engine window. |
@@ -56,6 +56,16 @@ link params. mvd-web converts from match time with
   `getClientState`, before `playdemo` has the demo running; a `demo_jump`
   sent then is dropped. Wait for `getDemoElapsedTime() > 0` first
   (mvd-web's `waitForDemoClock`).
+- **End of demo.** FTE disconnects when the demo runs out ("EndOfDemo")
+  and refuses `demo_jump` after that ("not playing a demo"). It has no
+  callback for this, so the loader watches the iframe's `console.log` (the
+  engine prints there directly) and calls `demoEnded()`; the next
+  `demoJump` re-issues `playdemo`, jumps once the fresh clock runs, and
+  restores track + speed when it arrives. `isRestarting()` is true until
+  then. Hub's player has the same dead end.
+- **Sound** starts muted. Browsers suspend audio until a user gesture in
+  the engine's window; the loader keeps the engine's `AudioContext`s and
+  `unmute()` resumes them, so a click in the host page is enough.
 - **One engine per window.** Emscripten publishes `Module` / `FTEC` as
   globals and has no teardown. To play another demo, reload the iframe.
 - **External hosts.** The engine, its assets and map BSPs load from

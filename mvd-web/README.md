@@ -827,7 +827,12 @@ reloads of a hub embed.
   Leaving the tab pauses the engine.
 - **POV bar** under the player: `Auto` (FTE's stats autotrack) and one
   button per player in canonical team order and colour; the followed
-  player stays lit under autotrack too.
+  player stays lit under autotrack too. A sound toggle sits at its right
+  end (the player starts muted, as hub's does).
+- **End of demo.** The demo runs a few seconds past the match end
+  (scoreboard) and then FTE disconnects. The play button drops its ⏸, a
+  seek restarts the demo and jumps (the cursor holds still meanwhile), and
+  play restarts from the match start.
 
 The direction (panes beside the player, a clip playlist, rerouted hub
 links) is sketched in [`plan-player-tab.md`](../plan-player-tab.md).

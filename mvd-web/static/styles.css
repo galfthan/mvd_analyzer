@@ -3758,6 +3758,10 @@ th.sortable.sort-desc::after {
     border-left-color: var(--pov-color, #888);
 }
 
+.player-sound-btn {
+    margin-left: auto;
+}
+
 .player-pov-btn.active {
     border-color: var(--accent-cyan);
     border-left-color: var(--pov-color, #888);

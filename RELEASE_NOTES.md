@@ -16,6 +16,9 @@ player is a port of hub.quakeworld.nu's (MIT) served from our own origin —
 hub's own embed accepts no commands from the page around it — and it plays
 the bytes already loaded for analysis, so local files work and nothing is
 downloaded twice. The engine itself loads on the first visit to the tab.
+A sound toggle unmutes it, and seeking or pressing play after the demo has
+run out restarts it instead of leaving the player stuck (hub's player has
+the same dead end).
 
 ## unreleased (gl-map) — the map renders entirely through WebGL2
 

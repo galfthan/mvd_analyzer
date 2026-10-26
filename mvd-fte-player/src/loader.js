@@ -20,6 +20,33 @@ export function startFte({ win, canvas, demoUrl, demoPath, mapName, configUrl, d
     const files = demoAssets({ demoUrl, demoPath, mapName, configUrl });
     const total = Object.keys(files).length;
     let loaded = 0;
+    let fte = null;
+
+    // Collect the engine's AudioContexts so the host can resume them from
+    // its own click (the engine only listens for gestures in this window).
+    const audioContexts = [];
+    for (const name of ['AudioContext', 'webkitAudioContext']) {
+        const Base = win[name];
+        if (!Base) continue;
+        win[name] = class extends Base {
+            constructor(...args) {
+                super(...args);
+                audioContexts.push(this);
+            }
+        };
+    }
+    const resumeAudio = () => {
+        for (const ctx of audioContexts) if (ctx.state === 'suspended') ctx.resume();
+    };
+
+    // FTE has no end-of-demo callback; its console line is the signal. The
+    // engine prints with console.log directly (_emscriptenfte_print, not
+    // Module.print), so watch this window's console — it is the engine's own.
+    const log = win.console.log.bind(win.console);
+    win.console.log = (...args) => {
+        log(...args);
+        if (fte && String(args[0]).includes('EndOfDemo')) fte.demoEnded();
+    };
 
     win.Module = {
         canvas,
@@ -45,7 +72,8 @@ export function startFte({ win, canvas, demoUrl, demoPath, mapName, configUrl, d
         const poll = setInterval(() => {
             if (!win.Module.getClientState) return;
             clearInterval(poll);
-            const fte = new FteController(win, { demoDuration });
+            const name = demoPath.split('/').pop().replace(/\.mvd(\.gz)?$/, '');
+            fte = new FteController(win, { demoDuration, demoName: name, resumeAudio });
             // Hub starts muted (config.cfg also sets volume 0); keep that.
             fte.mute();
             resolve(fte);

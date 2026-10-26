@@ -94,3 +94,41 @@ test('demoAssets places the demo, map and config where config.cfg expects them',
     assert.equal(a['id1/maps/dm3.bsp'], 'https://assets.quake.world/maps/dm3.bsp');
     assert.equal(a['id1/gfx.wad'], 'https://a.quake.world/fte/id1/gfx.wad');
 });
+
+test('a seek after the demo ended restarts it, then jumps and restores', async () => {
+    const win = fakeWin({ demoTime: 1216.3 });
+    const fte = new FteController(win, { demoName: 'match' });
+    fte.track(7);
+    fte.setDemoSpeed(50);
+    fte.demoEnded();
+    assert.equal(fte.isPlaying(), false, 'an ended demo is not playing');
+    win.commands.length = 0;
+
+    fte.demoJump(200);
+    assert.deepEqual(win.commands, ['playdemo match\n']);
+    await new Promise((r) => setTimeout(r, 60));
+    assert.deepEqual(win.commands, ['playdemo match\n'], 'old clock still showing — wait');
+
+    win.demoTime = 0.4;
+    await new Promise((r) => setTimeout(r, 60));
+    assert.deepEqual(win.commands, ['playdemo match\n', 'demo_jump 200\n']);
+    assert.equal(fte.isRestarting(), true, 'still fast-forwarding to the target');
+
+    win.demoTime = 200.1;
+    await new Promise((r) => setTimeout(r, 60));
+    assert.deepEqual(win.commands, ['playdemo match\n', 'demo_jump 200\n', 'track 7\n', 'demo_setspeed 50\n']);
+    assert.equal(fte.isRestarting(), false);
+    assert.equal(fte.hasEnded(), false);
+    assert.equal(fte.isPlaying(), true);
+});
+
+test('unmute resumes audio and picks an audible volume', () => {
+    const win = fakeWin();
+    let resumed = 0;
+    const fte = new FteController(win, { resumeAudio: () => resumed++ });
+    fte.mute();
+    fte.toggleMute();
+    assert.equal(resumed, 1);
+    assert.equal(fte.isMuted(), false);
+    assert.deepEqual(win.commands, ['volume 0\n', 'volume 0.1\n']);
+});

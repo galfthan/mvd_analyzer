@@ -14,9 +14,13 @@ export const AUTOTRACK_ON = 'stats';
 export const AUTOTRACK_OFF = 'user';
 
 export class FteController {
-    constructor(win, { demoDuration = null } = {}) {
+    constructor(win, { demoDuration = null, demoName = 'match', resumeAudio = null } = {}) {
         this._win = win;
         this._demoDuration = demoDuration;
+        this._demoName = demoName;
+        this._resumeAudio = resumeAudio;
+        this._ended = false;
+        this._restartTimer = null;
         this._demoSpeed = 100;
         this._lastPositiveDemoSpeed = 100;
         this._autotrack = AUTOTRACK_ON;
@@ -91,6 +95,10 @@ export class FteController {
         const upper = this._demoDuration != null ? 1.1 + this._demoDuration : Infinity;
         // Hub floors before clamping and can send `demo_jump 601.1`; floor last.
         const target = Math.floor(Math.max(0, Math.min(demoTime, upper)));
+        if (this._ended || this._restartTimer) {
+            this._restart(target);
+            return;
+        }
         const current = Math.floor(this.getDemoElapsedTime());
         if (Math.abs(target - current) < 1) return;
 
@@ -102,11 +110,64 @@ export class FteController {
         }
     }
 
-    _restorePlayback() {
-        if (!this._restoreTimer) return;
-        if (this.getDemoElapsedTime() - this._restoreTarget > 1) return;
-        clearInterval(this._restoreTimer);
-        this._restoreTimer = null;
+    // Not in hub: once the demo runs out FTE disconnects ("EndOfDemo") and
+    // answers every demo_jump with "not playing a demo", so a seek after the
+    // end was a dead end. The loader forwards that console line to
+    // demoEnded(); the next seek starts the demo again, jumps once the fresh
+    // clock is running, and re-applies track + speed as after a rewind.
+    demoEnded() {
+        this._ended = true;
+    }
+
+    hasEnded() {
+        return this._ended;
+    }
+
+    // True from a post-end seek until the restarted demo has been jumped.
+    isRestarting() {
+        return this._restartTimer !== null;
+    }
+
+    _restart(target) {
+        if (this._restartTimer) clearInterval(this._restartTimer);
+        if (this._ended) {
+            this._ended = false;
+            this._restartFrom = this.getDemoElapsedTime();
+            this.command('playdemo', this._demoName);
+        }
+        // Two steps: wait for the fresh demo's clock, jump, then wait for the
+        // clock to reach the target (fast-forwarding from 0 takes seconds)
+        // before restoring — isRestarting() stays true throughout.
+        let jumped = false;
+        this._restartTimer = setInterval(() => {
+            const t = this.getDemoElapsedTime();
+            if (this._ended) {
+                // Target was past the end; it ran out again.
+                clearInterval(this._restartTimer);
+                this._restartTimer = null;
+                return;
+            }
+            if (!jumped) {
+                if (!(t > 0 && t < this._restartFrom - 1)) return;
+                jumped = true;
+                this.command('demo_jump', target);
+                return;
+            }
+            if (t < target - 1) return;
+            clearInterval(this._restartTimer);
+            this._restartTimer = null;
+            this._restoreTarget = target;
+            this._restorePlayback(true);
+        }, 25);
+    }
+
+    _restorePlayback(now = false) {
+        if (!now) {
+            if (!this._restoreTimer) return;
+            if (this.getDemoElapsedTime() - this._restoreTarget > 1) return;
+            clearInterval(this._restoreTimer);
+            this._restoreTimer = null;
+        }
         if (this.isUsingAutotrack()) this.enableAutotrack();
         else if (this._lastTrackUserId) this.track(this._lastTrackUserId);
         this.command('demo_setspeed', this._demoSpeed);
@@ -125,7 +186,7 @@ export class FteController {
 
     play() { this.setDemoSpeed(this._lastPositiveDemoSpeed); }
     pause() { this.setDemoSpeed(0); }
-    isPlaying() { return this._demoSpeed > 0; }
+    isPlaying() { return this._demoSpeed > 0 && !this._ended; }
     togglePlay() { this.isPlaying() ? this.pause() : this.play(); }
 
     isUsingAutotrack() {
@@ -163,8 +224,13 @@ export class FteController {
         this.setVolume(0);
     }
 
+    // Hub unmutes to a tenth of its slider; we have no slider, so half.
+    // Browsers keep audio suspended until a user gesture in the engine's
+    // window — resumeAudio (from the loader) resumes it from the host's
+    // click, which counts for a same-origin child frame.
     unmute() {
-        if (this._lastVolume <= this._maxVolume / 100) this._lastVolume = this._maxVolume / 10;
+        if (this._resumeAudio) this._resumeAudio();
+        if (this._lastVolume <= this._maxVolume / 100) this._lastVolume = this._maxVolume / 2;
         this.setVolume(this._lastVolume);
     }
 
