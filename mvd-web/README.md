@@ -845,8 +845,9 @@ worker.js implements identically to `fetchLocSync` but against
 [`scripts/fetch-bsps.sh`](../scripts/fetch-bsps.sh) — id-stock maps
 (dm2/dm3/dm6/e1m2) from [id-maps-gpl](https://github.com/quakeworld/id-maps-gpl)
 gzipped, community competitive maps from
-[maps.quakeworld.nu/core](https://maps.quakeworld.nu/core/), each
-sha256-pinned. `make build` then copies them into `dist/bsps/`. When
+[maps.quakeworld.nu/core](https://maps.quakeworld.nu/core/) (falling back
+to [vikpe/qw-assets](https://github.com/vikpe/qw-assets) and this repo's
+`bsp-mirror-1` release when that host is down), each sha256-pinned. `make build` then copies them into `dist/bsps/`. When
 a map has no BSP available the WASM side returns `null` and locvis
 transparently degrades to the V1 Euclidean nearest-neighbour
 attribution — no UI change beyond losing the wall-bleed correction

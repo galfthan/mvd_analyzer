@@ -110,10 +110,12 @@ make build                                  # output in dist/
 the competitive QW map set defined in
 [`scripts/fetch-bsps.sh`](scripts/fetch-bsps.sh) (id-stock from
 [id-maps-gpl](https://github.com/quakeworld/id-maps-gpl), community
-maps from [maps.quakeworld.nu/core](https://maps.quakeworld.nu/core/),
-sha256-pinned). `make build` then copies them into `dist/bsps/` for
-the WASM worker to lazy-fetch per map. The script hard-fails on any
-download or sha mismatch so a flaky mirror produces a red build
+maps from [maps.quakeworld.nu/core](https://maps.quakeworld.nu/core/)
+with fallbacks to [vikpe/qw-assets](https://github.com/vikpe/qw-assets)
+and this repo's `bsp-mirror-1` release, every source held to the same
+sha256 pin). `make build` then copies them into `dist/bsps/` for
+the WASM worker to lazy-fetch per map. The script hard-fails when no
+mirror yields a map matching its pin, so an outage produces a red build
 rather than a silent V1-everywhere deploy.
 
 For local dev the step is skippable — maps without a BSP fall back to

@@ -14,6 +14,21 @@
 #     mirror; /core/ holds the bsps shipped in the nquake client
 #     distribution).
 #
+# maps.quakeworld.nu is a single host, and an outage of it (2026-10-26)
+# took the Netlify deploy down with it. Its maps therefore carry fallback
+# mirrors, tried in order when the primary fails or serves bytes that
+# miss the pin (fallback_urls below):
+#
+#   - https://github.com/vikpe/qw-assets — byte-identical copies of most
+#     of the /core/ set.
+#   - The bsp-mirror-1 release on github.com/galfthan/mvd_analyzer — the
+#     maps qw-assets lacks (anwalked, defer, katt) or carries in a
+#     different build than the one our geometry and locs were made from
+#     (metron, pocket).
+#
+# Every mirror is held to the same sha256 pin, so a fallback can never
+# substitute a different map build.
+#
 # Local filenames use the LOC-CORPUS form (loc.NormalizeMapName) so the
 # locvis loader finds them by the same name `loc.LoadForMap` resolves
 # to. Only "phantombase" (the current, dominant version) is provisioned;
@@ -76,6 +91,67 @@ check_sha() {
   [[ "$actual" == "$expected" ]]
 }
 
+QW_ASSETS="https://raw.githubusercontent.com/vikpe/qw-assets/main/maps"
+OWN_MIRROR="https://github.com/galfthan/mvd_analyzer/releases/download/bsp-mirror-1"
+OWN_MIRROR_MAPS=" anwalked defer katt metron pocket "
+
+fallback_urls() {
+  local localname="$1" url="$2"
+  [[ "$url" == https://maps.quakeworld.nu/core/* ]] || return 0
+  if [[ "$OWN_MIRROR_MAPS" == *" $localname "* ]]; then
+    echo "$OWN_MIRROR/$localname.bsp"
+  else
+    echo "$QW_ASSETS/$localname/$localname.bsp"
+  fi
+}
+
+# Hosts that could not be connected to this run. A down host times out
+# rather than refusing, so without this every one of its ~24 maps would
+# sit through connect timeouts x retries before its fallback got a turn.
+DEAD_HOSTS=" "
+
+# fetch_one downloads $url into $out (gunzipping .gz) and checks the pin.
+# Returns non-zero, leaving no $out behind, on any failure.
+fetch_one() {
+  local localname="$1" url="$2" expected_sha="$3" out="$4"
+  local host="${url#https://}"; host="${host%%/*}"
+
+  if [[ "$DEAD_HOSTS" == *" $host "* ]]; then
+    printf "  skip  %-12s %s unreachable earlier this run\n" "$localname" "$host"
+    return 1
+  fi
+
+  local tmp rc=0
+  tmp="$(mktemp)"
+  curl -fsSL --connect-timeout 15 --retry 3 --retry-delay 2 -o "$tmp" "$url" || rc=$?
+  if (( rc != 0 )); then
+    printf "  FAIL  %-12s download failed (curl exit %d): %s\n" "$localname" "$rc" "$url"
+    # 6 = DNS failure, 7 = connection refused, 28 = timeout.
+    case "$rc" in 6|7|28) DEAD_HOSTS+="$host " ;; esac
+    rm -f "$tmp"
+    return 1
+  fi
+
+  if [[ "$url" == *.gz ]]; then
+    if ! gunzip -c "$tmp" > "$out"; then
+      printf "  FAIL  %-12s gunzip failed: %s\n" "$localname" "$url"
+      rm -f "$tmp" "$out"
+      return 1
+    fi
+    rm -f "$tmp"
+  else
+    mv "$tmp" "$out"
+  fi
+
+  if [[ -n "$expected_sha" ]] && ! check_sha "$out" "$expected_sha"; then
+    local actual
+    actual="$(sha256sum "$out" | awk '{print $1}')"
+    printf "  FAIL  %-12s sha mismatch from %s: got %s want %s\n" "$localname" "$url" "$actual" "$expected_sha"
+    rm -f "$out"
+    return 1
+  fi
+}
+
 download_one() {
   local localname="$1" url="$2" expected_sha="$3"
   local out="$BSP_DIR/$localname.bsp"
@@ -85,40 +161,18 @@ download_one() {
     return 0
   fi
 
-  local tmp
-  tmp="$(mktemp)"
-  if ! curl -fsSL --retry 3 --retry-delay 2 -o "$tmp" "$url"; then
-    printf "  FAIL  %-12s download failed: %s\n" "$localname" "$url"
-    rm -f "$tmp"
-    return 1
-  fi
-
-  if [[ "$url" == *.gz ]]; then
-    if ! gunzip -c "$tmp" > "$out"; then
-      printf "  FAIL  %-12s gunzip failed\n" "$localname"
-      rm -f "$tmp" "$out"
-      return 1
+  local u
+  for u in "$url" $(fallback_urls "$localname" "$url"); do
+    if fetch_one "$localname" "$u" "$expected_sha" "$out"; then
+      if [[ -n "$expected_sha" ]]; then
+        printf "  ok    %-12s (verified%s)\n" "$localname" "$([[ "$u" == "$url" ]] || echo ", fallback $u")"
+      else
+        printf "  ok    %-12s (downloaded, no sha pin — record %s)\n" "$localname" "$(sha256sum "$out" | awk '{print $1}')"
+      fi
+      return 0
     fi
-    rm -f "$tmp"
-  else
-    mv "$tmp" "$out"
-  fi
-
-  if [[ -n "$expected_sha" ]]; then
-    if check_sha "$out" "$expected_sha"; then
-      printf "  ok    %-12s (verified)\n" "$localname"
-    else
-      local actual
-      actual="$(sha256sum "$out" | awk '{print $1}')"
-      printf "  FAIL  %-12s sha mismatch: got %s want %s\n" "$localname" "$actual" "$expected_sha"
-      rm -f "$out"
-      return 1
-    fi
-  else
-    local actual
-    actual="$(sha256sum "$out" | awk '{print $1}')"
-    printf "  ok    %-12s (downloaded, no sha pin — record %s)\n" "$localname" "$actual"
-  fi
+  done
+  return 1
 }
 
 echo "Fetching BSPs into $BSP_DIR/ ..."
