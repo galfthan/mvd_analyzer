@@ -1,6 +1,8 @@
 # Plan — mvd-web on Svelte, behind a data layer
 
-Status: phases A–B done (2026-10-27), C–E in progress.
+Status: phases A–C done (2026-10-27), D–E in progress. C covers the
+clock, teams and current-demo stores; pov and URL state come with the
+components that use them (D/E).
 Branch: to be created off `player-tab`. The Player tab does not merge
 until at least phases A–E below are done.
 
@@ -56,8 +58,9 @@ Non-goals (for this plan):
   into `dist/`, then the corpus copies. The `<meta name="build">` stamp
   and the wasm hash check (`checkBuildCoherence`) carry over.
 - Netlify: the build image has node; pin it (`NODE_VERSION` in
-  netlify.toml or `.nvmrc`). Cache headers: keep `no-cache` for the stable
-  URLs; `dist/assets/*` is hashed and can be `immutable`.
+  netlify.toml or `.nvmrc`). Cache headers stay `no-cache` everywhere
+  (Netlify merges overlapping header rules, so an `immutable` rule for the
+  hashed `dist/assets/*` would combine with `/*`'s `no-cache`).
 - `make test`: node becomes required for mvd-web (today it is skipped
   without node). Adds `svelte-check`. Pure modules (data layer, stores,
   playlist) keep `node --test`.
@@ -79,7 +82,7 @@ DemoHandle
   view(fn, opts) → Promise<…>       view queries: topWindows, topKills,
                                     stateAt, streamSlice, … (today's viewQueryInWorker)
   recomputeRegions(def), lineOfSight()
-  demoBytes() → Promise<Uint8Array> for the player iframe
+  demoBlob                          the demo itself, for the player iframe
 ```
 
 - **`WasmSource`** (this plan): wraps today's worker protocol

@@ -292,6 +292,14 @@ and the demo bytes). `src/main.js` publishes it as `window.mvdData` /
 talks to the worker or the hub itself. A handle answers only while it is
 the current demo — the worker holds one.
 
+Shared state is in `src/state/` (`window.MvdState`): `clock` (the one
+match clock — `setCurrentTime` seeks it and `onClockTick` syncs the legacy
+views; the map tab's playback loop publishes as `'playback'` and does its
+own lighter sync), `teams` (the canonical team order and colours —
+`TEAM_COLORS` is app.js's mirror) and `demo` (the current `DemoHandle`).
+The stores follow Svelte's store contract, so components read them as
+`$clock`; `store.set` always notifies, even with an unchanged value.
+
 1. User drops an MVD file on the Search tab, pastes a hub.quakeworld.nu
    URL, or picks a row from the search results.
 2. `loadDemo()` hands it to `mvdData.load()`, which downloads hub demos
@@ -837,8 +845,8 @@ reloads of a hub embed.
   created on the first visit to the tab, and dropped on the next demo load
   (`teardownPlayer` from `resetUIToCleanState`).
 - **No second download.** The data layer keeps a copy of the analysed bytes
-  (`DemoHandle.demoBytes()`; the analyze transfers the original buffer),
-  wrapped by `snapshotPlayerDemo` and
+  as a Blob (`DemoHandle.demoBlob`; the analyze transfers the original
+  buffer), wrapped by `playerDemoOf` and
   handed to the engine as a `blob:` URL — so locally loaded files play too.
 - **One clock.** While the tab is active the engine is the clock: a 100 ms
   poll pushes its time (demo-relative, minus `demoOffset`) into

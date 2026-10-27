@@ -91,10 +91,12 @@ belongs in the frontend.
   of untouched files.
 - **Team colors (frontend).** There is one canonical team→color
   mapping used everywhere the user sees a team — Summary, scoreboard,
-  map, timeline, region control, loc heatmap. It is `TEAM_COLORS` in
-  `mvd-web/static/app.js` indexed by a team's position in
-  `timelineState.teams`, the frag-sorted order set once via
-  `setCanonicalTeams()` in `displayResults()` (winning team = index 0).
+  map, timeline, region control, loc heatmap. It lives in
+  `mvd-web/src/state/teams.js` (the `teams` store: `order` + `colors`,
+  `colorOf` / `teamIndexOf`); legacy `app.js` reads its mirror,
+  `TEAM_COLORS` indexed by a team's position in `timelineState.teams`.
+  The order is the frag-sorted one set once via `setCanonicalTeams()`
+  in `displayResults()` (winning team = index 0).
   Which palette entry lands at each index is decided by team NAME
   (`assignTeamColors`): teams literally named "red"/"blue" get those
   colors, everyone else takes the remaining entries in name sort order —

@@ -49,28 +49,40 @@ export class WasmSource {
             name = hub.demoFilename(game);
         }
         onStage('analyze');
-        // The analyze transfers (detaches) the buffer; the player needs its
-        // own copy.
-        const kept = bytes.slice();
-        if (this.current) this.current.current = false;
+        // The analyze transfers (detaches) the buffer, so the player's copy
+        // is taken first.
+        const handle = new DemoHandle(this, {
+            name, game: game || null,
+            blob: new Blob([bytes]),
+            gzipped: bytes.length > 1 && bytes[0] === 0x1f && bytes[1] === 0x8b,
+        });
+        const prev = this.current;
+        if (prev) prev.current = false;
+        this.current = handle;
         const { reqId, promise } = this.client.request(
             'analyze', { bytes: bytes.buffer, filename: name }, [bytes.buffer]);
-        const handle = new DemoHandle(this, { name, game: game || null, bytes: kept });
-        this.current = handle;
         this._byReqId.set(reqId, handle);
+        // A failed analyze leaves the Go side holding the previous demo
+        // (cmd/wasm analyze returns before replacing lastResult), so the
+        // previous handle is queryable again.
+        const fail = (err) => {
+            this._byReqId.delete(reqId);
+            handle.current = false;
+            if (this.current === handle) {
+                this.current = prev;
+                if (prev) prev.current = true;
+            }
+            throw err;
+        };
         let reply;
         try {
             reply = await promise;
         } catch (err) {
-            this._byReqId.delete(reqId);
-            throw err;
+            fail(err);
         }
         const tParse = performance.now();
         const result = JSON.parse(reply.json);
-        if (result.error) {
-            this._byReqId.delete(reqId);
-            throw new Error(result.error);
-        }
+        if (result.error) fail(new Error(result.error));
         handle.result = result;
         handle.timings = { net, worker: reply.timings || null, parseMs: performance.now() - tParse };
         return handle;
@@ -95,7 +107,7 @@ export class WasmSource {
 }
 
 export class DemoHandle {
-    constructor(source, { name, game, bytes }) {
+    constructor(source, { name, game, blob, gzipped }) {
         this.source = source;
         this.name = name;           // file name; the engine needs the extension
         this.game = game;           // the hub row, or null for a local file
@@ -106,16 +118,12 @@ export class DemoHandle {
         this.current = true;
         this.result = null;         // the whole Result (legacy app.js reads it)
         this.timings = null;
-        this._bytes = bytes;
+        this.demoBlob = blob;       // the original demo, for the player
+        this.gzipped = gzipped;
         let settle;
         const p = new Promise((resolve, reject) => { settle = { resolve, reject }; });
         p.catch(() => {});
         this._buckets = { promise: p, ...settle };
-    }
-
-    // demoBytes is the original demo, for the player.
-    demoBytes() {
-        return this._bytes;
     }
 
     // section(name) resolves one top-level Result section.

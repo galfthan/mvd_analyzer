@@ -35,10 +35,3 @@
     # build-stamped <meta name="build"> in index.html (belt for a deploy
     # landing mid-session) and reloads once on mismatch.
     Cache-Control = "no-cache"
-
-# Vite's bundles carry a content hash in their file name, so a cached copy
-# can never be stale.
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"

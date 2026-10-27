@@ -7,10 +7,13 @@ import * as MapView from '../../mvd-map-view/src/index.js';
 import * as Playlist from './lib/playlist.js';
 import * as MvdHub from './data/hub.js';
 import { WasmSource } from './data/wasm-source.js';
+import * as MvdState from './state/index.js';
 
 window.MapView = MapView;
 window.Playlist = Playlist;
 window.MvdHub = MvdHub;
+// Shared state: the clock, the team colours, the current demo.
+window.MvdState = MvdState;
 // The data layer: every demo load, view query, region recompute and line of
 // sight goes through this one source (src/data/wasm-source.js).
 window.mvdData = new WasmSource(new Worker('worker.js'));

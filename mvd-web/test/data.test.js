@@ -43,15 +43,27 @@ test('load analyses bytes, keeps a copy for the player, and names the demo', asy
     const { w, src } = await readySource();
     const { handle, req } = await analyze(w, src, { match: { map: 'dm3' } });
     assert.equal(req.filename, 'a.mvd');
-    assert.deepEqual([...handle.demoBytes()], [1, 2, 3]);
+    assert.deepEqual([...new Uint8Array(await handle.demoBlob.arrayBuffer())], [1, 2, 3]);
+    assert.equal(handle.gzipped, false);
     assert.deepEqual(handle.ref, { key: 'file:a.mvd', gameId: null });
     assert.deepEqual(await handle.section('match'), { map: 'dm3' });
     assert.equal(handle.timings.worker.wasmAnalyzeMs, 5);
 });
 
-test('a Result error envelope rejects the load', async () => {
+test('a failed load rejects and leaves the previous demo queryable', async () => {
     const { w, src } = await readySource();
-    await assert.rejects(analyze(w, src, { error: 'bad demo' }), /bad demo/);
+    const { handle } = await analyze(w, src, {});
+    await assert.rejects(analyze(w, src, { error: 'bad demo' }, 'bad.mvd'), /bad demo/);
+    assert.equal(src.current, handle);
+    const p = handle.lineOfSight();
+    w.reply({ type: 'los_result', reqId: w.last('computeLos').reqId, json: '[]' });
+    assert.equal(await p, '[]');
+
+    const q = src.load({ bytes: new Uint8Array([1]), name: 'c.mvd' });
+    await tick();
+    w.reply({ type: 'error', reqId: w.last('analyze').reqId, message: 'worker died' });
+    await assert.rejects(q, /worker died/);
+    assert.equal(handle.current, true);
 });
 
 test('deferred buckets land on their own demo only', async () => {

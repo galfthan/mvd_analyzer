@@ -7,101 +7,25 @@
 // it can be tweaked in one place — including the values that are duplicated
 // in styles.css as :root custom properties (kept in sync by hand: see the
 // matching --team-a / --armor-* / --accent-cyan declarations in styles.css).
-const TEAM_PALETTE = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
+// Team colours live in src/state/teams.js (MvdState) — the one team → colour
+// mapping, chosen by team NAME (see CLAUDE.md "Team colors"). TEAM_COLORS and
+// timelineState.teams are app.js's mirror of it, refreshed by onTeamsChanged:
+// TEAM_COLORS[i] is the colour of timelineState.teams[i], the winner-first
+// canonical order every call site indexes by.
+let TEAM_COLORS = [];
 
-// Per-PLAYER palette, used in individual modes with more than two players
-// (FFA, race) where every player is their own side and there is no team to
-// name a colour after. It is deliberately NOT the team palette: that one is
-// four entries, which runs out after four of a field of eleven.
-//
-// It is assigned exactly the way TEAM_PALETTE is — by NAME, in sort order
-// (assignPlayerColors) — so CLAUDE.md's stability property holds here too: a
-// player keeps the same colour in every demo of the same field regardless of
-// who won. Assigning by frag RANK instead (which this briefly did) recoloured
-// the whole scoreboard when the result changed. A DUEL is not routed here at
-// all: two players are a matchup, and it keeps the team palette so the
-// familiar red/blue reading of a 1v1 is unchanged.
-//
-// Twelve hues, ordered so adjacent entries stay distinguishable, and chosen to
-// read against the dark panel background.
-const PLAYER_PALETTE = [
-    '#ff5050', '#50a0ff', '#4ecdc4', '#ffc107',
-    '#c084fc', '#7ee787', '#ff8fab', '#f97316',
-    '#38bdf8', '#a3e635', '#e879f9', '#94a3b8',
-];
-
-// Per-match team colours. TEAM_COLORS[i] is the colour of
-// timelineState.teams[i] — the winner-first index convention every call site
-// uses — but WHICH palette entry lands at each index is decided by team NAME
-// (assignTeamColors, called from displayResults), so a team keeps its colour
-// across demos regardless of who won. The CSS mirror --team-a..--team-d is
-// re-pointed at the same values there.
-let TEAM_COLORS = [...TEAM_PALETTE];
-
-// Deterministic name-based palette assignment. Teams literally named "red" /
-// "blue" (case-insensitive) claim those palette entries outright; every other
-// team takes the remaining entries in code-unit sort order of its name, so
-// e.g. [fu] vs -s- colours the same way in every demo of that matchup. The
-// returned array is always at least palette-length: unused palette entries
-// pad the tail so defensive TEAM_COLORS[i] lookups past the team count still
-// resolve; a fifth-or-later team (palette exhausted) falls back to grey.
-function assignTeamColors(teams) {
-    const slotOf = new Array(teams.length).fill(-1);
-    const taken = new Set();
-    teams.forEach((t, i) => {
-        const n = String(t).toLowerCase();
-        const fixed = n === 'red' ? 0 : n === 'blue' ? 1 : -1;
-        if (fixed >= 0 && !taken.has(fixed)) { slotOf[i] = fixed; taken.add(fixed); }
-    });
-    const rest = teams.map((_, i) => i).filter(i => slotOf[i] < 0)
-        .sort((a, b) => (teams[a] < teams[b] ? -1 : teams[a] > teams[b] ? 1 : 0));
-    let next = 0;
-    for (const i of rest) {
-        while (taken.has(next)) next++;
-        if (next >= TEAM_PALETTE.length) break;
-        slotOf[i] = next;
-        taken.add(next);
-    }
-    const colors = teams.map((_, i) => TEAM_PALETTE[slotOf[i]] ?? '#cccccc');
-    for (let s = 0; s < TEAM_PALETTE.length; s++) {
-        if (!taken.has(s)) colors.push(TEAM_PALETTE[s]);
-    }
-    return colors;
-}
-
-// The player-palette twin of assignTeamColors: entries are handed out in
-// code-unit sort order of the player NAMES, and the returned array is aligned
-// with the caller's (frag-sorted) `players` order, so TEAM_COLORS keeps its
-// index convention while a player's colour depends only on who is in the
-// game. Beyond the palette's length it wraps — twelve distinct hues is the
-// practical limit of a legend anyway.
-function assignPlayerColors(players) {
-    const byName = players.map((_, i) => i)
-        .sort((a, b) => (players[a] < players[b] ? -1 : players[a] > players[b] ? 1 : 0));
-    const colors = new Array(players.length);
-    byName.forEach((idx, rank) => {
-        colors[idx] = PLAYER_PALETTE[rank % PLAYER_PALETTE.length];
-    });
-    return colors;
-}
-
-// Single entry point for the canonical team order: every path that decides
-// the order goes through here, so timelineState.teams, TEAM_COLORS and the
-// CSS mirror (--team-a..--team-d — .team-item:nth-child stripes, the topbar
-// "A vs B" spans, anything on var(--team-*)) can never disagree.
+// setCanonicalTeams sets the match's canonical team order (once per demo, from
+// displayResults). In an individual layout with more than two players
+// (`perPlayer`) every player is their own side and is coloured from the
+// player palette.
 function setCanonicalTeams(teams, perPlayer = false) {
-    timelineState.teams = teams;
-    // In an individual mode `teams` is the frag-sorted PLAYER list. The
-    // four-entry team palette cannot cover it, so the wider player palette is
-    // handed out instead — by NAME sort order, never by rank, so the colours
-    // do not move when the scoreline does. Same array, same index convention,
-    // so every call site is unchanged.
-    TEAM_COLORS = perPlayer
-        ? assignPlayerColors(teams)
-        : assignTeamColors(teams);
-    // The map component keeps its own palette reference (it never reads app
-    // globals); re-point it so the canvas layers repaint in the same colours
-    // the DOM shows. mapView exists before any demo load (module bootstrap).
+    const players = [...(currentResult?.match?.players || []), ...(currentResult?.demoInfo?.players || [])];
+    MvdState.setCanonicalTeams(teams, perPlayer, players);
+}
+
+function onTeamsChanged(state) {
+    timelineState.teams = state.order;
+    TEAM_COLORS = state.colors;
     if (mapView) mapView.teamColors = TEAM_COLORS;
     const rootStyle = document.documentElement.style;
     ['--team-a', '--team-b', '--team-c', '--team-d'].forEach((v, i) =>
@@ -164,6 +88,7 @@ let currentResult = null;
 // behind `currentResult`: its view queries, region recompute and line of
 // sight answer for that demo only.
 let currentDemo = null;
+let analyzerFailed = false;
 
 // ─── Load-timing instrumentation ────────────────────────────────────────────
 // Structured per-stage timing for the demo load path, printed to the console
@@ -331,6 +256,13 @@ function onBucketsReady(data) {
 // ─── Setup ──────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Shared state (src/state/) → app.js's mirrors. Both stores call their
+    // subscriber at once; the clock's first call (t = 0, nothing loaded) is
+    // not a tick.
+    MvdState.teams.subscribe(onTeamsChanged);
+    let clockSubscribed = false;
+    MvdState.clock.subscribe((tick) => { if (clockSubscribed) onClockTick(tick); });
+    clockSubscribed = true;
     setupFileUpload();
     setupTabs();
     setupPlayerTab();
@@ -353,8 +285,10 @@ document.addEventListener('DOMContentLoaded', () => {
         switchTab(requestedTab);
     } // else: leave the HTML default (Search) active.
 
-    mvdData.ready.then(onAnalyzerReady,
-        (err) => setLoadingOverlayMessage(`Failed to load the analyzer: ${err.message}`));
+    mvdData.ready.then(onAnalyzerReady, (err) => {
+        analyzerFailed = true;
+        setLoadingOverlayMessage(err.message);
+    });
 
     // Auto-load demo if URL has ?gameId= (canonical) or ?hub= (legacy) param.
     // The load waits for the analyzer itself.
@@ -385,9 +319,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ─── Current Time ──────────────────────────────────────────────────────────
 
-// Single function to set current time and sync all views
+// setCurrentTime moves the page's one clock (MvdState.clock, src/state/
+// clock.js); onClockTick then syncs every legacy view.
 function setCurrentTime(time) {
-    mapState.currentTime = Math.max(0, Math.min(time, timelineState.duration || Infinity));
+    MvdState.clock.seek(time);
+}
+
+// onClockTick is app.js's clock subscriber. The map tab's playback loop
+// ('playback') does its own lighter per-frame sync, and a demo reset
+// ('reset') happens while the views are half torn down — both skip it.
+function onClockTick({ t, from }) {
+    if (from === 'playback' || from === 'reset') return;
+    mapState.currentTime = t;
     mapState.renderDirty = true;
     updateUnifiedCursor();
     updateUnifiedTimeDisplay();
@@ -672,8 +615,9 @@ async function loadFromHub() {
         status.textContent = 'Error: ' + error.message;
         status.className = 'status error';
         // If we were holding the loading overlay up for a deep-link auto-load,
-        // drop it so the user sees the error message instead of a stuck spinner.
-        hideLoadingOverlay();
+        // drop it so the user sees the error message instead of a stuck
+        // spinner — unless the analyzer itself failed, which the overlay says.
+        if (!analyzerFailed) hideLoadingOverlay();
     } finally {
         btn.disabled = false;
     }
@@ -692,6 +636,11 @@ const LOAD_STAGE_TEXT = {
 async function loadDemo(input) {
     const status = document.getElementById('upload-status');
     status.className = 'status loading';
+    const hubId = input.game?.id ?? input.gameId;
+    if (hubId != null) document.getElementById('hub-input').value = hubId;
+    // The timing window opens once the analyzer is up, so a deep link's
+    // total does not include the wasm load (logged on its own).
+    await mvdData.ready;
     startLoadTiming();
     const handle = await mvdData.load(input, {
         onStage: (stage) => { status.textContent = LOAD_STAGE_TEXT[stage]; },
@@ -705,9 +654,9 @@ async function loadDemo(input) {
     setAnalysisStatus(status, handle.result);
     currentDemo = handle;
     currentResult = handle.result;
-    playerState.demo = snapshotPlayerDemo(handle.demoBytes(), handle.name);
+    MvdState.demo.set(handle);
+    playerState.demo = playerDemoOf(handle);
     if (handle.game) {
-        document.getElementById('hub-input').value = handle.game.id;
         currentResult.hubInfo = {
             gameId: handle.game.id,
             viewerUrl: `https://hub.quakeworld.nu/games/?gameId=${handle.game.id}`,
@@ -4237,6 +4186,7 @@ function resetUIToCleanState() {
     mapState.mapGeometry = null;
     mapState.bounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
     mapState.currentTime = 0;
+    MvdState.clock.seek(0, 'reset');
     mapState.isPlaying = false;
     mapState.playbackSpeed = 1;
     mapState.animationFrameId = null;
@@ -4295,9 +4245,10 @@ function resetTimelineState() {
     timelineState.deathEvents = [];
     timelineState.killEvents = [];
     timelineState.duration = 0;
+    MvdState.clock.setDuration(0);
     timelineState.matchStartTime = 0;
     timelineState.demoOffset = 0;
-    timelineState.teams = [];
+    MvdState.setCanonicalTeams([]);
     timelineState.segment = null;
     timelineState.dragging = false;
     precomputedFrags = [];
@@ -4355,6 +4306,7 @@ function displayTimelineAnalysis(result) {
     timelineState.matchStartTime = 0;
     timelineState.demoOffset = (result.streams?.global?.demoOffset || 0) * 0.001;
     timelineState.duration = (result.match?.duration || 600000) * 0.001;
+    MvdState.clock.setDuration(timelineState.duration);
     timelineState.events = (result.messages?.messages || []).map(e => ({ ...e, time: e.time * 0.001 }));
     // Sorted by time once here so prepScoreData / precomputeFragCounts don't
     // each re-sort a clone on every render (pan-drag re-renders many times/sec).
@@ -6751,7 +6703,7 @@ const PLAYER_SEEK_THROTTLE_MS = 150;
 const PLAYER_SEEK_SETTLE_MS = 2000;
 
 const playerState = {
-    demo: null,         // { blob, path } of the loaded demo, see snapshotPlayerDemo
+    demo: null,         // { blob, path } of the loaded demo, see playerDemoOf
     blobUrl: null,
     iframe: null,
     fte: null,          // FteController once the engine is up
@@ -6768,12 +6720,11 @@ const playerState = {
     markOut: null,
 };
 
-// snapshotPlayerDemo wraps the demo bytes for the Player tab. The engine
-// finds the demo by name (config.cfg: `playdemo match`), so the extension
-// has to say whether the bytes are gzipped.
-function snapshotPlayerDemo(bytes, name) {
-    const gz = bytes.length > 1 && bytes[0] === 0x1f && bytes[1] === 0x8b;
-    return { blob: new Blob([bytes]), path: gz ? 'qw/match.mvd.gz' : 'qw/match.mvd', name };
+// playerDemoOf: the loaded demo as the Player tab hands it to the engine. The
+// engine finds the demo by name (config.cfg: `playdemo match`), so the
+// extension has to say whether the bytes are gzipped.
+function playerDemoOf(handle) {
+    return { blob: handle.demoBlob, path: handle.gzipped ? 'qw/match.mvd.gz' : 'qw/match.mvd', name: handle.name };
 }
 
 function playerTabActive() {
@@ -6940,11 +6891,10 @@ function playerSetSpeed(speed) {
 // TEAM_COLORS index), -1 when unknown. In an individual layout every player
 // is their own side.
 function playerTeamIndex(name) {
-    const teams = timelineState.teams || [];
-    if (individualFieldActive()) return teams.indexOf(name);
-    const demoPlayers = currentResult?.demoInfo?.players || [];
-    const team = demoPlayers.find(p => p.name === name)?.team ?? mapState.playerSymbols?.[name]?.team;
-    return teams.indexOf(team);
+    const state = MvdState.teams.get();
+    const idx = MvdState.teamIndexOf(state, name, individualFieldActive());
+    if (idx >= 0) return idx;
+    return state.order.indexOf(mapState.playerSymbols?.[name]?.team);
 }
 
 function playerColor(name) {
@@ -12044,6 +11994,7 @@ function animatePlayback() {
     }
 
     // Lightweight sync every frame
+    MvdState.clock.seek(mapState.currentTime, 'playback');
     updateUnifiedCursor();
     updateUnifiedTimeDisplay();
     renderMap(mapState.currentTime);
