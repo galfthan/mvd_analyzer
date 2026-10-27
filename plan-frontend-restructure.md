@@ -17,6 +17,12 @@ Key Moments followed the same way (`src/tabs/keymoments/`,
 `src/lib/keymoments.js`); its damage banner, shared with Summary and Aim,
 moved to `src/lib/provenance.js` (`MvdLib.damageProvenanceHtml`). The
 two view queries go through the `demo` store's handle, not `app.js`.
+Summary followed (`src/tabs/summary/`, `src/lib/summary.js`), with its
+accuracy conventions in `src/lib/accuracy.js` and the match wall clock in
+`src/lib/wall-clock.js` (the topbar and the Aim tab reach theirs through
+`MvdLib`). The orchestration it shares with Timeline, Map and Aim —
+`displayResults`, the body classes, `setCanonicalTeams`, the topbar —
+stays in `app.js` until those tabs are ported.
 C covers the clock, teams and current-demo stores. D renders the top bar,
 sidebar and layout in Svelte with the active tab in a store; the load
 overlay and search stay legacy until their tabs are ported. E is the
@@ -192,7 +198,7 @@ and panes `MapPane`, `HealthArmorPane`, `MomentsPane`, `FragFeedPane`.
 | D | Svelte shell (sidebar, tabs, overlay, search) with `LegacyTab` hosts | all tabs work inside the new shell |
 | E | Player tab in Svelte, panes on dockview, own Map pane instance | Player tab section deleted from `app.js` → **player-tab can merge** |
 | F0 | Arrangeable panels on the multi-panel tabs (Summary, Timeline, Locs & regions, Key moments, Pickups, Aim) | done |
-| F | Remaining tabs, smallest/least coupled first: Chat (done), Pack drops (done), Pickups (done), Key moments (done), Summary, Aim, Locs & regions, Timeline, Map | each port deletes its `app.js` section; done when `app.js` is gone |
+| F | Remaining tabs, smallest/least coupled first: Chat (done), Pack drops (done), Pickups (done), Key moments (done), Summary (done), Aim, Locs & regions, Timeline, Map | each port deletes its `app.js` section; done when `app.js` is gone |
 
 Not everything in `app.js` becomes a component. The parts without a DOM
 (playerStats accessors, bucket-view accessors, the data-preparation

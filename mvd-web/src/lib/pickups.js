@@ -162,7 +162,7 @@ function holdCol(spec, isWeapon) {
 
 // Possession cell for a pickups row. Team rows read the pre-summed team row
 // from playerStats (never a JS re-aggregation of member shares — see the
-// comment on app.js teamRowsInColourOrder).
+// comment on teamRowsInColourOrder in player-stats.js).
 function holdCellFor(col, isTeam, key, state) {
     const row = isTeam ? state.psTeamByName.get(key) : state.psByName.get(key);
     const stat = row?.hold?.[col.kindSpec.hold]?.[col.kindSpec.kind];

@@ -22,7 +22,7 @@ talks to it through a JS shim.
   uses — [`mvd-map-view`](../mvd-map-view/README.md) (`MapView`), the data
   layer (`mvdData`, `MvdHub`), shared state (`MvdState`), result helpers
   (`MvdLib`) and the Player tab's engine (`MvdPlayer`). Ported so far: the
-  shell, the Player tab (`src/player/`), and the Chat, Pack Drops,
+  shell, the Player tab (`src/player/`), and the Summary, Chat, Pack Drops,
   Pickups and Key Moments tabs (`src/tabs/<name>/`, their DOM-free parts in
   `src/lib/<name>.js`); see
   [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
@@ -260,8 +260,8 @@ says so instead of claiming the demo had no powerups.
 The tab is Svelte (`src/tabs/keymoments/KeyMomentsTab.svelte`); the
 lists, the filter, the two view queries' options, the highlight rankings
 and every row's markup are `src/lib/keymoments.js`, and the damage
-banner is `src/lib/provenance.js` (`app.js` reaches it as
-`MvdLib.damageProvenanceHtml` for Summary and Aim). The tables are built
+banner is `src/lib/provenance.js` (shared with the Summary tab; `app.js`
+reaches it as `MvdLib.damageProvenanceHtml` for Aim). The tables are built
 on the first frame the tab shows after the demo changed, the view
 queries issued then; a reply for a superseded demo is dropped. Rows are
 hand-built markup so `makeSortable` can sort them.
@@ -328,7 +328,7 @@ The shell is Svelte (`src/shell/`): `App.svelte` renders the top bar,
 the sidebar (from `TABS` in `src/state/ui.js`) and the layout, and adopts
 the markup of tabs not yet ported — `index.html`'s hidden `#legacy-dom`,
 which `app.js` finds by id — into the main pane (`adopt.js`). Ported
-tabs (`PlayerTab`, and `ChatTab`, `PackDropsTab`, `PickupsTab`,
+tabs (`PlayerTab`, and `SummaryTab`, `ChatTab`, `PackDropsTab`, `PickupsTab`,
 `KeyMomentsTab` in
 `src/tabs/`) are mounted there beside
 them; `app.js` still toggles their `active` class like any `.tab-content`.
@@ -359,9 +359,9 @@ them; `app.js` still toggles their `active` class like any `.tab-content`.
 6. On `result`, `app.js` parses the JSON, clears the no-demo class,
    switches to the Summary tab, and renders all tabs. The main-thread
    inits are cheap, so they run now even though the bucket-derived
-   fields are still empty — the scoreboard, key moments and loc graph
-   are fully populated (chat, pack drops and pickups build on the first
-   frame their tab shows); only the timeline
+   fields are still empty — the loc graph is fully populated (the
+   Svelte tabs — Summary, Chat, Key Moments, Pack Drops, Pickups —
+   build on the first frame they show); only the timeline
    graph, map trails and region overlay are blank. On the later
    `buckets` message the data layer (`DemoHandle._applyBuckets`) stashes
    the payload onto `result.timelineAnalysis.bucketView` / `.regionControl
@@ -380,6 +380,20 @@ Every table on the Summary tab — Basic Stats, Weapon Stats, Item Pickups
 `match.players`, `frags.byPlayer`, `frags.frags` and `demoInfo` that
 lived in `app.js` and that the REST and MCP consumers never got; the
 merge now happens once, in Go.
+
+The tab is Svelte (`src/tabs/summary/SummaryTab.svelte`). Its DOM-free
+parts are `src/lib/summary.js` (Match Info / Settings / Server Info, the
+Teams box, every table's row markup, Kills by Weapon, the no-match
+explanation), `src/lib/accuracy.js` (the `Acc` cell and its conventions)
+and `src/lib/wall-clock.js` (the Date cell); team rows and per-team sums
+come through `src/lib/player-stats.js`. It reads the `demo` and `teams`
+stores and builds on the first frame it shows after either changed, so
+every row takes its stripe from the canonical order `displayResults` set
+(CLAUDE.md "Team colors"). The body classes that hide its panels
+(`duel-mode`, `individual-mode`, `no-team-rows`, `no-match`) stay with
+`displayResults`, which the other tabs share. Rows are hand-built markup
+so `makeSortable` can sort them; a header's sort arrow survives a demo
+load while the rows come back in their default order, as before.
 
 Two consequences worth knowing:
 
@@ -520,7 +534,8 @@ between two screenshots, where a tooltip does not exist.
 So a cell whose `hitsConvention` (v74) is not the one KTX uses for that
 weapon wears a **`≠`** in the text, with a footnote under the table that
 appears exactly when some cell wears it. The rule is per weapon, not per
-family (`ktxHitsConvention` mirrors `view.ktxHitsConvention`), and since
+family (`ktxHitsConvention` in `src/lib/accuracy.js` mirrors
+`view.ktxHitsConvention`), and since
 v75 every computed tier publishes KTX's convention on every weapon but
 one, so the mark has shrunk from four cells to one. A KTX-overlaid family
 matches on every weapon and is never marked. A `derived` one is not marked
@@ -560,8 +575,8 @@ unlinked still counts and `Splash` floors at zero.)
 A reader with both on screen gets the reconciliation IN THE PAYLOAD, not
 only in the source: the Aim cell's tooltip on `rl`/`gl` names its own
 convention and the Summary number it differs from, with the size of the
-gap (~4x on RL, ~1.5x on GL — `RECON_ANYDAMAGE_NOTE`, appended to
-`RECON_ACCURACY_NOTE` for those two weapons only, since everywhere else
+gap (~4x on RL, ~1.5x on GL — `RECON_ANYDAMAGE_NOTE` in `app.js`, appended
+to `RECON_ACCURACY_NOTE` (`src/lib/accuracy.js`) for those two weapons only, since everywhere else
 the two conventions coincide and the sentence would invent a difference).
 
 Note that `getAccuracyClass` (`accuracy-high/medium/low`) is currently
@@ -603,7 +618,8 @@ to the minute claims a minute. The ±14 h `assumedUtc` grade puts the true
 instant anywhere in a 28-hour window, so an anchor accurate to an hour or
 worse prints the DAY plus its ± instead — `~2002-08-04 UTC ±14 h`, not
 `~2002-08-04 11:44 UTC`. Second-scale and tighter anchors keep the minute.
-`formatUtcStamp` switches on the number, like `formatAccuracyMs` beside it,
+`formatUtcStamp` (`src/lib/wall-clock.js`) switches on the number, like
+`formatAccuracyMs` beside it,
 so a new rung on the accuracy ladder needs no change here.
 
 ### A mode with no teams (FFA, race — and every duel)
@@ -744,8 +760,8 @@ depends on how many message columns there are.
 the tab used to render headers over nothing with an "Analysis complete!"
 status, indistinguishable from a bug.
 
-`displayNoMatch()` now renders the marker's own story at the top of the
-Summary tab: a reason-appropriate heading (the five `reason` values are a
+The Summary tab now renders the marker's own story at the top of the
+tab (`noMatchView` in `src/lib/summary.js`): a reason-appropriate heading (the five `reason` values are a
 total partition, so the title map is exhaustive by contract), the marker's
 `detail` sentence verbatim — it is **display-only** by contract, unstable
 wording that is never parsed, and every fact in it is a structured field
@@ -779,7 +795,7 @@ exactly one reason, and there — `demoUnreadable` — the panel also prints
 the reader's own message. The load status line likewise drops to the
 neutral `status` class rather than the red `status error`.
 
-The body class `no-match` hides the four Summary panels fed by `streams`
+The body class `no-match` (set by `displayResults`) hides the four Summary panels fed by `streams`
 (Basic Stats, Weapon Stats, Item Pickups, Kills by Weapon); Match Info,
 Match Settings and Server Info stay, because they have something to say.
 The Teams box is hidden only when the frag log named no teams either — a
@@ -811,7 +827,8 @@ Several panels need a paragraph explaining what their numbers mean and
 where they come from — Item Pickups & Drops (Summary), Region Control and
 Loc Heatmap (Locs & Regions), and both Aim panels. That prose is kept in
 full, but collapsed, so a panel opens with its table rather than with a
-wall of text. The idiom is a single one in `index.html`:
+wall of text. The idiom is a single one in the tab markup (`index.html`, or
+the tab's Svelte component once ported):
 
 ```html
 <details class="panel-info">
@@ -845,7 +862,8 @@ to the default layout. The arrangement is saved per viewer in
 this browser across visits and demos, and nothing is sent anywhere.
 
 The panels are the tabs' existing markup, tagged `data-panel="<id>"` in
-`index.html`; `src/ui/panels/config.js` names each tab's panels, their
+`index.html` (or a ported tab's component, which renders them as direct
+children of its `#tab-<name>`); `src/ui/panels/config.js` names each tab's panels, their
 titles and default order. Nothing is moved in the DOM: the order is the
 CSS `order` property (a panelized tab lays out as a flex column; Key
 Moments keeps its grid) and collapse / close are classes. `app.js` keeps

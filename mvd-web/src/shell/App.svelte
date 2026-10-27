@@ -6,6 +6,7 @@
     import Topbar from './Topbar.svelte';
     import Sidebar from './Sidebar.svelte';
     import PlayerTab from '../player/PlayerTab.svelte';
+    import SummaryTab from '../tabs/summary/SummaryTab.svelte';
     import ChatTab from '../tabs/chat/ChatTab.svelte';
     import PackDropsTab from '../tabs/packdrops/PackDropsTab.svelte';
     import PickupsTab from '../tabs/pickups/PickupsTab.svelte';
@@ -19,6 +20,7 @@
     <Sidebar />
     <main class="main" use:adopt={{ selector: '#legacy-dom > #unified-timeline', first: true }}>
         <div class="main-scroll" use:adopt={{ selector: '#legacy-dom > .tab-content' }}>
+            <SummaryTab />
             <ChatTab />
             <PackDropsTab />
             <PickupsTab />

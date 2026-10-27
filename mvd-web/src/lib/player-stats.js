@@ -19,6 +19,19 @@ export function sortByFragsDesc(players) {
     return [...players].sort((a, b) => fragsOfRow(b) - fragsOfRow(a));
 }
 
+// Sum frags per team, returning a { teamName: totalFrags } map. Players
+// with no team bucket under `emptyTeamKey` (default '' — the topbar /
+// team-order convention; the Teams panel passes 'unknown' so a teamless
+// bucket renders with a visible label).
+export function teamFragTotals(players, emptyTeamKey = '') {
+    const totals = {};
+    for (const p of (players || [])) {
+        const t = p.team || emptyTeamKey;
+        totals[t] = (totals[t] || 0) + fragsOfRow(p);
+    }
+    return totals;
+}
+
 // teamOrder: the canonical order (the teams store's `order`, set early in
 // displayResults(), sorted by total frags) when it names two or more sides;
 // otherwise the order the teams first appear in `sortedPlayers` (already
@@ -55,6 +68,26 @@ export function playerStatsRows(result) {
 // Rows for the per-team tables. Absent on duels and FFA by construction.
 export function playerStatsTeamRows(result) {
     return result?.playerStats?.teams || [];
+}
+
+// The per-team tables render playerStats.teams verbatim. The sums are done
+// ONCE in Go (analyzer aggregateTeamRows / view reaggregateTeams) rather
+// than re-derived per panel here: hold figures in particular must be summed
+// over the team's own alive time, and averaging per-player shares — which is
+// what a JS reduce naturally does — is simply wrong.
+// Rows arrive in the section's own order; the canonical order (`canonical`,
+// through teamOrder) is still the colour index authority, so a team's stripe
+// matches it everywhere else.
+export function teamRowsInColourOrder(teamRows, canonical) {
+    const order = teamOrder(canonical, teamRows);
+    const byName = {};
+    for (const t of teamRows) byName[t.name] = t;
+    const out = [];
+    for (const name of order) if (byName[name]) out.push(byName[name]);
+    // Any team the colour order doesn't know about still renders, after
+    // the ones it does — dropping a row would silently lose a whole team.
+    for (const t of teamRows) if (!order.includes(t.name)) out.push(t);
+    return out;
 }
 
 // One possession cell of the Item Pickups table (and the Pickups tab's `s`
