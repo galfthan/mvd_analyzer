@@ -2,8 +2,10 @@
 
 Branch: `player-tab`, stacked on `gl-map` (which stacks on
 `map-view-extract`). Merge order: `gl-map` PR first, then this.
-Status: **PoC** — phases 1–4 and most of 5 built as a proof of concept
-(2026-10-26/27) to discuss; see "PoC status" at the end.
+Status: **PoC**, now ported to Svelte (branch `web-svelte`, see
+[`plan-frontend-restructure.md`](plan-frontend-restructure.md)) — phases
+1–4 and most of 5 built (2026-10-26/27) to discuss; see "PoC status" at
+the end. Code: `mvd-web/src/player/`.
 
 ## Goal
 
@@ -162,11 +164,10 @@ to main.
 What is built is described in [`mvd-web/README.md`](mvd-web/README.md#player-tab).
 Decisions taken for the PoC that are worth revisiting:
 
-- **Map pane borrows the Map tab's canvas** instead of a second `MvdMap`.
-  Cheap and it works, but the pane and the Map tab share one camera and
-  follow target (the follow target is restored on leaving). A second
-  instance would need every field `initMapView` and the async loaders push
-  routed to both — worth it if the pane stays.
+- **Map pane** — settled in the Svelte port
+  ([`plan-frontend-restructure.md`](plan-frontend-restructure.md), phase
+  E): the pane is its own `MvdMap` with its own camera and follow target,
+  reading the Map tab's loaded data each frame.
 - **Link mapping**: plain click = play here, shift = add, ctrl/middle =
   hub. The links still read "Hub"; they could read "▶" now.
 - **Local files have no hub links** (no gameId), so nothing to reroute or
@@ -181,8 +182,8 @@ Decisions taken for the PoC that are worth revisiting:
 
 Open questions:
 
-- Which panes next (frags/weapons per player, region control, chat,
-  key-moment list)? Resizable column / panes?
+- Which panes next (frags/weapons per player, region control, chat)?
+  (Resizable / collapsible panes and column: done in the Svelte port.)
 - Should a clip from another local file prompt for the file instead of
   being skipped?
 - Cross-demo generated sets ("milton's quad runs this season") need
