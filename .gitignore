@@ -34,3 +34,4 @@ DEPLOY-HETZNER.md
 
 # Local planning docs (plan/spec files for in-flight work) — per-machine, never committed.
 plans/
+node_modules/

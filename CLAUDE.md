@@ -59,7 +59,9 @@ Five modules in a Go workspace (`go.work`):
   implements each sub-analyzer. Nothing here reaches into MVD bytes —
   everything flows through events.
 - **`mvd-web/` (Layer 3)** is one consumer of Result. The WASM entry
-  is in `cmd/wasm/`; the static frontend is in `static/`. Nothing
+  is in `cmd/wasm/`; the frontend is `index.html` + `src/` (Vite + Svelte)
+  with the legacy `static/app.js` copied as-is (see
+  `plan-frontend-restructure.md`). Nothing
   mvd-reader or mvd-analytics imports from here.
 - **`mvd-api/`** is another Layer-3 consumer: it serves
   `mvd-analytics/view` as a hosted REST API with an on-disk demo cache.

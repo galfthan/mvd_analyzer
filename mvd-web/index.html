@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Stamped with the git hash by `make build` (sed); "dev" when served
-         straight from static/. app.js compares it against the wasm's embedded
+    <!-- Stamped with the git hash by `make build` (sed); "dev" in a local
+         Vite build. app.js compares it against the wasm's embedded
          hash to detect a stale cached bundle after a deploy. -->
     <meta name="build" content="dev">
     <title>MVD Analyzer</title>
@@ -1332,22 +1332,9 @@
         </main>
     </div>
 
-    <!-- mvd-map-view (the embeddable map renderer) is authored as ESM, while
-         app.js has to stay a classic script — index.html carries inline
-         handlers that call its globals. This bootstrap bridges the two: it
-         publishes the module namespace as window.MapView. Module scripts are
-         deferred, so it runs after app.js's top level but before
-         DOMContentLoaded — every MapView.* call site is inside a function
-         that runs later still. -->
-    <script type="module">
-        import * as MapView from './map-view/index.js';
-        import * as Playlist from './playlist.js';
-        window.MapView = MapView;
-        window.Playlist = Playlist;
-        // app.js defines this on its top level (classic scripts run before
-        // deferred module ones), and uses it to allocate the camera.
-        if (window.onMapViewReady) window.onMapViewReady(MapView);
-    </script>
+    <!-- src/main.js publishes the ESM modules app.js uses (MapView,
+         Playlist) on window; see the comment there. -->
+    <script type="module" src="./src/main.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

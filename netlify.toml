@@ -8,6 +8,10 @@
   command = "make bsps && make build"
   publish = "dist"
 
+[build.environment]
+  # make build runs `npm ci && vite build` in mvd-web/.
+  NODE_VERSION = "22"
+
 # Ensure correct MIME type for WASM and enable compression
 [[headers]]
   for = "/*.wasm"
@@ -31,3 +35,10 @@
     # build-stamped <meta name="build"> in index.html (belt for a deploy
     # landing mid-session) and reloads once on mismatch.
     Cache-Control = "no-cache"
+
+# Vite's bundles carry a content hash in their file name, so a cached copy
+# can never be stale.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

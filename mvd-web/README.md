@@ -15,9 +15,17 @@ talks to it through a JS shim.
   `recomputeRegionControl(regionsJSON)`. All take a JSON-string argument
   (or none for `getDefaultBuckets`) and return a JSON string; under the
   hood they call into `mvd-analytics/view` over the cached `lastResult`.
-- `static/` — the browser frontend.
-  - `index.html`, `styles.css`, `app.js` — main page and the tabbed
-    analyzer UI (scoreboard, timeline, map, chat, loc graph, ...).
+- `index.html`, `src/`, `package.json`, `vite.config.js` — the page,
+  built by Vite (`make build` runs `npm ci && npm run build` here, so
+  node is needed to build). `src/main.js` is the module entry: it
+  bundles [`mvd-map-view`](../mvd-map-view/README.md) and
+  `src/lib/playlist.js` and publishes them as `window.MapView` /
+  `window.Playlist` for `app.js`. Svelte is set up but nothing is ported
+  yet — see [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
+- `static/` — copied into `dist/` as-is (Vite's `publicDir`).
+  - `styles.css`, `app.js` — the tabbed analyzer UI (scoreboard,
+    timeline, map, chat, loc graph, ...). `app.js` is still a classic
+    script: `index.html` carries inline handlers that call its globals.
   - `worker.js` — wraps the WASM module in a Web Worker so analysis
     doesn't block the main thread. Provides the host callbacks the
     WASM side calls synchronously: `fetchLocSync(mapName)` for the
@@ -60,8 +68,10 @@ make serve                    # build + python3 -m http.server 8080
 dist/
   analyzer.wasm               ~4 MB, the WASM bundle
   wasm_exec.js                Go glue
-  index.html, styles.css,
-  app.js, worker.js           frontend
+  index.html, assets/         the page + Vite's hashed bundles
+  styles.css, app.js,
+  worker.js                   frontend copied from static/
+  fte-player/                 the Player tab's engine page
   vendor/                     vendored Cytoscape + fcose + web fonts
   maps/                       pre-generated map geometry
   locs/                       .loc files copied from mvd-analytics/loc/data

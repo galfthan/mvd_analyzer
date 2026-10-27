@@ -5,7 +5,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import {
     parseHubReplayUrl, hubClipsUrl, singleHubGame, encodePlaylist, decodePlaylist,
     playlistStep, GENERATORS, playerFragClips, MAX_HUB_CLIPS,
-} from '../static/playlist.js';
+} from '../src/lib/playlist.js';
 
 const demo = { key: 'hub:212260', gameId: 212260, title: 'dm3', offset: 10.3 };
 

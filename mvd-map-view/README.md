@@ -106,13 +106,13 @@ the same "2D context as texture baker" category as the label atlas.
 import { normalizeLocationName, moverPoseAt } from 'mvd-map-view';
 ```
 
-mvd-web has no bundler — `app.js` is a classic script, because `index.html`
-carries inline handlers that call its globals. It therefore loads this
-package through a small module bootstrap in `index.html` that publishes the
-namespace as `window.MapView`, and `make build` copies `src/*.js` into
-`dist/map-view/`. Module scripts are deferred, so the bootstrap runs after
-`app.js`'s top level but before `DOMContentLoaded`; every `MapView.*` call
-site is inside a function that runs later still.
+mvd-web bundles this package with Vite (`mvd-web/src/main.js` imports
+`src/index.js` by relative path). `app.js` there is still a classic script,
+because `index.html` carries inline handlers that call its globals, so the
+entry publishes the namespace as `window.MapView`. Module scripts are
+deferred, so that runs after `app.js`'s top level but before
+`DOMContentLoaded`; every `MapView.*` call site is inside a function that
+runs later still.
 
 ## Tests
 

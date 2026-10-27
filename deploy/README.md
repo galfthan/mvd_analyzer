@@ -57,7 +57,8 @@ See PLAN-hosting.md → **"Operator prerequisites"**. In short:
 
 ## 1. Build
 
-On a build host with the Go toolchain:
+On a build host with the Go toolchain and node (`make build` runs
+`npm ci && vite build` in mvd-web/):
 
 ```sh
 make bsps           # fetch BSPs into bsps/ (sha-pinned; web locvis filter)
