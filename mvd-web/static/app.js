@@ -327,10 +327,33 @@ function setCurrentTime(time) {
 // onClockTick is app.js's clock subscriber. The map tab's playback loop
 // ('playback') does its own lighter per-frame sync, and a demo reset
 // ('reset') happens while the views are half torn down — both skip it.
+// The Player engine ('engine') ticks once per display frame with the Map
+// and Chat tabs hidden (onTabActivated redraws them): move the cursor every
+// frame, the rest at the playback loop's 200 ms full-sync rate.
+let _engineSyncTimer = null;
 function onClockTick({ t, from }) {
+    if (from === 'reset') {
+        clearTimeout(_engineSyncTimer);
+        _engineSyncTimer = null;
+    }
     if (from === 'playback' || from === 'reset') return;
     mapState.currentTime = t;
     mapState.renderDirty = true;
+    if (from === 'engine') {
+        updateUnifiedCursor();
+        updateUnifiedTimeDisplay();
+        if (!_engineSyncTimer) {
+            _engineSyncTimer = setTimeout(() => {
+                _engineSyncTimer = null;
+                updateTimeIndicators();
+                updateMapLegend();
+                updateRegionStatus();
+                updateItemsPanelStatus(mapState.currentTime);
+                updateUrlState();
+            }, 200);
+        }
+        return;
+    }
     updateUnifiedCursor();
     updateUnifiedTimeDisplay();
     updateTimeIndicators(); // tail-calls updateTeamStatus() when range > 0

@@ -863,12 +863,15 @@ and the Timeline tab's mini-stack renderer are reached through
   as a Blob (`DemoHandle.demoBlob`; the analyze transfers the original
   buffer), handed to the engine as a `blob:` URL — so locally loaded files
   play too.
-- **One clock.** While the tab is active the engine is the clock: a 100 ms
-  poll pushes its time (demo-relative, minus `demoOffset`) into the page
+- **One clock.** While the tab is active the engine is the clock: a poll
+  once per display frame (`requestAnimationFrame`) pushes its time (demo-relative, minus `demoOffset`) into the page
   clock as an `'engine'` seek, and every other seek — scrubbing the unified
   timeline, any time link — becomes a throttled `demo_jump`. The tab opens
   paused at the cursor's current time. A jump suppresses the poll until the
-  engine clock arrives, so the cursor does not snap back.
+  engine clock arrives, so the cursor does not snap back. Per-frame engine
+  ticks move only the timeline cursor and time display in `app.js`; its
+  heavier views (team status, region and item panels) refresh every 200 ms,
+  and the hidden Map and Chat tabs redraw when they are next shown.
 - **Playback buttons** map to `demo_setspeed` (0.2× / 1× / 5×; pressing the
   running speed pauses). `-1x` is disabled — FTE cannot play backwards.
   Leaving the tab pauses the engine.

@@ -9,13 +9,14 @@
 //
 // Clock: FTE runs on demo-relative seconds, the page on match-relative
 // ones (demoOffsetSec). While the tab is active the engine is the clock: a
-// poll pushes its time into the page clock as an 'engine' seek, and any
-// other seek (scrub, time links) becomes a throttled demo_jump.
+// poll once per display frame pushes its time into the page clock as an
+// 'engine' seek — the Map pane's follow camera moves with it, so a slower
+// poll shows as stepping — and any other seek (scrub, time links) becomes a
+// throttled demo_jump.
 
 import { store } from '../state/store.js';
 import { demoOffsetSec, mapFileKey, userIdOf, nameOfUserId } from '../lib/result.js';
 
-const SYNC_MS = 100;
 const SEEK_THROTTLE_MS = 150;
 // demo_jump lands on whole seconds and takes a few frames; until the engine
 // clock is near the target (or this long has passed), the sync poll must
@@ -39,7 +40,7 @@ export class PlayerEngine {
         this.iframe = null;
         this.blobUrl = null;
         this.fte = null;
-        this.syncTimer = null;
+        this.syncFrame = null;
         this.seekTimer = null;
         this.pendingSeek = null;   // match time awaiting the throttled jump
         this.seekTarget = null;    // demo time of the last jump, until reached
@@ -133,13 +134,17 @@ export class PlayerEngine {
     }
 
     startSync() {
-        if (this.syncTimer || !this.fte) return;
-        this.syncTimer = setInterval(() => this.tick(), SYNC_MS);
+        if (this.syncFrame || !this.fte) return;
+        const loop = () => {
+            this.syncFrame = requestAnimationFrame(loop);
+            this.tick();
+        };
+        this.syncFrame = requestAnimationFrame(loop);
     }
 
     stopSync() {
-        if (this.syncTimer) clearInterval(this.syncTimer);
-        this.syncTimer = null;
+        if (this.syncFrame) cancelAnimationFrame(this.syncFrame);
+        this.syncFrame = null;
     }
 
     // onTick(fn): fn(demoT) after every sync poll; the playlist runner
