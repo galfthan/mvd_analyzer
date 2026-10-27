@@ -35,17 +35,6 @@ const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
 
 const PLAYBACK_FPS_MS   = 16;   // map playback throttle (~60 fps = 16 ms/frame)
 
-// Derive a strong (darkened) color variant from a hex color for region
-// control displays.
-function hexToRgb(hex) {
-    return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
-}
-function teamStrongColor(hex) {
-    const [r, g, b] = hexToRgb(hex);
-    // Darken by 30% for strong control
-    return `rgb(${Math.round(r * 0.7)}, ${Math.round(g * 0.7)}, ${Math.round(b * 0.7)})`;
-}
-
 let currentResult = null;
 
 // ─── Data source ────────────────────────────────────────────────────────────
@@ -196,21 +185,22 @@ function onAnalyzerReady(info) {
 
 // onBucketsReady runs when the current demo's deferred 50 ms bucket view and
 // region states have landed on its Result (DemoHandle.ready('buckets')), and
-// RE-RUNS the bucket-dependent initialisers (region control, timeline, map).
-// They already ran once in displayResults with the bucket-derived fields
-// empty (blank timeline graph / map trails / region overlay); re-running them
-// now fills those in. Finally re-render the active tab so a Timeline/Map view
-// the user already opened repaints.
+// RE-RUNS the bucket-dependent initialisers (region control, the bucket view
+// the map draws, the map). They already ran once in displayResults with the
+// bucket-derived fields empty (blank map trails / region overlay);
+// re-running them now fills those in. Finally re-render the active tab so a
+// Map view the user already opened repaints. (The Timeline tab,
+// src/tabs/timeline/, redraws itself when the buckets land.)
 function onBucketsReady(data) {
     const ta = currentResult.timelineAnalysis;
 
     // Re-run the inits, now that bucket-derived data is present. Order
-    // matches displayResults: region control feeds timeline + map.
+    // matches displayResults: region control feeds the map.
     if (ta && ta.regionControl) initRegionControlData(currentResult);
-    if (ta || currentResult.messages?.messages) displayTimelineAnalysis(currentResult);
+    if (ta || currentResult.messages?.messages) initTimeline(currentResult);
     if (ta) initMapView(currentResult);
 
-    // Re-render whichever tab is active so Timeline/Map paint with the new
+    // Re-render whichever tab is active so the Map paints with the new
     // data (re-selecting re-runs the tab's render path; harmless on Summary).
     switchTab(activeTabName());
 
@@ -230,12 +220,12 @@ document.addEventListener('DOMContentLoaded', () => {
     MvdState.regionControl.subscribe(onRegionControlChanged);
     let clockSubscribed = false;
     MvdState.clock.subscribe((tick) => { if (clockSubscribed) onClockTick(tick); });
+    MvdState.segment.subscribe((seg) => { if (clockSubscribed) onSegmentChanged(seg); });
     clockSubscribed = true;
     setupFileUpload();
     setupTabs();
     MvdPlayer.status.subscribe(() => updatePlaybackButtons());
     setupSearch();
-    setupTeamStatusSort();
 
     const params = new URLSearchParams(location.search);
     const hubId = params.get('gameId') || params.get('hub');
@@ -296,7 +286,8 @@ function setCurrentTime(time) {
 // ('reset') happens while the views are half torn down — both skip it.
 // The Player engine ('engine') ticks once per display frame with the Map
 // tab hidden (onTabActivated redraws it): move the cursor every
-// frame, the rest at the playback loop's 200 ms full-sync rate.
+// frame, the rest at the playback loop's 200 ms full-sync rate. (The
+// Timeline tab, src/tabs/timeline/, follows the clock itself.)
 let _engineSyncTimer = null;
 function onClockTick({ t, from }) {
     if (from === 'reset') {
@@ -312,7 +303,6 @@ function onClockTick({ t, from }) {
         if (!_engineSyncTimer) {
             _engineSyncTimer = setTimeout(() => {
                 _engineSyncTimer = null;
-                updateTimeIndicators();
                 updateMapLegend();
                 updateRegionStatus();
                 updateItemsPanelStatus(mapState.currentTime);
@@ -323,7 +313,6 @@ function onClockTick({ t, from }) {
     }
     updateUnifiedCursor();
     updateUnifiedTimeDisplay();
-    updateTimeIndicators(); // tail-calls updateTeamStatus() when range > 0
     updateMapLegend();
     updateRegionStatus();
     updateItemsPanelStatus(mapState.currentTime);
@@ -359,8 +348,9 @@ function updateUrlState() {
                 params.set('t', Math.round(mapState.currentTime));
             }
 
-            if (timelineState.segment) {
-                params.set('seg', `${Math.round(timelineState.segment.start)}-${Math.round(timelineState.segment.end)}`);
+            const seg = MvdState.segment.get();
+            if (seg) {
+                params.set('seg', `${Math.round(seg.start)}-${Math.round(seg.end)}`);
             }
         }
 
@@ -393,12 +383,7 @@ function applyUrlState() {
     const seg = params.get('seg');
     if (seg) {
         const [start, end] = seg.split('-').map(Number);
-        if (!isNaN(start) && !isNaN(end)) {
-            timelineState.segment = { start, end };
-            updateSelectionOverlay();
-            updateSegmentLabel();
-            updateDetailView();
-        }
+        if (!isNaN(start) && !isNaN(end)) MvdState.segment.set({ start, end });
     }
 
     const t = params.get('t');
@@ -532,14 +517,12 @@ function onTabActivated(tabName) {
 // renderTabContent redraws a tab's canvases and size-dependent views: on
 // activation (above), and when a panel of it is expanded or reopened
 // (src/ui/panels) — a canvas drawn while hidden is drawn at zero width.
+// Only the Map is left here; the ported tabs redraw themselves.
 function renderTabContent(tabName) {
     if (tabName === 'map') {
         mapState.renderDirty = true;
         mapState.lastRenderedBucket = null;
         renderMap(mapState.currentTime);
-    } else if (tabName === 'timeline') {
-        if (currentResult) updateDetailView();
-        updateTimeIndicators();
     }
 }
 
@@ -1037,20 +1020,18 @@ function displayResults(result) {
 
     updateTopbarDemoInfo(result);
 
-    // Region control data (needed by both timeline and map). Cheap on the
-    // main thread; the multi-second cost was the worker's bucket build,
-    // which now runs after the result is delivered. These run here with the
-    // bucket-derived fields still empty (timeline graph / map trails /
-    // region overlay blank) and onBucketsReady() re-runs them once the
-    // 'buckets' message lands. displayTimelineAnalysis also populates the
-    // timeline strip, so it must run now.
+    // Region control data (needed by the map). Cheap on the main thread;
+    // the multi-second cost was the worker's bucket build, which now runs
+    // after the result is delivered. These run here with the bucket-derived
+    // fields still empty (map trails / region overlay blank) and
+    // onBucketsReady() re-runs them once the 'buckets' message lands.
+    // initTimeline populates the unified timeline strip, so it must run now.
     if (result.timelineAnalysis?.regionControl) {
         initRegionControlData(result);
     }
 
-    // Timeline Analysis (new graphical view)
     if (result.timelineAnalysis || result.messages?.messages) {
-        timeRender('displayTimelineAnalysis', () => displayTimelineAnalysis(result));
+        timeRender('initTimeline', () => initTimeline(result));
     }
 
     // Map View
@@ -1116,59 +1097,13 @@ function isMultiPlayerIndividual(result) {
     return isIndividualLayout(result) && !isDuel(result);
 }
 
-// individualFieldActive reports the layout currently applied. The render paths
-// read the body class rather than re-deriving from the result so the DOM, the
-// row grouping and the row heights can never disagree — and displayTimeline-
-// Analysis's title write runs again from onBucketsReady long after
-// applyDuelModeUI, where the class is what survives.
-function individualFieldActive() {
-    return document.body.classList.contains('individual-field');
-}
-
-// The three per-player drill-downs and where each lives in the two layouts:
-// `node` is the content that MOVES, `home` the <details> it sits in under its
-// team graph, `host` the body of the panel it is promoted into. The node is
-// re-parented, never cloned — it owns live canvases plus the `_sig` / `_cells`
-// rebuild cache, and a second copy would render into a detached tree.
-const PER_PLAYER_VIEWS = [
-    { node: 'frags-per-player',        home: 'frags-per-player-details',   host: 'frags-per-player-host',   panel: 'frags-per-player-panel'   },
-    { node: 'weapons-per-player-rows', home: 'weapons-per-player-details', host: 'weapons-per-player-host', panel: 'weapons-per-player-panel' },
-    { node: 'ha-per-player',           home: 'ha-per-player-details',      host: 'ha-per-player-host',      panel: 'ha-per-player-panel'      },
-];
-
-// setIndividualFieldLayout switches every two-sided surface between its two
-// forms, off one body class.
-//
-// Timeline: hide the A-vs-B graphs and promote the three per-player views to
-// panels of their own. Chat (src/tabs/chat/): CSS hides the second say column
-// and its header off the class; the tab fills the first from the teams store.
+// setIndividualFieldLayout puts the `individual-field` class on <body>: the
+// CSS switches every two-sided surface to its per-player form off it — the
+// Timeline's A-vs-B panels (src/tabs/timeline/ moves its per-player views
+// into panels of their own off the teams store's perPlayer, the same test)
+// and the Chat tab's second say column (src/tabs/chat/).
 function setIndividualFieldLayout(on) {
     document.body.classList.toggle('individual-field', on);
-    for (const v of PER_PLAYER_VIEWS) {
-        const panel = document.getElementById(v.panel);
-        if (panel) panel.style.display = on ? '' : 'none';
-        const node = document.getElementById(v.node);
-        const target = document.getElementById(on ? v.host : v.home);
-        if (!node || !target || node.parentElement === target) continue;
-        target.appendChild(node);
-    }
-    // The selected-range suffix rides along: its only home is the Weapons
-    // heading, which this layout hides.
-    const rangeLabel = document.getElementById('time-range-label');
-    const rangeHome = document.getElementById(on ? 'weapons-per-player-heading' : 'weapons-timeline-heading');
-    if (rangeLabel && rangeHome && rangeLabel.parentElement !== rangeHome) rangeHome.appendChild(rangeLabel);
-}
-
-// Row heights for the per-player views. The compact pair is what a collapsed
-// drill-down under a team graph uses; promoted to a panel of their own these
-// rows carry the tab, with no team graph above them competing for the fold, so
-// they get more pixels each.
-function ppMiniHeight() {
-    return individualFieldActive() ? 60 : 44;
-}
-
-function ppSpanRowHeight() {
-    return individualFieldActive() ? 28 : RC_ROW_H;
 }
 
 function applyDuelModeUI(result) {
@@ -1208,16 +1143,17 @@ function formatDuration(seconds) {
     return MvdLib.formatDuration(seconds);
 }
 
-// Timeline Analysis State
+// The match timeline as app.js's map and unified bar use it. The selected
+// segment is shared (MvdState.segment); the Timeline tab
+// (src/tabs/timeline/) reads the rest from the Result itself.
 let timelineState = {
-    bucketView: null,      // column-major ColumnarBuckets (50ms) from getDefaultBuckets
-    highResDuration: 0.05, // High-res bucket interval
-    duration: 0,
-    matchStartTime: 0,
-    teams: [],
-    segment: null, // { start, end } or null for full match - selected time segment
-    dragging: false, // Is user dragging to select a segment on overview?
-    dragStartTime: 0 // Time at drag start
+    bucketView: null,  // column-major ColumnarBuckets (50ms) from getDefaultBuckets
+    duration: 0,       // match length, seconds
+    demoOffset: 0,     // demo time = match time + this, seconds
+    teams: [],         // the canonical team order (teams store mirror)
+    dragging: false,   // a range select on the unified bar in progress
+    dragStartTime: 0,  // where it started
+    dragPreview: null, // { start, end } the bar shows while dragging
 };
 
 // Reset all timeline state for loading a new demo
@@ -1232,10 +1168,6 @@ function resetUIToCleanState() {
 
     document.title = 'MVD Analyzer';
 
-    const setText = (id, v) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = v;
-    };
     const setHTML = (id, v) => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = v;
@@ -1251,27 +1183,12 @@ function resetUIToCleanState() {
     // Topbar demo info
     setHTML('topbar-demo-info', '');
 
-    // Timeline canvases (DOM order)
-    for (const cid of [
-        'score-canvas', 'powerup-canvas',
-        'detail-graph-canvas', 'health-armor-canvas',
-        'region-control-canvas', 'weapons-per-player-canvas',
-    ]) {
-        const c = document.getElementById(cid);
-        if (c && c.getContext) c.getContext('2d').clearRect(0, 0, c.width, c.height);
-    }
-    hide('powerup-timeline-panel');
-    hide('region-control-timeline-panel');
-    // Two-sided default for the timeline AND the chat columns (CSS): the
-    // per-player views return to their <details> under the team graphs.
+    // The Timeline tab (src/tabs/timeline/) clears itself on the demo store.
+    // Two-sided default for the timeline AND the chat columns (CSS);
     // applyDuelModeUI re-applies the individual field layout below if this
     // demo wants it.
     setIndividualFieldLayout(false);
     hide('unified-timeline');
-    setText('time-range-label', '');
-    setHTML('team-status-a', '');
-    setHTML('team-status-b', '');
-    teamStatusSort = { ...TEAM_STATUS_SORT_DEFAULT };
 
     // Map view
     const mapCanvas = document.getElementById('map-canvas');
@@ -1321,15 +1238,6 @@ function resetUIToCleanState() {
     if ('dropEvents' in mapState) mapState.dropEvents = [];
     if ('zRange' in mapState) mapState.zRange = null;
     if ('locTable' in mapState) mapState.locTable = [''];
-
-    if (typeof weaponGraphHitState !== 'undefined') {
-        weaponGraphHitState.W = null;
-        weaponGraphHitState.dropMarks = [];
-    }
-    if (typeof powerupGraphHitState !== 'undefined') {
-        powerupGraphHitState.W = null;
-        powerupGraphHitState.rows = [];
-    }
 }
 
 function resetTimelineState() {
@@ -1350,33 +1258,23 @@ function resetTimelineState() {
 
     timelineState.bucketView = null;
     mapView.setFrames(null);
-    timelineState.highResDuration = 0.05;
-    timelineState.fragEvents = [];
-    timelineState.deathEvents = [];
-    timelineState.killEvents = [];
     timelineState.duration = 0;
     MvdState.clock.setDuration(0);
-    timelineState.matchStartTime = 0;
     timelineState.demoOffset = 0;
     MvdState.setCanonicalTeams([]);
-    timelineState.segment = null;
+    MvdState.segment.set(null);
     timelineState.dragging = false;
-    precomputedFrags = [];
+    timelineState.dragPreview = null;
 
     // Clear the timeline axis
     const axis = document.getElementById('tl-axis');
     if (axis) axis.innerHTML = '';
-    // Clear canvases
-    for (const cid of ['detail-graph-canvas', 'health-armor-canvas', 'score-canvas']) {
-        const c = document.getElementById(cid);
-        if (c && c.getContext) {
-            const ctx = c.getContext('2d');
-            ctx.clearRect(0, 0, c.width, c.height);
-        }
-    }
 }
 
-function displayTimelineAnalysis(result) {
+// initTimeline sets up the match timeline app.js keeps — the bucket view the
+// map draws, the duration and demo offset, the unified bar — on load and
+// again when the deferred buckets land.
+function initTimeline(result) {
     const timeline = result.timelineAnalysis;
     const demoInfo = result.demoInfo;
 
@@ -1389,56 +1287,26 @@ function displayTimelineAnalysis(result) {
             setCanonicalTeams(result.match.teams.map(t => t.name), isMultiPlayerIndividual(result));
         }
     }
-    const teams = timelineState.teams;
 
     // Schema v7: bucketed data is not a parse-time field; the WASM worker
     // calls getDefaultBuckets after analyzeMVD and onBucketsReady
     // stashes the resulting column-major ColumnarBuckets object on
-    // timeline.bucketView. The panels read it via the bucket-view accessors.
+    // timeline.bucketView.
     timelineState.bucketView = timeline?.bucketView || null;
     mapView.setFrames(timelineState.bucketView);
-    timelineState.highResDuration = 0.05;
-    // Schema v8: raw time fields on result/timelineAnalysis flipped from
-    // float seconds to int32 ms. The frontend internally still works in
-    // seconds (mapState.currentTime, formatDuration,
-    // hub URL `from`/`to`, etc. all expect seconds), so convert ms→s once
-    // here at intake. Anything copied into timelineState below is in
-    // seconds and panels downstream are unchanged.
-    // Schema v23 moved the timing anchor from timelineAnalysis to
-    // streams.global. matchStartTime is always 0 (the match-relative origin).
-    timelineState.matchStartTime = 0;
-    timelineState.demoOffset = (result.streams?.global?.demoOffset || 0) * 0.001;
-    timelineState.duration = (result.match?.duration || 600000) * 0.001;
+    // Schema v8: raw time fields are int32 ms; the page works in seconds
+    // (mapState.currentTime, formatDuration, hub URL `from`/`to`), so convert
+    // here at intake. Schema v23 moved the timing anchor to streams.global.
+    timelineState.demoOffset = MvdLib.demoOffsetSec(result);
+    timelineState.duration = MvdLib.matchDurationSec(result);
     MvdState.clock.setDuration(timelineState.duration);
-    // Sorted by time once here so prepScoreData / precomputeFragCounts don't
-    // each re-sort a clone on every render (pan-drag re-renders many times/sec).
-    timelineState.fragEvents = (timeline?.fragEvents || []).map(f => ({ ...f, time: f.time * 0.001 })).sort((a, b) => a.time - b.time); // Frag events from stat tracking
-    timelineState.deathEvents = (timeline?.deathEvents || []).map(d => ({ ...d, time: d.time * 0.001 })); // Per-player deaths (every death) for the frags/deaths drill-down
-    timelineState.killEvents = (timeline?.killEvents || []).map(k => ({ ...k, time: k.time * 0.001 })); // Per-player enemy kills (killer-keyed) for the frags/deaths drill-down
-    timelineState.backpacks = (result.backpacks || []).map(d => ({ ...d, time: d.time * 0.001 })); // RL/LG drops (KTX hint or reconstructed — see d.source)
-    timelineState.powerupEvents = (timeline?.powerupEvents || []).map(ev => ({ // per-run records: player, team, frags, duration
-        ...ev,
-        time: ev.time * 0.001,
-        endTime: (ev.endTime || 0) * 0.001,
-        duration: (ev.duration || 0) * 0.001,
-    }));
 
     // Note: the shared playhead (mapState.currentTime) is initialised to 0 by
     // resetUIToCleanState at the start of each demo load. It is deliberately
-    // NOT reset here — displayTimelineAnalysis is re-run by onBucketsReady
-    // seconds after load, and a reset there would clobber a ?t= deep link or
-    // any early scrubbing the user did during the deferred-bucket window.
+    // NOT reset here — initTimeline is re-run by onBucketsReady seconds after
+    // load, and a reset there would clobber a ?t= deep link or any early
+    // scrubbing the user did during the deferred-bucket window.
 
-    // Update legend team names
-    if (teams.length >= 2) {
-        const setTextIfExists = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-        setTextIfExists('legend-health-team-a', teams[0] + ' ↑');
-        setTextIfExists('legend-health-team-b', teams[1] + ' ↓');
-        setTextIfExists('legend-weapons-team-a', teams[0] + ' ↑');
-        setTextIfExists('legend-weapons-team-b', teams[1] + ' ↓');
-    }
-
-    precomputeFragCounts();
     setupUnifiedTimeline();
 
     // Show the unified timeline on applicable tabs
@@ -1447,1127 +1315,16 @@ function displayTimelineAnalysis(result) {
     if (tl) tl.style.display = TABS_WITH_TIMELINE.includes(activeTab) ? '' : 'none';
 
     updateUnifiedCursor();
-    updateDetailView();
-    updateTimeIndicators();
-    updateTeamStatus();
-}
-
-// ─── Columnar bucket-view accessors ──────────────────────────────────────────
-//
-// The column-major ColumnarBuckets object (see mvd-analytics/view/columnar.go)
-// is stored on timelineState.bucketView and pushed into the map component via
-// mapView.setFrames. The accessors themselves live in
-// mvd-map-view/src/frames.js — one implementation, so the timeline panels and
-// the map can never disagree on the row shape. These wrappers keep the
-// long-standing local names for the panel code.
-
-function bucketTimeSec(view, i) {
-    return MapView.bucketTimeSec(view, i);
-}
-
-function bucketIndexAtTime(view, tSec) {
-    return MapView.bucketIndexAtTime(view, tSec);
-}
-
-function bucketIndexAtOrAfter(view, tSec) {
-    return MapView.bucketIndexAtOrAfter(view, tSec);
-}
-
-function playerValAt(p, field, i) {
-    return MapView.playerValAt(p, field, i);
-}
-
-function playerAliveAt(p, i) {
-    return MapView.playerAliveAt(p, i);
-}
-
-function teamSnapshot(view, team, i) {
-    return MapView.teamSnapshot(view, team, i);
-}
-
-// ─── Unified Canvas Graph Renderer ──────────────────────────────────────────
-//
-// All timeline graphs (weapons, health/armor, frags, score) share a single
-// canvas-based diverging-bar renderer. Each graph type provides a data
-// preparation function that returns an array of data points in a common
-// format. The renderer draws them at full resolution on a <canvas>.
-
-const GRAPH_COLORS = {
-    RL:     'rgba(255, 107, 107, 0.9)',
-    LG:     'rgba(0, 217, 255, 0.9)',
-    RLLG:   'rgba(156, 39, 176, 0.9)',
-    QUAD:   'rgba(0, 150, 255, 0.9)',
-    PENT:   'rgba(255, 0, 0, 0.9)',
-    RING:   'rgba(255, 235, 59, 0.9)',
-    HEALTH: 'rgba(0, 200, 83, 0.9)',
-    RA:     'rgba(255, 50, 50, 0.9)',
-    YA:     'rgba(255, 200, 0, 0.9)',
-    GA:     'rgba(0, 180, 0, 0.6)',
-};
-
-const NICE_TICK_INTERVALS = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1200, 1800, 3600];
-
-function pickTickInterval(duration, maxTicks) {
-    const target = duration / maxTicks;
-    for (const iv of NICE_TICK_INTERVALS) {
-        if (iv >= target) return iv;
-    }
-    return NICE_TICK_INTERVALS[NICE_TICK_INTERVALS.length - 1];
-}
-
-// Plot background — slightly different shade than the panel so the
-// graph area is visually delineated. Same colour for every detail
-// graph so they read as a uniform set.
-const PLOT_BG_COLOR = '#16213e';
-
-// Size a canvas for device-pixel rendering and return the drawing
-// context plus the dimensions in both CSS and device pixels.
-//
-// We render directly in device pixels (no ctx.scale) so every fillRect
-// edge lands on an integer device pixel by construction. CSS-pixel
-// rendering with ctx.scale(dpr, dpr) is fine when dpr is an integer,
-// but at fractional dpr (Linux/KDE/GNOME fractional scaling, browser
-// zoom != 100 %, some Windows configs) every CSS-pixel fillRect edge
-// lands at a non-integer device-pixel offset; the rasteriser then
-// splits that edge across two device pixels at ~50 % coverage each,
-// producing visible darker boundary pixels (and at one fillRect per
-// CSS pixel a regular moiré stripe pattern).
-//
-// Returns null if the canvas element is missing.
-function setupGraphCanvas(canvasId, cssHeight) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas || !canvas.getContext) return null;
-    const container = canvas.parentElement;
-    const Wcss = container.clientWidth;
-    const Hcss = cssHeight;
-    const dpr = window.devicePixelRatio || 1;
-    const W = Math.round(Wcss * dpr);
-    const H = Math.round(Hcss * dpr);
-    canvas.width = W;
-    canvas.height = H;
-    canvas.style.width = Wcss + 'px';
-    canvas.style.height = Hcss + 'px';
-    const ctx = canvas.getContext('2d');
-    return { canvas, ctx, Wcss, Hcss, W, H, dpr };
-}
-
-// Draw the adaptive x-axis tick line and time labels at the bottom of
-// a graph. Tick density keys off Wcss so it doesn't change with dpr.
-// All coords are in device pixels (W, graphH, dpr).
-function drawXAxisTicks(ctx, { W, Wcss, dpr, graphH, startTime, endTime }) {
-    const duration = endTime - startTime;
-    if (duration <= 0) return;
-    const targetTicks = Math.max(4, Math.min(12, Math.floor(Wcss / 100)));
-    const interval = pickTickInterval(duration, targetTicks);
-    ctx.fillStyle = '#888';
-    ctx.font = `${Math.round(10 * dpr)}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    const firstTick = Math.ceil(startTime / interval) * interval;
-    for (let t = firstTick; t <= endTime; t += interval) {
-        const x = ((t - startTime) / duration) * W;
-        ctx.beginPath();
-        ctx.moveTo(x, graphH);
-        ctx.lineTo(x, graphH + 4 * dpr);
-        ctx.stroke();
-        ctx.fillText(formatDuration(t), x, graphH + 5 * dpr);
-    }
-}
-
-// Output-driven (scanline) sampler shared by the diverging + mini stacked
-// renderers. Returns a closure that, given a query time, walks a monotonic
-// cursor over the sorted `points` (step function / hold-last) and returns
-// the active point (or null before the first point / past the last point's
-// declared dt). Walking the *output* (one call per pixel column) makes
-// "every column is drawn" structural and gives a draw cost that scales with
-// canvas width, not bucket count — empty buckets no longer leave un-painted
-// vertical stripes through the bars.
-function makeScanlineSampler(points) {
-    let cursor = -1;
-    return (tQuery) => {
-        while (cursor + 1 < points.length && points[cursor + 1].t <= tQuery) cursor++;
-        if (cursor < 0) return null;
-        const pt = points[cursor];
-        // Last point: cap at its declared dt so we don't paint past the end
-        // of the data when the view extends slightly beyond it.
-        if (cursor === points.length - 1) {
-            const endT = pt.t + (pt.dt || 0);
-            if (endT > 0 && tQuery > endT) return null;
-        }
-        return pt;
-    };
-}
-
-// Fill one 1px-wide stacked column of segments, snapping each segment
-// boundary to a pixel row so stacked segments meet on exact rows instead of
-// anti-aliased fractional ones. `from` is the baseline y (device px); `dir`
-// is -1 to stack upward, +1 downward; `scale` is the full-height pixel span
-// that maps to `maxValue`. Shared by renderDivergingGraph / renderMiniStack /
-// renderMiniDiverging.
-function fillStackedColumn(ctx, px, segs, from, dir, scale, maxValue) {
-    if (!segs) return;
-    let yAcc = from;
-    let yPrev = Math.round(from);
-    for (const seg of segs) {
-        if (seg.h > 0) {
-            yAcc += dir * ((seg.h / maxValue) * scale);
-            const yCur = Math.round(yAcc);
-            const segH = (yCur - yPrev) * dir;
-            if (segH > 0) {
-                ctx.fillStyle = seg.color;
-                ctx.fillRect(px, Math.min(yPrev, yCur), 1, segH);
-            }
-            yPrev = yCur;
-        }
-    }
-}
-
-// Diverging-graph layout, in CSS px. renderDivergingGraph multiplies these
-// by dpr for device-pixel drawing; the weapon-graph hit-tester
-// (attachWeaponGraphTooltip) consumes them directly since its cursor coords
-// are CSS px. One source of truth so the renderer and hit-tester can never
-// drift apart.
-const DIVERGING_GRAPH_LAYOUT = {
-    H: 200,           // total canvas height
-    AXIS_H: 20,       // bottom x-axis strip
-    PAD: 4,           // inner padding
-    DROP_STRIP_H: 8,  // reserved drop-dot strip at top/bottom of plot
-};
-
-// Render a diverging bar graph on a canvas.
-//   dataPoints: [{t, dt, up: [{h, color}], down: [{h, color}]}]
-//   dropMarks:  [{time, color, isTop}] (optional, e.g. RL/LG backpack drops
-//               on the weapon graph). Renders as small dots in a reserved
-//               strip zone so they never overlap the bars.
-function renderDivergingGraph(canvasId, {
-    startTime, endTime,
-    dataPoints,
-    maxValue,
-    yAxisId,
-    yTopLabel, yBottomLabel,
-    dropMarks,
-}) {
-    const setup = setupGraphCanvas(canvasId, DIVERGING_GRAPH_LAYOUT.H);
-    if (!setup) return;
-    const { ctx, Wcss, W, H, dpr } = setup;
-
-    // Constants below are in device pixels — multiply the shared CSS-px
-    // layout by dpr so the displayed (CSS-px) size of axes / padding / dots
-    // / fonts matches what the previous CSS-px-coordinate version drew.
-    const AXIS_H = Math.round(DIVERGING_GRAPH_LAYOUT.AXIS_H * dpr);
-    const PAD = Math.round(DIVERGING_GRAPH_LAYOUT.PAD * dpr);
-    const graphH = H - AXIS_H;
-    // Drop-mark strips live in a reserved zone at the top and bottom of
-    // the plot area so weapon bars can never grow into them — the
-    // weapons bar height scales with max players-per-team, so without
-    // this reservation a high-rollout 5v5 snapshot could paint bars
-    // straight through the dots. Sized for one row of ~6 px dots.
-    const DROP_STRIP_H = Math.round(DIVERGING_GRAPH_LAYOUT.DROP_STRIP_H * dpr);
-    const hasDropMarks = !!(dropMarks && dropMarks.length);
-    const stripZone = hasDropMarks ? DROP_STRIP_H + Math.round(2 * dpr) : 0;
-    const midY = PAD + (graphH - PAD) / 2;
-    const barH = midY - PAD - stripZone;
-    const duration = endTime - startTime;
-
-    // Plot background — safe again now that the scanline/hold-last
-    // renderer below paints every pixel column with the active data
-    // point: empty buckets no longer leave bg-coloured vertical stripes
-    // through the bars. The bg only shows above/below bars and in the
-    // axis strip.
-    ctx.fillStyle = PLOT_BG_COLOR;
-    ctx.fillRect(0, 0, W, graphH);
-
-    // Grid lines at ±50% (drawn first so bars overlay them)
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(0, midY - barH * 0.5); ctx.lineTo(W, midY - barH * 0.5);
-    ctx.moveTo(0, midY + barH * 0.5); ctx.lineTo(W, midY + barH * 0.5);
-    ctx.stroke();
-
-    if (duration > 0 && dataPoints && dataPoints.length > 0) {
-        // Scanline hold-last rendering: sample each pixel column via a
-        // monotonic cursor and paint a 1px column. Team A stacks up from
-        // the center, team B stacks down. See makeScanlineSampler /
-        // fillStackedColumn for the sampling + integer-snap details.
-        const sampleAt = makeScanlineSampler(dataPoints);
-        for (let px = 0; px < W; px++) {
-            const tPx = startTime + (px / W) * duration;
-            const pt = sampleAt(tPx);
-            if (pt == null) continue;
-            fillStackedColumn(ctx, px, pt.up, midY, -1, barH, maxValue);
-            fillStackedColumn(ctx, px, pt.down, midY, 1, barH, maxValue);
-        }
-    }
-
-    // Drop-mark dots — small filled circles in the reserved strip zone.
-    // Top strip = team A drops, bottom strip = team B drops; color is
-    // weapon-coded by the caller (e.g. RL red, LG cyan).
-    if (hasDropMarks && duration > 0) {
-        const dotR = 3 * dpr;
-        const topY    = PAD + DROP_STRIP_H / 2;
-        const bottomY = graphH - PAD - DROP_STRIP_H / 2;
-        for (const m of dropMarks) {
-            const x = ((m.time - startTime) / duration) * W;
-            if (x < -dotR || x > W + dotR) continue;
-            const y = m.isTop ? topY : bottomY;
-            ctx.fillStyle = m.color;
-            ctx.beginPath();
-            ctx.arc(x, y, dotR, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-
-    // Zero-y divider — drawn on top of bars so the upper/lower split is
-    // always clearly visible. Integer-aligned to avoid anti-aliasing.
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.fillRect(0, Math.round(midY), W, Math.max(1, Math.round(dpr)));
-
-    drawXAxisTicks(ctx, { W, Wcss, dpr, graphH, startTime, endTime });
-
-    // Y-axis labels
-    if (yAxisId) {
-        const el = document.getElementById(yAxisId);
-        if (el) {
-            const top = el.querySelector('.y-top');
-            const bot = el.querySelector('.y-bottom');
-            if (top) top.textContent = yTopLabel !== undefined ? yTopLabel : maxValue;
-            if (bot) bot.textContent = yBottomLabel !== undefined ? yBottomLabel : maxValue;
-        }
-    }
-}
-
-// ─── Data preparation: Weapons ──────────────────────────────────────────────
-
-function prepWeaponsData(startTime, endTime, teams) {
-    const view = timelineState.bucketView;
-    if (!view || !view.count) return { points: [], max: 4 };
-    const hrDur = timelineState.highResDuration || 0.05;
-    const points = [];
-    let maxVal = 4;
-    const idx0 = bucketIndexAtOrAfter(view, startTime);
-    for (let i = idx0; i < view.count; i++) {
-        const bt = bucketTimeSec(view, i);
-        if (bt > endTime) break;
-        const tdA = teamSnapshot(view, teams[0], i);
-        const tdB = teamSnapshot(view, teams[1], i);
-        const upT = (tdA.rl || 0) + (tdA.lg || 0) + (tdA.rllg || 0);
-        const dnT = (tdB.rl || 0) + (tdB.lg || 0) + (tdB.rllg || 0);
-        maxVal = Math.max(maxVal, upT, dnT);
-        points.push({
-            t: bt, dt: hrDur,
-            up: [
-                { h: tdA.rllg || 0, color: GRAPH_COLORS.RLLG },
-                { h: tdA.lg || 0, color: GRAPH_COLORS.LG },
-                { h: tdA.rl || 0, color: GRAPH_COLORS.RL },
-            ],
-            down: [
-                { h: tdB.rllg || 0, color: GRAPH_COLORS.RLLG },
-                { h: tdB.lg || 0, color: GRAPH_COLORS.LG },
-                { h: tdB.rl || 0, color: GRAPH_COLORS.RL },
-            ],
-        });
-    }
-    return { points, max: maxVal };
-}
-
-// computeBackpackDrops returns dot markers for the weapon timeline:
-// every RL or LG backpack dropped within the [startTime, endTime]
-// window, with isTop=true for team-A drops and false for team-B.
-// Reads from timelineState.backpacks (populated from result.backpacks
-// in displayTimelineAnalysis). Each mark carries the source `drop`
-// entry so hover tooltips can show player, loc, and time.
-function computeBackpackDrops(startTime, endTime, teams) {
-    const drops = timelineState.backpacks;
-    if (!drops || drops.length === 0) return [];
-    const teamA = teams[0], teamB = teams[1];
-    const out = [];
-    for (const d of drops) {
-        if (d.time < startTime || d.time > endTime) continue;
-        let isTop;
-        if (d.team === teamA)      isTop = true;
-        else if (d.team === teamB) isTop = false;
-        else continue; // unknown team (spectator drop, mid-substitution, etc.)
-        const color = d.weapon === 'rl' ? GRAPH_COLORS.RL
-                    : d.weapon === 'lg' ? GRAPH_COLORS.LG
-                    : null;
-        if (!color) continue;
-        out.push({ time: d.time, color, isTop, drop: d });
-    }
-    return out;
-}
-
-// Hit-test state for the weapon-graph drop dots — populated by
-// updateDetailGraph after each render so the canvas mousemove handler
-// can find the dot under the cursor without re-running the data prep.
-const weaponGraphHitState = {
-    startTime: 0,
-    endTime:   0,
-    W:         0,
-    dropMarks: [],
-};
-
-// ─── Data preparation: Health/Armor ─────────────────────────────────────────
-
-function prepHealthArmorData(startTime, endTime, teams) {
-    const view = timelineState.bucketView;
-    if (!view || !view.count) return { points: [], max: 400 };
-    const hrDur = timelineState.highResDuration || 0.05;
-    const points = [];
-    let maxVal = 400;
-    const idx0 = bucketIndexAtOrAfter(view, startTime);
-    for (let i = idx0; i < view.count; i++) {
-        const bt = bucketTimeSec(view, i);
-        if (bt > endTime) break;
-        const tdA = teamSnapshot(view, teams[0], i);
-        const tdB = teamSnapshot(view, teams[1], i);
-        maxVal = Math.max(maxVal, (tdA.th || 0) + (tdA.ta || 0), (tdB.th || 0) + (tdB.ta || 0));
-        points.push({
-            t: bt, dt: hrDur,
-            up: buildHASegments(tdA),
-            down: buildHASegments(tdB),
-        });
-    }
-    return { points, max: maxVal };
-}
-
-function buildHASegments(td) {
-    const segs = [];
-    if ((td.th || 0) > 0) segs.push({ h: td.th, color: GRAPH_COLORS.HEALTH });
-    const armor = td.ta || 0;
-    const abt = td.abt || {};
-    const ra = abt.ra || 0, ya = abt.ya || 0, ga = abt.ga || 0;
-    const total = ra + ya + ga;
-    if (total > 0 && armor > 0) {
-        if (ga > 0) segs.push({ h: (ga / total) * armor, color: GRAPH_COLORS.GA });
-        if (ya > 0) segs.push({ h: (ya / total) * armor, color: GRAPH_COLORS.YA });
-        if (ra > 0) segs.push({ h: (ra / total) * armor, color: GRAPH_COLORS.RA });
-    } else if (armor > 0) {
-        segs.push({ h: armor, color: GRAPH_COLORS.YA });
-    }
-    return segs;
-}
-
-// ─── Per-player drill-downs (health/armor + weapons) ─────────────────────────
-//
-// Both the Team Health/Armor and Weapons panels expand to a per-player view.
-// All series come from the columnar bucket view already on the client
-// (timelineState.bucketView.players[name], read via playerValAt/playerAliveAt)
-// plus timelineState.backpacks for weapon-drop dots — no extra data fetch.
-
-// Group the bucket-view players by side, following timelineState.teams order,
-// so group index == TEAM_COLORS index. Team membership mirrors updateTeamStatus:
-// prefer demoInfo.players, fall back to the map's playerSymbols. Players whose
-// team can't be resolved (spectators, mid-game joiners) are dropped.
-//
-// In the individual layout every player IS a side, so there is one group per
-// entry in timelineState.teams (the frag-sorted player list) and a player's
-// side is their own name — no roster lookup needed. Before this, the grouping
-// hard-coded two sides and resolved everyone to teams[0] / teams[1], so an
-// FFA drill-down drew two rows of N. The two-sided panels keep exactly two
-// groups, so a team demo is unchanged.
-function timelinePlayersByTeam() {
-    const teams = timelineState.teams;
-    const view = timelineState.bucketView;
-    const individual = individualFieldActive();
-    const groupCount = individual ? Math.max(2, teams.length) : 2;
-    const out = Array.from({ length: groupCount }, () => []);
-    if (teams.length < 2 || !view || !view.players) return out;
-    const demoPlayers = currentResult?.demoInfo?.players || [];
-    const teamOf = (name) => {
-        if (individual) return name;
-        const dp = demoPlayers.find(p => p.name === name);
-        if (dp?.team) return dp.team;
-        return mapState.playerSymbols?.[name]?.team;
-    };
-    for (const name of Object.keys(view.players)) {
-        const ti = teams.indexOf(teamOf(name));
-        if (ti < 0 || ti >= out.length) continue;
-        out[ti].push(name);
-    }
-    for (const group of out) group.sort();
-    return out;
-}
-
-// Single-player health+armor stack for the mini chart. Health (green) at the
-// bottom, then armor coloured by its type (RA/YA/GA).
-function buildPlayerHASegments(h, a, at) {
-    const segs = [];
-    if (h > 0) segs.push({ h, color: GRAPH_COLORS.HEALTH });
-    if (a > 0) {
-        const color = at === 'ra' ? GRAPH_COLORS.RA
-                    : at === 'ga' ? GRAPH_COLORS.GA
-                    : GRAPH_COLORS.YA; // ya or unknown
-        segs.push({ h: a, color });
-    }
-    return segs;
-}
-
-function prepPlayerHAData(cp, startTime, endTime) {
-    const view = timelineState.bucketView;
-    const hrDur = timelineState.highResDuration || 0.05;
-    const points = [];
-    if (!view || !view.count || !cp) return points;
-    const idx0 = bucketIndexAtOrAfter(view, startTime);
-    for (let i = idx0; i < view.count; i++) {
-        const bt = bucketTimeSec(view, i);
-        if (bt > endTime) break;
-        // playerValAt returns undefined when the player is dead/absent at this
-        // bucket — emit an empty stack so the chart shows a gap there.
-        const h = playerValAt(cp, 'h', i) || 0;
-        const a = playerValAt(cp, 'a', i) || 0;
-        const at = playerValAt(cp, 'at', i) || '';
-        points.push({ t: bt, dt: hrDur, up: buildPlayerHASegments(h, a, at) });
-    }
-    return points;
-}
-
-// Compact single-direction stacked renderer for the per-player mini charts.
-// Reuses setupGraphCanvas + the scanline hold-last sampling from
-// renderDivergingGraph, but stacks upward from the baseline only and skips the
-// diverging mirror, zero divider, and x-axis (the team chart above carries it).
-function renderMiniStack(canvasId, { startTime, endTime, points, maxValue, height }) {
-    const setup = setupGraphCanvas(canvasId, height || 44);
-    if (!setup) return;
-    const { ctx, W, H, dpr } = setup;
-    const PAD = Math.round(2 * dpr);
-    const baseY = H - PAD;
-    const usableH = H - 2 * PAD;
-
-    ctx.fillStyle = PLOT_BG_COLOR;
-    ctx.fillRect(0, 0, W, H);
-
-    const duration = endTime - startTime;
-    if (duration <= 0 || !points || points.length === 0 || maxValue <= 0) return;
-
-    const sampleAt = makeScanlineSampler(points);
-    for (let px = 0; px < W; px++) {
-        const tPx = startTime + (px / W) * duration;
-        const pt = sampleAt(tPx);
-        if (!pt) continue;
-        fillStackedColumn(ctx, px, pt.up, baseY, -1, usableH, maxValue);
-    }
-}
-
-// Render one mini health/armor chart per player under the Team Health/Armor
-// panel. The per-player canvases are built lazily and rebuilt only when the
-// roster changes (signature check); on every view change we just re-render.
-function renderHealthArmorPerPlayer(startTime, endTime) {
-    const container = document.getElementById('ha-per-player');
-    if (!container) return;
-    const teams = timelineState.teams;
-    const view = timelineState.bucketView;
-    if (!view || !view.count || teams.length < 2) {
-        // Clearing the DOM must invalidate the rebuild cache too: otherwise a
-        // later render with the same roster signature skips the rebuild and
-        // iterates now-detached _cells, rendering nothing. This bit when a new
-        // demo's buckets arrive deferred (the first render runs view-less).
-        container.innerHTML = '';
-        container._sig = null;
-        container._cells = [];
-        return;
-    }
-
-    const grouped = timelinePlayersByTeam();
-    const sig = grouped.map(g => g.join('|')).join('#');
-    if (container._sig !== sig) {
-        container.innerHTML = '';
-        container._cells = [];
-        for (let ti = 0; ti < grouped.length; ti++) {
-            grouped[ti].forEach((name, idx) => {
-                const cid = `ha-pp-${ti}-${idx}`;
-                const cell = document.createElement('div');
-                cell.className = 'per-player-cell';
-                const label = document.createElement('div');
-                label.className = 'per-player-label';
-                label.textContent = name;
-                label.title = name;
-                label.style.color = TEAM_COLORS[ti] || '#ccc';
-                const wrap = document.createElement('div');
-                wrap.className = 'per-player-canvas-wrap';
-                const canvas = document.createElement('canvas');
-                canvas.id = cid;
-                canvas.className = 'timeline-canvas';
-                const indicator = document.createElement('div');
-                indicator.className = 'current-time-indicator pp-time-indicator';
-                wrap.appendChild(canvas);
-                wrap.appendChild(indicator);
-                cell.appendChild(label);
-                cell.appendChild(wrap);
-                container.appendChild(cell);
-                installGraphPanZoom(cid);
-                installIndicatorScrub(indicator, wrap);
-                container._cells.push({ name, cid });
-            });
-        }
-        container._sig = sig;
-    }
-
-    // Shared max across all players (rounded up) so the minis are comparable.
-    let maxVal = 300;
-    const prepped = {};
-    for (const { name } of container._cells) {
-        const pts = prepPlayerHAData(view.players[name], startTime, endTime);
-        prepped[name] = pts;
-        for (const p of pts) {
-            let s = 0;
-            for (const seg of p.up) s += seg.h;
-            if (s > maxVal) maxVal = s;
-        }
-    }
-    for (const { name, cid } of container._cells) {
-        const cv = document.getElementById(cid);
-        if (cv) cv.style.width = ''; // let the cell reflow on resize
-        renderMiniStack(cid, { startTime, endTime, points: prepped[name] || [], maxValue: maxVal, height: ppMiniHeight() });
-    }
-    renderSharedTimeAxis(container, startTime, endTime);
-}
-
-// ─── Per-player frags / deaths drill-down ───────────────────────────────────
-//
-// One compact +/- chart per player under the Score Timeline, mirroring the team
-// Score Timeline above: the player's running plus/minus = cumulative enemy
-// kills minus cumulative deaths. When ahead (more kills than deaths) the area
-// rises above the divider in the team colour; when behind it drops below in a
-// dimmed team colour. Kills come from killEvents (the canonical frag log,
-// suicides/teamkills excluded) and deaths from deathEvents (every death counts
-// once), so the full-match endpoint equals byPlayer.kills − byPlayer.deaths and
-// reconciles with the kills-based efficiency = kills/(kills+deaths)
-// (ktx/src/statsTables.c calculateEfficiency) shown on each row.
-
-// Darken a team hex toward black so the behind-half reads as a muted mirror of
-// the team-coloured ahead-half (position above/below the divider already
-// separates them; the shade keeps team identity).
-function dimColor(hex) {
-    const [r, g, b] = hexToRgb(hex);
-    return `rgb(${Math.round(r * 0.55)},${Math.round(g * 0.55)},${Math.round(b * 0.55)})`;
-}
-
-// Build sampled +/- points for one player plus the window-end kill/death
-// totals. Mirrors prepScoreData: carry the running totals from match start so
-// the window's left edge shows the cumulative plus/minus, then plot the single
-// net value (kills − deaths) as up when positive / down when negative.
-function prepPlayerFragDeathData(name, startTime, endTime, upColor, downColor) {
-    const ke = timelineState.killEvents || [];
-    const de = timelineState.deathEvents || [];
-
-    let kills = 0, deaths = 0;
-    for (const k of ke) {
-        if (k.time >= startTime) break;
-        if (k.player === name) kills += 1;
-    }
-    for (const d of de) {
-        if (d.time >= startTime) break;
-        if (d.player === name) deaths += 1;
-    }
-
-    // Merge this player's in-window kill and death events by time, then
-    // accumulate into a net (kills − deaths) step series.
-    const evs = [];
-    for (const k of ke) {
-        if (k.time < startTime) continue;
-        if (k.time > endTime) break;
-        if (k.player === name) evs.push({ time: k.time, dn: 1 });
-    }
-    for (const d of de) {
-        if (d.time < startTime) continue;
-        if (d.time > endTime) break;
-        if (d.player === name) evs.push({ time: d.time, dn: -1 });
-    }
-    evs.sort((a, b) => a.time - b.time);
-
-    const stepAt = [{ time: startTime, net: kills - deaths }];
-    let ck = kills, cd = deaths;
-    for (const e of evs) {
-        if (e.dn > 0) ck += 1; else cd += 1;
-        stepAt.push({ time: e.time, net: ck - cd });
-    }
-    stepAt.push({ time: endTime, net: ck - cd });
-
-    const duration = endTime - startTime;
-    const sampleRate = Math.max(0.5, duration / 400);
-    let maxVal = 1;
-    const points = [];
-    let si = 0;
-    for (let t = startTime; t < endTime; t += sampleRate) {
-        while (si + 1 < stepAt.length && stepAt[si + 1].time <= t) si++;
-        const v = stepAt[si].net;
-        maxVal = Math.max(maxVal, Math.abs(v));
-        points.push({
-            t, dt: sampleRate,
-            up: v > 0 ? [{ h: v, color: upColor }] : [],
-            down: v < 0 ? [{ h: -v, color: downColor }] : [],
-        });
-    }
-    return { points, max: maxVal, kills: ck, deaths: cd };
-}
-
-// Compact diverging renderer for the per-player frags/deaths minis: net frags
-// stack up from the center, deaths stack down, sharing maxValue. Mirrors
-// renderMiniStack's scanline sampling, mirrored across a faint center divider.
-function renderMiniDiverging(canvasId, { startTime, endTime, points, maxValue, height }) {
-    const setup = setupGraphCanvas(canvasId, height || 44);
-    if (!setup) return;
-    const { ctx, W, H, dpr } = setup;
-    const PAD = Math.round(2 * dpr);
-    const midY = Math.round(H / 2);
-    const halfH = (H - 2 * PAD) / 2;
-
-    ctx.fillStyle = PLOT_BG_COLOR;
-    ctx.fillRect(0, 0, W, H);
-
-    const duration = endTime - startTime;
-    if (duration > 0 && points && points.length && maxValue > 0) {
-        const sampleAt = makeScanlineSampler(points);
-        for (let px = 0; px < W; px++) {
-            const tPx = startTime + (px / W) * duration;
-            const pt = sampleAt(tPx);
-            if (!pt) continue;
-            // Up (net frags, above center); down (deaths, below center).
-            fillStackedColumn(ctx, px, pt.up, midY, -1, halfH, maxValue);
-            fillStackedColumn(ctx, px, pt.down, midY, 1, halfH, maxValue);
-        }
-    }
-
-    // Center divider.
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.fillRect(0, midY, W, Math.max(1, Math.round(dpr)));
-}
-
-// Render one mini +/- chart per player under the Score Timeline panel. Built
-// lazily, rebuilt only when the roster changes (signature check). Each row is
-// scaled by its OWN |net| max (0 stays centred) so a player whose plus/minus
-// swings little still fills the row instead of collapsing to a few pixels next
-// to a high-swing team-mate. The labels track the playhead via
-// updateFragsPerPlayerStats.
-function renderFragsPerPlayer(startTime, endTime) {
-    const container = document.getElementById('frags-per-player');
-    if (!container) return;
-    const teams = timelineState.teams;
-    const view = timelineState.bucketView;
-    if (!view || !view.count || teams.length < 2) {
-        // Clearing the DOM must invalidate the rebuild cache too: otherwise a
-        // later render with the same roster signature skips the rebuild and
-        // iterates now-detached _cells, rendering nothing. This bit when a new
-        // demo's buckets arrive deferred (the first render runs view-less).
-        container.innerHTML = '';
-        container._sig = null;
-        container._cells = [];
-        return;
-    }
-
-    const grouped = timelinePlayersByTeam();
-    const sig = grouped.map(g => g.join('|')).join('#');
-    if (container._sig !== sig) {
-        container.innerHTML = '';
-        container._cells = [];
-        for (let ti = 0; ti < grouped.length; ti++) {
-            grouped[ti].forEach((name, idx) => {
-                const cid = `fd-pp-${ti}-${idx}`;
-                const cell = document.createElement('div');
-                cell.className = 'per-player-cell';
-                const label = document.createElement('div');
-                label.className = 'per-player-label fd-label';
-                label.style.color = TEAM_COLORS[ti] || '#ccc';
-                const nameEl = document.createElement('div');
-                nameEl.className = 'fd-name';
-                nameEl.textContent = name;
-                nameEl.title = name;
-                const statEl = document.createElement('div');
-                statEl.className = 'fd-stat';
-                label.appendChild(nameEl);
-                label.appendChild(statEl);
-                const wrap = document.createElement('div');
-                wrap.className = 'per-player-canvas-wrap';
-                const canvas = document.createElement('canvas');
-                canvas.id = cid;
-                canvas.className = 'timeline-canvas';
-                const indicator = document.createElement('div');
-                indicator.className = 'current-time-indicator pp-time-indicator';
-                wrap.appendChild(canvas);
-                wrap.appendChild(indicator);
-                cell.appendChild(label);
-                cell.appendChild(wrap);
-                container.appendChild(cell);
-                installGraphPanZoom(cid);
-                installIndicatorScrub(indicator, wrap);
-                container._cells.push({ name, cid, ti, statEl });
-            });
-        }
-        container._sig = sig;
-    }
-
-    for (const { name, ti, cid } of container._cells) {
-        const upColor = TEAM_COLORS[ti] || '#ccc';
-        const d = prepPlayerFragDeathData(name, startTime, endTime, upColor, dimColor(upColor));
-        const cv = document.getElementById(cid);
-        if (cv) cv.style.width = '';
-        // Per-player max (symmetric about 0): each row uses its full height.
-        renderMiniDiverging(cid, { startTime, endTime, points: d.points, maxValue: d.max, height: ppMiniHeight() });
-    }
-    updateFragsPerPlayerStats();
-    renderSharedTimeAxis(container, startTime, endTime);
-}
-
-// Update the per-player frags/deaths labels to the cumulative kills / deaths
-// and efficiency AT the current playback time (not whole-match totals), so the
-// numbers track the playhead as it moves / scrubs. Counts the kill and death
-// event streams in one pass each; no-op when the drill-down isn't built.
-function updateFragsPerPlayerStats() {
-    const container = document.getElementById('frags-per-player');
-    if (!container || !container._cells || !container._cells.length) return;
-    const t = mapState.currentTime;
-    const kc = {}, dc = {};
-    for (const e of (timelineState.killEvents || [])) if (e.time <= t) kc[e.player] = (kc[e.player] || 0) + 1;
-    for (const e of (timelineState.deathEvents || [])) if (e.time <= t) dc[e.player] = (dc[e.player] || 0) + 1;
-    for (const { name, statEl } of container._cells) {
-        if (!statEl) continue;
-        const k = kc[name] || 0, d = dc[name] || 0;
-        const eff = (k + d) > 0 ? Math.round((k / (k + d)) * 100) : 0;
-        statEl.textContent = `${k}/${d} · ${eff}%`;
-        statEl.title = `${k} kills / ${d} deaths · ${eff}% efficiency at ${formatDuration(t)}`;
-    }
-}
-
-// Per-player weapons timeline: one combined row per player coloured by whether
-// they hold RL / LG / both, with weapon-drop events as dots. Reuses
-// renderSpansTimeline (one row per player) with team-coloured labels.
-function prepPlayerWeaponSpans(cp, startTime, endTime) {
-    const view = timelineState.bucketView;
-    const spans = [];
-    if (!view || !view.count || !cp) return spans;
-    const idx0 = bucketIndexAtOrAfter(view, startTime);
-    let curState = null, curStart = startTime;
-    for (let i = idx0; i < view.count; i++) {
-        const bt = bucketTimeSec(view, i);
-        if (bt > endTime) break;
-        let state = null;
-        if (playerAliveAt(cp, i)) {
-            const rl = !!playerValAt(cp, 'rl', i);
-            const lg = !!playerValAt(cp, 'lg', i);
-            if (rl && lg) state = 'rllg';
-            else if (rl) state = 'rl';
-            else if (lg) state = 'lg';
-        }
-        if (state !== curState) {
-            if (curState) spans.push({ start: curStart, end: bt, state: curState });
-            curState = state;
-            curStart = bt;
-        }
-    }
-    if (curState) spans.push({ start: curStart, end: endTime, state: curState });
-    return spans;
-}
-
-function renderWeaponsPerPlayer(startTime, endTime) {
-    const labelsEl = document.getElementById('weapons-per-player-labels');
-    if (!labelsEl) return;
-    const teams = timelineState.teams;
-    const view = timelineState.bucketView;
-    if (!view || !view.count || teams.length < 2) { labelsEl.innerHTML = ''; return; }
-
-    const grouped = timelinePlayersByTeam();
-    const rows = [];
-    const rowPlayers = [];
-    for (let ti = 0; ti < grouped.length; ti++) {
-        for (const name of grouped[ti]) {
-            rows.push({
-                name,
-                color: TEAM_COLORS[ti] || '#ccc',
-                spans: prepPlayerWeaponSpans(view.players[name], startTime, endTime),
-            });
-            rowPlayers.push(name);
-        }
-    }
-    if (rows.length === 0) { labelsEl.innerHTML = ''; return; }
-
-    const dropMarks = [];
-    for (const d of (timelineState.backpacks || [])) {
-        if (d.time < startTime || d.time > endTime) continue;
-        const row = rowPlayers.indexOf(d.player);
-        if (row < 0) continue;
-        const color = d.weapon === 'rl' ? GRAPH_COLORS.RL
-                    : d.weapon === 'lg' ? GRAPH_COLORS.LG
-                    : null;
-        if (!color) continue;
-        dropMarks.push({ row, time: d.time, color });
-    }
-
-    renderSpansTimeline('weapons-per-player-canvas', 'weapons-per-player-labels', {
-        startTime, endTime, rows, rowH: ppSpanRowHeight(),
-        stateColors: { rl: GRAPH_COLORS.RL, lg: GRAPH_COLORS.LG, rllg: GRAPH_COLORS.RLLG },
-        dropMarks,
-    });
-}
-
-// ─── Data preparation: Score ────────────────────────────────────────────────
-
-function prepScoreData(startTime, endTime, teams) {
-    const fragEvents = timelineState.fragEvents || []; // pre-sorted at intake
-    if (teams.length < 2) return { points: [], max: 10 };
-    let score = 0;
-    for (const f of fragEvents) {
-        if (f.time >= startTime) break;
-        if (f.team === teams[0]) score += (f.delta || 1);
-        else if (f.team === teams[1]) score -= (f.delta || 1);
-    }
-    // Build cumulative score change points
-    const scoreAt = [{ time: startTime, score }];
-    let s = score;
-    for (const f of fragEvents) {
-        if (f.time < startTime) continue;
-        if (f.time > endTime) break;
-        if (f.team === teams[0]) s += (f.delta || 1);
-        else if (f.team === teams[1]) s -= (f.delta || 1);
-        scoreAt.push({ time: f.time, score: s });
-    }
-    scoreAt.push({ time: endTime, score: s });
-
-    const duration = endTime - startTime;
-    const sampleRate = Math.max(0.5, duration / 400);
-    const [rA, gA, bA2] = hexToRgb(TEAM_COLORS[0]);
-    const [rB, gB, bB2] = hexToRgb(TEAM_COLORS[1]);
-    const cA = `rgba(${rA},${gA},${bA2},0.8)`;
-    const cB = `rgba(${rB},${gB},${bB2},0.8)`;
-    let maxVal = 10;
-    const points = [];
-    let si = 0;
-    for (let t = startTime; t < endTime; t += sampleRate) {
-        while (si + 1 < scoreAt.length && scoreAt[si + 1].time <= t) si++;
-        const v = scoreAt[si].score;
-        maxVal = Math.max(maxVal, Math.abs(v));
-        points.push({
-            t, dt: sampleRate,
-            up: v > 0 ? [{ h: v, color: cA }] : [],
-            down: v < 0 ? [{ h: -v, color: cB }] : [],
-        });
-    }
-    return { points, max: maxVal };
-}
-
-// ─── Graph pan/zoom (shared view range) ─────────────────────────────────────
-//
-// All four diverging graphs and the region-control timeline share
-// timelineState.segment as their view range. Ctrl+wheel zooms around the
-// cursor; left-click drag pans horizontally. The unified timeline bar's
-// range-select still feeds the same state, so both entry points stay in sync.
-
-const MIN_VIEW_SPAN = 2; // seconds — don't zoom past this
-
-function currentViewRange() {
-    const duration = timelineState.duration || 0;
-    const seg = timelineState.segment;
-    return seg ? [seg.start, seg.end] : [0, duration];
-}
-
-function setViewRange(start, end) {
-    const duration = timelineState.duration || 0;
-    if (duration <= 0) return;
-    if (end - start < MIN_VIEW_SPAN) {
-        const mid = (start + end) / 2;
-        start = mid - MIN_VIEW_SPAN / 2;
-        end = mid + MIN_VIEW_SPAN / 2;
-    }
-    // Slide the window back inside [0, duration] without shrinking it.
-    if (start < 0) { end -= start; start = 0; }
-    if (end > duration) { start -= (end - duration); end = duration; }
-    start = Math.max(0, start);
-    end = Math.min(duration, end);
-    if (start <= 0 && end >= duration) {
-        timelineState.segment = null;
-    } else {
-        timelineState.segment = { start, end };
-    }
-    updateSelectionOverlay();
-    updateSegmentLabel();
-    updateDetailView();
-    updateUrlState();
-}
-
-function graphMouseToTime(canvas, clientX) {
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width <= 0) return null;
-    const [start, end] = currentViewRange();
-    return start + ((clientX - rect.left) / rect.width) * (end - start);
-}
-
-// One global drag tracker shared by all installed canvases — avoids attaching
-// a mousemove listener per canvas. Pan updates are coalesced to one per
-// animation frame: a raw mousemove stream would otherwise run
-// setViewRange → updateDetailView (five graph preps/renders, each resizing its
-// canvas) dozens of times per second.
-const graphPanState = { canvas: null, lastX: 0, pendingX: 0, rafId: 0 };
-let graphPanGlobalsInstalled = false;
-
-// Apply the accumulated pan since the last processed frame. Runs from the rAF
-// scheduled by mousemove, and synchronously from mouseup to flush the final
-// cursor position exactly.
-function processGraphPan() {
-    graphPanState.rafId = 0;
-    const c = graphPanState.canvas;
-    if (!c) return;
-    const rect = c.getBoundingClientRect();
-    if (rect.width <= 0) return;
-    const [start, end] = currentViewRange();
-    const secPerPx = (end - start) / rect.width;
-    const dx = graphPanState.pendingX - graphPanState.lastX;
-    if (dx === 0) return;
-    graphPanState.lastX = graphPanState.pendingX;
-    setViewRange(start - dx * secPerPx, end - dx * secPerPx);
-    // Pin the playhead to its on-screen position while panning: shift the
-    // current time by the amount the window actually moved (after the
-    // [0,duration] clamp), so the indicator line stays put and the unified
-    // caret + clock + map follow. Not zoomed ⇒ the window can't move ⇒
-    // applied === 0 ⇒ the playhead holds.
-    const [newStart] = currentViewRange();
-    const applied = newStart - start;
-    if (applied !== 0) setCurrentTime(mapState.currentTime + applied);
-}
-
-function ensureGraphPanGlobals() {
-    if (graphPanGlobalsInstalled) return;
-    graphPanGlobalsInstalled = true;
-    document.addEventListener('mousemove', (e) => {
-        if (!graphPanState.canvas) return;
-        graphPanState.pendingX = e.clientX;
-        if (!graphPanState.rafId) graphPanState.rafId = requestAnimationFrame(processGraphPan);
-    });
-    document.addEventListener('mouseup', () => {
-        if (!graphPanState.canvas) return;
-        // Flush any pending pan so the drag ends exactly where the cursor is.
-        if (graphPanState.rafId) {
-            cancelAnimationFrame(graphPanState.rafId);
-            graphPanState.rafId = 0;
-            processGraphPan();
-        }
-        graphPanState.canvas.style.cursor = 'grab';
-        graphPanState.canvas = null;
-    });
-}
-
-function installGraphPanZoom(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas || canvas._panZoomInstalled) return;
-    canvas._panZoomInstalled = true;
-    ensureGraphPanGlobals();
-
-    canvas.addEventListener('wheel', (e) => {
-        if (!e.ctrlKey && !e.metaKey) return;  // plain wheel = page scroll
-        e.preventDefault();                    // stop browser pinch-zoom
-        const centerT = graphMouseToTime(canvas, e.clientX);
-        if (centerT === null) return;
-        // Exponential factor — deltaY > 0 scrolls toward the user → zoom out.
-        const factor = Math.exp(e.deltaY * 0.0015);
-        const [start, end] = currentViewRange();
-        setViewRange(
-            centerT - (centerT - start) * factor,
-            centerT + (end - centerT) * factor,
-        );
-    }, { passive: false });
-
-    canvas.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) return;
-        graphPanState.canvas = canvas;
-        graphPanState.lastX = e.clientX;
-        graphPanState.pendingX = e.clientX;
-        canvas.style.cursor = 'grabbing';
-        e.preventDefault();
-    });
-
-    canvas.addEventListener('dblclick', () => {
-        // Quick reset to full match
-        setViewRange(0, timelineState.duration || 0);
-    });
-
-    canvas.style.cursor = 'grab';
-}
-
-// ─── Current-time scrubbing on the graphs ───────────────────────────────────
-//
-// Grabbing the current-time line on any timeline graph (team or per-player,
-// normal or zoomed) sets the playback time. The indicator div sits above the
-// canvas; its parent (the graph-outer / canvas-wrap / spans-outer) holds the
-// canvas at full width and so shares the canvas's time→x mapping, which we
-// invert through currentViewRange. One global move/up pair, mirroring
-// graphPanState.
-const graphScrubState = { el: null };
-let graphScrubGlobalsInstalled = false;
-
-function ensureGraphScrubGlobals() {
-    if (graphScrubGlobalsInstalled) return;
-    graphScrubGlobalsInstalled = true;
-    document.addEventListener('mousemove', (e) => {
-        const el = graphScrubState.el;
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        if (rect.width <= 0) return;
-        const [start, end] = currentViewRange();
-        const frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        setCurrentTime(start + frac * (end - start));
-    });
-    document.addEventListener('mouseup', () => {
-        if (!graphScrubState.el) return;
-        graphScrubState.el = null;
-        document.body.classList.remove('graph-scrubbing');
-    });
-}
-
-// Make a current-time indicator line draggable to scrub. measureEl (the
-// element whose width maps to the view range) defaults to the indicator's
-// parent, which holds the canvas at full width.
-function installIndicatorScrub(indicatorEl, measureEl) {
-    if (!indicatorEl || indicatorEl._scrubInstalled) return;
-    indicatorEl._scrubInstalled = true;
-    ensureGraphScrubGlobals();
-    indicatorEl.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) return;
-        graphScrubState.el = measureEl || indicatorEl.parentElement;
-        document.body.classList.add('graph-scrubbing');
-        e.preventDefault();
-        e.stopPropagation();
-    });
-}
-
-// Render one shared time axis at the bottom of a per-player grid, aligned with
-// the graph column (an empty label-width spacer + a tick track spanning the
-// canvas column). Rebuilt on every view change since labels depend on the
-// window. The team graphs draw their axis on-canvas and the per-player weapons
-// spans canvas draws its own; the compact frags/health minis share this single
-// axis instead of repeating one per row.
-function renderSharedTimeAxis(gridEl, startTime, endTime) {
-    if (!gridEl) return;
-    let axis = gridEl.querySelector(':scope > .per-player-axis-cell');
-    let track;
-    if (!axis) {
-        axis = document.createElement('div');
-        axis.className = 'per-player-cell per-player-axis-cell';
-        const spacer = document.createElement('div');
-        spacer.className = 'per-player-label';
-        track = document.createElement('div');
-        track.className = 'per-player-axis-track';
-        axis.appendChild(spacer);
-        axis.appendChild(track);
-    } else {
-        track = axis.querySelector('.per-player-axis-track');
-    }
-    gridEl.appendChild(axis); // keep the axis as the last row
-    track.innerHTML = '';
-    const duration = endTime - startTime;
-    if (duration <= 0) return;
-    const wCss = track.clientWidth || 300;
-    const targetTicks = Math.max(4, Math.min(10, Math.floor(wCss / 100)));
-    const interval = pickTickInterval(duration, targetTicks);
-    const firstTick = Math.ceil(startTime / interval) * interval;
-    for (let t = firstTick; t <= endTime + 1e-6; t += interval) {
-        const span = document.createElement('span');
-        span.textContent = formatDuration(t);
-        span.style.left = `${((t - startTime) / duration) * 100}%`;
-        track.appendChild(span);
-    }
 }
 
 // ─── Unified Timeline Widget ──────────────────────────────────────────────
+//
+// The playback bar above the Timeline, Chat, Map, Key Moments and Player
+// tabs: playback buttons, the time, a scrub caret and a range select. The
+// range it selects is the shared segment (MvdState.segment, src/state/
+// timeline.js) — the Timeline tab's view window, which that tab's own zoom
+// and pan also set. While a drag is in progress the bar shows its own
+// preview (timelineState.dragPreview); the segment is set on release.
 
 let unifiedTimelineInitialized = false;
 
@@ -2609,9 +1366,9 @@ function setupUnifiedTimeline() {
         const end = Math.max(timelineState.dragStartTime, time);
 
         if (end - start > 2) {
-            timelineState.segment = { start, end };
-            updateSelectionOverlay();
-            updateSegmentLabel();
+            timelineState.dragPreview = { start, end };
+            updateSelectionOverlay(timelineState.dragPreview);
+            updateSegmentLabel(timelineState.dragPreview);
         }
     });
 
@@ -2624,6 +1381,7 @@ function setupUnifiedTimeline() {
 
         if (!timelineState.dragging) return;
         timelineState.dragging = false;
+        timelineState.dragPreview = null;
 
         const time = tlBarClickToTime(e);
         if (time === null) return;
@@ -2632,17 +1390,12 @@ function setupUnifiedTimeline() {
         const end = Math.max(timelineState.dragStartTime, time);
 
         if (end - start <= 2) {
-            timelineState.segment = null;
-            updateSelectionOverlay();
-            updateSegmentLabel();
+            // A click: no segment, and the time moves there.
+            MvdState.segment.set(null);
             setCurrentTime(time);
         } else {
-            timelineState.segment = { start, end };
-            updateSelectionOverlay();
-            updateSegmentLabel();
-            updateDetailView();
+            MvdState.segment.set({ start, end });
         }
-        updateUrlState();
     });
 
     bar.addEventListener('mousedown', (e) => {
@@ -2651,19 +1404,15 @@ function setupUnifiedTimeline() {
 
         timelineState.dragging = true;
         timelineState.dragStartTime = time;
-        timelineState.segment = null;
-        updateSelectionOverlay();
-        updateSegmentLabel();
+        timelineState.dragPreview = null;
+        updateSelectionOverlay(null);
+        updateSegmentLabel(null);
 
         e.preventDefault();
     });
 
     bar.addEventListener('dblclick', () => {
-        timelineState.segment = null;
-        updateSelectionOverlay();
-        updateSegmentLabel();
-        updateDetailView();
-        updateUrlState();
+        MvdState.segment.set(null);
     });
 
     // --- Playback controls ---
@@ -2672,88 +1421,14 @@ function setupUnifiedTimeline() {
     document.getElementById('tl-play-pause').addEventListener('click', () => startPlaybackAtSpeed(1));
     document.getElementById('tl-5x').addEventListener('click', () => startPlaybackAtSpeed(5));
 
-    // --- Pan/zoom on every diverging graph + spans timelines (DOM order) ---
-    ['score-canvas', 'powerup-canvas', 'detail-graph-canvas',
-     'health-armor-canvas', 'region-control-canvas',
-     // Per-player weapons spans canvas — same Ctrl/Cmd+scroll zoom + drag-pan.
-     'weapons-per-player-canvas'].forEach(installGraphPanZoom);
-
-    // --- Drag the current-time line on any graph to scrub the clock ---
-    ['score-time-indicator', 'powerup-time-indicator', 'detail-time-indicator',
-     'health-time-indicator', 'region-time-indicator',
-     'weapons-pp-time-indicator'].forEach(id =>
-        installIndicatorScrub(document.getElementById(id)));
-
-    // --- Hover tooltip on weapon-graph drop dots ---
-    attachWeaponGraphTooltip();
-
-    // --- Hover tooltip on powerup-timeline spans ---
-    attachPowerupTimelineTooltip();
-
-    // --- Per-player drill-down toggles: render on first open (and on every
-    // re-open) at the current view range. Subsequent view changes re-render
-    // via updateDetailGraph / updateHealthArmorGraph while the panel is open.
-    // updateTimeIndicators after the first render seats the freshly-created
-    // current-time lines at the playhead (they'd otherwise sit at 0% until the
-    // next view/time change).
-    const haDet = document.getElementById('ha-per-player-details');
-    if (haDet && !haDet._toggleWired) {
-        haDet._toggleWired = true;
-        haDet.addEventListener('toggle', () => {
-            if (haDet.open) { renderHealthArmorPerPlayer(...currentViewRange()); updateTimeIndicators(); }
-        });
-    }
-    const wpDet = document.getElementById('weapons-per-player-details');
-    if (wpDet && !wpDet._toggleWired) {
-        wpDet._toggleWired = true;
-        wpDet.addEventListener('toggle', () => {
-            if (wpDet.open) { renderWeaponsPerPlayer(...currentViewRange()); updateTimeIndicators(); }
-        });
-    }
-    const fpDet = document.getElementById('frags-per-player-details');
-    if (fpDet && !fpDet._toggleWired) {
-        fpDet._toggleWired = true;
-        fpDet.addEventListener('toggle', () => {
-            if (fpDet.open) { renderFragsPerPlayer(...currentViewRange()); updateTimeIndicators(); }
-        });
-    }
-
-    // --- Window resize: detail-panel canvases are sized in pixels from
-    // container.clientWidth, so they don't reflow with the viewport on
-    // their own — re-render them when the window resizes. Only the
-    // timeline tab has the detail panels; on other tabs the active-tab
-    // re-render path handles it on switch. Debounced to a single
-    // animation frame per resize burst.
-    window.addEventListener('resize', onTimelineWindowResize);
-
     unifiedTimelineInitialized = true;
 }
 
-const TIMELINE_CANVAS_IDS = [
-    'score-canvas', 'powerup-canvas', 'detail-graph-canvas',
-    'health-armor-canvas', 'region-control-canvas', 'weapons-per-player-canvas',
-];
-
-let _timelineResizeRafId = null;
-function onTimelineWindowResize() {
-    if (!currentResult) return;
-    const activeTab = activeTabName();
-    if (activeTab !== 'timeline') return;
-    if (_timelineResizeRafId !== null) return;
-    _timelineResizeRafId = requestAnimationFrame(() => {
-        _timelineResizeRafId = null;
-        // The renderers set canvas.style.width in pixels, which (combined
-        // with the default flex `min-width: auto`) wedges the parent open
-        // and prevents shrink-to-fit on window down-size. Clear the inline
-        // width before re-measuring so each container reports its true
-        // available width via clientWidth.
-        for (const id of TIMELINE_CANVAS_IDS) {
-            const c = document.getElementById(id);
-            if (c) c.style.width = '';
-        }
-        updateDetailView();
-        updateTimeIndicators();
-    });
+// onSegmentChanged mirrors the shared segment onto the bar and the URL.
+function onSegmentChanged(seg) {
+    updateSelectionOverlay(seg);
+    updateSegmentLabel(seg);
+    updateUrlState();
 }
 
 function tlBarClickToTime(e) {
@@ -2767,11 +1442,13 @@ function tlBarClickToTime(e) {
     return frac * timelineState.duration;
 }
 
-function updateSelectionOverlay() {
+// The bar's selection overlay and label for a segment (the shared one, or
+// the drag preview); null hides them.
+function updateSelectionOverlay(seg) {
     const overlay = document.getElementById('tl-selection-overlay');
     if (!overlay) return;
 
-    if (!timelineState.segment) {
+    if (!seg) {
         overlay.style.display = 'none';
         return;
     }
@@ -2779,24 +1456,24 @@ function updateSelectionOverlay() {
     const duration = timelineState.duration;
     if (duration <= 0) return;
 
-    const startPct = (timelineState.segment.start / duration) * 100;
-    const endPct = (timelineState.segment.end / duration) * 100;
+    const startPct = (seg.start / duration) * 100;
+    const endPct = (seg.end / duration) * 100;
 
     overlay.style.display = 'block';
     overlay.style.left = `${startPct}%`;
     overlay.style.width = `${endPct - startPct}%`;
 }
 
-function updateSegmentLabel() {
+function updateSegmentLabel(seg) {
     const label = document.getElementById('tl-segment-label');
     if (!label) return;
 
-    if (!timelineState.segment) {
+    if (!seg) {
         label.textContent = '';
         return;
     }
 
-    label.textContent = `${formatDuration(timelineState.segment.start)} – ${formatDuration(timelineState.segment.end)}`;
+    label.textContent = `${formatDuration(seg.start)} – ${formatDuration(seg.end)}`;
 }
 
 function updateUnifiedCursor() {
@@ -2836,721 +1513,6 @@ function renderUnifiedAxis() {
     }
 }
 
-function updateTimeIndicators() {
-    updateUnifiedCursor();
-
-    // Detail graphs show either the segment or the full match
-    const seg = timelineState.segment;
-    const rangeStart = seg ? seg.start : 0;
-    const rangeEnd = seg ? seg.end : timelineState.duration;
-    const range = rangeEnd - rangeStart;
-
-    const detailIndicators = [
-        'score-time-indicator',
-        'powerup-time-indicator',
-        'detail-time-indicator',
-        'health-time-indicator',
-        'region-time-indicator'
-    ];
-
-    if (range <= 0) return;
-
-    const pct = Math.max(0, Math.min(100, ((mapState.currentTime - rangeStart) / range) * 100));
-
-    for (const id of detailIndicators) {
-        const el = document.getElementById(id);
-        if (el) {
-            // Indicator shares the canvas's time-to-pixel mapping:
-            // x = (t - start) / (end - start) * W, spanning the full
-            // container width. No inset — the legacy 10 px padding
-            // came from a removed axis-strip sibling and causes the
-            // cursor to drift away from the bars near the edges.
-            el.style.left = `${pct}%`;
-        }
-    }
-
-    // Per-player drill-down lines share the same view window, so the same
-    // pct applies. These exist only while a drill-down is open.
-    document.querySelectorAll('.pp-time-indicator').forEach(el => {
-        el.style.left = `${pct}%`;
-    });
-
-    // Per-player frags/deaths labels read the cumulative score at the playhead.
-    updateFragsPerPlayerStats();
-
-    // Update team status table
-    updateTeamStatus();
-}
-
-function updateDetailView() {
-    const duration = timelineState.duration;
-
-    // Use segment if selected, otherwise full match
-    const start = timelineState.segment ? timelineState.segment.start : 0;
-    const end = timelineState.segment ? timelineState.segment.end : duration;
-
-    // Show range in label
-    if (timelineState.segment) {
-        document.getElementById('time-range-label').textContent =
-            `(${formatDuration(start)} - ${formatDuration(end)})`;
-    } else {
-        document.getElementById('time-range-label').textContent = '';
-    }
-
-    // Update all detail panels (axes are drawn on canvas by the unified
-    // renderer). Order mirrors the DOM: score, powerups, weapons,
-    // health/armor, then region control.
-    updateScoreTimeline(start, end);
-    updatePowerupTimeline(start, end);
-    updateDetailGraph(start, end);
-    updateHealthArmorGraph(start, end);
-    updateRegionControlTimeline(start, end);
-
-    // Re-glue the current-time lines to the new window. Without this the
-    // indicators keep their last left% after a zoom/pan/select and end up
-    // over the wrong time until the next setCurrentTime.
-    updateTimeIndicators();
-}
-
-function updateDetailGraph(startTime, endTime) {
-    const teams = timelineState.teams;
-    if (teams.length < 2) return;
-    // Individual layout: the A↑/B↓ graph is hidden and the per-player view is
-    // a panel of its own, so render that and skip the series prep for a
-    // display:none canvas — this runs on every pan/zoom frame.
-    if (individualFieldActive()) { renderWeaponsPerPlayer(startTime, endTime); return; }
-    const { points, max } = prepWeaponsData(startTime, endTime, teams);
-    const dropMarks = computeBackpackDrops(startTime, endTime, teams);
-    const legendA = document.getElementById('legend-weapons-team-a');
-    const legendB = document.getElementById('legend-weapons-team-b');
-    if (legendA) legendA.textContent = `${teams[0]} ↑`;
-    if (legendB) legendB.textContent = `${teams[1]} ↓`;
-    renderDivergingGraph('detail-graph-canvas', {
-        startTime, endTime, dataPoints: points, maxValue: max,
-        yAxisId: 'detail-y-axis', dropMarks,
-    });
-    // Refresh the hit-test cache so the tooltip can find dots after
-    // pan/zoom and after segment selection.
-    const canvas = document.getElementById('detail-graph-canvas');
-    weaponGraphHitState.startTime = startTime;
-    weaponGraphHitState.endTime   = endTime;
-    weaponGraphHitState.W         = canvas ? canvas.clientWidth : 0;
-    weaponGraphHitState.dropMarks = dropMarks;
-
-    if (document.getElementById('weapons-per-player-details')?.open) {
-        renderWeaponsPerPlayer(startTime, endTime);
-    }
-}
-
-// Generic canvas hover-tooltip. Creates one `.canvas-tooltip` div inside the
-// canvas's positioned parent, runs `hitTest(mx, my)` (canvas-local CSS px) on
-// every mousemove, and — when it returns a truthy hit — fills the tip with
-// `renderHtml(hit)` and clamp-positions it near the cursor (kept inside the
-// wrapper's right edge). Idempotent per canvas. Shared by the weapon-graph
-// drop-dot and powerup-span tooltips; the loc-graph tooltip
-// (src/tabs/locgraph/loc-graph-view.js) is intentionally
-// NOT built on this (it rides Cytoscape's own node/edge mouseover events and
-// renderedPosition, not a raw canvas hit-test).
-function attachCanvasTooltip(canvas, hitTest, renderHtml) {
-    if (!canvas || canvas._canvasTipAttached) return;
-    canvas._canvasTipAttached = true;
-
-    const wrapper = canvas.parentElement; // positioned ancestor
-    const tip = document.createElement('div');
-    tip.className = 'canvas-tooltip';
-    tip.style.display = 'none';
-    wrapper.appendChild(tip);
-
-    canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
-        const hit = hitTest(mx, my);
-        if (!hit) { tip.style.display = 'none'; return; }
-        tip.innerHTML = renderHtml(hit);
-        tip.style.display = 'block';
-        // Position offset from cursor; clamp inside the wrapper so the tip
-        // doesn't get cut off near the right edge.
-        const tipW = tip.offsetWidth || 200;
-        const wrapW = wrapper.clientWidth;
-        let left = mx + 12;
-        if (left + tipW > wrapW) left = mx - tipW - 12;
-        tip.style.left = left + 'px';
-        tip.style.top  = (my + 12) + 'px';
-    });
-    canvas.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
-}
-
-// Hover tooltip on the weapon-graph canvas: highlights the drop dot under
-// the cursor and shows {player, weapon, loc, time}. Layout comes from the
-// shared DIVERGING_GRAPH_LAYOUT (same source the renderer scales by dpr).
-function attachWeaponGraphTooltip() {
-    const canvas = document.getElementById('detail-graph-canvas');
-    if (!canvas) return;
-
-    const HIT_R  = 6;   // hit radius (slightly larger than dot radius=3)
-    const HIT_DY = 8;   // vertical tolerance — generous so users can hover near
-    const { H, AXIS_H, PAD, DROP_STRIP_H } = DIVERGING_GRAPH_LAYOUT;
-    const graphH  = H - AXIS_H;
-    const topY    = PAD + DROP_STRIP_H / 2;
-    const bottomY = graphH - PAD - DROP_STRIP_H / 2;
-
-    const hitTest = (mx, my) => {
-        const s = weaponGraphHitState;
-        if (!s.W || !s.dropMarks.length) return null;
-        const duration = s.endTime - s.startTime;
-        if (duration <= 0) return null;
-        let best = null;
-        let bestDx = HIT_R + 1;
-        for (const m of s.dropMarks) {
-            const x = ((m.time - s.startTime) / duration) * s.W;
-            const y = m.isTop ? topY : bottomY;
-            const dx = Math.abs(mx - x);
-            const dy = Math.abs(my - y);
-            if (dy <= HIT_DY && dx <= bestDx) {
-                bestDx = dx;
-                best = m;
-            }
-        }
-        return best;
-    };
-
-    const renderHtml = (best) => {
-        const d = best.drop;
-        const weapon = (d.weapon || '').toUpperCase();
-        const locLine = d.loc ? `<div>Loc: ${escapeHtml(d.loc)}</div>` : '';
-        return `<div><strong>${escapeHtml(d.player || '?')}</strong> dropped <strong>${weapon}</strong></div>
-${locLine}<div>Time: ${formatDuration(d.time)}</div>`;
-    };
-
-    attachCanvasTooltip(canvas, hitTest, renderHtml);
-}
-
-function updateHealthArmorGraph(startTime, endTime) {
-    const teams = timelineState.teams;
-    if (teams.length < 2) return;
-    if (individualFieldActive()) { renderHealthArmorPerPlayer(startTime, endTime); return; }
-    const { points, max } = prepHealthArmorData(startTime, endTime, teams);
-    const legendA = document.getElementById('legend-health-team-a');
-    const legendB = document.getElementById('legend-health-team-b');
-    if (legendA) legendA.textContent = `${teams[0]} ↑`;
-    if (legendB) legendB.textContent = `${teams[1]} ↓`;
-    renderDivergingGraph('health-armor-canvas', {
-        startTime, endTime, dataPoints: points, maxValue: max,
-        yAxisId: 'health-y-axis',
-    });
-
-    if (document.getElementById('ha-per-player-details')?.open) {
-        renderHealthArmorPerPlayer(startTime, endTime);
-    }
-}
-
-function updateScoreTimeline(startTime, endTime) {
-    const teams = timelineState.teams;
-    if (teams.length < 2) return;
-    if (individualFieldActive()) { renderFragsPerPlayer(startTime, endTime); return; }
-    const { points, max } = prepScoreData(startTime, endTime, teams);
-    const legendA = document.getElementById('legend-score-team-a');
-    const legendB = document.getElementById('legend-score-team-b');
-    if (legendA) { legendA.textContent = `${teams[0]} leading ↑`; legendA.style.color = TEAM_COLORS[0]; }
-    if (legendB) { legendB.textContent = `${teams[1]} leading ↓`; legendB.style.color = TEAM_COLORS[1]; }
-    renderDivergingGraph('score-canvas', {
-        startTime, endTime, dataPoints: points, maxValue: max,
-        yAxisId: 'score-y-axis', yTopLabel: `+${max}`, yBottomLabel: `-${max}`,
-    });
-
-    if (document.getElementById('frags-per-player-details')?.open) {
-        renderFragsPerPlayer(startTime, endTime);
-    }
-}
-
-// ─── Region Control Timeline ────────────────────────────────────────────────
-//
-// One row per control region; each row colors contiguous spans by indexing
-// into mapState.bucketStates (the Go-supplied per-bucket state strings from
-// view.RegionControl). Only the "strong" states (solo armed control +
-// armed-vs-armed contested) paint pixels — weak states render as gaps to
-// keep the color story readable.
-
-const RC_ROW_H = 20;
-const RC_AXIS_H = 20;
-
-function prepRegionControlData(startTime, endTime, teams) {
-    const regions = mapState.controlRegions;
-    const bucketStates = mapState.bucketStates;
-    if (!regions || regions.length === 0 || !bucketStates) return null;
-    const view = timelineState.bucketView;
-    if (!view || !view.count) return null;
-
-    // Team labels come from the Go-supplied regionControl when present
-    // (matches the bucketStates A/B encoding); fall back to mapState.teams
-    // for the rendering layer that wants to show team names.
-    const teamA = mapState.teamA || teams[0];
-    const teamB = mapState.teamB || teams[1];
-
-    // bucketStates is computed at the same 50ms-from-match-start grid as the
-    // bucket view (recomputeRegionControl uses WindowMs:50), so its per-region
-    // string indexes 1:1 with the columnar bucket index.
-    const idx0 = bucketIndexAtOrAfter(view, startTime);
-    const rows = [];
-    for (const r of regions) {
-        const s = bucketStates[r.name];
-        if (typeof s !== 'string') continue;
-        const spans = [];
-        let curState = null;
-        let curStart = startTime;
-        for (let i = idx0; i < view.count; i++) {
-            const bt = bucketTimeSec(view, i);
-            if (bt > endTime) break;
-            const c = i < s.length ? s[i] : '_';
-            const state = MapView.decodeRegionStateChar(c);
-            if (state !== curState) {
-                if (curState) spans.push({ start: curStart, end: bt, state: curState });
-                curState = state;
-                curStart = bt;
-            }
-        }
-        if (curState) spans.push({ start: curStart, end: endTime, state: curState });
-        rows.push({ name: r.name, spans });
-    }
-    return { rows, teamA, teamB };
-}
-
-// Generic span-timeline renderer. Each row carries a list of
-// {start, end, state} spans; stateColors maps state strings to fill
-// colors. Used by both the region-control timeline and the powerup
-// timeline so they share one renderer instead of two near-copies.
-// dropMarks (optional): [{row, time, color}] — small dots painted in a
-// row, e.g. weapon-drop events on the per-player weapons timeline. Callers
-// that don't pass it (powerups, region control) render unchanged.
-function renderSpansTimeline(canvasId, labelsId, { startTime, endTime, rows, stateColors, dropMarks, rowH }) {
-    const labelsEl = document.getElementById(labelsId);
-    if (!labelsEl) return;
-    // rowH lets a caller stretch the rows (the per-player weapons view does in
-    // the individual layout); the region-control and powerup rows take RC_ROW_H,
-    // which their hover hit-tests assume.
-    const ROW_H_CSS = rowH || RC_ROW_H;
-    const setup = setupGraphCanvas(canvasId, rows.length * ROW_H_CSS + RC_AXIS_H);
-    if (!setup) return;
-    const { ctx, Wcss, W, dpr } = setup;
-
-    const ROW_H = Math.round(ROW_H_CSS * dpr);
-    const ROW_PAD = Math.max(1, Math.round(dpr));
-
-    // Label column, one DOM element per row, sized to match the canvas
-    // row in CSS pixels (the labels live outside the canvas).
-    labelsEl.innerHTML = '';
-    for (const r of rows) {
-        const lab = document.createElement('div');
-        lab.className = 'region-timeline-label';
-        lab.style.height = ROW_H_CSS + 'px';
-        lab.style.lineHeight = ROW_H_CSS + 'px';
-        if (r.color) lab.style.color = r.color;
-        lab.textContent = r.name;
-        lab.title = r.name;
-        labelsEl.appendChild(lab);
-    }
-
-    const graphH = rows.length * ROW_H;
-    ctx.fillStyle = PLOT_BG_COLOR;
-    ctx.fillRect(0, 0, W, graphH);
-
-    const duration = endTime - startTime;
-    if (duration <= 0) return;
-
-    rows.forEach((row, idx) => {
-        const y = idx * ROW_H;
-        for (const span of row.spans) {
-            const color = stateColors[span.state];
-            if (!color) continue;
-            const x1 = Math.round(((span.start - startTime) / duration) * W);
-            const x2 = Math.round(((span.end - startTime) / duration) * W);
-            const w = x2 - x1;
-            if (w <= 0) continue;
-            ctx.fillStyle = color;
-            ctx.fillRect(x1, y + ROW_PAD, w, ROW_H - 2 * ROW_PAD);
-        }
-    });
-
-    if (dropMarks && dropMarks.length) {
-        const dotR = 3 * dpr;
-        for (const m of dropMarks) {
-            const x = ((m.time - startTime) / duration) * W;
-            if (x < -dotR || x > W + dotR) continue;
-            const y = m.row * ROW_H + ROW_H / 2;
-            ctx.fillStyle = m.color;
-            ctx.beginPath();
-            ctx.arc(x, y, dotR, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-
-    drawXAxisTicks(ctx, { W, Wcss, dpr, graphH, startTime, endTime });
-}
-
-// ─── Powerup Timeline ───────────────────────────────────────────────────────
-//
-// One row per powerup type (Quad / Pent / Ring); each row colors contiguous
-// spans by which team currently holds the powerup. Reuses renderSpansTimeline,
-// the same renderer the region-control timeline uses — only the input rows
-// and the state→color map differ.
-//
-// Sourced from result.timelineAnalysis.powerupEvents (one record per run,
-// already containing player/team/frags/duration), not from per-bucket
-// aggregates: that gives us exact span boundaries plus the metadata the
-// hover tooltip needs.
-
-const POWERUP_TYPES = [
-    { key: 'quad', name: 'Quad' },
-    { key: 'pent', name: 'Pent' },
-    { key: 'ring', name: 'Ring' },
-];
-
-function prepPowerupRowsData(startTime, endTime, teams) {
-    const events = timelineState.powerupEvents;
-    if (!events || events.length === 0) return null;
-    const teamA = teams[0], teamB = teams[1];
-    if (!teamA || !teamB) return null;
-
-    const rowByKey = new Map();
-    const rows = POWERUP_TYPES.map(pu => {
-        const r = { name: pu.name, spans: [] };
-        rowByKey.set(pu.key, r);
-        return r;
-    });
-
-    for (const ev of events) {
-        const row = rowByKey.get(ev.powerupType);
-        if (!row) continue;
-        // Clip the run to the visible window so the bar doesn't extend
-        // beyond the canvas; record the original endpoints in the meta
-        // so the tooltip still shows the full duration.
-        const start = Math.max(startTime, ev.time);
-        const end   = Math.min(endTime,   ev.endTime);
-        if (end <= start) continue;
-        let state;
-        if      (ev.team === teamA) state = 'teamA';
-        else if (ev.team === teamB) state = 'teamB';
-        else                        state = 'other'; // mid-game team change / spectator
-        row.spans.push({ start, end, state, event: ev });
-    }
-    return { rows, teamA, teamB };
-}
-
-// Hit-test state for the powerup-timeline span hover tooltip — populated
-// by updatePowerupTimeline after each render so the canvas mousemove
-// handler can identify which row + span sits under the cursor.
-const powerupGraphHitState = {
-    startTime: 0,
-    endTime:   0,
-    W:         0,
-    rows:      [], // [{name, spans}]
-};
-
-function updatePowerupTimeline(startTime, endTime) {
-    const panel = document.getElementById('powerup-timeline-panel');
-    if (!panel) return;
-    const teams = timelineState.teams;
-    if (teams.length < 2) { panel.style.display = 'none'; return; }
-    // The rows are per powerup TYPE coloured by which of two TEAMS holds it,
-    // so an individual layout with more than two players paints the top two
-    // and greys every other run as 'other'. Hidden rather than recoloured —
-    // same call initRegionControl makes for the same reason.
-    if (individualFieldActive()) { panel.style.display = 'none'; return; }
-
-    const data = prepPowerupRowsData(startTime, endTime, teams);
-    if (!data) { panel.style.display = 'none'; return; }
-
-    // Hide if no powerup activity at all in this window — keeps the
-    // panel out of the way for maps without powerups.
-    const hasAny = data.rows.some(r => r.spans.length > 0);
-    if (!hasAny) { panel.style.display = 'none'; return; }
-    panel.style.display = '';
-
-    const teamAEl = document.getElementById('pu-tl-teamA');
-    const teamBEl = document.getElementById('pu-tl-teamB');
-    if (teamAEl) teamAEl.textContent = data.teamA;
-    if (teamBEl) teamBEl.textContent = data.teamB;
-    const setLegend = (id, color) => {
-        const el = document.getElementById(id);
-        if (el) el.style.background = color;
-    };
-    setLegend('pu-legend-a', teamStrongColor(TEAM_COLORS[0]));
-    setLegend('pu-legend-b', teamStrongColor(TEAM_COLORS[1]));
-
-    renderSpansTimeline('powerup-canvas', 'powerup-timeline-labels', {
-        startTime, endTime, rows: data.rows,
-        stateColors: {
-            teamA: teamStrongColor(TEAM_COLORS[0]),
-            teamB: teamStrongColor(TEAM_COLORS[1]),
-            other: 'rgba(180, 180, 180, 0.85)',
-        },
-    });
-
-    // Refresh hit-test cache for the hover tooltip.
-    const canvas = document.getElementById('powerup-canvas');
-    powerupGraphHitState.startTime = startTime;
-    powerupGraphHitState.endTime   = endTime;
-    powerupGraphHitState.W         = canvas ? canvas.clientWidth : 0;
-    powerupGraphHitState.rows      = data.rows;
-}
-
-// Mousemove tooltip on the powerup-canvas. Hit-tests against the
-// last-rendered row layout (RC_ROW_H per row) and shows the source
-// PowerupEvent metadata (player, team, frags, duration).
-function attachPowerupTimelineTooltip() {
-    const canvas = document.getElementById('powerup-canvas');
-
-    const hitTest = (mx, my) => {
-        const s = powerupGraphHitState;
-        if (!s.W || !s.rows.length) return null;
-        const duration = s.endTime - s.startTime;
-        if (duration <= 0) return null;
-        // Row index by Y; gracefully ignore the axis strip below the rows.
-        const rowIdx = Math.floor(my / RC_ROW_H);
-        if (rowIdx < 0 || rowIdx >= s.rows.length) return null;
-        const row = s.rows[rowIdx];
-        // Find the first span whose [start, end] window contains the cursor x.
-        let hit = null;
-        for (const sp of row.spans) {
-            const x1 = ((sp.start - s.startTime) / duration) * s.W;
-            const x2 = ((sp.end   - s.startTime) / duration) * s.W;
-            if (mx >= x1 && mx <= x2) { hit = sp; break; }
-        }
-        if (!hit || !hit.event) return null;
-        return { row, sp: hit };
-    };
-
-    const renderHtml = ({ row, sp }) => {
-        const ev = sp.event;
-        const player = escapeHtml(ev.playerName || 'Unknown');
-        const team   = ev.team ? `<div>Team: ${escapeHtml(ev.team)}</div>` : '';
-        const dur    = (ev.duration != null) ? `${Math.round(ev.duration)}s` : '?';
-        return `<div><strong>${escapeHtml(row.name)}</strong> · <strong>${player}</strong></div>
-${team}<div>Frags: ${ev.frags || 0}</div>
-<div>Duration: ${dur}</div>`;
-    };
-
-    attachCanvasTooltip(canvas, hitTest, renderHtml);
-}
-
-function updateRegionControlTimeline(startTime, endTime) {
-    const panel = document.getElementById('region-control-timeline-panel');
-    if (!panel) return;
-    const teams = timelineState.teams;
-    if (teams.length < 2) { panel.style.display = 'none'; return; }
-
-    const data = prepRegionControlData(startTime, endTime, teams);
-    if (!data) { panel.style.display = 'none'; return; }
-    panel.style.display = '';
-
-    const teamAEl = document.getElementById('rc-tl-teamA');
-    const teamBEl = document.getElementById('rc-tl-teamB');
-    if (teamAEl) teamAEl.textContent = data.teamA;
-    if (teamBEl) teamBEl.textContent = data.teamB;
-    const setLegend = (id, color) => {
-        const el = document.getElementById(id);
-        if (el) el.style.background = color;
-    };
-    setLegend('rc-legend-a-ctrl', teamStrongColor(TEAM_COLORS[0]));
-    setLegend('rc-legend-b-ctrl', teamStrongColor(TEAM_COLORS[1]));
-
-    renderSpansTimeline('region-control-canvas', 'region-timeline-labels', {
-        startTime, endTime, rows: data.rows,
-        stateColors: {
-            teamAControl: teamStrongColor(TEAM_COLORS[0]),
-            contested:    'rgb(255, 255, 255)',
-            teamBControl: teamStrongColor(TEAM_COLORS[1]),
-        },
-    });
-}
-
-// ─── Team Status Panel ──────────────────────────────────────────────────────
-
-// Sort state shared by both timeline roster tables. The default is player
-// name ascending: the rosters are rebuilt on every playhead tick, so the old
-// frags-descending order made rows swap places as the match progressed —
-// churn under the reader's eyes while scrubbing. Reset per demo load.
-const TEAM_STATUS_SORT_DEFAULT = { key: 'name', dir: 1 };
-let teamStatusSort = { ...TEAM_STATUS_SORT_DEFAULT };
-
-// dir: 1 ascending, -1 descending. Numeric keys tie-break on name (always
-// ascending) so equal-frag rows keep a stable, readable order.
-function compareTeamStatusRows(a, b) {
-    const k = teamStatusSort.key;
-    if (k === 'name') return a.name.localeCompare(b.name) * teamStatusSort.dir;
-    const cmp = (a[k] || 0) - (b[k] || 0);
-    return cmp ? cmp * teamStatusSort.dir : a.name.localeCompare(b.name);
-}
-
-// One delegated listener per roster container, wired at load. updateTeamStatus
-// rewrites the tables' innerHTML on every tick, so per-<th> listeners (what
-// makeSortable installs) would be thrown away between clicks.
-function setupTeamStatusSort() {
-    document.querySelectorAll('.team-status-panel').forEach(panel => {
-        panel.addEventListener('click', e => {
-            const th = e.target.closest('th[data-key]');
-            if (!th || !panel.contains(th)) return;
-            const key = th.dataset.key;
-            if (teamStatusSort.key === key) {
-                teamStatusSort.dir = -teamStatusSort.dir;
-            } else {
-                // First click: names read A→Z, numbers biggest-first.
-                teamStatusSort = { key, dir: key === 'name' ? 1 : -1 };
-            }
-            updateTeamStatus();
-        });
-    });
-}
-
-function updateTeamStatus() {
-    const containerA = document.getElementById('team-status-a');
-    const containerB = document.getElementById('team-status-b');
-    if (!containerA || !containerB) return;
-
-    // Individual layout: the two-sided status panel is hidden, so don't
-    // rebuild its rows on every playhead tick.
-    if (individualFieldActive()) {
-        containerA.innerHTML = '';
-        containerB.innerHTML = '';
-        return;
-    }
-
-    const teams = timelineState.teams;
-    const view = timelineState.bucketView;
-    if (!view || !view.count || teams.length < 2) {
-        containerA.innerHTML = '';
-        containerB.innerHTML = '';
-        return;
-    }
-
-    // Find high-res bucket at current time
-    const time = mapState.currentTime;
-    const hrBucket = findBucketAtTime(time);
-    const pd = hrBucket ? (hrBucket.p || {}) : {};
-    const fragCounts = getFragsAtTime(time);
-
-    for (let ti = 0; ti < 2; ti++) {
-        const team = teams[ti];
-        const container = ti === 0 ? containerA : containerB;
-
-        // Collect ALL players for this team — show dead/respawning players with '-' stats
-        // (matching the map legend behavior)
-        const players = [];
-        const allPlayerNames = new Set();
-
-        // Get all known players for this team from demoInfo/playerSymbols
-        const demoPlayers = currentResult?.demoInfo?.players || [];
-        for (const dp of demoPlayers) {
-            if (dp.team === team) allPlayerNames.add(dp.name);
-        }
-        for (const [name, info] of Object.entries(mapState.playerSymbols || {})) {
-            if (info.team === team) allPlayerNames.add(name);
-        }
-        // Also include any players present in bucket data for this team
-        for (const [name, data] of Object.entries(pd)) {
-            const t = data.team || mapState.playerSymbols?.[name]?.team;
-            if (t === team) allPlayerNames.add(name);
-        }
-
-        for (const name of allPlayerNames) {
-            const data = pd[name];
-            const isDead = !data || (data.d ?? data.dead) || (data.h ?? data.health ?? 0) <= 0;
-            players.push({
-                name,
-                dead: isDead,
-                health: isDead ? 0 : (data.h ?? data.health ?? 0),
-                armor: isDead ? 0 : (data.a ?? data.armor ?? 0),
-                armorType: isDead ? '' : (data.at ?? data.armorType ?? ''),
-                hasRL: isDead ? false : (data.rl ?? data.hasRL ?? false),
-                hasLG: isDead ? false : (data.lg ?? data.hasLG ?? false),
-                hasQuad: isDead ? false : (data.q ?? data.hasQuad ?? false),
-                hasPent: isDead ? false : (data.pe ?? false),
-                hasRing: isDead ? false : (data.r ?? data.hasRing ?? false),
-                frags: fragCounts[name] || 0,
-            });
-        }
-
-        players.sort(compareTeamStatusRows);
-
-        const teamFrags = players.reduce((s, p) => s + p.frags, 0);
-        const teamHealth = players.reduce((s, p) => s + (p.health || 0), 0);
-        const teamArmor = players.reduce((s, p) => s + (p.armor || 0), 0);
-
-        const hubInfo = currentResult?.hubInfo;
-        const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
-
-        // Color the team name + frag header in the team's identity color so
-        // the two sides are visually distinct at a glance and match the
-        // colors used everywhere else (map legend, score timeline, etc.).
-        const teamColor = TEAM_COLORS[ti] || '#ccc';
-        let html = `<h4 style="color: ${teamColor}">${escapeHtml(team)} — ${teamFrags} frags</h4>`;
-        html += `<table class="team-status-table">`;
-        // Sortable headers carry their key; setupTeamStatusSort reads it off
-        // the delegated click. The arrow classes are the same ones
-        // makeSortable sets, so the indicator styling is shared.
-        const sortTh = (key, label) => {
-            const active = teamStatusSort.key === key;
-            const cls = `sortable${active ? (teamStatusSort.dir === 1 ? ' sort-asc' : ' sort-desc') : ''}`;
-            return `<th class="${cls}" data-key="${key}">${label}</th>`;
-        };
-        html += `<tr>${sortTh('name', 'Player')}${sortTh('frags', 'Frags')}` +
-            `${sortTh('health', 'Health')}${sortTh('armor', 'Armor')}` +
-            `<th>Weapons</th><th>View</th></tr>`;
-
-        for (const p of players) {
-            const hubLink = buildHubWatchLink(p.name, time, hubInfo, playerUserIDs);
-
-            if (p.dead) {
-                html += `<tr>`;
-                html += `<td>${escapeHtml(p.name)}</td>`;
-                html += `<td>${p.frags}</td>`;
-                html += `<td>-</td>`;
-                html += `<td>-</td>`;
-                html += `<td>-</td>`;
-                html += `<td>${hubLink}</td>`;
-                html += `</tr>`;
-            } else {
-                const hp = p.health || 0;
-                const arm = p.armor || 0;
-                const at = p.armorType || '';
-                const armorClass = at ? `armor-${at}` : '';
-                const armorStr = arm > 0 ? `<span class="${armorClass}">${arm} ${at.toUpperCase()}</span>` : '0';
-
-                const weps = [];
-                if (p.hasRL && p.hasLG) weps.push('RL+LG');
-                else if (p.hasRL) weps.push('RL');
-                else if (p.hasLG) weps.push('LG');
-                if (p.hasQuad) weps.push('Quad');
-                if (p.hasPent) weps.push('Pent');
-                if (p.hasRing) weps.push('Ring');
-
-                html += `<tr>`;
-                html += `<td>${escapeHtml(p.name)}</td>`;
-                html += `<td>${p.frags}</td>`;
-                html += `<td>${hp}</td>`;
-                html += `<td>${armorStr}</td>`;
-                html += `<td>${weps.join(', ') || '-'}</td>`;
-                html += `<td>${hubLink}</td>`;
-                html += `</tr>`;
-            }
-        }
-
-        // Totals row
-        html += `<tr class="totals-row">`;
-        html += `<td>Total</td>`;
-        html += `<td>${teamFrags}</td>`;
-        html += `<td>${teamHealth}</td>`;
-        html += `<td>${teamArmor}</td>`;
-        html += `<td></td>`;
-        html += `<td></td>`;
-        html += `</tr>`;
-
-        html += `</table>`;
-        container.innerHTML = html;
-    }
-}
-
 // ─── Player Tab ─────────────────────────────────────────────────────────────
 //
 // The Player tab is Svelte (src/player/). app.js reaches it only through
@@ -3559,49 +1521,6 @@ function updateTeamStatus() {
 
 function playerDrives() {
     return MvdPlayer.drives();
-}
-
-// ─── Hub Watch Link Helper ──────────────────────────────────────────────────
-
-// The hub replay URL (src/lib/hub-url.js): from/to are DEMO-relative
-// seconds (match time + demoOffset); `to` optional.
-function hubReplayUrl(args) {
-    return MvdLib.hubReplayUrl(args);
-}
-
-function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {
-    if (!hubInfo || !hubInfo.gameId) return '';
-    const trackId = playerUserIDs[playerName];
-    if (!trackId) return '';
-    // Our times are match-relative (0 = match start). Hub uses demo-relative time
-    // (includes countdown/warmup), so add demoOffset to convert.
-    const from = Math.floor(time + (timelineState.demoOffset || 0));
-    const url = hubReplayUrl({ gameId: hubInfo.gameId, from, track: trackId });
-    return `<a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">hub</a>`;
-}
-
-// ─── Precomputed Frag Counts ────────────────────────────────────────────────
-
-// Sorted array of { time, cumulative: { player: frags } }
-// Built once per demo load; looked up via binary search.
-let precomputedFrags = []; // [{ time, cumulative }]
-
-function precomputeFragCounts() {
-    const sorted = timelineState.fragEvents || []; // pre-sorted at intake
-    precomputedFrags = [];
-    if (sorted.length === 0) return;
-
-    const running = {}; // player -> cumulative frags
-
-    for (const fe of sorted) {
-        running[fe.player] = (running[fe.player] || 0) + (fe.delta || 1);
-        precomputedFrags.push({ time: fe.time, cumulative: { ...running } });
-    }
-}
-
-function getFragsAtTime(time) {
-    const idx = MapView.lowerBoundIndex(precomputedFrags, time, (a, i) => a[i].time);
-    return idx < 0 ? {} : precomputedFrags[idx].cumulative;
 }
 
 // =============================================================================
@@ -3848,7 +1767,7 @@ function initMapView(result) {
     renderMap(mapState.currentTime);
 }
 
-// Early init of region control data (before timeline renders, before map init)
+// Early init of region control data (before the map init)
 function initRegionControlData(result) {
     const rc = result.timelineAnalysis?.regionControl;
     if (!rc || !rc.regions || rc.regions.length === 0) return;
@@ -3916,8 +1835,9 @@ function initRegionControl(result) {
 // onRegionControlChanged mirrors an edit on the Locs & Regions tab
 // (src/state/regions.js) onto the Map's state, in the two steps it lands in:
 // the resolved regions, then Go's recomputed control states — after which
-// the map and the Timeline's Region Control panel redraw. The demo's own
-// regions ('loaded') were written by initRegionControlData already.
+// the map redraws (the Timeline's Region Control panel reads the model
+// itself). The demo's own regions ('loaded') were written by
+// initRegionControlData already.
 function onRegionControlChanged(rc) {
     if (!rc || rc.stage === 'loaded') return;
     mapState.controlRegions = rc.regions;
@@ -3936,9 +1856,6 @@ function onRegionControlChanged(rc) {
     // Force map redraw
     mapState.renderDirty = true;
     renderMap(mapState.currentTime);
-
-    // Re-render timeline region control graph
-    updateDetailView();
 }
 
 // Look up region control state at a given time — MvdMap.regionControlAt
@@ -4238,7 +2155,7 @@ function updateMapLegend() {
     const playerData = bucket ? (bucket.p) : null;
     const hubInfo = currentResult?.hubInfo;
     const playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
-    const fragCounts = typeof getFragsAtTime === 'function' ? getFragsAtTime(time) : {};
+    const fragCounts = MvdLib.fragsAt(currentResult, time);
 
     // Update team titles with frag counts
     for (let ti = 0; ti < mapState.teams.length; ti++) {
@@ -4305,7 +2222,7 @@ function updateMapLegend() {
     const hubCells = legend.querySelectorAll('.map-legend-hub');
     for (const cell of hubCells) {
         const name = cell.dataset.player;
-        cell.innerHTML = buildHubWatchLink(name, time, hubInfo, playerUserIDs);
+        cell.innerHTML = MvdLib.hubWatchLinkHtml(name, time, hubInfo, playerUserIDs, timelineState.demoOffset);
     }
 }
 
@@ -5474,7 +3391,6 @@ function animatePlayback() {
     if (now - _lastFullSyncTime > 200) {
         _lastFullSyncTime = now;
         mapState.renderDirty = true;
-        updateTimeIndicators(); // tail-calls updateTeamStatus() when range > 0
         updateMapLegend();
         updateRegionStatus();
         updateItemsPanelStatus(mapState.currentTime);

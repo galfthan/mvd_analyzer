@@ -4,7 +4,7 @@
 // click on one (a.viewer-link / a.hub-watch-link) to the Player tab.
 
 // Build a hub.quakeworld.nu replay URL. `to` is optional — omit it for a
-// single "jump here" link (buildHubWatchLink) and pass it for a windowed
+// single "jump here" link (hubWatchLinkHtml) and pass it for a windowed
 // clip (powerups / streaks / airgibs / pack drops). Callers do their own
 // demoOffset conversion + window padding (each surface pads differently),
 // then hand the final demo-relative from/to/track here so the URL scheme

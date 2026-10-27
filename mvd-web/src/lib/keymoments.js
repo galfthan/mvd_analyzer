@@ -97,7 +97,7 @@ const hubAnchor = (url) => `<a href="${url}" target="_blank" class="viewer-link"
 export function powerupRunRowHtml(event, ctx) {
     // A slot number is NOT a userid — falling back to one tracks whichever
     // player happens to hold that userid, and a rare wrong link is the kind
-    // nobody reports. No userid, no link (same rule as buildHubWatchLink and
+    // nobody reports. No userid, no link (same rule as hubWatchLinkHtml and
     // the pack-drop anchors).
     let watchCell = '-';
     if (ctx.gameId && event.playerUserID) {

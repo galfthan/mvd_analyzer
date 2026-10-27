@@ -13,6 +13,7 @@
     import KeyMomentsTab from '../tabs/keymoments/KeyMomentsTab.svelte';
     import AimStatsTab from '../tabs/aimstats/AimStatsTab.svelte';
     import LocGraphTab from '../tabs/locgraph/LocGraphTab.svelte';
+    import TimelineTab from '../tabs/timeline/TimelineTab.svelte';
     import Toast from '../player/Toast.svelte';
     import { adopt } from './adopt.js';
 </script>
@@ -29,6 +30,7 @@
             <KeyMomentsTab />
             <AimStatsTab />
             <LocGraphTab />
+            <TimelineTab />
             <PlayerTab />
         </div>
     </main>

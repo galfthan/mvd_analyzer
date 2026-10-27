@@ -22,9 +22,9 @@ talks to it through a JS shim.
   uses — [`mvd-map-view`](../mvd-map-view/README.md) (`MapView`), the data
   layer (`mvdData`, `MvdHub`), shared state (`MvdState`), result helpers
   (`MvdLib`) and the Player tab's engine (`MvdPlayer`). Ported so far: the
-  shell, the Player tab (`src/player/`), and the Summary, Chat, Pack Drops,
-  Pickups, Key Moments, Aim Stats and Locs & Regions tabs (`src/tabs/<name>/`, their
-  DOM-free parts in `src/lib/<name>.js`); see
+  shell, the Player tab (`src/player/`), and the Summary, Timeline, Chat,
+  Pack Drops, Pickups, Key Moments, Aim Stats and Locs & Regions tabs
+  (`src/tabs/<name>/`, their DOM-free parts in `src/lib/<name>.js`); see
   [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
   Two UI packages are bundled (pinned in `package.json`):
   [PaneForge](https://paneforge.com) for the Player tab's player | panes
@@ -280,16 +280,29 @@ hand-built markup so `makeSortable` can sort them.
 
 The **Timeline** tab stacks its panels in reading order — team rosters,
 Score, Powerups, Weapons, Team Health/Armor, Region Control. That order
-is pure DOM order in `index.html`; the JS lists that mirror it
-(`updateDetailView`, `TIMELINE_CANVAS_IDS`, the pan/zoom and
-current-time-indicator installs) are kept in the same sequence on
-purpose. The roster tables above them are **sortable by Player, Frags,
-Health or Armor**, defaulting to player name ascending so rows don't
-swap places under the reader as the playhead moves; both sides share one
-sort state, and a delegated click handler on `.team-status-panel`
-survives the innerHTML rebuild that happens on every tick. First click
-sorts names A→Z and numbers biggest-first; clicking the active column
-flips it.
+is the DOM order of `src/tabs/timeline/TimelineTab.svelte`; its `redraw`
+draws the graphs in the same sequence on purpose. The tab is Svelte: the
+series behind every graph, the roster rows and markup and the hover
+read-outs are `src/lib/timeline.js`, the canvas renderers (diverging
+graph, per-player mini stacks, span rows — shared with the Player tab's
+Health / armor pane) `src/ui/timeline-canvas.js`, and the Ctrl/Cmd+wheel
+zoom, drag pan, double-click reset, current-time-line scrub and hover tips
+`src/tabs/timeline/interaction.js`. Every graph shows one view window, the
+selected segment (`MvdState.segment`, `src/state/timeline.js`): the unified
+bar's range select in `app.js` sets it as well as the tab's zoom and pan,
+and `app.js` mirrors it onto the bar and the URL. A segment change redraws
+at once; a new demo, its buckets, the teams or a region edit redraw on the
+next frame the tab shows; showing the tab (now, a frame later and 120 ms
+later) or one of its panels redraws everything. The clock moves only the
+current-time lines, the per-player frag labels and the rosters — at once
+on a seek, every 200 ms (trailing) under the Map tab's playback loop or the
+Player engine — and nothing runs while the tab is hidden. The roster tables
+above them are **sortable by Player, Frags, Health or Armor**, defaulting
+to player name ascending so rows don't swap places under the reader as the
+playhead moves; both sides share one sort state (reset per demo), and a
+delegated click handler on `.team-status-panel` survives the rebuild that
+happens on every tick. First click sorts names A→Z and numbers
+biggest-first; clicking the active column flips it.
 
 The **Chat** tab has a **Hide team chat** checkbox that drops `say_team`
 lines (`event.type === 'teamsay'`) from the chat column(s); frags and
@@ -341,7 +354,7 @@ the sidebar (from `TABS` in `src/state/ui.js`) and the layout, and adopts
 the markup of tabs not yet ported — `index.html`'s hidden `#legacy-dom`,
 which `app.js` finds by id — into the main pane (`adopt.js`). Ported
 tabs (`PlayerTab`, and `SummaryTab`, `ChatTab`, `PackDropsTab`, `PickupsTab`,
-`KeyMomentsTab`, `AimStatsTab`, `LocGraphTab` in
+`KeyMomentsTab`, `AimStatsTab`, `LocGraphTab`, `TimelineTab` in
 `src/tabs/`) are mounted there beside
 them; `app.js` still toggles their `active` class like any `.tab-content`.
 `src/main.js` mounts it synchronously, so that markup is in place before
@@ -366,21 +379,23 @@ them; `app.js` still toggles their `active` class like any `.tab-content`.
    These are expensive (the bucket build alone is ~1 s in WASM), and
    only the Timeline/Map tabs need them, so deferring them roughly halves
    time-to-interactive. The Timeline/Map panels read the columnar view
-   through the bucket-view accessors in `app.js` (`bucketIndexAtTime`,
-   `playerValAt`, `reconstructBucketPlayers`, `teamSnapshot`, …).
+   through the bucket-view accessors of `mvd-map-view/src/frames.js`
+   (`bucketIndexAtTime`, `playerValAt`, `reconstructBucketPlayers`,
+   `teamSnapshot`, …).
 6. On `result`, `app.js` parses the JSON, clears the no-demo class,
    switches to the Summary tab, and renders all tabs. The main-thread
    inits are cheap, so they run now even though the bucket-derived
-   fields are still empty (the Svelte tabs — Summary, Chat, Key Moments,
-   Pack Drops, Pickups, Aim Stats, Locs & Regions — build on the first
-   frame they show, the loc graph fully populated); only the timeline
-   graph, map trails and region overlay are blank. On the later
+   fields are still empty (the Svelte tabs — Summary, Timeline, Chat, Key
+   Moments, Pack Drops, Pickups, Aim Stats, Locs & Regions — build on the
+   first frame they show, the loc graph fully populated); only the timeline
+   graphs, map trails and region overlay are blank. On the later
    `buckets` message the data layer (`DemoHandle._applyBuckets`) stashes
    the payload onto `result.timelineAnalysis.bucketView` / `.regionControl
    .bucketStates` and resolves `handle.ready('buckets')`; `onBucketsReady()`
    then **re-runs** the bucket-dependent inits
-   (`initRegionControlData`, `displayTimelineAnalysis`, `initMapView`),
-   and re-renders the active tab so Timeline/Map fill in. The win is
+   (`initRegionControlData`, `initTimeline`, `initMapView`),
+   and re-renders the active tab so the Map fills in; the Timeline tab
+   redraws on the same `ready('buckets')`. The win is
    purely that the worker no longer blocks on the bucket build before
    delivering the result.
 
@@ -651,7 +666,7 @@ CTF server is laid out individually and genuinely was teamplay. So:
 |---|---|---|---|
 | Layout | `isIndividualLayout(result)` | `match.sources.teams === 'individual'` — authoritative, no fallback: the page only ever renders the Result its bundled WASM just produced from a `.mvd` (index.html `accept`), so a Result is always at this build's schema version | Which panels exist, which palette, the scoreboard shape |
 | Semantics | `isTeamBasedMode(result)` | `match.gameMode.teamBased === true` — same, no fallback | Whether a same-team quantity can exist |
-| Field | `isMultiPlayerIndividual(result)` | `isIndividualLayout && !isDuel` | The one test behind the player palette, the per-player Timeline and the single-column Chat (`individual-field` on `<body>`, set by `setIndividualFieldLayout`) |
+| Field | `isMultiPlayerIndividual(result)` | `isIndividualLayout && !isDuel` | The one test behind the player palette (the teams store's `perPlayer`), the per-player Timeline and the single-column Chat (`individual-field` on `<body>`, set by `setIndividualFieldLayout`) |
 | Both | `hasTeammates(result)` | teamplay in force AND not laid out per player | The aim tab's Team victim filter |
 
 The layout, semantics and both predicates live in `src/lib/result.js`
@@ -701,25 +716,24 @@ when the layout is individual and not a duel —
 `isMultiPlayerIndividual(result)`, i.e. `isIndividualLayout && !isDuel`,
 where `isDuel` needs exactly two `playerStats` rows, so a lone player takes
 this layout too; the same test `initRegionControl` and the palette apply — `setIndividualFieldLayout` puts an `individual-field` class
-on `<body>`, and the tab becomes the per-player views:
+on `<body>`, the teams store carries it as `perPlayer`, and the tab becomes
+the per-player views:
 
 - CSS hides Team Status and the three A↑/B↓ graphs, which takes their
   Team A / Team B legends with them.
 - The three per-player drill-downs leave their collapsed `<details>` and
   become panels of their own, in order: **Frags / deaths per player**,
-  **Weapons per player**, **Health / armor per player**. The live nodes are
-  RE-PARENTED into the panel bodies, never cloned — they own the canvases and
-  the `_sig` / `_cells` rebuild cache, and a second copy would render into a
-  detached tree. The selected-range label rides along from the Weapons
-  heading. The move reverses on the next demo load: `resetUIToCleanState`
-  restores the two-sided layout, then `applyDuelModeUI` re-promotes if the new
-  demo wants it, so an FFA → 4on4 → duel walk lands on the right layout each
-  time.
+  **Weapons per player**, **Health / armor per player**. The tab renders
+  each view (a snippet) in exactly one place — the panel body in this
+  layout, the `<details>` otherwise — so there is never a second copy to keep
+  in sync. The selected-range label rides along from the Weapons heading.
+  The layout follows each demo's teams store (`perPlayer`), so an FFA → 4on4
+  → duel walk lands on the right layout each time.
 - Rows are taller there — mini charts 44 → 60 px, weapon-span rows 20 → 28 px
-  (`ppMiniHeight` / `ppSpanRowHeight`) — since these three views now carry the
+  (`miniH` / `spanRowH` in the tab) — since these three views now carry the
   tab instead of hiding under a graph.
-- `timelinePlayersByTeam` returns one group per entry in
-  `timelineState.teams` instead of always two, so EVERY player gets a row.
+- `playersByTeam` (`src/lib/timeline.js`) returns one group per entry in
+  the canonical order instead of always two, so EVERY player gets a row.
   Before, only the players whose team matched `teams[0]` / `teams[1]` did —
   in an individual layout that is two of N. Group index is still the
   `TEAM_COLORS` index, so the rows carry the player palette exactly as
@@ -727,7 +741,7 @@ on `<body>`, and the tab becomes the per-player views:
   roster lookup is involved.
 - **Powerups is hidden.** Its rows are per powerup TYPE, coloured by which of
   two TEAMS holds it, so a field of N paints the top two and greys every
-  other run as `other`. `updatePowerupTimeline` hides the panel itself, the
+  other run as `other`. The tab hides the panel itself (`drawPowerups`), the
   way `initRegionControl` hides region control. Colouring those spans per
   player is separate work.
 
@@ -889,8 +903,9 @@ hiding the panels a demo has no data for — by inline style or body class
 into view asks the tab to redraw, since a canvas drawn while it was
 collapsed is drawn at zero width: a ported tab registers its redraw with
 `onPanelReveal` (`src/ui/panels/reveal.js` — Aim Stats repaints its two
-crosshair images, Locs & Regions resizes and fits its loc graph), a tab
-still in `app.js` gets `renderTabContent`.
+crosshair images, Locs & Regions resizes and fits its loc graph, the
+Timeline redraws its graphs), a tab still in `app.js` (the Map) gets
+`renderTabContent`.
 
 ## Performance timing (console)
 
@@ -915,7 +930,7 @@ is no UI for it. Stages reported, in load order:
   `finalize:timelineAnalysis`. To get the **pure loc-resolution compute**,
   subtract `locFetch + bspFetch` from `finalize:timelineAnalysis`.
 - **result JSON.parse** (main thread), each legacy tab render
-  (`displayTimelineAnalysis`, `initMapView`; the ported tabs build when
+  (`initTimeline`, `initMapView`; the ported tabs build when
   first shown), and the
   async `map geometry fetch` (logged separately as it resolves after
   the UI is shown).
@@ -941,8 +956,8 @@ player), hosted in a **same-origin** iframe so the page drives it directly
 through `iframe.contentWindow` — seek, POV and speed are instant commands,
 not reloads of a hub embed. `src/player/engine.js` owns it (`app.js` sees it
 as `window.MvdPlayer`, for the timeline's speed buttons); the Map tab's data
-and the Timeline tab's mini-stack renderer are reached through
-`src/legacy.js` until those tabs are ported.
+is reached through `src/legacy.js` until that tab is ported, and the Health /
+armor pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
 
 - **Lazy.** The iframe (≈6 MB of wasm plus assets from `a.quake.world`) is
   created on the first visit to the tab, and dropped when the `demo` store
@@ -958,8 +973,9 @@ and the Timeline tab's mini-stack renderer are reached through
   paused at the cursor's current time. A jump suppresses the poll until the
   engine clock arrives, so the cursor does not snap back. Per-frame engine
   ticks move only the timeline cursor and time display in `app.js`; its
-  heavier views (team status, region and item panels) refresh every 200 ms,
-  and the hidden Map and Chat tabs redraw when they are next shown.
+  heavier views (the Map's legend, region and item panels) refresh every
+  200 ms, and the hidden Map, Timeline and Chat tabs redraw when they are
+  next shown.
 - **Playback buttons** map to `demo_setspeed` (0.2× / 1× / 5×; pressing the
   running speed pauses). `-1x` is disabled — FTE cannot play backwards.
   Leaving the tab pauses the engine.
@@ -1575,7 +1591,8 @@ survives a new demo when that demo has the same team / player.
   `recomputeRegionControl` WASM bridge) and published again;
   `app.js`'s `onRegionControlChanged` mirrors both steps onto `mapState`
   (`controlRegions`, `locToRegion`, `regionToGroups`, `bucketStates`, …)
-  and redraws the Map and the Timeline's Region Control panel. When the
+  and redraws the Map; the Timeline's Region Control panel reads the model
+  itself (`src/tabs/timeline/`, redrawn once the recompute lands). When the
   map geometry arrives, `applyMapGeometry` re-applies the regions in effect
   (`reapplyRegions`) so the overlay's region → loc-group lookup points at
   the new groups. Region edits are not persisted: a reload or another

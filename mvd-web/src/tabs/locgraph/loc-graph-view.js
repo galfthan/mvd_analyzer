@@ -117,7 +117,7 @@ export class LocGraphView {
     // Click: show a tooltip with top-5 connections. Hover: fade the rest of the
     // graph so the node's neighborhood is clear.
     attachInteractions() {
-        // NB: not built on app.js's attachCanvasTooltip — this rides
+        // NB: not built on the Timeline's canvas tooltip — this rides
         // Cytoscape's own node/edge mouseover delegation and renderedPosition
         // (plus a graph-fade side effect), not a raw canvas mousemove
         // hit-test, so the shared helper wouldn't fit without contortion.

@@ -14,6 +14,7 @@ import { escapeHtml } from './lib/html.js';
 import { hubReplayUrl } from './lib/hub-url.js';
 import { matchWallClock } from './lib/wall-clock.js';
 import { locToRegionOf, regionToGroupsOf } from './lib/regions.js';
+import { fragsAt, hubWatchLinkHtml, matchDurationSec } from './lib/timeline.js';
 import * as PlayerStatsLib from './lib/player-stats.js';
 import { makeSortable } from './ui/sortable.js';
 import { engine, setupPlayer } from './player/index.js';
@@ -27,7 +28,7 @@ window.MvdState = MvdState;
 // wrappers of the same name).
 window.MvdLib = {
     ...ResultLib, ...PlayerStatsLib, escapeHtml, hubReplayUrl, makeSortable, matchWallClock,
-    locToRegionOf, regionToGroupsOf,
+    locToRegionOf, regionToGroupsOf, fragsAt, hubWatchLinkHtml, matchDurationSec,
 };
 // The Player tab's engine: the timeline's speed buttons drive it while it
 // is the page clock (src/player/engine.js).

@@ -40,12 +40,17 @@ share link to this page. Every hub link on the other tabs now plays its
 clip in the Player tab; shift-click adds it to the playlist, ctrl-click
 still opens hub.
 
-Under the hood the page is now built with Vite, and the shell, the
-Player tab and the Chat tab are Svelte, with demo loading behind one data
-layer (`plan-frontend-restructure.md`); the other tabs look and behave as
+Under the hood the page is now built with Vite, and the shell and every
+tab but Search and Map are Svelte, with demo loading behind one data
+layer (`plan-frontend-restructure.md`); the tabs look and behave as
 before. One Chat fix came with its port: lines that crowd together no longer
 overlap when the demo was loaded while another tab was showing (they were
-stacked at a minimum height, not their real one).
+stacked at a minimum height, not their real one). Two Timeline fixes came
+with its: a click on the timeline bar that clears a selected range now
+redraws the graphs over the whole match (they stayed zoomed while the bar
+showed no range), and the name column of the per-player weapons, powerup and
+region rows widens to its names after a demo switch instead of cutting a
+long name short.
 
 ## unreleased (gl-map) — the map renders entirely through WebGL2
 

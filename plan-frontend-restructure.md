@@ -36,10 +36,25 @@ demo: `src/state/regions.js` (`regionControl`, `resetRegionControl`,
 `applyRegionDefs`, `reapplyRegions`). `app.js` puts each demo's own
 regions in effect and mirrors every edit onto `mapState` in
 `onRegionControlChanged`; it reaches the derived lookups
-(`locToRegionOf`, `regionToGroupsOf`) and `isDuel` through `MvdLib`. The orchestration
-the ported tabs share with Timeline and Map — `displayResults`, the body
-classes, `setCanonicalTeams`, the topbar — stays in `app.js` until those
-tabs are ported.
+(`locToRegionOf`, `regionToGroupsOf`) and `isDuel` through `MvdLib`.
+Timeline followed (`src/tabs/timeline/`; `src/lib/timeline.js` for the
+event intake, every graph's series, the rosters and the hover read-outs,
+`src/ui/timeline-canvas.js` for the canvas renderers, which the Player
+tab's Health / armor pane now imports instead of going through
+`legacy.js`). It reads the region-control model directly, so
+`onRegionControlChanged` mirrors it for the Map only. The seam it leaves
+with the Map tab: the unified bar (playback buttons, caret, range select)
+and the playback loop stay in `app.js`; the selected segment became a
+shared store, `src/state/timeline.js` (`MvdState.segment`), which the bar
+sets on release and mirrors onto its overlay and the URL, and the tab's
+zoom / pan set too; the tab follows the clock itself (not while hidden);
+`app.js` keeps `timelineState` for the Map (bucket view, duration, demo
+offset, the teams mirror) and reads the running frag counts and the hub
+watch link through `MvdLib` (`fragsAt`, `hubWatchLinkHtml`). The
+orchestration the ported tabs share with the Map — `displayResults`, the
+body classes (`individual-field` included: the tab takes the same test
+from the teams store's `perPlayer`), `setCanonicalTeams`, the topbar —
+stays in `app.js` until the Map is ported.
 C covers the clock, teams and current-demo stores. D renders the top bar,
 sidebar and layout in Svelte with the active tab in a store; the load
 overlay and search stay legacy until their tabs are ported. E is the
@@ -215,7 +230,7 @@ and panes `MapPane`, `HealthArmorPane`, `MomentsPane`, `FragFeedPane`.
 | D | Svelte shell (sidebar, tabs, overlay, search) with `LegacyTab` hosts | all tabs work inside the new shell |
 | E | Player tab in Svelte, panes on dockview, own Map pane instance | Player tab section deleted from `app.js` → **player-tab can merge** |
 | F0 | Arrangeable panels on the multi-panel tabs (Summary, Timeline, Locs & regions, Key moments, Pickups, Aim) | done |
-| F | Remaining tabs, smallest/least coupled first: Chat (done), Pack drops (done), Pickups (done), Key moments (done), Summary (done), Aim (done), Locs & regions (done), Timeline, Map | each port deletes its `app.js` section; done when `app.js` is gone |
+| F | Remaining tabs, smallest/least coupled first: Chat (done), Pack drops (done), Pickups (done), Key moments (done), Summary (done), Aim (done), Locs & regions (done), Timeline (done), Map | each port deletes its `app.js` section; done when `app.js` is gone |
 
 Not everything in `app.js` becomes a component. The parts without a DOM
 (playerStats accessors, bucket-view accessors, the data-preparation

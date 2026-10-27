@@ -10,3 +10,4 @@ export { teams, setCanonicalTeams, teamIndexOf, colorOf, TEAM_PALETTE } from './
 export const demo = store(null);
 export { TABS, activeTab, selectTab } from './ui.js';
 export { regionControl, resetRegionControl, applyRegionDefs, reapplyRegions } from './regions.js';
+export { segment } from './timeline.js';

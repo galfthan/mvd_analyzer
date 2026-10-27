@@ -5,7 +5,8 @@
     // marked, and the values at it. Click a name to watch that player.
     import { demo, teams, colorOf } from '../../state/index.js';
     import { bucketIndexAtTime, playerValAt } from '../../../../mvd-map-view/src/index.js';
-    import { timelinePlayersByTeam, prepPlayerHAData, renderMiniStack } from '../../legacy.js';
+    import { playersByTeam, rosterTeamOf, prepPlayerHAData } from '../../lib/timeline.js';
+    import { renderMiniStack } from '../../ui/timeline-canvas.js';
     import { engine } from '../index.js';
     import { onFrame } from './tick.js';
 
@@ -29,9 +30,10 @@
     });
 
     let rows = $derived.by(() => {
-        $teams;
+        const t = $teams;
         if (!view) return [];
-        return timelinePlayersByTeam().flat().map((name) => ({ name, cid: `pp-stack-${uid++}` }));
+        return playersByTeam(view, t.order, rosterTeamOf($demo?.result), t.perPlayer).flat()
+            .map((name) => ({ name, cid: `pp-stack-${uid++}` }));
     });
 
     let vals = $state({});
@@ -48,7 +50,7 @@
                 const cp = v.players[name];
                 renderMiniStack(cid, {
                     startTime: t - BEFORE, endTime: t + AFTER,
-                    points: prepPlayerHAData(cp, t - BEFORE, t + AFTER),
+                    points: prepPlayerHAData(v, cp, t - BEFORE, t + AFTER),
                     maxValue: MAX, height: ROW_H,
                 });
                 const canvas = document.getElementById(cid);

@@ -1,10 +1,11 @@
 // regions.js — the region-control model: which loc regions are in effect
 // for the current demo, and Go's control states for them. The Locs &
 // Regions tab edits it (its region editor and control matrix,
-// src/tabs/locgraph/); app.js mirrors it onto the Map's state
+// src/tabs/locgraph/); the Timeline's Region Control panel
+// (src/tabs/timeline/) reads it, and app.js mirrors it onto the Map's state
 // (mapState.controlRegions / locToRegion / regionToGroups / bucketStates /
 // regionControlStats / teamA / teamB), which the Map overlay and region
-// status and the Timeline's Region Control panel read.
+// status read.
 //
 // The value is null when the demo has no regions, else
 //   { stage, editable, locations, defs, regions, stats, bucketStates, teamA, teamB }
@@ -16,7 +17,8 @@
 //              'resolved' — an edit's definitions resolved against the
 //                            locs, the recompute still running.
 //              'computed' — Go's control states for those regions.
-//   editable   the editor is shown: region control needs two sides, so a
+//   editable   the editor (and the Timeline's control timeline) is shown:
+//              region control needs two sides, so a
 //              field of more than two individual players gets none (app.js
 //              isMultiPlayerIndividual) though Go ships regions for it.
 //   locations  timelineAnalysis.locationData, what definitions resolve against
