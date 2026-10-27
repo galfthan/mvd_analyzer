@@ -1,6 +1,6 @@
 # Plan — mvd-web on Svelte, behind a data layer
 
-Status: **plan**, not started (agreed 2026-10-27).
+Status: phases A–B done (2026-10-27), C–E in progress.
 Branch: to be created off `player-tab`. The Player tab does not merge
 until at least phases A–E below are done.
 

@@ -143,7 +143,7 @@ initWasm().catch(err => {
 
 onmessage = function(e) {
     // reqId correlates each reply with its caller's pending promise on the
-    // main thread (see app.js pendingWorkerReqs). Echo it back on every
+    // main thread (see src/data/worker-client.js). Echo it back on every
     // request-scoped reply; the un-correlated init-failure 'error' above has
     // no reqId and the main thread drops it.
     const reqId = e.data.reqId;
@@ -211,7 +211,7 @@ onmessage = function(e) {
             // stored default regions — no need to JSON.parse the multi-MB
             // result here just to hand the default regions straight back. On a
             // non-binary team layout it returns an {"error":...} envelope,
-            // which applyDeferredBuckets tolerates (it skips when rs.error set).
+            // which DemoHandle._applyBuckets tolerates (it skips when rs.error set).
             let regionStatesJSON = '';
             const tRegion = performance.now();
             try {

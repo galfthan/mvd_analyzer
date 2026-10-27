@@ -223,7 +223,7 @@ computed on demand from the demo the WASM module still holds, so they
 fill in a moment after the rest of the tab has painted. The Go exports
 (`getTopWindows`, `getTopKills`) live on the worker's global like every
 other one, so the main page reaches them through a `viewQuery` worker
-message (`viewQueryInWorker`) — the same round-trip as region recompute
+message (`DemoHandle.view`, `src/data/wasm-source.js`) — the same round-trip as region recompute
 and line of sight. **Top Damage Windows (10 s)** is the top 10 windows by bounded enemy
 damage (`metric=damageGiven`, `windowMs=10000`, `dmg=bounded` — the same
 family as the kill-burst tables beside it, ties breaking on the window's
@@ -281,13 +281,21 @@ strip above the main pane.
 
 ## How the pieces fit
 
-A move to Svelte with a data layer between the page and the WASM worker
-is planned in [`plan-frontend-restructure.md`](../plan-frontend-restructure.md)
-(not started); what follows describes the current page.
+The page is moving to Svelte behind a data layer
+([`plan-frontend-restructure.md`](../plan-frontend-restructure.md)).
+The data layer is in: `src/data/` — `hub.js` (hub lookup, search, demo
+download), `worker-client.js` (reqId-correlated RPC over `worker.js`) and
+`wasm-source.js` (`WasmSource.load()` → a `DemoHandle` with the Result,
+`view()` queries, region recompute, line of sight, the deferred buckets
+and the demo bytes). `src/main.js` publishes it as `window.mvdData` /
+`window.MvdHub`; `app.js` loads every demo through `loadDemo()` and never
+talks to the worker or the hub itself. A handle answers only while it is
+the current demo — the worker holds one.
 
 1. User drops an MVD file on the Search tab, pastes a hub.quakeworld.nu
    URL, or picks a row from the search results.
-2. `app.js` hands the bytes to `worker.js` via `postMessage`.
+2. `loadDemo()` hands it to `mvdData.load()`, which downloads hub demos
+   and posts the bytes to `worker.js`.
 3. The worker calls `analyzeMVD(bytes, filename)` on the WASM instance.
 4. WASM code (`cmd/wasm/main.go`) runs the mvd-analytics default pipeline
    and marshals the Result to JSON. The worker posts this back
@@ -309,9 +317,10 @@ is planned in [`plan-frontend-restructure.md`](../plan-frontend-restructure.md)
    fields are still empty — the scoreboard, chat, pack drops, pickups,
    key moments and loc graph are fully populated; only the timeline
    graph, map trails and region overlay are blank. On the later
-   `buckets` message, `applyDeferredBuckets()` stashes the payload onto
-   `result.timelineAnalysis.bucketView` / `.regionControl
-   .bucketStates`, **re-runs** the bucket-dependent inits
+   `buckets` message the data layer (`DemoHandle._applyBuckets`) stashes
+   the payload onto `result.timelineAnalysis.bucketView` / `.regionControl
+   .bucketStates` and resolves `handle.ready('buckets')`; `onBucketsReady()`
+   then **re-runs** the bucket-dependent inits
    (`initRegionControlData`, `displayTimelineAnalysis`, `initMapView`),
    and re-renders the active tab so Timeline/Map fill in. The win is
    purely that the worker no longer blocks on the bucket build before
@@ -670,7 +679,7 @@ that drives the Timeline also:
   The Kills column is unchanged — obituaries name their own players.
 - The heading becomes plain **Chat**. `displayTimelineAnalysis`'s
   `${teams[0]} Chat` write is skipped while the class is on — it re-runs from
-  `applyDeferredBuckets` long after `applyDuelModeUI`, so the body class, not
+  `onBucketsReady` long after `applyDuelModeUI`, so the body class, not
   the result, is what the render paths read.
 - **"Hide team chat" stays.** It filters on message TYPE (`say_team`), not on
   side, so it keeps its meaning here.
@@ -808,7 +817,7 @@ The breakdown reflects **time-to-interactive** — it ends when the Summary
 and non-bucket tabs are painted. The deferred 50 ms bucket build
 (`getDefaultBuckets` + `recomputeRegionControl`) runs after that and is
 logged on its own line (`deferred bucket build (off critical path)`),
-followed by a `Timeline/Map ready` line when `applyDeferredBuckets`
+followed by a `Timeline/Map ready` line when `onBucketsReady`
 finishes wiring those tabs.
 
 This exists to replace guesswork about where load time goes (e.g. "is
@@ -827,8 +836,9 @@ reloads of a hub embed.
 - **Lazy.** The iframe (≈6 MB of wasm plus assets from `a.quake.world`) is
   created on the first visit to the tab, and dropped on the next demo load
   (`teardownPlayer` from `resetUIToCleanState`).
-- **No second download.** The analysed bytes are snapshotted into a Blob
-  before `analyzeInWorker` transfers the buffer (`snapshotPlayerDemo`) and
+- **No second download.** The data layer keeps a copy of the analysed bytes
+  (`DemoHandle.demoBytes()`; the analyze transfers the original buffer),
+  wrapped by `snapshotPlayerDemo` and
   handed to the engine as a `blob:` URL — so locally loaded files play too.
 - **One clock.** While the tab is active the engine is the clock: a 100 ms
   poll pushes its time (demo-relative, minus `demoOffset`) into
@@ -894,7 +904,7 @@ in `mvd-web/test/`) holds the pure parts; `app.js` the glue. A clip is
   playback crosses the clip's `to` (not on a seek past it), follow a manual
   seek into another clip (hub's `useClipListPlayback` rules,
   `playlistStep`). A clip of another hub demo loads that demo
-  (`loadGameFromHub`) and carries on; a clip of another local file is
+  (`loadDemo`) and carries on; a clip of another local file is
   skipped with a note.
 - **Copy hub link**: one `hub.quakeworld.nu/games/?gameId=…&clip=F-T:U…`
   link (hub's own multi-clip format) when every clip is from one hub demo;

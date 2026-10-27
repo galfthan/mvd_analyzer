@@ -156,31 +156,14 @@ function renderTableRows(tbodyId, items, buildRow, getTeamIdx) {
 
 let currentResult = null;
 
-// ─── WASM Worker ────────────────────────────────────────────────────────────
+// ─── Data source ────────────────────────────────────────────────────────────
 
-const worker = new Worker('worker.js');
-let wasmReady = false;
-
-// Worker RPC correlation. Each request carries a monotonic `reqId` that the
-// worker echoes back on its reply; pending resolvers are keyed by that id in
-// `pendingWorkerReqs` so two in-flight calls on the same lane (e.g. the user
-// clicking two search rows, or a region recompute issued before the previous
-// reply lands) can no longer cross-wire — the old single-slot resolvers let
-// the first reply settle the second caller and dropped the second reply,
-// hanging one promise forever. Non-correlated broadcasts (the deferred
-// 'buckets' message, the WASM-load-failure 'error') carry no reqId and are
-// handled without a lookup.
-let nextWorkerReqId = 1;
-const pendingWorkerReqs = new Map(); // reqId -> { resolve, reject }
-
-// takePendingWorkerReq pops the resolver pair for a correlated reply. Returns
-// undefined for an unknown/absent id (a superseded-and-already-settled request
-// or a non-correlated message), so a stray reply is dropped without throwing.
-function takePendingWorkerReq(reqId) {
-    const p = pendingWorkerReqs.get(reqId);
-    if (p) pendingWorkerReqs.delete(reqId);
-    return p;
-}
+// Demos load through the data layer (src/data/, published as window.mvdData
+// and window.MvdHub by src/main.js). Module scripts run after this file's top
+// level, so only functions may touch them. `currentDemo` is the DemoHandle
+// behind `currentResult`: its view queries, region recompute and line of
+// sight answer for that demo only.
+let currentDemo = null;
 
 // ─── Load-timing instrumentation ────────────────────────────────────────────
 // Structured per-stage timing for the demo load path, printed to the console
@@ -189,13 +172,9 @@ function takePendingWorkerReq(reqId) {
 // render and flushed by finishLoadTiming(). Also stashed on window.__mvdTimings.
 let mvdTiming = { wasmLoadMs: null };
 let loadTiming = null;
-let pendingGameInfoMs = null; // game-info fetch happens before loadTiming starts
 
 function startLoadTiming() {
     loadTiming = { t0: performance.now(), net: {}, render: [], worker: null, parseMs: 0 };
-}
-function markNet(name, ms) {
-    if (loadTiming) loadTiming.net[name] = +ms.toFixed(1);
 }
 function timeRender(name, fn) {
     if (!loadTiming) return fn();
@@ -293,129 +272,44 @@ function setLoadingOverlayMessage(text) {
     if (subtitle) subtitle.textContent = text;
 }
 
-worker.onmessage = (e) => {
-    if (e.data.type === 'ready') {
-        wasmReady = true;
-        if (typeof e.data.wasmLoadMs === 'number') mvdTiming.wasmLoadMs = e.data.wasmLoadMs;
-        const params = new URLSearchParams(location.search);
-        const willAutoLoadDemo = !!(params.get('gameId') || params.get('hub'));
-        if (willAutoLoadDemo) {
-            // Demo download is about to start; keep the overlay up and
-            // show the next phase.
-            setLoadingOverlayMessage('Loading demo…');
-        } else {
-            hideLoadingOverlay();
-        }
-        const v = e.data.version;
-        const tag = document.getElementById('version-tag');
-        if (tag && v) {
-            tag.textContent = `${v.tag} (`;
-            const a = document.createElement('a');
-            a.href = `https://github.com/galfthan/mvd_analyzer/commit/${encodeURIComponent(v.hash)}`;
-            a.target = '_blank';
-            a.rel = 'noopener';
-            a.textContent = v.hash;
-            tag.appendChild(a);
-            tag.appendChild(document.createTextNode(`) — ${v.date}`));
-        }
-        checkBuildCoherence(v);
-    } else if (e.data.type === 'buckets') {
-        // Deferred 50ms bucket + region-control payload — arrives a few
-        // seconds after 'result'. Stash it and render the Timeline/Map
-        // tabs that displayResults intentionally skipped. Not request-
-        // correlated (broadcast follow-up to the analyze), so no reqId lookup.
-        applyDeferredBuckets(e.data);
-    } else if (
-        e.data.type === 'result' ||
-        e.data.type === 'recompute_result' ||
-        e.data.type === 'los_result' ||
-        e.data.type === 'view_result'
-    ) {
-        // Correlated success reply — hand the whole message to the caller's
-        // resolver, which pulls the fields it needs (json/timings). Keyed by
-        // reqId so it always settles its own caller.
-        const pending = takePendingWorkerReq(e.data.reqId);
-        if (pending) pending.resolve(e.data);
-    } else if (
-        e.data.type === 'error' ||
-        e.data.type === 'recompute_error' ||
-        e.data.type === 'los_error' ||
-        e.data.type === 'view_error'
-    ) {
-        // Correlated failure reply. The WASM-load-failure 'error' emitted
-        // before any analyze is issued carries no reqId → no pending entry →
-        // dropped (matches the previous null-resolver behaviour).
-        const pending = takePendingWorkerReq(e.data.reqId);
-        if (pending) pending.reject(new Error(e.data.message));
+// onAnalyzerReady runs once the wasm is up (mvdData.ready): records its
+// load time, drops the overlay unless a deep-linked demo is about to load,
+// and fills the version tag.
+function onAnalyzerReady(info) {
+    if (typeof info.wasmLoadMs === 'number') mvdTiming.wasmLoadMs = info.wasmLoadMs;
+    const params = new URLSearchParams(location.search);
+    const willAutoLoadDemo = !!(params.get('gameId') || params.get('hub'));
+    if (willAutoLoadDemo) {
+        // Demo download is about to start; keep the overlay up and
+        // show the next phase.
+        setLoadingOverlayMessage('Loading demo…');
+    } else {
+        hideLoadingOverlay();
     }
-};
-
-// analyzeInWorker returns the parsed Result object. The 50ms column-major
-// bucket view is built by the worker (calling getDefaultBuckets after
-// analyzeMVD, since WASM exports live on the worker's global, not the main
-// page) and arrives later via the 'buckets' message, stashed on
-// result.timelineAnalysis.bucketView by applyDeferredBuckets.
-function analyzeInWorker(bytes, filename) {
-    return new Promise((resolve, reject) => {
-        const reqId = nextWorkerReqId++;
-        pendingWorkerReqs.set(reqId, {
-            resolve: (payload) => {
-                try {
-                    const tParse = performance.now();
-                    const result = JSON.parse(payload.json);
-                    if (loadTiming) {
-                        loadTiming.parseMs = performance.now() - tParse;
-                        loadTiming.worker = payload.timings || null;
-                    }
-                    // Buckets / region states arrive later via the 'buckets'
-                    // message and are stashed by applyDeferredBuckets — the
-                    // summary renders without waiting for them.
-                    resolve(result);
-                } catch (e) {
-                    reject(e);
-                }
-            },
-            reject,
-        });
-        // Transfer the ArrayBuffer (zero-copy)
-        worker.postMessage(
-            { type: 'analyze', reqId, bytes: bytes.buffer, filename },
-            [bytes.buffer]
-        );
-    });
+    const v = info.version;
+    const tag = document.getElementById('version-tag');
+    if (tag && v) {
+        tag.textContent = `${v.tag} (`;
+        const a = document.createElement('a');
+        a.href = `https://github.com/galfthan/mvd_analyzer/commit/${encodeURIComponent(v.hash)}`;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = v.hash;
+        tag.appendChild(a);
+        tag.appendChild(document.createTextNode(`) — ${v.date}`));
+    }
+    checkBuildCoherence(v);
 }
 
-// applyDeferredBuckets stashes the worker's deferred 50ms bucket + region
-// outputs onto the current result, then RE-RUNS the bucket-dependent
-// initialisers (region control, timeline, map). They already ran once in
-// displayResults with the bucket-derived fields empty (blank timeline
-// graph / map trails / region overlay); re-running them now that the data
-// is present fills those in. Finally re-render the active tab so a
-// Timeline/Map view the user already opened repaints. Called when the
-// 'buckets' message arrives, a few seconds after the result.
-function applyDeferredBuckets(data) {
-    if (!currentResult) return;
+// onBucketsReady runs when the current demo's deferred 50 ms bucket view and
+// region states have landed on its Result (DemoHandle.ready('buckets')), and
+// RE-RUNS the bucket-dependent initialisers (region control, timeline, map).
+// They already ran once in displayResults with the bucket-derived fields
+// empty (blank timeline graph / map trails / region overlay); re-running them
+// now fills those in. Finally re-render the active tab so a Timeline/Map view
+// the user already opened repaints.
+function onBucketsReady(data) {
     const ta = currentResult.timelineAnalysis;
-    if (ta && data.bucketsJSON) {
-        try {
-            const view = JSON.parse(data.bucketsJSON);
-            // Column-major ColumnarBuckets object (not the old array shape).
-            if (view && typeof view === 'object' && !view.error) ta.bucketView = view;
-        } catch (e) {
-            console.warn('parse deferred buckets failed:', e);
-        }
-    }
-    if (ta && ta.regionControl && data.regionStatesJSON) {
-        try {
-            const rs = JSON.parse(data.regionStatesJSON);
-            if (!rs.error && rs.bucketStates) {
-                ta.regionControl.bucketStates = rs.bucketStates;
-                if (rs.stats) ta.regionControl.stats = rs.stats;
-            }
-        } catch (e) {
-            console.warn('parse deferred region states failed:', e);
-        }
-    }
 
     // Re-run the inits, now that bucket-derived data is present. Order
     // matches displayResults: region control feeds timeline + map.
@@ -432,171 +326,6 @@ function applyDeferredBuckets(data) {
         const deferred = (data.bucketsMs + (data.regionMs || 0)).toFixed(0);
         console.log(`[mvd-timing] Timeline/Map ready — ${deferred} ms of bucket work ran off the critical path`);
     }
-}
-
-// recomputeInWorker round-trips an edited regions definition through
-// the WASM bridge living on the worker. The Go function is exported on
-// the worker's self (js.Global()), unreachable from the main page —
-// that's why edited region stats stayed stale before this lane existed.
-function recomputeInWorker(overrideJSON) {
-    return new Promise((resolve, reject) => {
-        const reqId = nextWorkerReqId++;
-        pendingWorkerReqs.set(reqId, {
-            resolve: (payload) => resolve(payload.json),
-            reject,
-        });
-        worker.postMessage({ type: 'recomputeRegions', reqId, overrideJSON });
-    });
-}
-
-// computeLosInWorker asks the worker to run the lazy line-of-sight pass on the
-// already-parsed demo (computeLineOfSight is a Go export on the worker scope).
-// Resolves with the JSON array of per-player {name, los, pvs} tracks (one pass
-// fills both the actual-sightline and potential-visibility metrics).
-function computeLosInWorker() {
-    return new Promise((resolve, reject) => {
-        const reqId = nextWorkerReqId++;
-        pendingWorkerReqs.set(reqId, {
-            resolve: (payload) => resolve(payload.json),
-            reject,
-        });
-        worker.postMessage({ type: 'computeLos', reqId });
-    });
-}
-
-// viewQueryInWorker runs ONE view-layer query (getTopWindows / getTopKills)
-// over the demo the worker already holds, for the same reason
-// recomputeInWorker and computeLosInWorker exist: those Go exports live on the
-// worker's global and the main page cannot reach them. `opts` is the view's
-// options struct, JSON-encoded here and decoded straight into the Go options
-// (field names match case-insensitively).
-//
-// Rejects on the {"error":...} envelope as well as on a worker failure, so one
-// .catch covers both the transport and the view's documented unavailable cases
-// (no damage log, no bounded family, unmeasurable liveness).
-function viewQueryInWorker(fn, opts) {
-    return new Promise((resolve, reject) => {
-        const reqId = nextWorkerReqId++;
-        pendingWorkerReqs.set(reqId, {
-            resolve: (payload) => {
-                try {
-                    const v = JSON.parse(payload.json);
-                    if (v && v.error) reject(new Error(v.error));
-                    else resolve(v);
-                } catch (e) {
-                    reject(e);
-                }
-            },
-            reject,
-        });
-        worker.postMessage({ type: 'viewQuery', reqId, fn, optsJSON: JSON.stringify(opts || {}) });
-    });
-}
-
-// ─── QuakeWorld Hub Client (JS) ─────────────────────────────────────────────
-
-const SUPABASE_URL = 'https://ncsphkjfominimxztjip.supabase.co/rest/v1/v1_games';
-const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc3Boa2pmb21pbmlteHp0amlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY5Mzg1NjMsImV4cCI6MjAxMjUxNDU2M30.NN6hjlEW-qB4Og9hWAVlgvUdwrbBO13s8OkAJuBGVbo';
-
-function parseGameId(input) {
-    input = input.trim();
-    const asNum = parseInt(input, 10);
-    if (!isNaN(asNum) && String(asNum) === input) return asNum;
-    try {
-        const url = new URL(input);
-        const gid = url.searchParams.get('gameId');
-        if (gid) return parseInt(gid, 10);
-    } catch {}
-    const match = input.match(/gameId=(\d+)/);
-    if (match) return parseInt(match[1], 10);
-    throw new Error('Could not parse game ID from: ' + input);
-}
-
-async function fetchGameFromHub(gameId) {
-    const resp = await fetch(`${SUPABASE_URL}?select=*&id=eq.${gameId}`, {
-        headers: {
-            'apikey': SUPABASE_API_KEY,
-            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
-            'accept-profile': 'public'
-        }
-    });
-    if (!resp.ok) throw new Error(`Hub API error: ${resp.status}`);
-    const games = await resp.json();
-    if (games.length === 0) throw new Error(`Game ID ${gameId} not found`);
-    return games[0];
-}
-
-const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 'to'];
-const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url,server_hostname';
-
-// Page size for the search tab. The hub itself pages at 1000 (PostgREST
-// max-rows); 100 keeps a single response light (~90 KB) while "Load more"
-// walks offset pages until every match is shown.
-const SEARCH_PAGE_SIZE = 100;
-
-async function searchHub(filters, offset = 0) {
-    const parts = [
-        `select=${encodeURIComponent(SEARCH_SELECT)}`,
-        `order=timestamp.desc`,
-        `limit=${SEARCH_PAGE_SIZE}`,
-    ];
-    if (offset > 0) parts.push(`offset=${offset}`);
-    if (filters.player) parts.push(`players_fts=fts.'${encodeURIComponent(filters.player)}'`);
-    if (filters.team)   parts.push(`team_names=cs.{${encodeURIComponent(filters.team)}}`);
-    if (filters.map)    parts.push(`map=eq.${encodeURIComponent(filters.map)}`);
-    if (filters.mode)   parts.push(`mode=eq.${encodeURIComponent(filters.mode)}`);
-    if (filters.tag)    parts.push(`matchtag=ilike.%25${encodeURIComponent(filters.tag)}%25`);
-    if (filters.from)   parts.push(`timestamp=gte.${encodeURIComponent(filters.from)}`);
-    if (filters.to)     parts.push(`timestamp=lte.${encodeURIComponent(filters.to + 'T23:59:59')}`);
-
-    const resp = await fetch(`${SUPABASE_URL}?${parts.join('&')}`, {
-        headers: {
-            'apikey': SUPABASE_API_KEY,
-            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
-            'accept-profile': 'public',
-            // Ask PostgREST for the exact total (Content-Range: 0-99/1234) so
-            // the UI can say "N of M" and know when every match is shown. With
-            // a count preference a partial page answers 206 — still resp.ok.
-            'Prefer': 'count=exact'
-        }
-    });
-    if (!resp.ok) throw new Error(`Hub API error: ${resp.status}`);
-    const games = await resp.json();
-    let total = null;
-    const cr = resp.headers.get('content-range') || '';
-    const slash = cr.lastIndexOf('/');
-    if (slash >= 0 && cr.slice(slash + 1) !== '*') {
-        const n = parseInt(cr.slice(slash + 1), 10);
-        if (!isNaN(n)) total = n;
-    }
-    return { games, total };
-}
-
-async function downloadDemoFromHub(game) {
-    const sha = game.demo_sha256;
-    // Try CDN first
-    if (sha && sha.length >= 3) {
-        const cdnUrl = `https://d.quake.world/${sha.slice(0,3)}/${sha}.mvd.gz`;
-        try {
-            const resp = await fetch(cdnUrl);
-            if (resp.ok) return new Uint8Array(await resp.arrayBuffer());
-        } catch {}
-    }
-    // Fallback to direct server URL
-    if (game.demo_source_url) {
-        const resp = await fetch(game.demo_source_url);
-        if (resp.ok) return new Uint8Array(await resp.arrayBuffer());
-        throw new Error('Failed to download demo from server');
-    }
-    throw new Error('No download URL available for this game');
-}
-
-function generateDemoFilename(game) {
-    const teams = (game.teams || []).map(t => (t.name || '').replace(/[^a-zA-Z0-9_-]/g, '_'));
-    const teamsStr = teams.join('_vs_') || 'unknown';
-    const mapName = (game.map || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_');
-    const ts = new Date(game.timestamp).toISOString().replace(/[-:T]/g, '').slice(0, 13);
-    return `${game.mode || 'unknown'}_${teamsStr}[${mapName}]${ts}.mvd.gz`;
 }
 
 // ─── Setup ──────────────────────────────────────────────────────────────────
@@ -624,22 +353,14 @@ document.addEventListener('DOMContentLoaded', () => {
         switchTab(requestedTab);
     } // else: leave the HTML default (Search) active.
 
-    // Auto-load demo if URL has ?gameId= (canonical) or ?hub= (legacy) param
+    mvdData.ready.then(onAnalyzerReady,
+        (err) => setLoadingOverlayMessage(`Failed to load the analyzer: ${err.message}`));
+
+    // Auto-load demo if URL has ?gameId= (canonical) or ?hub= (legacy) param.
+    // The load waits for the analyzer itself.
     if (hubId) {
         document.getElementById('hub-input').value = hubId;
-        if (wasmReady) {
-            loadFromHub();
-        } else {
-            // Queue auto-load for when WASM finishes loading
-            const origHandler = worker.onmessage;
-            worker.onmessage = (e) => {
-                origHandler(e);
-                if (e.data.type === 'ready') {
-                    worker.onmessage = origHandler;
-                    loadFromHub();
-                }
-            };
-        }
+        loadFromHub();
     }
 
     // Auto-populate search filters from the URL. Only auto-RUN the
@@ -649,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // demo, not a request to browse the search results.
     const urlFilters = {};
     let hasSearch = false;
-    for (const f of SEARCH_FIELDS) {
+    for (const f of MvdHub.SEARCH_FIELDS) {
         const v = params.get(f);
         if (v) { urlFilters[f] = v; hasSearch = true; }
     }
@@ -715,7 +436,7 @@ function updateUrlState() {
         }
 
         if (lastExecutedSearch) {
-            for (const f of SEARCH_FIELDS) {
+            for (const f of MvdHub.SEARCH_FIELDS) {
                 const v = lastExecutedSearch[f];
                 if (v) params.set(f, v);
             }
@@ -922,28 +643,15 @@ async function uploadFile(file) {
     const status = document.getElementById('upload-status');
     status.textContent = 'Analyzing...';
     status.className = 'status loading';
-
     try {
-        if (!wasmReady) throw new Error('Analyzer is still loading, please wait...');
-
-        startLoadTiming();
-        const buffer = await file.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        const playerDemo = snapshotPlayerDemo(bytes, file.name);
-        const result = await analyzeInWorker(bytes, file.name);
-        if (result.error) throw new Error(result.error);
-
-        setAnalysisStatus(status, result);
-        currentResult = result;
-        playerState.demo = playerDemo;
-        displayResults(result);
+        await loadDemo({ bytes: new Uint8Array(await file.arrayBuffer()), name: file.name });
     } catch (error) {
         status.textContent = 'Error: ' + error.message;
         status.className = 'status error';
     }
 }
 
-// ─── Hub Loading (JS fetch + WASM Worker) ───────────────────────────────────
+// ─── Hub Loading ────────────────────────────────────────────────────────────
 
 async function loadFromHub() {
     const input = document.getElementById('hub-input').value.trim();
@@ -959,16 +667,7 @@ async function loadFromHub() {
     btn.disabled = true;
 
     try {
-        if (!wasmReady) throw new Error('Analyzer is still loading, please wait...');
-
-        const gameId = parseGameId(input);
-
-        status.textContent = 'Fetching game info...';
-        const tInfo = performance.now();
-        const game = await fetchGameFromHub(gameId);
-        pendingGameInfoMs = performance.now() - tInfo;
-
-        await loadGameFromHub(game);
+        await loadDemo({ gameId: MvdHub.parseGameId(input) });
     } catch (error) {
         status.textContent = 'Error: ' + error.message;
         status.className = 'status error';
@@ -980,44 +679,46 @@ async function loadFromHub() {
     }
 }
 
-// Given a game object already fetched from Supabase, download the demo,
-// analyse it, and render the results. Shared by loadFromHub() (which
-// fetches by ID first) and the search-result click handler (which
-// already has the row in hand).
-async function loadGameFromHub(game) {
+const LOAD_STAGE_TEXT = {
+    info: 'Fetching game info...',
+    download: 'Downloading demo...',
+    analyze: 'Analyzing...',
+};
+
+// loadDemo loads one demo through the data source (`input` is what
+// WasmSource.load takes: a file's bytes, a hub row, or a hub game id) and
+// renders it. Shared by the file drop, the hub box, search clicks and
+// playlist runs; throws on failure for the caller to report.
+async function loadDemo(input) {
     const status = document.getElementById('upload-status');
-    if (!wasmReady) throw new Error('Analyzer is still loading, please wait...');
-
-    document.getElementById('hub-input').value = game.id;
-
-    startLoadTiming();
-    if (pendingGameInfoMs != null) {
-        markNet('gameInfoFetch', pendingGameInfoMs);
-        pendingGameInfoMs = null;
-    }
-    status.textContent = 'Downloading demo...';
     status.className = 'status loading';
-    const tDownload = performance.now();
-    const demoBytes = await downloadDemoFromHub(game);
-    markNet('demoDownload', performance.now() - tDownload);
+    startLoadTiming();
+    const handle = await mvdData.load(input, {
+        onStage: (stage) => { status.textContent = LOAD_STAGE_TEXT[stage]; },
+    });
+    if (loadTiming) {
+        Object.assign(loadTiming.net, handle.timings.net);
+        loadTiming.worker = handle.timings.worker;
+        loadTiming.parseMs = handle.timings.parseMs;
+    }
 
-    status.textContent = 'Analyzing...';
-    const filename = generateDemoFilename(game);
-    const playerDemo = snapshotPlayerDemo(demoBytes, filename);
-    const result = await analyzeInWorker(demoBytes, filename);
-    if (result.error) throw new Error(result.error);
+    setAnalysisStatus(status, handle.result);
+    currentDemo = handle;
+    currentResult = handle.result;
+    playerState.demo = snapshotPlayerDemo(handle.demoBytes(), handle.name);
+    if (handle.game) {
+        document.getElementById('hub-input').value = handle.game.id;
+        currentResult.hubInfo = {
+            gameId: handle.game.id,
+            viewerUrl: `https://hub.quakeworld.nu/games/?gameId=${handle.game.id}`,
+            players: handle.game.players
+        };
+    }
+    handle.ready('buckets').then(
+        (info) => { if (handle === currentDemo) onBucketsReady(info); },
+        (err) => console.warn('deferred buckets failed:', err.message));
 
-    setAnalysisStatus(status, result);
-    currentResult = result;
-    playerState.demo = playerDemo;
-
-    currentResult.hubInfo = {
-        gameId: game.id,
-        viewerUrl: `https://hub.quakeworld.nu/games/?gameId=${game.id}`,
-        players: game.players
-    };
-
-    displayResults(result);
+    displayResults(currentResult);
 }
 
 // ─── Demo Search Panel ──────────────────────────────────────────────────────
@@ -1080,7 +781,7 @@ async function runSearch(loadMore = false) {
     submit.disabled = true;
 
     try {
-        const { games, total } = await searchHub(filters, offset);
+        const { games, total } = await MvdHub.searchGames(filters, offset);
         status.textContent = '';
         status.className = 'status';
         renderSearchResults(games, loadMore);
@@ -1818,7 +1519,7 @@ function renderSearchResults(games, append = false) {
 
 async function loadGameFromSearch(game) {
     try {
-        await loadGameFromHub(game);
+        await loadDemo({ game });
         // displayResults() switches to the Summary tab as part of finishing a load.
     } catch (error) {
         const status = document.getElementById('upload-status');
@@ -1991,7 +1692,7 @@ function displayResults(result) {
     // main thread; the multi-second cost was the worker's bucket build,
     // which now runs after the result is delivered. These run here with the
     // bucket-derived fields still empty (timeline graph / map trails /
-    // region overlay blank) and applyDeferredBuckets() re-runs them once the
+    // region overlay blank) and onBucketsReady() re-runs them once the
     // 'buckets' message lands. displayTimelineAnalysis also populates the
     // Chat tab's events and the timeline strip, so it must run now.
     if (result.timelineAnalysis?.regionControl) {
@@ -2343,7 +2044,7 @@ function isMultiPlayerIndividual(result) {
 // individualFieldActive reports the layout currently applied. The render paths
 // read the body class rather than re-deriving from the result so the DOM, the
 // row grouping and the row heights can never disagree — and displayTimeline-
-// Analysis's title write runs again from applyDeferredBuckets long after
+// Analysis's title write runs again from onBucketsReady long after
 // applyDuelModeUI, where the class is what survives.
 function individualFieldActive() {
     return document.body.classList.contains('individual-field');
@@ -3095,7 +2796,7 @@ function renderTopMoments() {
     // rather than quietly ranking a different damage family under the same
     // heading.
     const run = (fn, opts, render) => {
-        viewQueryInWorker(fn, opts)
+        currentDemo.view(fn, opts)
             .then(v => { if (token === topMomentsToken) render(v); })
             .catch(err => {
                 if (token !== topMomentsToken) return;
@@ -4574,7 +4275,7 @@ function resetTimelineState() {
     if (mapState.isPlaying) stopPlayback();
 
     // Map view data is rebuilt by initMapView, which is now deferred until
-    // the 50ms buckets arrive (see applyDeferredBuckets). Clear it here so a
+    // the 50ms buckets arrive (see onBucketsReady). Clear it here so a
     // fast demo-swap can't render the previous demo's map during the window
     // before the new demo's buckets finish building.
     mapState.locations = [];
@@ -4637,7 +4338,7 @@ function displayTimelineAnalysis(result) {
     const teams = timelineState.teams;
 
     // Schema v7: bucketed data is not a parse-time field; the WASM worker
-    // calls getDefaultBuckets after analyzeMVD and applyDeferredBuckets
+    // calls getDefaultBuckets after analyzeMVD and onBucketsReady
     // stashes the resulting column-major ColumnarBuckets object on
     // timeline.bucketView. The panels read it via the bucket-view accessors.
     timelineState.bucketView = timeline?.bucketView || null;
@@ -4670,7 +4371,7 @@ function displayTimelineAnalysis(result) {
 
     // Note: the shared playhead (mapState.currentTime) is initialised to 0 by
     // resetUIToCleanState at the start of each demo load. It is deliberately
-    // NOT reset here — displayTimelineAnalysis is re-run by applyDeferredBuckets
+    // NOT reset here — displayTimelineAnalysis is re-run by onBucketsReady
     // seconds after load, and a reset there would clobber a ?t= deep link or
     // any early scrubbing the user did during the deferred-bucket window.
 
@@ -7067,8 +6768,7 @@ const playerState = {
     markOut: null,
 };
 
-// snapshotPlayerDemo copies the demo bytes for the Player tab. Must run
-// BEFORE analyzeInWorker, which transfers (detaches) the buffer. The engine
+// snapshotPlayerDemo wraps the demo bytes for the Player tab. The engine
 // finds the demo by name (config.cfg: `playdemo match`), so the extension
 // has to say whether the bytes are gzipped.
 function snapshotPlayerDemo(bytes, name) {
@@ -8010,8 +7710,7 @@ async function loadDemoForRun(c) {
     playerToast(`Loading ${c.demo.title || `game ${c.demo.gameId}`}…`);
     playlistState.loadingRun = run;
     try {
-        const game = await fetchGameFromHub(c.demo.gameId);
-        await loadGameFromHub(game);
+        await loadDemo({ gameId: c.demo.gameId });
     } catch (err) {
         playerToast(`Could not load game ${c.demo.gameId}: ${err.message}`);
         if (playlistState.run === run) stopPlaylistRun();
@@ -8630,7 +8329,7 @@ function initMapView(result) {
     document.querySelectorAll('.map-player-trail-cb').forEach(cb => { cb.checked = false; });
 
     // On first load resetUIToCleanState has set currentTime to 0; on the
-    // deferred re-init (applyDeferredBuckets) it holds the user's scrub
+    // deferred re-init (onBucketsReady) it holds the user's scrub
     // position or a ?t= deep link, which must survive — so currentTime is
     // deliberately NOT reset to 0 here.
 
@@ -8661,7 +8360,7 @@ function initRegionControlData(result) {
     }
     MapView.computeRegionStacking(mapState.controlRegions);
 
-    // v7: bucketStates and stats are populated by analyzeInWorker —
+    // v7: bucketStates and stats are populated by the deferred buckets (DemoHandle._applyBuckets) —
     // the worker calls recomputeRegionControl with the default regions
     // after analyzeMVD and the result is stashed back onto the parsed
     // result before displayResults runs. Same code shape as v6.
@@ -8868,7 +8567,7 @@ async function applyRegionConfig() {
     });
     let res;
     try {
-        const jsonStr = await recomputeInWorker(overrideJSON);
+        const jsonStr = await currentDemo.recomputeRegions(overrideJSON);
         res = JSON.parse(jsonStr);
     } catch (err) {
         console.warn('recomputeRegionControl:', err.message);
@@ -10011,7 +9710,7 @@ async function ensureLosComputed(losBtn) {
     mapState.losPending = true;
     if (losBtn) losBtn.classList.add('pending');
     try {
-        const json = await computeLosInWorker();
+        const json = await currentDemo.lineOfSight();
         const players = JSON.parse(json);
         if (players && players.error) throw new Error(players.error);
         mapState.losByPair = MapView.buildVisByPair(players, 'los');
