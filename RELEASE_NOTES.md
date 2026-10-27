@@ -40,9 +40,12 @@ share link to this page. Every hub link on the other tabs now plays its
 clip in the Player tab; shift-click adds it to the playlist, ctrl-click
 still opens hub.
 
-Under the hood the page is now built with Vite, and the shell and the
-Player tab are Svelte, with demo loading behind one data layer
-(`plan-frontend-restructure.md`); the other tabs look and behave as before.
+Under the hood the page is now built with Vite, and the shell, the
+Player tab and the Chat tab are Svelte, with demo loading behind one data
+layer (`plan-frontend-restructure.md`); the other tabs look and behave as
+before. One Chat fix came with its port: lines that crowd together no longer
+overlap when the demo was loaded while another tab was showing (they were
+stacked at a minimum height, not their real one).
 
 ## unreleased (gl-map) — the map renders entirely through WebGL2
 

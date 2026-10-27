@@ -793,7 +793,7 @@ body.individual-field #health-armor-timeline-panel {
 
 /* Chat tab, individual layout. Same field as above: a column per side is a
  * column per player only in a duel, so with more than two of them the second
- * say column and its header go and app.js (buildFullChat) pours every line —
+ * say column and its header go and the Chat tab (src/tabs/chat/) pours every line —
  * say and say_team alike — into the first one, titled "Chat". Kills and Chat
  * are both flex:1, so the two left split the width. */
 body.individual-field #team-b-chat-header,
@@ -1976,7 +1976,7 @@ body.graph-scrubbing * {
 }
 
 /* Speaker name in the single-column chat layout. The colour is written
- * inline per row (chatSpeakerColor, from TEAM_COLORS). Never shrinks: the row
+ * inline per row (colorOf from the teams store). Never shrinks: the row
  * is a flex line whose message wraps, and a clipped name is worse than a
  * clipped message. */
 .chat-speaker {

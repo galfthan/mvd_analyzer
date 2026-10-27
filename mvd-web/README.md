@@ -22,7 +22,8 @@ talks to it through a JS shim.
   uses — [`mvd-map-view`](../mvd-map-view/README.md) (`MapView`), the data
   layer (`mvdData`, `MvdHub`), shared state (`MvdState`), result helpers
   (`MvdLib`) and the Player tab's engine (`MvdPlayer`). Ported so far: the
-  shell and the Player tab (`src/player/`); see
+  shell, the Player tab (`src/player/`) and the Chat tab (`src/tabs/chat/`,
+  its DOM-free parts in `src/lib/chat.js`); see
   [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
   Two UI packages are bundled (pinned in `package.json`):
   [PaneForge](https://paneforge.com) for the Player tab's player | panes
@@ -30,7 +31,7 @@ talks to it through a JS shim.
   (`@lucide/svelte/icons/<name>`) so only the icons used ship.
 - `static/` — copied into `dist/` as-is (Vite's `publicDir`).
   - `styles.css`, `app.js` — the tabbed analyzer UI (scoreboard,
-    timeline, map, chat, loc graph, ...). `app.js` is still a classic
+    timeline, map, loc graph, ...). `app.js` is still a classic
     script: `index.html` carries inline handlers that call its globals.
   - `worker.js` — wraps the WASM module in a Web Worker so analysis
     doesn't block the main thread. Provides the host callbacks the
@@ -273,6 +274,13 @@ lines (`event.type === 'teamsay'`) from the chat column(s); frags and
 public `say` are untouched, and the flag resets per demo load. Its columns
 are Kills plus one per side — or, in an individual layout that is not a
 duel, Kills plus a single "Chat" column (see *A mode with no teams* below).
+The tab is Svelte (`src/tabs/chat/ChatTab.svelte`) and reads only the
+shared stores: the messages from the `demo` store's Result, the sides and
+colours from `teams`, the time from `clock`. While it is hidden it does
+nothing; it rebuilds its columns on the first frame it shows after the
+demo, the teams or the filter changed, and a clock tick only moves the
+current-time line and the auto-scroll (paused for 2 s after a scroll by
+the user).
 
 The Search tab is the first tab and is always available — it holds the
 file picker, the hub-URL load row, and the filter form for browsing
@@ -309,7 +317,9 @@ The stores follow Svelte's store contract, so components read them as
 The shell is Svelte (`src/shell/`): `App.svelte` renders the top bar,
 the sidebar (from `TABS` in `src/state/ui.js`) and the layout, and adopts
 the markup of tabs not yet ported — `index.html`'s hidden `#legacy-dom`,
-which `app.js` finds by id — into the main pane (`adopt.js`).
+which `app.js` finds by id — into the main pane (`adopt.js`). Ported
+tabs (`PlayerTab`, `ChatTab` in `src/tabs/chat/`) are mounted there beside
+them; `app.js` still toggles their `active` class like any `.tab-content`.
 `src/main.js` mounts it synchronously, so that markup is in place before
 `app.js`'s `DOMContentLoaded` setup. The sidebar sets
 `MvdState.activeTab`; `app.js` follows it in `onTabActivated`, and
@@ -687,27 +697,27 @@ that drives the Timeline also:
 - CSS hides `#team-b-chat-header` and `#team-b-messages`. Both remaining
   columns are `flex: 1`, so Kills and Chat split the width; nothing is moved
   or cloned, the hidden container just stays empty.
-- `buildFullChat` pours EVERY say line — `say` and `say_team` alike — into
+- `bucketChat` (`src/lib/chat.js`) pours EVERY say line — `say` and `say_team` alike — into
   the one column in time order. In an FFA a `say_team` reaches only the
   players sharing the speaker's clan tag, which makes it narrower than public
   chat but still chat; it keeps its own colour (`.chat-time-marker-msg
   .teamsay`), so the two read apart in the single column.
 - Each row is prefixed with the speaker's name (`.chat-speaker`), coloured by
-  `chatSpeakerColor` = `TEAM_COLORS[timelineState.teams.indexOf(player)]` —
+  `colorOf(teams, player, true)` (`src/state/teams.js`) — the colour at the
+  player's index in the canonical order —
   CLAUDE.md's canonical index, so a name here is the colour that player
   carries on the scoreboard, the map and the timeline; a speaker who is not
   in that list (a spectator under `sv_spectalk 1`, a mid-match rename) gets
   neutral grey rather than being dropped. With two sides the column heading
   said who was talking; with eight players nothing else does.
   The Kills column is unchanged — obituaries name their own players.
-- The heading becomes plain **Chat**. `displayTimelineAnalysis`'s
-  `${teams[0]} Chat` write is skipped while the class is on — it re-runs from
-  `onBucketsReady` long after `applyDuelModeUI`, so the body class, not
-  the result, is what the render paths read.
+- The heading becomes plain **Chat** (`chatTitles`). The tab reads the
+  layout from the `teams` store's `perPlayer` flag, which `displayResults`
+  sets from the same `isMultiPlayerIndividual(result)` as the body class.
 - **"Hide team chat" stays.** It filters on message TYPE (`say_team`), not on
   side, so it keeps its meaning here.
 - Reverses with the Timeline layout: `resetUIToCleanState` calls
-  `setIndividualFieldLayout(false)` and restores the default titles, then
+  `setIndividualFieldLayout(false)` and the teams store is reset, then
   `applyDuelModeUI` re-applies for the new demo.
 
 The time axis, the current-time line and scroll-to-current-time are unchanged

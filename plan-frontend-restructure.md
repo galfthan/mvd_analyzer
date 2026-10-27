@@ -4,6 +4,9 @@ Status: phases A–E done (2026-10-27); F (the remaining tabs) started with
 F0, arrangeable panels on the legacy tabs (`src/ui/panels/`: reorder,
 collapse, close, show all, saved per viewer) — ahead of the ports, since
 it needs none of them: it tags the existing panels and never moves them.
+The first F port is Chat (`src/tabs/chat/`, DOM-free parts in
+`src/lib/chat.js`): it reads the `demo`, `teams` and `clock` stores and
+needs no `legacy.js` bridge.
 C covers the clock, teams and current-demo stores. D renders the top bar,
 sidebar and layout in Svelte with the active tab in a store; the load
 overlay and search stay legacy until their tabs are ported. E is the
@@ -179,7 +182,7 @@ and panes `MapPane`, `HealthArmorPane`, `MomentsPane`, `FragFeedPane`.
 | D | Svelte shell (sidebar, tabs, overlay, search) with `LegacyTab` hosts | all tabs work inside the new shell |
 | E | Player tab in Svelte, panes on dockview, own Map pane instance | Player tab section deleted from `app.js` → **player-tab can merge** |
 | F0 | Arrangeable panels on the multi-panel tabs (Summary, Timeline, Locs & regions, Key moments, Pickups, Aim) | done |
-| F | Remaining tabs, smallest/least coupled first: Chat, Pack drops, Pickups, Key moments, Summary, Aim, Locs & regions, Timeline, Map | each port deletes its `app.js` section; done when `app.js` is gone |
+| F | Remaining tabs, smallest/least coupled first: Chat (done), Pack drops, Pickups, Key moments, Summary, Aim, Locs & regions, Timeline, Map | each port deletes its `app.js` section; done when `app.js` is gone |
 
 Not everything in `app.js` becomes a component. The parts without a DOM
 (playerStats accessors, bucket-view accessors, the data-preparation

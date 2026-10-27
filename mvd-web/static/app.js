@@ -33,12 +33,6 @@ function onTeamsChanged(state) {
 }
 const PLAYER_SYMBOLS = ['*', 'x', '+', 'o', '◆', '▲', '●', '■'];
 
-// Timing / layout constants used by the chat scroller and the map playback.
-// CHAT_PX_PER_SEC is the chat-track density: it has to stay in sync with the
-// 700px chat viewport in styles.css (see #chat-track) — change one, change
-// the other.
-const CHAT_PX_PER_SEC   = 17.5; // ~same density as the original 40s/700px window
-const CHAT_ITEM_HEIGHT  = 18;
 const PLAYBACK_FPS_MS   = 16;   // map playback throttle (~60 fps = 16 ms/frame)
 
 // Derive a strong (darkened) color variant from a hex color for region
@@ -266,7 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupTabs();
     MvdPlayer.status.subscribe(() => updatePlaybackButtons());
     setupSearch();
-    setupChatToolbar();
     setupKeyMomentsFilters();
     setupTeamStatusSort();
 
@@ -328,7 +321,7 @@ function setCurrentTime(time) {
 // ('playback') does its own lighter per-frame sync, and a demo reset
 // ('reset') happens while the views are half torn down — both skip it.
 // The Player engine ('engine') ticks once per display frame with the Map
-// and Chat tabs hidden (onTabActivated redraws them): move the cursor every
+// tab hidden (onTabActivated redraws it): move the cursor every
 // frame, the rest at the playback loop's 200 ms full-sync rate.
 let _engineSyncTimer = null;
 function onClockTick({ t, from }) {
@@ -360,7 +353,6 @@ function onClockTick({ t, from }) {
     updateMapLegend();
     updateRegionStatus();
     updateItemsPanelStatus(mapState.currentTime);
-    renderChatMessages();
     renderMap(mapState.currentTime);
     updateUrlState();
 }
@@ -574,8 +566,6 @@ function renderTabContent(tabName) {
     } else if (tabName === 'timeline') {
         if (currentResult) updateDetailView();
         updateTimeIndicators();
-    } else if (tabName === 'chat') {
-        renderChatMessages();
     } else if (tabName === 'loc-graph') {
         renderLocGraph();
     } else if (tabName === 'aimstats') {
@@ -1649,7 +1639,7 @@ function displayResults(result) {
     // bucket-derived fields still empty (timeline graph / map trails /
     // region overlay blank) and onBucketsReady() re-runs them once the
     // 'buckets' message lands. displayTimelineAnalysis also populates the
-    // Chat tab's events and the timeline strip, so it must run now.
+    // timeline strip, so it must run now.
     if (result.timelineAnalysis?.regionControl) {
         initRegionControlData(result);
     }
@@ -2011,11 +2001,8 @@ const PER_PLAYER_VIEWS = [
 // forms, off one body class.
 //
 // Timeline: hide the A-vs-B graphs and promote the three per-player views to
-// panels of their own. Chat: collapse the two say columns into a single "Chat"
-// column carrying every line, the second column and its header hidden by CSS
-// off the class — the columns are flex:1, so the two survivors split the width
-// with no empty third. No chat node is moved or cloned: the same three
-// containers persist and buildFullChat fills whichever the layout uses.
+// panels of their own. Chat (src/tabs/chat/): CSS hides the second say column
+// and its header off the class; the tab fills the first from the teams store.
 function setIndividualFieldLayout(on) {
     document.body.classList.toggle('individual-field', on);
     for (const v of PER_PLAYER_VIEWS) {
@@ -2031,9 +2018,6 @@ function setIndividualFieldLayout(on) {
     const rangeLabel = document.getElementById('time-range-label');
     const rangeHome = document.getElementById(on ? 'weapons-per-player-heading' : 'weapons-timeline-heading');
     if (rangeLabel && rangeHome && rangeLabel.parentElement !== rangeHome) rangeHome.appendChild(rangeLabel);
-    if (!on) return;
-    const chatTitle = document.getElementById('team-a-chat-title');
-    if (chatTitle) chatTitle.textContent = 'Chat';
 }
 
 // Row heights for the per-player views. The compact pair is what a collapsed
@@ -3900,103 +3884,10 @@ function getWeaponName(code) {
     return names[code] || code;
 }
 
-// Escape a single character for HTML
-function escapeHtmlChar(char) {
-    switch (char) {
-        case '<': return '&lt;';
-        case '>': return '&gt;';
-        case '&': return '&amp;';
-        case '"': return '&quot;';
-        case "'": return '&#39;';
-        default: return char;
-    }
-}
-
-// Format Quake chat messages with colors
-// Based on ezQuake source code character rendering:
-// - Characters 0-127: Normal white text
-// - Characters 128-255: "Gold/Brown" alternate text (same glyphs as 0-127)
-// - &cRGB: Set color to RGB (hex digits 0-F, each multiplied by 16)
-// - &r: Reset color to white
-function formatQuakeMessage(text) {
-    if (!text) return '';
-
-    // Remove sound triggers at end of messages (!K, !H, !G, !C, etc.)
-    let result = text.replace(/![A-Z]$/g, '');
-
-    let output = '';
-    let currentColor = null;
-    let i = 0;
-
-    while (i < result.length) {
-        const charCode = result.charCodeAt(i);
-
-        // Check for &cRGB color code
-        if (result.slice(i, i + 2) === '&c') {
-            // Check for &cfff (white/reset)
-            if (result.slice(i, i + 5).toLowerCase() === '&cfff') {
-                if (currentColor) output += '</span>';
-                currentColor = null;
-                i += 5;
-                continue;
-            }
-            // Check for 3-digit hex color
-            const colorMatch = result.slice(i + 2, i + 5).match(/^[0-9a-fA-F]{3}/);
-            if (colorMatch) {
-                if (currentColor) output += '</span>';
-                // ezQuake uses r * 16 for each hex digit (0-240 range)
-                const r = parseInt(colorMatch[0][0], 16) * 16;
-                const g = parseInt(colorMatch[0][1], 16) * 16;
-                const b = parseInt(colorMatch[0][2], 16) * 16;
-                currentColor = `rgb(${r},${g},${b})`;
-                output += `<span style="color:${currentColor}">`;
-                i += 5;
-                continue;
-            }
-        }
-
-        // Check for &r reset
-        if (result.slice(i, i + 2) === '&r') {
-            if (currentColor) output += '</span>';
-            currentColor = null;
-            i += 2;
-            continue;
-        }
-
-        // High-bit gold characters (128-255)
-        if (charCode >= 128 && charCode <= 255) {
-            const baseChar = String.fromCharCode(charCode - 128);
-            if (currentColor === null) {
-                output += `<span class="quake-gold">${escapeHtmlChar(baseChar)}</span>`;
-            } else {
-                output += escapeHtmlChar(baseChar);
-            }
-            i++;
-            continue;
-        }
-
-        // Skip macro delimiters (curly braces and square brackets)
-        // These are Quake client markup, not displayed text
-        if (result[i] === '{' || result[i] === '}' ||
-            result[i] === '[' || result[i] === ']') {
-            i++;
-            continue;
-        }
-
-        // Regular character
-        output += escapeHtmlChar(result[i]);
-        i++;
-    }
-
-    if (currentColor) output += '</span>';
-    return output;
-}
-
 // Timeline Analysis State
 let timelineState = {
     bucketView: null,      // column-major ColumnarBuckets (50ms) from getDefaultBuckets
     highResDuration: 0.05, // High-res bucket interval
-    events: [],
     duration: 0,
     matchStartTime: 0,
     teams: [],
@@ -4079,7 +3970,7 @@ function resetUIToCleanState() {
     }
     hide('powerup-timeline-panel');
     hide('region-control-timeline-panel');
-    // Two-sided default for the timeline AND the chat columns: the
+    // Two-sided default for the timeline AND the chat columns (CSS): the
     // per-player views return to their <details> under the team graphs.
     // applyDuelModeUI re-applies the individual field layout below if this
     // demo wants it.
@@ -4089,16 +3980,6 @@ function resetUIToCleanState() {
     setHTML('team-status-a', '');
     setHTML('team-status-b', '');
     teamStatusSort = { ...TEAM_STATUS_SORT_DEFAULT };
-
-    // Chat
-    for (const id of ['chat-time-axis', 'kill-messages', 'team-a-messages', 'team-b-messages']) {
-        setHTML(id, '');
-    }
-    setText('team-a-chat-title', 'Team A Chat');
-    setText('team-b-chat-title', 'Team B Chat');
-    chatHideTeam = false;
-    const hideTeamCb = document.getElementById('chat-hide-teamsay');
-    if (hideTeamCb) hideTeamCb.checked = false;
 
     // Map view
     const mapCanvas = document.getElementById('map-canvas');
@@ -4234,7 +4115,6 @@ function resetTimelineState() {
     timelineState.bucketView = null;
     mapView.setFrames(null);
     timelineState.highResDuration = 0.05;
-    timelineState.events = [];
     timelineState.fragEvents = [];
     timelineState.deathEvents = [];
     timelineState.killEvents = [];
@@ -4246,17 +4126,10 @@ function resetTimelineState() {
     timelineState.segment = null;
     timelineState.dragging = false;
     precomputedFrags = [];
-    chatRendered = false;
-    chatUserScrolling = false;
 
-    // Clear all timeline graph containers
-    const containers = [
-        'tl-axis', 'kill-messages', 'team-a-messages', 'team-b-messages'
-    ];
-    containers.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = '';
-    });
+    // Clear the timeline axis
+    const axis = document.getElementById('tl-axis');
+    if (axis) axis.innerHTML = '';
     // Clear canvases
     for (const cid of ['detail-graph-canvas', 'health-armor-canvas', 'score-canvas']) {
         const c = document.getElementById(cid);
@@ -4291,7 +4164,7 @@ function displayTimelineAnalysis(result) {
     timelineState.highResDuration = 0.05;
     // Schema v8: raw time fields on result/timelineAnalysis flipped from
     // float seconds to int32 ms. The frontend internally still works in
-    // seconds (mapState.currentTime, formatDuration, CHAT_PX_PER_SEC,
+    // seconds (mapState.currentTime, formatDuration,
     // hub URL `from`/`to`, etc. all expect seconds), so convert ms→s once
     // here at intake. Anything copied into timelineState below is in
     // seconds and panels downstream are unchanged.
@@ -4301,7 +4174,6 @@ function displayTimelineAnalysis(result) {
     timelineState.demoOffset = (result.streams?.global?.demoOffset || 0) * 0.001;
     timelineState.duration = (result.match?.duration || 600000) * 0.001;
     MvdState.clock.setDuration(timelineState.duration);
-    timelineState.events = (result.messages?.messages || []).map(e => ({ ...e, time: e.time * 0.001 }));
     // Sorted by time once here so prepScoreData / precomputeFragCounts don't
     // each re-sort a clone on every render (pan-drag re-renders many times/sec).
     timelineState.fragEvents = (timeline?.fragEvents || []).map(f => ({ ...f, time: f.time * 0.001 })).sort((a, b) => a.time - b.time); // Frag events from stat tracking
@@ -4324,13 +4196,6 @@ function displayTimelineAnalysis(result) {
     // Update legend team names
     if (teams.length >= 2) {
         const setTextIfExists = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-        // The single-column layout owns both chat titles
-        // (setIndividualFieldLayout set the one visible column to "Chat");
-        // teams[0]/[1] are two players out of the field there, not sides.
-        if (!individualFieldActive()) {
-            setTextIfExists('team-a-chat-title', `${teams[0]} Chat`);
-            setTextIfExists('team-b-chat-title', `${teams[1]} Chat`);
-        }
         setTextIfExists('legend-health-team-a', teams[0] + ' ↑');
         setTextIfExists('legend-health-team-b', teams[1] + ' ↓');
         setTextIfExists('legend-weapons-team-a', teams[0] + ' ↑');
@@ -4349,7 +4214,6 @@ function displayTimelineAnalysis(result) {
     updateDetailView();
     updateTimeIndicators();
     updateTeamStatus();
-    renderChatMessages();
 }
 
 // ─── Columnar bucket-view accessors ──────────────────────────────────────────
@@ -5810,229 +5674,6 @@ function updateDetailView() {
     // indicators keep their last left% after a zoom/pan/select and end up
     // over the wrong time until the next setCurrentTime.
     updateTimeIndicators();
-}
-
-// ─── Chat Tab ──────────────────────────────────────────────────────────────
-
-// Chat: pixels per second for the full-match scrollable layout
-// (CHAT_PX_PER_SEC and CHAT_ITEM_HEIGHT now live with the rest of the
-// theme constants at the top of this file.)
-
-let chatRendered = false;
-// "Hide team chat" — drops say_team lines from the two chat columns so the
-// public banter (and the taunts a spectator would have heard) reads on its
-// own. Off by default; the Result keeps every message either way.
-let chatHideTeam = false;
-let chatUserScrolling = false;
-let _chatScrollTimer = null;
-let chatContentHeight = 0;
-let _chatProgrammaticScroll = false; // flag to distinguish our scrollTop writes from user scrolls
-
-// Wired once at load: the checkbox lives outside the rebuilt chat DOM, so a
-// change only has to invalidate the built columns and re-run the build.
-function setupChatToolbar() {
-    const cb = document.getElementById('chat-hide-teamsay');
-    if (!cb) return;
-    cb.addEventListener('change', () => {
-        chatHideTeam = cb.checked;
-        chatRendered = false;
-        renderChatMessages();
-    });
-}
-
-function renderChatMessages() {
-    if (chatRendered) {
-        updateChatTimeLine();
-        scrollChatToCurrentTime();
-        return;
-    }
-    buildFullChat();
-}
-
-function buildFullChat() {
-    const viewport = document.getElementById('chat-scroll-viewport');
-    const killContainer = document.getElementById('kill-messages');
-    const teamAContainer = document.getElementById('team-a-messages');
-    const teamBContainer = document.getElementById('team-b-messages');
-    const axisContainer = document.getElementById('chat-time-axis');
-    if (!viewport || !killContainer || !teamAContainer || !teamBContainer) return;
-
-    const teams = timelineState.teams;
-    const duration = timelineState.duration || 600;
-    chatContentHeight = Math.round(duration * CHAT_PX_PER_SEC);
-
-    killContainer.innerHTML = '';
-    teamAContainer.innerHTML = '';
-    teamBContainer.innerHTML = '';
-
-    if (!currentResult?.messages?.messages || teams.length < 2) return;
-
-    // Schema v57: messages.messages[].time is int32 ms on the raw result;
-    // timelineState.events was already converted to seconds at intake in
-    // displayTimelineAnalysis, so use that pre-converted copy here.
-    // `duration` (timelineState.duration) is also seconds.
-    //
-    // No client-side text dedup: the only real duplication source — KTX
-    // sprints each say/say_team line once per recipient, all sharing one
-    // wire-ms — is already collapsed upstream by messages.go's seenChat on an
-    // exact (time,type,player,message) key (the documented CLAUDE.md filter
-    // exception; see mvd-reader/MVD_FORMAT.md §chat). Obituaries are broadcast
-    // once and pass through verbatim. A previous 3s message-text filter here
-    // also swallowed authentic repeats (a player re-sending the same bind, or
-    // two genuinely identical deaths within 3s), violating the
-    // surface-authoritative-data rule, so it was removed. Only clip to the
-    // match window.
-    const events = (timelineState.events || []).filter(e => e.time >= 0 && e.time <= duration);
-
-    // Individual field: one chat column for everybody. Column A is that
-    // column (the B one is hidden by CSS and stays empty), and its rows get a
-    // speaker name — with two sides the column heading said who was talking,
-    // with eight players nothing else does.
-    const single = individualFieldActive();
-
-    const killEvents = [];
-    const teamAEvents = [];
-    const teamBEvents = [];
-
-    for (const event of events) {
-        if (event.type === 'frag') {
-            killEvents.push(event);
-        } else if (event.type === 'teamsay' || event.type === 'chat') {
-            // "Hide team chat" is a display filter over the say columns only;
-            // frags and public say keep their rows. It filters on message TYPE,
-            // not on side, so it keeps its meaning in an individual field: an
-            // FFA's say_team still goes only to same-tag players.
-            if (chatHideTeam && event.type === 'teamsay') continue;
-            if (single) teamAEvents.push(event);
-            else if (event.team === teams[0]) teamAEvents.push(event);
-            else if (event.team === teams[1]) teamBEvents.push(event);
-        }
-    }
-
-    renderChatColumnFull(killContainer, killEvents);
-    renderChatColumnFull(teamAContainer, teamAEvents, single);
-    renderChatColumnFull(teamBContainer, teamBEvents);
-
-    if (axisContainer) {
-        renderChatTimeAxisFull(axisContainer);
-    }
-
-    // Add current-time line inside the scroll inner (scrolls with content).
-    // resetUIToCleanState clears the message containers but not this persistent
-    // wrapper, so guard against re-appending a duplicate line on every rebuild
-    // (each demo load re-runs buildFullChat); reuse the existing one.
-    const scrollInner = viewport.querySelector('.chat-scroll-inner');
-    if (scrollInner && !document.getElementById('chat-current-time-line')) {
-        const line = document.createElement('div');
-        line.className = 'chat-current-time-line';
-        line.id = 'chat-current-time-line';
-        scrollInner.appendChild(line);
-    }
-
-    // Scroll listener: only mark user scrolling if it's not our programmatic
-    // scroll. The viewport persists across demo loads, so wire the listener
-    // exactly once (mirrors the _toggleWired pattern) — a fresh listener per
-    // rebuild would accumulate one per demo.
-    if (!viewport._scrollWired) {
-        viewport._scrollWired = true;
-        viewport.addEventListener('scroll', () => {
-            if (_chatProgrammaticScroll) return;
-            chatUserScrolling = true;
-            if (_chatScrollTimer) clearTimeout(_chatScrollTimer);
-            _chatScrollTimer = setTimeout(() => { chatUserScrolling = false; }, 2000);
-        }, { passive: true });
-    }
-
-    chatRendered = true;
-    updateChatTimeLine();
-    scrollChatToCurrentTime();
-}
-
-function updateChatTimeLine() {
-    const line = document.getElementById('chat-current-time-line');
-    if (!line) return;
-    line.style.top = `${mapState.currentTime * CHAT_PX_PER_SEC}px`;
-}
-
-function scrollChatToCurrentTime() {
-    if (chatUserScrolling) return;
-    const viewport = document.getElementById('chat-scroll-viewport');
-    if (!viewport) return;
-
-    const topPx = mapState.currentTime * CHAT_PX_PER_SEC;
-    const targetScroll = Math.max(0, topPx - viewport.clientHeight / 2);
-
-    _chatProgrammaticScroll = true;
-    viewport.scrollTop = targetScroll;
-    // Reset flag after browser processes the scroll event
-    requestAnimationFrame(() => { _chatProgrammaticScroll = false; });
-}
-
-function renderChatTimeAxisFull(container) {
-    container.innerHTML = '';
-    const duration = timelineState.duration || 600;
-
-    const inner = document.createElement('div');
-    inner.style.position = 'relative';
-    inner.style.height = `${chatContentHeight}px`;
-
-    const tickInterval = 5;
-    for (let t = 0; t <= duration; t += tickInterval) {
-        const topPx = Math.round(t * CHAT_PX_PER_SEC);
-        const tick = document.createElement('div');
-        tick.className = 'chat-tick';
-        tick.style.top = `${topPx}px`;
-        tick.textContent = formatDuration(t);
-        inner.appendChild(tick);
-    }
-
-    container.appendChild(inner);
-}
-
-// Speaker colour for the single chat column. CLAUDE.md's team-colour rule:
-// TEAM_COLORS indexed by position in timelineState.teams, which in an
-// individual layout is one entry per player — so a name here is the same
-// colour it carries on the scoreboard, the map and the timeline.
-function chatSpeakerColor(name) {
-    const idx = timelineState.teams.indexOf(name);
-    return (idx >= 0 && idx < TEAM_COLORS.length) ? TEAM_COLORS[idx] : '#ccc';
-}
-
-function renderChatColumnFull(container, events, withSpeaker = false) {
-    const inner = document.createElement('div');
-    inner.style.position = 'relative';
-    inner.style.height = `${chatContentHeight}px`;
-    // Attached before the rows go in so each row's rendered height is
-    // measurable: `.chat-time-marker-msg` wraps (white-space: normal), and a
-    // wrapped row is taller than CHAT_ITEM_HEIGHT — stacking the next event
-    // at the constant would draw it over the second line. The constant stays
-    // the floor, and is all there is when the tab is not laid out (offsetHeight 0).
-    container.appendChild(inner);
-
-    let lastBottom = -Infinity;
-
-    for (const event of events) {
-        let topPx = Math.round(event.time * CHAT_PX_PER_SEC);
-
-        let displaced = false;
-        if (topPx < lastBottom) {
-            topPx = lastBottom;
-            displaced = true;
-        }
-
-        const marker = document.createElement('div');
-        marker.className = 'chat-time-marker' + (displaced ? ' chat-displaced' : '');
-        marker.style.top = `${topPx}px`;
-
-        const prefix = displaced ? '<span class="chat-displaced-dots">...</span>' : '';
-        const speaker = withSpeaker && event.player
-            ? `<span class="chat-speaker" style="color: ${chatSpeakerColor(event.player)}">${escapeHtml(event.player)}</span>`
-            : '';
-        marker.innerHTML = `${prefix}${speaker}<span class="chat-time-marker-msg ${event.type}">${formatQuakeMessage(event.message)}</span>`;
-
-        inner.appendChild(marker);
-        lastBottom = topPx + Math.max(CHAT_ITEM_HEIGHT, marker.offsetHeight || 0);
-    }
 }
 
 function updateDetailGraph(startTime, endTime) {
@@ -10701,8 +10342,6 @@ function animatePlayback() {
     updateUnifiedCursor();
     updateUnifiedTimeDisplay();
     renderMap(mapState.currentTime);
-    updateChatTimeLine();
-    scrollChatToCurrentTime();
 
     // Full sync every 200ms
     if (now - _lastFullSyncTime > 200) {
