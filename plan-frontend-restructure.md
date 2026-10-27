@@ -1,10 +1,13 @@
 # Plan — mvd-web on Svelte, behind a data layer
 
-Status: phases A–D done (2026-10-27), E in progress. C covers the
-clock, teams and current-demo stores; pov and URL state come with the
-components that use them (E). D renders the top bar, sidebar and layout
-in Svelte with the active tab in a store; the load overlay and search
-stay legacy until their tabs are ported.
+Status: phases A–E done (2026-10-27); F (the remaining tabs) not started.
+C covers the clock, teams and current-demo stores. D renders the top bar,
+sidebar and layout in Svelte with the active tab in a store; the load
+overlay and search stay legacy until their tabs are ported. E is the
+Player tab in `src/player/`. Decided in E: no dockview (see below), and
+no separate `pov` store — the engine's `status` store carries the tracked
+player, which is all the panes need. The URL state stays legacy until a
+ported tab needs it.
 Branch: to be created off `player-tab`. The Player tab does not merge
 until at least phases A–E below are done.
 
@@ -130,12 +133,12 @@ DemoHandle
 - **Legacy tabs**: a `LegacyTab` host component that owns the tab's
   existing markup and calls `app.js`'s init/render for it, so unported tabs
   work unchanged inside the new shell.
-- **Panes**: use **dockview-core** (framework-free core; Svelte components
-  are mounted into its panels) for resizable, movable, collapsible panes
-  and tabbed groups — rather than growing our own column. A short spike
-  first checks bundle size, dark-theme styling and touch behaviour; if it
-  doesn't fit, a small Svelte pane column (what the PoC does) is the
-  fallback.
+- **Panes**: dockview-core was the first choice and was dropped after the
+  spike: ~390 KB minified (the page bundle is ~80 KB), its ESM build ships
+  no stylesheet, and it moves panels between DOM parents — which reloads
+  an iframe, so the engine could never sit in one. The pane column is our
+  own (`src/player/PaneColumn.svelte`): reorder by drag or ↑ ↓, collapse,
+  resize each pane's height, resize and hide the column.
 - The same layout primitives back the "collapsible side panel" wanted on
   other tabs (Map items panel, Timeline drill-downs).
 

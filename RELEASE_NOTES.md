@@ -24,7 +24,8 @@ Beside the player, a column of panes follows its clock and POV — the map
 (following whoever you watch; click a player to switch to them), a rolling
 health/armor strip per player, a list of the demo's moments (quad runs,
 streaks, highlights — click to play), and a frag feed (click a frag to
-watch it from the killer's view) — added, closed and reordered at will. Under it, a
+watch it from the killer's view) — added, closed, reordered, collapsed and
+resized at will; the column itself can be widened or hidden. Under it, a
 **playlist** of clips: mark In/Out and add from the current POV, or
 generate quad runs, frag streaks, quadbores, airgibs, telefrags, discharges
 or one player's frags; play the list right there as a script (across hub
@@ -32,6 +33,10 @@ demos too), or export it as one hub link (hub's multi-clip format) or a
 share link to this page. Every hub link on the other tabs now plays its
 clip in the Player tab; shift-click adds it to the playlist, ctrl-click
 still opens hub.
+
+Under the hood the page is now built with Vite, and the shell and the
+Player tab are Svelte, with demo loading behind one data layer
+(`plan-frontend-restructure.md`); the other tabs look and behave as before.
 
 ## unreleased (gl-map) — the map renders entirely through WebGL2
 

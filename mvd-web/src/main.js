@@ -6,16 +6,20 @@
 import { mount, flushSync } from 'svelte';
 import App from './shell/App.svelte';
 import * as MapView from '../../mvd-map-view/src/index.js';
-import * as Playlist from './lib/playlist.js';
 import * as MvdHub from './data/hub.js';
 import { WasmSource } from './data/wasm-source.js';
 import * as MvdState from './state/index.js';
+import * as MvdLib from './lib/result.js';
+import { engine, setupPlayer } from './player/index.js';
 
 window.MapView = MapView;
-window.Playlist = Playlist;
 window.MvdHub = MvdHub;
 // Shared state: the clock, the team colours, the current demo.
 window.MvdState = MvdState;
+window.MvdLib = MvdLib;
+// The Player tab's engine: the timeline's speed buttons drive it while it
+// is the page clock (src/player/engine.js).
+window.MvdPlayer = engine;
 // The data layer: every demo load, view query, region recompute and line of
 // sight goes through this one source (src/data/wasm-source.js).
 window.mvdData = new WasmSource(new Worker('worker.js'));
@@ -23,5 +27,6 @@ window.mvdData = new WasmSource(new Worker('worker.js'));
 // markup is in place before app.js's DOMContentLoaded setup finds it by id.
 mount(App, { target: document.getElementById('app') });
 flushSync();
+setupPlayer();
 // app.js defines this on its top level and uses it to allocate the camera.
 if (window.onMapViewReady) window.onMapViewReady(MapView);

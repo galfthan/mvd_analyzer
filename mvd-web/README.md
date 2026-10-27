@@ -17,11 +17,13 @@ talks to it through a JS shim.
   hood they call into `mvd-analytics/view` over the cached `lastResult`.
 - `index.html`, `src/`, `package.json`, `vite.config.js` — the page,
   built by Vite (`make build` runs `npm ci && npm run build` here, so
-  node is needed to build). `src/main.js` is the module entry: it
-  bundles [`mvd-map-view`](../mvd-map-view/README.md) and
-  `src/lib/playlist.js` and publishes them as `window.MapView` /
-  `window.Playlist` for `app.js`. Svelte is set up but nothing is ported
-  yet — see [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
+  node is needed to build). `src/main.js` is the module entry: it mounts
+  the Svelte shell (`src/shell/`) and publishes on `window` what `app.js`
+  uses — [`mvd-map-view`](../mvd-map-view/README.md) (`MapView`), the data
+  layer (`mvdData`, `MvdHub`), shared state (`MvdState`), result helpers
+  (`MvdLib`) and the Player tab's engine (`MvdPlayer`). Ported so far: the
+  shell and the Player tab (`src/player/`); see
+  [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
 - `static/` — copied into `dist/` as-is (Vite's `publicDir`).
   - `styles.css`, `app.js` — the tabbed analyzer UI (scoreboard,
     timeline, map, chat, loc graph, ...). `app.js` is still a classic
@@ -844,25 +846,29 @@ bucket build.
 
 ## Player tab
 
-Watches the loaded demo in the FTE engine
-([`mvd-fte-player`](../mvd-fte-player/README.md), ported from hub's player),
-hosted in a **same-origin** iframe so `app.js` drives it directly through
-`iframe.contentWindow` — seek, POV and speed are instant commands, not
-reloads of a hub embed.
+The first tab ported to Svelte: `src/player/` (`PlayerTab.svelte` and its
+components, mounted by the shell). It watches the loaded demo in the FTE
+engine ([`mvd-fte-player`](../mvd-fte-player/README.md), ported from hub's
+player), hosted in a **same-origin** iframe so the page drives it directly
+through `iframe.contentWindow` — seek, POV and speed are instant commands,
+not reloads of a hub embed. `src/player/engine.js` owns it (`app.js` sees it
+as `window.MvdPlayer`, for the timeline's speed buttons); the Map tab's data
+and the Timeline tab's mini-stack renderer are reached through
+`src/legacy.js` until those tabs are ported.
 
 - **Lazy.** The iframe (≈6 MB of wasm plus assets from `a.quake.world`) is
-  created on the first visit to the tab, and dropped on the next demo load
-  (`teardownPlayer` from `resetUIToCleanState`).
+  created on the first visit to the tab, and dropped when the `demo` store
+  changes to the next demo.
 - **No second download.** The data layer keeps a copy of the analysed bytes
   as a Blob (`DemoHandle.demoBlob`; the analyze transfers the original
-  buffer), wrapped by `playerDemoOf` and
-  handed to the engine as a `blob:` URL — so locally loaded files play too.
+  buffer), handed to the engine as a `blob:` URL — so locally loaded files
+  play too.
 - **One clock.** While the tab is active the engine is the clock: a 100 ms
-  poll pushes its time (demo-relative, minus `demoOffset`) into
-  `setCurrentTime`, and every other `setCurrentTime` — scrubbing the
-  unified timeline, any time link — becomes a throttled `demo_jump`. The
-  tab opens paused at the cursor's current time. A jump suppresses the
-  poll until the engine clock arrives, so the cursor does not snap back.
+  poll pushes its time (demo-relative, minus `demoOffset`) into the page
+  clock as an `'engine'` seek, and every other seek — scrubbing the unified
+  timeline, any time link — becomes a throttled `demo_jump`. The tab opens
+  paused at the cursor's current time. A jump suppresses the poll until the
+  engine clock arrives, so the cursor does not snap back.
 - **Playback buttons** map to `demo_setspeed` (0.2× / 1× / 5×; pressing the
   running speed pauses). `-1x` is disabled — FTE cannot play backwards.
   Leaving the tab pauses the engine.
@@ -877,19 +883,25 @@ reloads of a hub embed.
 
 ### Panes
 
-A column beside the player (`#player-panes`), mounted while the tab is
-active and unmounted when it is left. A pane type in `PLAYER_PANE_TYPES` is
-`{ title, mount(body, head), unmount(), update(t) }`; `setCurrentTime`
-schedules one `update` per animation frame. Which panes are open, and their
-order, is a per-viewer convenience in `localStorage` (`mvd.playerPanes.v1`,
-default Map / Health / armor / Moments / Frag feed); headers drag to reorder, ↑ ↓ ×
-move and close, "+ Add pane…" reopens.
+A column beside the player (`PaneColumn.svelte`). Each pane is a Svelte
+component inside a `Pane.svelte` frame and redraws at most once per
+animation frame on the page clock or the engine's status, only while the
+tab shows (`panes/tick.js`). The layout is a per-viewer convenience in
+`localStorage` (`mvd.playerPanes.v2`; the PoC's `v1` order is migrated):
+which panes are open and in what order (default Map / Health / armor /
+Moments / Frag feed), each pane's height and collapsed state, the column's
+width and whether it is shown. Headers drag to reorder, ↑ ↓ × move and
+close, the title collapses, the bottom edge resizes (double-click: natural
+height), the column's left edge resizes it, *Hide ▸* folds it away and
+"+ Add pane…" reopens a closed pane. (dockview was tried for this and
+dropped: ~390 KB, no stylesheet in its ESM build, and it reparents panels,
+which would reload the engine's iframe.)
 
-- **Map** borrows the Map tab's `#map-canvas` — the one `MvdMap` — while the
-  tab is active (sized by `sizeMapPane` from a `ResizeObserver`;
-  `resizeMapCanvas` defers to it) and hands it back, size and follow target
-  restored, on leaving. *follow POV* keeps the camera on the watched
-  player; clicking a player on the map switches the POV to them.
+- **Map** is its own `MvdMap` — its own canvas, camera and follow target —
+  reading the Map tab's loaded data each frame (`panes/map-sync.js`: data
+  fields by reference, never view state). *follow POV* keeps the camera on
+  the watched player; clicking a player on the map switches the POV to
+  them; drag pans, right-drag orbits, the wheel zooms, double-click resets.
 - **Health / armor**: one row per player in canonical team order and
   colour — a rolling strip (45 s back, 15 s ahead, `renderMiniStack`, fixed
   0–300 scale) with the playhead, and the values at it. Click a name to
@@ -903,8 +915,9 @@ move and close, "+ Add pane…" reopens.
 
 ### Clips and the playlist
 
-`playlist.js` (ESM, `window.Playlist` via the module bootstrap; node tests
-in `mvd-web/test/`) holds the pure parts; `app.js` the glue. A clip is
+`src/lib/playlist.js` (node tests in `mvd-web/test/`) holds the pure parts;
+`src/player/playlist-store.js` the list and the run, `runner.js` the
+scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
 `{ from, to, track, who, label, demo }` with `from`/`to` in
 **demo-relative** whole seconds — the engine's and hub's clock — and
 `demo = { key, gameId, title, offset }` (`hub:<gameId>` or
@@ -933,7 +946,8 @@ in `mvd-web/test/`) holds the pure parts; `app.js` the glue. A clip is
 ### Hub links on the other tabs
 
 Every hub link built by `hubReplayUrl` (`.viewer-link`, `.hub-watch-link`)
-for the **loaded** demo is rerouted by one capture-phase click handler:
+for the **loaded** demo is rerouted by one capture-phase click handler
+(`src/player/hub-links.js`):
 plain click plays that clip in the Player tab (a one-clip run that stops at
 `to`), shift-click adds it to the playlist, ctrl/cmd-click and middle-click
 keep the browser's "open hub in a new tab". Links exist only for hub demos

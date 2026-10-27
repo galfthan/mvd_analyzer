@@ -5,6 +5,8 @@
     // mount synchronously).
     import Topbar from './Topbar.svelte';
     import Sidebar from './Sidebar.svelte';
+    import PlayerTab from '../player/PlayerTab.svelte';
+    import Toast from '../player/Toast.svelte';
     import { adopt } from './adopt.js';
 </script>
 
@@ -12,6 +14,9 @@
 <div class="layout">
     <Sidebar />
     <main class="main" use:adopt={{ selector: '#legacy-dom > #unified-timeline', first: true }}>
-        <div class="main-scroll" use:adopt={{ selector: '#legacy-dom > .tab-content' }}></div>
+        <div class="main-scroll" use:adopt={{ selector: '#legacy-dom > .tab-content' }}>
+            <PlayerTab />
+        </div>
     </main>
 </div>
+<Toast />

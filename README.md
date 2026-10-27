@@ -858,7 +858,7 @@ mvd-analyzer/
     No mvd-analytics import — outputs are opaque JSON pass-through
 
   mvd-web/                 Module: browser UX + WASM glue (Layer 3, frontend)
-    index.html, src/       page entry + modules, built by Vite (src/lib/playlist.js)
+    index.html, src/       Vite + Svelte: shell/, player/ (Player tab), data/, state/, lib/
     static/                app.js, worker.js, styles.css, maps/ (copied as-is)
     cmd/wasm/              WASM entry (exports analyzeMVD to JS)
 

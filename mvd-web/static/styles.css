@@ -3873,11 +3873,6 @@ th.sortable.sort-desc::after {
     position: relative;
 }
 
-.player-pane-body canvas#map-canvas {
-    display: block;
-}
-
-.player-pane-add select,
 .player-playlist-head select {
     background: var(--bg-panel);
     color: var(--fg-default);
