@@ -26,7 +26,11 @@ player models, first-person camera). A machine without WebGL2 sees a
 (their toolbar buttons are gone); fog is anchored to the map centre, so
 it no longer shifts with where the view was panned before tilting.
 Liquids gain a depth-based absorption haze under their surfaces — deep
-water reads denser than shallow. The FPS and Bench toolbar buttons
+water reads denser than shallow. For that the map geometry now keeps pool
+bottoms: usage pruning never drops a floor under a liquid surface (no
+player ever stood there, so every pool used to be bottomless), and the
+pruned corpus was regenerated against newer and more demos
+(`scripts/prune-demos.tsv`; phantombase is now pruned too). The FPS and Bench toolbar buttons
 described below were removed again; the measurement hooks stay in
 `mvd-map-view` (`MvdMap.lastFrameStats`, `perfCapture`, `bench.js`).
 

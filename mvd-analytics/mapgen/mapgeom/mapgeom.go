@@ -237,6 +237,7 @@ type Stats struct {
 	SubModelMeshes int // brush-model meshes emitted into SubModels
 	SubModelTris   int // triangles emitted across all SubModelMesh
 	FacesPruned    int // floor faces dropped by usage pruning (BuildPruned)
+	FacesUnderLiq  int // floor faces kept unpruned because a liquid covers them
 }
 
 // Build extracts floor geometry from bsp with the default thresholds,
@@ -255,8 +256,8 @@ func BuildParams(mapName string, b *bsp.BSP, finder *loc.Finder, params Params) 
 // BuildPruned is BuildParams plus offline usage-based floor pruning: a
 // floor face that no recorded floor-contact sample in usage lands on
 // (within params.PruneXYTol / PruneZTol) is dropped, and result.Pruned
-// records the provenance. Walls, liquids and submodels are never pruned.
-// A nil usage behaves exactly like BuildParams.
+// records the provenance. Walls, liquids and submodels are never pruned,
+// nor are floors under a liquid surface (see underLiquid). A nil usage behaves exactly like BuildParams.
 func BuildPruned(mapName string, b *bsp.BSP, finder *loc.Finder, params Params, usage *FloorUsage) (*MapRegions, Stats) {
 	return buildRegions(mapName, b, finder, params.withDefaults(), usage)
 }
@@ -301,6 +302,23 @@ func buildRegions(mapName string, b *bsp.BSP, finder *loc.Finder, p Params, usag
 	// Liquid triangles accumulated per kind ("water"/"slime"/"lava").
 	liquidTris := make(map[string][]float32)
 
+	// Liquid face rings, gathered up front for usage pruning: a floor face
+	// under a liquid surface is a pool bottom, which floor-contact samples
+	// never reach (a swimming player is not on ground), so pruning would
+	// drop every one of them and leave the pool bottomless.
+	var liquidRings [][]bsp.Vec3
+	if usage != nil {
+		for faceIdx := firstFace; faceIdx < endFace; faceIdx++ {
+			face := b.Faces[faceIdx]
+			if int(face.PlaneID) >= len(b.Planes) || !isLiquidTex(b.FaceTexName(face)) {
+				continue
+			}
+			if ring, ok := assembleRing(b, face); ok && len(ring) >= 3 {
+				liquidRings = append(liquidRings, ring)
+			}
+		}
+	}
+
 	for faceIdx := firstFace; faceIdx < endFace; faceIdx++ {
 		stats.FacesTotal++
 		face := b.Faces[faceIdx]
@@ -316,7 +334,7 @@ func buildRegions(mapName string, b *bsp.BSP, finder *loc.Finder, p Params, usag
 		// Liquids mesh and skip loc assignment and the ceiling cap. When
 		// the BSP has no texture lump FaceTexName returns "" and the face
 		// falls through to the floor/wall path (pre-v4 behaviour).
-		if texName := strings.ToLower(b.FaceTexName(face)); strings.HasPrefix(texName, "*") && !strings.Contains(texName, "tele") {
+		if texName := strings.ToLower(b.FaceTexName(face)); isLiquidTex(texName) {
 			ring3D, ok := assembleRing(b, face)
 			if !ok || len(ring3D) < 3 {
 				stats.FacesDropped++
@@ -416,8 +434,11 @@ func buildRegions(mapName string, b *bsp.BSP, finder *loc.Finder, p Params, usag
 		// recorded player floor-contact sample lands on. Uses the original
 		// (non-side-negated) plane so planeZ is evaluated correctly.
 		if usage != nil && !usage.matches(ring3D, plane, p.PruneXYTol, p.PruneZTol) {
-			stats.FacesPruned++
-			continue
+			if !underLiquid(ring3D, liquidRings) {
+				stats.FacesPruned++
+				continue
+			}
+			stats.FacesUnderLiq++
 		}
 
 		if key == UnnamedRegionKey {
@@ -642,6 +663,59 @@ func fanTriangulate(dst []float32, ring []bsp.Vec3, degen *int) []float32 {
 // liquidKind classifies a lowercased '*' texture name into the liquid kind
 // the viewer tints. Engine convention: substrings "lava"/"slime"; anything
 // else turbulent is water (*water*, *04mwat*, plain "*").
+// isLiquidTex reports whether a face texture marks a liquid: the engine's
+// turbulent '*' textures, excluding teleporters.
+func isLiquidTex(name string) bool {
+	name = strings.ToLower(name)
+	return strings.HasPrefix(name, "*") && !strings.Contains(name, "tele")
+}
+
+// underLiquid reports whether a floor face lies beneath some liquid face:
+// the liquid sits above the floor's highest vertex and the two overlap in
+// XY. Overlap is sampled at each polygon's centroid and at its vertices
+// pulled 10% toward the centroid, so faces that merely share an edge in XY
+// don't count. Both are convex BSP faces.
+func underLiquid(floor []bsp.Vec3, liquids [][]bsp.Vec3) bool {
+	fTop := floor[0].Z
+	for _, v := range floor[1:] {
+		fTop = maxF(fTop, v.Z)
+	}
+	for _, lq := range liquids {
+		lTop := lq[0].Z
+		for _, v := range lq[1:] {
+			lTop = maxF(lTop, v.Z)
+		}
+		if lTop <= fTop {
+			continue
+		}
+		if ringSampleInside(floor, lq) || ringSampleInside(lq, floor) {
+			return true
+		}
+	}
+	return false
+}
+
+// ringSampleInside reports whether a's centroid, or any of a's vertices
+// pulled 10% toward that centroid, falls inside b in XY.
+func ringSampleInside(a, b []bsp.Vec3) bool {
+	var cx, cy float32
+	for _, v := range a {
+		cx += v.X
+		cy += v.Y
+	}
+	cx /= float32(len(a))
+	cy /= float32(len(a))
+	if pointInPolygonXY(cx, cy, b) {
+		return true
+	}
+	for _, v := range a {
+		if pointInPolygonXY(v.X+0.1*(cx-v.X), v.Y+0.1*(cy-v.Y), b) {
+			return true
+		}
+	}
+	return false
+}
+
 func liquidKind(name string) string {
 	switch {
 	case strings.Contains(name, "lava"):

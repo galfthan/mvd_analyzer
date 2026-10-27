@@ -134,9 +134,12 @@ that downstream consumers render, summarise, or feed to an agent.
   (`(X, Y, Z − PlayerFeetOffset − H)`) is collected per map, and floor
   faces no sample lands on (within `-prune-xy-tol`, default
   `mapclip.FootprintReach` = 24, and `-prune-z-tol`, default 16) are
-  dropped. Pruned files carry a `pruned` provenance block; maps with no
-  matching demos emit unpruned. The committed 3D corpus (the ~18 maps
-  with BSPs) is pruned this way against recent competitive games —
+  dropped — except floors lying under a liquid surface, which swimmers
+  never touch, so pruning would leave every pool bottomless. Pruned files
+  carry a `pruned` provenance block; maps with no matching demos emit
+  unpruned. The committed 3D corpus (the maps with provisioned BSPs, bar
+  dad2 / spinev2 / zeal, which stay unpruned) is pruned this way against
+  recent competitive games —
   [`scripts/prune-demos.tsv`](../scripts/prune-demos.tsv) records the
   exact map → mode → hub gameIds used, so the prune is reproducible.
 - `cmd/qw-recon-eval/` — damage-reconstruction accuracy harness: runs
