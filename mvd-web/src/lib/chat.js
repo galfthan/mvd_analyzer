@@ -3,6 +3,7 @@
 // px-per-second layout, and the Quake text markup.
 
 import { formatDuration } from './result.js';
+import { escapeHtml } from './html.js';
 
 // The chat-track density. It has to stay in sync with the 700px chat
 // viewport in styles.css (.chat-scroll-viewport) — change one, change the
@@ -105,10 +106,7 @@ export function rowBottom(top, measuredHeight) {
     return top + Math.max(CHAT_ITEM_HEIGHT, measuredHeight || 0);
 }
 
-export function escapeHtml(s) {
-    if (s == null) return '';
-    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
+export { escapeHtml };
 
 // Format Quake chat messages with colors (HTML).
 // Based on ezQuake source code character rendering:

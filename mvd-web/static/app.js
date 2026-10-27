@@ -800,18 +800,15 @@ const SEARCH_MODE_LABELS = {
 // inline `mode !== '1on1' && mode !== 'ffa'` at the one call site).
 const SEARCH_INDIVIDUAL_MODES = new Set(['1on1', 'ffa']);
 
+// The shared helpers below live in src/lib/ (window.MvdLib, published by
+// src/main.js); the wrappers keep app.js's call sites unchanged.
 function escapeHtml(s) {
-    if (s == null) return '';
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    return MvdLib.escapeHtml(s);
 }
 
-// Frags off a row from either shape: a playerStats row (score.frags — the
-// corrected svc_updatefrags net score) or a legacy demoInfo player
-// (stats.frags). Both are read during the same render on demos where one
-// panel has migrated and another has not, so the accessor takes both
-// rather than each call site branching.
+// src/lib/player-stats.js: either row shape (playerStats / demoInfo).
 function fragsOfRow(p) {
-    return p?.score?.frags ?? p?.stats?.frags ?? 0;
+    return MvdLib.fragsOfRow(p);
 }
 
 // Sum frags per team, returning a { teamName: totalFrags } map. Players
@@ -827,34 +824,22 @@ function teamFragTotals(players, emptyTeamKey = '') {
     return totals;
 }
 
-// Return a new array of players sorted by frags descending. The sort is
-// stable (equal-frag players keep input order); this frag-sorted order is the
-// canonical TEAM_COLORS source, so its semantics must not change.
+// src/lib/player-stats.js: stable, frag-sorted — the canonical colour order.
 function sortByFragsDesc(players) {
-    return [...players].sort((a, b) => fragsOfRow(b) - fragsOfRow(a));
+    return MvdLib.sortByFragsDesc(players);
 }
 
 // ─── playerStats accessors ─────────────────────────────────────────────────
 //
-// result.playerStats is the canonical per-player section (schema v61). The
-// WASM entry point applies the KTX overlay before marshalling
-// (mvd-web/cmd/wasm/main.go withPlayerStatsOverlay), so what reaches the
-// browser is already merged — every family carries `src` saying whether the
-// numbers came from KTX's demoinfo block or from this pipeline's
-// reconstruction. The summary tab reads it and nothing else; the old
-// four-source join across match.players / frags.byPlayer / frags.frags /
-// demoInfo now lives in Go.
+// result.playerStats is the canonical per-player section (schema v61); see
+// src/lib/player-stats.js.
 
-// Rows for the per-player tables. Empty array when the section is absent
-// (a parse that produced no player streams — e.g. a race demo, which has
-// no match at all), which the callers render as an empty table.
 function playerStatsRows(result) {
-    return result?.playerStats?.players || [];
+    return MvdLib.playerStatsRows(result);
 }
 
-// Rows for the per-team tables. Absent on duels and FFA by construction.
 function playerStatsTeamRows(result) {
-    return result?.playerStats?.teams || [];
+    return MvdLib.playerStatsTeamRows(result);
 }
 
 // The map's FILE key — the basename the shipped geometry (maps/e1m2.json)
@@ -863,37 +848,10 @@ function mapFileKey(result) {
     return MvdLib.mapFileKey(result);
 }
 
-// One possession cell of the Item Pickups table: seconds spent holding the
-// item, from OUR hold integral (KTX writes no weapon hold time at all, and
-// its armor clock keeps counting after the armor is chewed to zero).
-// Returns '-' when the item was never held, so a blank cell means "never",
-// never "not measured".
-//
-// The share of ALIVE time and the run count go into the tooltip together
-// with the raw ms and the row's window: a share is only as meaningful as
-// its denominator, and a player the streams barely saw can get a presence
-// window that is a FLOOR rather than a measurement (possessionExtent in
-// analyzer/player_stats.go says so itself) — a confident "100%" over a few
-// seconds of an 18-minute match. The seconds cannot express that; the
-// numbers behind them can, so they are one hover away.
-//
-// data-sort-value keeps the raw ms so the column sorts numerically rather
-// than on the rendered "12s".
+// One possession cell (src/lib/player-stats.js): '-' when never held, the
+// raw ms as data-sort-value, the share and window in the tooltip.
 function holdCell(stat, win) {
-    if (!stat || !stat.ms) return `<td data-sort-value="0">-</td>`;
-    const bits = [`held ${stat.ms} ms`];
-    if (stat.shareAlive != null) bits.push(`${(stat.shareAlive * 100).toFixed(0)}% of alive time`);
-    bits.push(`${stat.runs || 0} run${stat.runs === 1 ? '' : 's'}`);
-    if (stat.longestMs) bits.push(`longest ${Math.round(stat.longestMs / 1000)}s`);
-    // Team rows sum alive/present over members while matchMs stays the
-    // single match length (aggregateTeamRows), so present > match is
-    // expected there — label it so the triple doesn't read as broken.
-    if (win) {
-        const summed = (win.presentMs || 0) > (win.matchMs || 0) ? ', member-summed' : '';
-        bits.push(`window alive ${win.aliveMs || 0} / present ${win.presentMs || 0} / match ${win.matchMs || 0} ms${summed}`);
-    }
-    const title = escapeHtml(bits.join(' · '));
-    return `<td data-sort-value="${stat.ms}" title="${title}">${Math.round(stat.ms / 1000)}s</td>`;
+    return MvdLib.holdCell(stat, win);
 }
 
 // What a hits count counts, keyed by playerStats `hitsConvention`. The same
@@ -1656,9 +1614,6 @@ function displayResults(result) {
         timeRender('displayKeyMoments', () => displayKeyMoments(result));
     }
 
-    // Pack Drops — always call so stale rows are cleared between demos.
-    timeRender('displayPackDrops', () => displayPackDrops(result));
-
     // Pickups — per-entity item pickups + KTX-tooks verification.
     timeRender('displayPickupsTab', () => displayPickupsTab(result));
 
@@ -1689,93 +1644,9 @@ function displayResults(result) {
 
 // ─── Sortable Tables ──────────────────────────────────────────────────────
 
+// src/ui/sortable.js: click a header to sort the rows (binds once per <th>).
 function makeSortable(table) {
-    const theadRows = table.querySelectorAll('thead tr');
-    const allHeaders = table.querySelectorAll('thead th');
-
-    // Build a column index map: for each th, compute which td column it maps to.
-    // Handles rowspan and colspan in multi-row headers.
-    const grid = []; // grid[row][col] = th element or null (occupied by span)
-    theadRows.forEach((tr, rowIdx) => {
-        if (!grid[rowIdx]) grid[rowIdx] = [];
-        let colPos = 0;
-        tr.querySelectorAll('th').forEach(th => {
-            // Skip columns already occupied by rowspan from previous rows
-            while (grid[rowIdx][colPos]) colPos++;
-            const colspan = parseInt(th.getAttribute('colspan')) || 1;
-            const rowspan = parseInt(th.getAttribute('rowspan')) || 1;
-            // Store mapping on the element
-            th._sortColIdx = colPos;
-            th._sortColspan = colspan;
-            // Mark grid cells as occupied
-            for (let r = 0; r < rowspan; r++) {
-                if (!grid[rowIdx + r]) grid[rowIdx + r] = [];
-                for (let c = 0; c < colspan; c++) {
-                    grid[rowIdx + r][colPos + c] = true;
-                }
-            }
-            colPos += colspan;
-        });
-    });
-
-    allHeaders.forEach(th => {
-        // Skip colspan > 1 headers (group headers, not sortable)
-        if (th._sortColspan > 1) return;
-        // Bind once per element. Dynamically rebuilt tables (e.g. the loc /
-        // region heatmaps) call makeSortable again after replacing their <th>
-        // nodes; fresh nodes lack the flag and bind, while the load-time
-        // querySelectorAll('.stats-table') pass won't double-bind existing ones
-        // (a second listener would cancel every toggle).
-        if (th._sortBound) return;
-        th._sortBound = true;
-
-        const colIdx = th._sortColIdx;
-        th.classList.add('sortable');
-        th.addEventListener('click', () => {
-            const tbody = table.querySelector('tbody');
-            if (!tbody) return;
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-
-            // Toggle direction. First click on a column sorts numeric
-            // columns descending (biggest first, what a stats reader wants)
-            // and text columns ascending; further clicks flip. The numeric
-            // sniff uses the same value a sort would (data-sort-value or
-            // text), from the first row that has one.
-            const wasAsc = th.classList.contains('sort-asc');
-            const wasDesc = th.classList.contains('sort-desc');
-            let dir;
-            if (wasAsc || wasDesc) {
-                dir = wasAsc ? 'desc' : 'asc';
-            } else {
-                const probe = rows
-                    .map(r => { const c = r.cells[colIdx]; return c?.dataset.sortValue ?? c?.textContent.trim() ?? ''; })
-                    .find(t => t !== '' && t !== '-');
-                dir = probe !== undefined && !isNaN(parseFloat(probe)) ? 'desc' : 'asc';
-            }
-
-            // Reset all headers in this table
-            allHeaders.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
-            th.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
-
-            rows.sort((a, b) => {
-                const aCell = a.cells[colIdx];
-                const bCell = b.cells[colIdx];
-                // Cells can opt-in to a custom sort key via data-sort-value
-                // (e.g. the Stack column shows "70 120 RA" but sorts on H+A).
-                const aText = (aCell?.dataset.sortValue ?? aCell?.textContent.trim() ?? '');
-                const bText = (bCell?.dataset.sortValue ?? bCell?.textContent.trim() ?? '');
-                // Extract leading number (handles "42", "3.5%", "12 (30s)", etc.)
-                const aNum = parseFloat(aText);
-                const bNum = parseFloat(bText);
-                if (!isNaN(aNum) && !isNaN(bNum)) {
-                    return dir === 'asc' ? aNum - bNum : bNum - aNum;
-                }
-                return dir === 'asc' ? aText.localeCompare(bText) : bText.localeCompare(aText);
-            });
-
-            rows.forEach(row => tbody.appendChild(row));
-        });
-    });
+    return MvdLib.makeSortable(table);
 }
 
 // Renders the standalone Teams summary box. `rows` are playerStats player
@@ -2322,18 +2193,9 @@ function formatXfer(entry) {
 // ─── Team helpers ──────────────────────────────────────────────────────────
 
 function getTeamOrder(sortedPlayers) {
-    // Canonical order set early in displayResults(), sorted by total frags
-    if (timelineState.teams && timelineState.teams.length >= 2) {
-        return [...timelineState.teams];
-    }
-    // Fallback: preserve order from input (already frag-sorted)
-    const seen = new Set();
-    const order = [];
-    for (const p of sortedPlayers) {
-        const t = p.team || '';
-        if (t && !seen.has(t)) { seen.add(t); order.push(t); }
-    }
-    return order;
+    // Canonical order set early in displayResults(), sorted by total frags;
+    // else the input's own (already frag-sorted) — src/lib/player-stats.js.
+    return MvdLib.teamOrder(timelineState.teams, sortedPlayers);
 }
 
 
@@ -3132,87 +2994,6 @@ function getPowerupDisplay(type) {
     }
 }
 
-// Pack Drops table — joins result.backpacks (the drop side from
-// //ktx drop) with the backpack-sourced entries in result.weaponPickups
-// (the pickup side from //ktx bp) by (backpackEnt, dropTime). A drop with
-// no matching pickup is shown as "expired" only when KTX said so in
-// //ktx expire (published as the drop row's own `fate`); otherwise it is
-// "unobserved", because a pack the recording ended on top of also has no
-// pickup row.
-//
-// RECONSTRUCTED drops (backpacks[].source === 'reconstructed', demos older
-// than the //ktx drop hint) have no `//ktx bp` to join to, so their pickup
-// side rides the drop row itself: `fate` / `picker` / `pickerTeam` /
-// `pickupTime`, read off the wire's backpack-ENTITY track (schema v72).
-// packDropPickup below turns those fields into the same row shape the join
-// produces, so one renderer serves both provenances.
-//
-// The filter row above the table narrows rows by dropper team, picker team,
-// or status label; filter state lives in the select elements themselves
-// so switching tabs and coming back preserves the view.
-const packDropsState = { rows: [], hubInfo: null, playerUserIDs: null };
-
-// packDropPickup adapts a reconstructed drop's own fate fields to the pickup
-// row shape. `kills` is null rather than 0: kill credit needs the `//ktx bp`
-// hint's HadBefore, which no reconstructed row has, and printing 0 would
-// claim the picker scored nothing with it.
-function packDropPickup(drop) {
-    if (drop.source !== 'reconstructed' || drop.fate !== 'picked' || !drop.picker) return null;
-    return {
-        player: drop.picker,
-        team: drop.pickerTeam || '',
-        time: (drop.pickupTime || 0) * 0.001,
-        nextDeathTime: 0,
-        kills: null,
-    };
-}
-
-function packDropStatusFor(drop, pickup) {
-    // A RECONSTRUCTED drop's fate comes from the entity track, not from a
-    // pickup row. Three outcomes, and `unobserved` is deliberately not
-    // `expired`: "we could not see the pickup side" is a different fact from
-    // "nobody took it".
-    if (drop.source === 'reconstructed') {
-        if (drop.fate === 'picked') return { label: 'picked', cls: 'status-picked' };
-        if (drop.fate === 'expired') return { label: 'expired', cls: 'status-expired' };
-        return { label: 'unobserved', cls: 'status-unobserved' };
-    }
-    // A KTX row with no pickup row is NOT automatically expired, and this
-    // used to say it was. KTX states an expiry outright in `//ktx expire`,
-    // which the pipeline stamps as `fate: "expired"`; over the archive that
-    // hint accounts for only half the pickup-less drops, the rest being packs
-    // the recording ended on top of. Those get `unobserved`.
-    if (!pickup) {
-        if (drop.fate === 'expired') return { label: 'expired', cls: 'status-expired' };
-        return { label: 'unobserved', cls: 'status-unobserved' };
-    }
-    const sameTeam = pickup.team && drop.team && pickup.team === drop.team;
-    const weaponUpper = drop.weapon.toUpperCase();
-    if (sameTeam) {
-        if (pickup.hadBefore) return { label: `xfer ${weaponUpper}`, cls: 'status-xfer-had' };
-        return { label: 'xfer', cls: 'status-xfer' };
-    }
-    if (pickup.hadBefore) return { label: `enemy ${weaponUpper}`, cls: 'status-enemy-had' };
-    return { label: 'enemy', cls: 'status-enemy' };
-}
-
-function populateFilterSelect(selectId, values) {
-    const sel = document.getElementById(selectId);
-    if (!sel) return;
-    const prev = sel.value;
-    // Keep the "All" option; replace the rest.
-    while (sel.options.length > 1) sel.remove(1);
-    for (const v of values) {
-        const opt = document.createElement('option');
-        opt.value = v;
-        opt.textContent = v;
-        sel.appendChild(opt);
-    }
-    // Preserve selection across demo reload when possible.
-    if (values.includes(prev)) sel.value = prev;
-    else sel.value = '';
-}
-
 // ─── Pickups tab ──────────────────────────────────────────────────────
 //
 // Two tables — Weapon Pickups (RL/LG/GL/SNG with per-entity columns,
@@ -3686,170 +3467,6 @@ function makeVerifyCell(ana, ktxPrimary, detail, hasKtx) {
     return td;
 }
 
-function displayPackDrops(result) {
-    const tbody = document.getElementById('packdrops-body');
-    const emptyMsg = document.getElementById('packdrops-empty');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    // Schema v57: backpacks[].time, weaponPickups[].time / .nextDeathTime /
-    // .dropTime are int32 ms. The pickup↔drop join must happen in the
-    // same time space — index against raw ms `dropTime` (an exact int)
-    // before converting. After the join, convert ms→s so hubAnchor /
-    // formatDuration further down (which expect seconds) is unchanged.
-    const rawDrops = result.backpacks || [];
-    if (rawDrops.length === 0) {
-        emptyMsg.style.display = 'block';
-        document.getElementById('packdrops-count').textContent = '';
-        return;
-    }
-    emptyMsg.style.display = 'none';
-
-    const pickupByKey = {};
-    for (const p of (result.weaponPickups || [])) {
-        if (p.source === 'backpack' && p.backpackEnt) {
-            pickupByKey[`${p.backpackEnt}@${p.dropTime}`] = p;
-        }
-    }
-
-    const rows = rawDrops.map(rawDrop => {
-        const rawPickup = pickupByKey[`${rawDrop.entNum}@${rawDrop.time}`] || null;
-        // Convert ms→s on the per-row copy so downstream renderers see seconds.
-        const drop = { ...rawDrop, time: rawDrop.time * 0.001 };
-        const pickup = rawPickup ? {
-            ...rawPickup,
-            time: rawPickup.time * 0.001,
-            nextDeathTime: (rawPickup.nextDeathTime || 0) * 0.001,
-            dropTime: (rawPickup.dropTime || 0) * 0.001,
-        } : packDropPickup(rawDrop);
-        return { drop, pickup, status: packDropStatusFor(drop, pickup) };
-    });
-
-    packDropsState.rows = rows;
-    packDropsState.hubInfo = currentResult?.hubInfo || null;
-    packDropsState.playerUserIDs = currentResult?.timelineAnalysis?.playerUserIDs || {};
-
-    const dropPlayers = new Set();
-    const pickPlayers = new Set();
-    const dropTeams = new Set();
-    const pickTeams = new Set();
-    const statuses = new Set();
-    for (const r of rows) {
-        if (r.drop.player) dropPlayers.add(r.drop.player);
-        if (r.drop.team) dropTeams.add(r.drop.team);
-        if (r.pickup?.player) pickPlayers.add(r.pickup.player);
-        if (r.pickup?.team) pickTeams.add(r.pickup.team);
-        statuses.add(r.status.label);
-    }
-    const cmp = (a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' });
-    populateFilterSelect('packdrops-filter-dropplayer', [...dropPlayers].sort(cmp));
-    populateFilterSelect('packdrops-filter-dropteam', [...dropTeams].sort(cmp));
-    populateFilterSelect('packdrops-filter-pickplayer', [...pickPlayers].sort(cmp));
-    populateFilterSelect('packdrops-filter-pickteam', [...pickTeams].sort(cmp));
-    populateFilterSelect('packdrops-filter-status', [...statuses].sort(cmp));
-
-    // Install filter-change handlers once. onchange is overwrite-safe
-    // — rebinding on each new demo replaces the previous closure rather
-    // than stacking listeners.
-    const filterIds = [
-        'packdrops-filter-dropplayer',
-        'packdrops-filter-dropteam',
-        'packdrops-filter-pickplayer',
-        'packdrops-filter-pickteam',
-        'packdrops-filter-status',
-    ];
-    for (const id of filterIds) {
-        const el = document.getElementById(id);
-        if (el) el.onchange = renderPackDropRows;
-    }
-
-    renderPackDropRows();
-}
-
-function renderPackDropRows() {
-    const tbody = document.getElementById('packdrops-body');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    const dropPlayer = document.getElementById('packdrops-filter-dropplayer').value;
-    const dropTeam = document.getElementById('packdrops-filter-dropteam').value;
-    const pickPlayer = document.getElementById('packdrops-filter-pickplayer').value;
-    const pickTeam = document.getElementById('packdrops-filter-pickteam').value;
-    const status = document.getElementById('packdrops-filter-status').value;
-
-    const { rows, hubInfo, playerUserIDs } = packDropsState;
-    const demoOff = timelineState.demoOffset || 0;
-
-    const hubAnchor = (from, to, trackName) => {
-        if (!hubInfo || !hubInfo.gameId) return '-';
-        const trackId = playerUserIDs[trackName];
-        if (!trackId) return '-';
-        const f = Math.max(0, Math.floor(from + demoOff));
-        const t = Math.floor(to + demoOff);
-        const url = hubReplayUrl({ gameId: hubInfo.gameId, from: f, to: t, track: trackId });
-        return `<a href="${url}" target="_blank" class="viewer-link">Hub</a>`;
-    };
-
-    let shown = 0;
-    for (const r of rows) {
-        if (dropPlayer && r.drop.player !== dropPlayer) continue;
-        if (dropTeam && r.drop.team !== dropTeam) continue;
-        if (pickPlayer && (r.pickup?.player || '') !== pickPlayer) continue;
-        if (pickTeam && (r.pickup?.team || '') !== pickTeam) continue;
-        if (status && r.status.label !== status) continue;
-
-        const { drop, pickup } = r;
-        const tr = document.createElement('tr');
-
-        const dropHub = hubAnchor(drop.time - 10, drop.time + 2, drop.player);
-
-        let runHub = '-';
-        let pickerLabel = '-';
-        let pickTeamLabel = '-';
-        let killsCell = '-';
-        if (pickup) {
-            const endTime = pickup.nextDeathTime > 0 ? pickup.nextDeathTime : pickup.time + 15;
-            runHub = hubAnchor(pickup.time - 3, endTime, pickup.player);
-            pickerLabel = escapeHtml(pickup.player || '?');
-            pickTeamLabel = escapeHtml(pickup.team || '-');
-            killsCell = pickup.kills === null
-                ? '-'
-                : (pickup.hadBefore
-                    ? `<span class="kills-redundant">${pickup.kills}</span>`
-                    : String(pickup.kills));
-        }
-
-        const statusCell = `<span class="pack-status ${r.status.cls}">${escapeHtml(r.status.label)}</span>`;
-
-        tr.innerHTML = `
-            <td class="time-cell time-link">${formatDuration(drop.time)}</td>
-            <td>${escapeHtml(drop.player || '?')}</td>
-            <td>${escapeHtml(drop.team || '-')}</td>
-            <td class="weapon-cell weapon-${drop.weapon}">${drop.weapon.toUpperCase()}</td>
-            <td>${dropHub}</td>
-            <td>${statusCell}</td>
-            <td>${pickerLabel}</td>
-            <td>${pickTeamLabel}</td>
-            <td class="kills-cell">${killsCell}</td>
-            <td>${runHub}</td>
-        `;
-
-        tr.querySelector('.time-link').addEventListener('click', () => {
-            setCurrentTime(drop.time);
-        });
-
-        tbody.appendChild(tr);
-        shown++;
-    }
-
-    const countEl = document.getElementById('packdrops-count');
-    if (countEl) {
-        countEl.textContent = shown === rows.length
-            ? `${rows.length} drops`
-            : `${shown} of ${rows.length} drops`;
-    }
-}
-
 function formatDuration(seconds) {
     return MvdLib.formatDuration(seconds);
 }
@@ -4027,11 +3644,6 @@ function resetUIToCleanState() {
     setHTML('toplg-body', '');
     hide('toplg-empty');
 
-    // Pack drops
-    setHTML('packdrops-body', '');
-    hide('packdrops-empty');
-    setText('packdrops-count', '');
-
     // Pickups tables (thead + tbody both rebuilt from scratch each load)
     for (const id of [
         'pickups-weap-team-table', 'pickups-weap-player-table',
@@ -4081,10 +3693,6 @@ function resetUIToCleanState() {
     if ('dropEvents' in mapState) mapState.dropEvents = [];
     if ('zRange' in mapState) mapState.zRange = null;
     if ('locTable' in mapState) mapState.locTable = [''];
-
-    packDropsState.rows = [];
-    packDropsState.hubInfo = null;
-    packDropsState.playerUserIDs = null;
 
     if (typeof weaponGraphHitState !== 'undefined') {
         weaponGraphHitState.W = null;
@@ -6326,34 +5934,10 @@ function playerDrives() {
 
 // ─── Hub Watch Link Helper ──────────────────────────────────────────────────
 
-// Build a hub.quakeworld.nu replay URL. `to` is optional — omit it for a
-// single "jump here" link (buildHubWatchLink) and pass it for a windowed
-// clip (powerups / streaks / airgibs / pack drops). Callers do their own
-// demoOffset conversion + window padding (each surface pads differently),
-// then hand the final demo-relative from/to/track here so the URL scheme
-// lives in exactly one place.
-//
-// from/to ARE DEMO-RELATIVE SECONDS — hub feeds `from` straight to
-// fte.demoJump() and pauses when the demo's elapsed time passes `to`
-// (hub.quakeworld.nu src/pages/games/player/clips/hooks.ts), with no
-// countdown arithmetic on either. So streams.global.demoOffset is the
-// correct conversion and the only one that puts the clip on the content.
-//
-// What is NOT correct is hub's displayed clock: fteController.ts hard-codes
-// _countdownDuration = 10.0 and shows demoElapsed-10, while the demo's own
-// hub metadata carries the real countdown (countdown_duration = 15.119 s on
-// qwleague servers, equal to our demoOffset to the millisecond) and the
-// player never reads it. On those demos hub's clock therefore reads
-// demoOffset-10 s HIGHER than the match time in our tables. That is an
-// upstream bug. Do not "fix" it by building links off hub's 10 s constant:
-// it drags every clip demoOffset-10 s earlier, and because `to` is a hard
-// pause point it truncates the payload — an airgib clip then ends before
-// the gib. Correct content, wrong-looking clock, is the trade we keep.
-function hubReplayUrl({ gameId, from, to, track }) {
-    let url = `https://hub.quakeworld.nu/games/?gameId=${gameId}&from=${from}`;
-    if (to != null) url += `&to=${to}`;
-    url += `&track=${track}`;
-    return url;
+// The hub replay URL (src/lib/hub-url.js): from/to are DEMO-relative
+// seconds (match time + demoOffset); `to` optional.
+function hubReplayUrl(args) {
+    return MvdLib.hubReplayUrl(args);
 }
 
 function buildHubWatchLink(playerName, time, hubInfo, playerUserIDs) {

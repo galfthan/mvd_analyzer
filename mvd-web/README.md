@@ -22,8 +22,9 @@ talks to it through a JS shim.
   uses — [`mvd-map-view`](../mvd-map-view/README.md) (`MapView`), the data
   layer (`mvdData`, `MvdHub`), shared state (`MvdState`), result helpers
   (`MvdLib`) and the Player tab's engine (`MvdPlayer`). Ported so far: the
-  shell, the Player tab (`src/player/`) and the Chat tab (`src/tabs/chat/`,
-  its DOM-free parts in `src/lib/chat.js`); see
+  shell, the Player tab (`src/player/`), and the Chat and Pack Drops
+  tabs (`src/tabs/<name>/`, their DOM-free parts in
+  `src/lib/<name>.js`); see
   [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
   Two UI packages are bundled (pinned in `package.json`):
   [PaneForge](https://paneforge.com) for the Player tab's player | panes
@@ -318,7 +319,8 @@ The shell is Svelte (`src/shell/`): `App.svelte` renders the top bar,
 the sidebar (from `TABS` in `src/state/ui.js`) and the layout, and adopts
 the markup of tabs not yet ported — `index.html`'s hidden `#legacy-dom`,
 which `app.js` finds by id — into the main pane (`adopt.js`). Ported
-tabs (`PlayerTab`, `ChatTab` in `src/tabs/chat/`) are mounted there beside
+tabs (`PlayerTab`, and `ChatTab`, `PackDropsTab` in
+`src/tabs/`) are mounted there beside
 them; `app.js` still toggles their `active` class like any `.tab-content`.
 `src/main.js` mounts it synchronously, so that markup is in place before
 `app.js`'s `DOMContentLoaded` setup. The sidebar sets
@@ -347,8 +349,9 @@ them; `app.js` still toggles their `active` class like any `.tab-content`.
 6. On `result`, `app.js` parses the JSON, clears the no-demo class,
    switches to the Summary tab, and renders all tabs. The main-thread
    inits are cheap, so they run now even though the bucket-derived
-   fields are still empty — the scoreboard, chat, pack drops, pickups,
-   key moments and loc graph are fully populated; only the timeline
+   fields are still empty — the scoreboard, pickups, key moments and loc
+   graph are fully populated (chat and pack drops build on the first
+   frame their tab shows); only the timeline
    graph, map trails and region overlay are blank. On the later
    `buckets` message the data layer (`DemoHandle._applyBuckets`) stashes
    the payload onto `result.timelineAnalysis.bucketView` / `.regionControl
@@ -863,9 +866,9 @@ is no UI for it. Stages reported, in load order:
   time is already included in the WASM analyze wall time *and* inside
   `finalize:timelineAnalysis`. To get the **pure loc-resolution compute**,
   subtract `locFetch + bspFetch` from `finalize:timelineAnalysis`.
-- **result JSON.parse** (main thread), each tab render
-  (`displayTimelineAnalysis`, `displayKeyMoments`, `displayPackDrops`,
-  `displayPickupsTab`, `initMapView`, `initLocGraphView`), and the
+- **result JSON.parse** (main thread), each legacy tab render
+  (`displayTimelineAnalysis`, `displayKeyMoments`, `displayPickupsTab`,
+  `initMapView`, `initLocGraphView`; the ported tabs build when first shown), and the
   async `map geometry fetch` (logged separately as it resolves after
   the UI is shown).
 
@@ -1113,7 +1116,8 @@ On demos older than KTX 1.38 the drop side is RECONSTRUCTED rather than
 hinted (`backpacks[].source == "reconstructed"`, schema v72), and there is
 no `//ktx bp` for it to join to. Those rows carry their pickup side on the
 drop row instead — `fate` / `picker` / `pickerTeam` / `pickupTime`, read
-off the wire's backpack-entity track — and `packDropPickup()` adapts those
+off the wire's backpack-entity track — and `packDropPickup()`
+(`src/lib/packdrops.js`) adapts those
 fields into the same row shape the join produces, so one renderer, one set
 of filters and one Picker column serve both provenances.
 
@@ -1150,7 +1154,11 @@ dropdowns above the table narrow rows by Dropper, Drop Team,
 Picker, Pick Team, or Status label; each dropdown is populated
 from the distinct values present in the current demo, and
 selections persist across demo reloads when the same value is
-still available in the new data.
+still available in the new data. The tab is Svelte
+(`src/tabs/packdrops/PackDropsTab.svelte`, the join, statuses, filters
+and row markup in `src/lib/packdrops.js`); a Time cell seeks the shared
+clock, and the hub links are `a.viewer-link`, so a click plays the clip
+in the Player tab (`src/player/hub-links.js`).
 
 Status column derivation:
 

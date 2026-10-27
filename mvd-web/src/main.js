@@ -9,7 +9,11 @@ import * as MapView from '../../mvd-map-view/src/index.js';
 import * as MvdHub from './data/hub.js';
 import { WasmSource } from './data/wasm-source.js';
 import * as MvdState from './state/index.js';
-import * as MvdLib from './lib/result.js';
+import * as ResultLib from './lib/result.js';
+import { escapeHtml } from './lib/html.js';
+import { hubReplayUrl } from './lib/hub-url.js';
+import * as PlayerStatsLib from './lib/player-stats.js';
+import { makeSortable } from './ui/sortable.js';
 import { engine, setupPlayer } from './player/index.js';
 import { setupPanels } from './ui/panels/index.js';
 
@@ -17,7 +21,9 @@ window.MapView = MapView;
 window.MvdHub = MvdHub;
 // Shared state: the clock, the team colours, the current demo.
 window.MvdState = MvdState;
-window.MvdLib = MvdLib;
+// Helpers app.js shares with the ported tabs (it calls them through thin
+// wrappers of the same name).
+window.MvdLib = { ...ResultLib, ...PlayerStatsLib, escapeHtml, hubReplayUrl, makeSortable };
 // The Player tab's engine: the timeline's speed buttons drive it while it
 // is the page clock (src/player/engine.js).
 window.MvdPlayer = engine;
