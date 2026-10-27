@@ -39,3 +39,39 @@ export function nameOfUserId(result, userid) {
     for (const [name, id] of Object.entries(ids)) if (id === Number(userid)) return name;
     return null;
 }
+
+// The frontend asks TWO different questions about teams, and they have two
+// different answers on the same demo. Keep them apart:
+//
+//   isIndividualLayout — "is every player their own side here?" It decides
+//     LAYOUT: which panels exist, which colour palette is handed out, whether
+//     the scoreboard is per player. It is a property of the RESULT, so it
+//     reads the layout the Go side actually applied: match.sources.teams ===
+//     'individual' (rebuildIndividualMatch's own stamp).
+//
+//   isTeamBasedMode — "was the teamplay ruleset in force?" It decides team
+//     SEMANTICS: whether a team kill or a team-damage figure is a thing that
+//     can happen. It reads match.gameMode.teamBased, the resolved descriptor.
+//
+// They disagree on a 1v1 played on a teamplay server (a CTF server's duel,
+// archive 2a2ed2e9ca…): the layout is individual — two participants, one side
+// each — while the ruleset genuinely was teamplay. Deriving either from the
+// other is what put a meaningless Team filter on an FFA aim tab and, in the
+// other direction, would put team colours on a duel.
+export function isIndividualLayout(result) {
+    return result?.match?.sources?.teams === 'individual';
+}
+
+// isTeamBasedMode reports the resolved ruleset: teamplay in force, so a team
+// tag names a side.
+export function isTeamBasedMode(result) {
+    return result?.match?.gameMode?.teamBased === true;
+}
+
+// hasTeammates reports whether any player in this demo has a team-mate: the
+// ruleset was teamplay AND the match is not laid out one side per player.
+// Everything that renders a same-team quantity (team kills, team damage, the
+// aim tab's Team victim filter) is empty without it.
+export function hasTeammates(result) {
+    return isTeamBasedMode(result) && !isIndividualLayout(result);
+}

@@ -1,6 +1,6 @@
 // provenance.js — the damage-evidence banner (damage.source /
-// damage.coverage, v74) shared by app.js (window.MvdLib: Summary's Basic
-// and Weapon Stats, the Aim tab) and the Key Moments tab.
+// damage.coverage, v74) shared by the Summary (Basic and Weapon Stats), Key
+// Moments and Aim Stats tabs.
 //
 // Everything that rides the reconstructed damage section — the Basic Stats
 // damage columns, Weapon Stats' Dmg and Acc, the Aim tab's Dmg and its recon

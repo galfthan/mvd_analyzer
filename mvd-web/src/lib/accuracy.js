@@ -1,7 +1,7 @@
 // accuracy.js — the per-weapon accuracy cell of Summary's Weapon Stats and
 // the hit-count conventions behind its `≠` mark (README "The ≠ on an Acc
 // cell"). getAccuracyClass and RECON_ACCURACY_NOTE are shared with the Aim
-// tab in app.js (window.MvdLib).
+// Stats tab (src/lib/aim.js).
 
 import { escapeHtml } from './html.js';
 

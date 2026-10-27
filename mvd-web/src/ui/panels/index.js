@@ -11,11 +11,11 @@
 
 import { mount } from 'svelte';
 import { activeTab } from '../../state/index.js';
-import { rerenderTab } from '../../legacy.js';
 import { PANEL_TABS } from './config.js';
 import { panelLayouts, updatePanels, movePanel } from './layout.js';
 import PanelControls from './PanelControls.svelte';
 import PanelBar from './PanelBar.svelte';
+import { panelRevealed } from './reveal.js';
 
 const DRAG_TYPE = 'text/x-mvd-panel';
 
@@ -71,7 +71,7 @@ function setupTab(tab) {
 
     // Apply the layout. A panel that comes back into view (expanded or
     // reopened) may hold a canvas drawn while it was hidden, at zero width:
-    // the tab redraws.
+    // the tab redraws (reveal.js).
     let shown = null;
     panelLayouts.subscribe((all) => {
         const l = all[tab];
@@ -86,6 +86,6 @@ function setupTab(tab) {
         });
         const revealed = shown && [...now].some((id) => !shown.has(id));
         shown = now;
-        if (revealed && activeTab.get() === tab) requestAnimationFrame(() => rerenderTab(tab));
+        if (revealed && activeTab.get() === tab) requestAnimationFrame(() => panelRevealed(tab));
     });
 }

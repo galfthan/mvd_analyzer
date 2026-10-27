@@ -1283,9 +1283,9 @@ table tbody tr:hover {
     min-width: 0;
 }
 
-/* Smoothed crosshair-density image; intrinsic size set by drawAimDensity.
-   The background doubles as the image's zero-density colour (read back by
-   aimSurfaceRGB) — bg-deep so empty regions match the table heatmaps. */
+/* Smoothed crosshair-density image; intrinsic size set by paintAimDensity
+   (src/tabs/aimstats/density-canvas.js). The background doubles as the
+   image's zero-density colour (read back when painting) — bg-deep so empty regions match the table heatmaps. */
 .aim-density {
     display: block;
     background: var(--bg-deep);
@@ -2313,7 +2313,7 @@ body.graph-scrubbing * {
     border-left: 2px solid rgba(255, 255, 255, 0.35);
 }
 
-/* Sequential viridis legend — gradient stops mirror HEAT_STOPS in app.js. */
+/* Sequential viridis legend — gradient stops mirror HEAT_STOPS in src/lib/heat-color.js. */
 .heatmap-legend {
     display: flex;
     align-items: center;

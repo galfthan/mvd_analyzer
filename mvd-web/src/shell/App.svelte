@@ -11,6 +11,7 @@
     import PackDropsTab from '../tabs/packdrops/PackDropsTab.svelte';
     import PickupsTab from '../tabs/pickups/PickupsTab.svelte';
     import KeyMomentsTab from '../tabs/keymoments/KeyMomentsTab.svelte';
+    import AimStatsTab from '../tabs/aimstats/AimStatsTab.svelte';
     import Toast from '../player/Toast.svelte';
     import { adopt } from './adopt.js';
 </script>
@@ -25,6 +26,7 @@
             <PackDropsTab />
             <PickupsTab />
             <KeyMomentsTab />
+            <AimStatsTab />
             <PlayerTab />
         </div>
     </main>

@@ -23,8 +23,8 @@ talks to it through a JS shim.
   layer (`mvdData`, `MvdHub`), shared state (`MvdState`), result helpers
   (`MvdLib`) and the Player tab's engine (`MvdPlayer`). Ported so far: the
   shell, the Player tab (`src/player/`), and the Summary, Chat, Pack Drops,
-  Pickups and Key Moments tabs (`src/tabs/<name>/`, their DOM-free parts in
-  `src/lib/<name>.js`); see
+  Pickups, Key Moments and Aim Stats tabs (`src/tabs/<name>/`, their
+  DOM-free parts in `src/lib/<name>.js`); see
   [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
   Two UI packages are bundled (pinned in `package.json`):
   [PaneForge](https://paneforge.com) for the Player tab's player | panes
@@ -184,6 +184,18 @@ by the analyzer on such a demo and now renders `—` too. It used to print a
 fabricated `0`, which beside a recovered 22% hit rate read as a measurement
 that contradicted it; the reconstruction recovers hit COUNTS only, never
 the breakdown of how a fire hit or missed.
+
+The tab is Svelte (`src/tabs/aimstats/AimStatsTab.svelte`): the victim
+filter, the column descriptors, the Hits / Dmg rules and every weapon
+table's markup are `src/lib/aim.js`; the sample selection, the density
+grid and its colour scale, the hover read-out and the histogram bins are
+`src/lib/aim-plot.js`; `density-canvas.js` paints the images. It builds on
+the first frame it shows after the demo or the teams changed (a new demo
+resets the filter to All and the picker to the first player); a filter or
+player change rebuilds at once. The images are sized by the painter, so
+they paint correctly while hidden; they are repainted when the Crosshair
+placement panel is expanded or reopened.
+
 The **Key Moments** tab has ten tables — a two-column grid of powerup
 runs beside the longest frag streaks, **Top Damage Windows (10 s)**
 beside **Top RL Kills**, **Demo Markers** beside **Top LG Kills** — and
@@ -260,8 +272,8 @@ says so instead of claiming the demo had no powerups.
 The tab is Svelte (`src/tabs/keymoments/KeyMomentsTab.svelte`); the
 lists, the filter, the two view queries' options, the highlight rankings
 and every row's markup are `src/lib/keymoments.js`, and the damage
-banner is `src/lib/provenance.js` (shared with the Summary tab; `app.js`
-reaches it as `MvdLib.damageProvenanceHtml` for Aim). The tables are built
+banner is `src/lib/provenance.js` (shared with the Summary and Aim Stats
+tabs). The tables are built
 on the first frame the tab shows after the demo changed, the view
 queries issued then; a reply for a superseded demo is dropped. Rows are
 hand-built markup so `makeSortable` can sort them.
@@ -575,7 +587,7 @@ unlinked still counts and `Splash` floors at zero.)
 A reader with both on screen gets the reconciliation IN THE PAYLOAD, not
 only in the source: the Aim cell's tooltip on `rl`/`gl` names its own
 convention and the Summary number it differs from, with the size of the
-gap (~4x on RL, ~1.5x on GL — `RECON_ANYDAMAGE_NOTE` in `app.js`, appended
+gap (~4x on RL, ~1.5x on GL — `RECON_ANYDAMAGE_NOTE` in `src/lib/aim.js`, appended
 to `RECON_ACCURACY_NOTE` (`src/lib/accuracy.js`) for those two weapons only, since everywhere else
 the two conventions coincide and the sentence would invent a difference).
 
@@ -641,6 +653,9 @@ CTF server is laid out individually and genuinely was teamplay. So:
 | Semantics | `isTeamBasedMode(result)` | `match.gameMode.teamBased === true` — same, no fallback | Whether a same-team quantity can exist |
 | Field | `isMultiPlayerIndividual(result)` | `isIndividualLayout && !isDuel` | The one test behind the player palette, the per-player Timeline and the single-column Chat (`individual-field` on `<body>`, set by `setIndividualFieldLayout`) |
 | Both | `hasTeammates(result)` | teamplay in force AND not laid out per player | The aim tab's Team victim filter |
+
+The layout, semantics and both predicates live in `src/lib/result.js`
+(`app.js` reaches the first two through `MvdLib`).
 
 `displayResults` puts an `individual-mode` class on `<body>` from the LAYOUT
 predicate. The CSS then hides **every team surface**: the Teams panel, the
@@ -869,8 +884,10 @@ CSS `order` property (a panelized tab lays out as a flex column; Key
 Moments keeps its grid) and collapse / close are classes. `app.js` keeps
 hiding the panels a demo has no data for — by inline style or body class
 — and a hidden panel takes its controls with it. A panel that comes back
-into view asks the tab to redraw (`renderTabContent`), since a canvas
-drawn while it was collapsed is drawn at zero width.
+into view asks the tab to redraw, since a canvas drawn while it was
+collapsed is drawn at zero width: a ported tab registers its redraw with
+`onPanelReveal` (`src/ui/panels/reveal.js` — Aim Stats repaints its two
+crosshair images), a tab still in `app.js` gets `renderTabContent`.
 
 ## Performance timing (console)
 
@@ -1542,7 +1559,8 @@ team,teamIdx,…}], teamCols, cellTitle }` where `i` is a 0..1 intensity
 printed %. It renders a sortable `.stats-table` (crisp text + free column
 sorting via `makeSortable`, tbody built with the shared `renderTableRows`
 helper) rather than a canvas; each cell is viridis-shaded
-(`heatColorRGB` / `HEAT_STOPS`, mirrored by the CSS `.heatmap-legend-bar`
+(`heatColorRGB` / `HEAT_STOPS` in `src/lib/heat-color.js`, shared with
+the Aim tab's crosshair image and mirrored by the CSS `.heatmap-legend-bar`
 gradient — chosen for red/green colour-vision-deficiency safety) with a
 contrast-aware ink and a `data-sort-value`. Team identity rides on the
 canonical `TEAM_COLORS`-by-`timelineState.teams` mapping (see the repo
