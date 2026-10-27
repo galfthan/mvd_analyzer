@@ -271,6 +271,10 @@ strip above the main pane.
 
 ## How the pieces fit
 
+A move to Svelte with a data layer between the page and the WASM worker
+is planned in [`plan-frontend-restructure.md`](../plan-frontend-restructure.md)
+(not started); what follows describes the current page.
+
 1. User drops an MVD file on the Search tab, pastes a hub.quakeworld.nu
    URL, or picks a row from the search results.
 2. `app.js` hands the bytes to `worker.js` via `postMessage`.
