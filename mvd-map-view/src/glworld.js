@@ -194,18 +194,20 @@ void main() { outColor = vColor; }`;
 
 // The world triangles (floors, movers, liquids, tints) support depth fog:
 // gl_FragCoord.z grows with camera distance (clip z is negated closeness),
-// so fog is a mix toward the fog colour past the map's mid-depth. uFogScale
-// is precomputed host-side from the map's world size; 0 disables.
+// so fog is a mix toward the fog colour past uFogZ0, the window depth of the
+// map centre. uFogScale is precomputed host-side from the map's world size;
+// 0 disables.
 const WORLD_FRAG_SRC = `#version 300 es
 precision mediump float;
 uniform float uFogScale;
+uniform float uFogZ0;
 uniform vec3 uFogColor;
 in vec4 vColor;
 out vec4 outColor;
 void main() {
     vec4 c = vColor;
     if (uFogScale > 0.0) {
-        float f = clamp((gl_FragCoord.z - 0.5) * uFogScale, 0.0, 0.9);
+        float f = clamp((gl_FragCoord.z - uFogZ0) * uFogScale, 0.0, 0.9);
         c = vec4(mix(c.rgb, uFogColor * c.a, f), c.a);
     }
     outColor = c;
@@ -452,6 +454,7 @@ export class GlWorld {
         this.uOffset = gl.getUniformLocation(tri, 'uOffset');
         this.uTint = gl.getUniformLocation(tri, 'uTint');
         this.uFogScale = gl.getUniformLocation(tri, 'uFogScale');
+        this.uFogZ0 = gl.getUniformLocation(tri, 'uFogZ0');
         this.uFogColor = gl.getUniformLocation(tri, 'uFogColor');
         this.aPos = gl.getAttribLocation(tri, 'aPos');
         this.aColor = gl.getAttribLocation(tri, 'aColor');
@@ -988,6 +991,12 @@ export class GlWorld {
         gl.uniform3f(this.uOffset, 0, 0, 0);
         gl.uniform4f(this.uTint, 1, 1, 1, 1);
         gl.uniform1f(this.uFogScale, dyn.fogScale || 0);
+        // Window depth (default depth range) of the fog anchor; without one
+        // the fog starts at the orbit pivot's depth plane.
+        const fa = dyn.fogAnchor;
+        gl.uniform1f(this.uFogZ0, fa
+            ? 0.5 + 0.5 * (t.rz[0] * fa[0] + t.rz[1] * fa[1] + t.rz[2] * fa[2] + t.rz[3])
+            : 0.5);
         const fc = dyn.fogColor || [0.039, 0.039, 0.082];
         gl.uniform3f(this.uFogColor, fc[0], fc[1], fc[2]);
 

@@ -837,12 +837,17 @@ export class MvdMap {
         // plus the fading death/drop markers.
         this._glActors(dyn, pxScale);
 
-        // Effects. Fog scale maps the map's world radius onto the clip-z
-        // range so density 1 reads clearly on any map size.
+        // Effects. Fog is anchored to the fixed map centre (bounds centre at
+        // the default mid height), not the orbit pivot: orbit drags move the
+        // pivot to wherever the view was panned, and fog keyed to it shifted
+        // with the pan history. Fog scale maps the map's world radius onto
+        // the clip-z range so density 1 reads clearly on any map size.
         if (s.fog > 0) {
-            const w = this.camera;
-            const halfDiag = Math.hypot(w.cx - w.minX, w.cy - w.minY) || 1;
+            const b = s.bounds;
+            const halfDiag = Math.hypot(b.maxX - b.minX, b.maxY - b.minY) / 2 || 1;
             dyn.fogScale = s.fog * (2 / (halfDiag * DEPTH_SCALE)) * 0.9;
+            dyn.fogAnchor = [(b.minX + b.maxX) / 2, (b.minY + b.maxY) / 2,
+                this.camera.zMidDefault || 0];
         }
         dyn.occludeActors = s.occludeActors;
         return dyn;
