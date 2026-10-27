@@ -29,3 +29,10 @@ export function renderMiniStack(canvasId, opts) {
 export function mapTabView() {
     return window.legacyMapView || null;
 }
+
+// rerenderTab(tab) redraws a tab's canvases (app.js renderTabContent): a
+// panel expanded or reopened (src/ui/panels) may hold a canvas drawn at
+// zero width while it was hidden.
+export function rerenderTab(tab) {
+    return window.renderTabContent?.(tab);
+}

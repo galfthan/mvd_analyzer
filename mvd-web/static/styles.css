@@ -4178,3 +4178,97 @@ th.sortable.sort-desc::after {
 .player-toast.show {
     opacity: 1;
 }
+
+/* Arrangeable panels (src/ui/panels): order is the CSS `order` property,
+ * so a panelized tab lays its children out as a flex column (Key Moments
+ * keeps its grid). The controls sit in each panel's top-right corner, dim
+ * until the panel is hovered. */
+.tab-content.panelized.active:not(.keymoments-grid) {
+    display: flex;
+    flex-direction: column;
+}
+
+.lp {
+    position: relative;
+}
+
+.lp.lp-closed {
+    display: none !important;
+}
+
+.lp.lp-drag-over {
+    border-color: var(--accent-cyan);
+}
+
+.lp-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px;
+    border-radius: 4px;
+    background: rgba(10, 14, 26, 0.6);
+    opacity: 0.25;
+    transition: opacity 0.15s;
+}
+
+.lp:hover > .lp-controls,
+.lp-controls:focus-within {
+    opacity: 1;
+}
+
+.lp-controls button,
+.lp-controls .lp-grip {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: 3px;
+    padding: 2px;
+    color: var(--fg-default);
+    cursor: pointer;
+}
+
+.lp-controls .lp-grip {
+    color: #889;
+    cursor: grab;
+}
+
+.lp-controls button:hover {
+    color: var(--accent-cyan);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* Collapsed: the heading only. A panel without one shows its title. */
+.lp.lp-collapsed {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.lp.lp-collapsed > :not(:first-child):not(.lp-controls),
+.lp.lp-untitled.lp-collapsed > :not(.lp-controls) {
+    display: none !important;
+}
+
+.lp.lp-collapsed > h3:first-child {
+    margin-bottom: 0;
+}
+
+.lp.lp-untitled.lp-collapsed::before {
+    content: attr(data-lp-title);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--accent-cyan);
+}
+
+.lp-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-bottom: 10px;
+    grid-column: 1 / -1;
+}

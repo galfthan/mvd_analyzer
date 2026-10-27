@@ -137,7 +137,7 @@
                     <p id="no-match-errors" class="no-match-errors" style="display: none;"></p>
                 </div>
 
-                <div id="match-summary" class="panel">
+                <div data-panel="match-info" id="match-summary" class="panel">
                     <h3>Match Info</h3>
                     <div class="summary-grid" id="match-info-grid">
                         <div class="summary-item">
@@ -163,7 +163,7 @@
                     </div>
                 </div>
 
-                <div id="match-settings-panel" class="panel" style="display: none;">
+                <div data-panel="match-settings" id="match-settings-panel" class="panel" style="display: none;">
                     <h3>Match Settings</h3>
                     <div class="summary-grid" id="match-settings-grid"></div>
                     <div id="match-modifiers-row" style="margin-top: 15px; display: none;">
@@ -172,7 +172,7 @@
                     </div>
                 </div>
 
-                <div id="server-info-panel" class="panel" style="display: none;">
+                <div data-panel="server-info" id="server-info-panel" class="panel" style="display: none;">
                     <details>
                         <summary><h3 style="display: inline-block; margin: 0;">Server Info</h3></summary>
                         <table id="server-info-table" class="stats-table serverinfo-table">
@@ -184,12 +184,12 @@
                     </details>
                 </div>
 
-                <div id="teams-panel" class="panel team-aggregate-panel">
+                <div data-panel="teams" id="teams-panel" class="panel team-aggregate-panel">
                     <h3>Teams</h3>
                     <div id="teams-list" class="teams-list"></div>
                 </div>
 
-                <div id="players-panel" class="panel">
+                <div data-panel="basic-stats" id="players-panel" class="panel">
                     <h3>Basic Stats</h3>
                     <div id="players-provenance" class="panel-provenance" style="display: none;"></div>
                     <h4 class="team-aggregate-heading">Per Team</h4>
@@ -246,7 +246,7 @@
                     </table>
                 </div>
 
-                <div id="weapons-summary-panel" class="panel">
+                <div data-panel="weapon-stats" id="weapons-summary-panel" class="panel">
                     <h3>Weapon Stats</h3>
                     <div id="weapons-provenance" class="panel-provenance" style="display: none;"></div>
                     <h4 class="team-aggregate-heading">Per Team</h4>
@@ -302,7 +302,7 @@
                     <p id="weapons-convention-note" class="panel-note acc-scale-note" style="display: none;"></p>
                 </div>
 
-                <div id="items-panel" class="panel">
+                <div data-panel="items" id="items-panel" class="panel">
                     <h3>Item Pickups & Drops</h3>
                     <details class="panel-info">
                         <summary>More info</summary>
@@ -401,7 +401,7 @@
                 </div>
 
 
-                <div id="weapons-panel" class="panel">
+                <div data-panel="kills-by-weapon" id="weapons-panel" class="panel">
                     <h3>Kills by Weapon</h3>
                     <div id="weapons-chart" class="chart"></div>
                 </div>
@@ -411,7 +411,7 @@
             <div id="tab-timeline" class="tab-content">
                 <div class="empty-state">Load or search a demo to begin.</div>
                 <!-- Team Status at Current Time -->
-                <div class="panel team-status-panel">
+                <div data-panel="team-status" class="panel team-status-panel">
                     <div class="team-status-row">
                         <div class="team-status-side" id="team-status-a"></div>
                         <div class="team-status-side" id="team-status-b"></div>
@@ -425,21 +425,21 @@
                      re-parents the existing per-player nodes into them, so the
                      canvases and their row caches move with them and there is
                      never a second copy to keep in sync. -->
-                <div class="panel per-player-panel" id="frags-per-player-panel" style="display: none;">
+                <div data-panel="frags-per-player" class="panel per-player-panel" id="frags-per-player-panel" style="display: none;">
                     <h3>Frags / deaths per player</h3>
                     <div class="per-player-panel-body" id="frags-per-player-host"></div>
                 </div>
-                <div class="panel per-player-panel" id="weapons-per-player-panel" style="display: none;">
+                <div data-panel="weapons-per-player" class="panel per-player-panel" id="weapons-per-player-panel" style="display: none;">
                     <h3 id="weapons-per-player-heading">Weapons per player</h3>
                     <div class="per-player-panel-body" id="weapons-per-player-host"></div>
                 </div>
-                <div class="panel per-player-panel" id="ha-per-player-panel" style="display: none;">
+                <div data-panel="ha-per-player" class="panel per-player-panel" id="ha-per-player-panel" style="display: none;">
                     <h3>Health / armor per player</h3>
                     <div class="per-player-panel-body" id="ha-per-player-host"></div>
                 </div>
 
                 <!-- Cumulative Frags Timeline -->
-                <div class="panel timeline-health-panel-full" id="score-timeline-panel">
+                <div data-panel="score" class="panel timeline-health-panel-full" id="score-timeline-panel">
                     <h3>Score Timeline</h3>
                     <div class="health-graph-wrapper">
                         <div class="timeline-y-axis" id="score-y-axis">
@@ -463,7 +463,7 @@
                 </div>
 
                 <!-- Powerups -->
-                <div class="panel timeline-region-panel" id="powerup-timeline-panel" style="display: none;">
+                <div data-panel="powerups" class="panel timeline-region-panel" id="powerup-timeline-panel" style="display: none;">
                     <h3>Powerups</h3>
                     <div class="region-timeline-wrapper">
                         <div class="region-timeline-labels" id="powerup-timeline-labels"></div>
@@ -479,7 +479,7 @@
                 </div>
 
                 <!-- Weapons (full width) -->
-                <div class="panel timeline-detail-graph-panel-full" id="weapons-timeline-panel">
+                <div data-panel="weapons" class="panel timeline-detail-graph-panel-full" id="weapons-timeline-panel">
                     <h3 id="weapons-timeline-heading">Weapons<span id="time-range-label"></span></h3>
                     <div class="detail-graph-wrapper">
                         <div class="timeline-y-axis" id="detail-y-axis">
@@ -514,7 +514,7 @@
                 </div>
 
                 <!-- Health/Armor (diverging style) -->
-                <div class="panel timeline-health-panel-full" id="health-armor-timeline-panel">
+                <div data-panel="health-armor" class="panel timeline-health-panel-full" id="health-armor-timeline-panel">
                     <h3>Team Health/Armor</h3>
                     <div class="health-graph-wrapper">
                         <div class="timeline-y-axis" id="health-y-axis">
@@ -542,7 +542,7 @@
                 </div>
 
                 <!-- Region Control -->
-                <div class="panel timeline-region-panel" id="region-control-timeline-panel" style="display: none;">
+                <div data-panel="region-control" class="panel timeline-region-panel" id="region-control-timeline-panel" style="display: none;">
                     <h3>Region Control</h3>
                     <div class="region-timeline-wrapper">
                         <div class="region-timeline-labels" id="region-timeline-labels"></div>
@@ -688,7 +688,7 @@
             <div id="tab-loc-graph" class="tab-content">
                 <div class="empty-state">Load or search a demo to begin.</div>
                 <!-- Region Control (definition editor + per-region control matrix) -->
-                <div class="panel" id="region-control-panel" style="display: none;">
+                <div data-panel="region-control" class="panel" id="region-control-panel" style="display: none;">
                     <h3>Region Control</h3>
                     <details class="panel-info">
                         <summary>More info</summary>
@@ -717,7 +717,7 @@
 
                 <!-- Metric selector — governs the loc graph + heatmap below
                      (Region Control above is independent of it). -->
-                <div class="panel locmetric-panel">
+                <div data-panel="loc-metric" class="panel locmetric-panel">
                     <h3>Loc Analysis Metric</h3>
                     <div class="locmetric-row">
                         <label class="locmetric-label">Metric:
@@ -733,7 +733,7 @@
                     </div>
                 </div>
 
-                <div class="panel locgraph-panel">
+                <div data-panel="loc-graph" class="panel locgraph-panel">
                     <h3>Loc Graph</h3>
                     <div class="locgraph-controls">
                         <label>Filter:
@@ -793,7 +793,7 @@
                 </div>
 
                 <!-- Loc Heatmap -->
-                <div class="panel locheatmap-panel" id="locheatmap-panel" style="display: none;">
+                <div data-panel="loc-heatmap" class="panel locheatmap-panel" id="locheatmap-panel" style="display: none;">
                     <h3>Loc Heatmap</h3>
                     <details class="panel-info">
                         <summary>More info</summary>
@@ -826,7 +826,7 @@
             <!-- Key Moments Tab -->
             <div id="tab-keymoments" class="tab-content keymoments-grid">
                 <div class="empty-state">Load or search a demo to begin.</div>
-                <div class="panel">
+                <div data-panel="powerup-runs" class="panel">
                     <h3>Powerup Runs</h3>
                     <div class="keymoments-filters">
                         <label>Min length: <input type="number" id="keymoments-min-dur" min="0" step="1" value="5"> s</label>
@@ -853,7 +853,7 @@
                         No powerup runs match the filter.
                     </div>
                 </div>
-                <div class="panel">
+                <div data-panel="streaks" class="panel">
                     <h3>Longest Frag Streaks</h3>
                     <table class="stats-table" id="fragstreaks-table">
                         <thead>
@@ -873,7 +873,7 @@
                         No frag streaks detected in this demo.
                     </div>
                 </div>
-                <div class="panel">
+                <div data-panel="top-damage" class="panel">
                     <h3 title="The ten 10-second stretches with the most bounded enemy damage dealt; ties break on frags">Top Damage Windows (10 s)</h3>
                     <div id="topdmg-provenance" class="panel-provenance" style="display: none;"></div>
                     <table class="stats-table" id="topdmg-table">
@@ -893,7 +893,7 @@
                         No damage windows in this demo (needs a damage stream).
                     </div>
                 </div>
-                <div class="panel">
+                <div data-panel="top-rl" class="panel">
                     <h3 title="Hardest rocket kill bursts: the run of RL hits on that victim leading up to the kill (gap 2.3 s)">Top RL Kills</h3>
                     <div id="toprl-provenance" class="panel-provenance" style="display: none;"></div>
                     <table class="stats-table" id="toprl-table">
@@ -915,7 +915,7 @@
                         No RL kill bursts (needs a damage log and measurable liveness).
                     </div>
                 </div>
-                <div class="panel">
+                <div data-panel="markers" class="panel">
                     <h3>Demo Markers</h3>
                     <table class="stats-table" id="demomarkers-table">
                         <thead>
@@ -933,7 +933,7 @@
                         No demo markers in this demo.
                     </div>
                 </div>
-                <div class="panel">
+                <div data-panel="top-lg" class="panel">
                     <h3 title="Hardest lightning kill bursts: the run of LG hits on that victim leading up to the kill (gap 1.2 s)">Top LG Kills</h3>
                     <div id="toplg-provenance" class="panel-provenance" style="display: none;"></div>
                     <table class="stats-table" id="toplg-table">
@@ -955,7 +955,7 @@
                         No LG kill bursts (needs a damage log and measurable liveness).
                     </div>
                 </div>
-                <div class="panel airgibs-panel">
+                <div data-panel="airgibs" class="panel airgibs-panel">
                     <h3>Direct Rocket Air Hits</h3>
                     <table class="stats-table sortable-table" id="airgibs-table">
                         <thead>
@@ -977,7 +977,7 @@
                         No direct rocket air hits detected (needs a map BSP for height data).
                     </div>
                 </div>
-                <div class="panel highlight-panel">
+                <div data-panel="discharges" class="panel highlight-panel">
                     <h3 title="Lightning gun fired in water: every discharge with evidence — the shooter's death, a kill it made, or a damage-log LG radius hit">Discharges</h3>
                     <table class="stats-table sortable-table" id="discharges-table">
                         <thead>
@@ -1004,7 +1004,7 @@
                         No discharges detected.
                     </div>
                 </div>
-                <div class="panel highlight-panel">
+                <div data-panel="quadbores" class="panel highlight-panel">
                     <h3 title="Self-kills by own rocket or grenade while holding quad">Quadbores</h3>
                     <table class="stats-table sortable-table" id="quadbores-table">
                         <thead>
@@ -1026,7 +1026,7 @@
                         No quadbores detected.
                     </div>
                 </div>
-                <div class="panel highlight-panel">
+                <div data-panel="telefrags" class="panel highlight-panel">
                     <h3 title="Every telefrag, ranked by how stacked the victim was; deflects are teleporters who died on a pentagram holder">Telefrags</h3>
                     <table class="stats-table sortable-table" id="telefrags-table">
                         <thead>
@@ -1090,7 +1090,7 @@
             <div id="tab-pickups" class="tab-content">
                 <div class="empty-state">Load or search a demo to begin.</div>
 
-                <div class="panel">
+                <div data-panel="weapon-pickups" class="panel">
                     <div class="pickups-toolbar">
                         <label>Mode:
                             <select id="pickups-mode">
@@ -1117,7 +1117,7 @@
                     </div>
                 </div>
 
-                <div class="panel" id="pickups-items-panel">
+                <div data-panel="item-pickups" class="panel" id="pickups-items-panel">
                     <h3>Item Pickups</h3>
                     <h4 class="team-aggregate-heading">Per Team</h4>
                     <div class="pickups-table-wrap">
@@ -1159,7 +1159,7 @@
                     </div>
                 </div>
 
-                <div class="panel" id="aim-accuracy-panel">
+                <div data-panel="accuracy" class="panel" id="aim-accuracy-panel">
                     <h3>Accuracy &amp; effectiveness</h3>
                     <div id="aim-provenance" class="panel-provenance" style="display: none;"></div>
                     <details class="panel-info">
@@ -1189,7 +1189,7 @@
                     <div id="aim-weapon-tables"></div>
                 </div>
 
-                <div class="panel" id="aim-heatmap-panel">
+                <div data-panel="crosshair" class="panel" id="aim-heatmap-panel">
                     <h3>Crosshair placement <span class="aim-sel-note">— selected player</span></h3>
                     <div class="aim-controls">
                         <span class="aim-controls-label">Player:</span>

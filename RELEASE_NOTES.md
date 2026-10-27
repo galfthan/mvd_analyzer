@@ -26,7 +26,12 @@ health/armor strip per player, a list of the demo's moments (quad runs,
 streaks, highlights — click to play), and a frag feed (click a frag to
 watch it from the killer's view) — added, closed, reordered, collapsed and
 resized at will; the column itself can be widened, by dragging or with the
-arrow keys, or dragged shut to hide it. Under it, a
+arrow keys, or dragged shut to hide it.
+
+The panels of the other tabs (Summary, Timeline, Locs & Regions, Key
+Moments, Pickups, Aim Stats) can be arranged the same way: reordered,
+collapsed to their heading or closed, with *Show all* and a reset to bring
+everything back. The arrangement is remembered in the browser. Under it, a
 **playlist** of clips: mark In/Out and add from the current POV, or
 generate quad runs, frag streaks, quadbores, airgibs, telefrags, discharges
 or one player's frags; play the list right there as a script (across hub

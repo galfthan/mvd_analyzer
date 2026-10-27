@@ -808,6 +808,29 @@ carry no U+24D8 and it rendered as tofu. Short single-line captions
 (`.locmetric-hint`, `.map-entity-hint`) stay inline and do **not** get
 a disclosure.
 
+### Arranging panels
+
+On Summary, Timeline, Locs & Regions, Key Moments, Pickups and Aim Stats
+the viewer arranges the panels (`src/ui/panels/`): each panel's top-right
+corner carries controls, dim until hovered — drag the grip onto another
+panel to reorder, collapse to the heading, move up / down (stepping over
+panels the viewer cannot see), close. Once the layout differs from the
+default, a bar above the panels offers *Add panel…* (reopen a closed one),
+*Show all* (reopen and expand everything, keeping the order) and a reset
+to the default layout. The arrangement is saved per viewer in
+`localStorage` (`mvd.panels.v1`, every tab under one key): it stays in
+this browser across visits and demos, and nothing is sent anywhere.
+
+The panels are the tabs' existing markup, tagged `data-panel="<id>"` in
+`index.html`; `src/ui/panels/config.js` names each tab's panels, their
+titles and default order. Nothing is moved in the DOM: the order is the
+CSS `order` property (a panelized tab lays out as a flex column; Key
+Moments keeps its grid) and collapse / close are classes. `app.js` keeps
+hiding the panels a demo has no data for — by inline style or body class
+— and a hidden panel takes its controls with it. A panel that comes back
+into view asks the tab to redraw (`renderTabContent`), since a canvas
+drawn while it was collapsed is drawn at zero width.
+
 ## Performance timing (console)
 
 Every demo load prints a structured per-stage breakdown to the browser

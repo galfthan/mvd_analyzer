@@ -11,6 +11,7 @@ import { WasmSource } from './data/wasm-source.js';
 import * as MvdState from './state/index.js';
 import * as MvdLib from './lib/result.js';
 import { engine, setupPlayer } from './player/index.js';
+import { setupPanels } from './ui/panels/index.js';
 
 window.MapView = MapView;
 window.MvdHub = MvdHub;
@@ -28,5 +29,7 @@ window.mvdData = new WasmSource(new Worker('worker.js'));
 mount(App, { target: document.getElementById('app') });
 flushSync();
 setupPlayer();
+// The viewer's panel arrangement on the tabs still in app.js's markup.
+setupPanels();
 // app.js defines this on its top level and uses it to allocate the camera.
 if (window.onMapViewReady) window.onMapViewReady(MapView);

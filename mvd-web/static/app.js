@@ -555,27 +555,32 @@ function onTabActivated(tabName) {
     const tabContentEl = document.getElementById(`tab-${tabName}`);
     if (tabContentEl) void tabContentEl.offsetHeight;
 
-    const renderForTab = () => {
-        if (tabName === 'map') {
-            mapState.renderDirty = true;
-            mapState.lastRenderedBucket = null;
-            renderMap(mapState.currentTime);
-        } else if (tabName === 'timeline') {
-            if (currentResult) updateDetailView();
-            updateTimeIndicators();
-        } else if (tabName === 'chat') {
-            renderChatMessages();
-        } else if (tabName === 'loc-graph') {
-            renderLocGraph();
-        } else if (tabName === 'aimstats') {
-            renderAimStats();
-        }
-    };
+    const renderForTab = () => renderTabContent(tabName);
     renderForTab();
     requestAnimationFrame(renderForTab);
     setTimeout(renderForTab, 120);
 
     updateUrlState();
+}
+
+// renderTabContent redraws a tab's canvases and size-dependent views: on
+// activation (above), and when a panel of it is expanded or reopened
+// (src/ui/panels) — a canvas drawn while hidden is drawn at zero width.
+function renderTabContent(tabName) {
+    if (tabName === 'map') {
+        mapState.renderDirty = true;
+        mapState.lastRenderedBucket = null;
+        renderMap(mapState.currentTime);
+    } else if (tabName === 'timeline') {
+        if (currentResult) updateDetailView();
+        updateTimeIndicators();
+    } else if (tabName === 'chat') {
+        renderChatMessages();
+    } else if (tabName === 'loc-graph') {
+        renderLocGraph();
+    } else if (tabName === 'aimstats') {
+        renderAimStats();
+    }
 }
 
 // ─── File Upload (via WASM Worker) ──────────────────────────────────────────
