@@ -66,6 +66,19 @@ test('a rewind restores even when the first reading overshoots the target', asyn
     assert.deepEqual(win.commands, ['demo_jump 65\n', 'track 7\n', 'demo_setspeed 100\n']);
 });
 
+test('a one-second rewind restores once it lands', async () => {
+    const win = fakeWin({ demoTime: 66.05 });
+    const fte = new FteController(win);
+    fte.track(8);
+    win.commands.length = 0;
+    fte.demoJump(65);
+    await new Promise((r) => setTimeout(r, 60));
+    assert.deepEqual(win.commands, ['demo_jump 65\n'], 'clock still at the start — the jump has not landed');
+    win.demoTime = 65.02;
+    await new Promise((r) => setTimeout(r, 60));
+    assert.deepEqual(win.commands, ['demo_jump 65\n', 'track 8\n', 'demo_setspeed 100\n']);
+});
+
 test('a forward jump restores nothing', async () => {
     const win = fakeWin({ demoTime: 100 });
     const fte = new FteController(win);

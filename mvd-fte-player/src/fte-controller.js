@@ -99,14 +99,15 @@ export class FteController {
             this._restart(target);
             return;
         }
-        const current = Math.floor(this.getDemoElapsedTime());
+        const now = this.getDemoElapsedTime();
+        const current = Math.floor(now);
         if (Math.abs(target - current) < 1) return;
 
         this.command('demo_jump', target);
 
         if (target < current) {
             this._restoreTarget = target;
-            this._restoreFrom = current;
+            this._restoreFrom = now;
             this._restoreTimer = setInterval(() => this._restorePlayback(), 25);
         }
     }
@@ -168,9 +169,12 @@ export class FteController {
             // Deviation from hub, which waits for the clock to sit within
             // 1 s of the target: a slow frame can carry it past that window
             // and the restore never fires. Arrived = back below where the
-            // jump started and at (or past) the target.
+            // jump started (the demo clock never runs backwards by itself)
+            // and at (or past) the target. The start is the exact clock, not
+            // the whole second the jump compares: a rewind of one second
+            // (66.0 → 65) lands less than a second below it.
             const t = this.getDemoElapsedTime();
-            if (!(t < this._restoreFrom - 1 && t >= this._restoreTarget - 0.5)) return;
+            if (!(t < this._restoreFrom - 0.25 && t >= this._restoreTarget - 0.5)) return;
             clearInterval(this._restoreTimer);
             this._restoreTimer = null;
         }
