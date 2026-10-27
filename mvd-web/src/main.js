@@ -12,6 +12,7 @@ import * as MvdState from './state/index.js';
 import * as ResultLib from './lib/result.js';
 import { escapeHtml } from './lib/html.js';
 import { hubReplayUrl } from './lib/hub-url.js';
+import { damageProvenanceHtml } from './lib/provenance.js';
 import * as PlayerStatsLib from './lib/player-stats.js';
 import { makeSortable } from './ui/sortable.js';
 import { engine, setupPlayer } from './player/index.js';
@@ -23,7 +24,7 @@ window.MvdHub = MvdHub;
 window.MvdState = MvdState;
 // Helpers app.js shares with the ported tabs (it calls them through thin
 // wrappers of the same name).
-window.MvdLib = { ...ResultLib, ...PlayerStatsLib, escapeHtml, hubReplayUrl, makeSortable };
+window.MvdLib = { ...ResultLib, ...PlayerStatsLib, escapeHtml, hubReplayUrl, damageProvenanceHtml, makeSortable };
 // The Player tab's engine: the timeline's speed buttons drive it while it
 // is the page clock (src/player/engine.js).
 window.MvdPlayer = engine;

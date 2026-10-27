@@ -22,8 +22,8 @@ talks to it through a JS shim.
   uses — [`mvd-map-view`](../mvd-map-view/README.md) (`MapView`), the data
   layer (`mvdData`, `MvdHub`), shared state (`MvdState`), result helpers
   (`MvdLib`) and the Player tab's engine (`MvdPlayer`). Ported so far: the
-  shell, the Player tab (`src/player/`), and the Chat, Pack Drops and
-  Pickups tabs (`src/tabs/<name>/`, their DOM-free parts in
+  shell, the Player tab (`src/player/`), and the Chat, Pack Drops,
+  Pickups and Key Moments tabs (`src/tabs/<name>/`, their DOM-free parts in
   `src/lib/<name>.js`); see
   [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
   Two UI packages are bundled (pinned in `package.json`):
@@ -257,6 +257,15 @@ low-value runs drop out — a quad cycles every 60 s, making 0-2-frag runs
 routine noise — while `timelineAnalysis.powerupEvents` stays complete. When the filter empties an otherwise non-empty table the panel
 says so instead of claiming the demo had no powerups.
 
+The tab is Svelte (`src/tabs/keymoments/KeyMomentsTab.svelte`); the
+lists, the filter, the two view queries' options, the highlight rankings
+and every row's markup are `src/lib/keymoments.js`, and the damage
+banner is `src/lib/provenance.js` (`app.js` reaches it as
+`MvdLib.damageProvenanceHtml` for Summary and Aim). The tables are built
+on the first frame the tab shows after the demo changed, the view
+queries issued then; a reply for a superseded demo is dropped. Rows are
+hand-built markup so `makeSortable` can sort them.
+
 The **Timeline** tab stacks its panels in reading order — team rosters,
 Score, Powerups, Weapons, Team Health/Armor, Region Control. That order
 is pure DOM order in `index.html`; the JS lists that mirror it
@@ -319,7 +328,8 @@ The shell is Svelte (`src/shell/`): `App.svelte` renders the top bar,
 the sidebar (from `TABS` in `src/state/ui.js`) and the layout, and adopts
 the markup of tabs not yet ported — `index.html`'s hidden `#legacy-dom`,
 which `app.js` finds by id — into the main pane (`adopt.js`). Ported
-tabs (`PlayerTab`, and `ChatTab`, `PackDropsTab`, `PickupsTab` in
+tabs (`PlayerTab`, and `ChatTab`, `PackDropsTab`, `PickupsTab`,
+`KeyMomentsTab` in
 `src/tabs/`) are mounted there beside
 them; `app.js` still toggles their `active` class like any `.tab-content`.
 `src/main.js` mounts it synchronously, so that markup is in place before
@@ -867,7 +877,7 @@ is no UI for it. Stages reported, in load order:
   `finalize:timelineAnalysis`. To get the **pure loc-resolution compute**,
   subtract `locFetch + bspFetch` from `finalize:timelineAnalysis`.
 - **result JSON.parse** (main thread), each legacy tab render
-  (`displayTimelineAnalysis`, `displayKeyMoments`, `initMapView`,
+  (`displayTimelineAnalysis`, `initMapView`,
   `initLocGraphView`; the ported tabs build when first shown), and the
   async `map geometry fetch` (logged separately as it resolves after
   the UI is shown).
