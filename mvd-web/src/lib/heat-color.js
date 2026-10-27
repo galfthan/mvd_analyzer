@@ -1,5 +1,5 @@
 // heat-color.js — the shared sequential colour ramp of the table heatmaps
-// (app.js, Locs & Regions — reached as MvdLib.heatColorRGB) and the Aim
+// (the Locs & Regions tab, src/lib/loc-heatmap.js) and the Aim
 // tab's crosshair-density image.
 
 // Sequential colormap stops [t, [r,g,b]] — viridis. Chosen because it is

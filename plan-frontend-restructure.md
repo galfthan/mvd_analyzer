@@ -25,7 +25,18 @@ Aim Stats followed (`src/tabs/aimstats/`, `src/lib/aim.js` for the tables,
 ramp it shares with the loc heatmaps moved to `src/lib/heat-color.js`, the
 team-layout predicates to `src/lib/result.js`, and a panel coming back
 into view now reaches a ported tab's own redraw (`src/ui/panels/reveal.js`)
-before falling back to `app.js`'s `renderTabContent`. The orchestration
+before falling back to `app.js`'s `renderTabContent`.
+Locs & Regions followed (`src/tabs/locgraph/`; `src/lib/locgraph.js` for
+the Cytoscape elements / style / layouts, `src/lib/loc-heatmap.js` for the
+two matrices, `src/lib/regions.js` for the region definitions; Cytoscape
+stays a vendored classic script). Its region editor feeds the Map and the
+Timeline, which are still in `app.js`, so the region set in effect became
+the first shared model in `src/state/` other than the clock / teams /
+demo: `src/state/regions.js` (`regionControl`, `resetRegionControl`,
+`applyRegionDefs`, `reapplyRegions`). `app.js` puts each demo's own
+regions in effect and mirrors every edit onto `mapState` in
+`onRegionControlChanged`; it reaches the derived lookups
+(`locToRegionOf`, `regionToGroupsOf`) and `isDuel` through `MvdLib`. The orchestration
 the ported tabs share with Timeline and Map — `displayResults`, the body
 classes, `setCanonicalTeams`, the topbar — stays in `app.js` until those
 tabs are ported.
@@ -204,7 +215,7 @@ and panes `MapPane`, `HealthArmorPane`, `MomentsPane`, `FragFeedPane`.
 | D | Svelte shell (sidebar, tabs, overlay, search) with `LegacyTab` hosts | all tabs work inside the new shell |
 | E | Player tab in Svelte, panes on dockview, own Map pane instance | Player tab section deleted from `app.js` → **player-tab can merge** |
 | F0 | Arrangeable panels on the multi-panel tabs (Summary, Timeline, Locs & regions, Key moments, Pickups, Aim) | done |
-| F | Remaining tabs, smallest/least coupled first: Chat (done), Pack drops (done), Pickups (done), Key moments (done), Summary (done), Aim (done), Locs & regions, Timeline, Map | each port deletes its `app.js` section; done when `app.js` is gone |
+| F | Remaining tabs, smallest/least coupled first: Chat (done), Pack drops (done), Pickups (done), Key moments (done), Summary (done), Aim (done), Locs & regions (done), Timeline, Map | each port deletes its `app.js` section; done when `app.js` is gone |
 
 Not everything in `app.js` becomes a component. The parts without a DOM
 (playerStats accessors, bucket-view accessors, the data-preparation

@@ -23,7 +23,7 @@ talks to it through a JS shim.
   layer (`mvdData`, `MvdHub`), shared state (`MvdState`), result helpers
   (`MvdLib`) and the Player tab's engine (`MvdPlayer`). Ported so far: the
   shell, the Player tab (`src/player/`), and the Summary, Chat, Pack Drops,
-  Pickups, Key Moments and Aim Stats tabs (`src/tabs/<name>/`, their
+  Pickups, Key Moments, Aim Stats and Locs & Regions tabs (`src/tabs/<name>/`, their
   DOM-free parts in `src/lib/<name>.js`); see
   [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
   Two UI packages are bundled (pinned in `package.json`):
@@ -341,7 +341,7 @@ the sidebar (from `TABS` in `src/state/ui.js`) and the layout, and adopts
 the markup of tabs not yet ported — `index.html`'s hidden `#legacy-dom`,
 which `app.js` finds by id — into the main pane (`adopt.js`). Ported
 tabs (`PlayerTab`, and `SummaryTab`, `ChatTab`, `PackDropsTab`, `PickupsTab`,
-`KeyMomentsTab` in
+`KeyMomentsTab`, `AimStatsTab`, `LocGraphTab` in
 `src/tabs/`) are mounted there beside
 them; `app.js` still toggles their `active` class like any `.tab-content`.
 `src/main.js` mounts it synchronously, so that markup is in place before
@@ -371,9 +371,9 @@ them; `app.js` still toggles their `active` class like any `.tab-content`.
 6. On `result`, `app.js` parses the JSON, clears the no-demo class,
    switches to the Summary tab, and renders all tabs. The main-thread
    inits are cheap, so they run now even though the bucket-derived
-   fields are still empty — the loc graph is fully populated (the
-   Svelte tabs — Summary, Chat, Key Moments, Pack Drops, Pickups —
-   build on the first frame they show); only the timeline
+   fields are still empty (the Svelte tabs — Summary, Chat, Key Moments,
+   Pack Drops, Pickups, Aim Stats, Locs & Regions — build on the first
+   frame they show, the loc graph fully populated); only the timeline
    graph, map trails and region overlay are blank. On the later
    `buckets` message the data layer (`DemoHandle._applyBuckets`) stashes
    the payload onto `result.timelineAnalysis.bucketView` / `.regionControl
@@ -663,7 +663,9 @@ predicate. The CSS then hides **every team surface**: the Teams panel, the
 (a copy of `Player`) plus `TK` / `TDmg`, which are structurally 0 when
 nobody has a teammate. Region control is not driven by that class:
 `initRegionControl` hides its two panels itself whenever the layout is
-individual and not a duel (`isMultiPlayerIndividual`), because the result
+individual and not a duel (`isMultiPlayerIndividual` — the Map's region
+status directly, the Locs & Regions editor through the region-control
+model's `editable` flag), because the result
 ships `timelineAnalysis.regionControl.regions` (the region GEOMETRY, a
 property of the map) for every demo — the panels are NOT hidden by a
 missing-data gate, and before this they rendered an editor whose Apply
@@ -887,7 +889,8 @@ hiding the panels a demo has no data for — by inline style or body class
 into view asks the tab to redraw, since a canvas drawn while it was
 collapsed is drawn at zero width: a ported tab registers its redraw with
 `onPanelReveal` (`src/ui/panels/reveal.js` — Aim Stats repaints its two
-crosshair images), a tab still in `app.js` gets `renderTabContent`.
+crosshair images, Locs & Regions resizes and fits its loc graph), a tab
+still in `app.js` gets `renderTabContent`.
 
 ## Performance timing (console)
 
@@ -912,8 +915,8 @@ is no UI for it. Stages reported, in load order:
   `finalize:timelineAnalysis`. To get the **pure loc-resolution compute**,
   subtract `locFetch + bspFetch` from `finalize:timelineAnalysis`.
 - **result JSON.parse** (main thread), each legacy tab render
-  (`displayTimelineAnalysis`, `initMapView`,
-  `initLocGraphView`; the ported tabs build when first shown), and the
+  (`displayTimelineAnalysis`, `initMapView`; the ported tabs build when
+  first shown), and the
   async `map geometry fetch` (logged separately as it resolves after
   the UI is shown).
 
@@ -1510,8 +1513,20 @@ on load when the map has a corpus. Code: `drawMapEntities` /
 **graph** and **heatmap**. All read `result.locGraph` (loc nodes weighted
 by **alive, observed** time-spent — dead players and unobserved holes are
 excluded since schema v64 — transition edges; per-player and per-team
-breakdowns baked onto every node) plus `demoInfo.{teams,players}` / `mapState.controlStats`
-— no extra analyzer pass.
+breakdowns baked onto every node) plus `demoInfo.{teams,players}` / the
+region-control model — no extra analyzer pass.
+
+The tab is Svelte (`src/tabs/locgraph/LocGraphTab.svelte`, the Region
+Control panel in `RegionControlPanel.svelte`). The graph's element set,
+stylesheet, layouts and tooltips are `src/lib/locgraph.js`; the two
+matrices `src/lib/loc-heatmap.js`; the region definitions (rows, reading,
+resolving against the locs, Save… / Load… JSON) `src/lib/regions.js`.
+`loc-graph-view.js` owns the Cytoscape instance — a fresh one per demo,
+destroyed when the demo changes. The graph and heatmap build on the first
+frame the tab shows after the demo or the teams changed; each time the tab
+shows (and again a frame and 120 ms later), and when one of its panels
+comes back into view, the graph is resized and fitted. The heatmaps are
+not rebuilt on a tab switch, so a column sort survives it.
 
 The **Metric** selector (`#locgraph-metric`, its own panel above the graph
 so it clearly governs both loc views but *not* Region Control) reweights
@@ -1519,19 +1534,22 @@ the loc graph and heatmap by combat posture, yielding a **self-contained
 graph per case** — its own nodes *and* edges: *Full time* (all observed
 time), *With RL / LG* (the `armed` LocWeights / LocEdgeWeights), *Without
 RL / LG* (`unarmed`, the complement), *With Quad* (`quad`), or *With Pent*
-(`pent`). It drives node sizes (occupancy: `getLocMetric` →
-`metricWeightsOf` → `nodeWeightFor`), edge widths (movement:
-`metricEdgeWeightsOf` → `edgeWeightFor`, edges absent from the case are
-pruned and locs with no presence dimmed), and the heatmap (which renders
-for every metric, including the sparse quad / pent cases).
-`populateLocMetricOptions` hides the metrics a given demo has no data for
-(presence of the node's `armed`/`quad`/`pent` sub-object == availability;
-e.g. quad usually absent in 1v1), and falls back to *Full time* if the
-current pick goes away — so a metric can't leave an empty graph + table.
+(`pent`). It drives node sizes (occupancy: `metricWeightsOf` →
+`nodeWeightFor`), edge widths (movement: `metricEdgeWeightsOf` →
+`edgeWeightFor`, edges absent from the case are pruned and locs with no
+presence dimmed), and the heatmap (which renders for every metric,
+including the sparse quad / pent cases). `locMetricAvailability` hides the
+metrics a given demo has no data for (presence of the node's
+`armed`/`quad`/`pent` sub-object == availability; e.g. quad usually absent
+in 1v1), and the tab falls back to *Full time* if the current pick goes
+away — so a metric can't leave an empty graph + table. A Filter pick
+survives a new demo when that demo has the same team / player.
 
-- The **movement graph** — a Cytoscape.js node/edge diagram with the
-  filter / edge-mode / layout controls, driven by `initLocGraphView` and
-  `buildOrRefreshCytoscape`.
+- The **movement graph** — a Cytoscape.js node/edge diagram
+  (`locGraphElements`, `locGraphStyle`) with the filter / edge-mode / min
+  count / layout / label controls, Re-layout (animated) and Fit.
+  Cytoscape + fcose stay vendored classic scripts (`static/vendor/`,
+  loaded by `index.html`).
 - The **Loc Heatmap** (`buildLocHeatmap`) — rows are locs (busiest
   first); the leading columns are the **teams** (every member's time
   combined), then one column per **player** grouped by team, with a
@@ -1540,30 +1558,45 @@ current pick goes away — so a metric can't leave an empty graph + table.
   own busiest loc (sqrt-curved). The team columns are dropped for duels
   and single-team demos.
 - **Region Control** (`buildRegionHeatmap`) — the region definition
-  editor (`buildRegionConfig`, group locs into named regions; save/load
-  JSON) plus the per-region control matrix: rows are regions, columns are
-  the seven control states (teamA control/weak, contested, cont. weak,
-  empty, teamB weak/control). Moved here from the Map tab; the live
-  region *overlay* and *status* still render on the Map. Initialised by
-  `initRegionControl` (from `initMapView`) and recomputed through the
-  `recomputeRegionControl` WASM bridge on edits (`renderRegionControlFromGo`).
-  Cells are normalised **per region** to that region's busiest control
-  state (Empty excluded — it is filler, not a control state, and would
-  swamp the scale) so each row spans the full colormap; the printed %
-  stays the absolute match fraction.
+  editor (group locs into named regions; save/load JSON) plus the
+  per-region control matrix: rows are regions, columns are the seven
+  control states (teamA control/weak, contested, cont. weak, empty, teamB
+  weak/control). The live region *overlay* and *status* render on the Map
+  and the control timeline on the Timeline tab; all three read the one
+  **region-control model**, `src/state/regions.js` (`MvdState.regionControl`).
+  `app.js`'s `initRegionControl` (from `initMapView`, on load and again
+  when the deferred buckets land) puts the demo's own regions in effect
+  with `resetRegionControl` — which rebuilds the editor rows — and decides
+  whether the editor shows (two sides only). A committed edit (an input's
+  change, a remove, a Load…) goes through `applyRegionDefs`: the
+  definitions are resolved against the demo's locs (case-insensitive,
+  duplicate names first-wins, unknown locs dropped) and published, then
+  recomputed through the data layer (`DemoHandle.recomputeRegions`, the
+  `recomputeRegionControl` WASM bridge) and published again;
+  `app.js`'s `onRegionControlChanged` mirrors both steps onto `mapState`
+  (`controlRegions`, `locToRegion`, `regionToGroups`, `bucketStates`, …)
+  and redraws the Map and the Timeline's Region Control panel. When the
+  map geometry arrives, `applyMapGeometry` re-applies the regions in effect
+  (`reapplyRegions`) so the overlay's region → loc-group lookup points at
+  the new groups. Region edits are not persisted: a reload or another
+  demo starts from that demo's regions. Cells are normalised **per
+  region** to that region's busiest control state (Empty excluded — it is
+  filler, not a control state, and would swamp the scale) so each row
+  spans the full colormap; the printed % stays the absolute match
+  fraction.
 
-The two matrices share one renderer, `renderHeatmapTable`, fed a
+The two matrices share one renderer, `heatmapTableHtml`, fed a
 policy-free model — `{ rows:[{name,cells:[{i,p}]}], columns:[{label,full,
 team,teamIdx,…}], teamCols, cellTitle }` where `i` is a 0..1 intensity
 (normalisation already baked in by the `build*` function) and `p` the
 printed %. It renders a sortable `.stats-table` (crisp text + free column
-sorting via `makeSortable`, tbody built with the shared `renderTableRows`
-helper) rather than a canvas; each cell is viridis-shaded
+sorting via `makeSortable`) rather than a canvas; each cell is
+viridis-shaded
 (`heatColorRGB` / `HEAT_STOPS` in `src/lib/heat-color.js`, shared with
 the Aim tab's crosshair image and mirrored by the CSS `.heatmap-legend-bar`
 gradient — chosen for red/green colour-vision-deficiency safety) with a
 contrast-aware ink and a `data-sort-value`. Team identity rides on the
-canonical `TEAM_COLORS`-by-`timelineState.teams` mapping (see the repo
+canonical team order and colours (`src/state/teams.js`, see the repo
 CLAUDE.md "Team colors" convention) as a colored underline on the
 relevant column headers. Player column headers show a truncated name with
 the full name on the header `title` — QuakeWorld's in-game short name

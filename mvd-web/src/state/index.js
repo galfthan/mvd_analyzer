@@ -9,3 +9,4 @@ export { teams, setCanonicalTeams, teamIndexOf, colorOf, TEAM_PALETTE } from './
 // load. Set once a load has fully replaced the previous demo.
 export const demo = store(null);
 export { TABS, activeTab, selectTab } from './ui.js';
+export { regionControl, resetRegionControl, applyRegionDefs, reapplyRegions } from './regions.js';

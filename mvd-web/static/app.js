@@ -46,32 +46,6 @@ function teamStrongColor(hex) {
     return `rgb(${Math.round(r * 0.7)}, ${Math.round(g * 0.7)}, ${Math.round(b * 0.7)})`;
 }
 
-// ─── Table builder ──────────────────────────────────────────────────────────
-//
-// Clear tbody, loop, build a <tr>, paint a 3px team-coloured border-left,
-// set innerHTML, append — the loc / region heatmaps' tbody builder (the
-// Summary tab's tables do the same in src/tabs/summary/).
-//
-// `getTeamIdx` is optional — pass it for tables whose rows should get a
-// team colour stripe. The helper looks up the colour from TEAM_COLORS so
-// the palette stays in one place.
-function renderTableRows(tbodyId, items, buildRow, getTeamIdx) {
-    const tbody = document.getElementById(tbodyId);
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    items.forEach((item, i) => {
-        const tr = document.createElement('tr');
-        if (getTeamIdx) {
-            const teamIdx = getTeamIdx(item, i);
-            if (teamIdx >= 0 && teamIdx < TEAM_COLORS.length) {
-                tr.style.borderLeft = `3px solid ${TEAM_COLORS[teamIdx]}`;
-            }
-        }
-        tr.innerHTML = buildRow(item, i);
-        tbody.appendChild(tr);
-    });
-}
-
 let currentResult = null;
 
 // ─── Data source ────────────────────────────────────────────────────────────
@@ -253,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // subscriber at once; the clock's first call (t = 0, nothing loaded) is
     // not a tick.
     MvdState.teams.subscribe(onTeamsChanged);
+    MvdState.regionControl.subscribe(onRegionControlChanged);
     let clockSubscribed = false;
     MvdState.clock.subscribe((tick) => { if (clockSubscribed) onClockTick(tick); });
     clockSubscribed = true;
@@ -565,8 +540,6 @@ function renderTabContent(tabName) {
     } else if (tabName === 'timeline') {
         if (currentResult) updateDetailView();
         updateTimeIndicators();
-    } else if (tabName === 'loc-graph') {
-        renderLocGraph();
     }
 }
 
@@ -1085,9 +1058,6 @@ function displayResults(result) {
         timeRender('initMapView', () => initMapView(result));
     }
 
-    // Loc Graph
-    timeRender('initLocGraphView', () => initLocGraphView(result));
-
     // Make all static tables sortable
     document.querySelectorAll('.stats-table').forEach(makeSortable);
 
@@ -1109,25 +1079,10 @@ function makeSortable(table) {
     return MvdLib.makeSortable(table);
 }
 
-// applyDuelModeUI toggles the "Per Team" aggregation panels and the
-// standalone "Teams" summary off when we're rendering a 1v1 demo.
-// Everything else (the per-player scoreboard, weapon stats, item
-// pickups) still renders normally.
-//
-// Detection: the Go `roster` core node stamps every participant team field
-// as their own name for duels (and only for exactly-2-player matches — see
-// newRoster in analyzer/roster.go), so we can detect duel mode reliably by
-// checking whether the two players each have `team === name`. This avoids
-// depending on the metadata mode string, which can be "duel" / "1on1" /
-// "LGC" / "Hoony" / missing entirely depending on the server flavour.
-//
-// Read off playerStats rather than demoInfo: the roster stamp is what is
-// being tested, playerStats carries it on every demo, and a pre-KTX-block
-// duel used to fall through here and render the team panels for a 1v1.
+// isDuel: a 1v1 — src/lib/result.js (applyDuelModeUI toggles the "Per Team"
+// aggregation panels and the standalone "Teams" summary off on one).
 function isDuel(result) {
-    const players = playerStatsRows(result);
-    if (!players.length) return false;
-    return players.length === 2 && players.every(p => p.team === p.name);
+    return MvdLib.isDuel(result);
 }
 
 // The two team questions — LAYOUT (every player their own side?) and
@@ -1327,23 +1282,11 @@ function resetUIToCleanState() {
     setHTML('map-items-body', '');
     hide('map-items-panel');
     hide('map-no-data');
-    setHTML('region-control-body', '');
-    hide('region-control-panel');
     setHTML('region-status-body', '');
     hide('region-status-panel');
-    setHTML('region-config', '');
-
-    // Loc graph
-    if (locGraphState.cy) {
-        try { locGraphState.cy.destroy(); } catch (_) {}
-        locGraphState.cy = null;
-    }
-    locGraphState.graph = null;
-    locGraphState.result = null;
-    setHTML('locgraph-canvas', '');
-    hide('locgraph-no-data');
-    setHTML('locheatmap-body', '');
-    hide('locheatmap-panel');
+    // The Locs & Regions tab (src/tabs/locgraph/) clears its region editor
+    // and matrix on this, and its loc graph on the demo store.
+    MvdState.regionControl.set(null);
 
     // Body classes — duel-mode / individual-mode / no-team-rows / no-match
     // collapse some panels via CSS; clear them so a teamplay demo loaded after
@@ -1374,7 +1317,6 @@ function resetUIToCleanState() {
     mapState.followPlayer = null;
     mapState._regionIconCache = null; // composited region-status icons (per demo)
     if ('controlRegions' in mapState) mapState.controlRegions = null;
-    if ('rcResult' in mapState) mapState.rcResult = null;
     if ('locToRegion' in mapState) mapState.locToRegion = {};
     if ('dropEvents' in mapState) mapState.dropEvents = [];
     if ('zRange' in mapState) mapState.zRange = null;
@@ -3005,7 +2947,8 @@ function updateDetailGraph(startTime, endTime) {
 // every mousemove, and — when it returns a truthy hit — fills the tip with
 // `renderHtml(hit)` and clamp-positions it near the cursor (kept inside the
 // wrapper's right edge). Idempotent per canvas. Shared by the weapon-graph
-// drop-dot and powerup-span tooltips; the loc-graph tooltip is intentionally
+// drop-dot and powerup-span tooltips; the loc-graph tooltip
+// (src/tabs/locgraph/loc-graph-view.js) is intentionally
 // NOT built on this (it rides Cytoscape's own node/edge mouseover events and
 // renderedPosition, not a raw canvas hit-test).
 function attachCanvasTooltip(canvas, hitTest, renderHtml) {
@@ -3702,11 +3645,12 @@ function markMapDirty() {
 // normalization, backdrop split, submodel indexing, cache invalidation,
 // group rebuild — is MvdMap.setGeometry; this wrapper only refreshes the
 // region->group references (the control overlay must not keep pointing at
-// the previous, stale-tris group objects) and repaints.
+// the previous, stale-tris group objects: re-applying the regions in effect
+// rebuilds them, see onRegionControlChanged) and repaints.
 function applyMapGeometry(geom) {
     mapView.setGeometry(geom);
-    if (mapState.rcResult) {
-        applyRegionConfig(); // also calls renderMap
+    if (MvdState.regionControl.get()) {
+        MvdState.reapplyRegions(currentDemo); // also calls renderMap
     } else {
         markMapDirty();
         renderMap(mapState.currentTime);
@@ -3916,7 +3860,6 @@ function initRegionControlData(result) {
 
     // Set control regions and locToRegion from backend definitions
     mapState.controlRegions = rc.regions;
-    mapState.rcResult = rc;
     mapState.locToRegion = {};
     for (const region of rc.regions) {
         for (const pt of region.points) {
@@ -3935,9 +3878,11 @@ function initRegionControlData(result) {
     mapState.teamB              = rc.teamB || null;
 }
 
+// initRegionControl puts the demo's own regions in effect
+// (src/state/regions.js — the Locs & Regions tab builds its editor and
+// control matrix from them) and shows or hides the Map's region status.
 function initRegionControl(result) {
     const rc = result.timelineAnalysis?.regionControl;
-    const panel = document.getElementById('region-control-panel');
     const statusPanel = document.getElementById('region-status-panel');
     // Region control is a two-SIDES display: the map tint, the legend and the
     // stats table are all "team A vs team B" (view/region_control.go builds
@@ -3948,205 +3893,45 @@ function initRegionControl(result) {
     // console warning. A two-participant match (a duel, a 1v1 FFA) does have
     // two sides and keeps the panels.
     if (!rc || !rc.regions || rc.regions.length === 0 || isMultiPlayerIndividual(result)) {
-        if (panel) panel.style.display = 'none';
         if (statusPanel) statusPanel.style.display = 'none';
         mapState.controlRegions = null;
+        MvdState.resetRegionControl(result, false);
         return;
     }
-
-    // Store the original backend result and all locations for recomputation
-    mapState.rcResult = rc;
 
     // Ensure location groups are processed
     if (!mapState.locationGroups && mapState.locations.length > 0) {
         mapView.rebuildLocationGroups();
     }
 
-    // Build region config UI (editable text fields per region)
-    buildRegionConfig(rc.regions);
-
-    // Render the table from the Go-supplied stats that
-    // initRegionControlData stashed on mapState. User edits route through
-    // applyRegionConfig, which calls the WASM bridge to refresh both.
-    renderRegionControlFromGo(rc.regions, mapState.regionControlStats, mapState.teamA, mapState.teamB);
+    // The editor and matrix render from the Go-supplied regions and stats
+    // (the same ones initRegionControlData stashed on mapState). User edits
+    // come back through onRegionControlChanged.
+    MvdState.resetRegionControl(result, true);
     mapState.renderDirty = true;
 
-    if (panel) panel.style.display = '';
     if (statusPanel) statusPanel.style.display = '';
 }
 
-function buildRegionConfig(regions) {
-    const container = document.getElementById('region-config');
-    if (!container) return;
-    container.innerHTML = '';
-
-    const rowsWrap = document.createElement('div');
-    rowsWrap.className = 'region-config-rows';
-    container.appendChild(rowsWrap);
-
-    for (const region of regions) {
-        const locNames = [...new Set(region.points.map(p => p.name))].join(', ');
-        rowsWrap.appendChild(buildRegionRow(region.name, locNames));
-    }
-
-    const actions = document.createElement('div');
-    actions.className = 'region-config-actions';
-    actions.innerHTML = `
-        <button type="button" class="region-add-btn">+ Add region</button>
-        <button type="button" class="region-save-btn" title="Download these region definitions as JSON">Save…</button>
-        <button type="button" class="region-load-btn" title="Load region definitions from a JSON file">Load…</button>
-        <input type="file" class="region-load-input" accept="application/json,.json" hidden>
-    `;
-    container.appendChild(actions);
-
-    actions.querySelector('.region-add-btn').addEventListener('click', () => {
-        const row = buildRegionRow('', '');
-        rowsWrap.appendChild(row);
-        const nameInput = row.querySelector('.region-name-input');
-        if (nameInput) nameInput.focus();
-    });
-    actions.querySelector('.region-save-btn').addEventListener('click', saveRegionConfig);
-    const loadInput = actions.querySelector('.region-load-input');
-    actions.querySelector('.region-load-btn').addEventListener('click', () => loadInput.click());
-    loadInput.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (file) loadRegionConfig(file);
-        loadInput.value = '';
-    });
-}
-
-function buildRegionRow(name, locNames) {
-    const row = document.createElement('div');
-    row.className = 'region-config-row';
-    row.innerHTML = `
-        <input type="text" class="region-name-input" placeholder="region name" value="${escapeHtml(name)}">
-        <input type="text" class="region-locs-input" placeholder="loc1, loc2, …" value="${escapeHtml(locNames)}">
-        <button type="button" class="region-remove-btn" title="Remove region">&times;</button>
-    `;
-    row.querySelector('.region-name-input').addEventListener('change', () => applyRegionConfig());
-    row.querySelector('.region-locs-input').addEventListener('change', () => applyRegionConfig());
-    row.querySelector('.region-remove-btn').addEventListener('click', () => {
-        row.remove();
-        applyRegionConfig();
-    });
-    return row;
-}
-
-function readRegionConfigFromUI() {
-    // Walk the per-row inputs in DOM order so the user's region order
-    // is preserved when serialised. Empty rows (no name or no locs)
-    // are dropped silently — they're transient editing state.
-    const out = [];
-    document.querySelectorAll('#region-config .region-config-row').forEach(row => {
-        const name = (row.querySelector('.region-name-input')?.value || '').trim();
-        const locsRaw = row.querySelector('.region-locs-input')?.value || '';
-        const locs = locsRaw.split(',').map(s => s.trim()).filter(s => s);
-        if (!name || locs.length === 0) return;
-        out.push({ name, locs });
-    });
-    return out;
-}
-
-async function applyRegionConfig() {
-    const rc = mapState.rcResult;
-    if (!rc) return;
-
-    // Read current region definitions from the per-row inputs
-    const regions = [];
-    const seenNames = new Set();
-    for (const def of readRegionConfigFromUI()) {
-        // Drop dupes — first occurrence wins so editing a row above
-        // doesn't get masked by a stale row below sharing the same name.
-        if (seenNames.has(def.name)) continue;
-        seenNames.add(def.name);
-
-        // Find matching locations from the full loc list. Match is
-        // case-insensitive so a hand-edited "ya" still claims the
-        // canonical "YA" loc — saves the user having to memorize the
-        // exact post-substitution casing.
-        const locSet = new Set(def.locs.map(s => s.toLowerCase()));
-        const points = [];
-        let sumX = 0, sumY = 0;
-        for (const loc of mapState.locations) {
-            if (locSet.has(loc.name.toLowerCase())) {
-                points.push({ x: loc.x, y: loc.y, z: loc.z, name: loc.name });
-                sumX += loc.x;
-                sumY += loc.y;
-            }
-        }
-        if (points.length > 0) {
-            regions.push({
-                name: def.name,
-                points: points,
-                centroidX: sumX / points.length,
-                centroidY: sumY / points.length,
-            });
-        }
-    }
-
-    mapState.controlRegions = regions;
-    MapView.computeRegionStacking(regions);
-
-    // Build loc-name-to-region lookup
-    mapState.locToRegion = {};
-    for (const region of regions) {
-        for (const pt of region.points) {
-            mapState.locToRegion[pt.name] = region.name;
-        }
-    }
-
-    // Build region-to-location-group mapping for coloring
-    mapState.regionToGroups = {};
-    if (mapState.locationGroups) {
-        for (const group of mapState.locationGroups) {
-            for (const region of regions) {
-                let matched = false;
-                for (const gpt of group.points) {
-                    for (const rpt of region.points) {
-                        const dx = gpt.x - rpt.x, dy = gpt.y - rpt.y;
-                        if (dx * dx + dy * dy < 1) {
-                            matched = true;
-                            break;
-                        }
-                    }
-                    if (matched) break;
-                }
-                if (matched) {
-                    if (!mapState.regionToGroups[region.name]) {
-                        mapState.regionToGroups[region.name] = [];
-                    }
-                    mapState.regionToGroups[region.name].push(group);
-                }
-            }
-        }
-    }
-
-    // Recompute control stats via the WASM bridge (view.RegionControl).
-    // Built and shipped together with this JS, so the export is always
-    // available.
-    const overrideJSON = JSON.stringify({
-        regions: regions.map(r => ({
-            name: r.name,
-            locs: r.points.map(p => p.name),
-        })),
-    });
-    let res;
-    try {
-        const jsonStr = await currentDemo.recomputeRegions(overrideJSON);
-        res = JSON.parse(jsonStr);
-    } catch (err) {
-        console.warn('recomputeRegionControl:', err.message);
+// onRegionControlChanged mirrors an edit on the Locs & Regions tab
+// (src/state/regions.js) onto the Map's state, in the two steps it lands in:
+// the resolved regions, then Go's recomputed control states — after which
+// the map and the Timeline's Region Control panel redraw. The demo's own
+// regions ('loaded') were written by initRegionControlData already.
+function onRegionControlChanged(rc) {
+    if (!rc || rc.stage === 'loaded') return;
+    mapState.controlRegions = rc.regions;
+    if (rc.stage === 'resolved') {
+        MapView.computeRegionStacking(rc.regions);
+        mapState.locToRegion = MvdLib.locToRegionOf(rc.regions);
+        // Region → loc groups, for the control overlay's colouring.
+        mapState.regionToGroups = MvdLib.regionToGroupsOf(rc.regions, mapState.locationGroups);
         return;
     }
-    if (res.error) {
-        console.warn('recomputeRegionControl:', res.error);
-        return;
-    }
-    mapState.bucketStates       = res.bucketStates || null;
-    mapState.regionControlStats = res.stats || null;
-    mapState.teamA              = res.teamA || mapState.teamA;
-    mapState.teamB              = res.teamB || mapState.teamB;
-    renderRegionControlFromGo(regions, res.stats, res.teamA, res.teamB);
+    mapState.bucketStates       = rc.bucketStates;
+    mapState.regionControlStats = rc.stats;
+    mapState.teamA              = rc.teamA || mapState.teamA;
+    mapState.teamB              = rc.teamB || mapState.teamB;
 
     // Force map redraw
     mapState.renderDirty = true;
@@ -4154,78 +3939,6 @@ async function applyRegionConfig() {
 
     // Re-render timeline region control graph
     updateDetailView();
-}
-
-// renderRegionControlFromGo decorates Go-supplied per-region stats with
-// teamA/teamB strings (the Go shape carries those at the parent level, not on
-// each region), stashes them on mapState, and (re)draws the region-control
-// matrix — the same canvas UX element as the loc heatmap.
-function renderRegionControlFromGo(regions, stats, teamA, teamB) {
-    if (!stats) return;
-    const decorated = {};
-    for (const r of regions) {
-        const s = stats[r.name];
-        if (!s) continue;
-        decorated[r.name] = Object.assign({}, s, { teamA, teamB });
-    }
-    mapState.controlRegions = regions;
-    mapState.controlStats = decorated;
-    renderRegionHeatmap();
-}
-
-// Map name → safe filename stem for the Save button. Falls back to
-// "regions" when no map info is available.
-function regionConfigFilename() {
-    const base = mapFileKey(currentResult).replace(/[^a-z0-9_-]/g, '');
-    return (base || 'regions') + '.json';
-}
-
-function saveRegionConfig() {
-    const regions = readRegionConfigFromUI();
-    const json = JSON.stringify({ regions }, null, 4) + '\n';
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = regionConfigFilename();
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 0);
-}
-
-function loadRegionConfig(file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-        let parsed;
-        try {
-            parsed = JSON.parse(reader.result);
-        } catch (err) {
-            alert('Failed to parse region JSON: ' + err.message);
-            return;
-        }
-        const regions = Array.isArray(parsed?.regions) ? parsed.regions : null;
-        if (!regions) {
-            alert('Region JSON must have a top-level "regions" array.');
-            return;
-        }
-        // Rebuild the row UI from the loaded definitions, then re-apply
-        // so map render / stats / timeline pick up the change.
-        const container = document.getElementById('region-config');
-        if (!container) return;
-        const rowsWrap = container.querySelector('.region-config-rows');
-        if (!rowsWrap) return;
-        rowsWrap.innerHTML = '';
-        for (const r of regions) {
-            const name = String(r.name || '').trim();
-            const locs = Array.isArray(r.locs) ? r.locs.map(s => String(s)) : [];
-            if (!name) continue;
-            rowsWrap.appendChild(buildRegionRow(name, locs.join(', ')));
-        }
-        applyRegionConfig();
-    };
-    reader.onerror = () => alert('Failed to read file.');
-    reader.readAsText(file);
 }
 
 // Look up region control state at a given time — MvdMap.regionControlAt
@@ -5650,894 +5363,6 @@ function onMapWindowResize() {
         mapState.renderDirty = true;
         renderMap(mapState.currentTime);
     });
-}
-
-// ─── Loc Graph (Cytoscape) ────────────────────────────────────────────────
-//
-// Prototype using Cytoscape.js for the loc-graph rendering. Swap-in
-// alternative to the earlier hand-rolled canvas version so we can evaluate
-// layout quality, interactivity and future extensibility (route analysis,
-// player animation on top of nodes).
-//
-// FIXME: when per-time player positions are added later, this tab will need
-// to be added to TABS_WITH_TIMELINE so the unified scrubber appears.
-
-const locGraphState = {
-    cy: null,            // Cytoscape instance
-    graph: null,         // { locs, edges } from result.locGraph
-    result: null,        // Full result — used for filter repopulation on re-init
-    initialized: false,
-    tooltip: null        // Hover tooltip DOM node
-};
-
-// cytoscape-fcose registers itself on the global `cytoscape` object when
-// loaded; guard the registration so re-loading the file during dev doesn't
-// throw.
-function registerCytoscapeExtensions() {
-    if (typeof cytoscape === 'undefined') return;
-    if (typeof cytoscapeFcose !== 'undefined' && !cytoscape.__fcoseRegistered) {
-        cytoscape.use(cytoscapeFcose);
-        cytoscape.__fcoseRegistered = true;
-    }
-}
-
-function initLocGraphView(result) {
-    const graph = result && result.locGraph;
-    const container = document.getElementById('locgraph-canvas');
-    if (!container) return;
-
-    locGraphState.graph = graph || null;
-    locGraphState.result = result;
-
-    const noData = document.getElementById('locgraph-no-data');
-    if (!graph || !graph.locs || graph.locs.length === 0) {
-        if (noData) noData.style.display = 'block';
-        if (locGraphState.cy) {
-            locGraphState.cy.destroy();
-            locGraphState.cy = null;
-        }
-        renderLocHeatmap();
-        return;
-    }
-    if (noData) noData.style.display = 'none';
-
-    populateLocGraphFilter(result);
-    populateLocMetricOptions();
-
-    if (!locGraphState.initialized) {
-        setupLocGraphControls();
-        locGraphState.initialized = true;
-    }
-
-    buildOrRefreshCytoscape();
-    renderLocHeatmap();
-}
-
-// Show only the loc-analysis metrics this demo actually has data for —
-// "With Quad"/"With Pent" disappear on maps/modes where nobody held that
-// powerup (e.g. quad in most 1v1s), so the user can't land on an empty
-// graph + table. A node carries the conditioned sub-object only when some
-// sample met the condition (omitempty), so presence == availability. If the
-// current selection becomes unavailable, fall back to "Full time".
-function populateLocMetricOptions() {
-    const sel = document.getElementById('locgraph-metric');
-    if (!sel) return;
-    const avail = { all: true, armed: false, unarmed: false, quad: false, pent: false };
-    const locs = (locGraphState.graph && locGraphState.graph.locs) || [];
-    for (const n of locs) {
-        if (n.armed) avail.armed = true;
-        if (n.unarmed) avail.unarmed = true;
-        if (n.quad) avail.quad = true;
-        if (n.pent) avail.pent = true;
-        if (avail.armed && avail.unarmed && avail.quad && avail.pent) break;
-    }
-    let currentOk = false;
-    for (const opt of sel.options) {
-        const ok = !!avail[opt.value];
-        opt.hidden = !ok;
-        opt.disabled = !ok;
-        if (ok && opt.value === sel.value) currentOk = true;
-    }
-    if (!currentOk) sel.value = 'all';
-}
-
-function populateLocGraphFilter(result) {
-    const select = document.getElementById('locgraph-filter');
-    if (!select) return;
-
-    const opts = [{ value: 'all', label: 'All' }];
-    const teams = (result.demoInfo && result.demoInfo.teams) || [];
-    const players = (result.demoInfo && result.demoInfo.players) || [];
-
-    // Hide team options in duel mode (team name == player name for every player).
-    if (!isDuel(result)) {
-        for (const t of teams) opts.push({ value: 'team:' + t, label: 'Team: ' + t });
-    }
-    for (const p of players) {
-        if (!p.name) continue;
-        opts.push({ value: 'player:' + p.name, label: p.name });
-    }
-
-    const prev = select.value;
-    select.innerHTML = '';
-    for (const o of opts) {
-        const opt = document.createElement('option');
-        opt.value = o.value;
-        opt.textContent = o.label;
-        if (o.value === prev) opt.selected = true;
-        select.appendChild(opt);
-    }
-    if (!opts.some(o => o.value === prev)) select.value = 'all';
-}
-
-function setupLocGraphControls() {
-    const on = (id, ev, fn) => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener(ev, fn);
-    };
-    on('locgraph-filter', 'change', buildOrRefreshCytoscape);
-    on('locgraph-edge-mode', 'change', buildOrRefreshCytoscape);
-    on('locgraph-min-edge', 'change', buildOrRefreshCytoscape);
-    on('locgraph-layout', 'change', buildOrRefreshCytoscape);
-    // Metric (all / armed / quad) reweights the graph nodes and the heatmap.
-    on('locgraph-metric', 'change', () => { buildOrRefreshCytoscape(); renderLocHeatmap(); });
-    on('locgraph-show-labels', 'change', applyLocGraphStyle);
-    on('locgraph-label-size', 'change', applyLocGraphStyle);
-    on('locgraph-relayout', 'click', () => runLocGraphLayout(true));
-    on('locgraph-fit', 'click', () => { if (locGraphState.cy) locGraphState.cy.fit(undefined, 30); });
-}
-
-function getLocGraphFilter() {
-    const sel = document.getElementById('locgraph-filter');
-    const val = sel ? sel.value : 'all';
-    if (val.startsWith('team:')) return { kind: 'team', key: val.slice(5) };
-    if (val.startsWith('player:')) return { kind: 'player', key: val.slice(7) };
-    return { kind: 'all', key: '' };
-}
-
-// 'all' | 'armed' | 'quad' — which time breakdown to weight by.
-function getLocMetric() {
-    const sel = document.getElementById('locgraph-metric');
-    return sel ? sel.value : 'all';
-}
-
-// Resolve a node's weight bundle for the chosen metric. 'all' is the node's
-// own Total/ByPlayer/ByTeam; 'armed'/'quad' read the optional sub-objects
-// (absent when no sample met the condition).
-function metricWeightsOf(node, metric) {
-    if (metric === 'armed') return node.armed || EMPTY_WEIGHTS;
-    if (metric === 'unarmed') return node.unarmed || EMPTY_WEIGHTS;
-    if (metric === 'quad') return node.quad || EMPTY_WEIGHTS;
-    if (metric === 'pent') return node.pent || EMPTY_WEIGHTS;
-    return node;
-}
-const EMPTY_WEIGHTS = { total: 0, byPlayer: {}, byTeam: {} };
-
-function nodeWeightFor(node, filter, metric) {
-    const w = metricWeightsOf(node, metric);
-    if (filter.kind === 'player') return w.byPlayer?.[filter.key] || 0;
-    if (filter.kind === 'team') return w.byTeam?.[filter.key] || 0;
-    return w.total || 0;
-}
-
-// Edges carry the same metric conditioning as nodes, so each metric is a
-// self-contained graph (its own nodes + edges).
-function metricEdgeWeightsOf(edge, metric) {
-    if (metric === 'armed') return edge.armed || EMPTY_WEIGHTS;
-    if (metric === 'unarmed') return edge.unarmed || EMPTY_WEIGHTS;
-    if (metric === 'quad') return edge.quad || EMPTY_WEIGHTS;
-    if (metric === 'pent') return edge.pent || EMPTY_WEIGHTS;
-    return edge;
-}
-
-function edgeWeightFor(edge, filter, metric) {
-    const w = metricEdgeWeightsOf(edge, metric);
-    if (filter.kind === 'player') return w.byPlayer?.[filter.key] || 0;
-    if (filter.kind === 'team') return w.byTeam?.[filter.key] || 0;
-    return w.total || 0;
-}
-
-// Build Cytoscape elements from the current graph + filter + edge-mode.
-// Nodes/edges carry their filtered weight in data so styles can reference it
-// directly instead of re-computing in the mapper.
-function buildCytoscapeElements() {
-    const { graph } = locGraphState;
-    if (!graph) return [];
-    const filter = getLocGraphFilter();
-    const metric = getLocMetric();
-    const edgeModeSel = document.getElementById('locgraph-edge-mode');
-    const edgeMode = edgeModeSel ? edgeModeSel.value : 'all';
-    const minEdgeSel = document.getElementById('locgraph-min-edge');
-    const minEdge = minEdgeSel ? (parseInt(minEdgeSel.value, 10) || 1) : 1;
-
-    let maxNodeWeight = 0;
-    for (const n of graph.locs) {
-        const w = nodeWeightFor(n, filter, metric);
-        if (w > maxNodeWeight) maxNodeWeight = w;
-    }
-    let maxEdgeWeight = 0;
-    for (const e of graph.edges) {
-        if (edgeMode === 'normal' && e.kind !== 'normal') continue;
-        if (edgeMode === 'teleport' && e.kind !== 'teleport') continue;
-        const w = edgeWeightFor(e, filter, metric);
-        if (w < minEdge) continue;
-        if (w > maxEdgeWeight) maxEdgeWeight = w;
-    }
-
-    const elements = [];
-
-    for (const n of graph.locs) {
-        const w = nodeWeightFor(n, filter, metric);
-        const norm = maxNodeWeight > 0 ? w / maxNodeWeight : 0;
-        const mw = metricWeightsOf(n, metric);
-        elements.push({
-            group: 'nodes',
-            data: {
-                id: 'n:' + n.name,
-                name: n.name,
-                weight: w,
-                weightNorm: norm,
-                total: mw.total || 0,
-                byPlayer: mw.byPlayer || {},
-                byTeam: mw.byTeam || {},
-                // Grey out nodes with zero contribution once a filter or a
-                // non-default metric is active, so each conditioned graph
-                // reads clearly while map context is preserved.
-                dim: w === 0 && (filter.kind !== 'all' || metric !== 'all')
-            },
-            // Preset/geographic layout reads world coords directly from data.
-            // Invert Y so "up" on screen matches "up" in map (QW Y is up).
-            position: { x: n.x || 0, y: -(n.y || 0) }
-        });
-    }
-
-    for (const e of graph.edges) {
-        if (edgeMode === 'normal' && e.kind !== 'normal') continue;
-        if (edgeMode === 'teleport' && e.kind !== 'teleport') continue;
-        const w = edgeWeightFor(e, filter, metric);
-        if (w === 0) continue; // Prune edges absent from this filter+metric subgraph
-        if (w < minEdge) continue; // UI minimum-edge-count filter
-        const norm = maxEdgeWeight > 0 ? w / maxEdgeWeight : 0;
-        const ew = metricEdgeWeightsOf(e, metric);
-        elements.push({
-            group: 'edges',
-            data: {
-                id: 'e:' + e.from + '->' + e.to,
-                source: 'n:' + e.from,
-                target: 'n:' + e.to,
-                weight: w,
-                weightNorm: norm,
-                kind: e.kind,
-                total: ew.total || 0,
-                byPlayer: ew.byPlayer || {},
-                byTeam: ew.byTeam || {}
-            }
-        });
-    }
-
-    return elements;
-}
-
-function buildLocGraphStyle() {
-    const showLabels = document.getElementById('locgraph-show-labels')?.checked ?? true;
-    const labelSizeSel = document.getElementById('locgraph-label-size');
-    const labelSize = labelSizeSel ? parseInt(labelSizeSel.value, 10) || 14 : 14;
-    const filter = getLocGraphFilter();
-
-    // Pick a node fill based on the filter so "Team: red" nodes are tinted
-    // with the team colour. In the "all" view, fall back to a neutral blue.
-    let nodeFill = '#8fb3ff';
-    if (filter.kind === 'team') {
-        const teams = timelineState.teams || [];
-        const idx = teams.indexOf(filter.key);
-        nodeFill = (idx >= 0 && idx < TEAM_COLORS.length) ? TEAM_COLORS[idx] : '#8fb3ff';
-    } else if (filter.kind === 'player') {
-        nodeFill = '#ffc107';
-    }
-
-    return [
-        {
-            selector: 'node',
-            style: {
-                'background-color': nodeFill,
-                'border-color': 'rgba(0, 217, 255, 0.6)',
-                'border-width': 1.5,
-                // sqrt so diameter scales with sqrt(time); "eye" area ≈ time.
-                'width':  'mapData(weightNorm, 0, 1, 16, 60)',
-                'height': 'mapData(weightNorm, 0, 1, 16, 60)',
-                'label': showLabels ? 'data(name)' : '',
-                'color': '#dfe6f5',
-                'font-size': labelSize,
-                'font-family': 'Inter, sans-serif',
-                'font-weight': 500,
-                'text-valign': 'bottom',
-                'text-margin-y': Math.max(4, labelSize * 0.3),
-                'text-outline-color': '#0a0a15',
-                'text-outline-width': Math.max(2, labelSize * 0.18)
-            }
-        },
-        {
-            selector: 'node[?dim]',
-            style: {
-                'background-opacity': 0.25,
-                'border-opacity': 0.2,
-                'text-opacity': 0.35
-            }
-        },
-        {
-            selector: 'edge',
-            style: {
-                'curve-style': 'bezier',
-                'control-point-step-size': 40,
-                'width': 'mapData(weightNorm, 0, 1, 1, 7)',
-                'line-color': '#8fb3ff',
-                'target-arrow-color': '#8fb3ff',
-                'target-arrow-shape': 'triangle',
-                'arrow-scale': 1.1,
-                'opacity': 0.8
-            }
-        },
-        {
-            selector: 'edge[kind = "teleport"]',
-            style: {
-                'line-color': '#00d9ff',
-                'target-arrow-color': '#00d9ff',
-                'line-style': 'dashed',
-                'line-dash-pattern': [8, 4]
-            }
-        },
-        {
-            selector: ':selected',
-            style: {
-                'border-color': '#ffc107',
-                'border-width': 3,
-                'line-color': '#ffc107',
-                'target-arrow-color': '#ffc107'
-            }
-        },
-        {
-            selector: '.highlight',
-            style: {
-                'opacity': 1,
-                'z-index': 50
-            }
-        },
-        {
-            selector: '.faded',
-            style: {
-                'opacity': 0.15
-            }
-        }
-    ];
-}
-
-// Build the cytoscape instance on first call, otherwise swap in the new
-// element set + layout. Keeping the instance alive preserves pan/zoom state
-// when the user toggles a filter.
-function buildOrRefreshCytoscape() {
-    if (!locGraphState.graph) return;
-    registerCytoscapeExtensions();
-    const container = document.getElementById('locgraph-canvas');
-    if (!container || typeof cytoscape === 'undefined') return;
-
-    const elements = buildCytoscapeElements();
-
-    if (!locGraphState.cy) {
-        locGraphState.cy = cytoscape({
-            container,
-            elements,
-            style: buildLocGraphStyle(),
-            layout: { name: 'preset' },
-            wheelSensitivity: 0.2,
-            minZoom: 0.1,
-            maxZoom: 4
-        });
-        attachLocGraphInteractions(locGraphState.cy);
-        locGraphState.cy.on('zoom', scheduleLabelSizeUpdate);
-    } else {
-        locGraphState.cy.batch(() => {
-            locGraphState.cy.elements().remove();
-            locGraphState.cy.add(elements);
-            locGraphState.cy.style(buildLocGraphStyle());
-        });
-    }
-
-    runLocGraphLayout(false);
-}
-
-// Run the chosen layout. `animate` is false on filter changes (the common
-// case) so layout runs instantly; the re-layout button passes true to get
-// the animated effect.
-function runLocGraphLayout(animate) {
-    const cy = locGraphState.cy;
-    if (!cy) return;
-    const sel = document.getElementById('locgraph-layout');
-    const name = sel ? sel.value : 'preset';
-
-    let opts;
-    if (name === 'preset') {
-        opts = { name: 'preset', fit: true, padding: 30 };
-    } else if (name === 'fcose') {
-        opts = {
-            name: 'fcose',
-            quality: 'default',
-            randomize: false,       // start from current positions
-            animate: animate,
-            animationDuration: 600,
-            nodeRepulsion: 8000,
-            idealEdgeLength: 80,
-            edgeElasticity: 0.45,
-            gravity: 0.25,
-            fit: true,
-            padding: 30
-        };
-    } else if (name === 'cose') {
-        opts = { name: 'cose', animate: animate, padding: 30, fit: true };
-    } else if (name === 'circle') {
-        opts = { name: 'circle', animate: animate, padding: 30, fit: true };
-    } else if (name === 'concentric') {
-        opts = {
-            name: 'concentric',
-            animate: animate,
-            padding: 30,
-            fit: true,
-            // Higher time spent = more central; Cytoscape expects larger
-            // numbers to be more central.
-            concentric: (node) => node.data('weight'),
-            levelWidth: () => 1
-        };
-    } else {
-        opts = { name: 'preset' };
-    }
-
-    const layout = cy.layout(opts);
-    layout.one('layoutstop', updateDynamicLabelSize);
-    layout.run();
-    // Non-animated layouts don't always emit layoutstop synchronously;
-    // run once now so the first paint already has correct sizing.
-    updateDynamicLabelSize();
-}
-
-function applyLocGraphStyle() {
-    if (!locGraphState.cy) return;
-    locGraphState.cy.style(buildLocGraphStyle());
-    updateDynamicLabelSize();
-}
-
-// Cytoscape font-size scales with zoom, so on wide maps (geographic
-// preset) the fit-to-viewport zoom drops the effective pixel size below
-// readability. Counter-act by recomputing font-size inversely proportional
-// to the current zoom, clamped to a sensible range.
-let _labelSizeRaf = 0;
-function scheduleLabelSizeUpdate() {
-    if (_labelSizeRaf) return;
-    _labelSizeRaf = requestAnimationFrame(() => {
-        _labelSizeRaf = 0;
-        updateDynamicLabelSize();
-    });
-}
-function updateDynamicLabelSize() {
-    const cy = locGraphState.cy;
-    if (!cy) return;
-    const sel = document.getElementById('locgraph-label-size');
-    const userSize = sel ? (parseInt(sel.value, 10) || 14) : 14;
-    const zoom = cy.zoom() || 1;
-    const target = Math.max(10, Math.min(48, userSize / zoom));
-    cy.batch(() => {
-        cy.nodes().style({
-            'font-size': target,
-            'text-margin-y': Math.max(4, target * 0.3),
-            'text-outline-width': Math.max(2, target * 0.18)
-        });
-    });
-}
-
-// Click: show a tooltip with top-5 connections. Hover: fade the rest of the
-// graph so the node's neighborhood is clear.
-function attachLocGraphInteractions(cy) {
-    // NB: not built on attachCanvasTooltip — this rides Cytoscape's own
-    // node/edge mouseover delegation and renderedPosition (plus a graph-fade
-    // side effect), not a raw canvas mousemove hit-test, so the shared helper
-    // wouldn't fit without contortion.
-    // Tooltip DOM — created lazily, reused across hovers.
-    const container = document.getElementById('locgraph-canvas');
-    if (!locGraphState.tooltip) {
-        const tip = document.createElement('div');
-        tip.className = 'locgraph-tooltip';
-        tip.style.display = 'none';
-        container.parentElement.appendChild(tip);
-        locGraphState.tooltip = tip;
-    }
-    const tip = locGraphState.tooltip;
-
-    const hideTip = () => { tip.style.display = 'none'; };
-    const showTipAt = (evt, html) => {
-        tip.textContent = '';
-        tip.innerHTML = html;
-        tip.style.display = 'block';
-        // Position via renderedPosition so it tracks pan/zoom.
-        const rect = container.getBoundingClientRect();
-        const x = evt.renderedPosition ? evt.renderedPosition.x : 0;
-        const y = evt.renderedPosition ? evt.renderedPosition.y : 0;
-        tip.style.left = (x + 12) + 'px';
-        tip.style.top = (rect.height - y - 12) + 'px'; // bottom-up coords
-        // Simpler: use originalEvent client position if available.
-        if (evt.originalEvent) {
-            tip.style.left = (evt.originalEvent.clientX - rect.left + 12) + 'px';
-            tip.style.top = (evt.originalEvent.clientY - rect.top + 12) + 'px';
-        }
-    };
-
-    cy.on('mouseover', 'node', (evt) => {
-        const node = evt.target;
-        cy.elements().addClass('faded');
-        node.removeClass('faded').addClass('highlight');
-        node.connectedEdges().removeClass('faded').addClass('highlight');
-        node.connectedEdges().connectedNodes().removeClass('faded').addClass('highlight');
-        showTipAt(evt, nodeTooltipHtml(node));
-    });
-    cy.on('mouseover', 'edge', (evt) => {
-        const edge = evt.target;
-        cy.elements().addClass('faded');
-        edge.removeClass('faded').addClass('highlight');
-        edge.source().removeClass('faded').addClass('highlight');
-        edge.target().removeClass('faded').addClass('highlight');
-        showTipAt(evt, edgeTooltipHtml(edge));
-    });
-    cy.on('mouseout', 'node, edge', () => {
-        cy.elements().removeClass('faded').removeClass('highlight');
-        hideTip();
-    });
-    cy.on('tap', (evt) => {
-        if (evt.target === cy) hideTip();
-    });
-}
-
-function nodeTooltipHtml(node) {
-    const name = node.data('name');
-    // Node time weights are int32 ms (schema v57); the UI shows seconds.
-    const total = (node.data('total') || 0) / 1000;
-    const byPlayer = node.data('byPlayer') || {};
-    const top = Object.entries(byPlayer).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const rows = top.map(([p, t]) => `<div>· ${escapeHtml(p)}: ${(t / 1000).toFixed(1)}s</div>`).join('');
-    return `<div><strong>${escapeHtml(name)}</strong></div>
-<div>Total time: ${total.toFixed(1)}s</div>
-${rows}`;
-}
-
-function edgeTooltipHtml(edge) {
-    const from = edge.data('source').replace(/^n:/, '');
-    const to = edge.data('target').replace(/^n:/, '');
-    const kind = edge.data('kind');
-    const total = edge.data('total') || 0;
-    const byPlayer = edge.data('byPlayer') || {};
-    const top = Object.entries(byPlayer).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const rows = top.map(([p, c]) => `<div>· ${escapeHtml(p)}: ${c}</div>`).join('');
-    return `<div><strong>${escapeHtml(from)} → ${escapeHtml(to)}</strong> (${kind})</div>
-<div>Total transitions: ${total}</div>
-${rows}`;
-}
-
-// Kept as a thin compatibility shim: the tab-switch handler and old callers
-// invoke renderLocGraph(); route them to the new refresh path.
-function renderLocGraph() {
-    if (locGraphState.cy) {
-        locGraphState.cy.resize();
-        locGraphState.cy.fit(undefined, 30);
-    } else if (locGraphState.graph) {
-        buildOrRefreshCytoscape();
-    }
-    // The heatmap / region-control tables are plain HTML built once at load
-    // (initLocGraphView, renderRegionControlFromGo) — unlike the canvas they
-    // don't need a re-render when the tab is revealed, and skipping it keeps
-    // the user's column sort intact across tab switches.
-}
-
-// ─── Loc Heatmap + Region Control matrices ───────────────────────────────────
-//
-// Both live in the loc-graph tab and share one renderer (renderHeatmapTable):
-// a sortable .stats-table — rows on the y-axis, one column per series, each
-// cell viridis-shaded by a precomputed intensity with the % printed in it.
-// Using a real table (vs. a canvas) gives crisp text and free column sorting
-// via makeSortable, and reuses the common renderTableRows tbody builder.
-//
-//   - Loc heatmap: rows = locs (busiest first); columns are the team
-//     aggregates (every member's time combined) then one per player grouped by
-//     team. Intensity = each column's share of its time in the loc, normalised
-//     PER COLUMN to its own busiest loc (sqrt-curved).
-//   - Region control: rows = regions; columns are the seven control states.
-//     Intensity = each state's share, normalised PER ROW to the region's
-//     busiest control state (Empty excluded — see buildRegionHeatmap).
-//
-// Normalisation is baked into each cell's intensity by the build* functions, so
-// the renderer is policy-free. Team identity rides on the canonical
-// TEAM_COLORS-by-timelineState.teams mapping (see CLAUDE.md "Team colors") as a
-// coloured underline on the relevant column headers. Data comes from
-// result.locGraph + result.demoInfo (locs) and mapState.controlStats (regions)
-// — no extra analyzer pass.
-
-// The shared viridis ramp (src/lib/heat-color.js), also the Aim tab's.
-function heatColorRGB(t) {
-    return MvdLib.heatColorRGB(t);
-}
-
-// Readable text color over an [r,g,b] fill — dark ink on light cells, white
-// on dark ones (Rec. 601 luma).
-function contrastInk(rgb) {
-    const lum = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
-    return lum > 150 ? '#10131f' : '#f0f0f0';
-}
-
-// Canonical team order: TEAM_COLORS is indexed by position in
-// timelineState.teams (frag-sorted, set in displayResults) so the header
-// underlines match the rest of the app. Fall back to demoInfo order before
-// that runs.
-function canonicalTeams(result) {
-    if (timelineState.teams && timelineState.teams.length) return [...timelineState.teams];
-    const dt = result.demoInfo && result.demoInfo.teams;
-    return (dt && dt.length) ? [...dt] : [''];
-}
-
-// Short display label for a long player name; the full name is kept on the
-// column header's title attribute. (QuakeWorld's in-game short name comes from
-// the client-side `cl_fakename` cvar, which is only ever injected as a text
-// prefix on say_team messages — never carried in userinfo — so there is no
-// per-player short name in the demo stream to read.)
-function shortName(name, n = 9) {
-    name = String(name || '');
-    return name.length > n ? name.slice(0, n - 1) + '…' : name;
-}
-
-// ── Shared matrix model ──────────────────────────────────────────────────────
-//
-// Both build* functions return the same shape, rendered by renderHeatmapTable:
-//
-//   {
-//     rows:    [{ name, cells: [{ i, p }, ...] }]    // i: 0..1 intensity, p: %|null
-//     columns: [{ label, full, team, teamIdx, ... }] // teamIdx<0 = no underline
-//     teamCols,                                       // separator before col teamCols
-//     cellTitle(col, row, ci) -> string               // <td> title text
-//   }
-//
-// Normalisation (per-column for locs, per-row for regions) is baked into each
-// cell's intensity `i` by the build* functions, so the renderer is policy-free.
-
-// Build the loc matrix for `metric` ('all' | 'armed' | 'quad'): leading
-// team-aggregate columns then one per player grouped by team; rows are locs
-// (busiest first by the metric). Intensity is each column's share normalised to
-// its own busiest loc (sqrt-curved to lift small shares). Returns null when
-// there's nothing to show (e.g. nobody ever held a quad).
-function buildLocHeatmap(result, metric) {
-    const graph = result && result.locGraph;
-    if (!graph || !graph.locs || graph.locs.length === 0) return null;
-    const players = (result.demoInfo && result.demoInfo.players) || [];
-    const teams = canonicalTeams(result);
-    const teamIdxOf = (team) => {
-        const i = teams.indexOf(team);
-        return i >= 0 ? i : teams.length; // unknown teams share the trailing color
-    };
-
-    // Weights for the chosen metric (node itself for 'all', the armed/quad
-    // sub-object otherwise) drive every time read below.
-    const W = (n) => metricWeightsOf(n, metric);
-
-    const playerTotal = new Map();
-    for (const node of graph.locs) {
-        for (const [p, t] of Object.entries(W(node).byPlayer || {})) {
-            playerTotal.set(p, (playerTotal.get(p) || 0) + t);
-        }
-    }
-
-    const baseLocs = graph.locs
-        .filter(n => W(n).byPlayer && Object.keys(W(n).byPlayer).length > 0)
-        .slice()
-        .sort((a, b) => (W(b).total || 0) - (W(a).total || 0));
-    if (baseLocs.length === 0) return null;
-
-    const hasTeams = !isDuel(result) && teams.length >= 2 && !(teams.length === 1 && teams[0] === '');
-
-    // Columns carry `members` so a cell value is uniformly sum(byPlayer[m]);
-    // `kind` ('team' | 'player') drives the title wording. `label` is the short
-    // header text, `full` the untruncated name kept on the header title.
-    const columns = [];
-    if (hasTeams) {
-        for (const t of teams) {
-            const members = players
-                .filter(p => (p.team || '') === t && (playerTotal.get(p.name) || 0) > 0)
-                .map(p => p.name);
-            const total = members.reduce((s, p) => s + (playerTotal.get(p) || 0), 0);
-            if (total > 0) columns.push({ kind: 'team', label: shortName(t), full: t, team: t, teamIdx: teamIdxOf(t), members, total });
-        }
-    }
-    const teamCols = columns.length;
-
-    const teamOfPlayer = new Map();
-    for (const p of players) if (p.name) teamOfPlayer.set(p.name, p.team || '');
-    const seen = new Set();
-    for (const team of teams) {
-        for (const p of players) {
-            if (!p.name || seen.has(p.name)) continue;
-            if ((p.team || '') !== team) continue;
-            const total = playerTotal.get(p.name) || 0;
-            if (total <= 0) continue;
-            columns.push({ kind: 'player', label: shortName(p.name), full: p.name, team, teamIdx: teamIdxOf(team), members: [p.name], total });
-            seen.add(p.name);
-        }
-    }
-    for (const [p, total] of playerTotal) {
-        if (seen.has(p) || total <= 0) continue;
-        const team = teamOfPlayer.get(p) || '';
-        columns.push({ kind: 'player', label: shortName(p), full: p, team, teamIdx: teamIdxOf(team), members: [p], total });
-        seen.add(p);
-    }
-    if (columns.length === 0) return null;
-
-    // Per-column max share → full intensity at each column's busiest loc.
-    const secOf = (n, c) => { const bp = W(n).byPlayer || {}; return c.members.reduce((s, p) => s + (bp[p] || 0), 0); };
-    const colMaxFrac = columns.map(c => {
-        let m = 0;
-        for (const n of baseLocs) {
-            const f = c.total > 0 ? secOf(n, c) / c.total : 0;
-            if (f > m) m = f;
-        }
-        return m || 1;
-    });
-
-    let rows = baseLocs.map(n => ({
-        name: n.name,
-        secs: columns.map(c => secOf(n, c)),
-        cells: columns.map((c, ci) => {
-            const sec = secOf(n, c);
-            const share = c.total > 0 ? sec / c.total : 0;
-            const norm = colMaxFrac[ci] > 0 ? share / colMaxFrac[ci] : 0;
-            return { i: sec > 0 ? Math.sqrt(norm) : 0, p: sec > 0 ? share * 100 : null };
-        }),
-    }));
-    rows = rows.filter(r => r.secs.some(v => v > 0));
-    if (rows.length === 0) return null;
-
-    return {
-        rows, columns, teamCols,
-        cellTitle: (col, row, ci) => {
-            // row.secs holds int32-ms weights (schema v57); show seconds.
-            const sec = (row.secs[ci] || 0) / 1000;
-            const pct = row.cells[ci].p != null ? row.cells[ci].p : 0;
-            const suffix = col.kind === 'team' ? 'of team time' : 'of their time';
-            const who = col.full + (col.kind === 'player' && col.team && col.team !== col.full ? ` (${col.team})` : '');
-            return `${who} · ${row.name}: ${sec.toFixed(1)}s · ${pct.toFixed(1)}% ${suffix}`;
-        },
-    };
-}
-
-// Build the region-control matrix: rows are regions, columns are the seven
-// control states. Colour is normalised per-row to the region's busiest control
-// state (Empty excluded — it is filler, not a control state, and would swamp
-// the scale), so a row uses the full colormap; the printed % stays absolute.
-function buildRegionHeatmap(regions, stats) {
-    if (!regions || !regions.length || !stats) return null;
-    const first = Object.values(stats)[0];
-    if (!first) return null;
-    const teamA = first.teamA || 'Team A';
-    const teamB = first.teamB || 'Team B';
-
-    // Columns: teamA control/weak (red underline) | contested/cont.weak/empty
-    // (neutral) | teamB weak/control (blue underline). `label` is the header
-    // text, `full` the title; the team-named columns carry the team identity.
-    const columns = [
-        { label: teamA,        full: `${teamA} control`,      key: 'teamAControl',     team: teamA, teamIdx: 0 },
-        { label: `${teamA} wk`, full: `${teamA} weak control`, key: 'teamAWeakControl', team: teamA, teamIdx: 0 },
-        { label: 'Cont',       full: 'Contested',             key: 'contested',        team: '',    teamIdx: -1 },
-        { label: 'Cont wk',    full: 'Contested (weak)',      key: 'weakContested',    team: '',    teamIdx: -1 },
-        { label: 'Empty',      full: 'Empty (no players)',    key: 'empty',            team: '',    teamIdx: -1, noHeat: true },
-        { label: `${teamB} wk`, full: `${teamB} weak control`, key: 'teamBWeakControl', team: teamB, teamIdx: 1 },
-        { label: teamB,        full: `${teamB} control`,      key: 'teamBControl',     team: teamB, teamIdx: 1 },
-    ];
-
-    const rows = [];
-    for (const region of regions) {
-        const s = stats[region.name];
-        if (!s) continue;
-        const rowMax = Math.max(
-            s.teamAControl, s.teamAWeakControl, s.contested,
-            s.weakContested, s.teamBWeakControl, s.teamBControl) || 1;
-        rows.push({
-            name: region.name,
-            cells: columns.map(c => {
-                const v = s[c.key] || 0;
-                const i = c.noHeat ? 0 : (rowMax > 0 ? v / rowMax : 0);
-                return { i, p: v };
-            }),
-        });
-    }
-    if (rows.length === 0) return null;
-
-    return {
-        rows, columns, teamCols: 0,
-        cellTitle: (col, row, ci) => `${row.name} · ${col.full}: ${row.cells[ci].p}% of match`,
-    };
-}
-
-function renderLocHeatmap() {
-    const panel = document.getElementById('locheatmap-panel');
-    if (!panel) return;
-    const metric = getLocMetric();
-    const data = locGraphState.result ? buildLocHeatmap(locGraphState.result, metric) : null;
-    const noData = document.getElementById('locheatmap-no-data');
-    if (!data) {
-        // Clear any stale table from a previous metric so the empty-state
-        // isn't shown alongside an outdated grid. (setHTML is a local of
-        // resetUIToCleanState and was never in scope here — reaching this
-        // branch threw a ReferenceError out of displayResults, which then
-        // skipped the Aim tab, applyUrlState and hideLoadingOverlay. Any
-        // demo with no loc-heatmap data hits it, a match-less recording
-        // always does.)
-        for (const id of ['locheatmap-thead-row', 'locheatmap-body']) {
-            const el = document.getElementById(id);
-            if (el) el.innerHTML = '';
-        }
-        const hasGraph = !!(locGraphState.graph && locGraphState.graph.locs && locGraphState.graph.locs.length);
-        panel.style.display = hasGraph ? '' : 'none';
-        if (noData) noData.style.display = hasGraph ? 'block' : 'none';
-        return;
-    }
-    panel.style.display = '';
-    if (noData) noData.style.display = 'none';
-    renderHeatmapTable('locheatmap-table', 'locheatmap-thead-row', 'locheatmap-body', data, 'Loc');
-}
-
-// Re-render the region-control matrix from the stats stashed on mapState.
-// Visibility of the panel itself is owned by initRegionControl.
-function renderRegionHeatmap() {
-    const data = buildRegionHeatmap(mapState.controlRegions, mapState.controlStats);
-    if (!data) return;
-    renderHeatmapTable('region-control-table', 'region-control-thead-row', 'region-control-body', data, 'Region');
-}
-
-// Render a matrix data model into a .stats-table: a header row (row-axis label
-// + one team-underlined <th> per column) and a tbody built with the shared
-// renderTableRows helper. Each cell is viridis-shaded by its intensity with the
-// % printed and a data-sort-value, so makeSortable can sort any column. The
-// table renders crisply and persists across tab switches — no canvas resize
-// dance needed.
-function renderHeatmapTable(tableId, theadRowId, tbodyId, data, firstColLabel) {
-    const table = document.getElementById(tableId);
-    const theadRow = document.getElementById(theadRowId);
-    if (!table || !theadRow) return;
-    const { columns, teamCols } = data;
-
-    const heads = [`<th>${escapeHtml(firstColLabel)}</th>`];
-    columns.forEach((col, ci) => {
-        const cls = ['heatmap-col'];
-        if (col.kind === 'team') cls.push('heatmap-col-team');
-        if (teamCols && ci === teamCols) cls.push('heatmap-col-sep');
-        const color = col.teamIdx >= 0 ? TEAM_COLORS[col.teamIdx % TEAM_COLORS.length] : '';
-        const style = color ? ` style="border-bottom: 3px solid ${color}"` : '';
-        heads.push(`<th class="${cls.join(' ')}"${style} title="${escapeHtml(col.full || col.label)}">${escapeHtml(col.label)}</th>`);
-    });
-    theadRow.innerHTML = heads.join('');
-
-    renderTableRows(tbodyId, data.rows, (row) => {
-        const tds = [`<td class="heatmap-rowname"><strong>${escapeHtml(row.name)}</strong></td>`];
-        row.cells.forEach((cell, ci) => {
-            const cls = ['heatmap-cell'];
-            if (teamCols && ci === teamCols) cls.push('heatmap-col-sep');
-            if (cell.p == null) { // column not present in this row (e.g. player never here)
-                tds.push(`<td class="${cls.join(' ')}" data-sort-value="-1"></td>`);
-                return;
-            }
-            const rgb = cell.i > 0 ? heatColorRGB(cell.i) : null;
-            const style = rgb ? ` style="background: rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]}); color: ${contrastInk(rgb)}"` : '';
-            const title = data.cellTitle ? data.cellTitle(columns[ci], row, ci) : '';
-            const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
-            // Cells default to "<p>%"; pass data.cellText to show another unit
-            // (e.g. a raw count) while keeping cell.p as the sort key.
-            const text = data.cellText ? data.cellText(cell) : `${Math.round(cell.p)}%`;
-            tds.push(`<td class="${cls.join(' ')}"${style} data-sort-value="${cell.p}"${titleAttr}>${text}</td>`);
-        });
-        return tds.join('');
-    });
-
-    makeSortable(table);
 }
 
 // ─── Playback Engine ──────────────────────────────────────────────────────

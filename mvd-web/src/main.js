@@ -13,7 +13,7 @@ import * as ResultLib from './lib/result.js';
 import { escapeHtml } from './lib/html.js';
 import { hubReplayUrl } from './lib/hub-url.js';
 import { matchWallClock } from './lib/wall-clock.js';
-import { heatColorRGB } from './lib/heat-color.js';
+import { locToRegionOf, regionToGroupsOf } from './lib/regions.js';
 import * as PlayerStatsLib from './lib/player-stats.js';
 import { makeSortable } from './ui/sortable.js';
 import { engine, setupPlayer } from './player/index.js';
@@ -21,12 +21,13 @@ import { setupPanels } from './ui/panels/index.js';
 
 window.MapView = MapView;
 window.MvdHub = MvdHub;
-// Shared state: the clock, the team colours, the current demo.
+// Shared state: the clock, the team colours, the current demo, the regions.
 window.MvdState = MvdState;
 // Helpers app.js shares with the ported tabs (it calls them through thin
 // wrappers of the same name).
 window.MvdLib = {
-    ...ResultLib, ...PlayerStatsLib, escapeHtml, hubReplayUrl, makeSortable, matchWallClock, heatColorRGB,
+    ...ResultLib, ...PlayerStatsLib, escapeHtml, hubReplayUrl, makeSortable, matchWallClock,
+    locToRegionOf, regionToGroupsOf,
 };
 // The Player tab's engine: the timeline's speed buttons drive it while it
 // is the page clock (src/player/engine.js).

@@ -2,6 +2,8 @@
 // mvd-analytics/RESULT_SCHEMA.md) shared by app.js (window.MvdLib) and the
 // Svelte side.
 
+import { playerStatsRows } from './player-stats.js';
+
 // mapFileKey mirrors Go's Result.EffectiveMap(): `demoInfo.map`, then the
 // serverinfo `map` key (on every pre-2020 demo, so the absence of the KTX
 // block never reads as "no map"), then `match.map` — the canonical SHORT
@@ -74,4 +76,25 @@ export function isTeamBasedMode(result) {
 // aim tab's Team victim filter) is empty without it.
 export function hasTeammates(result) {
     return isTeamBasedMode(result) && !isIndividualLayout(result);
+}
+
+// isDuel reports a 1v1. app.js's applyDuelModeUI toggles the "Per Team"
+// aggregation panels and the standalone "Teams" summary off on one;
+// everything else (the per-player scoreboard, weapon stats, item pickups)
+// still renders normally, and the loc graph drops its team filters.
+//
+// Detection: the Go `roster` core node stamps every participant team field
+// as their own name for duels (and only for exactly-2-player matches — see
+// newRoster in analyzer/roster.go), so we can detect duel mode reliably by
+// checking whether the two players each have `team === name`. This avoids
+// depending on the metadata mode string, which can be "duel" / "1on1" /
+// "LGC" / "Hoony" / missing entirely depending on the server flavour.
+//
+// Read off playerStats rather than demoInfo: the roster stamp is what is
+// being tested, playerStats carries it on every demo, and a pre-KTX-block
+// duel used to fall through here and render the team panels for a 1v1.
+export function isDuel(result) {
+    const players = playerStatsRows(result);
+    if (!players.length) return false;
+    return players.length === 2 && players.every(p => p.team === p.name);
 }

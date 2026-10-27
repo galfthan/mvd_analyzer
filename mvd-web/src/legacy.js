@@ -33,7 +33,7 @@ export function mapTabView() {
 // rerenderTab(tab) redraws a tab's canvases (app.js renderTabContent): a
 // panel expanded or reopened (src/ui/panels/reveal.js, for a tab that has
 // not registered its own redraw) may hold a canvas drawn at zero width
-// while it was hidden. Goes when Timeline, Map and Locs & Regions are ported.
+// while it was hidden. Goes when Timeline and Map are ported.
 export function rerenderTab(tab) {
     return window.renderTabContent?.(tab);
 }
