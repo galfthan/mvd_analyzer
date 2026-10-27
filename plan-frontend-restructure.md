@@ -138,7 +138,13 @@ DemoHandle
   no stylesheet, and it moves panels between DOM parents — which reloads
   an iframe, so the engine could never sit in one. The pane column is our
   own (`src/player/PaneColumn.svelte`): reorder by drag or ↑ ↓, collapse,
-  resize each pane's height, resize and hide the column.
+  resize each pane's height. The player | column split is PaneForge
+  (resize, keyboard, drag shut to hide; ~50 KB minified with its
+  runed / svelte-toolbelt deps and the Lucide icons) — it keeps the DOM
+  in place, and turns off pointer events inside its panes while dragging,
+  so the iframe neither reloads nor swallows the drag. A full kit
+  (shadcn-svelte, Skeleton) was passed over: they bring Tailwind, which
+  would fight the legacy `styles.css` until the other tabs are ported.
 - The same layout primitives back the "collapsible side panel" wanted on
   other tabs (Map items panel, Timeline drill-downs).
 

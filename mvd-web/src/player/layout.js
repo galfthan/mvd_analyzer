@@ -1,6 +1,6 @@
 // layout.js — the Player tab's pane column: which panes are open, in what
-// order, each one's height and collapsed state, the column's width and
-// whether it is shown. A per-viewer convenience kept in localStorage.
+// order, each one's height and collapsed state, the column's share of the
+// tab's width (a percentage, PaneForge's unit) and whether it is shown. A per-viewer convenience kept in localStorage.
 
 import { store } from '../state/store.js';
 
@@ -12,11 +12,11 @@ const DEFAULT = {
     order: ['map', 'stack', 'moments', 'feed'],
     collapsed: {},
     heights: {},          // pane id → body height in px; unset = natural
-    width: 420,
+    split: 30,            // the column's % of the width, when shown
     hidden: false,
 };
-export const MIN_WIDTH = 260;
-export const MAX_WIDTH = 900;
+export const MIN_SPLIT = 18;
+export const MAX_SPLIT = 60;
 
 function sanitize(v) {
     const out = { ...DEFAULT, ...(v && typeof v === 'object' ? v : {}) };
@@ -24,7 +24,8 @@ function sanitize(v) {
     out.order = order.filter((id, i) => PANE_IDS.includes(id) && order.indexOf(id) === i);
     out.collapsed = { ...(out.collapsed || {}) };
     out.heights = { ...(out.heights || {}) };
-    out.width = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, Number(out.width) || DEFAULT.width));
+    out.split = Math.min(MAX_SPLIT, Math.max(MIN_SPLIT, Number(out.split) || DEFAULT.split));
+    delete out.width;     // v2's px width, before the split
     out.hidden = !!out.hidden;
     return out;
 }

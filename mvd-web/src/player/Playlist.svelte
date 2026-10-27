@@ -1,4 +1,12 @@
 <script>
+    import Play from '@lucide/svelte/icons/play';
+    import Square from '@lucide/svelte/icons/square';
+    import Link from '@lucide/svelte/icons/link';
+    import Share2 from '@lucide/svelte/icons/share-2';
+    import Trash2 from '@lucide/svelte/icons/trash-2';
+    import ArrowUp from '@lucide/svelte/icons/arrow-up';
+    import ArrowDown from '@lucide/svelte/icons/arrow-down';
+    import X from '@lucide/svelte/icons/x';
     import { demo, teams, colorOf, teamIndexOf } from '../state/index.js';
     import { formatDuration } from '../lib/result.js';
     import {
@@ -113,9 +121,11 @@
 <div class="player-playlist">
     <div class="player-playlist-head">
         <h3>Playlist <span class="muted">{clips.length ? `(${clips.length})` : ''}</span></h3>
-        <button class="player-pov-btn" title="Play the clips in order, here" onclick={() => runner.start(clips, 0)}>▶ Play all</button>
-        <button class="player-pov-btn" title="Stop the scripted run" disabled={!run} onclick={() => runner.stop()}>■ Stop</button>
-        <select title="Append generated clips from this demo" onchange={generate}>
+        <span class="pt-group">
+            <button class="pt-btn" title="Play the clips in order, here" disabled={!clips.length} onclick={() => runner.start(clips, 0)}><Play size={14} /> Play all</button>
+            <button class="pt-btn" title="Stop the scripted run" disabled={!run} onclick={() => runner.stop()}><Square size={13} /> Stop</button>
+        </span>
+        <select class="pt-select" title="Append generated clips from this demo" onchange={generate}>
             <option value="">Generate…</option>
             {#if ref}
                 {#each Object.entries(GENERATORS) as [id, g] (id)}
@@ -130,9 +140,11 @@
                 {/if}
             {/if}
         </select>
-        <button class="player-pov-btn" title="Copy one hub.quakeworld.nu link playing every clip (one hub demo, up to 20 clips)" onclick={copyHubLink}>Copy hub link</button>
-        <button class="player-pov-btn" title="Copy a link to this page carrying the playlist" onclick={copyShareLink}>Copy share link</button>
-        <button class="player-pov-btn" title="Remove every clip" onclick={clear}>Clear</button>
+        <span class="pt-group">
+            <button class="pt-btn" title="Copy one hub.quakeworld.nu link playing every clip (one hub demo, up to 20 clips)" onclick={copyHubLink}><Link size={14} /> Hub link</button>
+            <button class="pt-btn" title="Copy a link to this page carrying the playlist" onclick={copyShareLink}><Share2 size={14} /> Share link</button>
+        </span>
+        <button class="pt-btn icon" title="Remove every clip" disabled={!clips.length} onclick={clear}><Trash2 size={15} /></button>
         <span class="player-clip-hint">
             {run ? (run.transient ? `Playing: ${run.clips[0].label}` : `Playing ${run.index + 1} / ${run.clips.length}`) : ''}
         </span>
@@ -145,7 +157,7 @@
                 style:--pov-color={current && c.who ? colorOf($teams, c.who, $teams.perPlayer) : null}
                 draggable="true" ondragstart={(e) => dragStart(e, i)} ondragover={(e) => dragOverRow(e, i)}
                 ondragleave={() => (dragOver = -1)} ondrop={(e) => drop(e, i)}>
-                <button class="play" title="Play from this clip on" onclick={() => runner.start(clips, i)}>▶</button>
+                <button class="play" title="Play from this clip on" onclick={() => runner.start(clips, i)}><Play size={13} /></button>
                 <span class="idx" title="Drag to reorder">{i + 1}</span>
                 <span class="when">{when(c)}</span>
                 <span class="who">{c.who || 'Auto'}</span>
@@ -153,9 +165,9 @@
                     oninput={(e) => setLabel(c, e.currentTarget.value)}>
                 <span class="demo-tag">{current ? '' : (c.demo?.title || c.demo?.key || '')}</span>
                 <span class="ops">
-                    <button class="up" title="Move up" onclick={() => moveClip(i, i - 1)}>↑</button>
-                    <button class="down" title="Move down" onclick={() => moveClip(i, i + 1)}>↓</button>
-                    <button class="del" title="Remove" onclick={() => removeClip(i)}>×</button>
+                    <button class="up" title="Move up" onclick={() => moveClip(i, i - 1)}><ArrowUp size={13} /></button>
+                    <button class="down" title="Move down" onclick={() => moveClip(i, i + 1)}><ArrowDown size={13} /></button>
+                    <button class="del" title="Remove" onclick={() => removeClip(i)}><X size={13} /></button>
                 </span>
             </li>
         {/each}

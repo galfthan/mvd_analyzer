@@ -1,6 +1,12 @@
 <script>
     // One pane in the column: a header (drag to reorder, click the title to
     // collapse, ↑ ↓ ×) and a body whose height the bottom handle resizes.
+    import GripVertical from '@lucide/svelte/icons/grip-vertical';
+    import ChevronDown from '@lucide/svelte/icons/chevron-down';
+    import ChevronRight from '@lucide/svelte/icons/chevron-right';
+    import ArrowUp from '@lucide/svelte/icons/arrow-up';
+    import ArrowDown from '@lucide/svelte/icons/arrow-down';
+    import X from '@lucide/svelte/icons/x';
     import { paneLayout, updateLayout, movePane } from './layout.js';
 
     let { id, title, index, count, children } = $props();
@@ -63,11 +69,16 @@
 <div class="player-pane" class:drag-over={dragOver} data-pane={id} role="group" aria-label={title}
     ondragover={dragOverPane} ondragleave={() => (dragOver = false)} ondrop={drop}>
     <div class="player-pane-head" draggable="true" ondragstart={dragStart} role="toolbar" tabindex="-1">
-        <button class="chev" title={collapsed ? 'Expand' : 'Collapse'} onclick={toggle}>{collapsed ? '▸' : '▾'}</button>
+        <span class="grip" title="Drag to reorder"><GripVertical size={14} /></span>
+        <button class="chev" title={collapsed ? 'Expand' : 'Collapse'} onclick={toggle}>
+            {#if collapsed}<ChevronRight size={14} />{:else}<ChevronDown size={14} />{/if}
+        </button>
         <span class="title" role="button" tabindex="-1" onclick={toggle} onkeydown={() => {}}>{title}</span>
-        <button title="Move up" disabled={index === 0} onclick={() => movePane(id, index - 1)}>↑</button>
-        <button title="Move down" disabled={index === count - 1} onclick={() => movePane(id, index + 1)}>↓</button>
-        <button title="Close pane" onclick={close}>×</button>
+        <span class="acts">
+            <button title="Move up" disabled={index === 0} onclick={() => movePane(id, index - 1)}><ArrowUp size={14} /></button>
+            <button title="Move down" disabled={index === count - 1} onclick={() => movePane(id, index + 1)}><ArrowDown size={14} /></button>
+            <button title="Close pane" onclick={close}><X size={14} /></button>
+        </span>
     </div>
     {#if !collapsed}
         <div class="player-pane-body" bind:this={body} class:sized={height != null}
@@ -85,15 +96,27 @@
         overflow: auto;
     }
     .pane-resize {
-        height: 6px;
+        height: 5px;
         cursor: ns-resize;
         border-top: 1px solid transparent;
     }
     .pane-resize:hover {
         border-top-color: var(--accent-cyan);
     }
-    .chev {
-        width: 1.2em;
+    .grip {
+        display: inline-flex;
+        color: #667;
+        cursor: grab;
+    }
+    .acts {
+        display: inline-flex;
+        gap: 2px;
+        opacity: 0.35;
+        transition: opacity 0.15s;
+    }
+    .player-pane-head:hover .acts,
+    .acts:focus-within {
+        opacity: 1;
     }
     button:disabled {
         opacity: 0.3;

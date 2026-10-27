@@ -3745,47 +3745,159 @@ th.sortable.sort-desc::after {
 .player-pov-bar {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    align-items: center;
+    gap: 4px;
 }
 
-.player-pov-btn {
-    background: var(--bg-panel);
-    color: var(--fg-default);
-    border: 1px solid transparent;
-    border-left: 4px solid var(--pov-color, #888);
-    border-radius: 3px;
-    padding: 4px 10px;
-    cursor: pointer;
-    font: inherit;
-}
-
-.player-pov-btn:hover {
-    border-color: var(--accent-cyan-dim);
-    border-left-color: var(--pov-color, #888);
-}
-
-.player-sound-btn {
+.player-pov-bar .pov-end {
+    display: inline-flex;
+    gap: 4px;
     margin-left: auto;
 }
 
+/* Player toolbar controls: compact buttons (text, icon + text, or .icon
+ * alone), joined into segments by .pt-group, and a matching select. */
+.pt-btn,
+.player-pov-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 26px;
+    padding: 0 9px;
+    background: var(--bg-panel);
+    color: var(--fg-default);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.pt-btn:hover:not(:disabled),
+.player-pov-btn:hover {
+    background: #34507a;
+    border-color: var(--accent-cyan-dim);
+}
+
+.pt-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.pt-btn.icon {
+    width: 26px;
+    padding: 0;
+    justify-content: center;
+}
+
+.pt-btn.active,
 .player-pov-btn.active {
     border-color: var(--accent-cyan);
-    border-left-color: var(--pov-color, #888);
     color: #fff;
+    background: #1d4a6a;
 }
 
-/* Player tab layout: player + POV/clip bars on the left, a column of panes
- * on the right, the playlist across the bottom. */
+.pt-btn:focus-visible,
+.player-pov-btn:focus-visible,
+.pt-select:focus-visible {
+    outline: 2px solid var(--accent-cyan);
+    outline-offset: 1px;
+}
+
+.pt-group {
+    display: inline-flex;
+}
+
+.pt-group > .pt-btn:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -1px;
+}
+
+.pt-group > .pt-btn:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.pt-group > .pt-btn:hover:not(:disabled),
+.pt-group > .pt-btn.active {
+    position: relative;
+    z-index: 1;
+}
+
+.pt-select {
+    height: 26px;
+    background: var(--bg-panel);
+    color: var(--fg-default);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    padding: 0 6px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.pt-select:hover {
+    border-color: var(--accent-cyan-dim);
+}
+
+/* POV chips: the team colour as a bar on the left. */
+.player-pov-btn {
+    border-left: 3px solid var(--pov-color, #888);
+}
+
+.player-pov-btn:hover,
+.player-pov-btn.active {
+    border-left-color: var(--pov-color, #888);
+}
+
+/* Player tab layout: player + POV/clip bars + playlist on the left, the
+ * pane column on the right — a PaneForge group (flex row, sizes inline). */
 .player-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 30%);
-    gap: 10px;
-    align-items: start;
+    align-items: flex-start;
 }
 
+.player-split {
+    position: relative;
+    flex: 0 0 10px;
+    align-self: stretch;
+    cursor: ew-resize;
+    outline: none;
+}
+
+.player-split::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 4px;
+    width: 2px;
+    border-radius: 1px;
+    background: transparent;
+    transition: background 0.12s;
+}
+
+.player-split:hover::after,
+.player-split[data-active]::after,
+.player-split:focus-visible::after {
+    background: var(--accent-cyan);
+}
+
+/* Narrow screens: the panes stack under the player, the split is off. */
 @media (max-width: 1100px) {
     .player-layout {
-        grid-template-columns: minmax(0, 1fr);
+        flex-direction: column !important;
+        align-items: stretch;
+    }
+    .player-layout > [data-pane] {
+        flex: none !important;
+        width: 100%;
+    }
+    .player-split {
+        display: none;
     }
 }
 
@@ -3802,11 +3914,6 @@ th.sortable.sort-desc::after {
     flex-wrap: wrap;
     align-items: center;
     gap: 6px;
-}
-
-.player-clip-bar .player-pov-btn,
-.player-playlist-head .player-pov-btn {
-    border-left-width: 1px;
 }
 
 .player-clip-hint {
@@ -3835,8 +3942,8 @@ th.sortable.sort-desc::after {
 .player-pane-head {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 3px 6px;
+    gap: 4px;
+    padding: 3px 4px;
     background: var(--bg-panel);
     cursor: grab;
     font-size: 13px;
@@ -3849,16 +3956,20 @@ th.sortable.sort-desc::after {
 }
 
 .player-pane-head button {
+    display: inline-flex;
+    align-items: center;
     background: none;
     border: 0;
+    border-radius: 3px;
     color: var(--fg-default);
     cursor: pointer;
-    padding: 0 3px;
+    padding: 2px;
     font: inherit;
 }
 
-.player-pane-head button:hover {
+.player-pane-head button:hover:not(:disabled) {
     color: var(--accent-cyan);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .player-pane-head label {
@@ -3871,15 +3982,6 @@ th.sortable.sort-desc::after {
 .player-pane-body {
     padding: 4px;
     position: relative;
-}
-
-.player-playlist-head select {
-    background: var(--bg-panel);
-    color: var(--fg-default);
-    border: 1px solid transparent;
-    border-radius: 3px;
-    padding: 4px 6px;
-    font: inherit;
 }
 
 /* Stack pane: one row per player, a rolling health/armor strip with the
@@ -4029,16 +4131,32 @@ th.sortable.sort-desc::after {
 }
 
 .playlist-item button {
+    display: inline-flex;
+    align-items: center;
     background: none;
     border: 0;
+    border-radius: 3px;
     color: var(--fg-default);
     cursor: pointer;
     font: inherit;
-    padding: 0 3px;
+    padding: 2px;
 }
 
 .playlist-item button:hover {
     color: var(--accent-cyan);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.playlist-item .ops {
+    display: inline-flex;
+    gap: 2px;
+    opacity: 0.35;
+    transition: opacity 0.15s;
+}
+
+.playlist-item:hover .ops,
+.playlist-item .ops:focus-within {
+    opacity: 1;
 }
 
 .player-toast {

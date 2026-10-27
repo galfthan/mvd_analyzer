@@ -6,6 +6,7 @@
     // until the Map tab's loading moves into src/. Click a player on the map
     // to watch them; drag pans, right-drag orbits, the wheel zooms,
     // double-click resets the view.
+    import Crosshair from '@lucide/svelte/icons/crosshair';
     import { MvdMap } from '../../../../mvd-map-view/src/index.js';
     import { clock, demo, teams } from '../../state/index.js';
     import { mapTabView } from '../../legacy.js';
@@ -140,6 +141,7 @@
     }
 
     function toggleFollow() {
+        follow = !follow;
         lastPov = null;
         if (!follow) setFollow(null);
         draw();
@@ -147,9 +149,9 @@
 </script>
 
 <div class="map-pane" class:sized bind:this={box}>
-    <label class="follow" title="Keep the map centred on the player you are watching">
-        <input type="checkbox" bind:checked={follow} onchange={toggleFollow}> follow POV
-    </label>
+    <button class="pt-btn icon follow" class:active={follow} aria-pressed={follow}
+        title={follow ? 'Following the POV — click to stop' : 'Keep the map centred on the player you are watching'}
+        onclick={toggleFollow}><Crosshair size={15} /></button>
     <canvas bind:this={canvas} onmousedown={down} onwheel={wheel} oncontextmenu={(e) => e.preventDefault()}
         ondblclick={() => map?.resetView()}></canvas>
     {#if empty}<div class="player-clip-hint">No map for this demo.</div>{/if}
@@ -168,14 +170,9 @@
     }
     .follow {
         position: absolute;
-        top: 4px;
+        top: 6px;
         right: 6px;
         z-index: 1;
-        font-size: 12px;
-        color: #aaa;
-        background: rgba(0, 0, 0, 0.45);
-        padding: 0 6px;
-        border-radius: 3px;
-        cursor: pointer;
+        background: rgba(10, 14, 26, 0.7);
     }
 </style>

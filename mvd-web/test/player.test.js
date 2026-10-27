@@ -10,7 +10,7 @@ globalThis.localStorage = {
 mem.set('mvd.playerPanes.v1', JSON.stringify(['feed', 'map', 'bogus', 'map']));
 
 const { store } = await import('../src/state/store.js');
-const { paneLayout, updateLayout, movePane, MAX_WIDTH } = await import('../src/player/layout.js');
+const { paneLayout, updateLayout, movePane, MAX_SPLIT } = await import('../src/player/layout.js');
 const { playlist, addClips, moveClip, removeClip, setRun, setLabel } = await import('../src/player/playlist-store.js');
 const { createRunner } = await import('../src/player/runner.js');
 const { demoRefOf } = await import('../src/player/demo-ref.js');
@@ -18,8 +18,9 @@ const { syncMapData } = await import('../src/player/panes/map-sync.js');
 
 test('pane layout migrates the PoC order and sanitizes', () => {
     assert.deepEqual(paneLayout.get().order, ['feed', 'map'], 'v1 order kept, unknown and duplicate ids dropped');
-    updateLayout((l) => { l.width = 99999; l.order.push('stack', 'stack'); });
-    assert.equal(paneLayout.get().width, MAX_WIDTH);
+    updateLayout((l) => { l.split = 99999; l.width = 420; l.order.push('stack', 'stack'); });
+    assert.equal(paneLayout.get().split, MAX_SPLIT);
+    assert.equal(paneLayout.get().width, undefined, 'the old px width is dropped');
     assert.deepEqual(paneLayout.get().order, ['feed', 'map', 'stack']);
     movePane('stack', 0);
     assert.deepEqual(paneLayout.get().order, ['stack', 'feed', 'map']);

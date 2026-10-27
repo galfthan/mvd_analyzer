@@ -3,8 +3,12 @@
     // grouped and coloured by the canonical team order. "Auto" lights while
     // autotrack is on; the followed player lights either way, so autotrack
     // shows whom it picked.
+    import Volume2 from '@lucide/svelte/icons/volume-2';
+    import VolumeX from '@lucide/svelte/icons/volume-x';
+    import PanelRightOpen from '@lucide/svelte/icons/panel-right-open';
     import { demo, teams, teamIndexOf, colorOf } from '../state/index.js';
     import { engine } from './index.js';
+    import { paneLayout, updateLayout } from './layout.js';
 
     const status = engine.status;
 
@@ -25,8 +29,16 @@
             <button class="player-pov-btn" class:active={$status.track === p.userid}
                 style:--pov-color={p.color} onclick={() => engine.track(p.userid)}>{p.name}</button>
         {/each}
-        <button class="player-pov-btn player-sound-btn" onclick={() => engine.toggleMute()}>
-            {$status.ready && !$status.muted ? '🔊 Sound on' : '🔇 Sound off'}
-        </button>
+        <span class="pov-end">
+            <button class="pt-btn icon" title={$status.ready && !$status.muted ? 'Sound on — click to mute' : 'Sound off — click to unmute'}
+                onclick={() => engine.toggleMute()}>
+                {#if $status.ready && !$status.muted}<Volume2 size={16} />{:else}<VolumeX size={16} />{/if}
+            </button>
+            {#if $paneLayout.hidden}
+                <button class="pt-btn icon" title="Show the panes" onclick={() => updateLayout((l) => { l.hidden = false; })}>
+                    <PanelRightOpen size={16} />
+                </button>
+            {/if}
+        </span>
     {/if}
 </div>

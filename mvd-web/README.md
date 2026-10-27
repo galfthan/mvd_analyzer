@@ -24,6 +24,10 @@ talks to it through a JS shim.
   (`MvdLib`) and the Player tab's engine (`MvdPlayer`). Ported so far: the
   shell and the Player tab (`src/player/`); see
   [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
+  Two UI packages are bundled (pinned in `package.json`):
+  [PaneForge](https://paneforge.com) for the Player tab's player | panes
+  split and [Lucide](https://lucide.dev) icons, imported one per file
+  (`@lucide/svelte/icons/<name>`) so only the icons used ship.
 - `static/` — copied into `dist/` as-is (Vite's `publicDir`).
   - `styles.css`, `app.js` — the tabbed analyzer UI (scoreboard,
     timeline, map, chat, loc graph, ...). `app.js` is still a classic
@@ -878,7 +882,9 @@ and the Timeline tab's mini-stack renderer are reached through
 - **POV bar** under the player: `Auto` (FTE's stats autotrack) and one
   button per player in canonical team order and colour; the followed
   player stays lit under autotrack too. A sound toggle sits at its right
-  end (the player starts muted, as hub's does).
+  end (the player starts muted, as hub's does), and the show-panes button
+  while the pane column is hidden. The tab's controls share one compact
+  style (`.pt-btn`, `.pt-group` segments, `.pt-select` in `styles.css`).
 - **End of demo.** The demo runs a few seconds past the match end
   (scoreboard) and then FTE disconnects. The play button drops its ⏸, a
   seek restarts the demo and jumps (the cursor holds still meanwhile), and
@@ -886,23 +892,28 @@ and the Timeline tab's mini-stack renderer are reached through
 
 ### Panes
 
-A column beside the player (`PaneColumn.svelte`). Each pane is a Svelte
+A column beside the player (`PaneColumn.svelte`), split from it by a
+PaneForge group in `PlayerTab.svelte`: drag the divider (or focus it and
+use the arrow keys) to resize, drag it shut to hide the column; below
+1100 px the column stacks under the player instead. Each pane is a Svelte
 component inside a `Pane.svelte` frame and redraws at most once per
 animation frame on the page clock or the engine's status, only while the
 tab shows (`panes/tick.js`). The layout is a per-viewer convenience in
 `localStorage` (`mvd.playerPanes.v2`; the PoC's `v1` order is migrated):
 which panes are open and in what order (default Map / Health / armor /
 Moments / Frag feed), each pane's height and collapsed state, the column's
-width and whether it is shown. Headers drag to reorder, ↑ ↓ × move and
-close, the title collapses, the bottom edge resizes (double-click: natural
-height), the column's left edge resizes it, *Hide ▸* folds it away and
-"+ Add pane…" reopens a closed pane. (dockview was tried for this and
+share of the width (`split`, %, stored when a drag ends — a drag that
+shuts the column passes its minimum on the way) and whether it is shown.
+Headers drag by the grip to reorder; ↑ ↓ × (dim until hovered) move and
+close, the chevron or title collapses, the bottom edge resizes
+(double-click: natural height), the column head's hide button folds the
+column away and "Add pane…" reopens a closed pane. (dockview was tried for this and
 dropped: ~390 KB, no stylesheet in its ESM build, and it reparents panels,
 which would reload the engine's iframe.)
 
 - **Map** is its own `MvdMap` — its own canvas, camera and follow target —
   reading the Map tab's loaded data each frame (`panes/map-sync.js`: data
-  fields by reference, never view state). *follow POV* puts the camera on
+  fields by reference, never view state). The crosshair toggle (*follow POV*) puts the camera on
   the watched player whenever the POV changes — a pan holds until the next
   switch; clicking a player on the map switches the POV to them; drag pans,
   right-drag orbits, the wheel zooms, double-click resets. Unmounting the
