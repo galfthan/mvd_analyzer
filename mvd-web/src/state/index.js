@@ -8,3 +8,4 @@ export { teams, setCanonicalTeams, teamIndexOf, colorOf, TEAM_PALETTE } from './
 // The current DemoHandle (src/data/wasm-source.js), null before the first
 // load. Set once a load has fully replaced the previous demo.
 export const demo = store(null);
+export { TABS, activeTab, selectTab } from './ui.js';

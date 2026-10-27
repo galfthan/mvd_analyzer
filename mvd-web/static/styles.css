@@ -63,6 +63,12 @@ body {
 /* Top bar — slim wordmark + version + GitHub link. Body is the
  * scroll-anchor (overflow: hidden, flex column), so this just needs to
  * sit at the top and not shrink. */
+/* The Svelte shell's mount point (src/shell/App.svelte) must not add a box:
+ * the topbar and .layout lay out as the body's flex children. */
+#app {
+    display: contents;
+}
+
 .topbar {
     display: flex;
     align-items: center;

@@ -1,8 +1,10 @@
 # Plan — mvd-web on Svelte, behind a data layer
 
-Status: phases A–C done (2026-10-27), D–E in progress. C covers the
+Status: phases A–D done (2026-10-27), E in progress. C covers the
 clock, teams and current-demo stores; pov and URL state come with the
-components that use them (D/E).
+components that use them (E). D renders the top bar, sidebar and layout
+in Svelte with the active tab in a store; the load overlay and search
+stay legacy until their tabs are ported.
 Branch: to be created off `player-tab`. The Player tab does not merge
 until at least phases A–E below are done.
 

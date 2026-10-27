@@ -300,6 +300,15 @@ own lighter sync), `teams` (the canonical team order and colours —
 The stores follow Svelte's store contract, so components read them as
 `$clock`; `store.set` always notifies, even with an unchanged value.
 
+The shell is Svelte (`src/shell/`): `App.svelte` renders the top bar,
+the sidebar (from `TABS` in `src/state/ui.js`) and the layout, and adopts
+the markup of tabs not yet ported — `index.html`'s hidden `#legacy-dom`,
+which `app.js` finds by id — into the main pane (`adopt.js`).
+`src/main.js` mounts it synchronously, so that markup is in place before
+`app.js`'s `DOMContentLoaded` setup. The sidebar sets
+`MvdState.activeTab`; `app.js` follows it in `onTabActivated`, and
+`switchTab()` re-selecting the current tab re-runs its render path.
+
 1. User drops an MVD file on the Search tab, pastes a hub.quakeworld.nu
    URL, or picks a row from the search results.
 2. `loadDemo()` hands it to `mvdData.load()`, which downloads hub demos

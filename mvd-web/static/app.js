@@ -243,9 +243,8 @@ function onBucketsReady(data) {
     if (ta) initMapView(currentResult);
 
     // Re-render whichever tab is active so Timeline/Map paint with the new
-    // data (re-clicking re-runs the tab's render path; harmless on Summary).
-    const active = document.querySelector('.sidebar-btn.active');
-    if (active) active.click();
+    // data (re-selecting re-runs the tab's render path; harmless on Summary).
+    switchTab(activeTabName());
 
     if (typeof data.bucketsMs === 'number') {
         const deferred = (data.bucketsMs + (data.regionMs || 0)).toFixed(0);
@@ -360,7 +359,7 @@ function updateUrlState() {
                 params.set('gameId', currentResult.hubInfo.gameId);
             }
 
-            const activeTab = document.querySelector('.sidebar-btn.active')?.dataset.tab;
+            const activeTab = activeTabName();
             if (activeTab && activeTab !== 'summary') {
                 params.set('tab', TAB_INTERNAL_TO_URL[activeTab] || activeTab);
             }
@@ -474,95 +473,100 @@ const TAB_INTERNAL_TO_URL = { 'loc-graph': 'locs-regions' };
 function resolveTabName(name) { return TAB_URL_TO_INTERNAL[name] || name; }
 
 function switchTab(name) {
-    const btn = document.querySelector(`.sidebar-btn[data-tab="${resolveTabName(name)}"]`);
-    if (btn) btn.click();
+    MvdState.selectTab(resolveTabName(name));
 }
 
+function activeTabName() {
+    return MvdState.activeTab.get();
+}
+
+// The sidebar (src/shell/Sidebar.svelte) sets MvdState.activeTab; app.js
+// follows it here. Setting the same tab again re-runs the tab's render path.
 function setupTabs() {
-    const tabButtons = document.querySelectorAll('.sidebar-btn');
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabName = btn.dataset.tab;
-            tabButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`tab-${tabName}`).classList.add('active');
-
-            // Show/hide the unified-timeline. It now lives outside the
-            // scroll container as a sibling row of .main-scroll, so a
-            // simple display toggle is all that's needed — no sticky,
-            // no compositor games.
-            const tl = document.getElementById('unified-timeline');
-            if (tl && currentResult) {
-                tl.style.display = TABS_WITH_TIMELINE.includes(tabName) ? '' : 'none';
-            }
-
-            // Stop playback when switching to tabs without timeline
-            if (!TABS_WITH_TIMELINE.includes(tabName) && mapState.isPlaying) {
-                stopPlayback();
-            }
-
-            // The Player tab's clock is the engine's: the map's own playback
-            // loop must not run underneath it, and the engine pauses (not
-            // unloads) when the tab is left.
-            if (tabName === 'player') {
-                if (mapState.isPlaying) stopPlayback();
-                ensurePlayer();
-                startPlayerSync();
-                mountPlayerPanes();
-            } else {
-                unmountPlayerPanes();
-                if (playerState.fte) {
-                    stopPlayerSync();
-                    playerState.fte.pause();
-                }
-            }
-            updatePlaybackButtons();
-
-            // Sync views on tab switch.
-            //
-            // Canvases sized from container.clientWidth render empty
-            // when first drawn while the tab was hidden (clientWidth
-            // === 0 under display:none). Force a synchronous reflow
-            // of the now-active tab content so the display:none →
-            // block transition commits before we measure or draw.
-            //
-            // Even after that, Firefox specifically composites the
-            // newly-revealed tab subtree through a layer snapshot for
-            // a brief window — canvas writes during that window stay
-            // invisible until the user does anything else. The two
-            // backup re-renders (next frame + 120 ms) catch it
-            // without us having to know exactly when the snapshot
-            // releases. (Restructuring the layout to drop position:
-            // sticky on the unified-timeline did not eliminate this
-            // — the snapshot trigger appears to be the tab-content
-            // display change itself, not the sticky element.)
-            const tabContentEl = document.getElementById(`tab-${tabName}`);
-            if (tabContentEl) void tabContentEl.offsetHeight;
-
-            const renderForTab = () => {
-                if (tabName === 'map') {
-                    mapState.renderDirty = true;
-                    mapState.lastRenderedBucket = null;
-                    renderMap(mapState.currentTime);
-                } else if (tabName === 'timeline') {
-                    if (currentResult) updateDetailView();
-                    updateTimeIndicators();
-                } else if (tabName === 'chat') {
-                    renderChatMessages();
-                } else if (tabName === 'loc-graph') {
-                    renderLocGraph();
-                } else if (tabName === 'aimstats') {
-                    renderAimStats();
-                }
-            };
-            renderForTab();
-            requestAnimationFrame(renderForTab);
-            setTimeout(renderForTab, 120);
-
-            updateUrlState();
-        });
+    let subscribed = false;
+    MvdState.activeTab.subscribe((tabName) => {
+        if (subscribed) onTabActivated(tabName);
     });
+    subscribed = true;
+}
+
+function onTabActivated(tabName) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+
+    // Show/hide the unified-timeline. It now lives outside the
+    // scroll container as a sibling row of .main-scroll, so a
+    // simple display toggle is all that's needed — no sticky,
+    // no compositor games.
+    const tl = document.getElementById('unified-timeline');
+    if (tl && currentResult) {
+        tl.style.display = TABS_WITH_TIMELINE.includes(tabName) ? '' : 'none';
+    }
+
+    // Stop playback when switching to tabs without timeline
+    if (!TABS_WITH_TIMELINE.includes(tabName) && mapState.isPlaying) {
+        stopPlayback();
+    }
+
+    // The Player tab's clock is the engine's: the map's own playback
+    // loop must not run underneath it, and the engine pauses (not
+    // unloads) when the tab is left.
+    if (tabName === 'player') {
+        if (mapState.isPlaying) stopPlayback();
+        ensurePlayer();
+        startPlayerSync();
+        mountPlayerPanes();
+    } else {
+        unmountPlayerPanes();
+        if (playerState.fte) {
+            stopPlayerSync();
+            playerState.fte.pause();
+        }
+    }
+    updatePlaybackButtons();
+
+    // Sync views on tab switch.
+    //
+    // Canvases sized from container.clientWidth render empty
+    // when first drawn while the tab was hidden (clientWidth
+    // === 0 under display:none). Force a synchronous reflow
+    // of the now-active tab content so the display:none →
+    // block transition commits before we measure or draw.
+    //
+    // Even after that, Firefox specifically composites the
+    // newly-revealed tab subtree through a layer snapshot for
+    // a brief window — canvas writes during that window stay
+    // invisible until the user does anything else. The two
+    // backup re-renders (next frame + 120 ms) catch it
+    // without us having to know exactly when the snapshot
+    // releases. (Restructuring the layout to drop position:
+    // sticky on the unified-timeline did not eliminate this
+    // — the snapshot trigger appears to be the tab-content
+    // display change itself, not the sticky element.)
+    const tabContentEl = document.getElementById(`tab-${tabName}`);
+    if (tabContentEl) void tabContentEl.offsetHeight;
+
+    const renderForTab = () => {
+        if (tabName === 'map') {
+            mapState.renderDirty = true;
+            mapState.lastRenderedBucket = null;
+            renderMap(mapState.currentTime);
+        } else if (tabName === 'timeline') {
+            if (currentResult) updateDetailView();
+            updateTimeIndicators();
+        } else if (tabName === 'chat') {
+            renderChatMessages();
+        } else if (tabName === 'loc-graph') {
+            renderLocGraph();
+        } else if (tabName === 'aimstats') {
+            renderAimStats();
+        }
+    };
+    renderForTab();
+    requestAnimationFrame(renderForTab);
+    setTimeout(renderForTab, 120);
+
+    updateUrlState();
 }
 
 // ─── File Upload (via WASM Worker) ──────────────────────────────────────────
@@ -4347,7 +4351,7 @@ function displayTimelineAnalysis(result) {
     setupUnifiedTimeline();
 
     // Show the unified timeline on applicable tabs
-    const activeTab = document.querySelector('.sidebar-btn.active')?.dataset.tab;
+    const activeTab = activeTabName();
     const tl = document.getElementById('unified-timeline');
     if (tl) tl.style.display = TABS_WITH_TIMELINE.includes(activeTab) ? '' : 'none';
 
@@ -5643,7 +5647,7 @@ const TIMELINE_CANVAS_IDS = [
 let _timelineResizeRafId = null;
 function onTimelineWindowResize() {
     if (!currentResult) return;
-    const activeTab = document.querySelector('.sidebar-btn.active')?.dataset.tab;
+    const activeTab = activeTabName();
     if (activeTab !== 'timeline') return;
     if (_timelineResizeRafId !== null) return;
     _timelineResizeRafId = requestAnimationFrame(() => {
