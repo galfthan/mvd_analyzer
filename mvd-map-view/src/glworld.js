@@ -71,6 +71,12 @@ export function parseColor(str) {
 // ~256 steps per world unit.
 export const DEPTH_SCALE = 1 / 32768;
 
+// Liquid volume haze: opacity approaches LIQUID_VOLUME_MAX as the liquid
+// under a surface deepens, reaching ~63% of it at LIQUID_VOLUME_LENGTH world
+// units (a QW pool is ~64–128 deep).
+const LIQUID_VOLUME_LENGTH = 96;
+const LIQUID_VOLUME_MAX = 0.45;
+
 // cssW/cssH are the logical surface size project() targets.
 export function makeWorldTransform(w, cssW, cssH) {
     const A = w.scale * w.zoomK;
@@ -211,6 +217,38 @@ void main() {
         c = vec4(mix(c.rgb, uFogColor * c.a, f), c.a);
     }
     outColor = c;
+}`;
+
+// Liquid volume: a light absorption haze under each liquid surface. The
+// liquid faces are BSP '*' surfaces, not closed volumes (qbsp drops the
+// faces against solid), so thickness is taken from the surface fragment to
+// the opaque world behind it, read from the scene-depth prepass
+// (uSceneDepth). Window depth → world units is 2 / DEPTH_SCALE (orthographic,
+// so it is linear). vColor is the premultiplied surface fill; its hue tints
+// the haze. Fogged like the surfaces. highp: one world unit is ~1.5e-5 of
+// window depth, below mediump's resolution.
+const LIQUID_VOLUME_FRAG_SRC = `#version 300 es
+precision highp float;
+uniform highp sampler2D uSceneDepth;
+uniform float uDepthToWorld;
+uniform float uVolLength;
+uniform float uVolMax;
+uniform float uFogScale;
+uniform float uFogZ0;
+uniform vec3 uFogColor;
+in vec4 vColor;
+out vec4 outColor;
+void main() {
+    float scene = texelFetch(uSceneDepth, ivec2(gl_FragCoord.xy), 0).r;
+    float thick = (scene - gl_FragCoord.z) * uDepthToWorld;
+    if (thick <= 0.0) discard;
+    float a = uVolMax * (1.0 - exp(-thick / uVolLength));
+    vec3 c = vColor.rgb / max(vColor.a, 1e-4);
+    if (uFogScale > 0.0) {
+        float f = clamp((gl_FragCoord.z - uFogZ0) * uFogScale, 0.0, 0.9);
+        c = mix(c, uFogColor, f);
+    }
+    outColor = vec4(c * a, a);
 }`;
 
 // Point sprites (projectile / nail dots; trail and actor markers):
@@ -376,6 +414,9 @@ class GlBatch {
         gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
         this.sortable = sortable;
         this.ibo = sortable ? gl.createBuffer() : null;
+        // Front-to-back order, for the liquid-volume pass (nearest surface
+        // claims the pixel through the stencil).
+        this.iboFront = sortable ? gl.createBuffer() : null;
         this.sortedFor = null;
     }
 
@@ -386,14 +427,23 @@ class GlBatch {
         const key = w.yaw + '|' + w.pitch;
         if (this.sortedFor === key) return;
         const gl = this.gl;
+        const idx = sortedIndices(w, this.centroids);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, sortedIndices(w, this.centroids), gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.DYNAMIC_DRAW);
+        const front = new Uint32Array(idx.length);
+        for (let i = 0; i < idx.length; i += 3) {
+            const j = idx.length - 3 - i;
+            front[i] = idx[j]; front[i + 1] = idx[j + 1]; front[i + 2] = idx[j + 2];
+        }
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.iboFront);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, front, gl.DYNAMIC_DRAW);
         this.sortedFor = key;
     }
 
     dispose() {
         this.gl.deleteBuffer(this.vbo);
         if (this.ibo) this.gl.deleteBuffer(this.ibo);
+        if (this.iboFront) this.gl.deleteBuffer(this.iboFront);
     }
 }
 
@@ -413,6 +463,7 @@ export class GlWorld {
                 alpha: true,
                 antialias: true,
                 depth: true,
+                stencil: true,
                 premultipliedAlpha: true,
                 preserveDrawingBuffer: false,
             });
@@ -458,6 +509,31 @@ export class GlWorld {
         this.uFogColor = gl.getUniformLocation(tri, 'uFogColor');
         this.aPos = gl.getAttribLocation(tri, 'aPos');
         this.aColor = gl.getAttribLocation(tri, 'aColor');
+
+        const lv = link(VERT_SRC, LIQUID_VOLUME_FRAG_SRC);
+        this.volumeProg = {
+            prog: lv,
+            uRowX: gl.getUniformLocation(lv, 'uRowX'),
+            uRowY: gl.getUniformLocation(lv, 'uRowY'),
+            uRowZ: gl.getUniformLocation(lv, 'uRowZ'),
+            uOffset: gl.getUniformLocation(lv, 'uOffset'),
+            uTint: gl.getUniformLocation(lv, 'uTint'),
+            uSceneDepth: gl.getUniformLocation(lv, 'uSceneDepth'),
+            uDepthToWorld: gl.getUniformLocation(lv, 'uDepthToWorld'),
+            uVolLength: gl.getUniformLocation(lv, 'uVolLength'),
+            uVolMax: gl.getUniformLocation(lv, 'uVolMax'),
+            uFogScale: gl.getUniformLocation(lv, 'uFogScale'),
+            uFogZ0: gl.getUniformLocation(lv, 'uFogZ0'),
+            uFogColor: gl.getUniformLocation(lv, 'uFogColor'),
+            aPos: gl.getAttribLocation(lv, 'aPos'),
+            aColor: gl.getAttribLocation(lv, 'aColor'),
+        };
+        // Scene-depth target for the liquid volume: the opaque world's depth
+        // as a texture (the default framebuffer's depth can't be sampled).
+        // Sized lazily to the drawing buffer.
+        this._sceneDepthFbo = null;
+        this._sceneDepthTex = null;
+        this._sceneDepthSize = '';
 
         const pt = link(POINT_VERT_SRC, POINT_FRAG_SRC);
         this.pointProg = {
@@ -679,6 +755,83 @@ export class GlWorld {
         }
         gl.uniform3f(this.uOffset, 0, 0, 0);
         gl.uniform4f(this.uTint, 1, 1, 1, 1);
+    }
+
+    // _sceneDepth: render the opaque world (floors + movers) depth-only into
+    // an offscreen depth texture and return it — the liquid volume's "floor
+    // behind the surface". Leaves the default framebuffer bound.
+    _sceneDepth(pxW, pxH, movers) {
+        const gl = this.gl;
+        const size = pxW + 'x' + pxH;
+        if (this._sceneDepthSize !== size) {
+            if (this._sceneDepthTex) gl.deleteTexture(this._sceneDepthTex);
+            if (!this._sceneDepthFbo) this._sceneDepthFbo = gl.createFramebuffer();
+            this._sceneDepthTex = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, this._sceneDepthTex);
+            gl.texStorage2D(gl.TEXTURE_2D, 1, gl.DEPTH_COMPONENT24, pxW, pxH);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this._sceneDepthFbo);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
+                gl.TEXTURE_2D, this._sceneDepthTex, 0);
+            this._sceneDepthSize = size;
+        }
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this._sceneDepthFbo);
+        gl.depthMask(true);
+        gl.clear(gl.DEPTH_BUFFER_BIT);
+        gl.enable(gl.DEPTH_TEST);
+        gl.disable(gl.BLEND);
+        this._drawOpaque(this.floorOpaque);
+        if (movers && movers.length > 0) this._drawMovers(movers);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        return this._sceneDepthTex;
+    }
+
+    // _drawLiquidVolume: the absorption haze under the liquid surfaces
+    // (LIQUID_VOLUME_FRAG_SRC). Faces draw front to back under a stencil
+    // that lets only the first — nearest — surface fragment per pixel
+    // through, so a top face over a side face isn't hazed twice. Depth is
+    // read-only, as for the surfaces themselves.
+    _drawLiquidVolume(w, t, pxW, pxH, dyn, fogZ0, fc) {
+        const gl = this.gl;
+        const batch = this.liquidBatch;
+        gl.useProgram(this.prog);
+        const depthTex = this._sceneDepth(pxW, pxH, dyn.movers);
+        const p = this.volumeProg;
+        gl.useProgram(p.prog);
+        gl.uniform4fv(p.uRowX, t.rx);
+        gl.uniform4fv(p.uRowY, t.ry);
+        gl.uniform4fv(p.uRowZ, t.rz);
+        gl.uniform3f(p.uOffset, 0, 0, 0);
+        gl.uniform4f(p.uTint, 1, 1, 1, 1);
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, depthTex);
+        gl.uniform1i(p.uSceneDepth, 1);
+        gl.uniform1f(p.uDepthToWorld, 2 / DEPTH_SCALE);
+        gl.uniform1f(p.uVolLength, LIQUID_VOLUME_LENGTH);
+        gl.uniform1f(p.uVolMax, LIQUID_VOLUME_MAX);
+        gl.uniform1f(p.uFogScale, dyn.fogScale || 0);
+        gl.uniform1f(p.uFogZ0, fogZ0);
+        gl.uniform3f(p.uFogColor, fc[0], fc[1], fc[2]);
+
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthMask(false);
+        gl.enable(gl.BLEND);
+        gl.enable(gl.STENCIL_TEST);
+        gl.stencilFunc(gl.EQUAL, 0, 0xff);
+        gl.stencilOp(gl.KEEP, gl.KEEP, gl.INCR);
+        gl.bindBuffer(gl.ARRAY_BUFFER, batch.vbo);
+        gl.enableVertexAttribArray(p.aPos);
+        gl.vertexAttribPointer(p.aPos, 3, gl.FLOAT, false, 28, 0);
+        gl.enableVertexAttribArray(p.aColor);
+        gl.vertexAttribPointer(p.aColor, 4, gl.FLOAT, false, 28, 12);
+        batch.ensureSorted(w);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, batch.iboFront);
+        gl.drawElements(gl.TRIANGLES, batch.count * 3, gl.UNSIGNED_INT, 0);
+        gl.disable(gl.STENCIL_TEST);
+        gl.activeTexture(gl.TEXTURE0);
+        this.stats.draws++;
+        this.stats.worldTris += batch.count;
     }
 
     // _drawFills: translucent region tints ([{tris, tint: [r,g,b,a]}]) —
@@ -981,8 +1134,9 @@ export class GlWorld {
         gl.viewport(0, 0, pxW, pxH);
         gl.clearColor(0, 0, 0, 0);
         gl.clearDepth(1);
+        gl.clearStencil(0);
         gl.depthMask(true);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
         gl.useProgram(this.prog);
         const t = makeWorldTransform(w, cssW, cssH);
         gl.uniform4fv(this.uRowX, t.rx);
@@ -990,16 +1144,17 @@ export class GlWorld {
         gl.uniform4fv(this.uRowZ, t.rz);
         gl.uniform3f(this.uOffset, 0, 0, 0);
         gl.uniform4f(this.uTint, 1, 1, 1, 1);
-        gl.uniform1f(this.uFogScale, dyn.fogScale || 0);
         // Window depth (default depth range) where fog starts: the fog
         // anchor's depth, pulled dyn.fogLead world units toward the viewer;
         // without an anchor, the orbit pivot's depth plane.
         const fa = dyn.fogAnchor;
-        gl.uniform1f(this.uFogZ0, fa
+        const fogZ0 = fa
             ? 0.5 + 0.5 * (t.rz[0] * fa[0] + t.rz[1] * fa[1] + t.rz[2] * fa[2] + t.rz[3]
                 - (dyn.fogLead || 0) * DEPTH_SCALE)
-            : 0.5);
+            : 0.5;
         const fc = dyn.fogColor || [0.039, 0.039, 0.082];
+        gl.uniform1f(this.uFogScale, dyn.fogScale || 0);
+        gl.uniform1f(this.uFogZ0, fogZ0);
         gl.uniform3f(this.uFogColor, fc[0], fc[1], fc[2]);
 
         // Loc-blob underlay (maps with no floor model): translucent fills
@@ -1019,6 +1174,10 @@ export class GlWorld {
         gl.depthMask(false);
         this._drawBlended(this.floorFaded, w);
         this._drawBlended(this.liquidBatch, w);
+        if (this.liquidBatch) {
+            this._drawLiquidVolume(w, t, pxW, pxH, dyn, fogZ0, fc);
+            gl.useProgram(this.prog);
+        }
 
         // Overlays and actors: depth-test-off normally (the analyzer wants
         // everything visible); the occlusion view mode reads the world depth

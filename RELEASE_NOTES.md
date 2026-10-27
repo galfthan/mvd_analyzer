@@ -22,6 +22,14 @@ player models, first-person camera). A machine without WebGL2 sees a
 "WebGL2 required" notice on the map tab; software rasterisers
 (SwiftShader/llvmpipe) still work, just slower. `?gl=0`/`?gl=1` are gone.
 
+**Map effects.** Depth fog and directional floor shading are always on
+(their toolbar buttons are gone); fog is anchored to the map centre, so
+it no longer shifts with where the view was panned before tilting.
+Liquids gain a depth-based absorption haze under their surfaces — deep
+water reads denser than shallow. The FPS and Bench toolbar buttons
+described below were removed again; the measurement hooks stay in
+`mvd-map-view` (`MvdMap.lastFrameStats`, `perfCapture`, `bench.js`).
+
 **Render-performance instrumentation.** The map toolbar gains two buttons.
 **FPS** shows a live overlay: presented map-frames per second, the frame
 split (CPU command build / GL submit / canvas blit / GPU time where the

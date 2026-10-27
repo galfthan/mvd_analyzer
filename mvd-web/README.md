@@ -1073,21 +1073,6 @@ WebGL2 sees a "WebGL2 required" notice on the map tab (everything else in
 the app still works), and software rasterisers (SwiftShader/llvmpipe) are
 accepted as the slow-but-working fallback.
 
-**Render-performance tools** — two toolbar buttons instrument the GL
-renderer. **FPS** toggles a live overlay over the canvas: presented
-map-frames per second and the per-frame cost split (CPU command build /
-GL submit / blit / GPU time where the browser exposes
-`EXT_disjoint_timer_query_webgl2`), plus draw-call and primitive counts
-from `GlWorld.stats`. **Bench** (`runMapBenchmark`) plays the demo from a
-fixed timestamp (min(30 s, 25 % of duration)) while the camera follows a
-deterministic 18-second spin / tilt / zoom script
-(`MapView.benchCameraAt`), records every frame's timings, restores the
-user's view, and reports avg fps, frame-time p50/p95/max and hitch count.
-Each run is logged to the console as a single JSON line and kept in
-localStorage (last 30), keyed by map+teams+duration and canvas size, so
-re-running after a renderer change on the same demo shows the fps delta
-against the previous run.
-
 **Occupied-region overlay** — a region a living player currently stands
 in is tinted by the team(s) present (`drawOccupiedRegionsOverlay`): one
 team → that team's canonical colour, both teams → white (contested),
@@ -1181,6 +1166,16 @@ body reads as a 3D volume with visible depth (water blue, slime green,
 lava orange). The per-face alpha is kept low (`LIQUID_ALPHA`) so the
 volume reads as a faint tint rather than dominating the floor under it.
 They draw live above the region fills and below the outlines/players.
+Under the surfaces sits an absorption haze in the liquid's colour whose
+opacity grows with the depth from the nearest liquid surface down to the
+opaque world behind it (a scene-depth prepass; `LIQUID_VOLUME_LENGTH` /
+`LIQUID_VOLUME_MAX` in `glworld.js`), so deep pools read darker and
+denser than shallow edges.
+
+Depth fog (`state.fog`) and directional floor shading
+(`state.worldLight`) are always on; they have no toolbar buttons. Fog
+starts a little in front of the map centre and thickens toward the far
+side.
 
 Everything is drawn through one orbit-camera orthographic projection
 (`projectWorld` in `app.js`): floor geometry uses the per-vertex heights

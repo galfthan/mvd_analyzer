@@ -104,8 +104,10 @@ label-dense learn view, atlas text vs canvas text); typical steps ~0.02%.
 
 ## Effects PoC — REVIEW WITH OWNER BEFORE BUILDING ON IT
 
-Three toggles exist (buttons after "3D" in the map toolbar), all
-default-OFF; with them off the shot corpus is byte-identical to step 6:
+Fog and Light are now always on (owner's call, no buttons); Occl is
+still a toolbar toggle, default off. The FPS/Bench buttons were removed
+(the mvd-map-view measurement hooks remain). A fourth effect, the
+liquid volume haze, is always on:
 
 - **Fog** — depth fog in the world fragment shader (floors, movers,
   liquids, tints), starting a little in front of the fixed map centre (`FOG_LEAD`)
@@ -118,6 +120,14 @@ default-OFF; with them off the shot corpus is byte-identical to step 6:
   world (`state.occludeActors`); floors hide players/items/lines behind
   them. Known nit: screen-space arrowhead triangles carry z=0, so they
   can clip oddly in this mode — fix if the mode survives review.
+- **Liquid volume** — `_drawLiquidVolume`: liquid faces are BSP `*`
+  surfaces, not closed volumes, so haze opacity comes from the depth
+  between the nearest liquid surface and the opaque world behind it
+  (`_sceneDepth` renders floors + movers depth-only into a texture each
+  frame when liquids exist). Faces draw front-to-back under a stencil so
+  only the nearest surface per pixel contributes. Where nothing opaque
+  lies behind (side views into a pool with no floor face behind it) the
+  haze runs to `LIQUID_VOLUME_MAX`.
 
 The owner said: *"Do not focus on adding new effects, that is part of
 next steps done together"* — so 3D player models and the perspective /

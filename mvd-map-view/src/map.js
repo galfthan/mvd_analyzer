@@ -341,12 +341,12 @@ export function newState() {
         showViewArrows: false,
         showVelArrows: false,
         // Effects (GL renderer). fog: 0..1 depth-fog density. worldLight:
-        // 0..1 directional shading strength on the floor model (0 keeps the
-        // deliberate flat look). occludeActors: depth-test overlays/actors
-        // against the world — realistic occlusion instead of the analyzer's
+        // 0..1 directional shading strength on the floor model (0 gives the
+        // flat look). occludeActors: depth-test overlays/actors against the
+        // world — realistic occlusion instead of the analyzer's
         // everyone-always-visible default.
-        fog: 0,
-        worldLight: 0,
+        fog: 1,
+        worldLight: 0.6,
         occludeActors: false,
         showLos: false,
         showPvs: false,
