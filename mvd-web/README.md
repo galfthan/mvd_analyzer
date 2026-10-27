@@ -22,8 +22,8 @@ talks to it through a JS shim.
   uses — [`mvd-map-view`](../mvd-map-view/README.md) (`MapView`), the data
   layer (`mvdData`, `MvdHub`), shared state (`MvdState`), result helpers
   (`MvdLib`) and the Player tab's engine (`MvdPlayer`). Ported so far: the
-  shell, the Player tab (`src/player/`), and the Chat and Pack Drops
-  tabs (`src/tabs/<name>/`, their DOM-free parts in
+  shell, the Player tab (`src/player/`), and the Chat, Pack Drops and
+  Pickups tabs (`src/tabs/<name>/`, their DOM-free parts in
   `src/lib/<name>.js`); see
   [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
   Two UI packages are bundled (pinned in `package.json`):
@@ -319,7 +319,7 @@ The shell is Svelte (`src/shell/`): `App.svelte` renders the top bar,
 the sidebar (from `TABS` in `src/state/ui.js`) and the layout, and adopts
 the markup of tabs not yet ported — `index.html`'s hidden `#legacy-dom`,
 which `app.js` finds by id — into the main pane (`adopt.js`). Ported
-tabs (`PlayerTab`, and `ChatTab`, `PackDropsTab` in
+tabs (`PlayerTab`, and `ChatTab`, `PackDropsTab`, `PickupsTab` in
 `src/tabs/`) are mounted there beside
 them; `app.js` still toggles their `active` class like any `.tab-content`.
 `src/main.js` mounts it synchronously, so that markup is in place before
@@ -349,8 +349,8 @@ them; `app.js` still toggles their `active` class like any `.tab-content`.
 6. On `result`, `app.js` parses the JSON, clears the no-demo class,
    switches to the Summary tab, and renders all tabs. The main-thread
    inits are cheap, so they run now even though the bucket-derived
-   fields are still empty — the scoreboard, pickups, key moments and loc
-   graph are fully populated (chat and pack drops build on the first
+   fields are still empty — the scoreboard, key moments and loc graph
+   are fully populated (chat, pack drops and pickups build on the first
    frame their tab shows); only the timeline
    graph, map trails and region overlay are blank. On the later
    `buckets` message the data layer (`DemoHandle._applyBuckets`) stashes
@@ -867,8 +867,8 @@ is no UI for it. Stages reported, in load order:
   `finalize:timelineAnalysis`. To get the **pure loc-resolution compute**,
   subtract `locFetch + bspFetch` from `finalize:timelineAnalysis`.
 - **result JSON.parse** (main thread), each legacy tab render
-  (`displayTimelineAnalysis`, `displayKeyMoments`, `displayPickupsTab`,
-  `initMapView`, `initLocGraphView`; the ported tabs build when first shown), and the
+  (`displayTimelineAnalysis`, `displayKeyMoments`, `initMapView`,
+  `initLocGraphView`; the ported tabs build when first shown), and the
   async `map geometry fetch` (logged separately as it resolves after
   the UI is shown).
 
@@ -1072,8 +1072,9 @@ Two panels — Weapon Pickups (RL / LG / GL / SNG) and Item Pickups
 (armors, MH, powerups) — each with a per-team and a per-player table.
 Every *spawn entity* gets its own column (`RL @ ra-room`, taken from
 `result.items[].phases`), RL/LG add a `pack` column, and each kind
-closes with a `Σ` verify cell that compares the analytics-derived count
-against KTX's own counter (silent on agreement, red ✗ on divergence).
+closes with a `Σ` verify cell: KTX's own counter when the demo carries
+one, the analytics-derived count otherwise, with both in the tooltip (a
+divergence is expected in weapon-stay modes and gets no warning styling).
 A mode selector switches both tables between "All pickups" (Σ vs KTX
 `total-taken`) and "First pickup per life" (Σ vs KTX `taken`).
 
@@ -1096,6 +1097,13 @@ the Summary tab's possession cells. Two properties are deliberate:
 These rows come from `demoInfo.players`, not `playerStats`, so the join
 is by player name and by team name (`playerStats.teams[].name`); a demo
 whose `playerStats` lacks the row or the hold family renders `-`.
+
+The tab is Svelte (`src/tabs/pickups/PickupsTab.svelte`); the counts,
+columns and cells are `src/lib/pickups.js`. Rows take their team colour
+from the `teams` store. The tables are rebuilt on the first frame the tab
+shows after the demo or the teams changed, and on a mode change, which
+also resets any column sort (the sortable headers are `src/ui/sortable.js`
+`makeSortable`, shared with `app.js`).
 
 ## Pack Drops tab
 

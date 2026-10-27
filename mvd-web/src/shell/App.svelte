@@ -8,6 +8,7 @@
     import PlayerTab from '../player/PlayerTab.svelte';
     import ChatTab from '../tabs/chat/ChatTab.svelte';
     import PackDropsTab from '../tabs/packdrops/PackDropsTab.svelte';
+    import PickupsTab from '../tabs/pickups/PickupsTab.svelte';
     import Toast from '../player/Toast.svelte';
     import { adopt } from './adopt.js';
 </script>
@@ -19,6 +20,7 @@
         <div class="main-scroll" use:adopt={{ selector: '#legacy-dom > .tab-content' }}>
             <ChatTab />
             <PackDropsTab />
+            <PickupsTab />
             <PlayerTab />
         </div>
     </main>
