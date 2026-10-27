@@ -194,8 +194,8 @@ void main() { outColor = vColor; }`;
 
 // The world triangles (floors, movers, liquids, tints) support depth fog:
 // gl_FragCoord.z grows with camera distance (clip z is negated closeness),
-// so fog is a mix toward the fog colour past uFogZ0, the window depth of the
-// map centre. uFogScale is precomputed host-side from the map's world size;
+// so fog is a mix toward the fog colour past uFogZ0, a window depth a little
+// in front of the map centre. uFogScale is precomputed host-side from the map's world size;
 // 0 disables.
 const WORLD_FRAG_SRC = `#version 300 es
 precision mediump float;
@@ -991,11 +991,13 @@ export class GlWorld {
         gl.uniform3f(this.uOffset, 0, 0, 0);
         gl.uniform4f(this.uTint, 1, 1, 1, 1);
         gl.uniform1f(this.uFogScale, dyn.fogScale || 0);
-        // Window depth (default depth range) of the fog anchor; without one
-        // the fog starts at the orbit pivot's depth plane.
+        // Window depth (default depth range) where fog starts: the fog
+        // anchor's depth, pulled dyn.fogLead world units toward the viewer;
+        // without an anchor, the orbit pivot's depth plane.
         const fa = dyn.fogAnchor;
         gl.uniform1f(this.uFogZ0, fa
-            ? 0.5 + 0.5 * (t.rz[0] * fa[0] + t.rz[1] * fa[1] + t.rz[2] * fa[2] + t.rz[3])
+            ? 0.5 + 0.5 * (t.rz[0] * fa[0] + t.rz[1] * fa[1] + t.rz[2] * fa[2] + t.rz[3]
+                - (dyn.fogLead || 0) * DEPTH_SCALE)
             : 0.5);
         const fc = dyn.fogColor || [0.039, 0.039, 0.082];
         gl.uniform3f(this.uFogColor, fc[0], fc[1], fc[2]);

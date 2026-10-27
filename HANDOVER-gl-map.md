@@ -108,7 +108,7 @@ Three toggles exist (buttons after "3D" in the map toolbar), all
 default-OFF; with them off the shot corpus is byte-identical to step 6:
 
 - **Fog** — depth fog in the world fragment shader (floors, movers,
-  liquids, tints), starting at the depth plane of the fixed map centre
+  liquids, tints), starting a little in front of the fixed map centre (`FOG_LEAD`)
   (not the orbit pivot, which moves with pan history), density scaled
   from the map's world radius (`state.fog` 0..1).
 - **Light** — directional Lambert baked into floor vertex colours at

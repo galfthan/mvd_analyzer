@@ -72,6 +72,10 @@ const BEAM_COLOR = 'rgba(150, 200, 255, 0.85)';
 // A beam flashes for this half-window (ms) around its instant.
 const BEAM_FLASH_MS = 60;
 
+// Depth fog starts this fraction of the map's radius in front of the map
+// centre, so the near half of the map already picks up some haze.
+const FOG_LEAD = 0.35;
+
 const ARMOR_COLORS = {
     ra: 'rgb(255, 50, 50)',
     ya: 'rgb(255, 200, 0)',
@@ -848,6 +852,7 @@ export class MvdMap {
             dyn.fogScale = s.fog * (2 / (halfDiag * DEPTH_SCALE)) * 0.9;
             dyn.fogAnchor = [(b.minX + b.maxX) / 2, (b.minY + b.maxY) / 2,
                 this.camera.zMidDefault || 0];
+            dyn.fogLead = FOG_LEAD * halfDiag;
         }
         dyn.occludeActors = s.occludeActors;
         return dyn;
