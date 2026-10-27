@@ -409,6 +409,18 @@ export class MvdMap {
         this.teamColors = opts.teamColors || ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
     }
 
+    // dispose releases the WebGL context of the world renderer now instead of
+    // at garbage collection: browsers keep a handful of live contexts and
+    // drop the oldest past that, which could be another map's. A host that
+    // mounts and unmounts maps calls this on unmount; the instance is not
+    // used afterwards.
+    dispose() {
+        const gl = this._glWorld?.gl;
+        if (gl) gl.getExtension('WEBGL_lose_context')?.loseContext();
+        this._glWorld = null;
+        this._glFailed = true;
+    }
+
     // attach binds the canvas the renderer draws into. Separate from the
     // constructor because the host may build the map before its canvas is in
     // the document (mvd-web constructs on script load, attaches on demo load).

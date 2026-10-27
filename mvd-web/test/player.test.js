@@ -42,6 +42,10 @@ test('playlist edits keep a running list on the same clip', () => {
     removeClip(2);
     r = playlist.get().run;
     assert.equal(r.clips[r.index].from, 30);
+    addClips([clip(70, 80)]);
+    r = playlist.get().run;
+    assert.equal(r.clips, playlist.get().clips, 'a running list reaches clips added while it plays');
+    assert.equal(r.clips[r.index].from, 30);
     removeClip(0);
     assert.equal(playlist.get().run, null, 'removing the playing clip ends the run');
     const before = playlist.get();

@@ -7,7 +7,7 @@
     // to watch them; drag pans, right-drag orbits, the wheel zooms,
     // double-click resets the view.
     import { MvdMap } from '../../../../mvd-map-view/src/index.js';
-    import { demo, teams } from '../../state/index.js';
+    import { clock, demo, teams } from '../../state/index.js';
     import { mapTabView } from '../../legacy.js';
     import { engine } from '../index.js';
     import { paneLayout } from '../layout.js';
@@ -23,6 +23,8 @@
     let empty = $state(false);
     let map = null;
     let setting = false;
+    let lastPov = null;       // the POV the camera last followed
+    let needsFit = true;      // a new demo: reset the view once its data is in
 
     const sized = $derived($paneLayout.heights.map != null);
 
@@ -31,10 +33,41 @@
         try { map.setFollowPlayer(name); } finally { setting = false; }
     }
 
+    // draw syncs the Map tab's data in and renders at the clock's time.
+    function draw() {
+        if (!map) return;
+        const src = mapTabView();
+        empty = !src?.state.initialized;
+        if (empty) return;
+        if (syncMapData(src.state, map.state) || needsFit) {
+            // The world's mid height comes from the loc z-range app.js
+            // computed for the Map tab's camera.
+            map.camera.zMidDefault = src.camera.zMidDefault;
+            if (needsFit) {
+                needsFit = false;
+                lastPov = null;
+                map.resetView();
+            }
+            fitCanvas();
+        }
+        map.teamColors = $teams.colors;
+        map.state.currentTime = clock.t;
+        map.state.renderDirty = true;
+        // Re-follow only when the POV changes: a pan, or a click that
+        // unfollows, holds until the next POV switch.
+        const pov = engine.povName();
+        if (follow && pov !== lastPov) {
+            lastPov = pov;
+            if (pov) setFollow(pov);
+        }
+        map.render(clock.t);
+    }
+
     // Width from the pane; height from the pane when the user sized it,
     // else the world's aspect, capped so the column stays scannable.
-    function resize() {
-        if (!map || !box) return;
+    // Resizing clears the canvas, so callers draw after.
+    function fitCanvas() {
+        if (!map || !box || !box.clientWidth) return;
         const cssW = Math.max(200, Math.floor(box.clientWidth));
         const s = map.state;
         const worldW = s.bounds.maxX - s.bounds.minX;
@@ -43,7 +76,11 @@
             ? Math.max(MIN_H, Math.floor(box.clientHeight))
             : worldW > 0 ? Math.round(Math.max(MIN_H, Math.min(MAX_H, cssW * (worldH / worldW)))) : cssW;
         map.resize(cssW, cssH, window.devicePixelRatio || 1);
-        s.renderDirty = true;
+    }
+
+    function resize() {
+        fitCanvas();
+        draw();
     }
 
     $effect(() => {
@@ -54,35 +91,20 @@
         });
         const ro = new ResizeObserver(() => resize());
         ro.observe(box);
-        const offFrame = onFrame((t) => {
-            if (!map) return;
-            const src = mapTabView();
-            empty = !src?.state.initialized;
-            if (empty) return;
-            if (syncMapData(src.state, map.state)) resize();
-            map.teamColors = $teams.colors;
-            map.state.currentTime = t;
-            map.state.renderDirty = true;
-            if (follow) {
-                const pov = engine.povName();
-                if (pov && pov !== map.state.followPlayer) setFollow(pov);
-            }
-            map.render(t);
-        });
+        const offFrame = onFrame(() => draw());
         return () => {
             offFrame();
             ro.disconnect();
+            map.dispose();
             map = null;
         };
     });
 
-    // A new demo: drop the old follow target and view.
+    // A new demo: drop the old follow target; the view resets on its data.
     $effect(() => {
         $demo;
-        if (map) {
-            setFollow(null);
-            map.resetView();
-        }
+        needsFit = true;
+        if (map) setFollow(null);
     });
 
     $effect(() => {
@@ -118,7 +140,9 @@
     }
 
     function toggleFollow() {
+        lastPov = null;
         if (!follow) setFollow(null);
+        draw();
     }
 </script>
 

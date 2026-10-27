@@ -10,6 +10,7 @@ import { toast } from './toast.js';
 
 export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRefOf }) {
     let loadingRun = null;   // the run whose next clip's demo is being loaded
+    let awaitingFrames = false;   // a clip waits for the shown engine to repaint
 
     const currentRef = () => demoRefOf(demo.get(), teams.get().order);
     const isCurrent = (c) => {
@@ -45,9 +46,13 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             // repaint plays on through it — the backward jump overshoots
             // its target and the controller's POV restore never sees the
             // clock arrive. Jump once frames flow again.
+            // The engine's sync poll starts with the tab; until the jump is
+            // sent its clock is the old one, so the run must not step on it.
             selectTab('player');
             const pending = playlist.get().run;
+            awaitingFrames = true;
             requestAnimationFrame(() => requestAnimationFrame(() => {
+                awaitingFrames = false;
                 if (playlist.get().run === pending) playClip(index);
             }));
             return;
@@ -92,7 +97,7 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
     engine.onTick((demoT) => {
         const run = playlist.get().run;
         const fte = engine.fte;
-        if (!run || !fte) return;
+        if (!run || !fte || awaitingFrames) return;
         if (engine.seeking()) {
             run.prev = null;
             return;

@@ -34,9 +34,15 @@ function update(fn) {
     playlist.set(next);
 }
 
+// A "Play all" run plays the list itself, so it reaches clips added while
+// it plays.
 export function addClips(clips) {
     if (!clips.length) return;
-    update((s) => { s.clips = [...s.clips, ...clips]; });
+    update((s) => {
+        const next = [...s.clips, ...clips];
+        if (s.run && s.run.clips === s.clips) s.run = { ...s.run, clips: next };
+        s.clips = next;
+    });
 }
 
 // setLabel edits in place: the list is not re-rendered for a keystroke.

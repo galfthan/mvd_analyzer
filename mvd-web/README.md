@@ -899,9 +899,12 @@ which would reload the engine's iframe.)
 
 - **Map** is its own `MvdMap` — its own canvas, camera and follow target —
   reading the Map tab's loaded data each frame (`panes/map-sync.js`: data
-  fields by reference, never view state). *follow POV* keeps the camera on
-  the watched player; clicking a player on the map switches the POV to
-  them; drag pans, right-drag orbits, the wheel zooms, double-click resets.
+  fields by reference, never view state). *follow POV* puts the camera on
+  the watched player whenever the POV changes — a pan holds until the next
+  switch; clicking a player on the map switches the POV to them; drag pans,
+  right-drag orbits, the wheel zooms, double-click resets. Unmounting the
+  pane (close, collapse, hiding the column) releases its WebGL context
+  (`MvdMap.dispose`).
 - **Health / armor**: one row per player in canonical team order and
   colour — a rolling strip (45 s back, 15 s ahead, `renderMiniStack`, fixed
   0–300 scale) with the playhead, and the values at it. Click a name to
