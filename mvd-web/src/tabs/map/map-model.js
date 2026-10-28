@@ -213,10 +213,12 @@ export function loadMap(result) {
 
 // applyMapGeometry installs a geometry as the floor / wall source; the
 // regions in effect are applied again so the overlay's region → loc-group
-// lookup points at the new groups.
+// lookup points at the new groups. Not on a field of players: its model is
+// not editable, no overlay shows, and Go answers a recompute there with
+// "region control unavailable".
 function applyMapGeometry(geom) {
     view.setGeometry(geom);
-    if (regionControl.get()) reapplyRegions(demo.get());
+    if (regionControl.get()?.editable) reapplyRegions(demo.get());
     touch();
 }
 
