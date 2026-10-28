@@ -40,8 +40,14 @@ build:
 	@cd $(WEB_DIR) && npm ci --no-fund --no-audit && npm run build
 	@echo "Building WASM module..."
 	GOOS=js GOARCH=wasm go build $(LDFLAGS) -o $(DIST_DIR)/analyzer.wasm $(WASM_MAIN)
+	@# The JS glue must match the toolchain that built analyzer.wasm. Go 1.24
+	@# moved it from misc/wasm/ to lib/wasm/; the committed copy in static/
+	@# (which Vite has already put in dist/) is the last resort.
 	@echo "Copying wasm_exec.js..."
-	@cp "$$(go env GOROOT)/misc/wasm/wasm_exec.js" $(DIST_DIR)/ 2>/dev/null || cp $(STATIC_DIR)/wasm_exec.js $(DIST_DIR)/
+	@goroot="$$(go env GOROOT)"; \
+	if [ -f "$$goroot/lib/wasm/wasm_exec.js" ]; then cp "$$goroot/lib/wasm/wasm_exec.js" $(DIST_DIR)/; \
+	elif [ -f "$$goroot/misc/wasm/wasm_exec.js" ]; then cp "$$goroot/misc/wasm/wasm_exec.js" $(DIST_DIR)/; \
+	else echo "  toolchain wasm_exec.js not found; using $(STATIC_DIR)/wasm_exec.js"; cp $(STATIC_DIR)/wasm_exec.js $(DIST_DIR)/; fi
 	@sed -i 's/<meta name="build" content="dev">/<meta name="build" content="$(GIT_HASH)">/' $(DIST_DIR)/index.html
 	@echo "Copying mvd-fte-player..."
 	@mkdir -p $(DIST_DIR)/fte-player/src && cp $(FTEPLAYER_DIR)/player.html $(FTEPLAYER_DIR)/config.cfg $(DIST_DIR)/fte-player/ && cp $(FTEPLAYER_DIR)/src/*.js $(DIST_DIR)/fte-player/src/
