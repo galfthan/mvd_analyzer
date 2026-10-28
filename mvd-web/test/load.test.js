@@ -7,7 +7,8 @@ import { readFileSync } from 'node:fs';
 import { canonicalTeamOrder, fallbackTeamOrder, canonicalPlayers } from '../src/lib/canonical-teams.js';
 import { topbarView } from '../src/lib/topbar.js';
 import { urlQuery, parseSeg, parseTime, resolveTabName, urlTab } from '../src/lib/url-state.js';
-import { isMultiPlayerIndividual } from '../src/lib/result.js';
+import { isMultiPlayerIndividual, mapFileKey, nameOfUserId, userIdOf } from '../src/lib/result.js';
+import { teams, setCanonicalTeams, teamIndexOf } from '../src/state/teams.js';
 import { SEARCH_FIELDS } from '../src/data/hub.js';
 
 const golden = (name) => JSON.parse(readFileSync(new URL(`../../mvd-analytics/testdata/golden/${name}.json`, import.meta.url)));
@@ -68,4 +69,45 @@ test('url state: what is written, and the deep-link readers', () => {
     assert.equal(urlTab('locs-regions'), 'loc-graph');
     assert.equal(urlTab('timeline'), 'timeline');
     for (const none of ['bogus', '', null]) assert.equal(urlTab(none), null, `${none}: counts as no ?tab=`);
+});
+
+test('mapFileKey: demoInfo map, else the serverinfo map, else match.map — never the title', () => {
+    const r = { metadata: { serverInfo: { map: 'maps/DM4.bsp' } }, match: { map: 'other', mapTitle: 'The Bad Place' } };
+    assert.equal(mapFileKey(r), 'dm4', 'no KTX block: the serverinfo key, short and lower-cased');
+    assert.equal(mapFileKey({ ...r, demoInfo: { map: 'Aerowalk' } }), 'aerowalk');
+    assert.equal(mapFileKey({ match: { map: 'e1m2', mapTitle: 'The Installation' } }), 'e1m2');
+    assert.equal(mapFileKey(RECON), 'dm4', 'the pre-KTX archive demo');
+    assert.equal(mapFileKey(null), '');
+});
+
+test('nameOfUserId: the userid may come as a string (FTE, URLs)', () => {
+    const TEAM2 = golden('2on2_nani_pora_210426_dm6');
+    const id = userIdOf(TEAM2, 'SS');
+    assert.equal(typeof id, 'number');
+    assert.equal(nameOfUserId(TEAM2, id), 'SS');
+    assert.equal(nameOfUserId(TEAM2, String(id)), 'SS');
+    assert.equal(nameOfUserId(TEAM2, 99999), null);
+});
+
+test('canonical order: without team rows the playerStats rows sum the team frags', () => {
+    // demoInfo's own frags say a > b; playerStats (the corrected net score)
+    // says b > a, and it is the frag source.
+    const r = {
+        match: { sources: { teams: 'serverinfo' } },
+        demoInfo: { teams: ['a', 'b'], players: [{ name: 'x', team: 'a', stats: { frags: 10 } }, { name: 'y', team: 'b', stats: { frags: 1 } }] },
+        playerStats: { players: [{ name: 'x', team: 'a', score: { frags: 2 } }, { name: 'y', team: 'b', score: { frags: 9 } }] },
+    };
+    assert.deepEqual(canonicalTeamOrder(r).order, ['b', 'a']);
+});
+
+test('canonicalPlayers: match.players first, and the first team named for a player wins', () => {
+    const r = {
+        match: { players: [{ name: 'p', team: 'red' }] },
+        demoInfo: { players: [{ name: 'p', team: 'blue' }, { name: 'q', team: 'blue' }] },
+    };
+    assert.deepEqual(canonicalPlayers(r).map((p) => `${p.name}:${p.team}`), ['p:red', 'p:blue', 'q:blue']);
+    setCanonicalTeams(['blue', 'red'], false, canonicalPlayers(r));
+    assert.equal(teamIndexOf(teams.get(), 'p', false), 1, 'p is red, from match.players');
+    assert.equal(teamIndexOf(teams.get(), 'q', false), 0, 'q only in demoInfo');
+    setCanonicalTeams([]);
 });
