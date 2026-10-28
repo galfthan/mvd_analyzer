@@ -16,8 +16,9 @@
     import { demo, teams, colorOf } from '../state/index.js';
     import { formatDuration } from '../lib/result.js';
     import {
-        SOURCES, PRESETS, viewCall, clipsOf, fieldPaths, toDraft, fromDraft, encodeQuery,
+        SOURCES, PRESETS, viewCall, clipsOf, fieldPaths, toDraft, fromDraft, encodeQuery, toEditTree, toExpr,
     } from '../lib/clip-query.js';
+    import { parseExpr, exprToText } from '../lib/clip-expr-text.js';
     import { runner, currentRef } from './index.js';
     import { addClips } from './playlist-store.js';
     import { userPresets, savePreset, deletePreset, finderInput } from './clip-presets.js';
@@ -57,6 +58,36 @@
         title = t;
         presetId = id;
         draft = toDraft(q);
+        exprText = exprToText(q.where);
+        exprError = '';
+    }
+
+    // The filter as text (src/lib/clip-expr-text.js): what the text parses
+    // to replaces the builder's tree; text that does not parse leaves the
+    // last good tree in force and says why.
+    let textMode = $state(false);
+    let exprText = $state('');
+    let exprError = $state('');
+
+    /** @param {boolean} on */
+    function setTextMode(on) {
+        if (on) {
+            exprText = exprToText(toExpr(draft.where));
+            exprError = '';
+        }
+        textMode = on;
+    }
+
+    /** @param {Event & { currentTarget: HTMLTextAreaElement }} e */
+    function editText(e) {
+        exprText = e.currentTarget.value;
+        const r = parseExpr(exprText);
+        if (r.error) {
+            exprError = r.error;
+            return;
+        }
+        exprError = '';
+        draft.where = toEditTree(r.expr);
     }
 
     // A preset picked elsewhere or a #clipquery= link opens here.
@@ -213,8 +244,20 @@
             </datalist>
 
             <div class="cf-section">
-                <span class="cf-heading">Keep rows where</span>
-                <ExprGroup bind:group={draft.where} fields="cf-fields" />
+                <div class="cf-row">
+                    <span class="cf-heading">Keep rows where</span>
+                    <span class="pt-group">
+                        <button class="pt-btn" class:active={!textMode} onclick={() => setTextMode(false)}>Builder</button>
+                        <button class="pt-btn" class:active={textMode} title={'e.g. weapon = rl and (pickerRelation = enemy or not pickerHadWeapon)'} onclick={() => setTextMode(true)}>Text</button>
+                    </span>
+                </div>
+                {#if textMode}
+                    <textarea class="cf-text" rows="3" spellcheck="false" value={exprText} oninput={editText}
+                        placeholder={'weapon = rl and (pickerRelation = enemy or not pickerHadWeapon) — and, or, not, ( ), = != < <= > >= ~ (contains), in [a, b]'}></textarea>
+                    {#if exprError}<span class="cf-error">{exprError}</span>{/if}
+                {:else}
+                    <ExprGroup bind:group={draft.where} fields="cf-fields" />
+                {/if}
             </div>
 
             <div class="cf-row">
@@ -359,6 +402,22 @@
     }
     .clip-finder :global(input[type='text']::placeholder) {
         color: #777;
+    }
+    .cf-text {
+        width: 100%;
+        box-sizing: border-box;
+        background: var(--bg-deep);
+        color: var(--fg-default);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 13px;
+        padding: 4px 6px;
+        resize: vertical;
+    }
+    .cf-error {
+        color: #ff8080;
+        font-size: 12px;
     }
     .cf-results {
         max-height: 220px;

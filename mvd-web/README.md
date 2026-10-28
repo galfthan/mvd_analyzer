@@ -34,10 +34,13 @@ talks to it through a JS shim.
   them — `src/main.js` publishes `window.MvdState` (the stores),
   `MvdMapTab` (the map view and loader), `MvdPlayer` (the Player engine),
   `mvdData` (the data source) and `loadDemo`.
-  Two UI packages are bundled (pinned in `package.json`):
+  Three packages are bundled (pinned in `package.json`):
   [PaneForge](https://paneforge.com) for the Player tab's player | panes
-  split and [Lucide](https://lucide.dev) icons, imported one per file
-  (`@lucide/svelte/icons/<name>`) so only the icons used ship.
+  split, [Lucide](https://lucide.dev) icons, imported one per file
+  (`@lucide/svelte/icons/<name>`) so only the icons used ship, and
+  [jsep](https://github.com/EricSmekens/jsep) (MIT), the expression parser
+  behind the clip finder's text mode. Its node test skips where `npm ci`
+  has not run.
 - `static/` — copied into `dist/` as-is (Vite's `publicDir`).
   - `styles.css` — the stylesheet.
   - `worker.js` — wraps the WASM module in a Web Worker so analysis
@@ -1144,8 +1147,12 @@ scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
   the filter editor `ExprGroup.svelte`; collapsed or open per browser)
   edits a query as a form: *Start from…* a preset, the source and its
   params (hints from the API), the filter as nested *all of* / *any of*
-  groups with *not*, the rank, one or more clip windows per row and the
-  label. Field boxes suggest the paths the endpoint's rows actually carry.
+  groups with *not* — or, under *Text*, as an expression like
+  `weapon = rl and (pickerRelation = enemy or not pickerHadWeapon)`
+  (`src/lib/clip-expr-text.js`: jsep parses, the syntax tree is converted
+  to the stored one and anything outside the small grammar is an error;
+  text that does not parse keeps the last good filter) — the rank, one or
+  more clip windows per row and the label. Field boxes suggest the paths the endpoint's rows actually carry.
   Results update as you type (the endpoint is re-queried only when the
   source or a param changes): click one to play it, shift-click to add it,
   or *Add N to playlist*. *Save as preset* keeps the query in this browser
