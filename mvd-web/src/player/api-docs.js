@@ -30,12 +30,37 @@ export function fieldDoc(doc, path) {
     return doc?.fields[path] || doc?.fields[path.replace(/\.\d+(?=\.|$)/g, '.0')];
 }
 
-// The first sentence of a description, for a tooltip.
-/** @param {string | undefined} text */
-export function firstSentence(text) {
+/** @param {string} text */
+const flat = (text) => text.replace(/\s+/g, ' ').replace(/[`*]/g, '').trim();
+
+// Up to `max` characters of whole sentences (one at least, cut short past
+// the limit).
+/**
+ * @param {string} text
+ * @param {number} max
+ */
+function sentences(text, max) {
+    const all = text.match(/[^.!?]+[.!?]+(?=\s|$)|[^.!?]+$/g) || [text];
+    let out = '';
+    for (const s of all) {
+        if (out && out.length + s.length > max) break;
+        out += s;
+    }
+    return out.length > max + 40 ? `${out.slice(0, max - 1).trimEnd()}…` : out.trim();
+}
+
+// shortDoc is a description cut to a tooltip: its opening paragraph's first
+// sentences, and the list item that is about `source` when the text has
+// one per endpoint; "(ⓘ for more)" when anything was left out.
+/**
+ * @param {string | undefined} text
+ * @param {string} [source]
+ */
+export function shortDoc(text, source) {
     if (!text) return '';
-    const flat = text.replace(/\s+/g, ' ').replace(/[`*]/g, '').trim();
-    const m = /^(.{20,}?[.!?])(\s|$)/.exec(flat);
-    const s = m ? m[1] : flat;
-    return s.length > 220 ? `${s.slice(0, 217)}…` : s;
+    const blocks = text.trim().split(/\n\s*\n/);
+    let tip = sentences(flat(blocks[0]), 220);
+    const own = source && text.split('\n- ').slice(1).find((it) => it.startsWith(`**/${source}**`));
+    if (own) tip += `\n${sentences(flat(own), 220)}`;
+    return tip.replace(/\s+$/, '').length < flat(text).length ? `${tip} (ⓘ for more)` : tip;
 }

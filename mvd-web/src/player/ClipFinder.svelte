@@ -31,7 +31,7 @@
     import { runner, currentRef } from './index.js';
     import { addClips } from './playlist-store.js';
     import { userPresets, savePreset, deletePreset, finderInput } from './clip-presets.js';
-    import { apiDocs, loadApiDocs, fieldDoc, firstSentence } from './api-docs.js';
+    import { apiDocs, loadApiDocs, fieldDoc, shortDoc } from './api-docs.js';
     import { toast } from './toast.js';
 
     /** @typedef {import('../lib/clip-query.js').Draft} Draft */
@@ -172,7 +172,7 @@
     });
 
     /** @param {string} f */
-    const fieldTip = (f) => firstSentence(fieldDoc(doc, f)?.description);
+    const fieldTip = (f) => shortDoc(fieldDoc(doc, f)?.description);
 
     /** @param {string} name */
     const paramDoc = (name) => doc?.params[name];
@@ -312,7 +312,7 @@
                 <div class="cf-params">
                     {#each src.params as name (name)}
                         {@const p = paramDoc(name)}
-                        <label class="cf-label" title={p?.description || ''}>{name}
+                        <label class="cf-label" title={shortDoc(p?.description, draft.source)}>{name}
                             {#if p?.enum?.length && p.type !== 'array'}
                                 <select class="pt-select" bind:value={draft.params[name]}>
                                     <option value="">{p.default != null ? `default (${p.default})` : 'default'}</option>

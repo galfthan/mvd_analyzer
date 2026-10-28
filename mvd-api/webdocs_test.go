@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 	"testing"
@@ -150,6 +151,54 @@ func (s webSpec) fields(node any, path string, depth int, out map[string]webDocF
 	}
 }
 
+// A parameter shared by several endpoints (components/parameters) spells
+// out each one's vocabulary in its own list item ("- **/frags** …") or
+// paragraph ("On `/frags`, …"); a source keeps the text that is about it.
+var (
+	otherItem = regexp.MustCompile("^- \\*\\*/([\\w-]+)\\*\\*")
+	otherPara = regexp.MustCompile("^On `/([\\w-]+)`")
+)
+
+func forEndpoint(desc, name string) string {
+	var blocks []string
+	for _, block := range strings.Split(desc, "\n\n") {
+		if m := otherPara.FindStringSubmatch(block); m != nil && m[1] != name {
+			continue
+		}
+		if !strings.HasPrefix(block, "- ") {
+			blocks = append(blocks, block)
+			continue
+		}
+		var items []string
+		for _, line := range strings.Split(block, "\n") {
+			if strings.HasPrefix(line, "- ") || len(items) == 0 {
+				items = append(items, line)
+			} else {
+				items[len(items)-1] += "\n" + line
+			}
+		}
+		var kept []string
+		for _, it := range items {
+			if m := otherItem.FindStringSubmatch(it); m != nil && m[1] != name {
+				continue
+			}
+			kept = append(kept, it)
+		}
+		if len(kept) > 0 {
+			blocks = append(blocks, strings.Join(kept, "\n"))
+		}
+	}
+	return strings.Join(blocks, "\n\n")
+}
+
+func TestForEndpoint(t *testing.T) {
+	desc := "CSV of codes.\n\nEach checks its own:\n\n- **/frags** a,\n  b;\n- **/top-kills** c.\n\nOn `/frags`, more.\n\nShared end."
+	want := "CSV of codes.\n\nEach checks its own:\n\n- **/top-kills** c.\n\nShared end."
+	if got := forEndpoint(desc, "top-kills"); got != want {
+		t.Errorf("forEndpoint:\n%q\nwant\n%q", got, want)
+	}
+}
+
 func buildWebDocs(t *testing.T) []byte {
 	t.Helper()
 	var root map[string]any
@@ -177,7 +226,7 @@ func buildWebDocs(t *testing.T) []byte {
 				continue
 			}
 			schema := s.resolve(pm["schema"])
-			param := webDocParam{Description: trimDoc(pm["description"]), Default: schema["default"]}
+			param := webDocParam{Description: forEndpoint(trimDoc(pm["description"]), src.name), Default: schema["default"]}
 			param.Type, _ = schema["type"].(string)
 			param.Enum = strList(schema["enum"])
 			if items := s.resolve(schema["items"]); items != nil {
