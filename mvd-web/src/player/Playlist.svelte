@@ -10,8 +10,9 @@
     import { demo, teams, colorOf, teamIndexOf } from '../state/index.js';
     import { formatDuration } from '../lib/result.js';
     import {
-        GENERATORS, playerFragClips, singleHubGame, hubClipsUrl, encodePlaylist, MAX_HUB_CLIPS,
+        playerFragClips, singleHubGame, hubClipsUrl, encodePlaylist, MAX_HUB_CLIPS,
     } from '../lib/playlist.js';
+    import { PRESETS, runQuery } from '../lib/clip-query.js';
     import { runner, currentRef } from './index.js';
     import { playlist, addClips, setLabel, moveClip, removeClip, clearClips } from './playlist-store.js';
     import { toast } from './toast.js';
@@ -36,22 +37,27 @@
     };
 
     /** @param {Event & { currentTarget: HTMLSelectElement }} e */
-    function generate(e) {
+    async function generate(e) {
         const value = e.currentTarget.value;
         e.currentTarget.value = '';
-        if (!ref || !value) return;
+        const handle = $demo;
+        if (!ref || !handle || !value) return;
         /** @type {import('../lib/playlist.js').Clip[]} */
         let out = [];
         let what = '';
-        if (value.startsWith('gen:')) {
-            const g = GENERATORS[value.slice(4)];
-            if (!g) return;
-            // ref is set only with a demo loaded.
-            out = g.build(/** @type {NonNullable<typeof $demo>} */ ($demo).result, ref);
-            what = g.title.toLowerCase();
+        if (value.startsWith('preset:')) {
+            const p = PRESETS.find((x) => x.id === value.slice(7));
+            if (!p) return;
+            what = p.title.toLowerCase();
+            try {
+                out = await runQuery(p.query, handle.view.bind(handle), handle.result, ref);
+            } catch (err) {
+                toast(`No ${what}: ${/** @type {Error} */ (err).message || err}`);
+                return;
+            }
         } else if (value.startsWith('frags:')) {
             const name = value.slice(6);
-            out = playerFragClips(/** @type {NonNullable<typeof $demo>} */ ($demo).result, ref, name);
+            out = playerFragClips(handle.result, ref, name);
             what = `frags of ${name}`;
         }
         if (!out.length) {
@@ -150,8 +156,8 @@
         <select class="pt-select" title="Append generated clips from this demo" onchange={generate}>
             <option value="">Generate…</option>
             {#if ref}
-                {#each Object.entries(GENERATORS) as [id, g] (id)}
-                    <option value="gen:{id}">{g.title}</option>
+                {#each PRESETS as p (p.id)}
+                    <option value="preset:{p.id}">{p.title}</option>
                 {/each}
                 {#if players.length}
                     <optgroup label="Frags of…">

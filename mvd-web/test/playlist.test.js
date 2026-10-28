@@ -4,7 +4,7 @@ import { readFileSync, existsSync } from 'node:fs';
 
 import {
     parseHubReplayUrl, hubClipsUrl, singleHubGame, encodePlaylist, decodePlaylist,
-    playlistStep, GENERATORS, playerFragClips, MAX_HUB_CLIPS,
+    playlistStep, playerFragClips, MAX_HUB_CLIPS,
 } from '../src/lib/playlist.js';
 
 const demo = { key: 'hub:212260', gameId: 212260, title: 'dm3', offset: 10.3 };
@@ -69,31 +69,10 @@ test('playlistStep advances on playback crossing `to`, not on a seek past it', (
     assert.deepEqual(playlistStep(clips, 0, null, 20.05, true), { type: 'none' }, 'just jumped');
 });
 
-// The generators run against a real pipeline result when the golden corpus
-// is present (it is committed, so normally always).
+// playerFragClips runs against a real pipeline result when the golden
+// corpus is present (it is committed, so normally always).
 const GOLDEN = new URL('../../mvd-analytics/testdata/golden/4on4_ahoy_bhb_240426_obsidian.json', import.meta.url);
 const golden = existsSync(GOLDEN) ? JSON.parse(readFileSync(GOLDEN, 'utf8')) : null;
-
-test('generators produce in-order, demo-relative clips', { skip: !golden && 'golden corpus absent' }, () => {
-    const off = golden.streams.global.demoOffset / 1000;
-    const quads = GENERATORS.quadRuns.build(golden, demo);
-    const runs = golden.timelineAnalysis.powerupEvents.filter((e) => e.powerupType === 'quad');
-    assert.equal(quads.length, runs.length);
-    assert.ok(quads.length > 0);
-    const first = runs.slice().sort((a, b) => a.time - b.time)[0];
-    assert.equal(quads[0].from, Math.floor((first.time - 3000) / 1000 + off));
-    assert.equal(quads[0].track, first.playerUserID);
-    assert.equal(quads[0].who, first.playerName);
-    for (let i = 1; i < quads.length; i++) assert.ok(quads[i].from >= quads[i - 1].from);
-    for (const c of quads) assert.ok(c.to > c.from);
-
-    for (const key of Object.keys(GENERATORS)) {
-        for (const c of GENERATORS[key].build(golden, demo)) {
-            assert.ok(c.to > c.from, `${key}: empty clip`);
-            assert.deepEqual(c.demo, demo);
-        }
-    }
-});
 
 test('playerFragClips merges kills that overlap', { skip: !golden && 'golden corpus absent' }, () => {
     const name = 'KreatoR';

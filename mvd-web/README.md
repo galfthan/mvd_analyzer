@@ -295,12 +295,14 @@ Time, Player, Team, Note, and a Hub Watch link — so a viewer can jump
 straight to the moments players flagged in-game; it is routinely empty
 since demos rarely carry markers, and warmup marks show a negative time.
 
-The three ranked lists are the tab's only **view queries**: they are not
+The three ranked lists are the tab's **view queries** (the Player tab's
+clip finder is the other caller, see *Clips and the playlist*): they are not
 stored `Result` fields but `view.TopWindows` / `view.TopKills` rankings
 computed on demand from the demo the WASM module still holds, so they
 fill in a moment after the rest of the tab has painted. The Go exports
 (`getTopWindows`, `getTopKills`) live on the worker's global like every
-other one, so the main page reaches them through a `viewQuery` worker
+other one, so the main page reaches them — and `getEvents`, `getLives`,
+`getHighlights`, the worker's other whitelisted view exports — through a `viewQuery` worker
 message (`DemoHandle.view`, `src/data/wasm-source.js`) — the same round-trip as region recompute
 and line of sight. **Top Damage Windows (10 s)** is the top 10 windows by bounded enemy
 damage (`metric=damageGiven`, `windowMs=10000`, `dmg=bounded` — the same
@@ -1101,7 +1103,7 @@ which would reload the engine's iframe.)
   0–300 scale) with the playhead, and the values at it. Click a name to
   watch them.
 - **Moments**: the demo's quad runs, frag streaks and highlights (the
-  playlist generators' clips) in time order; the ones under the playhead
+  clips of those Generate presets) in time order; the ones under the playhead
   are lit and the list keeps the next one in view. Click plays the clip,
   shift-click adds it to the playlist.
 - **Frag feed**: the last 12 frags up to the playhead, newest first, the
@@ -1119,9 +1121,21 @@ scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
 
 - **Make**: ⟦ In / Out ⟧ mark the player's time (keys `i` / `o`), *+ Add
   clip* (`c`) adds In→Out from the current POV (no marks: the last 10 s).
-- **Generate** from the loaded demo's Result: quad runs, best quad runs,
-  frag streaks, quadbores, airgibs, telefrags, discharges, one player's
-  frags (merged when 5 s apart or less).
+- **Generate** from the loaded demo: quad runs, best quad runs,
+  frag streaks, quadbores, airgibs, telefrags, discharges — presets of the
+  clip finder below — and one player's frags (merged when 5 s apart or less).
+- **Clip finder** (`src/lib/clip-query.js`): a query is one mvd-api
+  endpoint (`events`, `highlights`, `top-kills`, `top-windows`, `lives`)
+  with its query params under their API names, a `where` over the rows it
+  returns (groups ORed, conditions inside a group ANDed, fields as dotted
+  paths into the row), an optional rank + limit, the clip window (row
+  fields plus padding, the POV a row's player field) and a label template.
+  On the loaded demo it runs the same Go view through `DemoHandle.view`
+  (`viewCall` maps the params onto the view's options, and defaults the
+  damage family to bounded with the raw fallback the handlers apply). The
+  finder adds no detection of its own: rows and fields are the endpoint's,
+  `mvd-api/openapi/openapi.yaml` is their reference. Plan:
+  [`plan-clip-finder.md`](../plan-clip-finder.md).
 - **Edit**: label inline, drag or ↑ ↓ to reorder, × to remove. The list
   persists in `localStorage` (`mvd.playlist.v1`).
 - **Play all / ▶ on a row**: a scripted run — seek, POV, play; advance when

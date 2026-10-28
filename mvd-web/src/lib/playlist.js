@@ -20,7 +20,6 @@
  * @typedef {{ key: string, gameId: number | null, title: string, offset: number }} ClipDemo
  * @typedef {{ from: number, to: number, track: Track, who: string, label: string, demo: ClipDemo }} Clip
  * @typedef {{ type: 'follow' | 'next', index: number } | { type: 'none' | 'end', index?: undefined }} PlaylistStep
- * @typedef {{ title: string, build: (result: Result, demo: ClipDemo) => Clip[] }} Generator
  */
 
 const HUB_GAMES_URL = 'https://hub.quakeworld.nu/games/';
@@ -208,11 +207,11 @@ export function playlistStep(clips, index, prev, now, playing) {
     return index + 1 < clips.length ? { type: 'next', index: index + 1 } : { type: 'end' };
 }
 
-// ── Generated playlists ─────────────────────────────────────────────────────
+// ── Generated clips ─────────────────────────────────────────────────────────
 //
-// Each generator reads the raw Result (ms, match-relative — schema in
-// mvd-analytics/RESULT_SCHEMA.md) and returns clips for `demo`. The
-// conversion to demo seconds is the same `+ demoOffset` hubReplayUrl uses.
+// Clips built from match times (ms, match-relative — the clip finder in
+// src/lib/clip-query.js, playerFragClips below). The conversion to demo
+// seconds is the same `+ demoOffset` hubReplayUrl uses.
 
 /**
  * @param {Result} result
@@ -233,7 +232,7 @@ function demoSec(result, ms) {
  * @param {string} label
  * @returns {Clip}
  */
-function clip(result, demo, fromMs, toMs, track, who, label) {
+export function makeClip(result, demo, fromMs, toMs, track, who, label) {
     return {
         from: Math.max(0, Math.floor(demoSec(result, fromMs))),
         to: Math.ceil(demoSec(result, toMs)),
@@ -248,83 +247,6 @@ function clip(result, demo, fromMs, toMs, track, who, label) {
 function mmss(ms) {
     const s = Math.max(0, Math.floor(ms / 1000));
     return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-}
-
-/** @type {Record<string, Generator>} */
-export const GENERATORS = {
-    quadRuns: {
-        title: 'Quad runs',
-        build(result, demo) {
-            return /** @type {any[]} */ (result?.timelineAnalysis?.powerupEvents || [])
-                .filter((e) => e.powerupType === 'quad')
-                .sort((a, b) => a.time - b.time)
-                .map((e) => clip(result, demo, e.time - 3000, e.endTime + 2000, e.playerUserID, e.playerName,
-                    `Quad run · ${e.playerName} · ${e.frags} frag${e.frags === 1 ? '' : 's'}`));
-        },
-    },
-    bestQuadRuns: {
-        title: 'Best quad runs (most frags)',
-        build(result, demo) {
-            const runs = /** @type {any[]} */ (result?.timelineAnalysis?.powerupEvents || [])
-                .filter((e) => e.powerupType === 'quad' && e.frags > 0)
-                .sort((a, b) => b.frags - a.frags || a.time - b.time)
-                .slice(0, 5);
-            return runs.map((e) => clip(result, demo, e.time - 3000, e.endTime + 2000, e.playerUserID, e.playerName,
-                `Quad run · ${e.playerName} · ${e.frags} frag${e.frags === 1 ? '' : 's'}`));
-        },
-    },
-    fragStreaks: {
-        title: 'Frag streaks',
-        build(result, demo) {
-            return /** @type {any[]} */ (result?.timelineAnalysis?.fragStreaks || [])
-                .slice()
-                .sort((a, b) => a.time - b.time)
-                .map((s) => clip(result, demo, s.time, s.endTime + 3000, s.playerUserID, s.playerName,
-                    `Streak · ${s.playerName} · ${s.frags} frags`));
-        },
-    },
-    quadbores: {
-        title: 'Quadbores',
-        build(result, demo) {
-            return highlightClips(result, demo, 'quadbores', (h) =>
-                `Quadbore · ${h.actor?.name} · quad held ${Math.round((h.quadHeldMs || 0) / 1000)} s`);
-        },
-    },
-    airgibs: {
-        title: 'Airgibs',
-        build(result, demo) {
-            return highlightClips(result, demo, 'airgibs', (h) =>
-                `Airgib · ${h.actor?.name} → ${h.victims?.[0]?.name || '?'}`);
-        },
-    },
-    telefrags: {
-        title: 'Telefrags',
-        build(result, demo) {
-            return highlightClips(result, demo, 'telefrags', (h) =>
-                `Telefrag · ${h.actor?.name} → ${h.victims?.[0]?.name || '?'}`);
-        },
-    },
-    discharges: {
-        title: 'Discharges',
-        build(result, demo) {
-            return highlightClips(result, demo, 'discharges', (h) =>
-                `Discharge · ${h.actor?.name} · ${h.enemyKills} kill${h.enemyKills === 1 ? '' : 's'}`);
-        },
-    },
-};
-
-/**
- * @param {Result} result
- * @param {ClipDemo} demo
- * @param {string} kind  a result.highlights list
- * @param {(h: any) => string} label
- * @returns {Clip[]}
- */
-function highlightClips(result, demo, kind, label) {
-    return /** @type {any[]} */ (result?.highlights?.[kind] || [])
-        .slice()
-        .sort((a, b) => a.time - b.time)
-        .map((h) => clip(result, demo, h.time - 6000, h.time + 3000, h.actor?.userId, h.actor?.name || '', label(h)));
 }
 
 // playerFragClips: every enemy kill by `name`, from the killer's view,
@@ -351,6 +273,6 @@ export function playerFragClips(result, demo, name) {
             merged.push({ fromMs: k.time - 5000, toMs: k.time + 2000, n: 1, at: k.time, weapon: k.weapon, victim: k.victim });
         }
     }
-    return merged.map((m) => clip(result, demo, m.fromMs, m.toMs, userid, name,
+    return merged.map((m) => makeClip(result, demo, m.fromMs, m.toMs, userid, name,
         m.n > 1 ? `${name} · ${m.n} frags from ${mmss(m.at)}` : `${name} · ${m.weapon} → ${m.victim}`));
 }

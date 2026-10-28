@@ -5,23 +5,28 @@
     // shift-click adds it to the playlist.
     import { demo, teams, colorOf } from '../../state/index.js';
     import { formatDuration } from '../../lib/result.js';
-    import { GENERATORS } from '../../lib/playlist.js';
+    import { PRESETS, runQuery } from '../../lib/clip-query.js';
     import { runner, currentRef, engine } from '../index.js';
     import { addClips } from '../playlist-store.js';
     import { toast } from '../toast.js';
     import { onFrame } from './tick.js';
 
-    const KINDS = ['quadRuns', 'fragStreaks', 'quadbores', 'airgibs', 'telefrags', 'discharges'];
+    const KINDS = ['quad-runs', 'frag-streaks', 'quadbores', 'airgibs', 'telefrags', 'discharges'];
 
-    let clips = $derived.by(() => {
+    let clips = $state(/** @type {import('../../lib/playlist.js').Clip[]} */ ([]));
+    $effect(() => {
         $teams;
-        const ref = $demo ? currentRef() : null;
-        if (!ref) return [];
-        const out = [];
-        // ref is only non-null with a demo.
-        const result = /** @type {import('../../state/demo.js').DemoHandle} */ ($demo).result;
-        for (const id of KINDS) out.push(...GENERATORS[id].build(result, ref));
-        return out.sort((a, b) => a.from - b.from);
+        const handle = $demo;
+        const ref = handle ? currentRef() : null;
+        clips = [];
+        if (!handle || !ref) return;
+        let live = true;
+        const view = handle.view.bind(handle);
+        // A source this demo lacks (no highlights section) just adds nothing.
+        Promise.all(PRESETS.filter((p) => KINDS.includes(p.id))
+            .map((p) => runQuery(p.query, view, handle.result, ref).catch(() => [])))
+            .then((lists) => { if (live) clips = lists.flat().sort((a, b) => a.from - b.from); });
+        return () => { live = false; };
     });
 
     let demoT = $state(0);

@@ -120,7 +120,7 @@ function logWorkerTimings(t) {
 // side, cheap enough to answer per request. Whitelisted by name rather than
 // dispatching whatever the message asks for: the message body decides which
 // global is invoked, so the set of invokable globals is pinned here.
-const VIEW_QUERY_FNS = new Set(['getTopWindows', 'getTopKills']);
+const VIEW_QUERY_FNS = new Set(['getTopWindows', 'getTopKills', 'getLives', 'getHighlights', 'getEvents']);
 
 let wasmReady = false;
 
@@ -248,7 +248,7 @@ onmessage = function(e) {
             postMessage({ type: 'recompute_error', reqId, message: err.message || String(err) });
         }
     } else if (e.data.type === 'viewQuery') {
-        // One view-layer query (view.TopWindows / view.TopKills) over the demo
+        // One view-layer query (view.TopWindows, view.Events, …) over the demo
         // already held on the Go side. Like recomputeRegions and computeLos,
         // this has to round-trip through the worker: the Go exports live on
         // this worker's global (js.Global() == worker scope), so the main page
