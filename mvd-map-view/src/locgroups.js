@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // Loc regions: grouping the analyzer's per-loc points into named regions,
 // attaching BSP-derived triangle geometry to them, and the derived shapes the
 // renderer draws — outline, bounding box, and the stacking relation that lets

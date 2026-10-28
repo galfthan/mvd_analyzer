@@ -7,6 +7,14 @@
 // result went out) go to `onFollowup` listeners with their reqId.
 
 // The worker's reply types per request lane: [success, failure].
+/** @typedef {'analyze' | 'recomputeRegions' | 'computeLos' | 'viewQuery'} Lane */
+/**
+ * A worker message: `type`, the echoed `reqId` and the lane's fields.
+ * @typedef {{ type: string, reqId?: number, message?: string, [field: string]: any }} WorkerMessage
+ * @typedef {WorkerMessage & { reqId: number }} FollowupMessage
+ */
+
+/** @type {Record<Lane, [string, string]>} */
 const LANES = {
     analyze: ['result', 'error'],
     recomputeRegions: ['recompute_result', 'recompute_error'],
@@ -15,14 +23,19 @@ const LANES = {
 };
 
 export class WorkerClient {
+    /** @param {Worker} worker */
     constructor(worker) {
         this.worker = worker;
         this.nextReqId = 1;
+        /** @type {Map<number, { lane: [string, string], resolve: (msg: WorkerMessage) => void, reject: (err: Error) => void }>} */
         this.pending = new Map();
+        /** @type {Set<(msg: FollowupMessage) => void>} */
         this.followups = new Set();
         // Resolves with { version, wasmLoadMs } once the wasm is up; rejects
         // when it fails to load (the one error with no reqId).
+        /** @type {Promise<{ version: import('../app/overlay.js').BuildVersion | null, wasmLoadMs: number }>} */
         this.ready = new Promise((resolve, reject) => {
+            /** @type {{ resolve: (v: { version: import('../app/overlay.js').BuildVersion | null, wasmLoadMs: number }) => void, reject: (err: Error) => void }} */
             this._ready = { resolve, reject };
         });
         worker.onmessage = (e) => this._onMessage(e.data);
@@ -31,9 +44,16 @@ export class WorkerClient {
     // request posts `{ type, reqId, ...payload }` and resolves with the
     // worker's success reply (the whole message), rejecting on its failure
     // reply.
+    /**
+     * @param {Lane} type
+     * @param {object} [payload]
+     * @param {Transferable[]} [transfer]
+     * @returns {{ reqId: number, promise: Promise<WorkerMessage> }}
+     */
     request(type, payload = {}, transfer = []) {
         if (!LANES[type]) throw new Error(`unknown worker request: ${type}`);
         const reqId = this.nextReqId++;
+        /** @type {Promise<WorkerMessage>} */
         const promise = new Promise((resolve, reject) => {
             this.pending.set(reqId, { lane: LANES[type], resolve, reject });
         });
@@ -41,11 +61,13 @@ export class WorkerClient {
         return { reqId, promise };
     }
 
+    /** @param {(msg: FollowupMessage) => void} fn */
     onFollowup(fn) {
         this.followups.add(fn);
         return () => this.followups.delete(fn);
     }
 
+    /** @param {WorkerMessage} msg */
     _onMessage(msg) {
         if (msg.type === 'ready') {
             this._ready.resolve({ version: msg.version || null, wasmLoadMs: msg.wasmLoadMs });
@@ -62,6 +84,6 @@ export class WorkerClient {
             else p.reject(new Error(msg.message));
             return;
         }
-        for (const fn of this.followups) fn(msg);
+        for (const fn of this.followups) fn(/** @type {FollowupMessage} */ (msg));
     }
 }

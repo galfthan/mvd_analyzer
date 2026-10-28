@@ -20,10 +20,12 @@ export const TABS = [
 // which is how it repaints after late data.
 export const activeTab = store('search');
 
+/** @param {string} id */
 export function isTab(id) {
     return TABS.some((t) => t.id === id);
 }
 
+/** @param {string} id */
 export function selectTab(id) {
     if (isTab(id)) activeTab.set(id);
 }

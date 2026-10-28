@@ -20,33 +20,38 @@
     let run = $derived($playlist.run);
     let onList = $derived(!!run && !run.transient && run.clips === clips);
     let ref = $derived($demo && $teams ? currentRef() : null);
+    // The clip a run over this list is on; -1 matches no row.
+    let activeIndex = $derived(onList ? /** @type {NonNullable<typeof run>} */ (run).index : -1);
 
     let players = $derived.by(() => {
         const ids = $demo?.result?.timelineAnalysis?.playerUserIDs || {};
         const t = $teams;
-        const idx = (n) => teamIndexOf(t, n, t.perPlayer);
+        const idx = (/** @type {string} */ n) => teamIndexOf(t, n, t.perPlayer);
         return Object.keys(ids).sort((a, b) => (idx(a) - idx(b)) || a.localeCompare(b));
     });
 
-    const when = (c) => {
+    const when = (/** @type {import('../lib/playlist.js').Clip} */ c) => {
         const off = c.demo?.offset || 0;
         return `${formatDuration(Math.max(0, c.from - off))}–${formatDuration(Math.max(0, c.to - off))}`;
     };
 
+    /** @param {Event & { currentTarget: HTMLSelectElement }} e */
     function generate(e) {
         const value = e.currentTarget.value;
         e.currentTarget.value = '';
         if (!ref || !value) return;
+        /** @type {import('../lib/playlist.js').Clip[]} */
         let out = [];
         let what = '';
         if (value.startsWith('gen:')) {
             const g = GENERATORS[value.slice(4)];
             if (!g) return;
-            out = g.build($demo.result, ref);
+            // ref is set only with a demo loaded.
+            out = g.build(/** @type {NonNullable<typeof $demo>} */ ($demo).result, ref);
             what = g.title.toLowerCase();
         } else if (value.startsWith('frags:')) {
             const name = value.slice(6);
-            out = playerFragClips($demo.result, ref, name);
+            out = playerFragClips(/** @type {NonNullable<typeof $demo>} */ ($demo).result, ref, name);
             what = `frags of ${name}`;
         }
         if (!out.length) {
@@ -57,6 +62,10 @@
         toast(`Added ${out.length} clip${out.length === 1 ? '' : 's'}: ${what}`);
     }
 
+    /**
+     * @param {string} text
+     * @param {string} what
+     */
     async function copyText(text, what) {
         try {
             await navigator.clipboard.writeText(text);
@@ -85,7 +94,7 @@
         }
         const first = clips.find((c) => c.demo?.gameId);
         const params = new URLSearchParams();
-        if (first) params.set('gameId', first.demo.gameId);
+        if (first) params.set('gameId', String(first.demo.gameId));
         params.set('tab', 'player');
         copyText(`${location.origin}${location.pathname}?${params}#playlist=${encodePlaylist(clips)}`, 'Share link');
     }
@@ -97,21 +106,34 @@
 
     let dragOver = $state(-1);
 
+    /**
+     * @param {DragEvent} e  a drag event carries dataTransfer
+     * @param {number} i
+     */
     function dragStart(e, i) {
-        if (e.target.closest('input')) return e.preventDefault();
-        e.dataTransfer.setData('text/x-mvd-clip', String(i));
-        e.dataTransfer.effectAllowed = 'move';
+        if (/** @type {Element} */ (e.target).closest('input')) return e.preventDefault();
+        const dt = /** @type {DataTransfer} */ (e.dataTransfer);
+        dt.setData('text/x-mvd-clip', String(i));
+        dt.effectAllowed = 'move';
     }
 
+    /**
+     * @param {DragEvent} e
+     * @param {number} i
+     */
     function dragOverRow(e, i) {
-        if (!e.dataTransfer.types.includes('text/x-mvd-clip')) return;
+        if (!/** @type {DataTransfer} */ (e.dataTransfer).types.includes('text/x-mvd-clip')) return;
         e.preventDefault();
         dragOver = i;
     }
 
+    /**
+     * @param {DragEvent} e
+     * @param {number} i
+     */
     function drop(e, i) {
         dragOver = -1;
-        const from = Number(e.dataTransfer.getData('text/x-mvd-clip'));
+        const from = Number(/** @type {DataTransfer} */ (e.dataTransfer).getData('text/x-mvd-clip'));
         if (!Number.isInteger(from)) return;
         e.preventDefault();
         moveClip(from, i);
@@ -152,7 +174,7 @@
     <ol class="playlist-items">
         {#each clips as c, i (c)}
             {@const current = !!ref && c.demo?.key === ref.key}
-            <li class="playlist-item" class:other-demo={!current} class:active={onList && run.index === i}
+            <li class="playlist-item" class:other-demo={!current} class:active={activeIndex === i}
                 class:drag-over={dragOver === i}
                 style:--pov-color={current && c.who ? colorOf($teams, c.who, $teams.perPlayer) : null}
                 draggable="true" ondragstart={(e) => dragStart(e, i)} ondragover={(e) => dragOverRow(e, i)}

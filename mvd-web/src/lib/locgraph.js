@@ -9,6 +9,20 @@
 
 import { escapeHtml } from './html.js';
 
+/**
+ * @typedef {import('./result.js').Result} Result
+ * A weight bundle (result.locGraph node / edge, or its armed / quad /
+ * … sub-object): time in int32 ms on a node, transitions on an edge.
+ * @typedef {{ total?: number, byPlayer?: Record<string, number>, byTeam?: Record<string, number> }} Weights
+ * @typedef {Weights & { name: string, x?: number, y?: number, armed?: Weights, unarmed?: Weights, quad?: Weights, pent?: Weights }} LocNode
+ * @typedef {Weights & { from: string, to: string, kind: string, armed?: Weights, unarmed?: Weights, quad?: Weights, pent?: Weights }} LocEdge
+ * @typedef {{ locs: LocNode[], edges: LocEdge[] }} LocGraph  result.locGraph
+ * @typedef {'all' | 'armed' | 'unarmed' | 'quad' | 'pent'} LocMetric
+ * @typedef {{ kind: 'all' | 'team' | 'player', key: string }} LocFilter
+ * @typedef {{ value: string, label: string }} LocFilterOption
+ */
+
+/** @type {{ total: number, byPlayer: Record<string, number>, byTeam: Record<string, number> }} */
 export const EMPTY_WEIGHTS = { total: 0, byPlayer: {}, byTeam: {} };
 
 // Show only the loc-analysis metrics this demo actually has data for —
@@ -16,6 +30,10 @@ export const EMPTY_WEIGHTS = { total: 0, byPlayer: {}, byTeam: {} };
 // powerup (e.g. quad in most 1v1s), so the user can't land on an empty
 // graph + table. A node carries the conditioned sub-object only when some
 // sample met the condition (omitempty), so presence == availability.
+/**
+ * @param {LocGraph | null | undefined} graph
+ * @returns {Record<LocMetric, boolean>}
+ */
 export function locMetricAvailability(graph) {
     const avail = { all: true, armed: false, unarmed: false, quad: false, pent: false };
     const locs = (graph && graph.locs) || [];
@@ -31,12 +49,22 @@ export function locMetricAvailability(graph) {
 
 // The metric to keep showing: the current pick if this demo has it, else
 // "Full time".
+/**
+ * @param {LocMetric} current
+ * @param {Record<LocMetric, boolean>} avail
+ * @returns {LocMetric}
+ */
 export function keptLocMetric(current, avail) {
     return avail[current] ? current : 'all';
 }
 
 // The Filter options: All, then one per team (not in a duel — every team
 // name is a player name there), then one per player.
+/**
+ * @param {Result} result
+ * @param {boolean} duel
+ * @returns {LocFilterOption[]}
+ */
 export function locFilterOptions(result, duel) {
     const opts = [{ value: 'all', label: 'All' }];
     const teams = (result.demoInfo && result.demoInfo.teams) || [];
@@ -53,10 +81,18 @@ export function locFilterOptions(result, duel) {
 }
 
 // The filter to keep: the previous pick when this demo offers it, else All.
+/**
+ * @param {string} prev
+ * @param {LocFilterOption[]} opts
+ */
 export function keptLocFilter(prev, opts) {
     return opts.some((o) => o.value === prev) ? prev : 'all';
 }
 
+/**
+ * @param {string | null | undefined} value
+ * @returns {LocFilter}
+ */
 export function parseLocFilter(value) {
     const val = value || 'all';
     if (val.startsWith('team:')) return { kind: 'team', key: val.slice(5) };
@@ -67,6 +103,11 @@ export function parseLocFilter(value) {
 // Resolve a node's weight bundle for the chosen metric. 'all' is the node's
 // own Total/ByPlayer/ByTeam; 'armed'/'quad' read the optional sub-objects
 // (absent when no sample met the condition).
+/**
+ * @param {LocNode} node
+ * @param {string} metric
+ * @returns {Weights}
+ */
 export function metricWeightsOf(node, metric) {
     if (metric === 'armed') return node.armed || EMPTY_WEIGHTS;
     if (metric === 'unarmed') return node.unarmed || EMPTY_WEIGHTS;
@@ -75,6 +116,12 @@ export function metricWeightsOf(node, metric) {
     return node;
 }
 
+/**
+ * @param {LocNode} node
+ * @param {LocFilter} filter
+ * @param {string} metric
+ * @returns {number}
+ */
 export function nodeWeightFor(node, filter, metric) {
     const w = metricWeightsOf(node, metric);
     if (filter.kind === 'player') return w.byPlayer?.[filter.key] || 0;
@@ -84,6 +131,11 @@ export function nodeWeightFor(node, filter, metric) {
 
 // Edges carry the same metric conditioning as nodes, so each metric is a
 // self-contained graph (its own nodes + edges).
+/**
+ * @param {LocEdge} edge
+ * @param {string} metric
+ * @returns {Weights}
+ */
 function metricEdgeWeightsOf(edge, metric) {
     if (metric === 'armed') return edge.armed || EMPTY_WEIGHTS;
     if (metric === 'unarmed') return edge.unarmed || EMPTY_WEIGHTS;
@@ -92,6 +144,12 @@ function metricEdgeWeightsOf(edge, metric) {
     return edge;
 }
 
+/**
+ * @param {LocEdge} edge
+ * @param {LocFilter} filter
+ * @param {string} metric
+ * @returns {number}
+ */
 export function edgeWeightFor(edge, filter, metric) {
     const w = metricEdgeWeightsOf(edge, metric);
     if (filter.kind === 'player') return w.byPlayer?.[filter.key] || 0;
@@ -102,6 +160,11 @@ export function edgeWeightFor(edge, filter, metric) {
 // Build Cytoscape elements from the graph + filter + metric + edge mode +
 // minimum edge count. Nodes/edges carry their filtered weight in data so
 // styles can reference it directly instead of re-computing in the mapper.
+/**
+ * @param {LocGraph | null | undefined} graph
+ * @param {{ filter: LocFilter, metric: string, edgeMode: string, minEdge: number }} opts
+ * @returns {Array<{ group: 'nodes' | 'edges', data: Record<string, any>, position?: { x: number, y: number } }>}
+ */
 export function locGraphElements(graph, { filter, metric, edgeMode, minEdge }) {
     if (!graph) return [];
     let maxNodeWeight = 0;
@@ -118,6 +181,7 @@ export function locGraphElements(graph, { filter, metric, edgeMode, minEdge }) {
         if (w > maxEdgeWeight) maxEdgeWeight = w;
     }
 
+    /** @type {ReturnType<typeof locGraphElements>} */
     const elements = [];
 
     for (const n of graph.locs) {
@@ -175,6 +239,11 @@ export function locGraphElements(graph, { filter, metric, edgeMode, minEdge }) {
 // The node fill for a filter: a "Team: red" filter tints the nodes with
 // that team's canonical colour (src/state/teams.js — order[i] owns
 // colors[i]), a player filter is amber, "all" a neutral blue.
+/**
+ * @param {LocFilter} filter
+ * @param {string[]} teamOrder
+ * @param {string[]} teamColors
+ */
 export function locGraphNodeFill(filter, teamOrder, teamColors) {
     if (filter.kind === 'team') {
         const idx = teamOrder.indexOf(filter.key);
@@ -184,6 +253,7 @@ export function locGraphNodeFill(filter, teamOrder, teamColors) {
     return '#8fb3ff';
 }
 
+/** @param {{ showLabels: boolean, labelSize: number, nodeFill: string }} opts */
 export function locGraphStyle({ showLabels, labelSize, nodeFill }) {
     return [
         {
@@ -264,6 +334,11 @@ export function locGraphStyle({ showLabels, labelSize, nodeFill }) {
 // The layout to run. `animate` is false on filter changes (the common
 // case) so layout runs instantly; the re-layout button passes true to get
 // the animated effect.
+/**
+ * @param {string} name
+ * @param {boolean} animate
+ * @returns {Record<string, any>}  Cytoscape layout options
+ */
 export function locGraphLayout(name, animate) {
     if (name === 'preset') {
         return { name: 'preset', fit: true, padding: 30 };
@@ -293,7 +368,7 @@ export function locGraphLayout(name, animate) {
             fit: true,
             // Higher time spent = more central; Cytoscape expects larger
             // numbers to be more central.
-            concentric: (node) => node.data('weight'),
+            concentric: (/** @type {any} */ node) => node.data('weight'),
             levelWidth: () => 1,
         };
     }
@@ -304,6 +379,10 @@ export function locGraphLayout(name, animate) {
 // preset) the fit-to-viewport zoom drops the effective pixel size below
 // readability. Counter-act by recomputing font-size inversely proportional
 // to the current zoom, clamped to a sensible range.
+/**
+ * @param {number} userSize
+ * @param {number} zoom
+ */
 export function zoomedLabelStyle(userSize, zoom) {
     const target = Math.max(10, Math.min(48, userSize / (zoom || 1)));
     return {
@@ -315,6 +394,7 @@ export function zoomedLabelStyle(userSize, zoom) {
 
 // Tooltips, from a node's / edge's data(). Node time weights are int32 ms
 // (schema v57); the UI shows seconds.
+/** @param {{ name: string, total?: number, byPlayer?: Record<string, number> }} d  a node's data() */
 export function nodeTooltipHtml(d) {
     const total = (d.total || 0) / 1000;
     const byPlayer = d.byPlayer || {};
@@ -325,6 +405,7 @@ export function nodeTooltipHtml(d) {
 ${rows}`;
 }
 
+/** @param {{ source: string, target: string, kind: string, total?: number, byPlayer?: Record<string, number> }} d  an edge's data() */
 export function edgeTooltipHtml(d) {
     const from = d.source.replace(/^n:/, '');
     const to = d.target.replace(/^n:/, '');

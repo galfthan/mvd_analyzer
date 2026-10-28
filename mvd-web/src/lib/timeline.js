@@ -20,6 +20,29 @@ import { hubReplayUrl } from './hub-url.js';
 import { formatDuration, demoOffsetSec } from './result.js';
 import { playerStatsRows } from './player-stats.js';
 
+/**
+ * @typedef {import('./result.js').Result} Result
+ * @typedef {Record<string, any>} BucketView    timelineAnalysis.bucketView (ColumnarBuckets, columnar.go)
+ * @typedef {Record<string, any>} BucketPlayer  one of its view.players columns
+ * @typedef {{ time: number, [field: string]: any }} TimedEvent  a Result event, its time in seconds
+ * @typedef {{ time: number, cumulative: Record<string, number> }} FragCount
+ * @typedef {object} TimelineEvents
+ * @property {TimedEvent[]} fragEvents
+ * @property {TimedEvent[]} deathEvents
+ * @property {TimedEvent[]} killEvents
+ * @property {TimedEvent[]} backpacks
+ * @property {TimedEvent[]} powerupEvents
+ * @property {FragCount[]} fragCounts
+ * @typedef {{ h: number, color: string }} StackSeg
+ * @typedef {{ t: number, dt: number, up: StackSeg[], down?: StackSeg[] }} StackPoint
+ * @typedef {{ points: StackPoint[], max: number }} DivergingSeries
+ * @typedef {{ start: number, end: number, state: string, event?: TimedEvent }} StateSpan
+ * @typedef {{ name: string, spans: StateSpan[] }} SpanRow
+ * @typedef {{ rows: SpanRow[], teamA: string, teamB: string }} SpanRows
+ * @typedef {{ time: number, color: string, isTop: boolean, drop: TimedEvent }} DropMark
+ * @typedef {{ key: string, dir: number }} TeamStatusSort
+ */
+
 // The bucket view's interval (50 ms): one data point spans this long.
 export const HR_DUR = 0.05;
 
@@ -40,12 +63,17 @@ export const GRAPH_COLORS = {
 // one; the same for every graph.
 export const PLOT_BG_COLOR = '#16213e';
 
+/**
+ * @param {string} hex
+ * @returns {[number, number, number]}
+ */
 export function hexToRgb(hex) {
     return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
 }
 
 // The strong (30 % darker) team colour the powerup and region-control spans
 // are filled with.
+/** @param {string} hex */
 export function teamStrongColor(hex) {
     const [r, g, b] = hexToRgb(hex);
     return `rgb(${Math.round(r * 0.7)}, ${Math.round(g * 0.7)}, ${Math.round(b * 0.7)})`;
@@ -53,6 +81,7 @@ export function teamStrongColor(hex) {
 
 // A team hex darkened toward black: the behind-half of a per-player +/- row
 // reads as a muted mirror of the team-coloured ahead-half.
+/** @param {string} hex */
 export function dimColor(hex) {
     const [r, g, b] = hexToRgb(hex);
     return `rgb(${Math.round(r * 0.55)},${Math.round(g * 0.55)},${Math.round(b * 0.55)})`;
@@ -60,27 +89,33 @@ export function dimColor(hex) {
 
 // ─── Event intake ───────────────────────────────────────────────────────────
 
+/** @type {WeakMap<Result, TimelineEvents>} */
 const eventCache = new WeakMap();
 
 // timelineEvents: the Result's timeline event streams in seconds, built once
 // per Result. fragEvents is sorted by time here so the score series and the
 // running frag counts don't each re-sort it on every render; fragCounts is
 // [{ time, cumulative: { player: frags } }], one entry per frag event.
+/**
+ * @param {Result | null | undefined} result
+ * @returns {TimelineEvents}
+ */
 export function timelineEvents(result) {
     if (!result) return emptyEvents();
     let ev = eventCache.get(result);
     if (ev) return ev;
     const ta = result.timelineAnalysis;
     ev = {
-        fragEvents: (ta?.fragEvents || []).map(f => ({ ...f, time: f.time * 0.001 })).sort((a, b) => a.time - b.time),
+        fragEvents: (ta?.fragEvents || []).map(/** @param {TimedEvent} f */ f => ({ ...f, time: f.time * 0.001 }))
+            .sort(/** @param {TimedEvent} a @param {TimedEvent} b */ (a, b) => a.time - b.time),
         // Every death, for the frags / deaths drill-down.
-        deathEvents: (ta?.deathEvents || []).map(d => ({ ...d, time: d.time * 0.001 })),
+        deathEvents: (ta?.deathEvents || []).map(/** @param {TimedEvent} d */ d => ({ ...d, time: d.time * 0.001 })),
         // Enemy kills, killer-keyed, for the same.
-        killEvents: (ta?.killEvents || []).map(k => ({ ...k, time: k.time * 0.001 })),
+        killEvents: (ta?.killEvents || []).map(/** @param {TimedEvent} k */ k => ({ ...k, time: k.time * 0.001 })),
         // RL / LG drops (KTX hint or reconstructed — see d.source).
-        backpacks: (result.backpacks || []).map(d => ({ ...d, time: d.time * 0.001 })),
+        backpacks: (result.backpacks || []).map(/** @param {TimedEvent} d */ d => ({ ...d, time: d.time * 0.001 })),
         // One record per powerup run: player, team, frags, duration.
-        powerupEvents: (ta?.powerupEvents || []).map(p => ({
+        powerupEvents: (ta?.powerupEvents || []).map(/** @param {TimedEvent} p */ p => ({
             ...p,
             time: p.time * 0.001,
             endTime: (p.endTime || 0) * 0.001,
@@ -88,6 +123,7 @@ export function timelineEvents(result) {
         })),
         fragCounts: [],
     };
+    /** @type {Record<string, number>} */
     const running = {};
     for (const fe of ev.fragEvents) {
         running[fe.player] = (running[fe.player] || 0) + (fe.delta || 1);
@@ -97,19 +133,26 @@ export function timelineEvents(result) {
     return ev;
 }
 
+/** @returns {TimelineEvents} */
 function emptyEvents() {
     return { fragEvents: [], deathEvents: [], killEvents: [], backpacks: [], powerupEvents: [], fragCounts: [] };
 }
 
 // fragsAt: { player: frags } at `time` — the Timeline's team status and the
 // Map legend.
+/**
+ * @param {Result | null | undefined} result
+ * @param {number} time
+ * @returns {Record<string, number>}
+ */
 export function fragsAt(result, time) {
     const counts = timelineEvents(result).fragCounts;
-    const idx = lowerBoundIndex(counts, time, (a, i) => a[i].time);
+    const idx = lowerBoundIndex(counts, time, /** @param {FragCount[]} a @param {number} i */ (a, i) => a[i].time);
     return idx < 0 ? {} : counts[idx].cumulative;
 }
 
 // The match length in seconds (the page clock's duration).
+/** @param {Result | null | undefined} result */
 export function matchDurationSec(result) {
     return (result?.match?.duration || 600000) * 0.001;
 }
@@ -122,6 +165,11 @@ export function matchDurationSec(result) {
 
 const MIN_VIEW_SPAN = 2; // seconds — don't zoom past this
 
+/**
+ * @param {{ start: number, end: number } | null | undefined} segment
+ * @param {number} duration
+ * @returns {[number, number]}
+ */
 export function viewRange(segment, duration) {
     return segment ? [segment.start, segment.end] : [0, duration || 0];
 }
@@ -130,6 +178,12 @@ export function viewRange(segment, duration) {
 // least MIN_VIEW_SPAN wide, slid back inside [0, duration] without
 // shrinking, and null when it covers the whole match. undefined when there
 // is no match to clamp against (the request is ignored).
+/**
+ * @param {number} start
+ * @param {number} end
+ * @param {number} duration
+ * @returns {{ start: number, end: number } | null | undefined}
+ */
 export function clampSegment(start, end, duration) {
     if (!(duration > 0)) return undefined;
     if (end - start < MIN_VIEW_SPAN) {
@@ -147,6 +201,11 @@ export function clampSegment(start, end, duration) {
 
 // The current-time line's left offset (percent of the plot width) for the
 // window, or null when the window is empty.
+/**
+ * @param {number} t
+ * @param {number} start
+ * @param {number} end
+ */
 export function indicatorPct(t, start, end) {
     const range = end - start;
     if (range <= 0) return null;
@@ -157,6 +216,10 @@ export function indicatorPct(t, start, end) {
 
 const NICE_TICK_INTERVALS = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1200, 1800, 3600];
 
+/**
+ * @param {number} duration
+ * @param {number} maxTicks
+ */
 export function pickTickInterval(duration, maxTicks) {
     const target = duration / maxTicks;
     for (const iv of NICE_TICK_INTERVALS) {
@@ -169,6 +232,14 @@ export function pickTickInterval(duration, maxTicks) {
 // [{ t, frac, label }]. `maxTicks` caps the density (the on-canvas axes use
 // 12, the per-player shared axis 10); `slack` admits a tick a hair past the
 // end.
+/**
+ * @param {number} start
+ * @param {number} end
+ * @param {number} widthCss
+ * @param {number} maxTicks
+ * @param {number} [slack]
+ * @returns {Array<{ t: number, frac: number, label: string }>}
+ */
 export function axisTicks(start, end, widthCss, maxTicks, slack = 0) {
     const duration = end - start;
     if (duration <= 0) return [];
@@ -191,6 +262,11 @@ export function axisTicks(start, end, widthCss, maxTicks, slack = 0) {
 // Walking the OUTPUT (one call per pixel column) makes "every column is
 // drawn" structural and gives a draw cost that scales with canvas width, not
 // bucket count — empty buckets leave no unpainted stripes through the bars.
+/**
+ * @template {{ t: number, dt?: number }} P
+ * @param {P[]} points
+ * @returns {(tQuery: number) => P | null}
+ */
 export function makeScanlineSampler(points) {
     let cursor = -1;
     return (tQuery) => {
@@ -213,16 +289,24 @@ export function makeScanlineSampler(points) {
 // [{ t, dt, up: [{ h, color }], down: [{ h, color }] }] — team A (teams[0])
 // stacks up, team B (teams[1]) down.
 
+/**
+ * @param {BucketView | null | undefined} view
+ * @param {number} startTime
+ * @param {number} endTime
+ * @param {string[]} teams
+ * @returns {DivergingSeries}
+ */
 export function prepWeaponsData(view, startTime, endTime, teams) {
     if (!view || !view.count) return { points: [], max: 4 };
+    /** @type {StackPoint[]} */
     const points = [];
     let maxVal = 4;
     const idx0 = bucketIndexAtOrAfter(view, startTime);
     for (let i = idx0; i < view.count; i++) {
         const bt = bucketTimeSec(view, i);
         if (bt > endTime) break;
-        const tdA = teamSnapshot(view, teams[0], i);
-        const tdB = teamSnapshot(view, teams[1], i);
+        const tdA = /** @type {Record<string, any>} */ (teamSnapshot(view, teams[0], i));
+        const tdB = /** @type {Record<string, any>} */ (teamSnapshot(view, teams[1], i));
         const upT = (tdA.rl || 0) + (tdA.lg || 0) + (tdA.rllg || 0);
         const dnT = (tdB.rl || 0) + (tdB.lg || 0) + (tdB.rllg || 0);
         maxVal = Math.max(maxVal, upT, dnT);
@@ -243,6 +327,7 @@ export function prepWeaponsData(view, startTime, endTime, teams) {
     return { points, max: maxVal };
 }
 
+/** @param {string} weapon */
 function dropColor(weapon) {
     return weapon === 'rl' ? GRAPH_COLORS.RL : weapon === 'lg' ? GRAPH_COLORS.LG : null;
 }
@@ -251,9 +336,17 @@ function dropColor(weapon) {
 // dropped in the window, isTop for team A, carrying the drop itself for the
 // hover read-out. A drop by neither side (a spectator, a mid-substitution
 // player) has no strip to sit in and is skipped.
+/**
+ * @param {TimedEvent[] | null | undefined} backpacks
+ * @param {number} startTime
+ * @param {number} endTime
+ * @param {string[]} teams
+ * @returns {DropMark[]}
+ */
 export function computeBackpackDrops(backpacks, startTime, endTime, teams) {
     if (!backpacks || backpacks.length === 0) return [];
     const teamA = teams[0], teamB = teams[1];
+    /** @type {DropMark[]} */
     const out = [];
     for (const d of backpacks) {
         if (d.time < startTime || d.time > endTime) continue;
@@ -268,16 +361,24 @@ export function computeBackpackDrops(backpacks, startTime, endTime, teams) {
     return out;
 }
 
+/**
+ * @param {BucketView | null | undefined} view
+ * @param {number} startTime
+ * @param {number} endTime
+ * @param {string[]} teams
+ * @returns {DivergingSeries}
+ */
 export function prepHealthArmorData(view, startTime, endTime, teams) {
     if (!view || !view.count) return { points: [], max: 400 };
+    /** @type {StackPoint[]} */
     const points = [];
     let maxVal = 400;
     const idx0 = bucketIndexAtOrAfter(view, startTime);
     for (let i = idx0; i < view.count; i++) {
         const bt = bucketTimeSec(view, i);
         if (bt > endTime) break;
-        const tdA = teamSnapshot(view, teams[0], i);
-        const tdB = teamSnapshot(view, teams[1], i);
+        const tdA = /** @type {Record<string, any>} */ (teamSnapshot(view, teams[0], i));
+        const tdB = /** @type {Record<string, any>} */ (teamSnapshot(view, teams[1], i));
         maxVal = Math.max(maxVal, (tdA.th || 0) + (tdA.ta || 0), (tdB.th || 0) + (tdB.ta || 0));
         points.push({ t: bt, dt: HR_DUR, up: buildHASegments(tdA), down: buildHASegments(tdB) });
     }
@@ -285,7 +386,12 @@ export function prepHealthArmorData(view, startTime, endTime, teams) {
 }
 
 // A team's health, then its armor split by the armor types its members wear.
+/**
+ * @param {Record<string, any>} td  a teamSnapshot
+ * @returns {StackSeg[]}
+ */
 export function buildHASegments(td) {
+    /** @type {StackSeg[]} */
     const segs = [];
     if ((td.th || 0) > 0) segs.push({ h: td.th, color: GRAPH_COLORS.HEALTH });
     const armor = td.ta || 0;
@@ -305,6 +411,14 @@ export function buildHASegments(td) {
 // The running score: team A's frags minus team B's, carried from match start
 // so the window's left edge shows the score at that point; sampled ~400 times
 // across the window. `colors` are the two teams' colours.
+/**
+ * @param {TimedEvent[]} fragEvents
+ * @param {number} startTime
+ * @param {number} endTime
+ * @param {string[]} teams
+ * @param {string[]} colors
+ * @returns {DivergingSeries}
+ */
 export function prepScoreData(fragEvents, startTime, endTime, teams, colors) {
     if (teams.length < 2) return { points: [], max: 10 };
     let score = 0;
@@ -331,6 +445,7 @@ export function prepScoreData(fragEvents, startTime, endTime, teams, colors) {
     const cA = `rgba(${rA},${gA},${bA},0.8)`;
     const cB = `rgba(${rB},${gB},${bB},0.8)`;
     let maxVal = 10;
+    /** @type {StackPoint[]} */
     const points = [];
     let si = 0;
     for (let t = startTime; t < endTime; t += sampleRate) {
@@ -360,12 +475,21 @@ const POWERUP_TYPES = [
 // teams held it ('other' — a mid-game team change, a spectator — grey). A
 // run is clipped to the window; the span keeps the run itself for the hover
 // read-out, which shows its full duration. null without runs or two teams.
+/**
+ * @param {TimedEvent[] | null | undefined} powerupEvents
+ * @param {number} startTime
+ * @param {number} endTime
+ * @param {string[]} teams
+ * @returns {SpanRows | null}
+ */
 export function prepPowerupRowsData(powerupEvents, startTime, endTime, teams) {
     if (!powerupEvents || powerupEvents.length === 0) return null;
     const teamA = teams[0], teamB = teams[1];
     if (!teamA || !teamB) return null;
+    /** @type {Map<string, SpanRow>} */
     const rowByKey = new Map();
     const rows = POWERUP_TYPES.map(pu => {
+        /** @type {SpanRow} */
         const r = { name: pu.name, spans: [] };
         rowByKey.set(pu.key, r);
         return r;
@@ -391,6 +515,14 @@ export function prepPowerupRowsData(powerupEvents, startTime, endTime, teams) {
 // set in effect: { regions, bucketStates, teamA, teamB }; Go's team labels
 // name the A / B states when it shipped them. null without regions, states
 // or a bucket view.
+/**
+ * @param {{ regions?: Array<{ name: string }>, bucketStates?: Record<string, string> | null, teamA?: string | null, teamB?: string | null } | null | undefined} rc
+ * @param {BucketView | null | undefined} view
+ * @param {number} startTime
+ * @param {number} endTime
+ * @param {string[]} teams
+ * @returns {SpanRows | null}
+ */
 export function prepRegionControlData(rc, view, startTime, endTime, teams) {
     const regions = rc?.regions;
     const bucketStates = rc?.bucketStates;
@@ -399,11 +531,14 @@ export function prepRegionControlData(rc, view, startTime, endTime, teams) {
     const teamA = rc.teamA || teams[0];
     const teamB = rc.teamB || teams[1];
     const idx0 = bucketIndexAtOrAfter(view, startTime);
+    /** @type {SpanRow[]} */
     const rows = [];
     for (const r of regions) {
         const s = bucketStates[r.name];
         if (typeof s !== 'string') continue;
+        /** @type {StateSpan[]} */
         const spans = [];
+        /** @type {string | null} */
         let curState = null;
         let curStart = startTime;
         for (let i = idx0; i < view.count; i++) {
@@ -431,7 +566,12 @@ export function prepRegionControlData(rc, view, startTime, endTime, teams) {
 // rosterTeamOf: a player's team as the Result's roster names it — the KTX
 // demoinfo block where the demo has one, else playerStats (the canonical
 // roster, present on every demo) — the source the Map's player symbols use.
+/**
+ * @param {Result | null | undefined} result
+ * @returns {Map<string, string>}
+ */
 export function rosterTeamOf(result) {
+    /** @type {Map<string, string>} */
     const teamOf = new Map();
     const demoPlayers = result?.demoInfo?.players || [];
     const rows = demoPlayers.length ? demoPlayers : playerStatsRows(result);
@@ -447,12 +587,20 @@ export function rosterTeamOf(result) {
 // are dropped); in the individual layout (`individual`) one group per entry
 // of `teams`, the frag-sorted player list, a player's side being their own
 // name. Names sort within a group.
+/**
+ * @param {BucketView | null | undefined} view
+ * @param {string[]} teams
+ * @param {Map<string, string>} teamOf
+ * @param {boolean} [individual]
+ * @returns {string[][]}
+ */
 export function playersByTeam(view, teams, teamOf, individual) {
     const groupCount = individual ? Math.max(2, teams.length) : 2;
-    const out = Array.from({ length: groupCount }, () => []);
+    const out = Array.from({ length: groupCount }, () => /** @type {string[]} */ ([]));
     if (teams.length < 2 || !view || !view.players) return out;
     for (const name of Object.keys(view.players)) {
-        const ti = teams.indexOf(individual ? name : teamOf.get(name));
+        // A player of neither team has no teamOf entry: indexOf(undefined) is -1.
+        const ti = teams.indexOf(individual ? name : /** @type {string} */ (teamOf.get(name)));
         if (ti < 0 || ti >= out.length) continue;
         out[ti].push(name);
     }
@@ -461,7 +609,14 @@ export function playersByTeam(view, teams, teamOf, individual) {
 }
 
 // One player's health, then armor in its type's colour.
+/**
+ * @param {number} h
+ * @param {number} a
+ * @param {string} at
+ * @returns {StackSeg[]}
+ */
 function buildPlayerHASegments(h, a, at) {
+    /** @type {StackSeg[]} */
     const segs = [];
     if (h > 0) segs.push({ h, color: GRAPH_COLORS.HEALTH });
     if (a > 0) {
@@ -475,7 +630,15 @@ function buildPlayerHASegments(h, a, at) {
 
 // A player's health / armor stack per bucket; an empty stack where they are
 // dead or absent, so the chart shows a gap there.
+/**
+ * @param {BucketView | null | undefined} view
+ * @param {BucketPlayer | null | undefined} cp
+ * @param {number} startTime
+ * @param {number} endTime
+ * @returns {StackPoint[]}
+ */
 export function prepPlayerHAData(view, cp, startTime, endTime) {
+    /** @type {StackPoint[]} */
     const points = [];
     if (!view || !view.count || !cp) return points;
     const idx0 = bucketIndexAtOrAfter(view, startTime);
@@ -492,6 +655,7 @@ export function prepPlayerHAData(view, cp, startTime, endTime) {
 
 // The tallest stack over a set of per-player series, never under 300, so the
 // health / armor minis share one comparable scale.
+/** @param {StackPoint[][]} seriesList */
 export function sharedStackMax(seriesList) {
     let maxVal = 300;
     for (const pts of seriesList) {
@@ -511,6 +675,15 @@ export function sharedStackMax(seriesList) {
 // full-match endpoint is byPlayer.kills − byPlayer.deaths, which reconciles
 // with the kills-based efficiency on each row
 // (ktx/src/statsTables.c calculateEfficiency).
+/**
+ * @param {TimedEvent[]} killEvents
+ * @param {TimedEvent[]} deathEvents
+ * @param {string} name
+ * @param {number} startTime
+ * @param {number} endTime
+ * @param {string} upColor
+ * @param {string} downColor
+ */
 export function prepPlayerFragDeathData(killEvents, deathEvents, name, startTime, endTime, upColor, downColor) {
     let kills = 0, deaths = 0;
     for (const k of killEvents) {
@@ -545,6 +718,7 @@ export function prepPlayerFragDeathData(killEvents, deathEvents, name, startTime
     const duration = endTime - startTime;
     const sampleRate = Math.max(0.5, duration / 400);
     let maxVal = 1;
+    /** @type {StackPoint[]} */
     const points = [];
     let si = 0;
     for (let t = startTime; t < endTime; t += sampleRate) {
@@ -562,10 +736,21 @@ export function prepPlayerFragDeathData(killEvents, deathEvents, name, startTime
 
 // Each player's kills / deaths and efficiency AT time t (not whole-match
 // totals): { name: { text, title } } for the per-player frags labels.
+/**
+ * @param {TimedEvent[]} killEvents
+ * @param {TimedEvent[]} deathEvents
+ * @param {string[]} names
+ * @param {number} t
+ * @returns {Record<string, { text: string, title: string }>}
+ */
 export function fragDeathLabels(killEvents, deathEvents, names, t) {
-    const kc = {}, dc = {};
+    /** @type {Record<string, number>} */
+    const kc = {};
+    /** @type {Record<string, number>} */
+    const dc = {};
     for (const e of killEvents) if (e.time <= t) kc[e.player] = (kc[e.player] || 0) + 1;
     for (const e of deathEvents) if (e.time <= t) dc[e.player] = (dc[e.player] || 0) + 1;
+    /** @type {Record<string, { text: string, title: string }>} */
     const out = {};
     for (const name of names) {
         const k = kc[name] || 0, d = dc[name] || 0;
@@ -580,14 +765,24 @@ export function fragDeathLabels(killEvents, deathEvents, names, t) {
 
 // One player's weapon state over the window as spans: 'rl', 'lg' or 'rllg'
 // while alive and holding them, nothing otherwise.
+/**
+ * @param {BucketView | null | undefined} view
+ * @param {BucketPlayer | null | undefined} cp
+ * @param {number} startTime
+ * @param {number} endTime
+ * @returns {StateSpan[]}
+ */
 export function prepPlayerWeaponSpans(view, cp, startTime, endTime) {
+    /** @type {StateSpan[]} */
     const spans = [];
     if (!view || !view.count || !cp) return spans;
     const idx0 = bucketIndexAtOrAfter(view, startTime);
+    /** @type {string | null} */
     let curState = null, curStart = startTime;
     for (let i = idx0; i < view.count; i++) {
         const bt = bucketTimeSec(view, i);
         if (bt > endTime) break;
+        /** @type {string | null} */
         let state = null;
         if (playerAliveAt(cp, i)) {
             const rl = !!playerValAt(cp, 'rl', i);
@@ -608,7 +803,15 @@ export function prepPlayerWeaponSpans(view, cp, startTime, endTime) {
 
 // The per-player weapons rows' drop dots: [{ row, time, color }], a row
 // being the dropper's index in `rowPlayers`.
+/**
+ * @param {TimedEvent[] | null | undefined} backpacks
+ * @param {string[]} rowPlayers
+ * @param {number} startTime
+ * @param {number} endTime
+ * @returns {Array<{ row: number, time: number, color: string }>}
+ */
 export function playerDropMarks(backpacks, rowPlayers, startTime, endTime) {
+    /** @type {Array<{ row: number, time: number, color: string }>} */
     const marks = [];
     for (const d of (backpacks || [])) {
         if (d.time < startTime || d.time > endTime) continue;
@@ -629,10 +832,16 @@ export const WEAPON_SPAN_COLORS = { rl: GRAPH_COLORS.RL, lg: GRAPH_COLORS.LG, rl
 // are rebuilt on every playhead tick, so a frags-descending order made rows
 // swap places as the match progressed — churn under the reader's eyes while
 // scrubbing. Reset per demo.
+/** @type {TeamStatusSort} */
 export const TEAM_STATUS_SORT_DEFAULT = { key: 'name', dir: 1 };
 
 // A click on a sortable header: the active column flips, a new one starts
 // names A→Z and numbers biggest-first.
+/**
+ * @param {TeamStatusSort} sort
+ * @param {string} key
+ * @returns {TeamStatusSort}
+ */
 export function nextTeamStatusSort(sort, key) {
     if (sort.key === key) return { key, dir: -sort.dir };
     return { key, dir: key === 'name' ? 1 : -1 };
@@ -640,11 +849,15 @@ export function nextTeamStatusSort(sort, key) {
 
 // dir: 1 ascending, -1 descending. Numeric keys tie-break on name (always
 // ascending) so equal-frag rows keep a stable, readable order.
+/**
+ * @param {TeamStatusSort} sort
+ * @returns {(a: TeamStatusRow, b: TeamStatusRow) => number}
+ */
 export function compareTeamStatusRows(sort) {
     return (a, b) => {
         const k = sort.key;
         if (k === 'name') return a.name.localeCompare(b.name) * sort.dir;
-        const cmp = (a[k] || 0) - (b[k] || 0);
+        const cmp = (/** @type {any} */ (a)[k] || 0) - (/** @type {any} */ (b)[k] || 0);
         return cmp ? cmp * sort.dir : a.name.localeCompare(b.name);
     };
 }
@@ -654,7 +867,32 @@ export function compareTeamStatusRows(sort) {
 // demoinfo roster's, the roster the Map's symbols use (rosterTeamOf), and
 // anyone in the frame on that team. `frame` is the row-shape player map at
 // the time (reconstructBucketPlayers), `frags` the running counts.
+/**
+ * @typedef {object} TeamStatusRow
+ * @property {string} name
+ * @property {boolean} dead
+ * @property {number} health
+ * @property {number} armor
+ * @property {string} armorType
+ * @property {boolean} hasRL
+ * @property {boolean} hasLG
+ * @property {boolean} hasQuad
+ * @property {boolean} hasPent
+ * @property {boolean} hasRing
+ * @property {number} frags
+ */
+
+/**
+ * @param {Result | null | undefined} result
+ * @param {Map<string, string>} teamOf
+ * @param {Record<string, Record<string, any>>} frame  reconstructBucketPlayers' row-shape players
+ * @param {Record<string, number>} frags
+ * @param {string} team
+ * @param {TeamStatusSort} sort
+ * @returns {TeamStatusRow[]}
+ */
 export function teamStatusRows(result, teamOf, frame, frags, team, sort) {
+    /** @type {Set<string>} */
     const names = new Set();
     for (const dp of (result?.demoInfo?.players || [])) {
         if (dp.team === team) names.add(dp.name);
@@ -665,6 +903,7 @@ export function teamStatusRows(result, teamOf, frame, frags, team, sort) {
     for (const [name, data] of Object.entries(frame)) {
         if ((data.team || teamOf.get(name)) === team) names.add(name);
     }
+    /** @type {TeamStatusRow[]} */
     const players = [];
     for (const name of names) {
         const data = frame[name];
@@ -690,6 +929,13 @@ export function teamStatusRows(result, teamOf, frame, frags, team, sort) {
 // The "hub" link of a roster row: the hub replay at `time`, tracking the
 // player. Our times are match-relative; hub's are demo-relative (countdown
 // included), hence `demoOffset` (seconds). '' without a hub game or userid.
+/**
+ * @param {string} playerName
+ * @param {number} time
+ * @param {{ gameId?: number } | null | undefined} hubInfo
+ * @param {Record<string, number>} playerUserIDs
+ * @param {number} [demoOffset]
+ */
 export function hubWatchLinkHtml(playerName, time, hubInfo, playerUserIDs, demoOffset) {
     if (!hubInfo || !hubInfo.gameId) return '';
     const trackId = playerUserIDs[playerName];
@@ -703,6 +949,14 @@ export function hubWatchLinkHtml(playerName, time, hubInfo, playerUserIDs, demoO
 // total in the team colour, a row per player, a totals row. The sortable
 // headers carry their key (the tab's delegated click reads it) and the same
 // arrow classes makeSortable sets.
+/**
+ * @param {Result | null | undefined} result
+ * @param {TeamStatusRow[]} players
+ * @param {string} team
+ * @param {string} color
+ * @param {TeamStatusSort} sort
+ * @param {number} time
+ */
 export function teamStatusHtml(result, players, team, color, sort, time) {
     const teamFrags = players.reduce((s, p) => s + p.frags, 0);
     const teamHealth = players.reduce((s, p) => s + (p.health || 0), 0);
@@ -713,6 +967,7 @@ export function teamStatusHtml(result, players, team, color, sort, time) {
 
     let html = `<h4 style="color: ${color}">${escapeHtml(team)} — ${teamFrags} frags</h4>`;
     html += `<table class="team-status-table">`;
+    /** @param {string} key @param {string} label */
     const sortTh = (key, label) => {
         const active = sort.key === key;
         const cls = `sortable${active ? (sort.dir === 1 ? ' sort-asc' : ' sort-desc') : ''}`;
@@ -768,6 +1023,12 @@ export const RC_AXIS_H = 20;
 // hitDropMark: the weapon-graph drop dot nearest the cursor (mx, my in
 // canvas CSS px) within reach, or null. `hit` is what the last render drew:
 // { startTime, endTime, W (CSS px), dropMarks }.
+/**
+ * @param {{ startTime: number, endTime: number, W: number, dropMarks: DropMark[] }} hit
+ * @param {number} mx
+ * @param {number} my
+ * @returns {DropMark | null}
+ */
 export function hitDropMark(hit, mx, my) {
     const HIT_R = 6;   // hit radius (dot radius is 3)
     const HIT_DY = 8;  // vertical tolerance — generous so hovering near works
@@ -793,6 +1054,7 @@ export function hitDropMark(hit, mx, my) {
     return best;
 }
 
+/** @param {DropMark} mark */
 export function dropTooltipHtml(mark) {
     const d = mark.drop;
     const weapon = (d.weapon || '').toUpperCase();
@@ -804,6 +1066,12 @@ ${locLine}<div>Time: ${formatDuration(d.time)}</div>`;
 // hitPowerupSpan: the powerup run under the cursor — the row by y (the axis
 // strip below the rows is ignored), the first span containing x — or null.
 // `hit` is { startTime, endTime, W, rows } from the last render.
+/**
+ * @param {{ startTime: number, endTime: number, W: number, rows: SpanRow[] }} hit
+ * @param {number} mx
+ * @param {number} my
+ * @returns {{ row: SpanRow, sp: StateSpan } | null}
+ */
 export function hitPowerupSpan(hit, mx, my) {
     if (!hit.W || !hit.rows.length) return null;
     const duration = hit.endTime - hit.startTime;
@@ -821,8 +1089,10 @@ export function hitPowerupSpan(hit, mx, my) {
     return { row, sp: found };
 }
 
+/** @param {{ row: SpanRow, sp: StateSpan }} hit */
 export function powerupTooltipHtml({ row, sp }) {
-    const ev = sp.event;
+    // hitPowerupSpan only answers spans that carry their run.
+    const ev = /** @type {TimedEvent} */ (sp.event);
     const player = escapeHtml(ev.playerName || 'Unknown');
     const team = ev.team ? `<div>Team: ${escapeHtml(ev.team)}</div>` : '';
     const dur = (ev.duration != null) ? `${Math.round(ev.duration)}s` : '?';

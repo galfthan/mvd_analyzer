@@ -9,6 +9,11 @@ import { matchWallClock } from './wall-clock.js';
 
 // topbarView(result, order) → { html, title }. `order` is the teams store's
 // canonical order.
+/**
+ * @param {import('./result.js').Result | null | undefined} result
+ * @param {string[]} order
+ * @returns {{ html: string, title: string }}
+ */
 export function topbarView(result, order) {
     const demoInfo = result?.demoInfo;
     // Display: the canonical shortname (dm2, e1m2) — how QW players name
@@ -21,13 +26,15 @@ export function topbarView(result, order) {
     const wallClock = demoInfo?.date ? null : matchWallClock(result);
     const date = demoInfo?.date || '';
 
+    /** @type {string[]} */
     let teams = order.length >= 2 ? [...order] : [];
     if (teams.length < 2 && demoInfo?.teams) teams = [...demoInfo.teams];
-    if (teams.length < 2 && result?.match?.teams) teams = result.match.teams.map(t => t.name);
+    if (teams.length < 2 && result?.match?.teams) teams = result.match.teams.map((/** @type {{ name: string }} */ t) => t.name);
 
     // playerStats first so the topbar score agrees with the scoreboard on
     // the Summary tab: its score.frags is the corrected net score, while
     // KTX's stats.frags resets after a reconnect.
+    /** @type {Record<string, number>} */
     let teamScores = {};
     const psRows = playerStatsRows(result);
     if (psRows.length) {

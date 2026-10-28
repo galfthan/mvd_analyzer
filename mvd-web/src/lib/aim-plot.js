@@ -6,6 +6,38 @@
 
 import { heatColorRGB } from './heat-color.js';
 
+/**
+ * A player's result.aim crosshair samples (RESULT_SCHEMA CrosshairSamples),
+ * columnar: one index per hitscan fire. The fields read here.
+ * @typedef {object} CrosshairSamples
+ * @property {number[]} t
+ * @property {string[]} w
+ * @property {number[]} dyaw
+ * @property {number[]} dpitch
+ * @property {number[]} dist
+ * @property {boolean[]} [hit]   absent when hits are not measured
+ * @property {boolean[]} [team]
+ *
+ * result.aim lgRamp (RESULT_SCHEMA LGRampSamples), one index per LG fire.
+ * @typedef {{ since: number[], hit?: boolean[], team?: boolean[] }} LGRampSamples
+ *
+ * @typedef {import('./aim.js').VictimFilter} VictimFilter
+ * @typedef {ReturnType<typeof aimDensityGrid>} DensityGrid
+ * @typedef {{ title: string, height: string, stub: boolean, opacity?: string }} HistCol  opacity: ramp bars only
+ * @typedef {object} MarginalHist
+ * @property {'marginal'} kind
+ * @property {string} name
+ * @property {string} dirNote
+ * @property {{ left: string, width: string }} band  % of the plot
+ * @property {HistCol[]} cols
+ * @property {string[]} axis
+ * @typedef {object} RampHist
+ * @property {'ramp'} kind
+ * @property {number} yMax
+ * @property {Array<HistCol & { opacity: string }>} cols
+ * @property {string[]} axis
+ */
+
 // Crosshair extents in Quake units at the target, shared by the density
 // image and the marginal histograms. Both axes use the same scale, so the
 // player's collision box (32 wide × 56 tall) draws true to shape. Yaw is
@@ -21,12 +53,19 @@ export const AIM_HULL_HALF_H = 28;
 // any angle, ≈ dist·tan θ at the small angles that matter). x is flipped so
 // enemy-right reads right (+dyaw is enemy-left in Quake).
 const AIM_DEG = Math.PI / 180;
+/** @type {(c: CrosshairSamples, i: number) => number} */
 export const aimOffX = (c, i) => -Math.sin(c.dyaw[i] * AIM_DEG) * c.dist[i];
+/** @type {(c: CrosshairSamples, i: number) => number} */
 export const aimOffY = (c, i) => Math.sin(c.dpitch[i] * AIM_DEG) * c.dist[i];
 
 // aimSampleInFilter applies the victim filter to one crosshair sample. Only
 // hits can be team-attributed (misses attribute to enemies by construction),
 // and hitscan samples can never be self-hits — so 'self' matches nothing.
+/**
+ * @param {CrosshairSamples} c
+ * @param {number} i
+ * @param {VictimFilter} filter
+ */
 function aimSampleInFilter(c, i, filter) {
     switch (filter) {
         case 'enemy': return !(c.team && c.team[i]);
@@ -38,6 +77,12 @@ function aimSampleInFilter(c, i, filter) {
 
 // The indices of one player's crosshair samples for a weapon under the
 // victim filter.
+/**
+ * @param {CrosshairSamples | null | undefined} c
+ * @param {string} weapon
+ * @param {VictimFilter} filter
+ * @returns {number[]}
+ */
 export function aimSampleIndices(c, weapon, filter) {
     const idx = [];
     if (c && c.t) {
@@ -48,6 +93,10 @@ export function aimSampleIndices(c, weapon, filter) {
     return idx;
 }
 
+/**
+ * @param {string} weapon
+ * @param {VictimFilter} filter
+ */
 export function aimNodataText(weapon, filter) {
     const W = weapon.toUpperCase();
     switch (filter) {
@@ -65,6 +114,10 @@ const AIM_IMG_SIGMA = 1.4;   // gaussian σ, in fine cells
 export const AIM_IMG_SCALE = 5;     // display px per fine cell
 const AIM_HOVER_BIN = 8;     // hover read-out bin, qu at the target
 
+/**
+ * @param {number} v
+ * @param {number} n
+ */
 function aimClampIndex(v, n) { return Math.max(0, Math.min(n - 1, v)); }
 
 // Zero density keeps the surface colour and the lowest densities fade into
@@ -72,6 +125,10 @@ function aimClampIndex(v, n) { return Math.max(0, Math.min(n - 1, v)); }
 // background and only real values get the shared viridis heatColorRGB.
 const AIM_IMG_FADE = 0.04; // density fraction over which the ramp fades in
 
+/**
+ * @param {number} t
+ * @param {number[]} bg
+ */
 export function aimDensityRGB(t, bg) {
     const rgb = heatColorRGB(t);
     const a = Math.min(1, t / AIM_IMG_FADE);
@@ -83,6 +140,10 @@ export function aimDensityRGB(t, bg) {
 // and counts shots / hits on the coarse hover grid. Returns
 // { nx, ny, sm (smoothed, row-major, top row first), max, hx, hy, hShots,
 // hHits, hitsKnown }.
+/**
+ * @param {CrosshairSamples} c
+ * @param {number[]} idx
+ */
 export function aimDensityGrid(c, idx) {
     const nx = Math.round(2 * AIM_X_HALF / AIM_IMG_CELL);
     const ny = Math.round(2 * AIM_Y_HALF / AIM_IMG_CELL);
@@ -135,16 +196,23 @@ export function aimDensityGrid(c, idx) {
 }
 
 // The colorbar's labels: 0 → max shots per fine cell (smoothed).
+/** @param {number} v */
 export const aimBarLabel = v => (v >= 10 ? String(Math.round(v)) : v.toFixed(1));
 
 // aimHoverTitle is the canvas tooltip for a cursor at (mx, my) in the
 // canvas's unscaled CSS px: shot/hit counts in the coarse bin under it, ''
 // off the plot. `d` = the grid plus the plot box { ML, MT, PW, PH }.
+/**
+ * @param {DensityGrid & { ML: number, MT: number, PW: number, PH: number }} d
+ * @param {number} mx
+ * @param {number} my
+ */
 export function aimHoverTitle(d, mx, my) {
     if (mx < d.ML || mx >= d.ML + d.PW || my < d.MT || my >= d.MT + d.PH) return '';
     const xi = aimClampIndex(Math.floor((mx - d.ML) / d.PW * d.hx), d.hx);
     const yi = aimClampIndex(Math.floor((my - d.MT) / d.PH * d.hy), d.hy);
     const s = d.hShots[yi * d.hx + xi], h = d.hHits[yi * d.hx + xi];
+    /** @param {number} v */
     const fmt = v => (v > 0 ? '+' : '') + v.toFixed(0);
     const xlo = -AIM_X_HALF + xi * AIM_HOVER_BIN;
     const yhi = AIM_Y_HALF - yi * AIM_HOVER_BIN;
@@ -166,8 +234,16 @@ export function aimHoverTitle(d, mx, my) {
 //
 // aimHistRow returns the row under one image: [] when nothing is selected,
 // else yaw, pitch and — for LG with a measured hit column — the ramp.
+/**
+ * @param {CrosshairSamples} c
+ * @param {number[]} idx
+ * @param {LGRampSamples | null | undefined} ramp
+ * @param {VictimFilter} filter
+ * @returns {Array<MarginalHist | RampHist>}
+ */
 export function aimHistRow(c, idx, ramp, filter) {
     if (!idx.length) return [];
+    /** @type {Array<MarginalHist | RampHist>} */
     const row = [
         aimMarginalHist('Yaw', 'enemy left ← → right', 'qu',
             AIM_X_HALF, AIM_HIST_BIN, i => aimOffX(c, i), c, idx, AIM_HULL_HALF_W),
@@ -176,19 +252,32 @@ export function aimHistRow(c, idx, ramp, filter) {
     ];
     // The ramp panel is hit-% by construction — without a measured hit
     // column (aim.hitsMeasured false) it would read a fabricated flat 0%.
-    if (ramp && ramp.since && ramp.since.length && ramp.hit) row.push(aimRampHist(ramp, filter));
+    if (ramp && ramp.since && ramp.since.length && ramp.hit) row.push(aimRampHist(/** @type {LGRampSamples & { hit: boolean[] }} */ (ramp), filter));
     return row;
 }
 
 // One marginal histogram: { kind: 'marginal', name, dirNote, band: {left,
 // width} (% of the plot), cols: [{ title, height (%), stub }], axis: [lo,
 // mid, hi] labels }. `stub` keeps a 2px bar on a non-empty bin.
+/**
+ * @param {string} name
+ * @param {string} dirNote
+ * @param {string} unit
+ * @param {number} half
+ * @param {number} w
+ * @param {(i: number) => number} val
+ * @param {CrosshairSamples} c
+ * @param {number[]} idx
+ * @param {number} bandHalf
+ * @returns {MarginalHist}
+ */
 export function aimMarginalHist(name, dirNote, unit, half, w, val, c, idx, bandHalf) {
     // Bin i is centered on (i − mid)·w: the middle bin straddles zero and the
     // outermost bin centers sit exactly at ±half (edges overhang by w/2).
     const mid = Math.round(half / w);
     const nb = 2 * mid + 1;
     const span = nb * w;
+    /** @param {number} v */
     const binOf = v => Math.max(0, Math.min(nb - 1, mid + Math.round(v / w)));
     const bins = Array.from({ length: nb }, () => ({ shots: 0, hits: 0 }));
     let max = 0;
@@ -228,11 +317,17 @@ const AIM_RAMP_BIN = 100; // ms
 const AIM_RAMP_BINS = 12; // 0-1100 ms, then 1100+
 
 // { kind: 'ramp', yMax, cols: [{ title, height, opacity, stub }], axis }.
+/**
+ * @param {LGRampSamples & { hit: boolean[] }} ramp
+ * @param {VictimFilter} filter
+ * @returns {RampHist}
+ */
 export function aimRampHist(ramp, filter) {
     // Score each fire under the victim filter: ramp.team flags fires that
     // connected but hit no enemy (teammate-only), so enemy = hit && !team,
     // team = hit && team. The denominator stays all LG fires — the ramp is
     // hit% of fires, whatever they hit.
+    /** @param {number} i */
     const rampHitAt = i => {
         const t = !!(ramp.team && ramp.team[i]);
         if (filter === 'enemy') return ramp.hit[i] && !t;
@@ -245,6 +340,7 @@ export function aimRampHist(ramp, filter) {
         b.shots++;
         if (rampHitAt(i)) b.hits++;
     }
+    /** @param {{ shots: number, hits: number }} b */
     const pctOf = b => (b.shots ? b.hits / b.shots * 100 : 0);
     const yMax = Math.max(10, Math.ceil(Math.max(...bins.map(pctOf)) / 10) * 10);
     const maxShots = Math.max(...bins.map(b => b.shots));

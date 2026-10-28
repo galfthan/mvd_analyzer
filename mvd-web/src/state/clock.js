@@ -11,8 +11,10 @@
 
 import { store } from './store.js';
 
+/** @typedef {{ t: number, from: string | null }} ClockValue */
+
 export function createClock() {
-    const s = store({ t: 0, from: null });
+    const s = store(/** @type {ClockValue} */ ({ t: 0, from: null }));
     let duration = Infinity;
     return {
         subscribe: s.subscribe,
@@ -22,9 +24,14 @@ export function createClock() {
         get duration() {
             return duration;
         },
+        /** @param {number} d */
         setDuration(d) {
             duration = d > 0 ? d : Infinity;
         },
+        /**
+         * @param {number} t
+         * @param {string | null} [from]
+         */
         seek(t, from = null) {
             s.set({ t: Math.max(0, Math.min(t, duration)), from });
         },

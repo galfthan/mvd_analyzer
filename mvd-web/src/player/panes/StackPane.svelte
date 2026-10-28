@@ -22,6 +22,7 @@
     // The 50 ms bucket view arrives after the rest of the result. Raw: a
     // deep proxy over the whole columnar view makes every per-frame read go
     // through a Proxy trap (and holds a second copy of the structure).
+    /** @type {Record<string, any> | null} the columnar bucket view */
     let view = $state.raw(null);
     $effect(() => {
         const handle = $demo;
@@ -38,15 +39,18 @@
             .map((name) => ({ name, cid: `pp-stack-${uid++}` }));
     });
 
+    /** @type {Record<string, { h: number, a: number, at: string } | null>} */
     let vals = $state({});
+    /** @type {string | null} */
     let pov = $state(null);
 
     $effect(() => {
         const r = rows;
         const v = view;
-        return onFrame((t) => {
+        return onFrame((/** @type {number} */ t) => {
             if (!v || !v.count) return;
             const i = bucketIndexAtTime(v, t);
+            /** @type {typeof vals} */
             const out = {};
             for (const { name, cid } of r) {
                 const cp = v.players[name];
@@ -55,9 +59,9 @@
                     points: prepPlayerHAData(v, cp, t - BEFORE, t + AFTER),
                     maxValue: MAX, height: ROW_H,
                 });
-                const canvas = document.getElementById(cid);
+                const canvas = /** @type {HTMLCanvasElement | null} */ (document.getElementById(cid));
                 if (canvas) {
-                    const ctx = canvas.getContext('2d');
+                    const ctx = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'));
                     const x = Math.round(canvas.width * BEFORE / (BEFORE + AFTER));
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
                     ctx.fillRect(x, 0, Math.max(1, Math.round(window.devicePixelRatio || 1)), canvas.height);

@@ -24,19 +24,26 @@
     let hideTeam = $state(false);
     // { height, ticks } of the built track; null when there is nothing to
     // show (no messages, fewer than two sides).
+    /** @type {{ height: number, ticks: Array<{ top: number, label: string }> } | null} */
     let track = $state(null);
     let lineTop = $state(0);
+    /** @type {HTMLDivElement | undefined} */
     let viewport = $state();
-    let killCol = $state();
-    let aCol = $state();
-    let bCol = $state();
+    // Bound before onMount, so every build() sees them.
+    /** @type {HTMLDivElement} */
+    let killCol = $state(/** @type {any} */ (undefined));
+    /** @type {HTMLDivElement} */
+    let aCol = $state(/** @type {any} */ (undefined));
+    /** @type {HTMLDivElement} */
+    let bCol = $state(/** @type {any} */ (undefined));
 
     const titles = $derived(chatTitles($teams.order, $teams.perPlayer));
 
     let dirty = true;
     let queued = false;
     let userScrolling = false;
-    let scrollTimer = null;
+    /** @type {ReturnType<typeof setTimeout> | undefined} */
+    let scrollTimer = undefined;
     let programmatic = false; // our scrollTop writes, told apart from the user's
 
     function schedule() {
@@ -86,6 +93,12 @@
     // the speaker's name in their canonical colour — with two sides the
     // column heading said who was talking, with eight players nothing else
     // does.
+    /**
+     * @param {HTMLElement} container
+     * @param {import('../../lib/chat.js').ChatEvent[]} events
+     * @param {number} height
+     * @param {((name: string) => string) | false | null} [speakerColor]
+     */
     function fillColumn(container, events, height, speakerColor = null) {
         const inner = document.createElement('div');
         inner.style.position = 'relative';
@@ -108,6 +121,7 @@
         }
     }
 
+    /** @param {number} t */
     function follow(t) {
         lineTop = timeLineTop(t);
         if (userScrolling || !viewport) return;

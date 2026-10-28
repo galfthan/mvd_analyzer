@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-fte-player is its own package; mvd-web's checkJs does not cover it.
 // FteController — a thin command/query wrapper around a running FTE
 // (ftewebgl) instance playing one demo.
 //

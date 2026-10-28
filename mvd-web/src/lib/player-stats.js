@@ -3,11 +3,29 @@
 
 import { escapeHtml } from './html.js';
 
+/**
+ * A result.playerStats.players row (Result JSON, RESULT_SCHEMA PlayerStats).
+ * Only the identity fields are named; the stat families stay open.
+ * @typedef {{ name: string, team: string, score?: Record<string, any>, accuracy?: import('./accuracy.js').AccFamily, [field: string]: any }} PlayerStatsRow
+ * A result.playerStats.teams row: the same families summed per team.
+ * @typedef {{ name: string, score?: Record<string, any>, accuracy?: import('./accuracy.js').AccFamily, [field: string]: any }} PlayerStatsTeamRow
+ * A row frags can be read off: a playerStats row or a legacy demoInfo
+ * player, the two shapes fragsOfRow takes.
+ * @typedef {{ team?: string, score?: { frags?: number }, stats?: { frags?: number } }} FragRow
+ * A hold-time stat and its window (playerStats possession families).
+ * @typedef {{ ms?: number, shareAlive?: number | null, runs?: number, longestMs?: number }} HoldStat
+ * @typedef {{ aliveMs?: number, presentMs?: number, matchMs?: number }} HoldWindow
+ */
+
 // Frags off a row from either shape: a playerStats row (score.frags — the
 // corrected svc_updatefrags net score) or a legacy demoInfo player
 // (stats.frags). Both are read during the same render on demos where one
 // panel has migrated and another has not, so the accessor takes both
 // rather than each call site branching.
+/**
+ * @param {FragRow | null | undefined} p
+ * @returns {number}
+ */
 export function fragsOfRow(p) {
     return p?.score?.frags ?? p?.stats?.frags ?? 0;
 }
@@ -15,6 +33,11 @@ export function fragsOfRow(p) {
 // Return a new array of players sorted by frags descending. The sort is
 // stable (equal-frag players keep input order); this frag-sorted order is the
 // canonical team order (src/state/teams.js), so its semantics must not change.
+/**
+ * @template {FragRow} P
+ * @param {P[]} players
+ * @returns {P[]}
+ */
 export function sortByFragsDesc(players) {
     return [...players].sort((a, b) => fragsOfRow(b) - fragsOfRow(a));
 }
@@ -23,7 +46,13 @@ export function sortByFragsDesc(players) {
 // with no team bucket under `emptyTeamKey` (default '' — the topbar /
 // team-order convention; the Teams panel passes 'unknown' so a teamless
 // bucket renders with a visible label).
+/**
+ * @param {FragRow[] | null | undefined} players
+ * @param {string} [emptyTeamKey]
+ * @returns {Record<string, number>}
+ */
 export function teamFragTotals(players, emptyTeamKey = '') {
+    /** @type {Record<string, number>} */
     const totals = {};
     for (const p of (players || [])) {
         const t = p.team || emptyTeamKey;
@@ -36,9 +65,15 @@ export function teamFragTotals(players, emptyTeamKey = '') {
 // displayResults(), sorted by total frags) when it names two or more sides;
 // otherwise the order the teams first appear in `sortedPlayers` (already
 // frag-sorted).
+/**
+ * @param {string[] | null | undefined} canonical
+ * @param {Array<{ team?: string }>} sortedPlayers
+ * @returns {string[]}
+ */
 export function teamOrder(canonical, sortedPlayers) {
     if (canonical && canonical.length >= 2) return [...canonical];
     const seen = new Set();
+    /** @type {string[]} */
     const order = [];
     for (const p of sortedPlayers) {
         const t = p.team || '';
@@ -61,11 +96,19 @@ export function teamOrder(canonical, sortedPlayers) {
 // Rows for the per-player tables. Empty array when the section is absent
 // (a parse that produced no player streams — e.g. a race demo, which has
 // no match at all), which the callers render as an empty table.
+/**
+ * @param {import('./result.js').Result | null | undefined} result
+ * @returns {PlayerStatsRow[]}
+ */
 export function playerStatsRows(result) {
     return result?.playerStats?.players || [];
 }
 
 // Rows for the per-team tables. Absent on duels and FFA by construction.
+/**
+ * @param {import('./result.js').Result | null | undefined} result
+ * @returns {PlayerStatsTeamRow[]}
+ */
 export function playerStatsTeamRows(result) {
     return result?.playerStats?.teams || [];
 }
@@ -78,10 +121,18 @@ export function playerStatsTeamRows(result) {
 // Rows arrive in the section's own order; the canonical order (`canonical`,
 // through teamOrder) is still the colour index authority, so a team's stripe
 // matches it everywhere else.
+/**
+ * @template {{ name: string, team?: string }} T
+ * @param {T[]} teamRows
+ * @param {string[] | null | undefined} canonical
+ * @returns {T[]}
+ */
 export function teamRowsInColourOrder(teamRows, canonical) {
     const order = teamOrder(canonical, teamRows);
+    /** @type {Record<string, T>} */
     const byName = {};
     for (const t of teamRows) byName[t.name] = t;
+    /** @type {T[]} */
     const out = [];
     for (const name of order) if (byName[name]) out.push(byName[name]);
     // Any team the colour order doesn't know about still renders, after
@@ -106,6 +157,11 @@ export function teamRowsInColourOrder(teamRows, canonical) {
 //
 // data-sort-value keeps the raw ms so the column sorts numerically rather
 // than on the rendered "12s".
+/**
+ * @param {HoldStat | null | undefined} stat
+ * @param {HoldWindow | null} [win]
+ * @returns {string}
+ */
 export function holdCell(stat, win) {
     if (!stat || !stat.ms) return `<td data-sort-value="0">-</td>`;
     const bits = [`held ${stat.ms} ms`];

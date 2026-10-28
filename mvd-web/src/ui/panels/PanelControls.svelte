@@ -10,6 +10,7 @@
     import X from '@lucide/svelte/icons/x';
     import { panelLayouts, updatePanels } from './layout.js';
 
+    /** @type {{ tab: string, id: string, title: string, step: (dir: number) => void }} */
     let { tab, id, title, step } = $props();
 
     let collapsed = $derived(!!$panelLayouts[tab].collapsed[id]);
@@ -22,11 +23,14 @@
         updatePanels(tab, (l) => { l.closed[id] = true; });
     }
 
+    /** @param {DragEvent & { currentTarget: HTMLElement }} e */
     function dragStart(e) {
-        e.dataTransfer.setData('text/x-mvd-panel', `${tab}:${id}`);
-        e.dataTransfer.effectAllowed = 'move';
+        // A dragstart always carries its dataTransfer.
+        const dt = /** @type {DataTransfer} */ (e.dataTransfer);
+        dt.setData('text/x-mvd-panel', `${tab}:${id}`);
+        dt.effectAllowed = 'move';
         const panel = e.currentTarget.closest('[data-panel]');
-        if (panel) e.dataTransfer.setDragImage(panel, 20, 20);
+        if (panel) dt.setDragImage(panel, 20, 20);
     }
 </script>
 

@@ -3,6 +3,7 @@
 // no heading of its own). The panel elements carry `data-panel="<id>"`;
 // the order here is the default.
 
+/** @type {Record<string, Array<[id: string, title: string]>>} */
 export const PANEL_TABS = {
     summary: [
         ['match-info', 'Match info'],

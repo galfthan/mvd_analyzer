@@ -26,6 +26,9 @@
 // it drags every clip demoOffset-10 s earlier, and because `to` is a hard
 // pause point it truncates the payload — an airgib clip then ends before
 // the gib. Correct content, wrong-looking clock, is the trade we keep.
+/**
+ * @param {{ gameId: number | string, from: number | string, to?: number | string | null, track: number | string }} link
+ */
 export function hubReplayUrl({ gameId, from, to, track }) {
     let url = `https://hub.quakeworld.nu/games/?gameId=${gameId}&from=${from}`;
     if (to != null) url += `&to=${to}`;

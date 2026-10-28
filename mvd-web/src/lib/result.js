@@ -4,11 +4,20 @@
 
 import { playerStatsRows } from './player-stats.js';
 
+/**
+ * The pipeline Result as parsed JSON. Its fields are left open on purpose:
+ * the shape is owned by the Go side (RESULT_SCHEMA.md, pinned by the golden
+ * tests), and a hand-kept copy of it here would drift. What the checker
+ * still sees is that a Result, not some other value, is passed around.
+ * @typedef {Record<string, any>} Result
+ */
+
 // mapFileKey mirrors Go's Result.EffectiveMap(): `demoInfo.map`, then the
 // serverinfo `map` key (on every pre-2020 demo, so the absence of the KTX
 // block never reads as "no map"), then `match.map` — the canonical SHORT
 // name. `match.mapTitle` is display-only text ("Castle of the Damned") and
 // must never appear here.
+/** @param {Result | null | undefined} result */
 export function mapFileKey(result) {
     const raw = result?.demoInfo?.map || result?.metadata?.serverInfo?.map
         || result?.match?.map || '';
@@ -21,10 +30,12 @@ export function mapFileKey(result) {
 // demoOffsetSec: demo-relative time = match time + this (seconds). The
 // engine, hub links and playlist clips run on demo time, the page on match
 // time (streams.global.demoOffset, ms).
+/** @param {Result | null | undefined} result */
 export function demoOffsetSec(result) {
     return (result?.streams?.global?.demoOffset || 0) * 0.001;
 }
 
+/** @param {number} seconds */
 export function formatDuration(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -32,10 +43,20 @@ export function formatDuration(seconds) {
 }
 
 // The userid FTE tracks a player by, from the pipeline's name → userid map.
+/**
+ * @param {Result | null | undefined} result
+ * @param {string} name
+ * @returns {number | null}
+ */
 export function userIdOf(result, name) {
     return result?.timelineAnalysis?.playerUserIDs?.[name] ?? null;
 }
 
+/**
+ * @param {Result | null | undefined} result
+ * @param {number | string} userid
+ * @returns {string | null}
+ */
 export function nameOfUserId(result, userid) {
     const ids = result?.timelineAnalysis?.playerUserIDs || {};
     for (const [name, id] of Object.entries(ids)) if (id === Number(userid)) return name;
@@ -60,12 +81,14 @@ export function nameOfUserId(result, userid) {
 // each — while the ruleset genuinely was teamplay. Deriving either from the
 // other is what put a meaningless Team filter on an FFA aim tab and, in the
 // other direction, would put team colours on a duel.
+/** @param {Result | null | undefined} result */
 export function isIndividualLayout(result) {
     return result?.match?.sources?.teams === 'individual';
 }
 
 // isTeamBasedMode reports the resolved ruleset: teamplay in force, so a team
 // tag names a side.
+/** @param {Result | null | undefined} result */
 export function isTeamBasedMode(result) {
     return result?.match?.gameMode?.teamBased === true;
 }
@@ -74,6 +97,7 @@ export function isTeamBasedMode(result) {
 // ruleset was teamplay AND the match is not laid out one side per player.
 // Everything that renders a same-team quantity (team kills, team damage, the
 // aim tab's Team victim filter) is empty without it.
+/** @param {Result | null | undefined} result */
 export function hasTeammates(result) {
     return isTeamBasedMode(result) && !isIndividualLayout(result);
 }
@@ -93,6 +117,7 @@ export function hasTeammates(result) {
 // Read off playerStats rather than demoInfo: the roster stamp is what is
 // being tested, playerStats carries it on every demo, and a pre-KTX-block
 // duel used to fall through here and render the team panels for a 1v1.
+/** @param {Result | null | undefined} result */
 export function isDuel(result) {
     const players = playerStatsRows(result);
     if (!players.length) return false;
@@ -111,6 +136,7 @@ export function isDuel(result) {
 // rather than "more than two": isDuel needs exactly two playerStats rows,
 // so an individual layout with fewer (one player alone on a server) takes
 // the field layout too — it has no pair of sides to show either.
+/** @param {Result | null | undefined} result */
 export function isMultiPlayerIndividual(result) {
     return isIndividualLayout(result) && !isDuel(result);
 }

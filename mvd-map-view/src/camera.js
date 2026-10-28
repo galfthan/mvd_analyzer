@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // The map's orbit camera: an orthographic projection with yaw about the
 // world Z axis, a pitch tilt, and a fit/zoom/pan linear map onto canvas
 // pixels.

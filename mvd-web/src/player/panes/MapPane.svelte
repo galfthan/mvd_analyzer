@@ -17,17 +17,23 @@
     const MIN_H = 200;
     const MAX_H = 520;
 
+    /** @type {HTMLCanvasElement} */
     let canvas;
+    /** @type {HTMLDivElement} */
     let box;
     let follow = $state(true);
     let empty = $state(false);
-    let map = null;
+    // Null only while unmounted, when no handler or frame runs.
+    /** @type {MvdMap} */
+    let map = /** @type {any} */ (null);
     let setting = false;
+    /** @type {string | null} */
     let lastPov = null;       // the POV the camera last followed
     let needsFit = true;      // a new demo: reset the view once its data is in
 
     const sized = $derived($paneLayout.heights.map != null);
 
+    /** @param {string | null} name */
     function setFollow(name) {
         setting = true;
         try { map.setFollowPlayer(name); } finally { setting = false; }
@@ -85,7 +91,7 @@
 
     $effect(() => {
         map = new MvdMap(canvas);
-        map.on('follow', (name) => {
+        map.on('follow', (/** @type {string | null} */ name) => {
             if (setting || !name) return;
             engine.trackName(name);
         });
@@ -96,7 +102,7 @@
             offFrame();
             ro.disconnect();
             map.dispose();
-            map = null;
+            map = /** @type {any} */ (null);
         };
     });
 
@@ -112,18 +118,20 @@
         resize();
     });
 
+    /** @param {MouseEvent} ev */
     function point(ev) {
         const r = canvas.getBoundingClientRect();
         return { x: ev.clientX - r.left, y: ev.clientY - r.top };
     }
 
+    /** @param {MouseEvent} ev */
     function down(ev) {
         if (ev.button !== 0 && ev.button !== 2) return;
         const p = point(ev);
         map.pointerDown(p.x, p.y, (ev.button === 2 || ev.ctrlKey || ev.metaKey) ? 'orbit' : 'pan', ev.button);
         ev.preventDefault();
-        const move = (e) => { const q = point(e); map.pointerMove(q.x, q.y); };
-        const up = (e) => {
+        const move = (/** @type {MouseEvent} */ e) => { const q = point(e); map.pointerMove(q.x, q.y); };
+        const up = (/** @type {MouseEvent} */ e) => {
             const q = point(e);
             map.pointerUp(q.x, q.y);
             window.removeEventListener('mousemove', move);
@@ -133,6 +141,7 @@
         window.addEventListener('mouseup', up);
     }
 
+    /** @param {WheelEvent} ev */
     function wheel(ev) {
         ev.preventDefault();
         const p = point(ev);

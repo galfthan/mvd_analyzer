@@ -7,18 +7,26 @@
 
 import { store } from '../state/store.js';
 
+/**
+ * @typedef {import('../lib/playlist.js').Clip} Clip
+ * @typedef {{ clips: Clip[], index: number, prev: number | null, transient: boolean }} Run
+ * @typedef {{ clips: Clip[], run: Run | null }} PlaylistState
+ */
+
 const KEY = 'mvd.playlist.v1';
 
+/** @returns {Clip[]} */
 function load() {
     try {
         const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
-        if (Array.isArray(saved)) return saved.filter((c) => c && c.to > c.from && c.demo?.key);
+        if (Array.isArray(saved)) return saved.filter((/** @type {any} */ c) => c && c.to > c.from && c.demo?.key);
     } catch { /* storage blocked or corrupt: start empty */ }
     return [];
 }
 
-export const playlist = store({ clips: load(), run: null });
+export const playlist = store(/** @type {PlaylistState} */ ({ clips: load(), run: null }));
 
+/** @param {Clip[]} clips */
 function save(clips) {
     try {
         localStorage.setItem(KEY, JSON.stringify(clips));
@@ -26,6 +34,7 @@ function save(clips) {
 }
 
 // update(fn) applies fn to a copy-on-write state and persists the clips.
+/** @param {(s: PlaylistState) => void} fn */
 function update(fn) {
     const s = playlist.get();
     const next = { clips: s.clips, run: s.run };
@@ -36,6 +45,7 @@ function update(fn) {
 
 // A "Play all" run plays the list itself, so it reaches clips added while
 // it plays.
+/** @param {Clip[]} clips */
 export function addClips(clips) {
     if (!clips.length) return;
     update((s) => {
@@ -46,12 +56,20 @@ export function addClips(clips) {
 }
 
 // setLabel edits in place: the list is not re-rendered for a keystroke.
+/**
+ * @param {Clip} clip
+ * @param {string} label
+ */
 export function setLabel(clip, label) {
     clip.label = label;
     save(playlist.get().clips);
 }
 
 // Keep a running playlist pointing at the same clip across edits.
+/**
+ * @param {number} from
+ * @param {number} to
+ */
 export function moveClip(from, to) {
     update((s) => {
         if (to < 0 || to >= s.clips.length || from === to) return;
@@ -60,16 +78,18 @@ export function moveClip(from, to) {
         const [c] = clips.splice(from, 1);
         clips.splice(to, 0, c);
         s.clips = clips;
-        if (playing) s.run = { ...s.run, clips, index: clips.indexOf(playing) };
+        // A clip playing means a run.
+        if (playing) s.run = { .../** @type {Run} */ (s.run), clips, index: clips.indexOf(playing) };
     });
 }
 
+/** @param {number} i */
 export function removeClip(i) {
     update((s) => {
         const playing = s.run && s.run.clips === s.clips ? s.clips[s.run.index] : null;
         const clips = s.clips.filter((_, k) => k !== i);
         s.clips = clips;
-        if (playing) s.run = clips.includes(playing) ? { ...s.run, clips, index: clips.indexOf(playing) } : null;
+        if (playing) s.run = clips.includes(playing) ? { .../** @type {Run} */ (s.run), clips, index: clips.indexOf(playing) } : null;
     });
 }
 
@@ -77,6 +97,7 @@ export function clearClips() {
     update((s) => { s.clips = []; s.run = null; });
 }
 
+/** @param {Run | null} run */
 export function setRun(run) {
     update((s) => { s.run = run; });
 }

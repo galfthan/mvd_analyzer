@@ -17,6 +17,8 @@
     import { FILTER_KEYS, packDropRows, filterOptions, filterRows, countText, rowHtml } from '../../lib/packdrops.js';
     import { makeSortable } from '../../ui/sortable.js';
 
+    /** @typedef {import('../../lib/packdrops.js').FilterKey} FilterKey */
+    /** @type {Array<[FilterKey, string]>} */
     const FILTERS = [
         ['dropplayer', 'Dropper'],
         ['dropteam', 'Drop team'],
@@ -24,16 +26,20 @@
         ['pickteam', 'Pick team'],
         ['status', 'Status'],
     ];
-    const blank = () => Object.fromEntries(FILTER_KEYS.map((k) => [k, []]));
+    const blank = () => /** @type {Record<FilterKey, string[]>} */ (Object.fromEntries(FILTER_KEYS.map((k) => [k, /** @type {string[]} */ ([])])));
 
     let options = $state(blank());
-    let filters = $state(Object.fromEntries(FILTER_KEYS.map((k) => [k, ''])));
+    let filters = $state(/** @type {Record<FilterKey, string>} */ (Object.fromEntries(FILTER_KEYS.map((k) => [k, '']))));
     let count = $state('');
     let empty = $state(false);
+    /** @type {HTMLTableElement | undefined} */
     let table = $state();
+    /** @type {HTMLTableSectionElement | undefined} */
     let tbody = $state();
 
+    /** @type {import('../../lib/packdrops.js').PackDropRow[]} */
     let rows = [];
+    /** @type {import('../../lib/packdrops.js').HubLinkCtx | null} */
     let ctx = null;
     let dirty = true;
     let queued = false;
@@ -72,20 +78,22 @@
         renderRows();
     }
 
+    // Only runs once mounted (build, or a filter's change), so tbody is bound.
     function renderRows() {
-        tbody.replaceChildren();
+        const body = /** @type {HTMLTableSectionElement} */ (tbody);
+        body.replaceChildren();
         const shown = filterRows(rows, filters);
         for (const r of shown) {
             const tr = document.createElement('tr');
             tr.innerHTML = rowHtml(r, ctx);
-            tr.querySelector('.time-link').addEventListener('click', () => clock.seek(r.drop.time));
-            tbody.appendChild(tr);
+            /** @type {HTMLElement} */ (tr.querySelector('.time-link')).addEventListener('click', () => clock.seek(r.drop.time));
+            body.appendChild(tr);
         }
         count = rows.length ? countText(shown.length, rows.length) : '';
     }
 
     onMount(() => {
-        makeSortable(table);
+        makeSortable(/** @type {HTMLTableElement} */ (table));
         const offs = [
             demo.subscribe(invalidate),
             activeTab.subscribe(schedule),

@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // Loc-name handling. normalizeLocationName is THE canonical normalizer for
 // the whole app — the frontend must not grow a second one that drifts from
 // it (loc names are matched against the analyzer's own normalisation, and

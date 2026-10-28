@@ -14,6 +14,7 @@
 
     // PaneForge takes the sizes once; the layout store follows its changes.
     const initial = paneLayout.get();
+    /** @type {Pane | undefined} */
     let column = $state();
 
     // The column's hidden flag and PaneForge's collapsed state move together,
@@ -30,6 +31,7 @@
         }
     });
 
+    /** @param {boolean} hidden */
     function setHidden(hidden) {
         if (paneLayout.get().hidden !== hidden) updateLayout((l) => { l.hidden = hidden; });
     }
@@ -38,18 +40,22 @@
     // shuts the column passes through its minimum on the way, and showing
     // it again should not bring that back. Keyboard steps store at once.
     let dragging = false;
+    /** @type {number[] | null} */
     let lastSizes = null;
 
+    /** @param {number[]} sizes */
     function storeSplit(sizes) {
         const split = Math.round(sizes[1] * 10) / 10;
         if (split >= MIN_SPLIT && split !== paneLayout.get().split) updateLayout((l) => { l.split = split; });
     }
 
+    /** @param {number[]} sizes */
     function layoutChange(sizes) {
         lastSizes = sizes;
         if (!dragging) storeSplit(sizes);
     }
 
+    /** @param {boolean} on */
     function draggingChange(on) {
         dragging = on;
         if (!on && lastSizes) storeSplit(lastSizes);

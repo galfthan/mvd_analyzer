@@ -30,12 +30,25 @@
     const BENCH_HISTORY_KEY = 'mvd-map-bench-history';
     const s = view.state;
 
+    /**
+     * @typedef {import('../../lib/map.js').MapItem & { loc?: string }} Item
+     * @typedef {{ yaw: number, pitch: number, zoomK: number, panX: number, panY: number,
+     *     cx: number, cy: number, zMid: number, time: number, follow: string | null, focus: string | null }} BenchView
+     */
+
+    // Bound at mount, before any handler or subscription runs.
+    /** @type {HTMLCanvasElement} */
     let canvas;
+    /** @type {HTMLDivElement} */
     let panel;
+    /** @type {HTMLDivElement} */
     let legendEl;
+    /** @type {HTMLDivElement} */
     let statusEl;
+    /** @type {HTMLSelectElement} */
     let followSel;
 
+    /** @type {import('../../lib/result.js').Result | null} */
     let result = $state.raw(null);
     let learn = $state(false);
     let rcShown = $state(false);
@@ -44,28 +57,41 @@
     let noData = $state(false);
     let tilted = $state(false);
     let flags = $state({ view: false, vel: false, los: false, pvs: false, fog: false, light: false, occl: false });
+    /** @type {string | null} */
     let pendingBtn = $state(null);
     let trails = $state.raw({ all: false, none: true, some: false });
+    /** @type {Array<{ name: string, color: string, on?: boolean }>} */
     let trailPlayers = $state.raw([]);
+    /** @type {string[]} */
     let followNames = $state.raw([]);
+    /** @type {Item[]} */
     let items = $state.raw([]);
+    /** @type {Array<{ text: string, cls: string, taken: boolean }>} */
     let itemCells = $state.raw([]);
     let entityHtml = $state('');
     let hudShown = $state(false);
     let hudText = $state('');
     let hudOn = $state(false);
     let benchOn = $state(false);
+    /** @type {BenchView | null} */
     let benchSaved = null;
 
+    /** @type {string[]} */
     let colors = [];
+    /** @type {Map<string, HTMLCanvasElement>} */
     let icons = new Map();
     let queued = false;
     let sidebarDirty = true;
     let lastFull = 0;
+    /** @type {Array<Record<string, any>>} MvdMap.lastFrameStats samples */
     let samples = [];
+    /** @type {ReturnType<typeof setInterval> | null} */
     let hudTimer = null;
-    let hudHideTimer = null;
+    /** @type {ReturnType<typeof setTimeout> | undefined} */
+    let hudHideTimer = undefined;
+    /** @type {{ parent: ParentNode | null, next: ChildNode | null } | null} */
     let fsHome = null;
+    /** @type {number | null} */
     let resizeRaf = null;
 
     const shown = () => activeTab.get() === TAB;
@@ -126,6 +152,7 @@
         draw();
     }
 
+    /** @param {string} tab */
     function onTab(tab) {
         if (tab !== TAB) {
             stopHudTimer();
@@ -140,6 +167,7 @@
         setTimeout(reveal, 120);
     }
 
+    /** @param {import('../../state/clock.js').ClockValue} c */
     function onClock({ from }) {
         if (from === 'reset' || !shown()) {
             sidebarDirty = true;
@@ -162,6 +190,7 @@
 
     // ─── A new demo ─────────────────────────────────────────────────────────
 
+    /** @param {{ result: import('../../lib/result.js').Result } | null} d */
     function onData(d) {
         const next = d?.result ?? null;
         if (next !== result) {
@@ -186,7 +215,7 @@
             name, color: colors[s.playerSymbols[name]?.teamIdx ?? 0] || colors[0],
         }));
         followNames = Object.keys(s.fullTrails).sort(byName);
-        items = panelItems(result.items?.items, ITEM_MARKER_STYLES);
+        items = panelItems(d.result.items?.items, ITEM_MARKER_STYLES);
         refreshTrails();
         flushSync();
         followSel.value = s.followPlayer || '';
@@ -197,6 +226,7 @@
 
     // ─── Items ──────────────────────────────────────────────────────────────
 
+    /** @param {number} t */
     function syncItems(t) {
         itemCells = items.map((it) => {
             const st = view.itemStatus(it, t);
@@ -206,6 +236,10 @@
 
     // The swatch mirrors the item's map marker: solid armour squares, black
     // squares outlined in the item's colour for the rest.
+    /**
+     * @param {HTMLElement} node
+     * @param {typeof ITEM_MARKER_STYLES[string]} style
+     */
     function swatch(node, style) {
         node.style.background = style.fill;
         if (style.outline) {
@@ -245,6 +279,10 @@
         redraw();
     }
 
+    /**
+     * @param {string} name
+     * @param {boolean} on
+     */
     function trailOne(name, on) {
         s.enabledPlayers[name] = on;
         if (on) s.trailStartTimes[name] = s.currentTime;
@@ -252,22 +290,29 @@
         redraw();
     }
 
+    /** @param {Event & { currentTarget: HTMLSelectElement }} e */
     function setDuration(e) {
         s.trailDuration = parseInt(e.currentTarget.value, 10);
         redraw();
     }
 
+    /** @param {Event & { currentTarget: HTMLSelectElement }} e */
     function setFollow(e) {
         view.setFollowPlayer(e.currentTarget.value || null);
     }
 
     // ─── Overlays ───────────────────────────────────────────────────────────
 
+    /**
+     * @param {keyof typeof flags} key
+     * @param {() => boolean} apply
+     */
     function toggle(key, apply) {
         flags = { ...flags, [key]: apply() };
         redraw();
     }
 
+    /** @param {'los' | 'pvs'} key */
     async function toggleVis(key) {
         const field = key === 'los' ? 'showLos' : 'showPvs';
         s[field] = !s[field];
@@ -286,6 +331,7 @@
 
     // ─── Learn mode ─────────────────────────────────────────────────────────
 
+    /** @param {boolean} on */
     function onLearn(on) {
         learn = on;
         if (on === s.learnMode) return;
@@ -295,11 +341,12 @@
     }
 
     function buildEntities() {
-        entityHtml = entityRowsHtml(entityRows(s.mapEntities || [], s.entityFilters, (e) => view.entityCategory(e)));
+        entityHtml = entityRowsHtml(entityRows(s.mapEntities || [], s.entityFilters, (/** @type {Record<string, any>} */ e) => view.entityCategory(e)));
     }
 
+    /** @param {Event & { currentTarget: HTMLInputElement }} e */
     function filterChange(e) {
-        s.entityFilters[e.currentTarget.dataset.cat] = e.currentTarget.checked;
+        s.entityFilters[/** @type {string} */ (e.currentTarget.dataset.cat)] = e.currentTarget.checked;
         if (s.learnMode) buildEntities();
         redraw();
     }
@@ -315,7 +362,7 @@
     }
 
     function stopHudTimer() {
-        clearInterval(hudTimer);
+        clearInterval(hudTimer ?? undefined);
         hudTimer = null;
     }
 
@@ -335,6 +382,7 @@
         }
     }
 
+    /** @returns {Array<Record<string, any>>} */
     function loadBenchHistory() {
         try {
             const list = JSON.parse(localStorage.getItem(BENCH_HISTORY_KEY) || '[]');
@@ -344,6 +392,7 @@
         }
     }
 
+    /** @param {Array<Record<string, any>>} list */
     function saveBenchHistory(list) {
         try {
             localStorage.setItem(BENCH_HISTORY_KEY, JSON.stringify(list.slice(-30)));
@@ -358,6 +407,7 @@
         if (benchOn || !result) return;
         if (playback.get().playing) stopPlayback();
         const cam = view.camera;
+        /** @type {BenchView} */
         const saved = {
             yaw: cam.yaw, pitch: cam.pitch, zoomK: cam.zoomK, panX: cam.panX, panY: cam.panY,
             cx: cam.cx, cy: cam.cy, zMid: cam.zMid,
@@ -377,6 +427,7 @@
         clearTimeout(hudHideTimer);
         hudShown = true;
         hudText = 'benchmarking… (18 s)';
+        /** @type {Array<Record<string, any>>} */
         const runSamples = [];
         const start = performance.now();
         let lastTick = start;
@@ -408,6 +459,10 @@
         requestAnimationFrame(step);
     }
 
+    /**
+     * @param {BenchView} saved
+     * @param {Array<Record<string, any>>} runSamples
+     */
     function finishBench(saved, runSamples) {
         const summary = summarizeBench(runSamples);
         const noFrames = summary.frames === 0;
@@ -416,6 +471,7 @@
             px: canvas ? `${canvas.width}x${canvas.height}` : '?',
             date: new Date().toISOString(),
         }, summary);
+        /** @type {Array<Record<string, any>>} */
         let prior = [];
         if (!noFrames) {
             // No GL frames presented (context lost / no geometry): not a run.
@@ -442,6 +498,7 @@
     }
 
     // The camera, focus, follow and time the run started from.
+    /** @param {BenchView} saved */
     function restoreBenchView(saved) {
         const cam = view.camera;
         Object.assign(cam, { cx: saved.cx, cy: saved.cy, zMid: saved.zMid, zoomK: saved.zoomK, panX: saved.panX, panY: saved.panY });
@@ -456,11 +513,13 @@
     // its load already reset the view, and the old demo's camera and time
     // must not land on it. The HUD goes with it unless the FPS overlay
     // owns it.
+    /** @param {boolean} restore */
     function abortBench(restore) {
         if (!benchOn) return;
         benchOn = false;
         view.perfCapture = hudOn;
-        if (restore) restoreBenchView(benchSaved);
+        // runBench sets benchSaved as it sets benchOn.
+        if (restore) restoreBenchView(/** @type {BenchView} */ (benchSaved));
         if (!hudOn) hudShown = false;
     }
 
@@ -509,11 +568,13 @@
     // the cursor) are MvdMap's; this turns browser events into canvas-space
     // CSS pixels. Move and up are on window so a drag tracks off the canvas.
     // Nothing is wired before the first demo loads.
+    /** @param {MouseEvent} ev */
     function point(ev) {
         const r = canvas.getBoundingClientRect();
         return { x: ev.clientX - r.left, y: ev.clientY - r.top };
     }
 
+    /** @param {MouseEvent} ev */
     function down(ev) {
         if (!s.initialized || (ev.button !== 0 && ev.button !== 2)) return;
         const p = point(ev);
@@ -521,18 +582,21 @@
         ev.preventDefault();
     }
 
+    /** @param {MouseEvent} ev */
     function winMove(ev) {
         if (!s.initialized) return;
         const p = point(ev);
         view.pointerMove(p.x, p.y);
     }
 
+    /** @param {MouseEvent} ev */
     function winUp(ev) {
         if (!s.initialized) return;
         const p = point(ev);
         view.pointerUp(p.x, p.y);
     }
 
+    /** @param {WheelEvent} ev */
     function wheel(ev) {
         if (!s.initialized) return;
         ev.preventDefault();
@@ -540,6 +604,7 @@
         view.wheelZoom(p.x, p.y, ev.deltaY);
     }
 
+    /** @param {MouseEvent} ev */
     function dblclick(ev) {
         if (!s.initialized) return;
         ev.preventDefault();
@@ -548,6 +613,7 @@
 
     // Escape clears a region focus (and nothing else, so it does not fight
     // leaving fullscreen).
+    /** @param {KeyboardEvent} ev */
     function keydown(ev) {
         if (ev.key === 'Escape' && s.focusGroupName) view.setFocusGroup(null);
     }

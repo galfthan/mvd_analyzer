@@ -20,10 +20,29 @@ import { escapeHtml } from './html.js';
 import { formatDuration } from './result.js';
 import { hubReplayUrl } from './hub-url.js';
 
+/**
+ * A result.backpacks row (Result JSON); `time` is ms there and seconds on
+ * the copy a PackDropRow carries.
+ * @typedef {{ time: number, weapon: string, player?: string, team?: string, entNum?: number, source?: string, fate?: string, picker?: string, pickerTeam?: string, pickupTime?: number, [field: string]: any }} PackDrop
+ * The pickup side of a drop: a backpack-sourced result.weaponPickups row
+ * (times in seconds) or packDropPickup's adaptation of a reconstructed drop.
+ * @typedef {{ player?: string, team?: string, time: number, nextDeathTime: number, kills: number | null, hadBefore?: boolean, [field: string]: any }} PackPickup
+ * @typedef {{ label: string, cls: string }} PackDropStatus
+ * @typedef {{ drop: PackDrop, pickup: PackPickup | null, status: PackDropStatus }} PackDropRow
+ * @typedef {'dropplayer' | 'dropteam' | 'pickplayer' | 'pickteam' | 'status'} FilterKey
+ * @typedef {Partial<Record<FilterKey, string>>} PackDropFilter
+ * Hub-link context: the game id, name → userid map and demo offset (s).
+ * @typedef {{ gameId?: number | null, userIDs?: Record<string, number>, demoOffset: number }} HubLinkCtx
+ */
+
 // packDropPickup adapts a reconstructed drop's own fate fields to the pickup
 // row shape. `kills` is null rather than 0: kill credit needs the `//ktx bp`
 // hint's HadBefore, which no reconstructed row has, and printing 0 would
 // claim the picker scored nothing with it.
+/**
+ * @param {PackDrop} drop
+ * @returns {PackPickup | null}
+ */
 export function packDropPickup(drop) {
     if (drop.source !== 'reconstructed' || drop.fate !== 'picked' || !drop.picker) return null;
     return {
@@ -35,6 +54,11 @@ export function packDropPickup(drop) {
     };
 }
 
+/**
+ * @param {PackDrop} drop
+ * @param {PackPickup | null} pickup
+ * @returns {PackDropStatus}
+ */
 export function packDropStatusFor(drop, pickup) {
     // A RECONSTRUCTED drop's fate comes from the entity track, not from a
     // pickup row. Three outcomes, and `unobserved` is deliberately not
@@ -72,14 +96,19 @@ export function packDropStatusFor(drop, pickup) {
 // same time space — index against raw ms `dropTime` (an exact int)
 // before converting. After the join, convert ms→s so the hub links /
 // formatDuration further down (which expect seconds) are unchanged.
+/**
+ * @param {import('./result.js').Result | null | undefined} result
+ * @returns {PackDropRow[]}
+ */
 export function packDropRows(result) {
+    /** @type {Record<string, any>} */
     const pickupByKey = {};
     for (const p of (result?.weaponPickups || [])) {
         if (p.source === 'backpack' && p.backpackEnt) {
             pickupByKey[`${p.backpackEnt}@${p.dropTime}`] = p;
         }
     }
-    return (result?.backpacks || []).map(rawDrop => {
+    return (result?.backpacks || []).map((/** @type {PackDrop} */ rawDrop) => {
         const rawPickup = pickupByKey[`${rawDrop.entNum}@${rawDrop.time}`] || null;
         // Convert ms→s on the per-row copy so downstream renderers see seconds.
         const drop = { ...rawDrop, time: rawDrop.time * 0.001 };
@@ -93,12 +122,17 @@ export function packDropRows(result) {
     });
 }
 
+/** @type {FilterKey[]} */
 export const FILTER_KEYS = ['dropplayer', 'dropteam', 'pickplayer', 'pickteam', 'status'];
 
 // The values each filter select offers (after its "All"), sorted
 // case-insensitively.
+/**
+ * @param {PackDropRow[]} rows
+ * @returns {Record<FilterKey, string[]>}
+ */
 export function filterOptions(rows) {
-    const sets = Object.fromEntries(FILTER_KEYS.map(k => [k, new Set()]));
+    const sets = /** @type {Record<FilterKey, Set<string>>} */ (Object.fromEntries(FILTER_KEYS.map(k => [k, new Set()])));
     for (const r of rows) {
         if (r.drop.player) sets.dropplayer.add(r.drop.player);
         if (r.drop.team) sets.dropteam.add(r.drop.team);
@@ -106,12 +140,18 @@ export function filterOptions(rows) {
         if (r.pickup?.team) sets.pickteam.add(r.pickup.team);
         sets.status.add(r.status.label);
     }
+    /** @type {(a: string, b: string) => number} */
     const cmp = (a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' });
-    return Object.fromEntries(FILTER_KEYS.map(k => [k, [...sets[k]].sort(cmp)]));
+    return /** @type {Record<FilterKey, string[]>} */ (Object.fromEntries(FILTER_KEYS.map(k => [k, [...sets[k]].sort(cmp)])));
 }
 
 // The filter row narrows rows by dropper, dropper team, picker, picker team
 // or status label; '' is "All".
+/**
+ * @param {PackDropRow[]} rows
+ * @param {PackDropFilter} f
+ * @returns {PackDropRow[]}
+ */
 export function filterRows(rows, f) {
     return rows.filter(r =>
         !(f.dropplayer && r.drop.player !== f.dropplayer)
@@ -121,6 +161,10 @@ export function filterRows(rows, f) {
         && !(f.status && r.status.label !== f.status));
 }
 
+/**
+ * @param {number} shown
+ * @param {number} total
+ */
 export function countText(shown, total) {
     return shown === total ? `${total} drops` : `${shown} of ${total} drops`;
 }
@@ -128,9 +172,15 @@ export function countText(shown, total) {
 // hubAnchor: a hub replay link for match seconds [from, to] tracking
 // `trackName`, or '-' when the demo is not a hub game or the player has no
 // userid. `ctx` is { gameId, userIDs, demoOffset } (seconds).
+/**
+ * @param {HubLinkCtx | null | undefined} ctx
+ * @param {number} from
+ * @param {number} to
+ * @param {string | undefined} trackName
+ */
 export function hubAnchor(ctx, from, to, trackName) {
     if (!ctx?.gameId) return '-';
-    const trackId = ctx.userIDs?.[trackName];
+    const trackId = ctx.userIDs?.[/** @type {string} */ (trackName)];
     if (!trackId) return '-';
     const f = Math.max(0, Math.floor(from + ctx.demoOffset));
     const t = Math.floor(to + ctx.demoOffset);
@@ -141,6 +191,10 @@ export function hubAnchor(ctx, from, to, trackName) {
 // The cells of one row (a <tr>'s innerHTML). The drop link starts 10 s
 // before the drop; the run link from 3 s before the pickup to the picker's
 // next death (15 s when there is none).
+/**
+ * @param {PackDropRow} r
+ * @param {HubLinkCtx | null | undefined} ctx
+ */
 export function rowHtml(r, ctx) {
     const { drop, pickup } = r;
     const dropHub = hubAnchor(ctx, drop.time - 10, drop.time + 2, drop.player);

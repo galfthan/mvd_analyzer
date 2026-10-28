@@ -7,7 +7,17 @@ import { store } from '../state/store.js';
 const KEY = 'mvd.playerPanes.v2';
 const OLD_KEY = 'mvd.playerPanes.v1';   // an order array, the PoC's format
 
+/**
+ * @typedef {object} PaneLayout
+ * @property {string[]} order                 open pane ids, top to bottom
+ * @property {Record<string, boolean>} collapsed
+ * @property {Record<string, number>} heights  pane id → body height in px
+ * @property {number} split                   the column's % of the width
+ * @property {boolean} hidden
+ */
+
 export const PANE_IDS = ['map', 'stack', 'moments', 'feed'];
+/** @type {PaneLayout} */
 const DEFAULT = {
     order: ['map', 'stack', 'moments', 'feed'],
     collapsed: {},
@@ -18,10 +28,15 @@ const DEFAULT = {
 export const MIN_SPLIT = 18;
 export const MAX_SPLIT = 60;
 
+/**
+ * @param {unknown} v  a stored layout, untrusted
+ * @returns {PaneLayout}
+ */
 function sanitize(v) {
+    /** @type {PaneLayout & { width?: unknown }} */
     const out = { ...DEFAULT, ...(v && typeof v === 'object' ? v : {}) };
     const order = Array.isArray(out.order) ? out.order : DEFAULT.order;
-    out.order = order.filter((id, i) => PANE_IDS.includes(id) && order.indexOf(id) === i);
+    out.order = order.filter((/** @type {string} */ id, /** @type {number} */ i) => PANE_IDS.includes(id) && order.indexOf(id) === i);
     out.collapsed = { ...(out.collapsed || {}) };
     out.heights = { ...(out.heights || {}) };
     out.split = Math.min(MAX_SPLIT, Math.max(MIN_SPLIT, Number(out.split) || DEFAULT.split));
@@ -42,6 +57,7 @@ function load() {
 
 export const paneLayout = store(load());
 
+/** @param {(layout: PaneLayout) => void} fn */
 export function updateLayout(fn) {
     const next = sanitize(structuredClone(paneLayout.get()));
     fn(next);
@@ -54,6 +70,10 @@ export function updateLayout(fn) {
 
 // movePane: the dragged pane takes the target's slot, so dropping on the
 // pane below moves it down.
+/**
+ * @param {string} id
+ * @param {number} toIndex
+ */
 export function movePane(id, toIndex) {
     updateLayout((l) => {
         const from = l.order.indexOf(id);

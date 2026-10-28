@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // Colour helpers used by the renderer.
 //
 // hexToRgb is deliberately a private copy rather than something imported from

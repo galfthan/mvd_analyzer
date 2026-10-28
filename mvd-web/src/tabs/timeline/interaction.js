@@ -12,8 +12,19 @@
 // coalesced to one per animation frame: a raw mousemove stream would redraw
 // every graph dozens of times a second.
 
+/**
+ * @typedef {object} TimelineCtl
+ * @property {() => [number, number]} range
+ * @property {(start: number, end: number) => void} setRange
+ * @property {() => void} reset
+ * @property {() => number} time
+ * @property {(t: number) => void} seek
+ */
+
+/** @param {TimelineCtl} ctl */
 export function createInteraction(ctl) {
-    const pan = { canvas: null, lastX: 0, pendingX: 0, rafId: 0 };
+    const pan = { canvas: /** @type {HTMLCanvasElement | null} */ (null), lastX: 0, pendingX: 0, rafId: 0 };
+    /** @type {HTMLElement | null} */
     let scrubEl = null;
 
     // Apply the pan accumulated since the last frame; from the rAF that
@@ -39,6 +50,7 @@ export function createInteraction(ctl) {
         if (applied !== 0) ctl.seek(ctl.time() + applied);
     }
 
+    /** @param {MouseEvent} e */
     function onMove(e) {
         if (pan.canvas) {
             pan.pendingX = e.clientX;
@@ -81,13 +93,16 @@ export function createInteraction(ctl) {
 
     // panZoom: Ctrl/Cmd+wheel zooms about the cursor (a plain wheel scrolls
     // the page), a left drag pans, a double click resets to the whole match.
+    /** @param {HTMLCanvasElement} canvas */
     function panZoom(canvas) {
+        /** @param {number} clientX */
         const timeAt = (clientX) => {
             const rect = canvas.getBoundingClientRect();
             if (rect.width <= 0) return null;
             const [start, end] = ctl.range();
             return start + ((clientX - rect.left) / rect.width) * (end - start);
         };
+        /** @param {WheelEvent} e */
         const wheel = (e) => {
             if (!e.ctrlKey && !e.metaKey) return;
             e.preventDefault(); // no browser pinch-zoom
@@ -98,6 +113,7 @@ export function createInteraction(ctl) {
             const [start, end] = ctl.range();
             ctl.setRange(centerT - (centerT - start) * factor, centerT + (end - centerT) * factor);
         };
+        /** @param {MouseEvent} e */
         const down = (e) => {
             if (e.button !== 0) return;
             pan.canvas = canvas;
@@ -123,7 +139,9 @@ export function createInteraction(ctl) {
 
     // scrub: grabbing a current-time line sets the time. Its parent holds
     // the canvas at full width and so shares the canvas's time → x mapping.
+    /** @param {HTMLElement} indicator */
     function scrub(indicator) {
+        /** @param {MouseEvent} e */
         const down = (e) => {
             if (e.button !== 0) return;
             scrubEl = indicator.parentElement;
@@ -142,12 +160,18 @@ export function createInteraction(ctl) {
 // canvas's positioned parent; on every mousemove `hitTest(mx, my)` (canvas
 // CSS px) picks what is under the cursor and `html(hit)` fills the tip,
 // placed by the cursor and kept inside the wrapper's right edge.
+/**
+ * @template H
+ * @param {HTMLCanvasElement} canvas
+ * @param {{ hitTest: (mx: number, my: number) => H | null | undefined, html: (hit: H) => string }} opts
+ */
 export function tooltip(canvas, { hitTest, html }) {
-    const wrapper = canvas.parentElement;
+    const wrapper = /** @type {HTMLElement} */ (canvas.parentElement);
     const tip = document.createElement('div');
     tip.className = 'canvas-tooltip';
     tip.style.display = 'none';
     wrapper.appendChild(tip);
+    /** @param {MouseEvent} e */
     const move = (e) => {
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left;

@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // Texture atlas for the GL sprite pass: text labels and letter glyphs baked
 // through an offscreen 2D canvas used purely as a rasteriser (the ground
 // rule for the pure-GL renderer — 2D contexts may bake textures, never draw

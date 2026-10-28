@@ -10,21 +10,30 @@
     import { uploadFile, loadFromHub, loadGameFromSearch } from '../../app/load.js';
     import { searchForm, searchStatus, searchBusy, searchResults, searchPaging, runSearch } from './search-model.js';
 
+    /** @type {HTMLInputElement} */
     let fileInput;
     let dragover = $state(false);
 
+    /** @param {Event} e */
     function onFile(e) {
-        if (e.target.files.length > 0) uploadFile(e.target.files[0]);
+        // A file input's `files` is never null.
+        const files = /** @type {FileList} */ (/** @type {HTMLInputElement} */ (e.target).files);
+        if (files.length > 0) uploadFile(files[0]);
     }
+    /** @param {DragEvent} e */
     function onDragOver(e) {
         e.preventDefault();
         dragover = true;
     }
+    /** @param {DragEvent} e */
     function onDrop(e) {
         e.preventDefault();
         dragover = false;
-        if (e.dataTransfer.files.length > 0) uploadFile(e.dataTransfer.files[0]);
+        // A drop event always carries its dataTransfer.
+        const dt = /** @type {DataTransfer} */ (e.dataTransfer);
+        if (dt.files.length > 0) uploadFile(dt.files[0]);
     }
+    /** @param {SubmitEvent} e */
     function onSubmit(e) {
         e.preventDefault();
         runSearch();

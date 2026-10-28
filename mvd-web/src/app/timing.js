@@ -4,7 +4,20 @@
 // network → WASM → render and flushed by finishLoadTiming(). Also stashed
 // on window.__mvdTimings.
 
-export const mvdTiming = { wasmLoadMs: null };
+/**
+ * @typedef {import('../data/wasm-source.js').LoadTimings} LoadTimings
+ * @typedef {{ stage: string, ms: number }} RenderTiming
+ * @typedef {object} LoadTimingSummary  the last load's breakdown (window.__mvdTimings)
+ * @property {number | null} wasmLoadMs
+ * @property {LoadTimings['net']} network
+ * @property {any} worker               the worker's own timings, as it sent them
+ * @property {number} parseMs
+ * @property {RenderTiming[]} render
+ * @property {number} downloadToUiMs
+ */
+
+export const mvdTiming = { wasmLoadMs: /** @type {number | null} */ (null) };
+/** @type {{ t0: number, net: LoadTimings['net'], render: RenderTiming[], worker: any, parseMs: number } | null} */
 let loadTiming = null;
 
 export function startLoadTiming() {
@@ -12,6 +25,7 @@ export function startLoadTiming() {
 }
 
 // recordLoadTimings copies a DemoHandle's network / worker / parse timings in.
+/** @param {LoadTimings} timings */
 export function recordLoadTimings(timings) {
     if (!loadTiming) return;
     Object.assign(loadTiming.net, timings.net);
@@ -19,6 +33,12 @@ export function recordLoadTimings(timings) {
     loadTiming.parseMs = timings.parseMs;
 }
 
+/**
+ * @template R
+ * @param {string} name
+ * @param {() => R} fn
+ * @returns {R}
+ */
 export function timeRender(name, fn) {
     if (!loadTiming) return fn();
     const t = performance.now();
@@ -34,6 +54,7 @@ export function finishLoadTiming() {
     const lt = loadTiming;
     loadTiming = null; // close the window before any async render fires
     const total = performance.now() - lt.t0;
+    /** @type {LoadTimingSummary} */
     const summary = {
         wasmLoadMs: mvdTiming.wasmLoadMs,
         network: lt.net,
@@ -51,14 +72,14 @@ export function finishLoadTiming() {
         console.log('network (ms):', lt.net);
         if (lt.worker) {
             const w = lt.worker;
-            const locMs = (w.locFetch || []).reduce((s, f) => s + f.ms, 0);
-            const bspMs = (w.bspFetch || []).reduce((s, f) => s + f.ms, 0);
+            const locMs = (w.locFetch || []).reduce(/** @param {number} s @param {{ ms: number }} f */ (s, f) => s + f.ms, 0);
+            const bspMs = (w.bspFetch || []).reduce(/** @param {number} s @param {{ ms: number }} f */ (s, f) => s + f.ms, 0);
             console.log(
                 `WASM analyze: ${w.wasmAnalyzeMs.toFixed(1)} ms ` +
                 `(incl. loc fetch ${locMs.toFixed(1)} ms, bsp fetch ${bspMs.toFixed(1)} ms — ` +
                 `subtract from finalize:timelineAnalysis for pure loc compute)`
             );
-            console.table((w.goPhases || []).map(p => ({ phase: p.name, ms: +p.ms.toFixed(2) })));
+            console.table((w.goPhases || []).map(/** @param {{ name: string, ms: number }} p */ p => ({ phase: p.name, ms: +p.ms.toFixed(2) })));
         }
         console.log(`result JSON.parse (main thread): ${lt.parseMs.toFixed(1)} ms`);
         console.table(lt.render);

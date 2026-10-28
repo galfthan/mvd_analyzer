@@ -290,7 +290,11 @@ Rough size of what F moves (current line counts): Summary + tables
 
 - `node --test` for the data layer (against a fake source and the golden
   Result in `mvd-analytics/testdata/golden/`), stores and `playlist.js`.
-- `svelte-check` in `make test`.
+- `svelte-check` in `make test`. As built it type-checks the JS too
+  (`checkJs` in `mvd-web/jsconfig.json`, JSDoc types, default `strict`),
+  not only the Svelte compiler's errors; a file that is not worth typing
+  is exempted with `// @ts-nocheck` and a reason (mvd-web/README.md
+  "Tests").
 - Headless Playwright (the PoC setup) as a smoke test per tab: load hub
   game 212260 and a local file, open each tab, no console errors, before/after
   screenshots compared with `mvd-web/test/compare-shots.sh`.

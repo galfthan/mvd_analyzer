@@ -36,8 +36,32 @@ import { escapeHtml } from './html.js';
 import { heatColorRGB } from './heat-color.js';
 import { metricWeightsOf } from './locgraph.js';
 
+/**
+ * @typedef {import('./result.js').Result} Result
+ * @typedef {{ i: number, p: number | null }} HeatCell  i: 0..1 intensity, p: % (null = absent)
+ * @typedef {{ name: string, cells: HeatCell[], secs?: number[] }} HeatRow
+ * @typedef {object} HeatColumn
+ * @property {string} label       header text
+ * @property {string} full        header title
+ * @property {string} team
+ * @property {number} teamIdx     canonical colour index; < 0 = no underline
+ * @property {'team' | 'player'} [kind]
+ * @property {string[]} [members]
+ * @property {number} [total]
+ * @property {string} [key]       region-control state key
+ * @property {boolean} [noHeat]
+ * @typedef {HeatColumn & { kind: 'team' | 'player', members: string[], total: number }} LocColumn
+ * @typedef {object} HeatMatrix
+ * @property {HeatRow[]} rows
+ * @property {HeatColumn[]} columns
+ * @property {number} teamCols    separator before this column (0 = none)
+ * @property {(col: HeatColumn, row: HeatRow, ci: number) => string} [cellTitle]
+ * @property {(cell: HeatCell) => string} [cellText]
+ */
+
 // Readable text color over an [r,g,b] fill — dark ink on light cells, white
 // on dark ones (Rec. 601 luma).
+/** @param {number[]} rgb */
 export function contrastInk(rgb) {
     const lum = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
     return lum > 150 ? '#10131f' : '#f0f0f0';
@@ -46,6 +70,11 @@ export function contrastInk(rgb) {
 // Canonical team order: team colours are indexed by position in the
 // canonical (frag-sorted) order, so the header underlines match the rest of
 // the app. Fall back to demoInfo order before that is set.
+/**
+ * @param {Result} result
+ * @param {string[] | null | undefined} order
+ * @returns {string[]}
+ */
 export function canonicalTeams(result, order) {
     if (order && order.length) return [...order];
     const dt = result.demoInfo && result.demoInfo.teams;
@@ -57,6 +86,10 @@ export function canonicalTeams(result, order) {
 // the client-side `cl_fakename` cvar, which is only ever injected as a text
 // prefix on say_team messages — never carried in userinfo — so there is no
 // per-player short name in the demo stream to read.)
+/**
+ * @param {string | null | undefined} name
+ * @param {number} [n]
+ */
 export function shortName(name, n = 9) {
     name = String(name || '');
     return name.length > n ? name.slice(0, n - 1) + '…' : name;
@@ -68,11 +101,21 @@ export function shortName(name, n = 9) {
 // its own busiest loc (sqrt-curved to lift small shares). Returns null when
 // there's nothing to show (e.g. nobody ever held a quad). `teamOrder` is the
 // canonical order; `duel` drops the team columns.
+/**
+ * @param {Result | null | undefined} result
+ * @param {string} metric
+ * @param {string[] | null | undefined} teamOrder
+ * @param {boolean} duel
+ * @returns {HeatMatrix | null}
+ */
 export function buildLocHeatmap(result, metric, teamOrder, duel) {
+    /** @type {import('./locgraph.js').LocGraph | undefined} */
     const graph = result && result.locGraph;
     if (!graph || !graph.locs || graph.locs.length === 0) return null;
-    const players = (result.demoInfo && result.demoInfo.players) || [];
+    /** @type {Array<{ name: string, team?: string }>} */
+    const players = (/** @type {Result} */ (result).demoInfo && /** @type {Result} */ (result).demoInfo.players) || [];
     const teams = canonicalTeams(result, teamOrder);
+    /** @param {string} team */
     const teamIdxOf = (team) => {
         const i = teams.indexOf(team);
         return i >= 0 ? i : teams.length; // unknown teams share the trailing color
@@ -80,8 +123,10 @@ export function buildLocHeatmap(result, metric, teamOrder, duel) {
 
     // Weights for the chosen metric (node itself for 'all', the armed/quad
     // sub-object otherwise) drive every time read below.
+    /** @param {import('./locgraph.js').LocNode} n */
     const W = (n) => metricWeightsOf(n, metric);
 
+    /** @type {Map<string, number>} */
     const playerTotal = new Map();
     for (const node of graph.locs) {
         for (const [p, t] of Object.entries(W(node).byPlayer || {})) {
@@ -90,7 +135,7 @@ export function buildLocHeatmap(result, metric, teamOrder, duel) {
     }
 
     const baseLocs = graph.locs
-        .filter(n => W(n).byPlayer && Object.keys(W(n).byPlayer).length > 0)
+        .filter(n => W(n).byPlayer && Object.keys(/** @type {Record<string, number>} */ (W(n).byPlayer)).length > 0)
         .slice()
         .sort((a, b) => (W(b).total || 0) - (W(a).total || 0));
     if (baseLocs.length === 0) return null;
@@ -100,6 +145,7 @@ export function buildLocHeatmap(result, metric, teamOrder, duel) {
     // Columns carry `members` so a cell value is uniformly sum(byPlayer[m]);
     // `kind` ('team' | 'player') drives the title wording. `label` is the short
     // header text, `full` the untruncated name kept on the header title.
+    /** @type {LocColumn[]} */
     const columns = [];
     if (hasTeams) {
         for (const t of teams) {
@@ -112,6 +158,7 @@ export function buildLocHeatmap(result, metric, teamOrder, duel) {
     }
     const teamCols = columns.length;
 
+    /** @type {Map<string, string>} */
     const teamOfPlayer = new Map();
     for (const p of players) if (p.name) teamOfPlayer.set(p.name, p.team || '');
     const seen = new Set();
@@ -134,6 +181,7 @@ export function buildLocHeatmap(result, metric, teamOrder, duel) {
     if (columns.length === 0) return null;
 
     // Per-column max share → full intensity at each column's busiest loc.
+    /** @type {(n: import('./locgraph.js').LocNode, c: LocColumn) => number} */
     const secOf = (n, c) => { const bp = W(n).byPlayer || {}; return c.members.reduce((s, p) => s + (bp[p] || 0), 0); };
     const colMaxFrac = columns.map(c => {
         let m = 0;
@@ -161,8 +209,8 @@ export function buildLocHeatmap(result, metric, teamOrder, duel) {
         rows, columns, teamCols,
         cellTitle: (col, row, ci) => {
             // row.secs holds int32-ms weights (schema v57); show seconds.
-            const sec = (row.secs[ci] || 0) / 1000;
-            const pct = row.cells[ci].p != null ? row.cells[ci].p : 0;
+            const sec = (/** @type {number[]} */ (row.secs)[ci] || 0) / 1000;
+            const pct = row.cells[ci].p ?? 0;
             const suffix = col.kind === 'team' ? 'of team time' : 'of their time';
             const who = col.full + (col.kind === 'player' && col.team && col.team !== col.full ? ` (${col.team})` : '');
             return `${who} · ${row.name}: ${sec.toFixed(1)}s · ${pct.toFixed(1)}% ${suffix}`;
@@ -177,6 +225,14 @@ export function buildLocHeatmap(result, metric, teamOrder, duel) {
 // `stats` is Go's per-region stats; the team names ride at the parent level
 // of Go's shape, not on each region, so they come in separately, with
 // `sides`, their canonical (colour) indices (lib/regions.js regionSides).
+/**
+ * @param {Array<{ name: string }> | null | undefined} regions
+ * @param {Record<string, Record<string, number>> | null | undefined} stats
+ * @param {string | null | undefined} teamAName
+ * @param {string | null | undefined} teamBName
+ * @param {[number, number]} sides
+ * @returns {HeatMatrix | null}
+ */
 export function buildRegionHeatmap(regions, stats, teamAName, teamBName, sides) {
     if (!regions || !regions.length || !stats) return null;
     // Only the regions Go returned stats for count (a stats object with none
@@ -189,6 +245,7 @@ export function buildRegionHeatmap(regions, stats, teamAName, teamBName, sides) 
     // contested/cont.weak/empty (neutral) | teamB weak/control (side B's).
     // `label` is the header text, `full` the title; the team-named columns
     // carry the team identity.
+    /** @type {HeatColumn[]} */
     const columns = [
         { label: teamA,        full: `${teamA} control`,      key: 'teamAControl',     team: teamA, teamIdx: sides[0] },
         { label: `${teamA} wk`, full: `${teamA} weak control`, key: 'teamAWeakControl', team: teamA, teamIdx: sides[0] },
@@ -199,6 +256,7 @@ export function buildRegionHeatmap(regions, stats, teamAName, teamBName, sides) 
         { label: teamB,        full: `${teamB} control`,      key: 'teamBControl',     team: teamB, teamIdx: sides[1] },
     ];
 
+    /** @type {HeatRow[]} */
     const rows = [];
     for (const region of regions) {
         const s = stats[region.name];
@@ -209,7 +267,7 @@ export function buildRegionHeatmap(regions, stats, teamAName, teamBName, sides) 
         rows.push({
             name: region.name,
             cells: columns.map(c => {
-                const v = s[c.key] || 0;
+                const v = s[/** @type {string} */ (c.key)] || 0;
                 const i = c.noHeat ? 0 : (rowMax > 0 ? v / rowMax : 0);
                 return { i, p: v };
             }),
@@ -227,6 +285,12 @@ export function buildRegionHeatmap(regions, stats, teamAName, teamBName, sides) 
 // Each cell is viridis-shaded by its intensity with the % printed and a
 // data-sort-value, so makeSortable can sort any column. `teamColors` is the
 // canonical colour list (colors[i] belongs to the canonical order[i]).
+/**
+ * @param {HeatMatrix} data
+ * @param {string} firstColLabel
+ * @param {string[]} teamColors
+ * @returns {{ head: string, rows: string[] }}
+ */
 export function heatmapTableHtml(data, firstColLabel, teamColors) {
     const { columns, teamCols } = data;
 

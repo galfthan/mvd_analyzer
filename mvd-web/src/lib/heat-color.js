@@ -6,6 +6,7 @@
 // perceptually uniform and safe for red/green colour-vision deficiency (no
 // red↔green crossover; intensity reads monotonically in greyscale too). Kept
 // in sync with the CSS gradient legend (.heatmap-legend-bar) in styles.css.
+/** @type {Array<[number, [number, number, number]]>} */
 const HEAT_STOPS = [
     [0.00, [ 68,   1,  84]], // deep purple
     [0.25, [ 59,  82, 139]], // blue
@@ -14,6 +15,10 @@ const HEAT_STOPS = [
     [1.00, [253, 231,  37]], // yellow
 ];
 
+/**
+ * @param {number} t
+ * @returns {[number, number, number]}
+ */
 export function heatColorRGB(t) {
     t = Math.max(0, Math.min(1, t));
     for (let i = 1; i < HEAT_STOPS.length; i++) {
@@ -28,5 +33,5 @@ export function heatColorRGB(t) {
             ];
         }
     }
-    return HEAT_STOPS[HEAT_STOPS.length - 1][1].slice();
+    return /** @type {[number, number, number]} */ (HEAT_STOPS[HEAT_STOPS.length - 1][1].slice());
 }

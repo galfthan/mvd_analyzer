@@ -20,6 +20,10 @@ const GEOMETRY_CACHES = ['_floorZCache', '_floorModel', '_floorCanvasKey', '_mov
 // syncMapData returns true when the world changed (geometry or bounds), so
 // the caller refits the view (and takes the world's mid height, `zMid`,
 // from the source camera — map-model.js sets it from the loc z-range).
+/**
+ * @param {Record<string, any>} src  the source MvdMap's state
+ * @param {Record<string, any>} dst  the destination MvdMap's state
+ */
 export function syncMapData(src, dst) {
     const geometryChanged = src.mapGeometry !== dst.mapGeometry || src.locationGroups !== dst.locationGroups;
     const boundsChanged = src.bounds !== dst.bounds;

@@ -129,8 +129,9 @@ belongs in the frontend.
   which palette fills it.
 - **Always run tests.** `make test` (which runs
   `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/...`,
-  then the frontend's `node --test` suites and svelte-check; the wasm
-  build itself is exercised by `make build`)
+  then the frontend's `node --test` suites and svelte-check, which
+  type-checks mvd-web's JS through its JSDoc — see mvd-web/README.md
+  "Tests"; the wasm build itself is exercised by `make build`)
   before every commit, no exceptions for "trivial" changes. If a test you
   don't understand fails, surface it — don't skip it. `make test` also
   gates on `gofmt -l` before running anything; `make fmt` fixes it.

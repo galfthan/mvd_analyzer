@@ -23,11 +23,13 @@ const FRAME_MS = 16;
 
 export const playback = store({ playing: false, speed: 1 });
 
+/** @type {number | null} */
 let raf = null;
 let last = 0;
 
 // playAtSpeed starts playback at `speed`, or changes the speed; pressing the
 // running speed again pauses.
+/** @param {number} speed */
 export function playAtSpeed(speed) {
     const { playing, speed: cur } = playback.get();
     if (playing && cur === speed) {
@@ -41,6 +43,7 @@ export function playAtSpeed(speed) {
     }
 }
 
+/** @param {number} [at] */
 export function stopPlayback(at = clock.t) {
     if (!playback.get().playing) return;
     if (raf) cancelAnimationFrame(raf);

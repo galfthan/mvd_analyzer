@@ -11,6 +11,7 @@
     import FeedPane from './panes/FeedPane.svelte';
     import { paneLayout, updateLayout, PANE_IDS } from './layout.js';
 
+    /** @type {Record<string, { title: string, component: import('svelte').Component }>} */
     const PANES = {
         map: { title: 'Map', component: MapPane },
         stack: { title: 'Health / armor', component: StackPane },
@@ -21,6 +22,7 @@
     let order = $derived($paneLayout.order);
     let closed = $derived(PANE_IDS.filter((id) => !order.includes(id)));
 
+    /** @param {Event & { currentTarget: HTMLSelectElement }} e */
     function add(e) {
         const id = e.currentTarget.value;
         e.currentTarget.value = '';

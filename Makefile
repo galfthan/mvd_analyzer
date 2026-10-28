@@ -162,9 +162,10 @@ test:
 # without demos. -count=1 is the only reliable fix; it costs nothing when
 # the directory really is absent.
 	go test -count=1 -timeout 1800s ./mvd-analytics/corpus/
-# The JS modules are tested with node's built-in runner, and the Svelte
-# components with svelte-check (needs `npm ci` in mvd-web, which `make
-# build` does). Skipped (loudly) where node is absent rather than failing
+# The JS modules are tested with node's built-in runner, and svelte-check
+# type-checks mvd-web/src (JSDoc types, checkJs in jsconfig.json; it exits
+# non-zero on any error, which fails this target). It needs `npm ci` in
+# mvd-web, which `make build` does. Skipped (loudly) where node is absent rather than failing
 # a Go-only checkout. Explicit glob, not a directory arg: `node --test
 # <dir>` is rejected by some node 22 releases.
 	@if command -v node >/dev/null 2>&1; then \

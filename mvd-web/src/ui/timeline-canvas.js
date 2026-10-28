@@ -17,17 +17,33 @@ import {
     PLOT_BG_COLOR, DIVERGING_GRAPH_LAYOUT, RC_ROW_H, RC_AXIS_H, axisTicks, makeScanlineSampler,
 } from '../lib/timeline.js';
 
+/**
+ * @typedef {import('../lib/timeline.js').StackSeg} StackSeg
+ * @typedef {import('../lib/timeline.js').StackPoint} StackPoint
+ * @typedef {HTMLElement | string | null | undefined} CanvasRef  the element or its id; none draws nothing
+ * @typedef {{ canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, Wcss: number, Hcss: number, W: number, H: number, dpr: number }} GraphSetup
+ */
+
+/**
+ * @param {CanvasRef} c
+ * @returns {HTMLCanvasElement | null | undefined}
+ */
 function canvasOf(c) {
-    return typeof c === 'string' ? document.getElementById(c) : c;
+    return /** @type {HTMLCanvasElement | null | undefined} */ (typeof c === 'string' ? document.getElementById(c) : c);
 }
 
 // setupGraphCanvas sizes a canvas for device-pixel drawing (its container's
 // width × cssHeight) and returns its context with both sizes; null without
 // a canvas.
+/**
+ * @param {CanvasRef} c
+ * @param {number} cssHeight
+ * @returns {GraphSetup | null}
+ */
 function setupGraphCanvas(c, cssHeight) {
     const canvas = canvasOf(c);
     if (!canvas || !canvas.getContext) return null;
-    const Wcss = canvas.parentElement.clientWidth;
+    const Wcss = /** @type {HTMLElement} */ (canvas.parentElement).clientWidth;
     const Hcss = cssHeight;
     const dpr = window.devicePixelRatio || 1;
     const W = Math.round(Wcss * dpr);
@@ -36,11 +52,15 @@ function setupGraphCanvas(c, cssHeight) {
     canvas.height = H;
     canvas.style.width = Wcss + 'px';
     canvas.style.height = Hcss + 'px';
-    return { canvas, ctx: canvas.getContext('2d'), Wcss, Hcss, W, H, dpr };
+    return { canvas, ctx: /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d')), Wcss, Hcss, W, H, dpr };
 }
 
 // The x-axis tick marks and time labels under a graph; density keys off the
 // CSS width so it does not change with dpr. Coordinates in device pixels.
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {{ W: number, Wcss: number, dpr: number, graphH: number, startTime: number, endTime: number }} axis
+ */
 function drawXAxisTicks(ctx, { W, Wcss, dpr, graphH, startTime, endTime }) {
     const ticks = axisTicks(startTime, endTime, Wcss, 12);
     if (!ticks.length) return;
@@ -63,6 +83,15 @@ function drawXAxisTicks(ctx, { W, Wcss, dpr, graphH, startTime, endTime }) {
 // pixel row so stacked segments meet on exact rows. `from` is the baseline y
 // (device px), `dir` -1 to stack up and +1 down, `scale` the pixel span that
 // maps to `maxValue`.
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} px
+ * @param {StackSeg[] | undefined} segs
+ * @param {number} from
+ * @param {number} dir
+ * @param {number} scale
+ * @param {number} maxValue
+ */
 function fillStackedColumn(ctx, px, segs, from, dir, scale, maxValue) {
     if (!segs) return;
     let yAcc = from;
@@ -87,6 +116,10 @@ function fillStackedColumn(ctx, px, segs, from, dir, scale, maxValue) {
 //   dropMarks  [{ time, color, isTop }] (optional — the weapon graph's RL / LG
 //              drops), dots in a strip reserved at the top and bottom of the
 //              plot so bars never overlap them.
+/**
+ * @param {CanvasRef} c
+ * @param {{ startTime: number, endTime: number, dataPoints: StackPoint[], maxValue: number, dropMarks?: Array<{ time: number, color: string, isTop: boolean }> }} opts
+ */
 export function renderDivergingGraph(c, { startTime, endTime, dataPoints, maxValue, dropMarks }) {
     const setup = setupGraphCanvas(c, DIVERGING_GRAPH_LAYOUT.H);
     if (!setup) return;
@@ -131,7 +164,7 @@ export function renderDivergingGraph(c, { startTime, endTime, dataPoints, maxVal
         const dotR = 3 * dpr;
         const topY = PAD + DROP_STRIP_H / 2;
         const bottomY = graphH - PAD - DROP_STRIP_H / 2;
-        for (const m of dropMarks) {
+        for (const m of /** @type {NonNullable<typeof dropMarks>} */ (dropMarks)) {
             const x = ((m.time - startTime) / duration) * W;
             if (x < -dotR || x > W + dotR) continue;
             ctx.fillStyle = m.color;
@@ -150,6 +183,10 @@ export function renderDivergingGraph(c, { startTime, endTime, dataPoints, maxVal
 
 // renderMiniStack draws a single-direction stack up from the baseline — the
 // per-player health / armor rows — with no mirror, zero line or axis.
+/**
+ * @param {CanvasRef} c
+ * @param {{ startTime: number, endTime: number, points: StackPoint[], maxValue: number, height?: number }} opts
+ */
 export function renderMiniStack(c, { startTime, endTime, points, maxValue, height }) {
     const setup = setupGraphCanvas(c, height || 44);
     if (!setup) return;
@@ -174,6 +211,10 @@ export function renderMiniStack(c, { startTime, endTime, points, maxValue, heigh
 
 // renderMiniDiverging draws a compact up / down row about a faint centre
 // line — the per-player frags / deaths rows.
+/**
+ * @param {CanvasRef} c
+ * @param {{ startTime: number, endTime: number, points: StackPoint[], maxValue: number, height?: number }} opts
+ */
 export function renderMiniDiverging(c, { startTime, endTime, points, maxValue, height }) {
     const setup = setupGraphCanvas(c, height || 44);
     if (!setup) return;
@@ -212,6 +253,11 @@ export function renderMiniDiverging(c, { startTime, endTime, points, maxValue, h
 // it is measured: the label column is as wide as its names, and a canvas
 // pinned at the width it had beside the previous rows' labels would hold
 // the column narrower than the names (and cut them off).
+/**
+ * @param {CanvasRef} c
+ * @param {HTMLElement | null | undefined} labelsEl
+ * @param {{ startTime: number, endTime: number, rows: Array<{ name: string, spans: Array<{ start: number, end: number, state: string }>, color?: string }>, stateColors: Record<string, string | null | undefined>, dropMarks?: Array<{ row: number, time: number, color: string }>, rowH?: number }} opts
+ */
 export function renderSpansTimeline(c, labelsEl, { startTime, endTime, rows, stateColors, dropMarks, rowH }) {
     const canvas = canvasOf(c);
     if (!labelsEl || !canvas) return;
@@ -230,7 +276,8 @@ export function renderSpansTimeline(c, labelsEl, { startTime, endTime, rows, sta
     }
 
     canvas.style.width = '';
-    const setup = setupGraphCanvas(canvas, rows.length * ROW_H_CSS + RC_AXIS_H);
+    // The canvas exists (checked above), so the setup does too.
+    const setup = /** @type {GraphSetup} */ (setupGraphCanvas(canvas, rows.length * ROW_H_CSS + RC_AXIS_H));
     const { ctx, Wcss, W, dpr } = setup;
     const ROW_H = Math.round(ROW_H_CSS * dpr);
     const ROW_PAD = Math.max(1, Math.round(dpr));

@@ -23,12 +23,15 @@ export function setupPanels() {
     for (const tab of Object.keys(PANEL_TABS)) setupTab(tab);
 }
 
+/** @param {string} tab */
 function setupTab(tab) {
     const tabEl = document.getElementById(`tab-${tab}`);
     if (!tabEl) return;
     const titles = Object.fromEntries(PANEL_TABS[tab]);
+    /** @type {Record<string, HTMLElement>} */
     const els = {};
     for (const [id, title] of PANEL_TABS[tab]) {
+        /** @type {HTMLElement | null} */
         const el = tabEl.querySelector(`:scope > [data-panel="${id}"]`);
         if (!el) continue;
         els[id] = el;
@@ -40,10 +43,14 @@ function setupTab(tab) {
         wireDrop(el, id);
     }
     tabEl.classList.add('panelized');
-    mount(PanelBar, { target: tabEl, anchor: tabEl.firstChild, props: { tab, titles } });
+    mount(PanelBar, { target: tabEl, anchor: tabEl.firstChild ?? undefined, props: { tab, titles } });
 
     // Up / down step over the panels the viewer can see: closed ones and
     // ones hidden for this demo would make a step look like nothing.
+    /**
+     * @param {string} id
+     * @param {number} dir  -1 up, 1 down
+     */
     function step(id, dir) {
         const shown = panelLayouts.get()[tab].order.filter((p) => p === id ||
             (els[p] && !els[p].classList.contains('lp-closed') && getComputedStyle(els[p]).display !== 'none'));
@@ -51,18 +58,24 @@ function setupTab(tab) {
         if (target) movePanel(tab, id, target);
     }
 
+    /**
+     * The drag events' dataTransfer is never null (only a synthetic
+     * DragEvent lacks one).
+     * @param {HTMLElement} el
+     * @param {string} id
+     */
     function wireDrop(el, id) {
         el.addEventListener('dragover', (e) => {
-            if (!e.dataTransfer.types.includes(DRAG_TYPE)) return;
+            if (!(/** @type {DataTransfer} */ (e.dataTransfer)).types.includes(DRAG_TYPE)) return;
             e.preventDefault();
             el.classList.add('lp-drag-over');
         });
         el.addEventListener('dragleave', (e) => {
-            if (!el.contains(e.relatedTarget)) el.classList.remove('lp-drag-over');
+            if (!el.contains(/** @type {Node | null} */ (e.relatedTarget))) el.classList.remove('lp-drag-over');
         });
         el.addEventListener('drop', (e) => {
             el.classList.remove('lp-drag-over');
-            const [fromTab, from] = (e.dataTransfer.getData(DRAG_TYPE) || '').split(':');
+            const [fromTab, from] = ((/** @type {DataTransfer} */ (e.dataTransfer)).getData(DRAG_TYPE) || '').split(':');
             if (fromTab !== tab || !from || from === id) return;
             e.preventDefault();
             movePanel(tab, from, id);
@@ -72,6 +85,7 @@ function setupTab(tab) {
     // Apply the layout. A panel that comes back into view (expanded or
     // reopened) may hold a canvas drawn while it was hidden, at zero width:
     // the tab redraws (reveal.js).
+    /** @type {Set<string> | null} */
     let shown = null;
     panelLayouts.subscribe((all) => {
         const l = all[tab];
@@ -84,7 +98,8 @@ function setupTab(tab) {
             el.classList.toggle('lp-closed', !!l.closed[id]);
             if (!l.collapsed[id] && !l.closed[id]) now.add(id);
         });
-        const revealed = shown && [...now].some((id) => !shown.has(id));
+        const prev = shown;
+        const revealed = prev && [...now].some((id) => !prev.has(id));
         shown = now;
         if (revealed && activeTab.get() === tab) requestAnimationFrame(() => panelRevealed(tab));
     });

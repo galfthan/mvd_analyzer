@@ -24,12 +24,35 @@
 import { escapeHtml } from './html.js';
 import { holdCell, playerStatsRows, playerStatsTeamRows, sortByFragsDesc, teamOrder } from './player-stats.js';
 
+/**
+ * A kind the tables have columns for.
+ * @typedef {{ kind: string, label: string, ktxName: string, hasPack?: boolean, hold?: 'weapons' | 'armor' | 'powerups' }} KindSpec
+ * The Result JSON these tables read: a demoInfo player (KTX's own
+ * counters), a result.items entity and a result.weaponPickups row.
+ * @typedef {{ name: string, team?: string, stats?: { frags?: number }, weapons?: Record<string, any>, items?: Record<string, any>, [field: string]: any }} KtxPlayer
+ * @typedef {{ kind: string, entNum: number, loc?: string, name?: string, phases?: Array<{ takenBy?: string, team?: string }> }} ItemEnt
+ * @typedef {{ weapon: string, player?: string, team?: string, source?: string, hadBefore?: boolean, [field: string]: any }} WeaponPickup
+ *
+ * One column of a pickups table.
+ * @typedef {{ type: 'hold', kindSpec: KindSpec, header: string, headerTitle: string }} HoldCol
+ * @typedef {{ type: 'weap-verify' | 'weap-pack', kindSpec: KindSpec, header: string, headerTitle?: undefined }} WeapCol
+ * @typedef {{ type: 'entity-count', kindSpec: KindSpec, entNum: number, header: string, headerTitle?: undefined }} EntityCol
+ * @typedef {{ type: 'item-verify', kindSpec: KindSpec, entNums: number[], header: string, headerTitle?: undefined }} ItemVerifyCol
+ * @typedef {HoldCol | WeapCol | EntityCol | ItemVerifyCol} PickupCol
+ *
+ * @typedef {ReturnType<typeof computePickupsState>} PickupsState
+ * @typedef {'all' | 'first'} PickupMode
+ * @typedef {{ colorIdx: number, html: string }} PickupsRow
+ * @typedef {{ head: string, rows: PickupsRow[] }} PickupsTable
+ */
+
 // `hold` names the playerStats.hold family a kind's possession seconds live
 // in (result/player_stats.go PlayerStatsHold), keyed by `kind`. Possession is
 // an integral over the player's inventory stream, so it belongs to the KIND,
 // never to the spawn point the item came from — one column per kind no matter
 // how many pads the map has. MH has no entry on purpose: mega health is
 // consumed on pickup, so the section carries no hold stat for it.
+/** @type {KindSpec[]} */
 const PICKUPS_WEAPON_KINDS = [
     { kind: 'rl',  label: 'RL',  ktxName: 'rl',  hasPack: true,  hold: 'weapons' },
     { kind: 'lg',  label: 'LG',  ktxName: 'lg',  hasPack: true,  hold: 'weapons' },
@@ -37,6 +60,7 @@ const PICKUPS_WEAPON_KINDS = [
     { kind: 'sng', label: 'SNG', ktxName: 'sng', hasPack: false, hold: 'weapons' },
 ];
 
+/** @type {KindSpec[]} */
 const PICKUPS_ITEM_KINDS = [
     { kind: 'ra',   label: 'RA',   ktxName: 'ra',         hold: 'armor'    },
     { kind: 'ya',   label: 'YA',   ktxName: 'ya',         hold: 'armor'    },
@@ -47,6 +71,11 @@ const PICKUPS_ITEM_KINDS = [
     { kind: 'ring', label: 'Ring', ktxName: 'r',          hold: 'powerups' },
 ];
 
+/**
+ * @param {KtxPlayer} player
+ * @param {string} ktxName
+ * @returns {Record<string, number>}
+ */
 function pickupsWeaponDetail(player, ktxName) {
     const pk = player.weapons?.[ktxName]?.pickups || {};
     return {
@@ -57,6 +86,11 @@ function pickupsWeaponDetail(player, ktxName) {
     };
 }
 
+/**
+ * @param {Record<string, number> | null} into
+ * @param {Record<string, number> | null} add
+ * @returns {Record<string, number> | null}
+ */
 function pickupsSumDetail(into, add) {
     if (!add) return into;
     if (!into) into = {};
@@ -67,23 +101,32 @@ function pickupsSumDetail(into, add) {
 // computePickupsState gathers everything the two tables read. `canonical`
 // is the teams store's order (src/state/teams.js); the tables' team order
 // falls back to the frag-sorted players' when it names fewer than two.
+/**
+ * @param {import('./result.js').Result} result
+ * @param {string[] | null | undefined} canonical
+ */
 export function computePickupsState(result, canonical) {
+    /** @type {KtxPlayer[]} */
     const players = result.demoInfo?.players || [];
     const order = teamOrder(canonical, sortByFragsDesc(players));
     const playerByName = new Map(players.map(p => [p.name, p]));
 
+    /** @type {ItemEnt[]} */
     const items = result.items?.items || [];
+    /** @type {Map<string, ItemEnt[]>} */
     const weaponEntsByKind = new Map();
+    /** @type {Map<string, ItemEnt[]>} */
     const itemEntsByKind = new Map();
     for (const it of items) {
         if (PICKUPS_WEAPON_KINDS.some(k => k.kind === it.kind)) {
             if (!weaponEntsByKind.has(it.kind)) weaponEntsByKind.set(it.kind, []);
-            weaponEntsByKind.get(it.kind).push(it);
+            /** @type {ItemEnt[]} */ (weaponEntsByKind.get(it.kind)).push(it);
         } else if (PICKUPS_ITEM_KINDS.some(k => k.kind === it.kind)) {
             if (!itemEntsByKind.has(it.kind)) itemEntsByKind.set(it.kind, []);
-            itemEntsByKind.get(it.kind).push(it);
+            /** @type {ItemEnt[]} */ (itemEntsByKind.get(it.kind)).push(it);
         }
     }
+    /** @type {(a: ItemEnt, b: ItemEnt) => number} */
     const sortByLoc = (a, b) => {
         const la = a.loc || ''; const lb = b.loc || '';
         if (la !== lb) return la.localeCompare(lb);
@@ -92,18 +135,20 @@ export function computePickupsState(result, canonical) {
     for (const list of weaponEntsByKind.values()) list.sort(sortByLoc);
     for (const list of itemEntsByKind.values()) list.sort(sortByLoc);
 
+    /** @type {Map<string, Map<number, number>>} */
     const entityCountsByPlayer = new Map(); // name -> Map(entNum -> count)
+    /** @type {Map<string, Map<number, number>>} */
     const entityCountsByTeam = new Map();   // team -> Map(entNum -> count)
     for (const it of items) {
         for (const ph of it.phases || []) {
             const who = ph.takenBy;
             if (!who) continue;
             if (!entityCountsByPlayer.has(who)) entityCountsByPlayer.set(who, new Map());
-            const pm = entityCountsByPlayer.get(who);
+            const pm = /** @type {Map<number, number>} */ (entityCountsByPlayer.get(who));
             pm.set(it.entNum, (pm.get(it.entNum) || 0) + 1);
             const team = ph.team || playerByName.get(who)?.team || '';
             if (!entityCountsByTeam.has(team)) entityCountsByTeam.set(team, new Map());
-            const tm = entityCountsByTeam.get(team);
+            const tm = /** @type {Map<number, number>} */ (entityCountsByTeam.get(team));
             tm.set(it.entNum, (tm.get(it.entNum) || 0) + 1);
         }
     }
@@ -130,7 +175,7 @@ export function computePickupsState(result, canonical) {
         result, players, teamOrder: order, playerByName,
         weaponEntsByKind, itemEntsByKind,
         entityCountsByPlayer, entityCountsByTeam,
-        weaponPickups: result.weaponPickups || [],
+        weaponPickups: /** @type {WeaponPickup[]} */ (result.weaponPickups || []),
         hasKtxWeaponCounters, hasKtxItemCounters,
         psByName, psTeamByName,
     };
@@ -138,6 +183,7 @@ export function computePickupsState(result, canonical) {
 
 // Whether the demo has any weapon / item entity the tables count; neither
 // is the tab's empty state.
+/** @param {PickupsState} state */
 export function hasPickups(state) {
     return {
         weapon: PICKUPS_WEAPON_KINDS.some(k => (state.weaponEntsByKind.get(k.kind) || []).length > 0),
@@ -147,6 +193,11 @@ export function hasPickups(state) {
 
 // The possession column for one kind, appended after that kind's last count
 // column. `s` mirrors the Summary table's possession heading.
+/**
+ * @param {KindSpec} spec
+ * @param {boolean} isWeapon
+ * @returns {HoldCol}
+ */
 function holdCol(spec, isWeapon) {
     const verb = spec.hold === 'weapons' ? 'holding the' : spec.hold === 'armor' ? 'wearing' : 'under';
     const title = `Total seconds ${verb} ${spec.label} — the whole match's possession for this item kind, ` +
@@ -163,13 +214,25 @@ function holdCol(spec, isWeapon) {
 // Possession cell for a pickups row. Team rows read the pre-summed team row
 // from playerStats (never a JS re-aggregation of member shares — see the
 // comment on teamRowsInColourOrder in player-stats.js).
+/**
+ * @param {HoldCol} col
+ * @param {boolean} isTeam
+ * @param {string} key
+ * @param {PickupsState} state
+ */
 function holdCellFor(col, isTeam, key, state) {
     const row = isTeam ? state.psTeamByName.get(key) : state.psByName.get(key);
-    const stat = row?.hold?.[col.kindSpec.hold]?.[col.kindSpec.kind];
+    // Every kind with a hold column names its family.
+    const stat = row?.hold?.[/** @type {string} */ (col.kindSpec.hold)]?.[col.kindSpec.kind];
     return holdCell(stat, row?.window);
 }
 
+/**
+ * @param {PickupsState} state
+ * @returns {PickupCol[]}
+ */
 export function buildWeaponCols(state) {
+    /** @type {PickupCol[]} */
     const cols = [];
     for (const spec of PICKUPS_WEAPON_KINDS) {
         const list = state.weaponEntsByKind.get(spec.kind) || [];
@@ -211,7 +274,12 @@ export function buildWeaponCols(state) {
     return cols;
 }
 
+/**
+ * @param {PickupsState} state
+ * @returns {PickupCol[]}
+ */
 export function buildItemCols(state) {
+    /** @type {PickupCol[]} */
     const cols = [];
     for (const spec of PICKUPS_ITEM_KINDS) {
         const list = state.itemEntsByKind.get(spec.kind) || [];
@@ -241,14 +309,23 @@ export function buildItemCols(state) {
     return cols;
 }
 
+/**
+ * @param {string} html
+ * @param {string} [title]
+ */
 function th(html, title) {
     return title ? `<th title="${escapeHtml(title)}">${html}</th>` : `<th>${html}</th>`;
 }
 
+/** @param {string} html */
 function td(html) {
     return `<td>${html}</td>`;
 }
 
+/**
+ * @param {Map<number, number>} entMap
+ * @param {number} entNum
+ */
 function entityCountCell(entMap, entNum) {
     const n = entMap.get(entNum) || 0;
     return td(n === 0 ? '<span class="muted">0</span>' : String(n));
@@ -259,11 +336,18 @@ function entityCountCell(entMap, entNum) {
 // the demo has no column for it (the tables hide); otherwise each table's
 // header row and body rows as markup, a row carrying the index of its team
 // in the canonical colour order (-1 when it has none).
+/**
+ * @param {PickupsState} state
+ * @param {'weap' | 'item'} kind
+ * @param {PickupMode} mode
+ * @returns {{ team: PickupsTable, player: PickupsTable } | null}
+ */
 export function pickupsSection(state, kind, mode) {
     const cols = kind === 'weap' ? buildWeaponCols(state) : buildItemCols(state);
     if (cols.length === 0) return null;
     const cellFor = kind === 'weap' ? weaponCellFor : itemCellFor;
 
+    /** @param {string} label */
     const header = (label) => th(label) + cols.map(c => th(c.header, c.headerTitle)).join('');
 
     const teamsSorted = [...state.teamOrder.filter(t => t !== '')];
@@ -301,10 +385,20 @@ export function pickupsSection(state, kind, mode) {
     };
 }
 
+/**
+ * @param {PickupCol} col
+ * @param {boolean} isTeam
+ * @param {string} key
+ * @param {Map<number, number>} entMap
+ * @param {KtxPlayer[]} scopedPlayers
+ * @param {PickupsState} state
+ * @param {PickupMode} mode
+ */
 function weaponCellFor(col, isTeam, key, entMap, scopedPlayers, state, mode) {
     const spec = col.kindSpec;
     if (col.type === 'hold') return holdCellFor(col, isTeam, key, state);
     if (col.type === 'entity-count') return entityCountCell(entMap, col.entNum);
+    /** @type {(w: WeaponPickup) => boolean} */
     const matches = isTeam
         ? (w => (w.team || '') === key)
         : (w => w.player === key);
@@ -341,7 +435,9 @@ function weaponCellFor(col, isTeam, key, entMap, scopedPlayers, state, mode) {
                 w.weapon === spec.kind && matches(w) && w.source === 'backpack').length;
         }
     }
-    let primary = 0; let detail = null;
+    /** @type {Record<string, number> | null} */
+    let detail = null;
+    let primary = 0;
     for (const p of scopedPlayers) {
         const pk = p.weapons?.[spec.ktxName]?.pickups || {};
         if (spec.hasPack) {
@@ -354,6 +450,14 @@ function weaponCellFor(col, isTeam, key, entMap, scopedPlayers, state, mode) {
     return verifyCell(ana, primary, detail, state.hasKtxWeaponCounters);
 }
 
+/**
+ * @param {PickupCol} col
+ * @param {boolean} isTeam
+ * @param {string} key
+ * @param {Map<number, number>} entMap
+ * @param {KtxPlayer[]} scopedPlayers
+ * @param {PickupsState} state
+ */
 function itemCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
     const spec = col.kindSpec;
     if (col.type === 'hold') return holdCellFor(col, isTeam, key, state);
@@ -361,7 +465,8 @@ function itemCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
     // item-verify: single counter on the KTX side (`took`) — mode has no
     // effect here (KTX doesn't expose a first-per-life counter for items).
     let ana = 0;
-    for (const ent of col.entNums) ana += (entMap.get(ent) || 0);
+    // An item table's only other column (buildItemCols).
+    for (const ent of /** @type {ItemVerifyCol} */ (col).entNums) ana += (entMap.get(ent) || 0);
     let primary = 0;
     for (const p of scopedPlayers) primary += (p.items?.[spec.ktxName]?.took || 0);
     return verifyCell(ana, primary, null, state.hasKtxItemCounters);
@@ -376,6 +481,12 @@ function itemCellFor(col, isTeam, key, entMap, scopedPlayers, state) {
 // timestamped / per-entity questions). Demos without KTX counters
 // (old / non-KTX servers) fall back to the analytics count, trusted
 // with its imperfections.
+/**
+ * @param {number} ana
+ * @param {number} ktxPrimary
+ * @param {Record<string, number> | null} detail
+ * @param {boolean} hasKtx
+ */
 export function verifyCell(ana, ktxPrimary, detail, hasKtx) {
     const shown = hasKtx ? ktxPrimary : ana;
     if (ana === 0 && ktxPrimary === 0 && (!detail || Object.values(detail).every(v => v === 0))) {

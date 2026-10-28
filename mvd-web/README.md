@@ -130,8 +130,33 @@ says SKIP otherwise):
 
 ```bash
 node --test mvd-map-view/test/*.test.js mvd-fte-player/test/*.test.js mvd-web/test/*.test.js
-cd mvd-web && npm run check     # svelte-check over the components (needs npm ci)
+cd mvd-web && npm run check     # svelte-check: type-checks src/ (needs npm ci)
 ```
+
+svelte-check runs the TypeScript checker over every `.js` and `.svelte`
+file in `src/` (`jsconfig.json`: `checkJs`, with TypeScript's default
+`strict`), so `make test` fails on an undefined identifier, an import of
+a name a module does not export, a wrong argument count, a property that
+a typed object does not have, and a possibly-null value used as if set.
+Types are JSDoc (`@param`, `@returns`, `@typedef`) — the bundle is plain
+JS and Vite strips the comments. A few things to know:
+
+- **The Result is untyped on purpose.** `Result` (src/lib/result.js) is
+  an open record: its shape is owned by RESULT_SCHEMA.md and the golden
+  tests, so a path into it (`result.timelineAnalysis.foo`) is not
+  checked. The rows and models the frontend builds from it are typed.
+- **Globals.** The vendored Cytoscape / fcose globals and the
+  `window.*` debug handles (src/main.js) are declared in
+  `src/globals.d.ts`.
+- **Exempting a file.** Where typing a file would be busywork for little
+  value, its first line is `// @ts-nocheck` (in a `.svelte` file, the
+  first line inside `<script>`) followed by a one-line reason. No file
+  in `src/` is exempt today. Never hide a single error with
+  `@ts-ignore`; fix it, or exempt the file and say why.
+- **Other packages.** `mvd-map-view/` and `mvd-fte-player/` are imported
+  by relative path, so the checker reads them too; they are their own
+  packages and outside this check (`// @ts-nocheck` on their files,
+  JSDoc where an export's inferred type would mislead a caller here).
 
 The node tests (`mvd-web/test/`) cover the DOM-free modules — `src/lib/`,
 `src/state/`, `src/data/`, the playlist runner — with node's built-in

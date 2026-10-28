@@ -15,7 +15,7 @@
     let players = $derived.by(() => {
         const ids = $demo?.result?.timelineAnalysis?.playerUserIDs || {};
         const t = $teams;
-        const idx = (n) => teamIndexOf(t, n, t.perPlayer);
+        const idx = (/** @type {string} */ n) => teamIndexOf(t, n, t.perPlayer);
         return Object.keys(ids)
             .sort((a, b) => (idx(a) - idx(b)) || a.localeCompare(b))
             .map((name) => ({ name, userid: ids[name], color: colorOf(t, name, t.perPlayer) }));

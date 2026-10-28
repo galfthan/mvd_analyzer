@@ -10,7 +10,7 @@ export const topbarDemo = store('');
 // The analyzer's build ({ tag, hash, date }) once it is up, and whether the
 // page and the wasm came from different builds after the one reload
 // (src/app/overlay.js checkBuildCoherence).
-export const buildVersion = store(null);
+export const buildVersion = store(/** @type {import('../app/overlay.js').BuildVersion | null} */ (null));
 export const buildStale = store(false);
 
 // The load panel: its status line ({ text, cls }), the hub box's text and

@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // Small shared primitives. Kept separate so geometry.js and the time-indexed
 // lookups can both use them without a cycle.
 

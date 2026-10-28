@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // Canvas-2D icon rasterisers.
 //
 // The scene renders through WebGL (glworld.js) — the 2D painter that used to

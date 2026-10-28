@@ -21,13 +21,23 @@
     import { mapFileKey } from '../../lib/result.js';
     import { fillHeatmapTable, clearHeatmapTable } from './heatmap-table.js';
 
+    /** @typedef {import('../../lib/regions.js').RegionRow & { id: number }} EditorRow */
+    /** @typedef {import('../../state/regions.js').RegionControl} RegionControl */
+
     let editable = $state(false);
+    /** @type {EditorRow[]} */
     let rows = $state([]);
+    // Bound before onMount subscribes to the model.
+    /** @type {HTMLTableElement} */
     let table;
-    let loadInput = $state();
+    // Bound whenever the Load… button that clicks it renders.
+    /** @type {HTMLInputElement} */
+    let loadInput = $state(/** @type {any} */ (undefined));
     let nextId = 0;
+    /** @param {import('../../lib/regions.js').RegionRow} r */
     const row = (r) => ({ id: nextId++, name: r.name, locs: r.locs });
 
+    /** @param {RegionControl | null} m */
     function onModel(m) {
         if (!m) {
             editable = false;
@@ -44,26 +54,36 @@
         }
     }
 
+    /** @param {RegionControl} m */
     function renderMatrix(m) {
         const t = teams.get();
+        // A model with stats names both sides.
         const data = buildRegionHeatmap(m.regions, m.stats, m.teamA, m.teamB, regionSides(t.order, m));
         if (data) fillHeatmapTable(table, data, 'Region', t.colors);
     }
 
     function apply() {
-        applyRegionDefs(demo.get(), readRegionDefs(rows));
+        // The editor shows only while a demo's regions are in effect.
+        applyRegionDefs(/** @type {import('../../data/wasm-source.js').DemoHandle} */ (demo.get()), readRegionDefs(rows));
     }
 
+    /**
+     * @param {EditorRow} r
+     * @param {'name' | 'locs'} field
+     * @param {Event & { currentTarget: HTMLInputElement }} e
+     */
     function edit(r, field, e) {
         r[field] = e.currentTarget.value;
         apply();
     }
 
+    /** @param {EditorRow} r */
     function remove(r) {
         rows = rows.filter((x) => x !== r);
         apply();
     }
 
+    /** @type {Record<number, HTMLInputElement>} */
     let nameInputs = $state({});
     async function add() {
         const r = row({ name: '', locs: '' });
@@ -86,17 +106,19 @@
 
     // Load…: rebuild the rows from the file's definitions, then put them in
     // effect so the map render / stats / timeline pick up the change.
+    /** @param {Event & { currentTarget: HTMLInputElement }} e */
     function load(e) {
         const file = e.currentTarget.files && e.currentTarget.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = () => {
-                const parsed = parseRegionFile(reader.result);
+                // readAsText: the result is a string.
+                const parsed = parseRegionFile(/** @type {string} */ (reader.result));
                 if (parsed.error) {
                     alert(parsed.error);
                     return;
                 }
-                rows = parsed.rows.map(row);
+                rows = /** @type {import('../../lib/regions.js').RegionRow[]} */ (parsed.rows).map(row);
                 apply();
             };
             reader.onerror = () => alert('Failed to read file.');

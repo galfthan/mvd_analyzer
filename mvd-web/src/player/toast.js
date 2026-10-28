@@ -2,8 +2,10 @@
 import { store } from '../state/store.js';
 
 export const toastText = store('');
-let timer = null;
+/** @type {ReturnType<typeof setTimeout> | undefined} */
+let timer;
 
+/** @param {string} text */
 export function toast(text) {
     toastText.set(text);
     clearTimeout(timer);

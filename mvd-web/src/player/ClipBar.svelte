@@ -12,8 +12,8 @@
 
     const CLIP_DEFAULT_S = 10;
 
-    let markIn = $state(null);
-    let markOut = $state(null);
+    let markIn = $state(/** @type {number | null} */ (null));
+    let markOut = $state(/** @type {number | null} */ (null));
 
     // A new demo drops the marks.
     $effect(() => {
@@ -22,7 +22,7 @@
         markOut = null;
     });
 
-    const fmt = (v) => (v == null ? '–' : formatDuration(Math.max(0, v - engine.offset())));
+    const fmt = (/** @type {number | null} */ v) => (v == null ? '–' : formatDuration(Math.max(0, v - engine.offset())));
 
     function addClip() {
         const ref = currentRef();
@@ -31,10 +31,11 @@
         let from = markIn;
         let to = markOut;
         if (from == null && to == null) { from = now - CLIP_DEFAULT_S; to = now; }
-        else if (to == null) to = Math.max(now, from + CLIP_DEFAULT_S);
+        else if (to == null) to = Math.max(now, /** @type {number} */ (from) + CLIP_DEFAULT_S);
         else if (from == null) from = to - CLIP_DEFAULT_S;
-        from = Math.max(0, Math.floor(from));
-        to = Math.ceil(to);
+        // Every branch above leaves both set.
+        from = Math.max(0, Math.floor(/** @type {number} */ (from)));
+        to = Math.ceil(/** @type {number} */ (to));
         if (to <= from) {
             toast('Out is before In — nothing added');
             return;
@@ -48,9 +49,10 @@
         toast(`Added: ${label}`);
     }
 
+    /** @param {KeyboardEvent} e */
     function onKey(e) {
         if ($activeTab !== 'player' || e.ctrlKey || e.metaKey || e.altKey) return;
-        if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
+        if (/** @type {Element} */ (e.target).closest?.('input, textarea, select, [contenteditable]')) return;
         if (e.key === 'i') markIn = engine.demoNow();
         else if (e.key === 'o') markOut = engine.demoNow();
         else if (e.key === 'c') addClip();

@@ -6,23 +6,33 @@
 
 import { nextSortDir, compareSortText } from '../lib/sortable.js';
 
+/**
+ * A header cell carrying makeSortable's per-element bookkeeping.
+ * @typedef {HTMLTableCellElement & { _sortColIdx?: number, _sortColspan?: number, _sortBound?: boolean }} SortHeader
+ */
+
+/** @param {HTMLTableCellElement | undefined} cell */
 const sortText = (cell) => cell?.dataset.sortValue ?? cell?.textContent.trim() ?? '';
 
+/** @param {HTMLTableElement} table */
 export function makeSortable(table) {
     const theadRows = table.querySelectorAll('thead tr');
+    /** @type {NodeListOf<SortHeader>} */
     const allHeaders = table.querySelectorAll('thead th');
 
     // Build a column index map: for each th, compute which td column it maps to.
     // Handles rowspan and colspan in multi-row headers.
+    /** @type {boolean[][]} */
     const grid = []; // grid[row][col] = th element or null (occupied by span)
     theadRows.forEach((tr, rowIdx) => {
         if (!grid[rowIdx]) grid[rowIdx] = [];
         let colPos = 0;
-        tr.querySelectorAll('th').forEach(th => {
+        tr.querySelectorAll('th').forEach((/** @type {SortHeader} */ th) => {
             // Skip columns already occupied by rowspan from previous rows
             while (grid[rowIdx][colPos]) colPos++;
-            const colspan = parseInt(th.getAttribute('colspan')) || 1;
-            const rowspan = parseInt(th.getAttribute('rowspan')) || 1;
+            // An absent attribute parses as NaN, which falls back to 1.
+            const colspan = parseInt(/** @type {string} */ (th.getAttribute('colspan'))) || 1;
+            const rowspan = parseInt(/** @type {string} */ (th.getAttribute('rowspan'))) || 1;
             // Store mapping on the element
             th._sortColIdx = colPos;
             th._sortColspan = colspan;
@@ -39,7 +49,7 @@ export function makeSortable(table) {
 
     allHeaders.forEach(th => {
         // Skip colspan > 1 headers (group headers, not sortable)
-        if (th._sortColspan > 1) return;
+        if (/** @type {number} */ (th._sortColspan) > 1) return;
         // Bind once per element. Dynamically rebuilt tables (e.g. the loc /
         // region heatmaps) call makeSortable again after replacing their <th>
         // nodes; fresh nodes lack the flag and bind, while the load-time
@@ -48,7 +58,7 @@ export function makeSortable(table) {
         if (th._sortBound) return;
         th._sortBound = true;
 
-        const colIdx = th._sortColIdx;
+        const colIdx = /** @type {number} */ (th._sortColIdx);
         th.classList.add('sortable');
         th.addEventListener('click', () => {
             const tbody = table.querySelector('tbody');

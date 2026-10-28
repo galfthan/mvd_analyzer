@@ -19,7 +19,26 @@ import { RECON_ACCURACY_NOTE } from './accuracy.js';
 import { getWeaponName } from './summary.js';
 import { playerStatsRows, teamOrder } from './player-stats.js';
 
+/**
+ * @typedef {import('./result.js').Result} Result
+ * @typedef {'all' | 'enemy' | 'team' | 'self'} VictimFilter
+ * A result.aim player's WeaponAim (raw Result JSON), or its projection onto a
+ * victim filter (aimWeaponView).
+ * @typedef {Record<string, any>} WeaponAim
+ * @typedef {{ n: number | null, lower: boolean, note: string }} DamageCell
+ * The WeaponAim a table cell renders: the projection plus the demo-wide
+ * facts aimWeaponTables puts on it.
+ * @typedef {WeaponAim & { hitsMeasured: boolean, reconTier: boolean, filter: VictimFilter, dmg: DamageCell }} AimCellInput
+ * @typedef {object} AimColumn
+ * @property {string} h            header
+ * @property {string} t            tooltip
+ * @property {boolean} [measured]  exists only where the wire damage log linked fires
+ * @property {(w: AimCellInput) => string | number} cell
+ * @property {(w: AimCellInput) => number} [sort]
+ */
+
 // The line under the player picker: how this demo's misses were attributed.
+/** @param {{ mode?: string }} pa  result.aim */
 export function aimModeText(pa) {
     return pa.mode === 'duel'
         ? 'Target attribution: duel (exact — one enemy; hits use the confirmed victim)'
@@ -39,7 +58,12 @@ export const RECON_ANYDAMAGE_NOTE = 'Counted as ANY fire that landed damage, spl
 // Player column is prepended automatically (with the team-coloured stripe).
 // Every count column has a share-of-fires % twin: counts depend on how much a
 // player fired, so the percentages are what compare across players.
+/** @param {number} p */
 const pctPlain = p => `${p.toFixed(1)}%`;
+/**
+ * @param {number | null | undefined} n
+ * @param {WeaponAim} w
+ */
 const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 
 // The RL/GL direct/splash pair is withheld PER ROW, not per demo — the one
@@ -58,14 +82,20 @@ const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 export const AIM_SPLIT_WITHHELD_NOTE = 'Not classified on this demo: no rocket or grenade fire ' +
     'linked to a projectile, so there is nothing to split into direct hits and splash. ' +
     'Not a zero — the fires were simply never classified.';
+/**
+ * @param {number | null | undefined} v
+ * @param {(n: number) => string} fmt
+ */
 function aimSplitCell(v, fmt) {
     if (v === null || v === undefined) {
         return `<span class="aim-na" title="${escapeHtml(AIM_SPLIT_WITHHELD_NOTE)}">—</span>`;
     }
     return fmt(v);
 }
+/** @param {number | null | undefined} v */
 const aimSplitSort = v => (v === null || v === undefined) ? -1 : v;
 
+/** @type {Record<string, AimColumn>} */
 export const AIM_COL = {
     shots: { h: 'Shots', t: 'Trigger pulls', cell: w => w.shots },
     hits: {
@@ -142,6 +172,11 @@ export const AIM_MEASURED_ONLY_NOTE = 'Not measured on this demo: it carries no 
 
 // aimCol resolves one column descriptor against the demo's hit measuredness,
 // so the cell functions themselves stay demo-agnostic.
+/**
+ * @param {AimColumn} c
+ * @param {boolean} hitsMeasured
+ * @returns {AimColumn}
+ */
 export function aimCol(c, hitsMeasured) {
     if (hitsMeasured || !c.measured) return c;
     return {
@@ -152,6 +187,7 @@ export function aimCol(c, hitsMeasured) {
 }
 // Per-weapon column order: counts first, then the share-of-fires block.
 // SG/SSG lead with the pellet stats.
+/** @type {Record<string, string[]>} */
 export const AIM_TABLE_COLS = {
     lg: ['shots', 'hits', 'dmg', 'lgMiss', 'blocked', 'far', 'unres', 'hitPct', 'lgMissPct', 'blockedPct', 'farPct'],
     sg: ['fired', 'pHit', 'pAcc', 'shots', 'hits', 'dmg', 'full', 'partial', 'miss', 'hitPct', 'fullPct', 'partialPct', 'missPct'],
@@ -174,6 +210,7 @@ export const AIM_TABLE_COLS = {
 // pAcc (a percentage) between the pellet counts and the shot counts, so the
 // groups are named after what they count. A weapon absent here (ng/sng, four
 // columns) keeps the flat single-row header.
+/** @type {Record<string, Array<[string, number]>>} */
 export const AIM_TABLE_GROUPS = {
     lg: [['Shots', 7], ['%', 4]],
     sg: [['Pellets', 3], ['Shots', 6], ['%', 4]],
@@ -198,6 +235,11 @@ const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl', 'ng', 'sng', 'axe'];
 // misses have no victim, so they don't move with the filter (the lg miss
 // bucket shares the `miss` field with the pellet split, so it must dodge
 // the pellet projection below).
+/**
+ * @param {WeaponAim | null} w
+ * @param {VictimFilter} filter
+ * @returns {WeaponAim | null}
+ */
 export function aimWeaponView(w, filter) {
     if (!w || filter === 'all') return w;
     // "No enemy split" means enemy == all for the MEASURED counters, which is
@@ -251,6 +293,10 @@ export function aimWeaponView(w, filter) {
 // same cell incomparable.
 //
 // Returns {n, recon} or null for "no answer on this demo".
+/**
+ * @param {WeaponAim} w
+ * @returns {{ n: number, recon: boolean } | null}
+ */
 export function aimHitsValue(w) {
     if (w.hitsMeasured !== false) return { n: w.hits || 0, recon: false };
     if (w.recon) return { n: w.recon.hits, recon: true };
@@ -260,6 +306,10 @@ export function aimHitsValue(w) {
 // Why a cell has no number, in the reader's terms. Both branches are
 // reachable on a reconstructed demo: the tier covers lg/sg/ssg/axe/rl/gl and
 // stops there, and it carries no victim split for the toggle above to slice.
+/**
+ * @param {WeaponAim} w
+ * @param {VictimFilter} filter
+ */
 function aimHitsNote(w, filter) {
     if (!w.reconTier) {
         return 'This demo carries no damage log to measure hits against, and none could be reconstructed from it.';
@@ -273,6 +323,10 @@ function aimHitsNote(w, filter) {
 // column's own text (a bare number, or a coloured percentage), so both
 // columns share one measured/reconstructed/absent decision. `w.filter` is
 // the active victim filter (aimWeaponTables puts it there).
+/**
+ * @param {WeaponAim} w
+ * @param {(n: number) => string} fmt
+ */
 export function aimHitsCell(w, fmt) {
     const v = aimHitsValue(w);
     if (!v) return `<span class="aim-na" title="${escapeHtml(aimHitsNote(w, w.filter))}">—</span>`;
@@ -302,6 +356,12 @@ export function aimHitsCell(w, fmt) {
 // mutually exclusive, so summing them is only correct when every one is
 // measured — otherwise the figure is labelled a lower bound rather than
 // served as a total or padded with a fabricated zero.
+/**
+ * @param {Record<string, any> | null | undefined} dmg  a playerStats row's damage
+ * @param {string} wn
+ * @param {VictimFilter} filter
+ * @returns {DamageCell}
+ */
 export function aimDamageCell(dmg, wn, filter) {
     if (!dmg) return { n: null, lower: false, note: 'No damage information for this player on this demo.' };
     const selfMeasured = dmg.taken !== null && dmg.taken !== undefined;
@@ -323,6 +383,7 @@ export function aimDamageCell(dmg, wn, filter) {
     }
 }
 
+/** @param {DamageCell | null | undefined} d */
 export function aimDamageText(d) {
     if (!d || d.n === null) {
         const t = d && d.note ? ` title="${escapeHtml(d.note)}"` : '';
@@ -338,15 +399,25 @@ export function aimDamageText(d) {
 // colours. Player-independent (rebuilt when the victim filter changes).
 // Returns [{ weapon, html }], html being the block's inner markup (title +
 // table) — rows are markup so the shared makeSortable can sort them.
+/**
+ * @param {Result | null | undefined} result
+ * @param {VictimFilter} filter
+ * @param {string[]} canonical
+ * @param {string[]} colors
+ * @returns {Array<{ weapon: string, html: string }>}
+ */
 export function aimWeaponTables(result, filter, canonical, colors) {
+    /** @type {Array<Record<string, any>>} */
     const players = (result && result.aim && result.aim.players) || [];
     if (!players.length) return [];
     // hitsMeasured=false: the demo carried no wire damage stream, so the
     // measured hit counters are withheld server-side. hitsSource then says
     // whether the reconstruction could recover them anyway (schema v73/v74) —
     // the per-weapon `recon` blocks the Hits / Hit % cells fall back to.
-    const hitsMeasured = result.aim.hitsMeasured !== false;
-    const reconTier = result.aim.hitsSource === 'reconstructed';
+    // Players were found on it, so there is a result.
+    const aim = /** @type {Result} */ (result).aim;
+    const hitsMeasured = aim.hitsMeasured !== false;
+    const reconTier = aim.hitsSource === 'reconstructed';
     const order = teamOrder(canonical, []); // canonical frag-sorted order (= Summary)
     // result.aim carries no damage, so the Dmg column is joined by player
     // name from playerStats — the same source (and the same weapon keys) the
@@ -360,10 +431,10 @@ export function aimWeaponTables(result, filter, canonical, colors) {
         const colKeys = AIM_TABLE_COLS[wn] || [];
         const cols = colKeys.map(k => aimCol(AIM_COL[k], hitsMeasured));
         const rows = players.map(pa => {
-            const w = aimWeaponView((pa.weapons || []).find(x => x.weapon === wn) || null, filter);
+            const w = aimWeaponView((pa.weapons || []).find(/** @param {WeaponAim} x */ x => x.weapon === wn) || null, filter);
             return {
                 player: pa.player, team: pa.team,
-                w: w ? { ...w, hitsMeasured, reconTier, filter, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn, filter) } : null,
+                w: w ? /** @type {AimCellInput} */ ({ ...w, hitsMeasured, reconTier, filter, dmg: aimDamageCell(dmgByPlayer.get(pa.player), wn, filter) }) : null,
             };
         });
         if (!rows.some(r => r.w)) continue; // weapon nobody fired → no table
@@ -372,11 +443,13 @@ export function aimWeaponTables(result, filter, canonical, colors) {
         // Column indices that open a header group carry the .group-start
         // separator, in the header rows and in the body alike.
         const groups = AIM_TABLE_GROUPS[wn];
+        /** @type {Set<number>} */
         const starts = new Set();
         if (groups) {
             let at = 0;
             for (const [, span] of groups) { starts.add(at); at += span; }
         }
+        /** @param {number} i */
         const cellCls = i => starts.has(i) ? ' class="group-start"' : '';
         const subHead = cols.map((c, i) =>
             `<th${cellCls(i)} title="${escapeHtml(c.t)}">${escapeHtml(c.h)}</th>`).join('');
@@ -392,12 +465,13 @@ export function aimWeaponTables(result, filter, canonical, colors) {
             const ti = order.indexOf(r.team || '');
             const color = (ti >= 0 && ti < colors.length) ? colors[ti] : '';
             const stripe = color ? ` style="border-left: 3px solid ${color}"` : '';
+            const w = r.w;
             const tds = `<td>${escapeHtml(r.player)}</td>` +
-                (r.w ? cols.map((c, i) => {
+                (w ? cols.map((c, i) => {
                     // A column whose text is not its own sort key (Dmg's "≥N"
                     // / "-") publishes one via data-sort-value.
-                    const sv = c.sort ? ` data-sort-value="${c.sort(r.w)}"` : '';
-                    return `<td${cellCls(i)}${sv}>${c.cell(r.w)}</td>`;
+                    const sv = c.sort ? ` data-sort-value="${c.sort(w)}"` : '';
+                    return `<td${cellCls(i)}${sv}>${c.cell(w)}</td>`;
                 }).join('') : naCells);
             body += `<tr${stripe}>${tds}</tr>`;
         });
@@ -413,7 +487,14 @@ export function aimWeaponTables(result, filter, canonical, colors) {
 
 // The player picker's chips: one per result.aim player, in its order, with
 // the canonical team colour of the player's team ('' when it has none).
+/**
+ * @param {Result | null | undefined} result
+ * @param {string[]} canonical
+ * @param {string[]} colors
+ * @returns {Array<{ player: string, color: string }>}
+ */
 export function aimChips(result, canonical, colors) {
+    /** @type {Array<Record<string, any>>} */
     const players = (result && result.aim && result.aim.players) || [];
     const order = teamOrder(canonical, []);
     return players.map(p => {

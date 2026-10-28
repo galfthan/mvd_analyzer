@@ -9,14 +9,30 @@
 import { playerStatsRows } from './player-stats.js';
 import { escapeHtml } from './html.js';
 
+/**
+ * @typedef {import('./result.js').Result} Result
+ * @typedef {{ symbol: string, team: string, teamIdx: number }} PlayerSymbol
+ * @typedef {Record<string, PlayerSymbol>} PlayerSymbols  player name → symbol
+ * @typedef {{ minX: number, maxX: number, minY: number, maxY: number }} MapBounds
+ * @typedef {{ name: string, x: number, y: number }} MapLoc
+ * @typedef {Record<string, any>} PlayerFrame  a player's state at the clock (MvdMap's frame shape)
+ * @typedef {{ name: string, kind: string }} MapItem
+ * @typedef {{ cls: string, type: string, name: string, loc: string, source: string }} EntityRow
+ */
+
 // ─── What the map draws ─────────────────────────────────────────────────────
 
 // mapTeams: the canonical frag-sorted order (the teams store) when it names
 // two sides or more, else the demo's own team list.
+/**
+ * @param {string[] | null | undefined} order
+ * @param {Result | null | undefined} result
+ * @returns {string[]}
+ */
 export function mapTeams(order, result) {
     if (order && order.length >= 2) return [...order];
     if (result?.demoInfo?.teams) return result.demoInfo.teams;
-    if (result?.match?.teams) return result.match.teams.map(t => t.name);
+    if (result?.match?.teams) return result.match.teams.map(/** @param {{ name: string }} t */ t => t.name);
     return [];
 }
 
@@ -25,20 +41,28 @@ export function mapTeams(order, result) {
 // side's index in `teams` (the colour index). The roster is the KTX demoinfo
 // block where the demo has one, else playerStats — present on every demo, so
 // a pre-KTX demo with position streams still has people on its map.
+/**
+ * @param {Result | null | undefined} result
+ * @param {string[]} teams
+ * @returns {PlayerSymbols}
+ */
 export function assignPlayerSymbols(result, teams) {
     const players = result?.demoInfo?.players?.length
         ? result.demoInfo.players
         : playerStatsRows(result);
+    /** @type {Record<string, string[]>} */
     const teamPlayers = {};
     for (const team of teams) teamPlayers[team] = [];
     for (const player of players) {
         if (player.team && teamPlayers[player.team]) teamPlayers[player.team].push(player.name);
     }
+    /** @type {Array<{ name: string, team: string, teamIdx: number }>} */
     const all = [];
     teams.forEach((team, teamIdx) => {
         for (const name of (teamPlayers[team] || [])) all.push({ name, team, teamIdx });
     });
     const used = new Set();
+    /** @type {PlayerSymbols} */
     const symbols = {};
     for (const p of all) {
         let letter = '?';
@@ -59,6 +83,11 @@ export function assignPlayerSymbols(result, teams) {
 // mapBounds: the world XY box of the loc points and every living player
 // position in the bucket view ((0, 0) slots are padding, skipped), padded by
 // 10 % — or ±1000 when there is nothing.
+/**
+ * @param {MapLoc[] | null | undefined} locations
+ * @param {Record<string, any> | null | undefined} view  the columnar bucket view
+ * @returns {MapBounds}
+ */
 export function mapBounds(locations, view) {
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     for (const loc of locations || []) {
@@ -95,8 +124,9 @@ export function mapBounds(locations, view) {
 
 // dropEventsOf: the backpack drops in the map's death-marker shape, time in
 // seconds (Result times are ms).
+/** @param {Result | null | undefined} result */
 export function dropEventsOf(result) {
-    return (result?.backpacks || []).map(d => ({
+    return (result?.backpacks || []).map(/** @param {Record<string, any>} d */ d => ({
         t: d.time * 0.001,
         wx: d.origin?.[0] || 0,
         wy: d.origin?.[1] || 0,
@@ -107,7 +137,12 @@ export function dropEventsOf(result) {
 
 // posStreamsOf: name → native-rate position track, for the players that have
 // samples.
+/**
+ * @param {Result | null | undefined} result
+ * @returns {Record<string, any>}
+ */
 export function posStreamsOf(result) {
+    /** @type {Record<string, any>} */
     const out = {};
     const players = result?.streams?.players;
     if (Array.isArray(players)) {
@@ -125,6 +160,12 @@ export const MAP_CANVAS_BASE_WIDTH = 850;
 
 // mapCanvasSize: fullscreen fills the panel's canvas container (`rect`);
 // otherwise a fixed width with the height from the world's aspect, capped.
+/**
+ * @param {boolean} fullscreen
+ * @param {{ width: number, height: number } | null | undefined} rect
+ * @param {MapBounds | null | undefined} bounds
+ * @returns {[number, number]}
+ */
 export function mapCanvasSize(fullscreen, rect, bounds) {
     if (fullscreen && rect) {
         return [Math.max(300, Math.floor(rect.width)), Math.max(200, Math.floor(rect.height))];
@@ -139,6 +180,11 @@ export function mapCanvasSize(fullscreen, rect, bounds) {
 
 // legendTeams: one block per team in colour order, its players in name
 // order (the column headers sort the rest).
+/**
+ * @param {string[]} teams
+ * @param {PlayerSymbols} symbols
+ * @param {string[]} colors
+ */
 export function legendTeams(teams, symbols, colors) {
     const byName = Object.entries(symbols).sort((a, b) => a[0].localeCompare(b[0]));
     return teams.map((team, ti) => ({
@@ -150,6 +196,11 @@ export function legendTeams(teams, symbols, colors) {
 }
 
 // legendRowHtml: one legend row's cells, before the clock fills them.
+/**
+ * @param {string} name
+ * @param {string} symbol
+ * @param {string} color
+ */
 export function legendRowHtml(name, symbol, color) {
     const n = escapeHtml(name);
     return `
@@ -165,6 +216,11 @@ export function legendRowHtml(name, symbol, color) {
 export const LEGEND_HEAD = '<thead><tr><th></th><th>Player</th><th>Loc</th><th title="Health + armor (sorted by H+A)">Stack</th><th>Wpn</th><th>View</th></tr></thead>';
 
 // teamFragsAt: a team's frags from the running per-player counts.
+/**
+ * @param {string} team
+ * @param {PlayerSymbols} symbols
+ * @param {Record<string, number>} fragCounts
+ */
 export function teamFragsAt(team, symbols, fragCounts) {
     let n = 0;
     for (const [name, info] of Object.entries(symbols)) {
@@ -175,6 +231,10 @@ export function teamFragsAt(team, symbols, fragCounts) {
 
 // stackCell: the Stack column — health, then armour with its type; the sort
 // value is health + armour. `html` null means the text is '-'.
+/**
+ * @param {PlayerFrame | null | undefined} data
+ * @returns {{ sort: string, html: string | null }}
+ */
 export function stackCell(data) {
     if (!data) return { sort: '0', html: null };
     const h = data.h ?? data.health ?? 0;
@@ -188,6 +248,7 @@ export function stackCell(data) {
 }
 
 // weaponsText: the Wpn column.
+/** @param {PlayerFrame | null | undefined} data */
 export function weaponsText(data) {
     if (!data) return '-';
     const w = [];
@@ -201,6 +262,13 @@ export function weaponsText(data) {
 // regionStateLabel: a control state's label and colour. `sides` is the
 // canonical index of Go's side A / side B (lib/regions.js regionSides) —
 // `teams` and `colors` are in the canonical order.
+/**
+ * @param {string} state
+ * @param {string[]} teams
+ * @param {string[]} colors
+ * @param {[number, number]} sides
+ * @returns {[string, string]}
+ */
 export function regionStateLabel(state, teams, colors, sides) {
     const [a, b] = sides;
     switch (state) {
@@ -216,7 +284,20 @@ export function regionStateLabel(state, teams, colors, sides) {
 
 // regionStatusRows: per region its state and the living players in it
 // (team A first). `locOf(data)` resolves a player's loc name.
+/**
+ * @param {object} args
+ * @param {Array<{ name: string }>} args.regions
+ * @param {Record<string, string>} args.states             region name → control state
+ * @param {Record<string, PlayerFrame> | null | undefined} args.playerData
+ * @param {(data: PlayerFrame) => string | null | undefined} args.locOf
+ * @param {Record<string, string> | null | undefined} args.locToRegion
+ * @param {PlayerSymbols} args.symbols
+ * @param {string[]} args.teams
+ * @param {string[]} args.colors
+ * @param {[number, number]} args.sides
+ */
 export function regionStatusRows({ regions, states, playerData, locOf, locToRegion, symbols, teams, colors, sides }) {
+    /** @type {Record<string, Array<{ name: string, data: PlayerFrame, sym: PlayerSymbol | undefined, teamIdx: number }>>} */
     const inRegion = {};
     for (const r of regions) inRegion[r.name] = [];
     if (playerData) {
@@ -243,8 +324,15 @@ export function regionStatusRows({ regions, states, playerData, locOf, locToRegi
 
 // The contested items the sidebar lists (armours, MH, RL / LG, powerups), in
 // display order; the map draws the rest too.
+/** @type {Record<string, number>} */
 const ITEM_KIND_ORDER = { ra: 0, ya: 1, ga: 2, mh: 3, rl: 4, lg: 5, quad: 6, pent: 7, ring: 8 };
 
+/**
+ * @template {MapItem} I
+ * @param {I[] | null | undefined} items
+ * @param {Record<string, unknown>} styles  item kind → the map's style for it
+ * @returns {I[]}
+ */
 export function panelItems(items, styles) {
     return (items || [])
         .filter(it => it.kind in ITEM_KIND_ORDER && styles[it.kind])
@@ -253,14 +341,17 @@ export function panelItems(items, styles) {
 
 // itemStatusCell: 'up', 'held' (taken, respawn not started) or the seconds
 // to respawn.
+/** @param {{ up: boolean, pending: boolean, secsToRespawn: number | null }} s  MvdMap.itemStatus */
 export function itemStatusCell(s) {
     if (s.up) return { text: 'up', cls: 'item-status up' };
     if (s.pending) return { text: 'held', cls: 'item-status pending' };
-    return { text: s.secsToRespawn.toFixed(1) + 's', cls: 'item-status respawn' };
+    // Taken and not pending: the respawn time is set.
+    return { text: /** @type {number} */ (s.secsToRespawn).toFixed(1) + 's', cls: 'item-status respawn' };
 }
 
 // ─── Learn mode ─────────────────────────────────────────────────────────────
 
+/** @type {Record<string, string>} */
 const ENTITY_CLASS_LABEL = {
     weapon: 'Weapon', armor: 'Armor', health: 'Health', ammo: 'Ammo',
     powerup: 'Powerup', teleporter: 'Teleporter', spawn: 'Spawn',
@@ -270,7 +361,14 @@ const ENTITY_CLASS_LABEL = {
 // entityRows: the learn-mode table — every entity of a shown category, the
 // teleporters as one row per entrance (Loc) → exit (Destination), exits with
 // no entrance on their own. `categoryOf(e)` is the map view's.
+/**
+ * @param {Array<Record<string, any>>} ents  the map's entities
+ * @param {Record<string, boolean>} filters  category → shown
+ * @param {(e: Record<string, any>) => string} categoryOf
+ * @returns {EntityRow[]}
+ */
 export function entityRows(ents, filters, categoryOf) {
+    /** @type {EntityRow[]} */
     const rows = [];
     for (const e of ents) {
         if (e.type === 'teleportSrc' || e.type === 'teleportDst') continue;
@@ -283,6 +381,7 @@ export function entityRows(ents, filters, categoryOf) {
         });
     }
     if (filters.teleporter) {
+        /** @type {Record<string, Record<string, any>>} */
         const dstByName = {};
         for (const e of ents) {
             if (e.type === 'teleportDst' && e.targetName) dstByName[e.targetName] = e;
@@ -304,6 +403,7 @@ export function entityRows(ents, filters, categoryOf) {
     return rows;
 }
 
+/** @param {EntityRow[]} rows */
 export function entityRowsHtml(rows) {
     return rows.map(r =>
         `<tr><td>${escapeHtml(r.cls)}</td><td>${escapeHtml(r.type)}</td>` +
@@ -316,6 +416,10 @@ export function entityRowsHtml(rows) {
 
 // trailButtons: All lit when every trail is on, None when none is, the
 // Players dropdown when a subset is.
+/**
+ * @param {string[]} names
+ * @param {Record<string, boolean>} enabled
+ */
 export function trailButtons(names, enabled) {
     let on = 0;
     for (const n of names) if (enabled[n]) on++;
@@ -323,22 +427,26 @@ export function trailButtons(names, enabled) {
     return { all: total > 0 && on === total, none: on === 0, some: on > 0 && on < total };
 }
 
-export const byName = (a, b) => a.localeCompare(b);
+export const byName = (/** @type {string} */ a, /** @type {string} */ b) => a.localeCompare(b);
 
 // ─── Perf HUD and benchmark ─────────────────────────────────────────────────
 
 // perfHudText: the last second of frame samples (MvdMap.lastFrameStats).
+/**
+ * @param {Array<Record<string, number>>} samples
+ * @param {number} now
+ */
 export function perfHudText(samples, now) {
     const recent = samples.filter(s => now - s.t < 1000);
     if (recent.length === 0) return 'map idle — play or drag to sample';
-    const avg = (field) => {
+    const avg = (/** @type {string} */ field) => {
         let sum = 0, n = 0;
         for (const s of recent) {
             if (typeof s[field] === 'number') { sum += s[field]; n++; }
         }
         return n > 0 ? sum / n : null;
     };
-    const ms1 = (v) => v === null ? '—' : v.toFixed(1);
+    const ms1 = (/** @type {number | null} */ v) => v === null ? '—' : v.toFixed(1);
     const last = recent[recent.length - 1];
     return `${recent.length} fps\n` +
         `build ${ms1(avg('buildMs'))}  submit ${ms1(avg('submitMs'))}` +
@@ -350,6 +458,11 @@ export function perfHudText(samples, now) {
 
 // benchDemoKey: "the same demo" across sessions — the Result has no file
 // name, so map + teams + rounded duration.
+/**
+ * @param {Result | null | undefined} result
+ * @param {string[] | null | undefined} teams
+ * @param {number | null | undefined} duration
+ */
 export function benchDemoKey(result, teams, duration) {
     const map = result?.demoInfo?.map || result?.match?.map || '?';
     return `${map}|${(teams || []).join('+')}|${Math.round(duration || 0)}s`;
@@ -357,6 +470,11 @@ export function benchDemoKey(result, teams, duration) {
 
 // benchText: a run's read-out, against the newest earlier run at the same
 // surface size when there is one.
+/**
+ * @param {Record<string, any>} record   a bench run's record (mvd-map-view bench.js)
+ * @param {Record<string, any>} summary
+ * @param {Record<string, any> | null | undefined} prev
+ */
 export function benchText(record, summary, prev) {
     const f = summary.frameMs || {};
     let text =
@@ -369,7 +487,7 @@ export function benchText(record, summary, prev) {
         `draws avg ${summary.draws.avg}`;
     if (prev) {
         const d = (record.avgFps - prev.avgFps).toFixed(1);
-        text += `\nvs ${prev.date.slice(0, 10)}: ${prev.avgFps} fps (${d >= 0 ? '+' : ''}${d})`;
+        text += `\nvs ${prev.date.slice(0, 10)}: ${prev.avgFps} fps (${Number(d) >= 0 ? '+' : ''}${d})`;
     }
     return text + '\nfull record in the console';
 }

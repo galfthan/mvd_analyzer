@@ -12,6 +12,14 @@ export const HOLD_WEAPON_NAMES = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 // weapon's percentage is on a different scale under each, which is why the
 // cell says so instead of leaving the reader to compare a KTX shotgun figure
 // with a fire-counted one six times smaller.
+/**
+ * A playerStats accuracy family and one weapon's entry in it (Result JSON,
+ * RESULT_SCHEMA PlayerStatsAcc).
+ * @typedef {{ attacks?: number, hits?: number | null, hitsConvention?: string }} AccEntry
+ * @typedef {{ src?: string, byWeapon?: Record<string, AccEntry> }} AccFamily
+ */
+
+/** @type {Record<string, string>} */
 const HITS_CONVENTION_TITLES = {
     anyDamage: 'Hits = fires that landed damage by any path (splash included) — KTX\'s own convention for LG, NG/SNG and the axe',
     directImpact: 'Hits = projectiles that touched a player (KTX\'s own RL/GL convention) — reads far lower than an any-path count',
@@ -28,6 +36,14 @@ const HITS_CONVENTION_TITLES = {
 // sg/ssg advance per PELLET on both sides of the ratio, rl/gl only when the
 // projectile touches a player, and everything else once per fire that
 // damaged — the same event as a direct hit for a weapon with one damage path.
+/**
+ * @typedef {'anyDamage' | 'directImpact' | 'pellets'} HitsConvention
+ */
+
+/**
+ * @param {string} weapon
+ * @returns {HitsConvention}
+ */
 export function ktxHitsConvention(weapon) {
     if (weapon === 'sg' || weapon === 'ssg') return 'pellets';
     if (weapon === 'rl' || weapon === 'gl') return 'directImpact';
@@ -76,13 +92,18 @@ const ACC_OFF_SCALE_MARK = '≠';
 // `hitsConvention`, the server's from ktxHitsConvention(weapon) — so the note
 // states the actual disagreement for the actual weapon instead of naming one
 // family's.
+/** @type {Record<string, string>} */
 const HITS_CONVENTION_PHRASES = {
     anyDamage: 'any fire that landed damage, splash included',
     directImpact: 'only a projectile that TOUCHED a player',
     pellets: 'a PELLET (6 per SG fire, 14 per SSG), on both sides of the ratio',
 };
+/**
+ * @param {AccEntry} entry
+ * @param {string} wn
+ */
 function accOffScaleNote(entry, wn) {
-    const ours = HITS_CONVENTION_PHRASES[entry.hitsConvention];
+    const ours = HITS_CONVENTION_PHRASES[/** @type {string} */ (entry.hitsConvention)];
     const theirs = HITS_CONVENTION_PHRASES[ktxHitsConvention(wn)];
     const what = (ours && theirs) ? `a hit here is ${ours}, where KTX counts ${theirs}. ` : '';
     return 'Not on the server\'s own scale for this weapon: ' + what +
@@ -123,16 +144,22 @@ export const RECON_ACCURACY_NOTE = 'Hits RECONSTRUCTED — this demo carries no 
 // An entry with attacks and no hits is a WITHHELD count, not a zero: nailgun
 // rows carry one whenever the demo was parsed without nail decoding, which is
 // the only way ng/sng fires can be linked to their damage.
+/**
+ * @param {AccFamily | null | undefined} accuracy
+ * @param {string} wn
+ * @returns {string}
+ */
 export function formatAccuracyCell(accuracy, wn) {
     const entry = accuracy?.byWeapon?.[wn];
     if (!entry || !entry.attacks) return '-';
     if (entry.hits == null) return `<span class="stat-muted" title="No linked damage to count hits against — attacks only">${entry.attacks} atk</span>`;
     const pct = ((entry.hits / entry.attacks) * 100).toFixed(1);
     const notes = [];
-    if (HITS_CONVENTION_TITLES[entry.hitsConvention]) notes.push(HITS_CONVENTION_TITLES[entry.hitsConvention]);
+    const conv = /** @type {string} */ (entry.hitsConvention);
+    if (HITS_CONVENTION_TITLES[conv]) notes.push(HITS_CONVENTION_TITLES[conv]);
     const offScale = accOffKtxScale(entry, wn);
     if (offScale) notes.push(accOffScaleNote(entry, wn));
-    const recon = accuracy.src === 'reconstructed';
+    const recon = /** @type {AccFamily} */ (accuracy).src === 'reconstructed';
     if (recon) notes.push(RECON_ACCURACY_NOTE);
     const attr = notes.length ? ` title="${escapeHtml(notes.join(' · '))}"` : '';
     const mark = offScale ? `<sup class="acc-off-scale">${ACC_OFF_SCALE_MARK}</sup>` : '';
@@ -144,6 +171,10 @@ export function formatAccuracyCell(accuracy, wn) {
 // published convention is not marked: the field is present whenever `hits` is
 // (RESULT_SCHEMA, PlayerStatsAcc), so its absence means there is no number to
 // put on a scale, not that the scale agrees.
+/**
+ * @param {AccEntry} entry
+ * @param {string} wn
+ */
 export function accOffKtxScale(entry, wn) {
     return !!entry.hitsConvention && entry.hitsConvention !== ktxHitsConvention(wn);
 }
@@ -153,6 +184,7 @@ export function accOffKtxScale(entry, wn) {
 // has-a-number test the cells use, so the note cannot appear over an unmarked
 // table (an axe or nailgun entry the table does not show) or go missing under
 // a marked one.
+/** @param {Array<{ accuracy?: AccFamily }>} rows */
 export function anyAccOffKtxScale(rows) {
     return rows.some(r => HOLD_WEAPON_NAMES.some(wn => {
         const e = r.accuracy?.byWeapon?.[wn];

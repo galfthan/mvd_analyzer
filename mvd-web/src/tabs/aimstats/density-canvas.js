@@ -10,12 +10,23 @@ import {
     AIM_X_HALF, AIM_Y_HALF, AIM_HULL_HALF_W, AIM_HULL_HALF_H, AIM_IMG_SCALE, aimDensityRGB, aimBarLabel,
 } from '../../lib/aim-plot.js';
 
+/**
+ * The hover data paintAimDensity returns: the grid plus its plot box.
+ * @typedef {import('../../lib/aim-plot.js').DensityGrid & { ML: number, MT: number, PW: number, PH: number, W: number, H: number }} DensityHover
+ */
+
+/** @param {HTMLCanvasElement} canvas */
 function surfaceRGB(canvas) {
     const m = (getComputedStyle(canvas).backgroundColor || '')
         .match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
     return m ? [+m[1], +m[2], +m[3]] : [26, 26, 46]; // --bg-deep fallback
 }
 
+/**
+ * @param {HTMLCanvasElement} canvas
+ * @param {import('../../lib/aim-plot.js').DensityGrid} g
+ * @returns {DensityHover}
+ */
 export function paintAimDensity(canvas, g) {
     const { nx, ny, sm, max } = g;
     // Paint the fine grid at 1px/cell offscreen, then upscale with bilinear
@@ -23,7 +34,7 @@ export function paintAimDensity(canvas, g) {
     const img = document.createElement('canvas');
     img.width = nx;
     img.height = ny;
-    const ictx = img.getContext('2d');
+    const ictx = /** @type {CanvasRenderingContext2D} */ (img.getContext('2d'));
     const idata = ictx.createImageData(nx, ny);
     const bg = surfaceRGB(canvas);
     for (let p = 0; p < nx * ny; p++) {
@@ -43,14 +54,17 @@ export function paintAimDensity(canvas, g) {
     canvas.height = H * dpr;
     canvas.style.width = `${W}px`;
     canvas.style.height = `${H}px`;
-    const ctx = canvas.getContext('2d');
+    const ctx = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'));
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(img, ML, MT, PW, PH);
 
+    /** @param {number} x */
     const px = x => ML + (x + AIM_X_HALF) / (2 * AIM_X_HALF) * PW;
+    /** @param {number} y */
     const py = y => MT + (AIM_Y_HALF - y) / (2 * AIM_Y_HALF) * PH;
+    /** @param {number} v */
     const crisp = v => Math.round(v) + 0.5;
 
     // Dead-center cross + the player collision box, true to shape (32 wide ×
@@ -118,6 +132,12 @@ export function paintAimDensity(canvas, g) {
 // can render the canvas below its intrinsic CSS size; map cursor px back
 // into the unscaled ML/PW space or the reported bin drifts on narrow
 // layouts.
+/**
+ * @param {HTMLCanvasElement} canvas
+ * @param {DensityHover} d
+ * @param {MouseEvent} e
+ * @returns {[number, number]}
+ */
 export function hoverPoint(canvas, d, e) {
     const rect = canvas.getBoundingClientRect();
     const sx = rect.width ? d.W / rect.width : 1;

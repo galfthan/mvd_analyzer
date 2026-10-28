@@ -28,20 +28,29 @@ import { urlTab } from '../lib/url-state.js';
 
 // The DemoHandle behind the page: its view queries, region recompute and
 // line of sight answer for that demo only.
+/** @type {import('../data/wasm-source.js').DemoHandle | null} */
 let currentDemo = null;
 
+/** @typedef {import('../lib/result.js').Result} Result */
+
+/** @type {Record<import('../data/wasm-source.js').LoadStage, string>} */
 const LOAD_STAGE_TEXT = {
     info: 'Fetching game info...',
     download: 'Downloading demo...',
     analyze: 'Analyzing...',
 };
 
+/**
+ * @param {string} text
+ * @param {string} cls
+ */
 function setStatus(text, cls) {
     loadStatus.set({ text, cls });
 }
 
+/** @param {unknown} error */
 function setLoadError(error) {
-    setStatus('Error: ' + error.message, 'status error');
+    setStatus('Error: ' + /** @type {Error} */ (error).message, 'status error');
 }
 
 // The load-status line after a successful analyse. A demo the marker calls
@@ -49,6 +58,7 @@ function setLoadError(error) {
 // reserved for a load or parse that failed) — but "Analysis complete!" over a
 // Summary tab with no scoreboard reads as a bug, so it says what happened and
 // points at the panel that explains it.
+/** @param {Result} result */
 function setAnalysisStatus(result) {
     if (result.noMatch) {
         setStatus('Analysed — this recording holds no match (see Summary).', 'status');
@@ -68,9 +78,15 @@ function setAnalysisStatus(result) {
 // failure for the caller to report. `deepLink` is the boot's ?gameId= load
 // (loadDeepLink), the one load that takes the URL's tab / time / segment /
 // learn mode; every other load starts on Summary at 0:00.
+/**
+ * @param {import('../data/wasm-source.js').LoadInput} input
+ * @param {{ deepLink?: boolean }} [opts]
+ * @returns {Promise<boolean>}
+ */
 export async function loadDemo(input, { deepLink = false } = {}) {
     setStatus(loadStatus.get().text, 'status loading');
-    const hubId = input.game?.id ?? input.gameId;
+    const ids = /** @type {{ game?: import('../data/hub.js').HubGame, gameId?: number | string }} */ (input);
+    const hubId = ids.game?.id ?? ids.gameId;
     if (hubId != null) hubInput.set(String(hubId));
     // The timing window opens once the analyzer is up, so a deep link's
     // total does not include the wasm load (logged on its own).
@@ -82,10 +98,11 @@ export async function loadDemo(input, { deepLink = false } = {}) {
             onStage: (stage) => { setStatus(LOAD_STAGE_TEXT[stage], loadStatus.get().cls); },
         });
     } catch (err) {
-        if (err.superseded) return false;
+        if (/** @type {{ superseded?: boolean }} */ (err).superseded) return false;
         throw err;
     }
-    recordLoadTimings(handle.timings);
+    // load() sets the timings before it resolves.
+    recordLoadTimings(/** @type {import('../data/wasm-source.js').LoadTimings} */ (handle.timings));
 
     setAnalysisStatus(handle.result);
     currentDemo = handle;
@@ -109,6 +126,7 @@ export async function loadDemo(input, { deepLink = false } = {}) {
 // The load panel's three ways in. Each reports its own failure on the
 // status line.
 
+/** @param {File} file */
 export async function uploadFile(file) {
     setStatus('Analyzing...', 'status loading');
     try {
@@ -128,6 +146,7 @@ export function loadDeepLink() {
     return loadHubInput(true);
 }
 
+/** @param {boolean} deepLink */
 async function loadHubInput(deepLink) {
     const input = hubInput.get().trim();
     if (!input) {
@@ -151,6 +170,7 @@ async function loadHubInput(deepLink) {
     }
 }
 
+/** @param {import('../data/hub.js').HubGame} game */
 export async function loadGameFromSearch(game) {
     try {
         await loadDemo({ game });
@@ -168,8 +188,11 @@ export async function loadGameFromSearch(game) {
 // trails / region overlay). Re-selecting the active tab re-runs its show
 // path. (The Timeline tab, src/tabs/timeline/, redraws itself when the
 // buckets land.)
+/** @param {{ bucketsMs: number, regionMs: number }} data */
 function onBucketsReady(data) {
-    if (currentDemo.result.timelineAnalysis) loadMapAndRegions(currentDemo.result);
+    // Called only for the handle that is still currentDemo.
+    const cur = /** @type {import('../data/wasm-source.js').DemoHandle} */ (currentDemo);
+    if (cur.result.timelineAnalysis) loadMapAndRegions(cur.result);
     switchTab(activeTabName());
 
     if (typeof data.bucketsMs === 'number') {
@@ -178,6 +201,10 @@ function onBucketsReady(data) {
     }
 }
 
+/**
+ * @param {Result} result
+ * @param {boolean} deepLink
+ */
 function displayResults(result, deepLink) {
     // Wipe every store and JS-side state object that could carry data from
     // a previous demo. Critical when swapping between demos with different
@@ -236,7 +263,8 @@ function displayResults(result, deepLink) {
     }
 
     // Make all static tables sortable
-    document.querySelectorAll('.stats-table').forEach(makeSortable);
+    // Every .stats-table is a <table>.
+    /** @type {NodeListOf<HTMLTableElement>} */ (document.querySelectorAll('.stats-table')).forEach(makeSortable);
 
     // The deep link's URL state (tab, time, segment, learn mode); any other
     // load writes the URL afresh for this demo.
@@ -256,10 +284,12 @@ function displayResults(result, deepLink) {
 // Timeline's A-vs-B panels (src/tabs/timeline/ moves its per-player views
 // into panels of their own off the teams store's perPlayer, the same test)
 // and the Chat tab's second say column (src/tabs/chat/).
+/** @param {boolean} on */
 function setIndividualFieldLayout(on) {
     document.body.classList.toggle('individual-field', on);
 }
 
+/** @param {Result} result */
 function applyDuelModeUI(result) {
     // Toggle a class on <body> so CSS can drive the hiding. Using a
     // class (instead of inline style writes) means the UI can re-render
@@ -325,6 +355,7 @@ function resetUIToCleanState() {
 // order, the demo's own. The shared playhead was put at 0 by
 // resetUIToCleanState; it is deliberately NOT reset here, so a ?t= deep
 // link or early scrubbing during the deferred-bucket window survives.
+/** @param {Result} result */
 function initTimeline(result) {
     if (teams.get().order.length === 0) {
         const fallback = fallbackTeamOrder(result);
@@ -343,6 +374,7 @@ function initTimeline(result) {
 // it all the same (the region GEOMETRY is a property of the map) none of
 // those surfaces is offered. A two-participant match (a duel, a 1v1 FFA)
 // has two sides and keeps them.
+/** @param {Result} result */
 function loadMapAndRegions(result) {
     mapModel.loadMap(result);
     resetRegionControl(result, !isMultiPlayerIndividual(result));

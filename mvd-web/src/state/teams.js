@@ -23,6 +23,10 @@ const PLAYER_PALETTE = [
 // entries — "red"/"blue" teams keep those colours — then the rest in name
 // sort order. Unused palette entries pad the tail so defensive colors[i]
 // lookups past the team count still answer a palette colour.
+/**
+ * @param {string[]} teams
+ * @returns {string[]}
+ */
 export function assignTeamColors(teams) {
     const slotOf = new Array(teams.length).fill(-1);
     const taken = new Set();
@@ -47,6 +51,10 @@ export function assignTeamColors(teams) {
     return colors;
 }
 
+/**
+ * @param {string[]} players
+ * @returns {string[]}
+ */
 export function assignPlayerColors(players) {
     const byName = players.map((_, i) => i)
         .sort((a, b) => (players[a] < players[b] ? -1 : players[a] > players[b] ? 1 : 0));
@@ -57,12 +65,24 @@ export function assignPlayerColors(players) {
     return colors;
 }
 
-// { order, colors, perPlayer, teamOf: Map(player name → team name) }
-export const teams = store({ order: [], colors: [...TEAM_PALETTE], perPlayer: false, teamOf: new Map() });
+/**
+ * @typedef {object} TeamsState
+ * @property {string[]} order          frag-sorted canonical order, winner first
+ * @property {string[]} colors         colors[i] belongs to order[i]
+ * @property {boolean} perPlayer       coloured per player (a field of > 2)
+ * @property {Map<string, string>} teamOf  player name → team name
+ */
+
+export const teams = store(/** @type {TeamsState} */ ({ order: [], colors: [...TEAM_PALETTE], perPlayer: false, teamOf: new Map() }));
 
 // setCanonicalTeams sets the match's canonical order once per demo.
 // `players` ([{ name, team }]) maps a player to their side for
 // teamIndexOf / colorOf; in an individual layout a player is their own side.
+/**
+ * @param {string[]} order
+ * @param {boolean} [perPlayer]
+ * @param {Array<{ name?: string, team?: string }>} [players]
+ */
 export function setCanonicalTeams(order, perPlayer = false, players = []) {
     const teamOf = new Map();
     for (const p of players) if (p?.name != null && p.team != null && !teamOf.has(p.name)) teamOf.set(p.name, p.team);
@@ -76,11 +96,22 @@ export function setCanonicalTeams(order, perPlayer = false, players = []) {
 
 // teamIndexOf: a player's index in the canonical order (the colour index),
 // -1 when unknown. `individual` is true when every player is their own side.
+/**
+ * @param {TeamsState} state
+ * @param {string} name
+ * @param {boolean} [individual]
+ */
 export function teamIndexOf(state, name, individual) {
     if (individual) return state.order.indexOf(name);
-    return state.order.indexOf(state.teamOf.get(name));
+    // An unknown player has no team: indexOf(undefined) is -1.
+    return state.order.indexOf(/** @type {string} */ (state.teamOf.get(name)));
 }
 
+/**
+ * @param {TeamsState} state
+ * @param {string} name
+ * @param {boolean} [individual]
+ */
 export function colorOf(state, name, individual) {
     return state.colors[teamIndexOf(state, name, individual)] || '#ccc';
 }

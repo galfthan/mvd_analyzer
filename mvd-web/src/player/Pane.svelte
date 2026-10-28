@@ -9,11 +9,13 @@
     import X from '@lucide/svelte/icons/x';
     import { paneLayout, updateLayout, movePane } from './layout.js';
 
+    /** @type {{ id: string, title: string, index: number, count: number, children: import('svelte').Snippet }} */
     let { id, title, index, count, children } = $props();
 
     let collapsed = $derived(!!$paneLayout.collapsed[id]);
     let height = $derived($paneLayout.heights[id] ?? null);
     let dragOver = $state(false);
+    /** @type {HTMLElement | undefined} */
     let body = $state();
 
     function toggle() {
@@ -24,20 +26,25 @@
         updateLayout((l) => { l.order = l.order.filter((x) => x !== id); });
     }
 
+    // A drag event carries dataTransfer.
+    /** @param {DragEvent} e */
     function dragStart(e) {
-        e.dataTransfer.setData('text/x-mvd-pane', id);
-        e.dataTransfer.effectAllowed = 'move';
+        const dt = /** @type {DataTransfer} */ (e.dataTransfer);
+        dt.setData('text/x-mvd-pane', id);
+        dt.effectAllowed = 'move';
     }
 
+    /** @param {DragEvent} e */
     function dragOverPane(e) {
-        if (!e.dataTransfer.types.includes('text/x-mvd-pane')) return;
+        if (!/** @type {DataTransfer} */ (e.dataTransfer).types.includes('text/x-mvd-pane')) return;
         e.preventDefault();
         dragOver = true;
     }
 
+    /** @param {DragEvent} e */
     function drop(e) {
         dragOver = false;
-        const from = e.dataTransfer.getData('text/x-mvd-pane');
+        const from = /** @type {DataTransfer} */ (e.dataTransfer).getData('text/x-mvd-pane');
         if (!from || from === id) return;
         e.preventDefault();
         movePane(from, index);
@@ -45,10 +52,13 @@
 
     // Bottom handle: drag to set the body height; double-click resets it to
     // the pane's natural height.
+    /** @param {PointerEvent} e */
     function resizeStart(e) {
         e.preventDefault();
         const startY = e.clientY;
-        const startH = body.getBoundingClientRect().height;
+        // The handle renders with the body it resizes.
+        const startH = /** @type {HTMLElement} */ (body).getBoundingClientRect().height;
+        /** @param {PointerEvent} ev */
         const move = (ev) => {
             const h = Math.max(60, Math.round(startH + ev.clientY - startY));
             updateLayout((l) => { l.heights[id] = h; });

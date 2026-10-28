@@ -17,27 +17,38 @@ import { isIndividualLayout, isMultiPlayerIndividual } from './result.js';
 // every `order.indexOf(row.team)` colour lookup resolves to the player's
 // rank without a second mapping. `perPlayer` (the player palette) only for
 // more than two: a duel keeps the team palette.
+/**
+ * @typedef {import('./result.js').Result} Result
+ * @typedef {{ order: string[], perPlayer: boolean }} TeamOrder
+ */
+
+/**
+ * @param {Result} result
+ * @returns {TeamOrder}
+ */
 export function canonicalTeamOrder(result) {
     const demoInfo = result.demoInfo;
     const individual = isIndividualLayout(result);
     const psTeams = playerStatsTeamRows(result);
+    /** @type {string[]} */
     let teams = [];
     if (individual) {
         teams = sortByFragsDesc(playerStatsRows(result)).map(p => p.name);
         if (!teams.length && result.match?.players) {
             teams = [...result.match.players]
-                .sort((a, b) => (b.frags || 0) - (a.frags || 0))
-                .map(p => p.name);
+                .sort((/** @type {{ frags?: number }} */ a, /** @type {{ frags?: number }} */ b) => (b.frags || 0) - (a.frags || 0))
+                .map((/** @type {{ name: string }} */ p) => p.name);
         }
     } else if (psTeams.length) {
         teams = psTeams.map(t => t.name);
     } else if (demoInfo?.teams) {
         teams = [...demoInfo.teams];
     } else if (result.match?.teams) {
-        teams = result.match.teams.map(t => t.name);
+        teams = result.match.teams.map((/** @type {{ name: string }} */ t) => t.name);
     }
     if (!individual && teams.length >= 2) {
         const rows = playerStatsRows(result);
+        /** @type {Record<string, number>} */
         const teamFrags = psTeams.length
             ? Object.fromEntries(psTeams.map(t => [t.name, fragsOfRow(t)]))
             : teamFragTotals(rows.length ? rows : demoInfo?.players);
@@ -49,18 +60,26 @@ export function canonicalTeamOrder(result) {
 // fallbackTeamOrder: the demo's own team list when canonicalTeamOrder found
 // none (an empty order) — demoInfo.teams for a team layout, else
 // match.teams — or null when it has neither.
+/**
+ * @param {Result} result
+ * @returns {TeamOrder | null}
+ */
 export function fallbackTeamOrder(result) {
     if (!isIndividualLayout(result) && result.demoInfo?.teams) {
         return { order: [...result.demoInfo.teams], perPlayer: false };
     }
     if (result.match?.teams) {
-        return { order: result.match.teams.map(t => t.name), perPlayer: isMultiPlayerIndividual(result) };
+        return { order: result.match.teams.map((/** @type {{ name: string }} */ t) => t.name), perPlayer: isMultiPlayerIndividual(result) };
     }
     return null;
 }
 
 // canonicalPlayers: the [{ name, team }] rows the teams store maps a player
 // to their side with.
+/**
+ * @param {Result | null | undefined} result
+ * @returns {Array<{ name?: string, team?: string }>}
+ */
 export function canonicalPlayers(result) {
     return [...(result?.match?.players || []), ...(result?.demoInfo?.players || [])];
 }

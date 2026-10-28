@@ -7,12 +7,23 @@
 // descending (biggest first, what a stats reader wants), text columns
 // ascending. The sniff uses the same value a sort would, from the first
 // row that has one ('' and '-' are "no value").
+/** @typedef {'asc' | 'desc'} SortDir */
+
+/**
+ * @param {string[]} texts
+ * @returns {SortDir}
+ */
 export function firstSortDir(texts) {
     const probe = texts.find(t => t !== '' && t !== '-');
     return probe !== undefined && !isNaN(parseFloat(probe)) ? 'desc' : 'asc';
 }
 
 // The next direction: a column already sorted flips, a fresh one sniffs.
+/**
+ * @param {SortDir | null} current
+ * @param {string[]} texts
+ * @returns {SortDir}
+ */
 export function nextSortDir(current, texts) {
     if (current === 'asc') return 'desc';
     if (current === 'desc') return 'asc';
@@ -21,6 +32,11 @@ export function nextSortDir(current, texts) {
 
 // compareSortText orders two sort texts. Both numeric — by their leading
 // number (handles "42", "3.5%", "12 (30s)", etc.) — else as strings.
+/**
+ * @param {string} aText
+ * @param {string} bText
+ * @param {SortDir} dir
+ */
 export function compareSortText(aText, bText, dir) {
     const aNum = parseFloat(aText);
     const bNum = parseFloat(bText);

@@ -5,6 +5,8 @@
 import { buildVersion, buildStale } from '../state/shell.js';
 import { mvdTiming } from './timing.js';
 
+/** @typedef {{ tag: string, hash: string, date: string }} BuildVersion  the wasm's build (cmd/wasm) */
+
 let analyzerFailed = false;
 
 // analyzerHasFailed: the wasm did not load; the overlay says why, and a
@@ -23,6 +25,7 @@ export function hideLoadingOverlay() {
     if (overlay) overlay.style.display = 'none';
 }
 
+/** @param {string} text */
 function setLoadingOverlayMessage(text) {
     const overlay = document.getElementById('wasm-loading');
     if (!overlay) return;
@@ -39,7 +42,9 @@ function setLoadingOverlayMessage(text) {
 // Cache-Control: no-cache, so the reload revalidates everything — and if
 // the mismatch survives the reload (deploy still propagating), just flag it
 // in the version tag instead of looping.
+/** @param {{ hash?: string } | null | undefined} v */
 function checkBuildCoherence(v) {
+    /** @type {HTMLMetaElement | null} */
     const meta = document.querySelector('meta[name="build"]');
     const pageBuild = meta ? meta.content : '';
     const wasmBuild = v && v.hash ? v.hash : '';
@@ -61,6 +66,7 @@ function checkBuildCoherence(v) {
 // onAnalyzerReady runs once the wasm is up (mvdData.ready): records its
 // load time, drops the overlay unless a deep-linked demo is about to load,
 // and fills the version tag.
+/** @param {{ version: BuildVersion | null, wasmLoadMs: number }} info */
 export function onAnalyzerReady(info) {
     if (typeof info.wasmLoadMs === 'number') mvdTiming.wasmLoadMs = info.wasmLoadMs;
     const params = new URLSearchParams(location.search);
@@ -77,6 +83,7 @@ export function onAnalyzerReady(info) {
 }
 
 // onAnalyzerFailed: the wasm did not load — the overlay stays up with why.
+/** @param {Error} err */
 export function onAnalyzerFailed(err) {
     analyzerFailed = true;
     setLoadingOverlayMessage(err.message);

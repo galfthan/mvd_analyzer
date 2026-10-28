@@ -10,6 +10,7 @@ import { updateUrlState } from './url.js';
 
 // switchTab takes a URL tab name too (the locs-regions alias); an unknown
 // name changes nothing.
+/** @param {string} name */
 export function switchTab(name) {
     selectTab(resolveTabName(name));
 }
@@ -26,8 +27,10 @@ export function setupTabs() {
     subscribed = true;
 }
 
+/** @param {string} tabName */
 function onTabActivated(tabName) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.getElementById(`tab-${tabName}`).classList.add('active');
+    // Every tab in TABS renders its #tab-<id> (src/shell/App.svelte).
+    /** @type {HTMLElement} */ (document.getElementById(`tab-${tabName}`)).classList.add('active');
     updateUrlState();
 }

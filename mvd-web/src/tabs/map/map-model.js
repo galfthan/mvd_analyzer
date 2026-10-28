@@ -26,7 +26,7 @@ export const view = new MvdMap();
 
 // The demo whose data is loaded ({ result }), null after a reset: the tab
 // rebuilds its legend, items list and controls from it.
-export const mapData = store(null);
+export const mapData = store(/** @type {{ result: import('../../lib/result.js').Result } | null} */ (null));
 
 // "The map changed, draw it again" — geometry arrived, regions changed, line
 // of sight landed. A counter.
@@ -129,6 +129,7 @@ export function resetMap() {
 // when it lands). It resets the view — pan / zoom / angles, follow, focus,
 // learn mode, the trail toggles — as every load always has, the deferred
 // re-run when the buckets land included.
+/** @param {import('../../lib/result.js').Result} result */
 export function loadMap(result) {
     const ta = result.timelineAnalysis;
     if (!ta) return;
@@ -216,9 +217,11 @@ export function loadMap(result) {
 // lookup points at the new groups. Not on a field of players: its model is
 // not editable, no overlay shows, and Go answers a recompute there with
 // "region control unavailable".
+/** @param {{ locs: unknown[] }} geom  the map's geometry JSON (maps/<map>.json) */
 function applyMapGeometry(geom) {
     view.setGeometry(geom);
-    if (regionControl.get()?.editable) reapplyRegions(demo.get());
+    // An editable region model exists only once a demo is loaded.
+    if (regionControl.get()?.editable) reapplyRegions(/** @type {import('../../data/wasm-source.js').DemoHandle} */ (demo.get()));
     touch();
 }
 
@@ -232,13 +235,15 @@ export async function ensureLineOfSight() {
     s.losPending = true;
     touch();
     try {
-        const players = JSON.parse(await demo.get().lineOfSight());
+        // The Map tab asks only with a demo loaded.
+        const handle = /** @type {import('../../data/wasm-source.js').DemoHandle} */ (demo.get());
+        const players = JSON.parse(await handle.lineOfSight());
         if (players && players.error) throw new Error(players.error);
         s.losByPair = buildVisByPair(players, 'los');
         s.pvsByPair = buildVisByPair(players, 'pvs');
         s.losComputed = true;
     } catch (err) {
-        console.warn('computeLineOfSight:', err.message);
+        console.warn('computeLineOfSight:', /** @type {Error} */ (err).message);
     } finally {
         s.losPending = false;
         touch();

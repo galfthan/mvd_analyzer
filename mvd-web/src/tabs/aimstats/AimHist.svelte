@@ -3,6 +3,7 @@
     // src/lib/aim-plot.js): bars, hover titles, the axis labels; a marginal
     // adds the shaded on-hull band and the dead-center rule, the ramp its
     // labelled y gutter. A bin with fires keeps a 2px stub.
+    /** @type {{ h: import('../../lib/aim-plot.js').MarginalHist | import('../../lib/aim-plot.js').RampHist }} */
     let { h } = $props();
 </script>
 

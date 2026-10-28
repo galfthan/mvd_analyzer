@@ -14,6 +14,12 @@
 // section rather than a cutoff picked by the UI.
 //
 // Returns { html, warn } or null when the section is measured.
+/** @typedef {{ html: string, warn: boolean }} ProvenanceNote */
+
+/**
+ * @param {import('./result.js').Result | null | undefined} result
+ * @returns {ProvenanceNote | null}
+ */
 export function damageProvenanceHtml(result) {
     if (result?.damage?.source !== 'reconstructed') return null;
     const lead = 'Damage on this demo is <strong>reconstructed</strong>: it predates the server\'s damage log, ' +
@@ -44,6 +50,7 @@ export function damageProvenanceHtml(result) {
 // 60 reconstructed demos in a 120-demo archive sample carry 200 or more
 // scoreable kills, the largest 843. There it truncates to two decimals
 // instead, which cannot reach 100 from below.
+/** @param {number} ratio */
 export function coveragePct(ratio) {
     const pct = ratio * 100;
     const rounded = pct.toFixed(ratio < 0.1 ? 1 : 0);
@@ -52,6 +59,7 @@ export function coveragePct(ratio) {
 }
 
 // The banner's class: a warning when the evidence is incomplete.
+/** @param {ProvenanceNote | null | undefined} note */
 export function provenanceClass(note) {
     return note && note.warn ? 'panel-provenance warn' : 'panel-provenance';
 }

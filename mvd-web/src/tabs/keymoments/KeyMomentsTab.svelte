@@ -31,22 +31,32 @@
     // Which empty message shows, by the id prefix of its table.
     const EMPTY_IDS = ['keymoments', 'keymoments-filtered', 'fragstreaks', 'demomarkers', 'topdmg', 'toprl', 'toplg',
         'airgibs', 'discharges', 'quadbores', 'telefrags'];
+    /**
+     * @typedef {import('../../lib/keymoments.js').Row} Row
+     * @typedef {import('../../lib/keymoments.js').RowCtx} RowCtx
+     * @typedef {import('../../lib/keymoments.js').RunFilter} RunFilter
+     */
+
+    /** @returns {Record<string, boolean>} */
     const noEmpties = () => Object.fromEntries(EMPTY_IDS.map((id) => [id, false]));
 
     let empty = $state(noEmpties());
     // The damage-evidence banner over the three damage-ranked tables (the
     // same renderer as the Summary and Aim tabs' banners). Powerup runs and
     // frag streaks are frag-log-only and carry none.
-    let note = $state(null);
-    let root = $state();
-    let minDurEl = $state();
-    let minFragsEl = $state();
-    // tbody / table elements by id prefix.
-    const bodies = $state({});
-    const tables = $state({});
+    let note = $state(/** @type {import('../../lib/provenance.js').ProvenanceNote | null} */ (null));
+    let root = $state(/** @type {HTMLElement | undefined} */ (undefined));
+    let minDurEl = $state(/** @type {HTMLInputElement | undefined} */ (undefined));
+    let minFragsEl = $state(/** @type {HTMLInputElement | undefined} */ (undefined));
+    // tbody / table elements by id prefix, bound at mount.
+    const bodies = $state(/** @type {Record<string, HTMLTableSectionElement>} */ ({}));
+    const tables = $state(/** @type {Record<string, HTMLTableElement>} */ ({}));
 
+    /** @type {RunFilter} */
     let filter = { ...KEYMOMENTS_FILTER_DEFAULTS };
+    /** @type {Row[]} */
     let runs = [];
+    /** @type {RowCtx | null} */
     let ctx = null;
     let token = 0;
     let dirty = true;
@@ -67,8 +77,8 @@
         token++;
         clearAll();
         filter = { ...KEYMOMENTS_FILTER_DEFAULTS };
-        if (minDurEl) minDurEl.value = filter.minDur;
-        if (minFragsEl) minFragsEl.value = filter.minFrags;
+        if (minDurEl) minDurEl.value = String(filter.minDur);
+        if (minFragsEl) minFragsEl.value = String(filter.minFrags);
         dirty = true;
         schedule();
     }
@@ -80,10 +90,17 @@
         runs = [];
     }
 
+    /**
+     * @param {HTMLTableSectionElement} body
+     * @param {Row[]} rows
+     * @param {(row: Row, ctx: RowCtx) => string} html
+     * @param {(row: Row) => number} timeOf
+     */
     function appendRows(body, rows, html, timeOf) {
         for (const r of rows) {
             const tr = document.createElement('tr');
-            tr.innerHTML = html(r, ctx);
+            // Rows are only appended by build() and what it starts, after ctx is set.
+            tr.innerHTML = html(r, /** @type {RowCtx} */ (ctx));
             const link = tr.querySelector('.time-link');
             if (link) link.addEventListener('click', () => clock.seek(timeOf(r)));
             body.appendChild(tr);
@@ -120,7 +137,7 @@
         for (const spec of HIGHLIGHT_TABLES) renderHighlights(spec, result);
 
         for (const [key, fn, opts] of TOP_QUERIES) {
-            handle.view(fn, opts)
+            /** @type {import('../../state/demo.js').DemoHandle} */ (handle).view(fn, opts)
                 .then((v) => { if (my === token) renderTop(key, v); })
                 .catch((err) => {
                     if (my !== token) return;
@@ -143,15 +160,23 @@
         appendRows(bodies.keymoments, shown, powerupRunRowHtml, (e) => e.time);
     }
 
+    /**
+     * @param {Event & { currentTarget: HTMLInputElement }} e
+     * @param {keyof RunFilter} key
+     */
     function onFilter(e, key) {
         const clean = cleanFilterValue(e.currentTarget.value, key);
         filter[key] = clean;
-        e.currentTarget.value = clean;
+        e.currentTarget.value = String(clean);
         if (demo.get()?.result) renderPowerupRuns();
     }
 
     // `v` is the view reply, or null when the query failed (the
     // 422-equivalent: no damage log or no measurable liveness).
+    /**
+     * @param {import('../../lib/keymoments.js').TopKey} key
+     * @param {Row | null} v
+     */
     function renderTop(key, v) {
         bodies[key].replaceChildren();
         const rows = topRows(key, v);
@@ -163,6 +188,10 @@
     // reset to it each load and the rows laid out in that order;
     // makeSortable takes over on click. An empty table leaves its headers as
     // they were.
+    /**
+     * @param {import('../../lib/keymoments.js').HighlightTable} spec
+     * @param {import('../../lib/result.js').Result} result
+     */
     function renderHighlights(spec, result) {
         const rows = spec.rows(result);
         const table = tables[spec.id];
@@ -177,7 +206,7 @@
     }
 
     onMount(() => {
-        root.querySelectorAll('table.stats-table').forEach(makeSortable);
+        /** @type {NodeListOf<HTMLTableElement>} */ (/** @type {HTMLElement} */ (root).querySelectorAll('table.stats-table')).forEach(makeSortable);
         const offs = [
             demo.subscribe(onDemo),
             activeTab.subscribe(schedule),
@@ -186,11 +215,11 @@
     });
 </script>
 
-{#snippet provenance(id)}
+{#snippet provenance(/** @type {string} */ id)}
     <div id="{id}-provenance" class={provenanceClass(note)} style:display={note ? null : 'none'}>{@html note?.html ?? ''}</div>
 {/snippet}
 
-{#snippet emptyMsg(id, text)}
+{#snippet emptyMsg(/** @type {string} */ id, /** @type {string} */ text)}
     <div id="{id}-empty" class="empty-message" style:display={empty[id] ? 'block' : 'none'}>{text}</div>
 {/snippet}
 

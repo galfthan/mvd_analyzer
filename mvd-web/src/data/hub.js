@@ -9,6 +9,14 @@ const HEADERS = {
     'accept-profile': 'public',
 };
 
+/**
+ * A hub game row (the v1_games table; the search selects a subset of its
+ * columns). Open: the hub owns its shape.
+ * @typedef {Record<string, any>} HubGame
+ * @typedef {typeof fetch} FetchImpl
+ * @typedef {Partial<Record<'player' | 'team' | 'map' | 'mode' | 'tag' | 'from' | 'to', string>>} SearchFilters
+ */
+
 export const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 'to'];
 const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,demo_source_url,server_hostname';
 
@@ -17,6 +25,10 @@ const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,
 // walks offset pages until every match is shown.
 const SEARCH_PAGE_SIZE = 100;
 
+/**
+ * @param {string} input
+ * @returns {number}
+ */
 export function parseGameId(input) {
     input = input.trim();
     const asNum = parseInt(input, 10);
@@ -31,6 +43,11 @@ export function parseGameId(input) {
     throw new Error('Could not parse game ID from: ' + input);
 }
 
+/**
+ * @param {number | string} gameId
+ * @param {FetchImpl} [fetchImpl]
+ * @returns {Promise<HubGame>}
+ */
 export async function fetchGame(gameId, fetchImpl = fetch) {
     const resp = await fetchImpl(`${SUPABASE_URL}?select=*&id=eq.${gameId}`, { headers: HEADERS });
     if (!resp.ok) throw new Error(`Hub API error: ${resp.status}`);
@@ -39,6 +56,12 @@ export async function fetchGame(gameId, fetchImpl = fetch) {
     return games[0];
 }
 
+/**
+ * @param {SearchFilters} filters
+ * @param {number} [offset]
+ * @param {FetchImpl} [fetchImpl]
+ * @returns {Promise<{ games: HubGame[], total: number | null }>}
+ */
 export async function searchGames(filters, offset = 0, fetchImpl = fetch) {
     const parts = [
         `select=${encodeURIComponent(SEARCH_SELECT)}`,
@@ -73,6 +96,11 @@ export async function searchGames(filters, offset = 0, fetchImpl = fetch) {
 }
 
 // downloadDemo tries the hub CDN by sha256, then the server's own URL.
+/**
+ * @param {HubGame} game
+ * @param {FetchImpl} [fetchImpl]
+ * @returns {Promise<Uint8Array<ArrayBuffer>>}
+ */
 export async function downloadDemo(game, fetchImpl = fetch) {
     const sha = game.demo_sha256;
     if (sha && sha.length >= 3) {
@@ -90,8 +118,9 @@ export async function downloadDemo(game, fetchImpl = fetch) {
     throw new Error('No download URL available for this game');
 }
 
+/** @param {HubGame} game */
 export function demoFilename(game) {
-    const teams = (game.teams || []).map(t => (t.name || '').replace(/[^a-zA-Z0-9_-]/g, '_'));
+    const teams = (game.teams || []).map(/** @param {{ name?: string }} t */ t => (t.name || '').replace(/[^a-zA-Z0-9_-]/g, '_'));
     const teamsStr = teams.join('_vs_') || 'unknown';
     const mapName = (game.map || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_');
     const ts = new Date(game.timestamp).toISOString().replace(/[-:T]/g, '').slice(0, 13);

@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // Region-control decoding. The Go analyzer emits one character per bucket
 // (mvd-analytics/analyzer/region_control.go); this is the reverse mapping to
 // the state names the overlay and the region timeline draw with.

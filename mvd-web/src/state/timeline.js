@@ -6,4 +6,4 @@
 // pan and double-click set it too; src/app/url.js writes it to the URL (`seg=`).
 import { store } from './store.js';
 
-export const segment = store(null);
+export const segment = store(/** @type {{ start: number, end: number } | null} */ (null));

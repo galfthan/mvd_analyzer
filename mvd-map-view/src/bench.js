@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // Map-render benchmark support: a deterministic scripted camera path and
 // the summary statistics for a recorded run.
 //

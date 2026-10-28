@@ -28,9 +28,31 @@
 import { store } from './store.js';
 import { regionRowsFromRegions, readRegionDefs, resolveRegions, regionOverrideJSON } from '../lib/regions.js';
 
-export const regionControl = store(null);
+/**
+ * @typedef {import('../lib/regions.js').RegionDef} RegionDef
+ * @typedef {import('../lib/regions.js').Region} Region
+ * @typedef {import('../lib/regions.js').RegionPoint} RegionPoint
+ * @typedef {import('../data/wasm-source.js').DemoHandle} DemoHandle
+ *
+ * @typedef {object} RegionControl
+ * @property {'loaded' | 'resolved' | 'computed'} stage
+ * @property {boolean} editable
+ * @property {RegionPoint[]} locations
+ * @property {RegionDef[]} defs
+ * @property {Region[]} regions
+ * @property {any} stats          Go's answer, as it shipped it
+ * @property {any} bucketStates
+ * @property {string | null} teamA
+ * @property {string | null} teamB
+ */
+
+export const regionControl = store(/** @type {RegionControl | null} */ (null));
 
 // resetRegionControl sets the demo's own regions (loadMapAndRegions, src/app/load.js).
+/**
+ * @param {import('../lib/result.js').Result | null} result
+ * @param {boolean} editable
+ */
 export function resetRegionControl(result, editable) {
     const rc = result?.timelineAnalysis?.regionControl;
     if (!rc || !rc.regions || rc.regions.length === 0) {
@@ -60,10 +82,15 @@ export function resetRegionControl(result, editable) {
 // back when the deferred buckets land (resetRegionControl), another demo —
 // is dropped: merged into the newer model it would pair this edit's
 // regions with that model's definitions.
+/**
+ * @param {DemoHandle} handle
+ * @param {RegionDef[]} defs
+ */
 export async function applyRegionDefs(handle, defs) {
     const cur = regionControl.get();
     if (!cur) return;
     const regions = resolveRegions(defs, cur.locations);
+    /** @type {RegionControl} */
     const resolved = { ...cur, stage: 'resolved', defs, regions };
     regionControl.set(resolved);
 
@@ -71,7 +98,7 @@ export async function applyRegionDefs(handle, defs) {
     try {
         res = JSON.parse(await handle.recomputeRegions(regionOverrideJSON(regions)));
     } catch (err) {
-        console.warn('recomputeRegionControl:', err.message);
+        console.warn('recomputeRegionControl:', /** @type {Error} */ (err).message);
         return;
     }
     if (regionControl.get() !== resolved) return;
@@ -92,6 +119,7 @@ export async function applyRegionDefs(handle, defs) {
 // reapplyRegions applies the definitions in effect again — the Map's model
 // calls it when the map geometry arrives, so the overlay's region → loc-group lookup
 // is rebuilt against the new groups.
+/** @param {DemoHandle} handle */
 export function reapplyRegions(handle) {
     const cur = regionControl.get();
     if (cur) return applyRegionDefs(handle, cur.defs);

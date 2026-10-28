@@ -8,16 +8,39 @@ import { playlistStep } from '../lib/playlist.js';
 import { playlist, setRun } from './playlist-store.js';
 import { toast } from './toast.js';
 
+/**
+ * @typedef {import('../lib/playlist.js').Clip} Clip
+ * @typedef {import('../lib/playlist.js').PlaylistStep} PlaylistStep
+ * @typedef {import('./playlist-store.js').Run} Run
+ * @typedef {import('../data/wasm-source.js').DemoHandle} DemoHandle
+ *
+ * @typedef {object} RunnerDeps
+ * @property {import('./engine.js').PlayerEngine} engine
+ * @property {import('../state/store.js').Store<DemoHandle | null>} demo
+ * @property {typeof import('../state/teams.js').teams} teams
+ * @property {(id: string) => void} selectTab
+ * @property {typeof import('../app/load.js').loadDemo} loadDemo
+ * @property {typeof import('./demo-ref.js').demoRefOf} demoRefOf
+ */
+
+/** @param {RunnerDeps} deps */
 export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRefOf }) {
+    /** @type {Run | null} */
     let loadingRun = null;   // the run whose next clip's demo is being loaded
     let awaitingFrames = false;   // a clip waits for the shown engine to repaint
 
     const currentRef = () => demoRefOf(demo.get(), teams.get().order);
+    /** @param {Clip} c */
     const isCurrent = (c) => {
         const ref = currentRef();
         return !!ref && c.demo?.key === ref.key;
     };
 
+    /**
+     * @param {Clip[]} clips
+     * @param {number} [index]
+     * @param {boolean} [transient]
+     */
     function start(clips, index = 0, transient = false) {
         if (!clips.length) return;
         setRun({ clips, index, prev: null, transient });
@@ -28,6 +51,10 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
         setRun(null);
     }
 
+    /**
+     * @param {number} index
+     * @returns {void | Promise<void>}
+     */
     function playClip(index) {
         const run = playlist.get().run;
         if (!run) return;
@@ -69,15 +96,17 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
         engine.play();
     }
 
+    /** @param {Clip} c  a hub clip: demo.gameId is set */
     async function loadForRun(c) {
-        const run = playlist.get().run;
+        // A run is what plays the clip.
+        const run = /** @type {Run} */ (playlist.get().run);
         toast(`Loading ${c.demo.title || `game ${c.demo.gameId}`}…`);
         loadingRun = run;
         let shown;
         try {
-            shown = await loadDemo({ gameId: c.demo.gameId });
+            shown = await loadDemo({ gameId: /** @type {number} */ (c.demo.gameId) });
         } catch (err) {
-            toast(`Could not load game ${c.demo.gameId}: ${err.message}`);
+            toast(`Could not load game ${c.demo.gameId}: ${/** @type {Error} */ (err).message}`);
             if (playlist.get().run === run) stop();
             return;
         } finally {
@@ -111,12 +140,14 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             return;
         }
         // Step over the clips of this demo only; indices map back to the list.
+        /** @type {number[]} */
         const local = [];
         run.clips.forEach((c, i) => { if (isCurrent(c)) local.push(i); });
         const li = local.indexOf(run.index);
         if (li < 0) return;
         // The demo can run out inside a clip padded past its last frame; FTE
         // then reports not playing and `to` is never crossed — it is done.
+        /** @type {PlaylistStep} */
         const step = fte.hasEnded()
             ? { type: 'end' }
             : playlistStep(local.map((i) => run.clips[i]), li, run.prev, demoT, fte.isPlaying());

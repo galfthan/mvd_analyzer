@@ -19,14 +19,23 @@ function registerCytoscapeExtensions() {
 
 // The hover tooltip: created on the first graph and kept (next to the
 // canvas, inside its container) for every later one.
+/** @type {HTMLDivElement | null} */
 let tooltip = null;
+
+// Cytoscape ships no types (src/globals.d.ts declares it `any`), so the
+// instance and its events are `any` here.
 
 export class LocGraphView {
     // `labelSize()` reads the user's label size (the zoom counter-scaling
     // starts from it).
+    /**
+     * @param {HTMLElement} container
+     * @param {() => number} labelSize
+     */
     constructor(container, labelSize) {
         this.container = container;
         this.labelSize = labelSize;
+        /** @type {any} */
         this.cy = null;
         this.labelRaf = 0;
     }
@@ -34,6 +43,11 @@ export class LocGraphView {
     // refresh builds the instance on first call, otherwise swaps in the new
     // element set + style, then runs the layout. Keeping the instance alive
     // preserves pan/zoom state when the user toggles a filter.
+    /**
+     * @param {ReturnType<typeof import('../../lib/locgraph.js').locGraphElements>} elements
+     * @param {ReturnType<typeof import('../../lib/locgraph.js').locGraphStyle>} style
+     * @param {string} layout
+     */
     refresh(elements, style, layout) {
         registerCytoscapeExtensions();
         if (typeof cytoscape === 'undefined') return;
@@ -59,6 +73,10 @@ export class LocGraphView {
         this.runLayout(layout, false);
     }
 
+    /**
+     * @param {string} name
+     * @param {boolean} animate
+     */
     runLayout(name, animate) {
         const cy = this.cy;
         if (!cy) return;
@@ -70,6 +88,7 @@ export class LocGraphView {
         this.updateLabelSize();
     }
 
+    /** @param {ReturnType<typeof import('../../lib/locgraph.js').locGraphStyle>} style */
     setStyle(style) {
         if (!this.cy) return;
         this.cy.style(style);
@@ -127,11 +146,12 @@ export class LocGraphView {
             tooltip = document.createElement('div');
             tooltip.className = 'locgraph-tooltip';
             tooltip.style.display = 'none';
-            container.parentElement.appendChild(tooltip);
+            /** @type {HTMLElement} */ (container.parentElement).appendChild(tooltip);
         }
         const tip = tooltip;
 
         const hideTip = () => { tip.style.display = 'none'; };
+        /** @type {(evt: any, html: string) => void} */
         const showTipAt = (evt, html) => {
             tip.textContent = '';
             tip.innerHTML = html;
@@ -149,7 +169,7 @@ export class LocGraphView {
             }
         };
 
-        cy.on('mouseover', 'node', (evt) => {
+        cy.on('mouseover', 'node', (/** @type {any} */ evt) => {
             const node = evt.target;
             cy.elements().addClass('faded');
             node.removeClass('faded').addClass('highlight');
@@ -157,7 +177,7 @@ export class LocGraphView {
             node.connectedEdges().connectedNodes().removeClass('faded').addClass('highlight');
             showTipAt(evt, nodeTooltipHtml(node.data()));
         });
-        cy.on('mouseover', 'edge', (evt) => {
+        cy.on('mouseover', 'edge', (/** @type {any} */ evt) => {
             const edge = evt.target;
             cy.elements().addClass('faded');
             edge.removeClass('faded').addClass('highlight');
@@ -169,7 +189,7 @@ export class LocGraphView {
             cy.elements().removeClass('faded').removeClass('highlight');
             hideTip();
         });
-        cy.on('tap', (evt) => {
+        cy.on('tap', (/** @type {any} */ evt) => {
             if (evt.target === cy) hideTip();
         });
     }

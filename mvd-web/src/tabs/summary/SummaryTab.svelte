@@ -28,7 +28,29 @@
     } from '../../lib/summary.js';
     import { makeSortable } from '../../ui/sortable.js';
 
+    /**
+     * @typedef {import('../../lib/summary.js').SummaryRow} SummaryRow
+     * A <tbody>'s rows: hand-built rows, or plain markup strings.
+     * @typedef {Array<SummaryRow | string>} BodyRows
+     * @typedef {object} SummaryView
+     * @property {Omit<import('../../lib/summary.js').MatchInfo, 'mapTitle'> & { mapTitle: string | undefined }} info
+     * @property {string} date
+     * @property {import('../../lib/summary.js').MatchSettings | null} settings
+     * @property {string[] | null} serverInfo
+     * @property {import('../../lib/summary.js').TeamSummary[]} teamList
+     * @property {boolean} teamsHidden
+     * @property {import('../../lib/summary.js').NoMatchView | null} noMatch
+     * @property {import('../../lib/provenance.js').ProvenanceNote | null} note
+     * @property {string} convNote
+     * @property {boolean} showHandicap
+     * @property {import('../../lib/summary.js').WeaponKillBar[] | null} bars
+     * @property {Record<'basicTeam' | 'basicPlayer' | 'weapTeam' | 'weapPlayer' | 'itemTeam' | 'itemPlayer', SummaryRow[]>} tables
+     * @property {string[]} colors
+     */
+
+    /** @type {SummaryRow[]} */
     const NO_ROWS = [];
+    /** @returns {SummaryView} */
     const blank = () => ({
         // mapTitle stays undefined until a demo sets it, so the cell has no
         // tooltip before the first load.
@@ -119,13 +141,18 @@
             colors: t.colors,
         };
         // Binds once per header cell, so a rebuild never double-binds.
-        root.querySelectorAll('table.stats-table').forEach(makeSortable);
+        /** @type {NodeListOf<HTMLTableElement>} */ (root.querySelectorAll('table.stats-table')).forEach(makeSortable);
     }
 
     // Fill a <tbody> with hand-built rows ({ html, colorIdx }, or a plain
     // markup string): a 3px stripe in the row's canonical team colour when
     // it has one.
+    /**
+     * @param {HTMLTableSectionElement} node
+     * @param {{ rows: BodyRows, colors?: string[] }} arg
+     */
     function rows(node, arg) {
+        /** @param {{ rows: BodyRows, colors?: string[] }} arg */
         const fill = ({ rows: list, colors = [] }) => {
             node.replaceChildren();
             for (const row of list) {
@@ -152,7 +179,7 @@
     });
 </script>
 
-{#snippet weaponHead(first)}
+{#snippet weaponHead(/** @type {string} */ first)}
     <thead>
         <tr>
             <th rowspan="2">{first}</th>
@@ -171,7 +198,7 @@
     </thead>
 {/snippet}
 
-{#snippet itemsHead(first)}
+{#snippet itemsHead(/** @type {string} */ first)}
     <thead>
         <tr>
             <th rowspan="2">{first}</th>

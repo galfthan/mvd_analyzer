@@ -22,20 +22,36 @@
 import { WorkerClient } from './worker-client.js';
 import * as hub from './hub.js';
 
+/**
+ * @typedef {import('./hub.js').HubGame} HubGame
+ * @typedef {import('./worker-client.js').WorkerMessage} WorkerMessage
+ * @typedef {'info' | 'download' | 'analyze'} LoadStage
+ * @typedef {{ bytes: Uint8Array<ArrayBuffer>, name: string } | { game: HubGame } | { gameId: number | string }} LoadInput
+ * @typedef {{ onStage?: (stage: LoadStage) => void }} LoadOptions
+ * @typedef {{ net: { gameInfoFetch?: number, demoDownload?: number }, worker: any, parseMs: number }} LoadTimings
+ */
+
 class SupersededError extends Error {
     constructor() {
         super('load superseded by a newer one');
+        /** @type {true} */
         this.superseded = true;
     }
 }
 
 export class WasmSource {
+    /**
+     * @param {Worker} worker
+     * @param {{ fetchImpl?: typeof fetch }} [opts]
+     */
     constructor(worker, { fetchImpl = (...a) => fetch(...a) } = {}) {
         this.client = new WorkerClient(worker);
         this.fetchImpl = fetchImpl;
         this.ready = this.client.ready;
+        /** @type {DemoHandle | null} */
         this.current = null;
         this._loadSeq = 0;
+        /** @type {Map<number, DemoHandle>} */
         this._byReqId = new Map();
         this.client.onFollowup((msg) => this._onFollowup(msg));
     }
@@ -47,6 +63,11 @@ export class WasmSource {
     //   onStage('info' | 'download' | 'analyze') reports progress.
     // Waits for the wasm if it is still loading. Rejects with a
     // SupersededError once a newer load() was called.
+    /**
+     * @param {LoadInput} input
+     * @param {LoadOptions} [opts]
+     * @returns {Promise<DemoHandle>}
+     */
     async load(input, opts = {}) {
         const seq = ++this._loadSeq;
         const stale = () => seq !== this._loadSeq;
@@ -57,13 +78,22 @@ export class WasmSource {
         }
     }
 
+    /**
+     * @param {LoadInput} input
+     * @param {LoadOptions} opts
+     * @param {() => boolean} stale
+     * @returns {Promise<DemoHandle>}
+     */
     async _load(input, { onStage = () => {} }, stale) {
         const live = () => { if (stale()) throw new SupersededError(); };
         await this.ready;
         live();
+        /** @type {LoadTimings['net']} */
         const net = {};
-        let { bytes, name, game } = input;
-        if (input.gameId != null) {
+        // A gameId or game input has no bytes or name yet: the branches
+        // below fill both before they are read.
+        let { bytes, name, game } = /** @type {{ bytes: Uint8Array<ArrayBuffer>, name: string, game?: HubGame }} */ (input);
+        if ('gameId' in input && input.gameId != null) {
             onStage('info');
             const t = performance.now();
             game = await hub.fetchGame(input.gameId, this.fetchImpl);
@@ -95,6 +125,7 @@ export class WasmSource {
         // A failed analyze leaves the Go side holding the previous demo
         // (cmd/wasm analyze returns before replacing lastResult), so the
         // previous handle is queryable again.
+        /** @type {(err: unknown) => never} */
         const fail = (err) => {
             this._byReqId.delete(reqId);
             handle.current = false;
@@ -123,6 +154,7 @@ export class WasmSource {
 
     // The deferred 50 ms bucket view and region states for an analyze that
     // already answered, or an error the worker raised while building them.
+    /** @param {import('./worker-client.js').FollowupMessage} msg */
     _onFollowup(msg) {
         const handle = this._byReqId.get(msg.reqId);
         if (!handle) return;
@@ -131,6 +163,12 @@ export class WasmSource {
         else if (msg.type === 'error') handle._buckets.reject(new Error(msg.message));
     }
 
+    /**
+     * @param {DemoHandle} handle
+     * @param {import('./worker-client.js').Lane} type
+     * @param {object} payload
+     * @returns {Promise<string>}
+     */
     async _view(handle, type, payload) {
         if (!handle.current) throw new Error('demo superseded by a newer load');
         const { promise } = this.client.request(type, payload);
@@ -140,6 +178,10 @@ export class WasmSource {
 }
 
 export class DemoHandle {
+    /**
+     * @param {WasmSource} source
+     * @param {{ name: string, game: HubGame | null, blob: Blob, gzipped: boolean }} init
+     */
     constructor(source, { name, game, blob, gzipped }) {
         this.source = source;
         this.name = name;           // file name; the engine needs the extension
@@ -149,17 +191,24 @@ export class DemoHandle {
             gameId: game ? game.id : null,
         };
         this.current = true;
-        this.result = null;         // the whole Result
+        // Typed as set: load() fills it before it hands the handle out.
+        /** @type {import('../lib/result.js').Result} */
+        this.result = /** @type {any} */ (null); // the whole Result
+        /** @type {LoadTimings | null} */
         this.timings = null;
         this.demoBlob = blob;       // the original demo, for the player
         this.gzipped = gzipped;
-        let settle;
+        // The executor runs synchronously, so settle is set before the spread.
+        /** @type {{ resolve: (v: { bucketsMs: number, regionMs: number }) => void, reject: (err: Error) => void }} */
+        let settle = /** @type {any} */ (undefined);
+        /** @type {Promise<{ bucketsMs: number, regionMs: number }>} */
         const p = new Promise((resolve, reject) => { settle = { resolve, reject }; });
         p.catch(() => {});
         this._buckets = { promise: p, ...settle };
     }
 
     // section(name) resolves one top-level Result section.
+    /** @param {string} name */
     async section(name) {
         return this.result[name];
     }
@@ -167,6 +216,7 @@ export class DemoHandle {
     // ready('buckets') resolves once the deferred bucket view and region
     // states are on the Result (with their build timings), and rejects when
     // the worker failed to build them.
+    /** @param {'buckets'} what */
     ready(what) {
         if (what !== 'buckets') throw new Error(`unknown readiness: ${what}`);
         return this._buckets.promise;
@@ -176,6 +226,11 @@ export class DemoHandle {
     // getTopKills, …) and resolves with its decoded JSON; an {"error":…}
     // envelope rejects, so one .catch covers transport and the view's own
     // unavailable cases.
+    /**
+     * @param {string} fn
+     * @param {object} [opts]
+     * @returns {Promise<any>}
+     */
     async view(fn, opts) {
         const json = await this.source._view(this, 'viewQuery', { fn, optsJSON: JSON.stringify(opts || {}) });
         const v = JSON.parse(json);
@@ -185,6 +240,7 @@ export class DemoHandle {
 
     // recomputeRegions re-runs region control for an edited region layout;
     // resolves with the worker's raw JSON string.
+    /** @param {string} overrideJSON */
     recomputeRegions(overrideJSON) {
         return this.source._view(this, 'recomputeRegions', { overrideJSON });
     }
@@ -194,6 +250,7 @@ export class DemoHandle {
         return this.source._view(this, 'computeLos', {});
     }
 
+    /** @param {WorkerMessage} msg */
     _applyBuckets(msg) {
         const ta = this.result?.timelineAnalysis;
         if (ta && msg.bucketsJSON) {

@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // MvdMap — the stateful renderer container.
 //
 // This is the object a host application holds. It owns the camera, the
@@ -125,6 +126,7 @@ const ITEM_MARKER_SIZE = 20;  // 25% larger than the prior 16 px baseline
 // with a coloured outline and text in the outline colour. Kinds not
 // listed here (ammo, small health) are skipped on the map and in the
 // sidebar.
+/** @type {Record<string, { fill: string, outline: string | null, label: string, textColor?: string }>} */
 export const ITEM_MARKER_STYLES = {
     ra:   { fill: 'rgb(255, 50, 50)',   outline: null,                   label: 'RA', textColor: '#000' },
     ya:   { fill: 'rgb(255, 200, 0)',   outline: null,                   label: 'YA', textColor: '#000' },
@@ -282,6 +284,10 @@ export function losCovers(iv, tMs) {
 // newState returns the renderer's mutable state. Fields are grouped by what
 // they answer: what the map IS, what is being SHOWN, and what has been
 // DERIVED and cached from those two.
+/**
+ * The renderer's mutable state bag; hosts read and set its fields directly.
+ * @returns {Record<string, any>}
+ */
 export function newState() {
     return {
         // Target surface. The host supplies both; the component never looks
@@ -372,6 +378,10 @@ export function newState() {
 }
 
 export class MvdMap {
+    /**
+     * @param {HTMLCanvasElement | null} [canvas]
+     * @param {Record<string, any>} [opts]
+     */
     constructor(canvas = null, opts = {}) {
         this.state = newState();
         this.camera = newCamera();
@@ -394,6 +404,7 @@ export class MvdMap {
         // Per-frame perf sample, refreshed by every GL frame (drawWorldGL).
         // The host's perf HUD / benchmark reads it after render(); perfCapture
         // additionally turns on the GPU timer queries.
+        /** @type {Record<string, any> | null} */
         this.lastFrameStats = null;
         this.perfCapture = false;
         this._drag = {
@@ -1763,6 +1774,10 @@ export class MvdMap {
     // same object, so render's `bucket === lastRenderedBucket` redraw-skip
     // and the host's legend/region/hit-test callers all share one
     // reconstruction per frame.
+    /**
+     * @param {number} time
+     * @returns {{ t: number, idx: number, p: Record<string, Record<string, any>>, td: any } | null}
+     */
     frameAt(time) {
         const s = this.state;
         const view = s.frames;
@@ -1784,6 +1799,10 @@ export class MvdMap {
     // regionControlAt: region name → control state at `time`, decoded from
     // the per-region bucket-state strings (which share the frame grid), or
     // null when region control is absent or the frames haven't arrived.
+    /**
+     * @param {number} time
+     * @returns {Record<string, string> | null}
+     */
     regionControlAt(time) {
         const s = this.state;
         if (!s.controlRegions || !s.bucketStates) return null;

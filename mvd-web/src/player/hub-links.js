@@ -12,7 +12,18 @@ const SELECTOR = 'a.viewer-link, a.hub-watch-link';
 const TITLE = 'Click: play in the Player tab · Shift-click: add to playlist · Ctrl/middle-click: open on hub';
 const DEFAULT_S = 15;
 
+/**
+ * @param {object} deps
+ * @param {ReturnType<typeof import('./runner.js').createRunner>} deps.runner
+ * @param {import('../state/store.js').Store<import('../data/wasm-source.js').DemoHandle | null>} deps.demo
+ * @param {(clips: import('../lib/playlist.js').Clip[]) => void} deps.addClips
+ * @param {(text: string) => void} deps.toast
+ */
 export function installHubLinkRouting({ runner, demo, addClips, toast }) {
+    /**
+     * @param {HTMLAnchorElement} a
+     * @returns {import('../lib/playlist.js').Clip | null}
+     */
     const clipFromLink = (a) => {
         const parsed = parseHubReplayUrl(a.href);
         const ref = runner.currentRef();
@@ -25,7 +36,7 @@ export function installHubLinkRouting({ runner, demo, addClips, toast }) {
     };
 
     document.addEventListener('click', (e) => {
-        const a = e.target.closest?.(SELECTOR);
+        const a = /** @type {HTMLAnchorElement | null | undefined} */ (/** @type {Element} */ (e.target).closest?.(SELECTOR));
         if (!a || e.button !== 0 || e.ctrlKey || e.metaKey || e.altKey) return;
         const c = clipFromLink(a);
         if (!c) return;
@@ -39,7 +50,7 @@ export function installHubLinkRouting({ runner, demo, addClips, toast }) {
         }
     }, true);
     document.addEventListener('mouseover', (e) => {
-        const a = e.target.closest?.(SELECTOR);
+        const a = /** @type {HTMLAnchorElement | null | undefined} */ (/** @type {Element} */ (e.target).closest?.(SELECTOR));
         if (a && a.title !== TITLE) a.title = TITLE;
     }, true);
 }

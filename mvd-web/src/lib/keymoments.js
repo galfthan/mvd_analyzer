@@ -14,6 +14,22 @@ import { escapeHtml } from './html.js';
 import { hubReplayUrl } from './hub-url.js';
 import { formatDuration } from './result.js';
 
+/**
+ * @typedef {import('./result.js').Result} Result
+ * A row of raw Result / view-reply JSON (a powerup run, a highlight, a top
+ * kill...), open like the Result itself, plus what the readers here add.
+ * @typedef {Record<string, any>} Row
+ * The row builders' shared context (see above).
+ * @typedef {{ gameId?: number | string | null, userIDs: Record<string, number>, demoOffset: number }} RowCtx
+ * @typedef {{ minDur: number, minFrags: number }} RunFilter
+ * @typedef {'topdmg' | 'toprl' | 'toplg'} TopKey
+ * @typedef {object} HighlightTable
+ * @property {string} id
+ * @property {string} defaultSort
+ * @property {(result: Result | null | undefined) => Row[]} rows
+ * @property {(row: Row, ctx: RowCtx) => string} rowHtml
+ */
+
 // ─── Powerup-run filter ─────────────────────────────────────────────────────
 //
 // A run is listed only when it lasted at least `minDur` seconds AND scored
@@ -27,6 +43,10 @@ import { formatDuration } from './result.js';
 export const KEYMOMENTS_FILTER_DEFAULTS = { minDur: 5, minFrags: 3 };
 
 // The value an input's text settles on.
+/**
+ * @param {string} raw
+ * @param {keyof RunFilter} key
+ */
 export function cleanFilterValue(raw, key) {
     // Number.isFinite, not isNaN: "1e309" parses to Infinity, which would
     // silently filter every run while the input displays blank.
@@ -39,8 +59,12 @@ export function cleanFilterValue(raw, key) {
 // Schema v57: powerupEvents / fragStreaks carry `time` (int32 ms) plus the
 // descriptive endTime / duration (also ms). Converted to seconds at intake so
 // formatDuration, the clock seek and the hub URL `from`/`to` all see seconds.
+/**
+ * @param {Result | null | undefined} result
+ * @returns {Row[]}
+ */
 export function powerupRuns(result) {
-    return (result?.timelineAnalysis?.powerupEvents || []).map(ev => ({
+    return (result?.timelineAnalysis?.powerupEvents || []).map(/** @param {Row} ev */ ev => ({
         ...ev,
         time: ev.time * 0.001,
         endTime: (ev.endTime || 0) * 0.001,
@@ -51,13 +75,21 @@ export function powerupRuns(result) {
 // duration is in seconds by here, matching the "min s" input. Compare the
 // ROUNDED seconds — the column displays Math.round(duration), and a 4.6s run
 // rendered as "5s" must not be hidden by a 5s threshold.
+/**
+ * @param {Row[]} runs
+ * @param {RunFilter} filter
+ */
 export function filterPowerupRuns(runs, filter) {
     return runs.filter(ev =>
         Math.round(ev.duration) >= filter.minDur && (ev.frags || 0) >= filter.minFrags);
 }
 
+/**
+ * @param {Result | null | undefined} result
+ * @returns {Row[]}
+ */
 export function fragStreaks(result) {
-    return (result?.timelineAnalysis?.fragStreaks || []).map(s => ({
+    return (result?.timelineAnalysis?.fragStreaks || []).map(/** @param {Row} s */ s => ({
         ...s,
         time: s.time * 0.001,
         endTime: (s.endTime || 0) * 0.001,
@@ -68,10 +100,15 @@ export function fragStreaks(result) {
 // User-inserted `/demomark` bookmarks. Rare (0-10 per demo) and routinely
 // absent. `time` is int32 ms and may be negative for markers dropped during
 // warmup (before match start).
+/**
+ * @param {Result | null | undefined} result
+ * @returns {Row[]}
+ */
 export function demoMarkers(result) {
-    return (result?.timelineAnalysis?.demoMarkers || []).map(m => ({ ...m, time: m.time * 0.001 }));
+    return (result?.timelineAnalysis?.demoMarkers || []).map(/** @param {Row} m */ m => ({ ...m, time: m.time * 0.001 }));
 }
 
+/** @param {string} type */
 function powerupLabel(type) {
     switch (type) {
         case 'quad': return 'Quad';
@@ -85,15 +122,21 @@ function powerupLabel(type) {
 // underflows both fields, e.g. -30.5 → "-1:-31"). Demo markers can carry a
 // negative match-relative time when a player marks during warmup, so format
 // the magnitude and prefix a "-".
+/** @param {number} seconds */
 export function formatMarkerTime(seconds) {
     if (seconds < 0) return `-${formatDuration(-seconds)}`;
     return formatDuration(seconds);
 }
 
+/** @param {string} url */
 const hubAnchor = (url) => `<a href="${url}" target="_blank" class="viewer-link">Hub</a>`;
 
 // ─── Stored tables: powerup runs, frag streaks, demo markers ───────────────
 
+/**
+ * @param {Row} event
+ * @param {RowCtx} ctx
+ */
 export function powerupRunRowHtml(event, ctx) {
     // A slot number is NOT a userid — falling back to one tracks whichever
     // player happens to hold that userid, and a rare wrong link is the kind
@@ -116,6 +159,10 @@ export function powerupRunRowHtml(event, ctx) {
         `;
 }
 
+/**
+ * @param {Row} streak
+ * @param {RowCtx} ctx
+ */
 export function streakRowHtml(streak, ctx) {
     let watchCell = '-';
     if (ctx.gameId) {
@@ -135,6 +182,10 @@ export function streakRowHtml(streak, ctx) {
             `;
 }
 
+/**
+ * @param {Row} marker
+ * @param {RowCtx} ctx
+ */
 export function markerRowHtml(marker, ctx) {
     let watchCell = '-';
     if (ctx.gameId) {
@@ -189,6 +240,7 @@ const TOP_RUN_WINDOW_MS = 10000;
 // mvd-analytics/view/topkills.go. RL gets the wide list beside the damage
 // windows; LG the short one beside the demo markers — the RL burst is the
 // headline highlight in team games.
+/** @type {Array<[TopKey, string, object]>} */
 export const TOP_QUERIES = [
     ['topdmg', 'getTopWindows', { metric: 'damageGiven', windowMs: TOP_RUN_WINDOW_MS, limit: 10, dmg: 'bounded' }],
     ['toprl', 'getTopKills', { weapons: ['rl'], gapMs: 2300, limit: 10, dmg: 'bounded' }],
@@ -199,6 +251,12 @@ export const TOP_QUERIES = [
 // pack-drop anchors: a slot number is NOT a userid, so a name that
 // timelineAnalysis.playerUserIDs does not resolve gets NO link rather than
 // one that follows whoever happens to hold that id. Times in, seconds.
+/**
+ * @param {string} playerName
+ * @param {number} fromSec
+ * @param {number} toSec
+ * @param {RowCtx} ctx
+ */
 export function topWatchCell(playerName, fromSec, toSec, ctx) {
     if (!ctx.gameId) return '-';
     const trackId = ctx.userIDs[playerName];
@@ -212,17 +270,31 @@ export function topWatchCell(playerName, fromSec, toSec, ctx) {
 // The rows of one view reply (null when the query failed), each with its
 // seek time `t` in seconds: windows of a TopWindowsView for topdmg, kills
 // of a TopKillsView otherwise.
+/**
+ * @param {TopKey} key
+ * @param {Row | null} v  the view reply
+ * @returns {Row[]}
+ */
 export function topRows(key, v) {
     if (key === 'topdmg') {
-        return (v?.windows || []).map(w => ({ ...w, t: w.start * 0.001, startSec: w.start * 0.001, endSec: w.end * 0.001 }));
+        return (v?.windows || []).map(/** @param {Row} w */ w => ({ ...w, t: w.start * 0.001, startSec: w.start * 0.001, endSec: w.end * 0.001 }));
     }
-    return (v?.kills || []).map(k => ({ ...k, t: k.time * 0.001, timeSec: k.time * 0.001 }));
+    return (v?.kills || []).map(/** @param {Row} k */ k => ({ ...k, t: k.time * 0.001, timeSec: k.time * 0.001 }));
 }
 
+/**
+ * @param {TopKey} key
+ * @param {Row} row
+ * @param {RowCtx} ctx
+ */
 export function topRowHtml(key, row, ctx) {
     return key === 'topdmg' ? topWindowRowHtml(row, ctx) : topKillRowHtml(row, ctx);
 }
 
+/**
+ * @param {Row} w
+ * @param {RowCtx} ctx
+ */
 function topWindowRowHtml(w, ctx) {
     // The clip is the window plus a 1 s lead-in — 11 s total, per the
     // product ruling: enough not to open mid-swing, short enough that the
@@ -245,6 +317,10 @@ function topWindowRowHtml(w, ctx) {
         `;
 }
 
+/**
+ * @param {Row} k
+ * @param {RowCtx} ctx
+ */
 function topKillRowHtml(k, ctx) {
     // spanMs is the burst's own length (first hit → kill), so the clip
     // covers the whole burst plus a lead-in, not just the killing hit.
@@ -275,6 +351,11 @@ function topKillRowHtml(k, ctx) {
 
 // The Hub replay link from the actor's userid (the JSON key is `userId` on
 // HighlightPlayer).
+/**
+ * @param {RowCtx} ctx
+ * @param {number} timeSec
+ * @param {number | undefined} trackId
+ */
 function highlightWatchCell(ctx, timeSec, trackId) {
     if (!ctx.gameId) return '-';
     const fromTime = Math.max(0, Math.floor(timeSec + ctx.demoOffset) - 5);
@@ -284,6 +365,7 @@ function highlightWatchCell(ctx, timeSec, trackId) {
 
 // "health/armor+type" ("118/180ra", "100/0"); "?" when the streams never
 // recorded the player (stateSource "").
+/** @param {Row | null | undefined} p  a HighlightPlayer */
 export function highlightStack(p) {
     if (!p || p.health == null) return '?';
     const armor = p.armor ?? 0;
@@ -300,22 +382,25 @@ export function highlightStack(p) {
 // timeline's weapon colors and caps; powerups render exactly as the powerup
 // list does (powerupLabel + .powerup-cell colors), full size — a quad is the
 // headline of the row.
+/** @param {Row | null | undefined} p  a HighlightPlayer */
 export function highlightHad(p) {
     if (!p) return '';
     const weapons = (p.weapons || [])
-        .map(w => `<span class="wep-${escapeHtml(w)}">${escapeHtml(w.toUpperCase())}</span>`).join(' ');
+        .map(/** @param {string} w */ w => `<span class="wep-${escapeHtml(w)}">${escapeHtml(w.toUpperCase())}</span>`).join(' ');
     const pus = (p.powerups || [])
-        .map(x => `<span class="powerup-cell ${escapeHtml(x)}">${escapeHtml(powerupLabel(x))}</span>`).join(' ');
+        .map(/** @param {string} x */ x => `<span class="powerup-cell ${escapeHtml(x)}">${escapeHtml(powerupLabel(x))}</span>`).join(' ');
     const weps = weapons ? `<span class="hl-had">${weapons}</span>` : '';
     return `${weps}${weapons && pus ? ' ' : ''}${pus}`;
 }
 
 // The shared "what they had" cell: stack + had.
+/** @param {Row | null | undefined} p */
 function highlightStateCell(p) {
     const had = highlightHad(p);
     return `${highlightStack(p)}${had ? ' ' + had : ''}`;
 }
 
+/** @param {string | undefined} rel */
 function relationBadge(rel) {
     const r = rel === 'team' || rel === 'self' ? rel : 'enemy';
     return `<span class="hl-badge hl-${r}">${r}</span>`;
@@ -323,6 +408,7 @@ function relationBadge(rel) {
 
 // One victim as its own line, no relation badge (the column already says
 // the side): name, stack, had. Hurt-not-killed victims are dimmed.
+/** @param {Row} v */
 function victimLine(v) {
     const cls = v.killed || v.survived ? 'hl-vline' : 'hl-vline hl-hurt';
     return `<span class="${cls}"><span class="hl-name">${escapeHtml(v.name || '?')}</span> ${highlightStateCell(v)}</span>`;
@@ -331,6 +417,7 @@ function victimLine(v) {
 // One victim: relation badge, name, stack, had, damage taken. Hurt-not-killed
 // victims (damage-log only) are dimmed; a deflect's surviving pentagram
 // holder gets its own badge.
+/** @param {Row} v */
 function victimChip(v) {
     const badge = v.survived ? '<span class="hl-badge hl-survived">survived</span>' : relationBadge(v.relation);
     const cls = v.killed || v.survived ? 'hl-chip' : 'hl-chip hl-hurt';
@@ -340,8 +427,11 @@ function victimChip(v) {
 
 const KTX_QUAD_MS = 30000; // KTX quad duration; quadHeldMs is measured, the remainder is derived here
 
+/** @type {(list: Row[] | null | undefined) => Row[]} */
 const withSec = list => (list || []).map(e => ({ ...e, t: e.time * 0.001 }));
+/** @param {Row} e */
 const timeCell = e => `<td class="time-cell time-link" data-sort-value="${e.time}">${formatDuration(e.t)}</td>`;
+/** @param {Row} e */
 const locOf = e => e.actor?.loc || e.victims?.[0]?.loc || '';
 
 // Direct rocket air hits, lethal or not (the Lethal column badges the ones
@@ -350,15 +440,19 @@ const locOf = e => e.actor?.loc || e.victims?.[0]?.loc || '';
 // analyzer ships the list ordered by floor height). Rows are
 // highlights.airgibs (schema v76, the list's only home): HighlightEvent —
 // actor / victims[0], the victim row carrying the state.
+/**
+ * @param {Result | null | undefined} result
+ * @returns {Row[]}
+ */
 function airgibRows(result) {
-    const data = (result?.highlights?.airgibs || []).map(h => ({
+    const data = (result?.highlights?.airgibs || []).map(/** @param {Row} h */ h => ({
         time: h.time, t: h.time * 0.001,
         height: h.height, heightAboveAttacker: h.heightAboveAttacker,
         attacker: h.actor?.name, attackerUserID: h.actor?.userId,
         victim: h.victims?.[0]?.name, lethal: !!h.victims?.[0]?.killed,
         loc: h.victims?.[0]?.loc, state: h.victims?.[0] || null,
     }));
-    return data.sort((a, b) => ((b.heightAboveAttacker ?? 0) - (a.heightAboveAttacker ?? 0)) || (a.time - b.time));
+    return data.sort(/** @param {Row} a @param {Row} b */ (a, b) => ((b.heightAboveAttacker ?? 0) - (a.heightAboveAttacker ?? 0)) || (a.time - b.time));
 }
 
 // heightAboveAttacker is omitted on the wire for a dead-level 0 (omitempty)
@@ -366,7 +460,12 @@ function airgibRows(result) {
 // covers both. Heights are float32 units; display rounds to 1 decimal while
 // data-sort-value keeps the raw value for sorting (as every numeric / raw
 // column here does, so display strings like "1:23" don't mis-sort).
+/** @param {number} v */
 const round1 = v => Math.round(v * 10) / 10;
+/**
+ * @param {Row} a
+ * @param {RowCtx} ctx
+ */
 function airgibRowHtml(a, ctx) {
     const lethalCell = a.lethal ? '<span class="airgib-lethal">gib</span>' : '';
     const aboveShooter = a.heightAboveAttacker ?? 0;
@@ -386,29 +485,39 @@ function airgibRowHtml(a, ctx) {
 // Discharges — ranked by kill VALUE: killed enemies holding RL or LG, +1
 // more per killed enemy with quad (armed kills over respawn fodder); ties by
 // enemy kills, then bounded enemy damage.
+/** @param {Row} e  a highlight */
 export function dischargeValue(e) {
-    return (e.victims || []).reduce((n, v) => {
+    return (e.victims || []).reduce(/** @param {number} n @param {Row} v */ (n, v) => {
         if (!v.killed || v.relation === 'team') return n;
-        const armed = (v.weapons || []).some(w => w === 'rl' || w === 'lg');
+        const armed = (v.weapons || []).some(/** @param {string} w */ w => w === 'rl' || w === 'lg');
         const quad = (v.powerups || []).includes('quad');
         return n + (armed ? 1 : 0) + (quad ? 1 : 0);
     }, 0);
 }
 
+/**
+ * @param {Result | null | undefined} result
+ * @returns {Row[]}
+ */
 function dischargeRows(result) {
+    /** @type {Row[]} */
     const rows = withSec(result?.highlights?.discharges).map(e => ({ ...e, value: dischargeValue(e) }));
     return rows.sort((a, b) => (b.value - a.value) || (b.enemyKills - a.enemyKills)
         || ((b.damageEnemy || 0) - (a.damageEnemy || 0)) || ((b.damage || 0) - (a.damage || 0)) || (a.time - b.time));
 }
 
+/**
+ * @param {Row} e
+ * @param {RowCtx} ctx
+ */
 function dischargeRowHtml(e, ctx) {
     const enemy = e.enemyKills || 0;
     const team = e.teamKills || 0;
     const self = e.actor?.killed ? 1 : 0;
     // KTX scores an enemy kill +1, a teamkill −1, a suicide −1.
     const delta = enemy - team - self;
-    const enemyV = (e.victims || []).filter(v => v.relation !== 'team').map(victimLine).join('');
-    const teamV = (e.victims || []).filter(v => v.relation === 'team').map(victimLine).join('');
+    const enemyV = (e.victims || []).filter(/** @param {Row} v */ v => v.relation !== 'team').map(victimLine).join('');
+    const teamV = (e.victims || []).filter(/** @param {Row} v */ v => v.relation === 'team').map(victimLine).join('');
     return `
                 ${timeCell(e)}
                 <td data-sort-value="${escapeHtml(e.actor?.name || '')}">${escapeHtml(e.actor?.name || 'Unknown')} ${highlightStateCell(e.actor)}</td>
@@ -428,11 +537,20 @@ function dischargeRowHtml(e, ctx) {
 }
 
 // Quadbores — most quad thrown away first.
+/**
+ * @param {Result | null | undefined} result
+ * @returns {Row[]}
+ */
 function quadboreRows(result) {
+    /** @type {Row[]} */
     const rows = withSec(result?.highlights?.quadbores).map(e => ({ ...e, quadLeft: Math.max(0, KTX_QUAD_MS - (e.quadHeldMs || 0)) }));
     return rows.sort((a, b) => (b.quadLeft - a.quadLeft) || (a.time - b.time));
 }
 
+/**
+ * @param {Row} e
+ * @param {RowCtx} ctx
+ */
 function quadboreRowHtml(e, ctx) {
     const victims = (e.victims || []).map(victimChip).join('');
     return `
@@ -450,15 +568,24 @@ function quadboreRowHtml(e, ctx) {
 
 // Telefrags — most stacked victim first; rows with no killed victim (a
 // deflect / spawnicide: the teleporter died) sort last.
+/**
+ * @param {Result | null | undefined} result
+ * @returns {Row[]}
+ */
 function telefragRows(result) {
+    /** @type {Row[]} */
     const rows = withSec(result?.highlights?.telefrags).map(e => {
-        const victim = (e.victims || []).find(v => v.killed) || null;
-        const survivor = (e.victims || []).find(v => v.survived) || null;
+        const victim = (e.victims || []).find(/** @param {Row} v */ v => v.killed) || null;
+        const survivor = (e.victims || []).find(/** @param {Row} v */ v => v.survived) || null;
         return { ...e, victim, survivor, stack: victim?.stack ?? -1 };
     });
     return rows.sort((a, b) => (b.stack - a.stack) || (a.time - b.time));
 }
 
+/**
+ * @param {Row} e
+ * @param {RowCtx} ctx
+ */
 function telefragRowHtml(e, ctx) {
     const kind = e.teleKind || 'telefrag';
     const subject = e.victim || e.survivor;
@@ -482,6 +609,7 @@ function telefragRowHtml(e, ctx) {
 
 // The four highlight tables: id prefix, default sort column, rows (in the
 // default order), row markup.
+/** @type {HighlightTable[]} */
 export const HIGHLIGHT_TABLES = [
     { id: 'airgibs', defaultSort: 'aboveShooter', rows: airgibRows, rowHtml: airgibRowHtml },
     { id: 'discharges', defaultSort: 'value', rows: dischargeRows, rowHtml: dischargeRowHtml },

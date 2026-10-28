@@ -6,12 +6,14 @@
     import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
     import { panelLayouts, updatePanels, showAll, resetPanels, isDefault } from './layout.js';
 
+    /** @type {{ tab: string, titles: Record<string, string> }} */
     let { tab, titles } = $props();
 
     let layout = $derived($panelLayouts[tab]);
     let closed = $derived(layout.order.filter((id) => layout.closed[id]));
     let hiddenCount = $derived(closed.length + Object.keys(layout.collapsed).length);
 
+    /** @param {Event & { currentTarget: HTMLSelectElement }} e */
     function add(e) {
         const id = e.currentTarget.value;
         e.currentTarget.value = '';

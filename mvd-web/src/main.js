@@ -31,7 +31,7 @@ MvdState.teams.subscribe((t) => {
 });
 // Mounted synchronously (flushSync runs the mount's effects) so every tab
 // is in the page before the boot looks tabs up by id.
-mount(App, { target: document.getElementById('app') });
+mount(App, { target: /** @type {HTMLElement} */ (document.getElementById('app')) });
 flushSync();
 setupPlayer();
 // The viewer's panel arrangement on the multi-panel tabs.

@@ -6,6 +6,13 @@
 // The mode facet list lives in ONE place: it fills the Mode dropdown (after
 // "Any") and labels the result rows, so a facet cannot be offered in the
 // dropdown and render as a raw token in the rows below it.
+/**
+ * @typedef {import('../data/hub.js').HubGame} HubGame
+ * @typedef {{ player: string, team: string, map: string, mode: string, tag: string, from: string, to: string }} Filters
+ * @typedef {{ filters: Filters | null, shown: number, total: number | null }} Paging
+ */
+
+/** @type {Record<string, string>} */
 export const SEARCH_MODE_LABELS = {
     '1on1': '1v1',
     '2on2': '2v2',
@@ -21,15 +28,21 @@ export const SEARCH_MODE_LABELS = {
 // here beside the facet table so the pair stays in step.
 const SEARCH_INDIVIDUAL_MODES = new Set(['1on1', 'ffa']);
 
+/** @type {Readonly<Filters>} */
 export const EMPTY_FILTERS = Object.freeze({ player: '', team: '', map: '', mode: '', tag: '', from: '', to: '' });
 
+/** @type {Array<'player' | 'team' | 'map' | 'tag'>} */
 const TEXT_FIELDS = ['player', 'team', 'map', 'tag'];
 
 // searchFilters: the query the form asks for — the text fields trimmed, the
 // dates as they are, a mode the dropdown does not offer (a deep link's
 // ?mode=bogus selects no option) read as '' like the <select> reads it.
+/**
+ * @param {Partial<Record<keyof Filters, unknown>>} form
+ * @returns {Filters}
+ */
 export function searchFilters(form) {
-    const f = { ...EMPTY_FILTERS, ...form };
+    const f = /** @type {Filters} */ ({ ...EMPTY_FILTERS, ...form });
     for (const k of TEXT_FIELDS) f[k] = String(f[k] ?? '').trim();
     if (f.mode !== '' && !(f.mode in SEARCH_MODE_LABELS)) f.mode = '';
     return { player: f.player, team: f.team, map: f.map, mode: f.mode, tag: f.tag, from: f.from, to: f.to };
@@ -37,6 +50,7 @@ export function searchFilters(form) {
 
 // validDateString: what an <input type="date"> keeps when its value is set
 // (yyyy-mm-dd naming a real day); anything else it clears to ''.
+/** @param {string} s */
 export function validDateString(s) {
     const m = /^(\d{4,})-(\d{2})-(\d{2})$/.exec(s);
     if (!m) return false;
@@ -51,7 +65,12 @@ export function validDateString(s) {
 // written in — only the fields given; a date the input cannot hold reads
 // ''. A mode the dropdown does not offer is kept: it selects no option
 // (the <select> shows blank), and searchFilters reads it as ''.
+/**
+ * @param {Partial<Record<string, unknown>>} filters
+ * @returns {Partial<Filters>}
+ */
 export function formValues(filters) {
+    /** @type {Record<string, string>} */
     const out = {};
     for (const k of Object.keys(EMPTY_FILTERS)) {
         if (filters[k] === undefined) continue;
@@ -64,7 +83,12 @@ export function formValues(filters) {
 
 // filtersFromParams: the search filters a URL carries (non-empty only), and
 // whether it carries any.
+/**
+ * @param {URLSearchParams} params
+ * @param {readonly string[]} fields
+ */
 export function filtersFromParams(params, fields) {
+    /** @type {Record<string, string>} */
     const filters = {};
     let any = false;
     for (const f of fields) {
@@ -76,6 +100,7 @@ export function filtersFromParams(params, fields) {
 
 // searchRow: one hub game's result-row cells. Contestants are the top two
 // teams for a team mode, the top two players otherwise.
+/** @param {HubGame} game */
 export function searchRow(game) {
     const mode = SEARCH_MODE_LABELS[game.mode] || game.mode || '-';
     const map = game.map || '-';
@@ -83,9 +108,11 @@ export function searchRow(game) {
     const isTeamMode = !!game.mode && !SEARCH_INDIVIDUAL_MODES.has(game.mode);
     let contest = '—';
     if (isTeamMode && Array.isArray(game.teams) && game.teams.length >= 2) {
+        /** @type {Array<{ name: string, frags?: number }>} */
         const t = [...game.teams].sort((a, b) => (b.frags || 0) - (a.frags || 0));
         contest = `${t[0].name} ${t[0].frags} : ${t[1].frags} ${t[1].name}`;
     } else if (Array.isArray(game.players) && game.players.length >= 2) {
+        /** @type {Array<{ name: string, frags?: number }>} */
         const p = [...game.players].sort((a, b) => (b.frags || 0) - (a.frags || 0));
         contest = `${p[0].name} ${p[0].frags} : ${p[1].frags} ${p[1].name}`;
     } else if (Array.isArray(game.players) && game.players.length === 1) {
@@ -97,16 +124,26 @@ export function searchRow(game) {
 
 // nextPaging: the paging state after a page of `count` rows at `offset`
 // answered for `filters`. A page without a total keeps the one known before.
+/**
+ * @param {Paging} prev
+ * @param {Filters} filters
+ * @param {number} offset
+ * @param {number} count
+ * @param {number | null} total
+ * @returns {Paging}
+ */
 export function nextPaging(prev, filters, offset, count, total) {
     return { filters, shown: offset + count, total: total !== null ? total : prev.total };
 }
 
 // pagerLabel / hasMore: the footer under the list — "N of M matches", and a
 // Load-more button while the hub reports more.
+/** @param {Paging} paging */
 export function pagerLabel({ shown, total }) {
     return total !== null ? `${shown} of ${total} matches` : `${shown} matches`;
 }
 
+/** @param {Paging} paging */
 export function hasMore({ shown, total }) {
     return total !== null && shown < total;
 }

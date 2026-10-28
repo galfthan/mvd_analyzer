@@ -5,6 +5,10 @@
 import { clock, activeTab } from '../../state/index.js';
 import { engine } from '../index.js';
 
+/**
+ * @param {(t: number) => void} draw  called with the clock's match time
+ * @returns {() => void} the unsubscribe
+ */
 export function onFrame(draw) {
     let queued = false;
     const schedule = () => {

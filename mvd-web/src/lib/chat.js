@@ -13,17 +13,29 @@ export const CHAT_PX_PER_SEC = 17.5; // ~same density as the original 40s/700px 
 export const CHAT_ITEM_HEIGHT = 18;
 const TICK_INTERVAL = 5;
 
+/**
+ * @typedef {import('./result.js').Result} Result
+ * A Result message (messages.messages[]) with `time` in seconds; the rest
+ * of its fields as the Go side ships them.
+ * @typedef {{ time: number, type: string, team?: string, [field: string]: any }} ChatEvent
+ */
+
 // The match length in seconds; 600 when the result carries none.
+/** @param {Result | null | undefined} result */
 export function chatDuration(result) {
     return (result?.match?.duration || 600000) * 0.001;
 }
 
 // The result's messages with `time` in seconds (Schema v57: messages[].time
 // is int32 ms on the raw result), or null when the result has none.
+/**
+ * @param {Result | null | undefined} result
+ * @returns {ChatEvent[] | null}
+ */
 export function chatEvents(result) {
     const messages = result?.messages?.messages;
     if (!messages) return null;
-    return messages.map(e => ({ ...e, time: e.time * 0.001 }));
+    return messages.map(/** @param {ChatEvent} e */ e => ({ ...e, time: e.time * 0.001 }));
 }
 
 // bucketChat splits the messages into the three columns. `teams` is the
@@ -40,9 +52,18 @@ export function chatEvents(result) {
 // two genuinely identical deaths within 3s), violating the
 // surface-authoritative-data rule, so it was removed. Only clip to the
 // match window.
+/**
+ * @param {ChatEvent[]} events
+ * @param {string[]} teams
+ * @param {number} duration
+ * @param {{ single?: boolean, hideTeam?: boolean }} [opts]
+ */
 export function bucketChat(events, teams, duration, { single = false, hideTeam = false } = {}) {
+    /** @type {ChatEvent[]} */
     const kills = [];
+    /** @type {ChatEvent[]} */
     const a = [];
+    /** @type {ChatEvent[]} */
     const b = [];
     for (const event of events) {
         if (event.time < 0 || event.time > duration) continue;
@@ -64,18 +85,25 @@ export function bucketChat(events, teams, duration, { single = false, hideTeam =
 
 // The column headings. In the individual field the one say column is plain
 // "Chat": teams[0]/[1] are two players out of the field there, not sides.
+/**
+ * @param {string[]} teams
+ * @param {boolean} single
+ */
 export function chatTitles(teams, single) {
     if (single) return ['Chat', 'Team B Chat'];
     if (teams.length >= 2) return [`${teams[0]} Chat`, `${teams[1]} Chat`];
     return ['Team A Chat', 'Team B Chat'];
 }
 
+/** @param {number} duration */
 export function contentHeight(duration) {
     return Math.round(duration * CHAT_PX_PER_SEC);
 }
 
 // The time axis: a tick every TICK_INTERVAL seconds, 0 through duration.
+/** @param {number} duration */
 export function axisTicks(duration) {
+    /** @type {Array<{ top: number, label: string }>} */
     const ticks = [];
     for (let t = 0; t <= duration; t += TICK_INTERVAL) {
         ticks.push({ top: Math.round(t * CHAT_PX_PER_SEC), label: formatDuration(t) });
@@ -83,17 +111,26 @@ export function axisTicks(duration) {
     return ticks;
 }
 
+/** @param {number} t */
 export function timeLineTop(t) {
     return t * CHAT_PX_PER_SEC;
 }
 
 // The viewport scroll that centres time t.
+/**
+ * @param {number} t
+ * @param {number} viewportHeight
+ */
 export function scrollTarget(t, viewportHeight) {
     return Math.max(0, timeLineTop(t) - viewportHeight / 2);
 }
 
 // stackRow places a row at its time, or — when that would overlap the row
 // above, whose bottom is lastBottom — just below it, marked displaced.
+/**
+ * @param {number} time
+ * @param {number} lastBottom
+ */
 export function stackRow(time, lastBottom) {
     const top = Math.round(time * CHAT_PX_PER_SEC);
     if (top < lastBottom) return { top: lastBottom, displaced: true };
@@ -102,6 +139,10 @@ export function stackRow(time, lastBottom) {
 
 // The next row's lastBottom: a row is at least CHAT_ITEM_HEIGHT tall, taller
 // when its message wraps (measured; 0 when the tab is not laid out).
+/**
+ * @param {number} top
+ * @param {number} [measuredHeight]
+ */
 export function rowBottom(top, measuredHeight) {
     return top + Math.max(CHAT_ITEM_HEIGHT, measuredHeight || 0);
 }
@@ -114,6 +155,7 @@ export { escapeHtml };
 // - Characters 128-255: "Gold/Brown" alternate text (same glyphs as 0-127)
 // - &cRGB: Set color to RGB (hex digits 0-F, each multiplied by 16)
 // - &r: Reset color to white
+/** @param {string | null | undefined} text */
 export function formatQuakeMessage(text) {
     if (!text) return '';
 

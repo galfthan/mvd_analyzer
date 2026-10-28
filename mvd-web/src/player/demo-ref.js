@@ -2,6 +2,11 @@
 // a clip's `demo`): { key, gameId, title, offset }.
 import { demoOffsetSec, mapFileKey } from '../lib/result.js';
 
+/**
+ * @param {import('../data/wasm-source.js').DemoHandle | null} handle
+ * @param {string[] | null | undefined} teamOrder
+ * @returns {import('../lib/playlist.js').ClipDemo | null}
+ */
 export function demoRefOf(handle, teamOrder) {
     if (!handle?.result) return null;
     const teams = (teamOrder || []).slice(0, 3).join(' vs ');

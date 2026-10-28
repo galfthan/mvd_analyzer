@@ -13,6 +13,7 @@ import { lastExecutedSearch } from '../tabs/search/search-model.js';
 import { urlQuery, parseSeg, parseTime } from '../lib/url-state.js';
 import { switchTab, activeTabName } from './tabs.js';
 
+/** @type {ReturnType<typeof setTimeout> | null} */
 let urlStateTimer = null;
 
 export function updateUrlState() {
@@ -71,10 +72,12 @@ export function applyUrlState() {
 // stop seeks once more, so it is skipped; the Player engine ('engine') ticks
 // every frame too, and is followed every 200 ms. A demo reset ('reset')
 // happens mid-load.
+/** @type {ReturnType<typeof setTimeout> | null} */
 let engineSyncTimer = null;
+/** @param {import('../state/clock.js').ClockValue} tick */
 export function onClockTick({ from }) {
     if (from === 'reset') {
-        clearTimeout(engineSyncTimer);
+        clearTimeout(engineSyncTimer ?? undefined);
         engineSyncTimer = null;
     }
     if (from === 'playback' || from === 'reset') return;

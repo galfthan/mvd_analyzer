@@ -18,12 +18,14 @@
         const ref = $demo ? currentRef() : null;
         if (!ref) return [];
         const out = [];
-        for (const id of KINDS) out.push(...GENERATORS[id].build($demo.result, ref));
+        // ref is only non-null with a demo.
+        const result = /** @type {import('../../state/demo.js').DemoHandle} */ ($demo).result;
+        for (const id of KINDS) out.push(...GENERATORS[id].build(result, ref));
         return out.sort((a, b) => a.from - b.from);
     });
 
     let demoT = $state(0);
-    let list = $state();
+    let list = $state(/** @type {HTMLOListElement | undefined} */ (undefined));
     $effect(() => onFrame((t) => { demoT = t + engine.offset(); }));
 
     let next = $derived.by(() => {
@@ -33,10 +35,16 @@
 
     // Keep the next moment in view, but only scroll when it changes.
     $effect(() => {
-        const anchor = list?.children[Math.max(0, next - 1)];
-        if (anchor) list.scrollTop = Math.max(0, anchor.offsetTop - list.offsetTop - 40);
+        const anchor = /** @type {HTMLElement | undefined} */ (list?.children[Math.max(0, next - 1)]);
+        // An anchor is a child of the list, so the list is there.
+        const ol = /** @type {HTMLOListElement} */ (list);
+        if (anchor) ol.scrollTop = Math.max(0, anchor.offsetTop - ol.offsetTop - 40);
     });
 
+    /**
+     * @param {MouseEvent | KeyboardEvent} e
+     * @param {(typeof clips)[number]} c
+     */
     function click(e, c) {
         if (e.shiftKey) {
             addClips([{ ...c, demo: { ...c.demo } }]);

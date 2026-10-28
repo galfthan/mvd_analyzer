@@ -50,6 +50,19 @@
     import { onPanelReveal } from '../../ui/panels/reveal.js';
     import { createInteraction, tooltip } from './interaction.js';
 
+    /**
+     * @typedef {import('../../lib/result.js').Result} Result
+     * @typedef {import('../../lib/timeline.js').BucketView} BucketView
+     * @typedef {import('../../lib/timeline.js').DropMark} DropMark
+     * @typedef {import('../../lib/timeline.js').SpanRow} SpanRow
+     * @typedef {import('../../lib/timeline.js').TeamStatusSort} TeamStatusSort
+     * @typedef {import('../../state/demo.js').DemoHandle} DemoHandle
+     * @typedef {{ name: string, cid: string, ti: number, color: string }} GridRow
+     * @typedef {{ t: number, frac: number, label: string }} AxisTick
+     * @typedef {{ a: string, b: string, ca: string | null, cb: string | null }} Legend
+     * @typedef {(start: number, end: number) => void} Draw
+     */
+
     const TAB = 'timeline';
     // The canvases a window resize or a reveal re-measures (DOM order).
     const CANVAS_IDS = [
@@ -58,60 +71,74 @@
     ];
 
     // The demo being drawn; refreshed on every redraw.
+    /** @type {Result | null} */
     let result = null;
+    /** @type {BucketView | null} */
     let view = null;
     let ev = timelineEvents(null);
+    /** @type {Map<string, string>} */
     let teamOf = new Map();
+    /** @type {string[]} */
     let order = [];
+    /** @type {string[]} */
     let colors = [];
 
     // The per-player layout (see the header).
     let individual = $state(false);
     let rangeLabel = $state('');
-    let indLeft = $state(null);
+    let indLeft = $state(/** @type {string | null} */ (null));
     let statusA = $state('');
     let statusB = $state('');
     let sort = TEAM_STATUS_SORT_DEFAULT;
 
     // Legends and y-axis labels keep their last values while a graph is not
     // drawn (fewer than two sides), as the markup they replace did.
-    let scoreLegend = $state.raw({ a: 'Team A leading ↑', b: 'Team B leading ↓', ca: null, cb: null });
+    let scoreLegend = $state.raw(/** @type {Legend} */ ({ a: 'Team A leading ↑', b: 'Team B leading ↓', ca: null, cb: null }));
     let sideLegend = $state.raw({ a: 'Team A', b: 'Team B' });
     let yScore = $state.raw(['+20', '-20']);
     let yWeapons = $state.raw([4, 4]);
     let yHealth = $state.raw([800, 800]);
     let puShown = $state(false);
-    let puLegend = $state.raw({ a: 'Team A', b: 'Team B', ca: null, cb: null });
+    let puLegend = $state.raw(/** @type {Legend} */ ({ a: 'Team A', b: 'Team B', ca: null, cb: null }));
     let rcShown = $state(false);
-    let rcLegend = $state.raw({ a: 'Team A', b: 'Team B', ca: null, cb: null });
+    let rcLegend = $state.raw(/** @type {Legend} */ ({ a: 'Team A', b: 'Team B', ca: null, cb: null }));
 
     // Per-player rows: the frags / deaths and health / armor grids
     // ({ name, cid, ti, color }), their shared axes (null = none), the frag
     // labels at the playhead.
-    let fdRows = $state.raw([]);
-    let haRows = $state.raw([]);
-    let fdAxis = $state.raw(null);
-    let haAxis = $state.raw(null);
-    let fdStats = $state.raw({});
+    let fdRows = $state.raw(/** @type {GridRow[]} */ ([]));
+    let haRows = $state.raw(/** @type {GridRow[]} */ ([]));
+    let fdAxis = $state.raw(/** @type {AxisTick[] | null} */ (null));
+    let haAxis = $state.raw(/** @type {AxisTick[] | null} */ (null));
+    let fdStats = $state.raw(/** @type {Record<string, { text: string, title: string }>} */ ({}));
+    /** @type {string | null} */
     let fdSig = null;
+    /** @type {string | null} */
     let haSig = null;
 
     let fdOpen = $state(false);
     let wpOpen = $state(false);
     let haOpen = $state(false);
 
+    /** @type {{ score?: HTMLCanvasElement, weapons?: HTMLCanvasElement, health?: HTMLCanvasElement, powerup?: HTMLCanvasElement, powerupLabels?: HTMLElement, region?: HTMLCanvasElement, regionLabels?: HTMLElement }} */
     let el = $state({});
+    /** @type {HTMLElement | undefined} */
     let fdTrack = $state();
+    /** @type {HTMLElement | undefined} */
     let haTrack = $state();
 
     // What the last render drew, for the hover read-outs.
-    const dropHit = { startTime: 0, endTime: 0, W: 0, dropMarks: [] };
-    const puHit = { startTime: 0, endTime: 0, W: 0, rows: [] };
+    const dropHit = { startTime: 0, endTime: 0, W: 0, dropMarks: /** @type {DropMark[]} */ ([]) };
+    const puHit = { startTime: 0, endTime: 0, W: 0, rows: /** @type {SpanRow[]} */ ([]) };
 
     let dirty = true;
     let queued = false;
+    /** @type {DemoHandle | null} */
     let lastHandle = null;
+    // clearTimeout(null) is a no-op; the casts below only say so to the checker.
+    /** @type {number | null} */
     let syncTimer = null;
+    /** @type {number | null} */
     let resizeRaf = null;
 
     const shown = () => activeTab.get() === TAB;
@@ -146,6 +173,7 @@
         schedule();
     }
 
+    /** @param {DemoHandle | null} handle */
     function onDemo(handle) {
         if (handle !== lastHandle) {
             lastHandle = handle;
@@ -155,8 +183,8 @@
             // A graph of the previous demo must not show through a panel
             // this one does not draw.
             for (const id of CANVAS_IDS) {
-                const c = document.getElementById(id);
-                if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
+                const c = /** @type {HTMLCanvasElement | null} */ (document.getElementById(id));
+                if (c) /** @type {CanvasRenderingContext2D} */ (c.getContext('2d')).clearRect(0, 0, c.width, c.height);
             }
             rangeLabel = '';
             statusA = '';
@@ -209,7 +237,7 @@
         }
         const time = clock.t;
         const i = bucketIndexAtTime(view, time);
-        const frame = i >= 0 ? reconstructBucketPlayers(view, i) : {};
+        const frame = /** @type {Record<string, Record<string, any>>} */ (i >= 0 ? reconstructBucketPlayers(view, i) : {});
         const frags = fragsAt(result, time);
         const html = [0, 1].map((ti) => teamStatusHtml(result,
             teamStatusRows(result, teamOf, frame, frags, order[ti], sort), order[ti], colors[ti] || '#ccc', sort, time));
@@ -219,13 +247,15 @@
 
     // One delegated click for both rosters: they are rebuilt on every tick,
     // so a listener per header would not survive.
+    /** @param {MouseEvent & { currentTarget: HTMLElement }} e */
     function onStatusClick(e) {
-        const th = e.target.closest('th[data-key]');
+        const th = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('th[data-key]'));
         if (!th || !e.currentTarget.contains(th)) return;
-        sort = nextTeamStatusSort(sort, th.dataset.key);
+        sort = nextTeamStatusSort(sort, /** @type {string} */ (th.dataset.key));
         syncTeamStatus();
     }
 
+    /** @type {Draw} */
     function drawScore(start, end) {
         if (order.length < 2) return;
         if (individual) { drawFragsPerPlayer(start, end); return; }
@@ -236,6 +266,7 @@
         if (fdOpen) drawFragsPerPlayer(start, end);
     }
 
+    /** @type {Draw} */
     function drawWeapons(start, end) {
         if (order.length < 2) return;
         // The A↑ / B↓ graph is hidden in the per-player layout: draw only
@@ -252,6 +283,7 @@
         if (wpOpen) drawWeaponsPerPlayer(start, end);
     }
 
+    /** @type {Draw} */
     function drawHealthArmor(start, end) {
         if (order.length < 2) return;
         if (individual) { drawHealthPerPlayer(start, end); return; }
@@ -261,6 +293,7 @@
         if (haOpen) drawHealthPerPlayer(start, end);
     }
 
+    /** @type {Draw} */
     function drawPowerups(start, end) {
         // Rows are per powerup TYPE coloured by which of two TEAMS holds it,
         // so a field of players would paint the top two and grey the rest:
@@ -290,6 +323,7 @@
     // The region set in effect (src/state/regions.js). A field of players
     // has no two sides to colour: the model is not editable there and the
     // panel stays hidden, like the editor on Locs & Regions.
+    /** @type {Draw} */
     function drawRegionControl(start, end) {
         const rc = regionControl.get();
         const data = order.length < 2 || !rc?.editable ? null : prepRegionControlData(rc, view, start, end, order);
@@ -316,22 +350,34 @@
     const spanRowH = () => (individual ? 28 : RC_ROW_H);
 
     // The rows of a per-player grid, rebuilt only when the roster changes.
+    /**
+     * @param {string} prefix
+     * @param {string | null} prevSig
+     * @returns {{ rows: GridRow[], sig: string } | null}
+     */
     function gridRows(prefix, prevSig) {
         const grouped = playersByTeam(view, order, teamOf, individual);
         const sig = grouped.map((g) => g.join('|')).join('#');
         if (sig === prevSig) return null;
+        /** @type {GridRow[]} */
         const rows = [];
         grouped.forEach((names, ti) => names.forEach((name, idx) =>
             rows.push({ name, cid: `${prefix}-${ti}-${idx}`, ti, color: colors[ti] || '#ccc' })));
         return { rows, sig };
     }
 
+    /**
+     * @param {HTMLElement | undefined} track
+     * @param {number} start
+     * @param {number} end
+     */
     function measureAxis(track, start, end) {
         return axisTicks(start, end, track?.clientWidth || 300, 10, 1e-6);
     }
 
     // One +/- row per player: running kills minus deaths, each row on its
     // own |net| scale so a small swing still fills it.
+    /** @type {Draw} */
     function drawFragsPerPlayer(start, end) {
         if (!view || !view.count || order.length < 2) {
             fdRows = [];
@@ -356,6 +402,7 @@
     }
 
     // One health / armor stack per player, on one shared scale.
+    /** @type {Draw} */
     function drawHealthPerPlayer(start, end) {
         if (!view || !view.count || order.length < 2) {
             haRows = [];
@@ -367,7 +414,7 @@
         if (g) { haRows = g.rows; haSig = g.sig; }
         if (haAxis === null) haAxis = [];
         flushSync();
-        const series = haRows.map(({ name }) => prepPlayerHAData(view, view.players[name], start, end));
+        const series = haRows.map(({ name }) => prepPlayerHAData(view, /** @type {BucketView} */ (view).players[name], start, end));
         const maxValue = sharedStackMax(series);
         haRows.forEach(({ cid }, i) => {
             const cv = document.getElementById(cid);
@@ -378,17 +425,21 @@
     }
 
     // One row per player coloured by RL / LG / both held, drops as dots.
+    /** @type {Draw} */
     function drawWeaponsPerPlayer(start, end) {
         // By id: the rows move between the <details> and their own panel.
         const labels = document.getElementById('weapons-per-player-labels');
         if (!labels) return;
         if (!view || !view.count || order.length < 2) { labels.innerHTML = ''; return; }
         const grouped = playersByTeam(view, order, teamOf, individual);
+        /** @type {Array<{ name: string, color: string, spans: import('../../lib/timeline.js').StateSpan[] }>} */
         const rows = [];
+        /** @type {string[]} */
         const names = [];
+        const v = /** @type {BucketView} */ (view);
         grouped.forEach((group, ti) => {
             for (const name of group) {
-                rows.push({ name, color: colors[ti] || '#ccc', spans: prepPlayerWeaponSpans(view, view.players[name], start, end) });
+                rows.push({ name, color: colors[ti] || '#ccc', spans: prepPlayerWeaponSpans(v, v.players[name], start, end) });
                 names.push(name);
             }
         });
@@ -402,7 +453,9 @@
 
     // A drill-down opened: draw it at the current window, then seat its
     // freshly made current-time lines.
+    /** @param {Draw} draw */
     function onToggle(draw) {
+        /** @param {Event & { currentTarget: HTMLDetailsElement }} e */
         return (e) => {
             if (!e.currentTarget.open || !shown()) return;
             draw(...range());
@@ -414,6 +467,7 @@
     // default min-width: auto) wedges its container open; clear it so the
     // container reports its true width. `shownOnly` leaves the canvases of
     // hidden panels, which the redraw will not size again, as they are.
+    /** @param {boolean} shownOnly */
     function unpinWidths(shownOnly) {
         for (const id of CANVAS_IDS) {
             const c = document.getElementById(id);
@@ -429,6 +483,7 @@
         redraw();
     }
 
+    /** @param {string} tab */
     function onTab(tab) {
         if (tab !== TAB) return;
         // Run once src/app/tabs.js has made the tab visible (it follows the same
@@ -443,9 +498,10 @@
         else dirty = true;
     }
 
+    /** @param {import('../../state/clock.js').ClockValue} c */
     function onClock({ from }) {
         if (from === 'reset') {
-            clearTimeout(syncTimer);
+            clearTimeout(/** @type {number} */ (syncTimer));
             syncTimer = null;
             return;
         }
@@ -474,7 +530,9 @@
         });
     }
 
+    /** @param {HTMLCanvasElement} canvas */
     const dropTip = (canvas) => tooltip(canvas, { hitTest: (x, y) => hitDropMark(dropHit, x, y), html: dropTooltipHtml });
+    /** @param {HTMLCanvasElement} canvas */
     const puTip = (canvas) => tooltip(canvas, { hitTest: (x, y) => hitPowerupSpan(puHit, x, y), html: powerupTooltipHtml });
 
     onMount(() => {
@@ -492,12 +550,12 @@
         return () => {
             offs.forEach((off) => off());
             window.removeEventListener('resize', onResize);
-            clearTimeout(syncTimer);
+            clearTimeout(/** @type {number} */ (syncTimer));
         };
     });
 </script>
 
-{#snippet axisCell(ticks, bindTrack)}
+{#snippet axisCell(/** @type {AxisTick[]} */ ticks, /** @type {(node: HTMLElement) => void} */ bindTrack)}
     <div class="per-player-cell per-player-axis-cell">
         <div class="per-player-label"></div>
         <div class="per-player-axis-track" use:bindTrack>
@@ -522,7 +580,7 @@
                 </div>
             </div>
         {/each}
-        {#if fdAxis}{@render axisCell(fdAxis, (n) => { fdTrack = n; })}{/if}
+        {#if fdAxis}{@render axisCell(fdAxis, (/** @type {HTMLElement} */ n) => { fdTrack = n; })}{/if}
     </div>
 {/snippet}
 
@@ -547,7 +605,7 @@
                 </div>
             </div>
         {/each}
-        {#if haAxis}{@render axisCell(haAxis, (n) => { haTrack = n; })}{/if}
+        {#if haAxis}{@render axisCell(haAxis, (/** @type {HTMLElement} */ n) => { haTrack = n; })}{/if}
     </div>
 {/snippet}
 

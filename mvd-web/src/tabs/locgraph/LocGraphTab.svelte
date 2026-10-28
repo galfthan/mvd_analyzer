@@ -30,16 +30,26 @@
     import { fillHeatmapTable, clearHeatmapTable } from './heatmap-table.js';
     import RegionControlPanel from './RegionControlPanel.svelte';
 
+    /** @typedef {import('../../lib/locgraph.js').LocMetric} LocMetric */
+
     const TAB = 'loc-graph';
 
+    /** @type {import('../../lib/result.js').Result | null} */
     let result = null;
+    /** @type {import('../../lib/locgraph.js').LocGraph | null} */
     let graph = null;
     // The Filter options, null until the first demo with a loc graph.
+    /** @type {import('../../lib/locgraph.js').LocFilterOption[] | null} */
     let filterOpts = $state.raw(null);
     let filter = 'all';
-    let filterSel = $state();
+    // The elements bound below are in place before onMount, so before any
+    // build() reads them.
+    /** @type {HTMLSelectElement} */
+    let filterSel = $state(/** @type {any} */ (undefined));
+    /** @type {LocMetric} */
     let metric = 'all';
-    let metricSel = $state();
+    /** @type {HTMLSelectElement} */
+    let metricSel = $state(/** @type {any} */ (undefined));
     let avail = $state.raw({ all: true, armed: true, unarmed: true, quad: true, pent: true });
     let edgeMode = 'all';
     let minEdge = '1';
@@ -49,12 +59,17 @@
     let graphNoData = $state(false);
     let heatShown = $state(false);
     let heatNoData = $state(false);
-    let canvas = $state();
-    let heatTable = $state();
-    let view = null;
+    /** @type {HTMLDivElement} */
+    let canvas = $state(/** @type {any} */ (undefined));
+    /** @type {HTMLTableElement} */
+    let heatTable = $state(/** @type {any} */ (undefined));
+    // Created in onMount, before the subscriptions that use it.
+    /** @type {LocGraphView} */
+    let view = /** @type {any} */ (null);
 
     let dirty = true;
     let queued = false;
+    /** @type {import('../../data/wasm-source.js').DemoHandle | null} */
     let lastHandle = null;
 
     function schedule() {
@@ -71,6 +86,7 @@
         schedule();
     }
 
+    /** @param {import('../../data/wasm-source.js').DemoHandle | null} handle */
     function onDemo(handle) {
         if (handle !== lastHandle) {
             lastHandle = handle;
@@ -156,6 +172,7 @@
         else view.reveal();
     }
 
+    /** @param {string} tab */
     function onTab(tab) {
         if (tab !== TAB) return;
         // Run once src/app/tabs.js has made the tab visible (it follows the same
@@ -167,6 +184,7 @@
         setTimeout(reveal, 120);
     }
 
+    /** @type {(set: (value: string) => void) => (e: Event & { currentTarget: HTMLSelectElement }) => void} */
     const sel = (set) => (e) => set(e.currentTarget.value);
 
     onMount(() => {
@@ -195,7 +213,7 @@
         <div class="locmetric-row">
             <label class="locmetric-label">Metric:
                 <select id="locgraph-metric" title="Weight the loc graph and heatmap by total time, time holding RL/LG (or not), or time with an active quad or pent"
-                    bind:this={metricSel} onchange={(e) => { metric = e.currentTarget.value; refreshGraph(); renderHeatmap(); }}>
+                    bind:this={metricSel} onchange={(e) => { metric = /** @type {LocMetric} */ (e.currentTarget.value); refreshGraph(); renderHeatmap(); }}>
                     <option value="all" selected>Full time</option>
                     <option value="armed" hidden={!avail.armed} disabled={!avail.armed}>With RL / LG</option>
                     <option value="unarmed" hidden={!avail.unarmed} disabled={!avail.unarmed}>Without RL / LG</option>

@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // WebGL backend for the static world — the floor model and the liquid
 // volumes, i.e. exactly the layers the 2D path bakes to an offscreen canvas
 // and re-bakes on every camera-motion frame.

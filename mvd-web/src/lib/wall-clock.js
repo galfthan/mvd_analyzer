@@ -18,16 +18,22 @@ import { escapeHtml } from './html.js';
 // window, so printing "11:44" claims a minute the stamp does not have. Those
 // print the day plus the ± in the TEXT; everything second-scale or tighter
 // keeps the minute.
+/**
+ * @param {number} unixMs
+ * @param {number} [accuracyMs]  absent compares false: the minute is printed
+ */
 export function formatUtcStamp(unixMs, accuracyMs) {
     // toISOString is UTC by definition: "2002-08-04T11:44:55.000Z".
     const iso = new Date(unixMs).toISOString();
-    if (accuracyMs >= 3600000) return `${iso.slice(0, 10)} UTC ±${formatAccuracyMs(accuracyMs)}`;
+    const acc = /** @type {number} */ (accuracyMs);
+    if (acc >= 3600000) return `${iso.slice(0, 10)} UTC ±${formatAccuracyMs(acc)}`;
     return `${iso.slice(0, 10)} ${iso.slice(11, 16)} UTC`;
 }
 
 // The accuracy ladder is 1 ms / 1 s / 1 h / 14 h, but this formats the number
 // rather than switching on those four values, so a new rung reads correctly
 // without a change here.
+/** @param {number} ms */
 export function formatAccuracyMs(ms) {
     if (ms >= 3600000) return `${Math.round(ms / 3600000)} h`;
     if (ms >= 1000) return `${Math.round(ms / 1000)} s`;
@@ -43,6 +49,10 @@ export function formatAccuracyMs(ms) {
 // plain date is the one way this field misleads. The anchor is never dropped
 // or coerced — the schema grades it rather than withholding it, and so does
 // this; the grade, the source, the ± and the note all ride the tooltip.
+/**
+ * @param {import('./result.js').Result | null | undefined} result
+ * @returns {{ html: string, text: string } | null}
+ */
 export function matchWallClock(result) {
     const g = result?.streams?.global;
     if (!g || !g.matchStartUnixMs) return null;
@@ -71,6 +81,7 @@ export function matchWallClock(result) {
 // block exists — it is the server's stamp, to the second, with its zone
 // printed (text, escaped here). The graded anchor fills the half of the
 // archive that has no block at all, which used to render "-".
+/** @param {import('./result.js').Result | null | undefined} result */
 export function matchDateHtml(result) {
     const ktxDate = result?.demoInfo?.date;
     if (ktxDate) return escapeHtml(ktxDate);

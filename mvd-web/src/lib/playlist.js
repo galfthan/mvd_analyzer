@@ -14,6 +14,15 @@
 // Times stay demo-relative in storage because both consumers (the engine
 // and hub links) speak it; the page converts to match time for display.
 
+/**
+ * @typedef {import('./result.js').Result} Result
+ * @typedef {number | 'auto'} Track
+ * @typedef {{ key: string, gameId: number | null, title: string, offset: number }} ClipDemo
+ * @typedef {{ from: number, to: number, track: Track, who: string, label: string, demo: ClipDemo }} Clip
+ * @typedef {{ type: 'follow' | 'next', index: number } | { type: 'none' | 'end', index?: undefined }} PlaylistStep
+ * @typedef {{ title: string, build: (result: Result, demo: ClipDemo) => Clip[] }} Generator
+ */
+
 const HUB_GAMES_URL = 'https://hub.quakeworld.nu/games/';
 // hub.quakeworld.nu src/utils/game-url.ts MAX_CLIPS @ 5c96205c19c7
 export const MAX_HUB_CLIPS = 20;
@@ -21,6 +30,10 @@ const PLAYLIST_VERSION = 1;
 
 // parseHubReplayUrl reads a link built by hubReplayUrl() (src/lib/hub-url.js) — the only
 // shape the page emits: /games/?gameId=N&from=F[&to=T]&track=U.
+/**
+ * @param {string} href
+ * @returns {{ gameId: number, from: number, to: number | null, track: Track } | null}
+ */
 export function parseHubReplayUrl(href) {
     let url;
     try {
@@ -43,6 +56,10 @@ export function parseHubReplayUrl(href) {
 // hubClipsUrl exports clips of ONE hub game as hub's native multi-clip link.
 // Hub reads at most MAX_HUB_CLIPS and drops from >= to; the caller checks
 // `clips.length` against the cap to tell the user.
+/**
+ * @param {number} gameId
+ * @param {Array<Pick<Clip, 'from' | 'to' | 'track'>>} clips
+ */
 export function hubClipsUrl(gameId, clips) {
     const params = new URLSearchParams({ gameId: String(gameId) });
     for (const c of clips.slice(0, MAX_HUB_CLIPS)) {
@@ -57,6 +74,10 @@ export function hubClipsUrl(gameId, clips) {
 
 // The single hub game every clip belongs to, or null when the list is
 // empty, mixes demos, or holds a local file.
+/**
+ * @param {Clip[]} clips
+ * @returns {number | null}
+ */
 export function singleHubGame(clips) {
     if (!clips.length) return null;
     const id = clips[0].demo?.gameId;
@@ -70,8 +91,11 @@ export function singleHubGame(clips) {
 // [from, to, track, who, label, demoIndex] plus a demo table. Local-file
 // demos travel by title only — the receiver has to load the file.
 
+/** @param {Clip[]} clips */
 export function encodePlaylist(clips) {
+    /** @type {Array<[string, number, string, number]>} */
     const demos = [];
+    /** @type {Map<string, number>} */
     const index = new Map();
     const rows = clips.map((c) => {
         const key = c.demo?.key || '';
@@ -84,6 +108,10 @@ export function encodePlaylist(clips) {
     return base64UrlEncode(JSON.stringify({ v: PLAYLIST_VERSION, d: demos, c: rows }));
 }
 
+/**
+ * @param {string} str
+ * @returns {Clip[] | null}
+ */
 export function decodePlaylist(str) {
     try {
         return decodeRows(JSON.parse(base64UrlDecode(str)));
@@ -95,9 +123,14 @@ export function decodePlaylist(str) {
 // A share link is untrusted input: anything malformed drops the row (or the
 // whole link), and a demo's key must agree with its gameId — the page loads
 // a clip's demo by gameId and then matches it by key.
+/**
+ * @param {any} doc  parsed share-link JSON, untrusted
+ * @returns {Clip[] | null}
+ */
 function decodeRows(doc) {
     if (!doc || doc.v !== PLAYLIST_VERSION || !Array.isArray(doc.c) || !Array.isArray(doc.d)) return null;
-    const demos = doc.d.map((row) => {
+    /** @type {Array<ClipDemo | null>} */
+    const demos = doc.d.map((/** @type {unknown} */ row) => {
         if (!Array.isArray(row)) return null;
         const [key, gameId, title, offset] = row;
         if (typeof key !== 'string') return null;
@@ -108,6 +141,7 @@ function decodeRows(doc) {
         }
         return { key, gameId: gameId || null, title: String(title || ''), offset: Number(offset) || 0 };
     });
+    /** @type {Clip[]} */
     const clips = [];
     for (const row of doc.c) {
         if (!Array.isArray(row)) continue;
@@ -125,6 +159,7 @@ function decodeRows(doc) {
     return clips;
 }
 
+/** @param {string} text */
 function base64UrlEncode(text) {
     const bytes = new TextEncoder().encode(text);
     let bin = '';
@@ -132,6 +167,7 @@ function base64UrlEncode(text) {
     return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
+/** @param {string} str */
 function base64UrlDecode(str) {
     const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
     const bin = atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4));
@@ -150,6 +186,14 @@ function base64UrlDecode(str) {
 //     last clip, ends the run ({ type: 'end' });
 //   - otherwise { type: 'none' }.
 // `prev` is the previous tick's clock (null right after a jump).
+/**
+ * @param {Array<Pick<Clip, 'from' | 'to'>>} clips
+ * @param {number} index
+ * @param {number | null} prev
+ * @param {number} now
+ * @param {boolean} playing
+ * @returns {PlaylistStep}
+ */
 export function playlistStep(clips, index, prev, now, playing) {
     const active = clips[index];
     if (!active) return { type: 'end' };
@@ -170,11 +214,25 @@ export function playlistStep(clips, index, prev, now, playing) {
 // mvd-analytics/RESULT_SCHEMA.md) and returns clips for `demo`. The
 // conversion to demo seconds is the same `+ demoOffset` hubReplayUrl uses.
 
+/**
+ * @param {Result} result
+ * @param {number} ms
+ */
 function demoSec(result, ms) {
     const off = result?.streams?.global?.demoOffset || 0;
     return (ms + off) / 1000;
 }
 
+/**
+ * @param {Result} result
+ * @param {ClipDemo} demo
+ * @param {number} fromMs
+ * @param {number} toMs
+ * @param {number | null | undefined} track  a userid; none follows FTE's autotrack
+ * @param {string} who
+ * @param {string} label
+ * @returns {Clip}
+ */
 function clip(result, demo, fromMs, toMs, track, who, label) {
     return {
         from: Math.max(0, Math.floor(demoSec(result, fromMs))),
@@ -186,16 +244,18 @@ function clip(result, demo, fromMs, toMs, track, who, label) {
     };
 }
 
+/** @param {number} ms */
 function mmss(ms) {
     const s = Math.max(0, Math.floor(ms / 1000));
     return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
+/** @type {Record<string, Generator>} */
 export const GENERATORS = {
     quadRuns: {
         title: 'Quad runs',
         build(result, demo) {
-            return (result?.timelineAnalysis?.powerupEvents || [])
+            return /** @type {any[]} */ (result?.timelineAnalysis?.powerupEvents || [])
                 .filter((e) => e.powerupType === 'quad')
                 .sort((a, b) => a.time - b.time)
                 .map((e) => clip(result, demo, e.time - 3000, e.endTime + 2000, e.playerUserID, e.playerName,
@@ -205,7 +265,7 @@ export const GENERATORS = {
     bestQuadRuns: {
         title: 'Best quad runs (most frags)',
         build(result, demo) {
-            const runs = (result?.timelineAnalysis?.powerupEvents || [])
+            const runs = /** @type {any[]} */ (result?.timelineAnalysis?.powerupEvents || [])
                 .filter((e) => e.powerupType === 'quad' && e.frags > 0)
                 .sort((a, b) => b.frags - a.frags || a.time - b.time)
                 .slice(0, 5);
@@ -216,7 +276,7 @@ export const GENERATORS = {
     fragStreaks: {
         title: 'Frag streaks',
         build(result, demo) {
-            return (result?.timelineAnalysis?.fragStreaks || [])
+            return /** @type {any[]} */ (result?.timelineAnalysis?.fragStreaks || [])
                 .slice()
                 .sort((a, b) => a.time - b.time)
                 .map((s) => clip(result, demo, s.time, s.endTime + 3000, s.playerUserID, s.playerName,
@@ -253,8 +313,15 @@ export const GENERATORS = {
     },
 };
 
+/**
+ * @param {Result} result
+ * @param {ClipDemo} demo
+ * @param {string} kind  a result.highlights list
+ * @param {(h: any) => string} label
+ * @returns {Clip[]}
+ */
 function highlightClips(result, demo, kind, label) {
-    return (result?.highlights?.[kind] || [])
+    return /** @type {any[]} */ (result?.highlights?.[kind] || [])
         .slice()
         .sort((a, b) => a.time - b.time)
         .map((h) => clip(result, demo, h.time - 6000, h.time + 3000, h.actor?.userId, h.actor?.name || '', label(h)));
@@ -262,11 +329,18 @@ function highlightClips(result, demo, kind, label) {
 
 // playerFragClips: every enemy kill by `name`, from the killer's view,
 // 5 s before to 2 s after, with kills closer than that merged into one clip.
+/**
+ * @param {Result} result
+ * @param {ClipDemo} demo
+ * @param {string} name
+ * @returns {Clip[]}
+ */
 export function playerFragClips(result, demo, name) {
     const userid = result?.timelineAnalysis?.playerUserIDs?.[name];
-    const kills = (result?.frags?.frags || [])
+    const kills = /** @type {any[]} */ (result?.frags?.frags || [])
         .filter((f) => f.killer === name && !f.isSuicide && !f.isTeamKill)
         .sort((a, b) => a.time - b.time);
+    /** @type {Array<{ fromMs: number, toMs: number, n: number, at: number, weapon: string, victim: string }>} */
     const merged = [];
     for (const k of kills) {
         const last = merged[merged.length - 1];

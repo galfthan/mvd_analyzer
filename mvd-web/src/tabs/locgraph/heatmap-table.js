@@ -7,9 +7,17 @@
 import { heatmapTableHtml } from '../../lib/loc-heatmap.js';
 import { makeSortable } from '../../ui/sortable.js';
 
+// Both tables are declared with a <thead> row and a <tbody>.
+
+/**
+ * @param {HTMLTableElement} table
+ * @param {import('../../lib/loc-heatmap.js').HeatMatrix} data
+ * @param {string} firstColLabel
+ * @param {string[]} teamColors
+ */
 export function fillHeatmapTable(table, data, firstColLabel, teamColors) {
     const { head, rows } = heatmapTableHtml(data, firstColLabel, teamColors);
-    table.tHead.rows[0].innerHTML = head;
+    /** @type {HTMLTableSectionElement} */ (table.tHead).rows[0].innerHTML = head;
     const tbody = table.tBodies[0];
     tbody.innerHTML = '';
     for (const html of rows) {
@@ -20,7 +28,11 @@ export function fillHeatmapTable(table, data, firstColLabel, teamColors) {
     makeSortable(table);
 }
 
+/**
+ * @param {HTMLTableElement} table
+ * @param {{ head?: boolean }} [opts]
+ */
 export function clearHeatmapTable(table, { head = true } = {}) {
-    if (head) table.tHead.rows[0].innerHTML = '';
+    if (head) /** @type {HTMLTableSectionElement} */ (table.tHead).rows[0].innerHTML = '';
     table.tBodies[0].innerHTML = '';
 }

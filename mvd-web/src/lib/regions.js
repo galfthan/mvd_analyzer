@@ -7,6 +7,14 @@
 // { name, points: [{x,y,z,name}], centroidX, centroidY } — the shape Go
 // ships in timelineAnalysis.regionControl.regions.
 
+/**
+ * @typedef {{ name: string, locs: string[] }} RegionDef
+ * @typedef {{ name: string, locs: string }} RegionRow  an editor row; locs comma-joined
+ * @typedef {{ x: number, y: number, z: number, name: string }} RegionPoint
+ * @typedef {{ name: string, points: RegionPoint[], centroidX: number, centroidY: number }} Region
+ * @typedef {{ name: string, points: Array<{ x: number, y: number }> }} LocGroup  a map loc group
+ */
+
 // regionSides: the canonical index (= colour index, src/state/teams.js) of
 // region control's side A and side B. Go names the sides itself
 // (rc.teamA / rc.teamB — view/region_control.go inferTeamsFromMatch takes
@@ -14,12 +22,22 @@
 // demoInfo's first team lost, Go's side A is canonical index 1. So every
 // teamA* / teamB* state is coloured and named through this, by name, never
 // as index 0 / 1.
+/**
+ * @param {string[]} order
+ * @param {{ teamA: string | null, teamB: string | null }} rc
+ * @returns {[number, number]}
+ */
 export function regionSides(order, rc) {
-    return [order.indexOf(rc.teamA), order.indexOf(rc.teamB)];
+    // A side Go did not name is no team: indexOf(null) is -1.
+    return [order.indexOf(/** @type {string} */ (rc.teamA)), order.indexOf(/** @type {string} */ (rc.teamB))];
 }
 
 // The editor's rows for a set of resolved regions: one per region, its
 // distinct loc names comma-joined.
+/**
+ * @param {Region[]} regions
+ * @returns {RegionRow[]}
+ */
 export function regionRowsFromRegions(regions) {
     return regions.map((region) => ({
         name: region.name,
@@ -30,6 +48,10 @@ export function regionRowsFromRegions(regions) {
 // readRegionDefs reads the definitions out of the editor rows, in row order
 // so the user's region order is preserved when serialised. Empty rows (no
 // name or no locs) are dropped silently — they're transient editing state.
+/**
+ * @param {Array<{ name?: string, locs?: string }>} rows
+ * @returns {RegionDef[]}
+ */
 export function readRegionDefs(rows) {
     const out = [];
     for (const row of rows) {
@@ -47,6 +69,11 @@ export function readRegionDefs(rows) {
 // case-insensitive so a hand-edited "ya" still claims the canonical "YA"
 // loc — saves the user having to memorize the exact post-substitution
 // casing. A definition that matches no loc is dropped.
+/**
+ * @param {RegionDef[]} defs
+ * @param {RegionPoint[]} locations  the demo's locs (timelineAnalysis.locationData)
+ * @returns {Region[]}
+ */
 export function resolveRegions(defs, locations) {
     const regions = [];
     const seenNames = new Set();
@@ -77,7 +104,12 @@ export function resolveRegions(defs, locations) {
 }
 
 // Loc name → region name.
+/**
+ * @param {Region[]} regions
+ * @returns {Record<string, string>}
+ */
 export function locToRegionOf(regions) {
+    /** @type {Record<string, string>} */
     const out = {};
     for (const region of regions) {
         for (const pt of region.points) out[pt.name] = region.name;
@@ -88,7 +120,14 @@ export function locToRegionOf(regions) {
 // Region name → the map's loc groups it covers (for the control overlay's
 // colouring): a group belongs to a region when one of its points sits on
 // one of the region's points in XY.
+/**
+ * @template {LocGroup} G
+ * @param {Region[]} regions
+ * @param {G[] | null | undefined} groups
+ * @returns {Record<string, G[]>}
+ */
 export function regionToGroupsOf(regions, groups) {
+    /** @type {Record<string, G[]>} */
     const out = {};
     if (!groups) return out;
     for (const group of groups) {
@@ -114,6 +153,7 @@ export function regionToGroupsOf(regions, groups) {
 }
 
 // The override the WASM recompute (view.RegionControl) takes.
+/** @param {Region[]} regions */
 export function regionOverrideJSON(regions) {
     return JSON.stringify({
         regions: regions.map(r => ({
@@ -125,10 +165,12 @@ export function regionOverrideJSON(regions) {
 
 // Save…: the definitions as typed (not as resolved), and the file name —
 // the map name as a safe stem, "regions" when no map info is available.
+/** @param {RegionDef[]} defs */
 export function regionFileJSON(defs) {
     return JSON.stringify({ regions: defs }, null, 4) + '\n';
 }
 
+/** @param {string | null | undefined} mapKey */
 export function regionFileName(mapKey) {
     const base = String(mapKey || '').replace(/[^a-z0-9_-]/g, '');
     return (base || 'regions') + '.json';
@@ -136,19 +178,23 @@ export function regionFileName(mapKey) {
 
 // Load…: the editor rows for a region file, or { error } for the alert.
 // A region without a name is skipped; `locs` is optional.
+/**
+ * @param {string} text
+ * @returns {{ rows: RegionRow[], error?: undefined } | { error: string, rows?: undefined }}
+ */
 export function parseRegionFile(text) {
     let parsed;
     try {
         parsed = JSON.parse(text);
     } catch (err) {
-        return { error: 'Failed to parse region JSON: ' + err.message };
+        return { error: 'Failed to parse region JSON: ' + /** @type {Error} */ (err).message };
     }
     const regions = Array.isArray(parsed?.regions) ? parsed.regions : null;
     if (!regions) return { error: 'Region JSON must have a top-level "regions" array.' };
     const rows = [];
     for (const r of regions) {
         const name = String(r.name || '').trim();
-        const locs = Array.isArray(r.locs) ? r.locs.map(s => String(s)) : [];
+        const locs = Array.isArray(r.locs) ? r.locs.map(/** @param {unknown} s */ s => String(s)) : [];
         if (!name) continue;
         rows.push({ name, locs: locs.join(', ') });
     }

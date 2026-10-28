@@ -5,6 +5,8 @@
 
 import { formatDuration } from './result.js';
 
+/** @typedef {{ start: number, end: number }} Span  match seconds */
+
 // A drag shorter than this is a click: it clears the segment and seeks.
 const CLICK_MAX_S = 2;
 
@@ -17,6 +19,10 @@ export const SPEED_BUTTONS = [
 ];
 
 // barAxisTicks: 4–10 evenly spaced labels, about one a minute.
+/**
+ * @param {number} duration
+ * @returns {Array<{ pct: number, label: string }>}
+ */
 export function barAxisTicks(duration) {
     if (!(duration > 0)) return [];
     const n = Math.min(10, Math.max(4, Math.floor(duration / 60)));
@@ -28,6 +34,10 @@ export function barAxisTicks(duration) {
 }
 
 // barPct: the cursor's position (percent), null without a duration.
+/**
+ * @param {number} t
+ * @param {number} duration
+ */
 export function barPct(t, duration) {
     if (!(duration > 0)) return null;
     return Math.max(0, Math.min(100, (t / duration) * 100));
@@ -35,26 +45,42 @@ export function barPct(t, duration) {
 
 // barTime: a pointer's clientX over the bar (its rect) as a time, null when
 // the bar has no width.
+/**
+ * @param {number} clientX
+ * @param {{ left: number, width: number }} rect
+ * @param {number} duration
+ */
 export function barTime(clientX, rect, duration) {
     if (!(rect.width > 0)) return null;
     return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) * duration;
 }
 
 // dragSpan: the span between the drag's start and `t`, ordered.
+/**
+ * @param {number} t0
+ * @param {number} t
+ * @returns {Span}
+ */
 export function dragSpan(t0, t) {
     return { start: Math.min(t0, t), end: Math.max(t0, t) };
 }
 
+/** @param {Span} span */
 export const isClick = (span) => span.end - span.start <= CLICK_MAX_S;
 
 // overlayBox: the selection overlay's left / width (percent), null without a
 // duration.
+/**
+ * @param {Span} seg
+ * @param {number} duration
+ */
 export function overlayBox(seg, duration) {
     if (!(duration > 0)) return null;
     const a = (seg.start / duration) * 100;
     return { left: `${a}%`, width: `${(seg.end / duration) * 100 - a}%` };
 }
 
+/** @param {Span | null | undefined} seg */
 export function segmentLabel(seg) {
     return seg ? `${formatDuration(seg.start)} – ${formatDuration(seg.end)}` : '';
 }
@@ -63,6 +89,9 @@ export function segmentLabel(seg) {
 // Player engine is the clock (`drives`) its status rules and it cannot play
 // backwards; otherwise the page's own playback (src/state/playback.js) does.
 // The running speed shows a pause glyph.
+/**
+ * @param {{ drives: boolean, engine: { playing: boolean, speed: number }, playing: boolean, speed: number }} state
+ */
 export function speedButtons({ drives, engine, playing, speed }) {
     const on = drives ? engine.playing : playing;
     const current = drives ? engine.speed / 100 : speed;

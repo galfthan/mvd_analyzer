@@ -19,7 +19,7 @@
     import { makeSortable } from '../../ui/sortable.js';
 
     // 'all' | 'first'. Kept across demos, like the select.
-    let mode = $state('all');
+    let mode = $state(/** @type {import('../../lib/pickups.js').PickupMode} */ ('all'));
     let empty = $state(false);
     // The Item Pickups panel hides when the demo has weapon pickups but no
     // item ones. A demo with neither leaves it as it was (the tab shows its
@@ -47,8 +47,10 @@
         schedule();
     }
 
+    /** @param {HTMLTableElement} table */
     function clear(table) {
-        table.tHead.replaceChildren();
+        // Every pickups table has its <thead> in the markup below.
+        /** @type {HTMLTableSectionElement} */ (table.tHead).replaceChildren();
         table.tBodies[0].replaceChildren();
     }
 
@@ -76,6 +78,12 @@
         for (const table of all) makeSortable(table);
     }
 
+    /**
+     * @param {ReturnType<typeof pickupsSection>} section
+     * @param {HTMLTableElement} teamTable
+     * @param {HTMLTableElement} playerTable
+     * @param {string[]} colors
+     */
     function fill(section, teamTable, playerTable, colors) {
         if (!section) {
             teamTable.style.display = 'none';
@@ -88,10 +96,15 @@
         fillTable(playerTable, section.player, colors);
     }
 
+    /**
+     * @param {HTMLTableElement} table
+     * @param {import('../../lib/pickups.js').PickupsTable} section
+     * @param {string[]} colors
+     */
     function fillTable(table, { head, rows }, colors) {
         const htr = document.createElement('tr');
         htr.innerHTML = head;
-        table.tHead.appendChild(htr);
+        /** @type {HTMLTableSectionElement} */ (table.tHead).appendChild(htr);
         const body = table.tBodies[0];
         for (const row of rows) {
             const tr = document.createElement('tr');

@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // Pure geometry helpers for the map renderer: triangle-soup handling, the
 // floor-slab boundary extrusion, and mover pose lookup. Nothing here touches
 // the DOM, a canvas, or renderer state — every function is a value in,

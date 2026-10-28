@@ -23,6 +23,7 @@
         barAxisTicks, barPct, barTime, dragSpan, isClick, overlayBox, segmentLabel, speedButtons,
     } from '../lib/playback-bar.js';
 
+    /** @type {Record<string, string>} */
     const TITLES = {
         'tl-rev': 'Reverse playback (1x)',
         'tl-slow': 'Play 0.2x (slow motion)',
@@ -30,19 +31,21 @@
         'tl-5x': 'Play 5x speed',
     };
 
+    /** @type {HTMLDivElement} */
     let bar;
-    let result = $state.raw(null);
+    let result = $state.raw(/** @type {import('../lib/result.js').Result | null} */ (null));
     let tab = $state('search');
     let duration = $state(0);
     let time = $state('0:00');
-    let left = $state(null);
-    let buttons = $state.raw(speedButtons({ drives: false, engine: {}, playing: false, speed: 1 }));
+    let left = $state(/** @type {string | null} */ (null));
+    // `engine` is not read while `drives` is false.
+    let buttons = $state.raw(speedButtons({ drives: false, engine: /** @type {any} */ ({}), playing: false, speed: 1 }));
 
     // The overlay keeps its last left / width while hidden, as the bar always
     // has; it has no style at all until the first segment change.
-    let ovDisplay = $state(null);
-    let ovLeft = $state(null);
-    let ovWidth = $state(null);
+    let ovDisplay = $state(/** @type {string | null} */ (null));
+    let ovLeft = $state(/** @type {string | null} */ (null));
+    let ovWidth = $state(/** @type {string | null} */ (null));
     let label = $state('');
 
     // A range drag (dragStart, the preview it shows) or a caret drag.
@@ -53,6 +56,7 @@
     const shown = $derived(!!result && TABS_WITH_TIMELINE.includes(tab));
     const ticks = $derived(barAxisTicks(duration));
 
+    /** @param {{ start: number, end: number } | null} seg */
     function showSegment(seg) {
         if (!seg) {
             ovDisplay = 'none';
@@ -68,6 +72,7 @@
         label = segmentLabel(seg);
     }
 
+    /** @param {number} t */
     function follow(t) {
         const pct = barPct(t, duration);
         if (pct !== null) left = `${pct}%`;
@@ -79,13 +84,16 @@
         buttons = speedButtons({ drives: engine.drives(), engine: engine.status.get(), playing: p.playing, speed: p.speed });
     }
 
+    /** @param {number} speed */
     function press(speed) {
         if (engine.drives()) engine.setSpeed(speed);
         else playAtSpeed(speed);
     }
 
+    /** @param {MouseEvent} e */
     const timeAt = (e) => barTime(e.clientX, bar.getBoundingClientRect(), duration);
 
+    /** @param {MouseEvent} e */
     function barDown(e) {
         const t = timeAt(e);
         if (t === null) return;
@@ -95,12 +103,14 @@
         e.preventDefault();
     }
 
+    /** @param {MouseEvent} e */
     function caretDown(e) {
         caretDragging = true;
         e.preventDefault();
         e.stopPropagation();
     }
 
+    /** @param {MouseEvent} e */
     function move(e) {
         if (caretDragging) {
             const t = timeAt(e);
@@ -114,6 +124,7 @@
         if (!isClick(span)) showSegment(span);
     }
 
+    /** @param {MouseEvent} e */
     function up(e) {
         if (caretDragging) {
             caretDragging = false;

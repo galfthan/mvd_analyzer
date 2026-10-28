@@ -32,8 +32,10 @@
         return out;
     });
 
+    /** @param {string} name */
     const color = (name) => colorOf($teams, name, $teams.perPlayer);
 
+    /** @param {Record<string, any>} f  a result.frags.frags row */
     function watch(f) {
         clock.seek(Math.max(0, f.time / 1000 - LEAD_S));
         engine.trackName((!f.isSuicide && f.killer) || f.victim);

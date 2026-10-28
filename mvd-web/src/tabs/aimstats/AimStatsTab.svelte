@@ -26,28 +26,41 @@
     import { onPanelReveal } from '../../ui/panels/reveal.js';
     import AimHist from './AimHist.svelte';
 
+    /**
+     * @typedef {import('../../lib/aim.js').VictimFilter} VictimFilter
+     * @typedef {import('../../lib/aim-plot.js').DensityGrid} DensityGrid
+     * @typedef {import('./density-canvas.js').DensityHover} DensityHover
+     * One weapon's crosshair panel.
+     * @typedef {{ shown: boolean, nodata: string, hists: ReturnType<typeof aimHistRow>, grid: DensityGrid | null }} Plot
+     * @typedef {'lg' | 'sg'} PlotWeapon
+     */
+
+    /** @type {PlotWeapon[]} */
     const WEAPONS = ['lg', 'sg'];
+    /** @type {(w: PlotWeapon) => Plot} */
     const noPlot = (w) => ({ shown: false, nodata: `No ${w.toUpperCase()} fired by this player.`, hists: [], grid: null });
 
-    let result = $state.raw(null);
+    let result = $state.raw(/** @type {import('../../lib/result.js').Result | null} */ (null));
     let hasData = $state(false);
     let teamless = $state(false);
-    let note = $state.raw(null);
-    let chips = $state.raw([]);
-    let tables = $state.raw([]);
-    let filter = $state('all');
-    let player = $state(null);
+    let note = $state.raw(/** @type {import('../../lib/provenance.js').ProvenanceNote | null} */ (null));
+    let chips = $state.raw(/** @type {ReturnType<typeof aimChips>} */ ([]));
+    let tables = $state.raw(/** @type {ReturnType<typeof aimWeaponTables>} */ ([]));
+    let filter = $state(/** @type {VictimFilter} */ ('all'));
+    let player = $state(/** @type {string | null} */ (null));
     let mode = $state('');
-    let plots = $state.raw({ lg: noPlot('lg'), sg: noPlot('sg') });
+    let plots = $state.raw(/** @type {Record<PlotWeapon, Plot>} */ ({ lg: noPlot('lg'), sg: noPlot('sg') }));
     // Bumped on every per-player build so the histogram rows are rebuilt
     // rather than patched.
     let gen = $state(0);
-    let chipBox = $state();
-    const canvases = $state({});
+    let chipBox = $state(/** @type {HTMLElement | undefined} */ (undefined));
+    const canvases = $state(/** @type {Partial<Record<PlotWeapon, HTMLCanvasElement>>} */ ({}));
+    /** @type {Partial<Record<PlotWeapon, DensityHover>>} */
     const hover = {};
 
     let dirty = true;
     let queued = false;
+    /** @type {import('../../state/demo.js').DemoHandle | null} */
     let lastHandle = null;
 
     function schedule() {
@@ -104,12 +117,14 @@
     // filter selects — the image and its histograms, or the no-data line.
     function buildPlayer() {
         if (!hasData) return;
-        const players = result.aim.players;
+        // hasData: result.aim has players.
+        /** @type {Array<Record<string, any>>} */
+        const players = /** @type {import('../../lib/result.js').Result} */ (result).aim.players;
         if (!players.some((p) => p.player === player)) player = players[0].player;
-        const pa = players.find((p) => p.player === player);
+        const pa = /** @type {Record<string, any>} */ (players.find((p) => p.player === player));
         mode = aimModeText(pa);
         const c = pa.crosshair;
-        const next = {};
+        const next = /** @type {Record<PlotWeapon, Plot>} */ ({});
         for (const w of WEAPONS) {
             const idx = aimSampleIndices(c, w, filter);
             next[w] = {
@@ -128,15 +143,18 @@
     function paint() {
         for (const w of WEAPONS) {
             const g = plots[w].grid;
-            if (g && canvases[w]) hover[w] = paintAimDensity(canvases[w], g);
+            const canvas = canvases[w];
+            if (g && canvas) hover[w] = paintAimDensity(canvas, g);
         }
     }
 
+    /** @param {string} name */
     function pickPlayer(name) {
         player = name;
         buildPlayer();
     }
 
+    /** @param {VictimFilter} kind */
     function pickFilter(kind) {
         filter = kind;
         buildTables();
@@ -145,6 +163,7 @@
 
     // Left / Right arrow keys (with the strip focused) step prev/next for
     // quick A/B comparison.
+    /** @param {KeyboardEvent} e */
     function chipKey(e) {
         if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
         e.preventDefault();
@@ -155,17 +174,27 @@
     }
 
     // Hover read-out: shot/hit counts in the coarse bin under the cursor.
+    /**
+     * @param {MouseEvent} e
+     * @param {PlotWeapon} w
+     */
     function onHover(e, w) {
         const d = hover[w];
         if (!d) return;
-        const canvas = canvases[w];
+        // The canvas the event came from, bound since mount.
+        const canvas = /** @type {HTMLCanvasElement} */ (canvases[w]);
         const [mx, my] = hoverPoint(canvas, d, e);
         canvas.title = aimHoverTitle(d, mx, my);
     }
 
     // Fill the weapon-tables container: one block per weapon, each table
     // made sortable (a fresh table every build, so the sort starts over).
+    /**
+     * @param {HTMLElement} node
+     * @param {ReturnType<typeof aimWeaponTables>} list
+     */
     function weaponBlocks(node, list) {
+        /** @param {ReturnType<typeof aimWeaponTables>} blocks */
         const fill = (blocks) => {
             node.replaceChildren();
             for (const b of blocks) {
@@ -173,7 +202,7 @@
                 block.className = 'aim-weapon-block';
                 block.innerHTML = b.html;
                 node.appendChild(block);
-                makeSortable(block.querySelector('table'));
+                makeSortable(/** @type {HTMLTableElement} */ (block.querySelector('table')));
             }
         };
         fill(list);
@@ -250,7 +279,7 @@
                  title="Click a player, or focus and use ← → to step between players">
                 {#each chips as chip}
                     <button type="button" class="aim-chip" data-player={chip.player} style:border-bottom-color={chip.color || null}
-                        class:active={chip.player === player} onclick={() => { pickPlayer(chip.player); chipBox.focus(); }}>{chip.player}</button>
+                        class:active={chip.player === player} onclick={() => { pickPlayer(chip.player); /** @type {HTMLElement} */ (chipBox).focus(); }}>{chip.player}</button>
                 {/each}
             </div>
             <span id="aim-mode" class="aim-mode">{mode}</span>

@@ -14,6 +14,22 @@ import { sortByFragsDesc, teamOrder, teamFragTotals, teamRowsInColourOrder, hold
 import { HOLD_WEAPON_NAMES, formatAccuracyCell, anyAccOffKtxScale, ACC_OFF_SCALE_FOOTNOTE } from './accuracy.js';
 import { formatUtcStamp } from './wall-clock.js';
 
+/**
+ * @typedef {import('./result.js').Result} Result
+ * @typedef {import('./player-stats.js').PlayerStatsRow} PlayerStatsRow
+ * @typedef {import('./player-stats.js').PlayerStatsTeamRow} PlayerStatsTeamRow
+ * A table row as markup plus its colour index into the canonical order.
+ * @typedef {{ html: string, colorIdx: number }} SummaryRow
+ * @typedef {{ map: string, mapTitle: string, duration: string, mode: string, hostname: string }} MatchInfo
+ * @typedef {{ label: string, value: string, title: string }} SettingCell
+ * @typedef {{ label: string, title: string }} SettingPill
+ * @typedef {{ cells: SettingCell[], modifiers: SettingPill[], shown: boolean }} MatchSettings
+ * @typedef {{ name: string, frags: number }} TeamSummary
+ * @typedef {{ name: string, count: number, pct: number }} WeaponKillBar
+ * @typedef {[label: string, value: string, title?: string]} NoMatchEvidence
+ * @typedef {{ title: string, detail: string, reading: string, evidence: NoMatchEvidence[], errors: string }} NoMatchView
+ */
+
 // ─── Match Info ────────────────────────────────────────────────────────────
 //
 // demoInfo.duration is verbatim from the KTX JSON (integer seconds,
@@ -23,9 +39,14 @@ import { formatUtcStamp } from './wall-clock.js';
 // players use. `match.mapTitle` ("Castle of the Damned") goes in the cell's
 // tooltip for anyone curious about the level title. Geometry lookups go
 // through mapFileKey() and never touch mapTitle.
+/**
+ * @param {Result | null | undefined} result
+ * @returns {MatchInfo}
+ */
 export function matchInfo(result) {
     const demoInfo = result?.demoInfo;
     const match = result?.match;
+    /** @type {MatchInfo} */
     const info = { map: '-', mapTitle: '', duration: '-', mode: '-', hostname: '-' };
     if (demoInfo) {
         info.map = demoInfo.map || match?.map || '-';
@@ -46,6 +67,7 @@ export function matchInfo(result) {
 // Long-form names for KTX spawn algorithms (k_spw values). Mirrors
 // respawn_model_name() in ktx/src/g_utils.c — used as a tooltip on the
 // short-form value rendered in the Match Settings panel.
+/** @type {Record<string, string>} */
 const SPAWN_LONG_NAMES = {
     'QW':  'Normal QW respawns',
     'KTS': 'KT SpawnSafety',
@@ -62,9 +84,15 @@ const SPAWN_LONG_NAMES = {
 // "Modifiers" row of pill-shaped tags below the grid. null when the demo
 // has no settings; `shown` is false when they produce nothing at all (an
 // entirely empty matchSettings — a parser failure), which hides the panel.
+/**
+ * @param {Record<string, any> | null | undefined} settings  result.metadata.matchSettings
+ * @returns {MatchSettings | null}
+ */
 export function matchSettings(settings) {
     if (!settings) return null;
+    /** @type {SettingCell[]} */
     const cells = [];
+    /** @type {(label: string, value: unknown, title?: string) => void} */
     const addCell = (label, value, title) => {
         if (value === undefined || value === null || value === '' || value === 0) return;
         cells.push({ label, value: String(value), title: title || '' });
@@ -91,7 +119,9 @@ export function matchSettings(settings) {
     addCell('Match tag', settings.matchtag);
 
     // Modifier pills — boolean flags + special string flags.
+    /** @type {SettingPill[]} */
     const modifiers = [];
+    /** @type {(label: string, on: unknown, title?: string) => void} */
     const addPill = (label, on, title) => {
         if (!on) return;
         modifiers.push({ label, title: title || '' });
@@ -116,6 +146,10 @@ export function matchSettings(settings) {
 // none (the panel hides). Star keys (server system metadata like *version,
 // *admin) sort below regular gameplay cvars. Special-cases the `epoch` key
 // to show a human-readable date alongside the raw unix timestamp.
+/**
+ * @param {Record<string, string> | null | undefined} serverInfo
+ * @returns {string[] | null}
+ */
 export function serverInfoRows(serverInfo) {
     if (!serverInfo || Object.keys(serverInfo).length === 0) return null;
     const keys = Object.keys(serverInfo).filter(k => serverInfo[k] !== '' && serverInfo[k] !== undefined);
@@ -146,6 +180,11 @@ export function serverInfoRows(serverInfo) {
 // it exists so the scores match the scoreboard below — its score.frags is
 // the corrected net score, where KTX's stats.frags resets after a
 // reconnect; demoInfo players, then match.teams, are the fallbacks.
+/**
+ * @param {Result | null | undefined} result
+ * @param {string[] | null | undefined} canonical
+ * @returns {TeamSummary[]}
+ */
 export function teamsSummary(result, canonical) {
     const rows = result?.playerStats?.players || [];
     if (rows.length) return teamsFromPlayers(rows, canonical);
@@ -159,8 +198,14 @@ export function teamsSummary(result, canonical) {
 // render with a visible label in this panel. The canonical order keeps the
 // colours consistent; any team it does not name follows. Without one, by
 // score.
+/**
+ * @param {import('./player-stats.js').FragRow[]} rows
+ * @param {string[] | null | undefined} canonical
+ * @returns {TeamSummary[]}
+ */
 function teamsFromPlayers(rows, canonical) {
     const teamScores = teamFragTotals(rows, 'unknown');
+    /** @type {Array<[string, number]>} */
     let ordered;
     if (canonical && canonical.length >= 2) {
         ordered = canonical.map(t => [t, teamScores[t] || 0]);
@@ -173,9 +218,15 @@ function teamsFromPlayers(rows, canonical) {
     return ordered.map(([name, frags]) => ({ name, frags }));
 }
 
+/**
+ * @param {Array<{ name: string, frags: number }>} teams  result.match.teams
+ * @param {string[] | null | undefined} canonical
+ * @returns {TeamSummary[]}
+ */
 function teamsFromMatch(teams, canonical) {
     let sorted;
     if (canonical && canonical.length >= 2) {
+        /** @type {Record<string, number>} */
         const orderMap = {};
         canonical.forEach((t, i) => { orderMap[t] = i; });
         sorted = [...teams].sort((a, b) => (orderMap[a.name] ?? 999) - (orderMap[b.name] ?? 999));
@@ -195,6 +246,7 @@ function teamsFromMatch(teams, canonical) {
 // matches. Deaths and frags are measured there and stay; printing 0 for the
 // rest made a 230-frag team read as one that never killed anybody. Zero is
 // still zero when the log WAS read, so these test for absence, not falsity.
+/** @param {{ efficiency?: number | null }} score */
 export function effPct(score) {
     // efficiency is a RATIO in [0,1] in the schema, shown as a percent.
     return score.efficiency == null ? '-' : `${(score.efficiency * 100).toFixed(1)}%`;
@@ -214,6 +266,10 @@ export function effPct(score) {
 // Measuredness rides with the rest of the kill family: the map is present
 // exactly when score.kills is, so branch on kills and render '-' when the
 // demo's frag log measured nothing, matching every other kill-side cell.
+/**
+ * @param {{ kills?: number | null, byEnemyWeapon?: Record<string, number> }} score
+ * @param {string} weapon
+ */
 export function enemyWeaponKillCell(score, weapon) {
     if (score.kills == null) return '-';
     const m = score.byEnemyWeapon || {};
@@ -233,6 +289,11 @@ export function enemyWeaponKillCell(score, weapon) {
 // only. See RESULT_SCHEMA.md.
 //
 // Returns { showHandicap, rows: [{ html, colorIdx }] }, frag-sorted.
+/**
+ * @param {PlayerStatsRow[]} rows
+ * @param {string[] | null | undefined} canonical
+ * @returns {{ showHandicap: boolean, rows: SummaryRow[] }}
+ */
 export function basicStatsPlayerRows(rows, canonical) {
     const sorted = sortByFragsDesc(rows);
     const order = teamOrder(canonical, sorted);
@@ -289,6 +350,11 @@ export function basicStatsPlayerRows(rows, canonical) {
 
 // The per-team rows, in colour order; a team's colour index is its row
 // index (teamRowsInColourOrder puts the canonical teams first, in order).
+/**
+ * @param {PlayerStatsTeamRow[]} teamRows
+ * @param {string[] | null | undefined} canonical
+ * @returns {SummaryRow[]}
+ */
 export function basicStatsTeamRows(teamRows, canonical) {
     return teamRowsInColourOrder(teamRows, canonical).map((team, idx) => {
         const s = team.score || {};
@@ -322,6 +388,10 @@ export function basicStatsTeamRows(teamRows, canonical) {
 // `accuracy` family, kills from `score.byWeapon` (the corrected frag log),
 // damage from `damage.byWeapon`, and eK from `score.byWeaponVsEnemyWeapon`.
 // A weapon the player never touched shows '-' in all four rather than zeros.
+/**
+ * @param {PlayerStatsRow | PlayerStatsTeamRow} player
+ * @param {string} wn
+ */
 function formatWeaponCells(player, wn) {
     const acc = formatAccuracyCell(player.accuracy, wn);
     const kills = player.score?.byWeapon?.[wn] || 0;
@@ -343,16 +413,20 @@ function formatWeaponCells(player, wn) {
 // FULL six-bucket breakdown rides in the cell's tooltip, so no part of the
 // cross-tab is hidden from a reader who wants it. Measuredness follows the
 // kill family, exactly like the K column beside it.
+/**
+ * @param {PlayerStatsRow | PlayerStatsTeamRow} player
+ * @param {string} wn
+ */
 export function enemyKillCell(player, wn) {
     if (player.score?.kills == null) return '<td>-</td>';
     const b = player.score?.byWeaponVsEnemyWeapon?.[wn] || null;
     if (!b) return '<td>-</td>';
     const armed = (b.rl || 0) + (b.lg || 0) + (b.both || 0);
     // Ordered strongest-first so the tooltip reads as a loadout ladder.
-    const parts = [
+    const parts = /** @type {Array<[string, number | undefined]>} */ ([
         ['RL+LG', b.both], ['RL', b.rl], ['LG', b.lg],
         ['mid', b.mid], ['sg only', b.sg], ['unknown', b.unknown],
-    ].filter(([, n]) => n).map(([k, n]) => `${k}: ${n}`);
+    ]).filter(([, n]) => n).map(([k, n]) => `${k}: ${n}`);
     const title = `Victim was holding — ${parts.join(' · ')}`;
     // `armed` prints even at 0. Reaching here means the player DID kill with
     // this weapon and the classification ran, so 0 is a measurement — "every
@@ -362,6 +436,7 @@ export function enemyKillCell(player, wn) {
     return `<td title="${escapeHtml(title)}">${armed}</td>`;
 }
 
+/** @param {PlayerStatsRow | PlayerStatsTeamRow} row */
 function weaponCellsRow(row) {
     let cells = `<td>${escapeHtml(row.name)}</td>`;
     HOLD_WEAPON_NAMES.forEach(wn => { cells += formatWeaponCells(row, wn); });
@@ -372,6 +447,11 @@ function weaponCellsRow(row) {
 // where no row has a damage family the comparator is a constant, which
 // left the rows in stream order — a different, teamwise-jumbled order
 // from every other Summary table. Fall back to the frag sort they use.
+/**
+ * @param {PlayerStatsRow[]} rows
+ * @param {string[] | null | undefined} canonical
+ * @returns {SummaryRow[]}
+ */
 export function weaponStatsPlayerRows(rows, canonical) {
     const hasDamage = rows.some(r => r.damage);
     const sorted = hasDamage
@@ -381,12 +461,21 @@ export function weaponStatsPlayerRows(rows, canonical) {
     return sorted.map(p => ({ html: weaponCellsRow(p), colorIdx: order.indexOf(p.team || '') }));
 }
 
+/**
+ * @param {PlayerStatsTeamRow[]} teamRows
+ * @param {string[] | null | undefined} canonical
+ * @returns {SummaryRow[]}
+ */
 export function weaponStatsTeamRows(teamRows, canonical) {
     return teamRowsInColourOrder(teamRows, canonical).map((t, idx) => ({ html: weaponCellsRow(t), colorIdx: idx }));
 }
 
 // The Acc marker's footnote under Weapon Stats, or '' when no rendered cell
 // wears the mark — so it never explains something that is not there.
+/**
+ * @param {PlayerStatsRow[]} rows
+ * @param {PlayerStatsTeamRow[]} teamRows
+ */
 export function accConventionNote(rows, teamRows) {
     return (anyAccOffKtxScale(rows) || anyAccOffKtxScale(teamRows)) ? ACC_OFF_SCALE_FOOTNOTE : '';
 }
@@ -398,6 +487,7 @@ export function accConventionNote(rows, teamRows) {
 // Counts come from the pickup tally, seconds from OUR hold integral rather
 // than KTX's item.time. MH has no possession column by design: mega health
 // is consumed on pickup, so playerStats carries no hold stat for it.
+/** @param {PlayerStatsRow | PlayerStatsTeamRow} row */
 export function itemCells(row) {
     const k = row.pickups?.byKind || {};
     const h = row.hold || {};
@@ -435,6 +525,7 @@ export function itemCells(row) {
 // conflates them; the tooltip shows the split. ABSENT — rendered '-' —
 // when the demo carries no //ktx bp hints, since a 0 there would claim
 // nobody ever recovered a pack.
+/** @param {{ xfer?: number | null, xferSelf?: number } | null | undefined} entry */
 export function formatXfer(entry) {
     if (!entry || entry.xfer == null) return '-';
     const self = entry.xferSelf || 0;
@@ -443,18 +534,29 @@ export function formatXfer(entry) {
     return `<span title="${entry.xfer} to a teammate, ${self} self-recovered">${total}</span>`;
 }
 
+/**
+ * @param {PlayerStatsRow[]} rows
+ * @param {string[] | null | undefined} canonical
+ * @returns {SummaryRow[]}
+ */
 export function itemsPlayerRows(rows, canonical) {
     const sorted = sortByFragsDesc(rows);
     const order = teamOrder(canonical, sorted);
     return sorted.map(p => ({ html: `<td>${escapeHtml(p.name)}</td>${itemCells(p)}`, colorIdx: order.indexOf(p.team || '') }));
 }
 
+/**
+ * @param {PlayerStatsTeamRow[]} teamRows
+ * @param {string[] | null | undefined} canonical
+ * @returns {SummaryRow[]}
+ */
 export function itemsTeamRows(teamRows, canonical) {
     return teamRowsInColourOrder(teamRows, canonical).map((t, idx) => ({ html: `<td>${escapeHtml(t.name)}</td>${itemCells(t)}`, colorIdx: idx }));
 }
 
 // ─── Kills by Weapon ───────────────────────────────────────────────────────
 
+/** @type {Record<string, string>} */
 const WEAPON_NAMES = {
     'rl': 'Rocket Launcher',
     'lg': 'Lightning Gun',
@@ -474,6 +576,7 @@ const WEAPON_NAMES = {
 };
 
 // A frag-log weapon code's display name (also the Aim tab's table titles).
+/** @param {string} code */
 export function getWeaponName(code) {
     return WEAPON_NAMES[code] || code;
 }
@@ -481,6 +584,10 @@ export function getWeaponName(code) {
 // The bars of Kills by Weapon from result.frags.byWeapon, most kills first,
 // each as a percentage of the largest; null when the demo has no frag
 // section (the panel stays empty).
+/**
+ * @param {Record<string, number> | null | undefined} byWeapon  result.frags.byWeapon
+ * @returns {WeaponKillBar[] | null}
+ */
 export function weaponKillBars(byWeapon) {
     if (!byWeapon) return null;
     const sorted = Object.entries(byWeapon).sort((a, b) => b[1] - a[1]);
@@ -500,6 +607,7 @@ export function weaponKillBars(byWeapon) {
 // partial match or nothing at all, and `demoUnreadable` is the one reason
 // that means both — which is why that reason (and only that one) also prints
 // the reader's own message.
+/** @type {Record<string, string>} */
 const NO_MATCH_TITLES = {
     demoUnreadable: 'This recording could not be read to the end',
     midMatchRecording: 'This recording starts mid-match',
@@ -520,6 +628,7 @@ const NO_MATCH_TITLES = {
 //
 // The pipeline's own detail strings are untouched — they are the finding, and
 // display-only by contract either way.
+/** @type {Record<string, string>} */
 const NO_MATCH_ACTIONS = {
     demoUnreadable: 'The file may be truncated, or not an MVD at all — try downloading it again.',
     midMatchRecording: 'Nothing is wrong with the file; it simply began after the match did. Per-match stats need a recording that covers the match start.',
@@ -532,6 +641,12 @@ const NO_MATCH_ACTIONS = {
 // the 170 `noMatchDeclared` demos in the sweep are a foreign gamedir
 // (`fortress` alone is 148), and the same mods turn up under three of the
 // other reasons. "qw" is the stock deathmatch dir and says nothing.
+/**
+ * result.noMatch (Result JSON).
+ * @typedef {{ reason: string, detail?: string, gameDir?: string, statusAtOpen?: string, statusRunningSeen?: boolean, kills?: number, dateMarkers?: Array<{ unixMs: number, source: string, raw?: string }> }} NoMatch
+ */
+
+/** @param {NoMatch} nm */
 function noMatchGameDirNote(nm) {
     if (!nm.gameDir || nm.gameDir === 'qw') return '';
     return `This looks like a ${nm.gameDir} demo; this tool analyzes KTX-style QuakeWorld matches.`;
@@ -541,7 +656,12 @@ function noMatchGameDirNote(nm) {
 // `detail` states is a structured field, and these are those fields —
 // `detail` is display-only by contract (unstable wording, never parsed), so
 // it is rendered verbatim and nothing is read back out of it.
+/**
+ * @param {NoMatch} nm
+ * @returns {NoMatchEvidence[]}
+ */
 function noMatchEvidence(nm) {
+    /** @type {NoMatchEvidence[]} */
     const items = [];
     // Absent when the opening fullserverinfo dump carried no `status` key at
     // all, which is a different reading from any value it could have had.
@@ -563,7 +683,12 @@ function noMatchEvidence(nm) {
 // finding — the reason's translation, then the gamedir's where the demo has
 // one to give ('' hides the line); `errors` the reader's message, ''
 // unless it is the evidence.
+/**
+ * @param {Result | null | undefined} result
+ * @returns {NoMatchView | null}
+ */
 export function noMatchView(result) {
+    /** @type {NoMatch | undefined} */
     const nm = result?.noMatch;
     if (!nm) return null;
     const reading = [NO_MATCH_ACTIONS[nm.reason] || '', noMatchGameDirNote(nm)].filter(Boolean).join(' ');
@@ -586,6 +711,7 @@ export function noMatchView(result) {
 // hidden only in the second case, since the .no-match CSS cannot tell them
 // apart. Otherwise the panel is left to the duel-mode / no-team-rows /
 // individual-mode rules.
+/** @param {Result | null | undefined} result */
 export function teamsPanelHidden(result) {
     return !!result?.noMatch && !(result.match?.teams || []).length;
 }

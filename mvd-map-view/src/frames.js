@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-map-view is its own package; mvd-web's checkJs (jsconfig.json) does not cover it.
 // Columnar bucket-view accessors — the frame feed's wire shape.
 //
 // The analytics pipeline ships a column-major ColumnarBuckets object (see

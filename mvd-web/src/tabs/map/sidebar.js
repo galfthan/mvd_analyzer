@@ -13,7 +13,20 @@ import {
     legendTeams, legendRowHtml, LEGEND_HEAD, teamFragsAt, stackCell, weaponsText, regionStatusRows,
 } from '../../lib/map.js';
 
+/**
+ * @typedef {import('../../../../mvd-map-view/src/index.js').MvdMap} MvdMap
+ * @typedef {import('../../lib/map.js').PlayerSymbols} PlayerSymbols
+ * @typedef {import('../../lib/map.js').PlayerSymbol} PlayerSymbol
+ * @typedef {import('../../lib/map.js').PlayerFrame} PlayerFrame
+ */
+
 // buildLegend fills `el` with a titled table per team.
+/**
+ * @param {HTMLElement} el
+ * @param {string[]} teams
+ * @param {PlayerSymbols} symbols
+ * @param {string[]} colors
+ */
 export function buildLegend(el, teams, symbols, colors) {
     el.innerHTML = '';
     for (const block of legendTeams(teams, symbols, colors)) {
@@ -36,44 +49,58 @@ export function buildLegend(el, teams, symbols, colors) {
         table.appendChild(tbody);
         el.appendChild(table);
     }
-    el.querySelectorAll('.team-status-table').forEach(makeSortable);
+    /** @type {NodeListOf<HTMLTableElement>} */ (el.querySelectorAll('.team-status-table')).forEach(makeSortable);
 }
 
 // syncLegend fills the legend at `time`: team frag totals, each player's
 // loc, stack, weapons and hub watch link.
+/**
+ * @param {HTMLElement} el
+ * @param {MvdMap} view
+ * @param {import('../../lib/result.js').Result} result
+ * @param {number} time
+ */
 export function syncLegend(el, view, result, time) {
     const s = view.state;
     const frame = view.frameAt(time);
     const pd = frame ? frame.p : null;
     const frags = fragsAt(result, time);
-    s.teams.forEach((team, ti) => {
+    s.teams.forEach((/** @type {string} */ team, /** @type {number} */ ti) => {
         const t = document.getElementById(`map-legend-team-title-${ti}`);
         if (t) t.textContent = `${team} — ${teamFragsAt(team, s.playerSymbols, frags)} frags`;
     });
-    for (const cell of el.querySelectorAll('.map-legend-loc')) {
-        const d = pd?.[cell.dataset.player];
+    // Every legend cell carries data-player (legendRowHtml).
+    for (const cell of /** @type {NodeListOf<HTMLElement>} */ (el.querySelectorAll('.map-legend-loc'))) {
+        const d = pd?.[/** @type {string} */ (cell.dataset.player)];
         cell.textContent = d && !(d.x === 0 && d.y === 0) ? (view.resolvePlayerLoc(d) || '') : '';
     }
-    for (const cell of el.querySelectorAll('.map-legend-stack')) {
-        const c = stackCell(pd?.[cell.dataset.player]);
+    for (const cell of /** @type {NodeListOf<HTMLElement>} */ (el.querySelectorAll('.map-legend-stack'))) {
+        const c = stackCell(pd?.[/** @type {string} */ (cell.dataset.player)]);
         cell.dataset.sortValue = c.sort;
         if (c.html === null) cell.textContent = '-';
         else cell.innerHTML = c.html;
     }
-    for (const cell of el.querySelectorAll('.map-legend-wpn')) {
-        cell.textContent = weaponsText(pd?.[cell.dataset.player]);
+    for (const cell of /** @type {NodeListOf<HTMLElement>} */ (el.querySelectorAll('.map-legend-wpn'))) {
+        cell.textContent = weaponsText(pd?.[/** @type {string} */ (cell.dataset.player)]);
     }
     const hubInfo = result?.hubInfo;
     const ids = result?.timelineAnalysis?.playerUserIDs || {};
     const offset = demoOffsetSec(result);
-    for (const cell of el.querySelectorAll('.map-legend-hub')) {
-        cell.innerHTML = hubWatchLinkHtml(cell.dataset.player, time, hubInfo, ids, offset);
+    for (const cell of /** @type {NodeListOf<HTMLElement>} */ (el.querySelectorAll('.map-legend-hub'))) {
+        cell.innerHTML = hubWatchLinkHtml(/** @type {string} */ (cell.dataset.player), time, hubInfo, ids, offset);
     }
 }
 
 // syncRegionStatus rebuilds the region rows at `time`. `icons` caches the
 // composited player icons per (name, letter, colour, badges) for the demo:
 // a player is in one region per frame, so a cached node is appended once.
+/**
+ * @param {HTMLElement | null | undefined} el
+ * @param {MvdMap} view
+ * @param {number} time
+ * @param {string[]} colors
+ * @param {Map<string, HTMLCanvasElement>} icons
+ */
 export function syncRegionStatus(el, view, time, colors, icons) {
     const s = view.state;
     if (!el || !s.controlRegions || s.controlRegions.length === 0) return;
@@ -83,7 +110,7 @@ export function syncRegionStatus(el, view, time, colors, icons) {
     const frame = view.frameAt(time);
     const rows = regionStatusRows({
         regions: s.controlRegions, states, playerData: frame ? frame.p : null,
-        locOf: (d) => view.resolvePlayerLoc(d), locToRegion: s.locToRegion,
+        locOf: (/** @type {PlayerFrame} */ d) => view.resolvePlayerLoc(d), locToRegion: s.locToRegion,
         symbols: s.playerSymbols, teams: s.teams || [], colors, sides: s.controlSides,
     });
     for (const r of rows) {
@@ -112,6 +139,13 @@ export function syncRegionStatus(el, view, time, colors, icons) {
 }
 
 // A player's symbol with their RL / LG / powerup badges around it.
+/**
+ * @param {MvdMap} view
+ * @param {{ name: string, data: PlayerFrame, sym: PlayerSymbol | undefined, teamIdx: number }} p
+ * @param {string[]} colors
+ * @param {Map<string, HTMLCanvasElement>} cache
+ * @returns {HTMLCanvasElement}
+ */
 function playerIcon(view, p, colors, cache) {
     const letter = p.sym?.symbol || p.name.charAt(0).toUpperCase();
     const color = colors[p.sym?.teamIdx ?? p.teamIdx] || colors[0];
@@ -127,7 +161,7 @@ function playerIcon(view, p, colors, cache) {
     canvas.style.width = size + 'px';
     canvas.style.height = size + 'px';
     canvas.className = 'region-player-icon';
-    const ctx = canvas.getContext('2d');
+    const ctx = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'));
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     drawPlayerSymbolAt(ctx, letter, color, size / 2, size / 2, PLAYER_SYMBOL_BASE_SIZE);
     if (badges.length > 0) drawBadgesAroundCenter(ctx, badges, size / 2, size / 2, 14, 5);
