@@ -100,7 +100,7 @@ export class PlayerEngine {
         iframe.addEventListener('load', () => {
             if (this.iframe !== iframe) return;
             iframe.contentWindow.mvdFte.start({ demoUrl, demoPath, mapName: mapFileKey(handle.result) })
-                .then((fte) => waitForDemoClock(fte).then(() => fte))
+                .then((fte) => waitForDemoClock(fte, () => this.iframe === iframe).then(() => fte))
                 .then((fte) => {
                     if (this.iframe !== iframe) return;
                     this.fte = fte;
@@ -299,11 +299,14 @@ export class PlayerEngine {
     }
 }
 
-function waitForDemoClock(fte) {
+// waitForDemoClock resolves once the engine's demo clock moves (or after
+// CLOCK_WAIT_MS). `live()` turning false — the engine torn down by a new
+// demo — ends the poll too.
+function waitForDemoClock(fte, live) {
     return new Promise((resolve) => {
         const started = performance.now();
         const poll = setInterval(() => {
-            if (fte.getDemoElapsedTime() > 0 || performance.now() - started > CLOCK_WAIT_MS) {
+            if (!live() || fte.getDemoElapsedTime() > 0 || performance.now() - started > CLOCK_WAIT_MS) {
                 clearInterval(poll);
                 resolve();
             }
