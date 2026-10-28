@@ -160,7 +160,9 @@ export function loadMap(result) {
     learnMode.set(false);
 
     // The BSP-derived floor polygons, when the map has them; otherwise the
-    // loc points' convex hulls stay.
+    // loc points' convex hulls stay. A reply for a demo no longer loaded
+    // (another load reset the map meanwhile) is dropped: it would put the
+    // old map's floors under the new one.
     const basename = mapFileKey(result);
     s.mapBasename = basename;
     if (basename) {
@@ -170,6 +172,7 @@ export function loadMap(result) {
             .then(geom => {
                 console.log(`[mvd-timing] map geometry fetch (async): ${(performance.now() - t0).toFixed(1)} ms`);
                 if (!geom || !Array.isArray(geom.locs) || geom.locs.length === 0) return;
+                if (mapData.get()?.result !== result) return;
                 applyMapGeometry(geom);
             })
             .catch(() => {});
