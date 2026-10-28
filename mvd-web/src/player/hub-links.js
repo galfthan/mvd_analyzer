@@ -1,4 +1,4 @@
-// hub-links.js — every hub link on the other tabs (app.js hubReplayUrl:
+// hub-links.js — every hub link on the other tabs (hubReplayUrl:
 // a.viewer-link, a.hub-watch-link) for the loaded demo: a plain click plays
 // the clip in the Player tab, shift-click adds it to the playlist, and
 // ctrl/cmd-click and middle-click keep the browser's own "open hub in a new

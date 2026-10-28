@@ -1,6 +1,7 @@
 # Plan — mvd-web on Svelte, behind a data layer
 
-Status: phases A–E done (2026-10-27); F (the remaining tabs) started with
+Status: phases A–F done (2026-10-28): every tab is Svelte and
+`static/app.js` is gone; the API step is next. F (the remaining tabs) started with
 F0, arrangeable panels on the legacy tabs (`src/ui/panels/`: reorder,
 collapse, close, show all, saved per viewer) — ahead of the ports, since
 it needs none of them: it tags the existing panels and never moves them.
@@ -73,6 +74,23 @@ the Player tab's map pane imports the model instead of going through
 `loadMap` and puts the demo's regions in effect), tab switching and the
 URL state (`?learn=` through `MvdMapTab.learnMode`). The map draws only
 while its tab shows.
+Search was the last port (`src/tabs/search/`: `SearchTab.svelte` over
+`search-model.js`; `src/lib/search.js` for the mode facets, the row
+cells, the paging and the form's value rules), and with it the rest of
+`app.js` moved into `src/app/` — `load.js` (`loadDemo`, the file / hub /
+search-result paths, `displayResults`: reset, the canonical team order
+from `src/lib/canonical-teams.js`, the body classes, the top bar from
+`src/lib/topbar.js`, the clock, the map and regions, `onBucketsReady`),
+`url.js` (the URL state, rules in `src/lib/url-state.js`), `tabs.js`
+(tab switching), `overlay.js` (the loading overlay, the version tag, the
+build check), `timing.js`, `source.js` (the one `WasmSource`) and
+`boot.js` (what `app.js`'s `DOMContentLoaded` did, run by `src/main.js`
+after the mount). The top bar's line and version and the load row's
+status / hub box are stores (`src/state/shell.js`). `app.js`,
+`legacy.js`, `adopt.js`, `index.html`'s `#legacy-dom` and the
+`window.MvdLib` / `MvdHub` bridges are gone; `src/main.js` publishes
+`MvdState`, `MvdMapTab`, `MvdPlayer`, `mvdData` and `loadDemo` for the
+console and the headless checks only.
 C covers the clock, teams and current-demo stores. D renders the top bar,
 sidebar and layout in Svelte with the active tab in a store; the load
 overlay and search stay legacy until their tabs are ported. E is the
@@ -248,7 +266,7 @@ and panes `MapPane`, `HealthArmorPane`, `MomentsPane`, `FragFeedPane`.
 | D | Svelte shell (sidebar, tabs, overlay, search) with `LegacyTab` hosts | all tabs work inside the new shell |
 | E | Player tab in Svelte, panes on dockview, own Map pane instance | Player tab section deleted from `app.js` → **player-tab can merge** |
 | F0 | Arrangeable panels on the multi-panel tabs (Summary, Timeline, Locs & regions, Key moments, Pickups, Aim) | done |
-| F | Remaining tabs, smallest/least coupled first: Chat (done), Pack drops (done), Pickups (done), Key moments (done), Summary (done), Aim (done), Locs & regions (done), Timeline (done), Map (done), Search | each port deletes its `app.js` section; done when `app.js` is gone |
+| F | Remaining tabs, smallest/least coupled first: Chat, Pack drops, Pickups, Key moments, Summary, Aim, Locs & regions, Timeline, Map, Search — **done** (2026-10-28) | each port deletes its `app.js` section; done when `app.js` is gone — **it is** |
 
 Not everything in `app.js` becomes a component. The parts without a DOM
 (playerStats accessors, bucket-view accessors, the data-preparation
@@ -292,7 +310,7 @@ have none outside the Player tab).
 ## For the later API step: what the page reads (first pass)
 
 Grep-level, not complete — a full audit is the first task of the API
-step. Top-level Result sections `app.js` reads, and the mvd-api endpoint
+step. Top-level Result sections the page reads, and the mvd-api endpoint
 that likely covers each (`mvd-api/openapi/openapi.yaml`):
 
 | Result section (fields seen) | Likely endpoint | Notes |

@@ -2,8 +2,8 @@
     // The Chat tab: frags and say / say_team lines on one scrolling time
     // track (Kills, then a say column per side — or one "Chat" column for
     // everybody in an individual field), with the current time as a line
-    // that the viewport follows. app.js still toggles the `active` class
-    // like on every other .tab-content (onTabActivated).
+    // that the viewport follows. src/app/tabs.js toggles the `active` class
+    // like on every other .tab-content.
     //
     // Nothing runs while the tab is hidden. The columns are rebuilt — once,
     // on the next frame the tab shows — when the demo, the teams or the

@@ -18,26 +18,28 @@ talks to it through a JS shim.
 - `index.html`, `src/`, `package.json`, `vite.config.js` — the page,
   built by Vite (`make build` runs `npm ci && npm run build` here, so
   node is needed to build). `src/main.js` is the module entry: it mounts
-  the Svelte shell (`src/shell/`) and publishes on `window` what `app.js`
-  uses — the data layer (`mvdData`, `MvdHub`), shared state (`MvdState`),
-  result helpers (`MvdLib`) and the Map tab's map view and loader
-  (`MvdMapTab`) — plus the Player tab's engine (`MvdPlayer`) for the
-  console. Ported so far: the shell with the unified playback bar
-  (`src/ui/PlaybackBar.svelte`), the Player tab (`src/player/`), and the
-  Summary, Timeline, Map, Chat, Pack Drops, Pickups, Key Moments, Aim
-  Stats and Locs & Regions tabs (`src/tabs/<name>/`, their DOM-free parts
-  in `src/lib/<name>.js`) — every tab but Search; see
+  the Svelte shell (`src/shell/`) and starts the page (`src/app/boot.js`).
+  Every tab is a Svelte component: the Player tab (`src/player/`) and
+  the Search, Summary, Timeline, Map, Chat, Pack Drops, Pickups, Key
+  Moments, Aim Stats and Locs & Regions tabs (`src/tabs/<name>/`, their
+  DOM-free parts in `src/lib/<name>.js`), with the unified playback bar
+  (`src/ui/PlaybackBar.svelte`) above them. The orchestration the tabs
+  share is `src/app/`: loading a demo (`load.js`: `loadDemo`, the file /
+  hub / search-result paths, `displayResults`), tab switching
+  (`tabs.js`), the URL state (`url.js`), the loading overlay and version
+  tag (`overlay.js`), load timing (`timing.js`) and the data source
+  (`source.js`); see
   [`plan-frontend-restructure.md`](../plan-frontend-restructure.md).
+  For the browser console and the headless checks — no page code reads
+  them — `src/main.js` publishes `window.MvdState` (the stores),
+  `MvdMapTab` (the map view and loader), `MvdPlayer` (the Player engine),
+  `mvdData` (the data source) and `loadDemo`.
   Two UI packages are bundled (pinned in `package.json`):
   [PaneForge](https://paneforge.com) for the Player tab's player | panes
   split and [Lucide](https://lucide.dev) icons, imported one per file
   (`@lucide/svelte/icons/<name>`) so only the icons used ship.
 - `static/` — copied into `dist/` as-is (Vite's `publicDir`).
-  - `styles.css`, `app.js` — the stylesheet, and what is left of the
-    pre-Svelte UI: the Search tab, file / hub loading, the load
-    orchestration (`displayResults`), tab switching and the URL state.
-    `app.js` is still a classic script: `index.html` carries inline
-    handlers that call its globals.
+  - `styles.css` — the stylesheet.
   - `worker.js` — wraps the WASM module in a Web Worker so analysis
     doesn't block the main thread. Provides the host callbacks the
     WASM side calls synchronously: `fetchLocSync(mapName)` for the
@@ -81,8 +83,7 @@ dist/
   analyzer.wasm               ~4 MB, the WASM bundle
   wasm_exec.js                Go glue
   index.html, assets/         the page + Vite's hashed bundles
-  styles.css, app.js,
-  worker.js                   frontend copied from static/
+  styles.css, worker.js       frontend copied from static/
   fte-player/                 the Player tab's engine page
   vendor/                     vendored Cytoscape + fcose + web fonts
   maps/                       pre-generated map geometry
@@ -294,7 +295,7 @@ zoom, drag pan, double-click reset, current-time-line scrub and hover tips
 `src/tabs/timeline/interaction.js`. Every graph shows one view window, the
 selected segment (`MvdState.segment`, `src/state/timeline.js`): the unified
 bar's range select (`src/ui/PlaybackBar.svelte`) sets it as well as the
-tab's zoom and pan, and the bar shows it; `app.js` writes it to the URL. A segment change redraws
+tab's zoom and pan, and the bar shows it; `src/app/url.js` writes it to the URL. A segment change redraws
 at once; a new demo, its buckets, the teams or a region edit redraw on the
 next frame the tab shows; showing the tab (now, a frame later and 120 ms
 later) or one of its panels redraws everything. The clock moves only the
@@ -322,8 +323,14 @@ current-time line and the auto-scroll (paused for 2 s after a scroll by
 the user).
 
 The Search tab is the first tab and is always available — it holds the
-file picker, the hub-URL load row, and the filter form for browsing
-the hub. The other tabs are always present in the sidebar; until a
+file picker (a button or a drop on the load row), the hub-URL load row,
+and the filter form for browsing the hub. It is
+`src/tabs/search/SearchTab.svelte` over `search-model.js` (the form, the
+status line, the rows and their paging, the last search that ran); the
+mode facets, the row cells, the paging arithmetic and the form's value
+rules are `src/lib/search.js`, the query `src/data/hub.js`. The load row's
+status line, hub box and button are stores (`src/state/shell.js`) the
+load writes. The other tabs are always present in the sidebar; until a
 demo is loaded they show a short "Load or search a demo to begin"
 placeholder (CSS-driven via a `body.no-demo` class). After a successful
 load the placeholder is hidden, the Summary tab activates, and the
@@ -334,15 +341,16 @@ strip above the main pane.
 
 ## How the pieces fit
 
-The page is moving to Svelte behind a data layer
+The page is Svelte behind a data layer
 ([`plan-frontend-restructure.md`](../plan-frontend-restructure.md)).
-The data layer is in: `src/data/` — `hub.js` (hub lookup, search, demo
+The data layer is `src/data/` — `hub.js` (hub lookup, search, demo
 download), `worker-client.js` (reqId-correlated RPC over `worker.js`) and
 `wasm-source.js` (`WasmSource.load()` → a `DemoHandle` with the Result,
 `view()` queries, region recompute, line of sight, the deferred buckets
-and the demo bytes). `src/main.js` publishes it as `window.mvdData` /
-`window.MvdHub`; `app.js` loads every demo through `loadDemo()` and never
-talks to the worker or the hub itself. A handle answers only while it is
+and the demo bytes). The page's one source is `src/app/source.js`
+(`window.mvdData` for the console); `src/app/load.js` loads every demo
+through `loadDemo()`, and only it and the Search tab (`searchGames`) call
+the hub. A handle answers only while it is
 the current demo — the worker holds one.
 
 Shared state is in `src/state/` (`window.MvdState`): `clock` (the one
@@ -357,21 +365,27 @@ variables), `segment`, `regionControl`, `activeTab` and `demo` (the
 current `DemoHandle`).
 The stores follow Svelte's store contract, so components read them as
 `$clock`; `store.set` always notifies, even with an unchanged value.
+`src/state/shell.js` holds the chrome's: the top bar's demo line and
+build version, the load row's status line, hub box and busy button.
 
 The shell is Svelte (`src/shell/`): `App.svelte` renders the top bar,
 the sidebar (from `TABS` in `src/state/ui.js`), the unified playback bar
 (`src/ui/PlaybackBar.svelte`, over the Timeline, Chat, Map, Key Moments
-and Player tabs) and the layout, and adopts the markup of the one tab not
-yet ported (Search) — `index.html`'s hidden `#legacy-dom`, which `app.js`
-finds by id — into the main pane (`adopt.js`). The ported tabs
-(`PlayerTab`, and `SummaryTab`, `ChatTab`, `PackDropsTab`, `PickupsTab`,
-`KeyMomentsTab`, `AimStatsTab`, `LocGraphTab`, `TimelineTab`, `MapTab` in
-`src/tabs/`) are mounted there beside it; `app.js` still toggles their
-`active` class like any `.tab-content`. `src/main.js` mounts it
-synchronously, so that markup is in place before `app.js`'s
-`DOMContentLoaded` setup. The sidebar sets `MvdState.activeTab`; `app.js`
-follows it in `onTabActivated`, and `switchTab()` re-selecting the current
-tab re-runs each tab's show path.
+and Player tabs), the layout and every tab (`PlayerTab`, and
+`SummaryTab`, `ChatTab`, `PackDropsTab`, `PickupsTab`, `KeyMomentsTab`,
+`AimStatsTab`, `LocGraphTab`, `TimelineTab`, `MapTab`, `SearchTab` in
+`src/tabs/`). `src/main.js` mounts it synchronously, then
+`src/app/boot.js` starts the page: the URL follows the clock, segment,
+learn mode and tab; the initial tab is picked from the URL; a
+deep-linked demo loads and the URL's search filters fill the form (and
+run, when no demo is deep-linked). The sidebar sets
+`MvdState.activeTab`; `src/app/tabs.js` follows it, after the tabs' own
+subscribers, toggling the `active` class on the tab's `.tab-content`,
+and `switchTab()` re-selecting the current tab re-runs each tab's show
+path. The loading overlay is plain markup in `index.html`, so it shows
+before any script runs; `src/app/overlay.js` drops it when the analyzer
+is up (or, for a deep link, once the demo has rendered) and puts the
+failure in it when the analyzer does not load.
 
 1. User drops an MVD file on the Search tab, pastes a hub.quakeworld.nu
    URL, or picks a row from the search results.
@@ -393,7 +407,10 @@ tab re-runs each tab's show path.
    through the bucket-view accessors of `mvd-map-view/src/frames.js`
    (`bucketIndexAtTime`, `playerValAt`, `reconstructBucketPlayers`,
    `teamSnapshot`, …).
-6. On `result`, `app.js` parses the JSON, clears the no-demo class,
+6. On `result`, the data layer parses the JSON and `displayResults()`
+   (`src/app/load.js`) resets the stores, clears the no-demo class,
+   sets the canonical team order (`src/lib/canonical-teams.js`), the
+   body classes and the top bar (`src/lib/topbar.js`),
    switches to the Summary tab, and loads the map and the demo's own
    regions. That is cheap, so it runs now even though the bucket-derived
    fields are still empty (the Svelte tabs build or draw on the first
@@ -679,8 +696,7 @@ CTF server is laid out individually and genuinely was teamplay. So:
 | Field | `isMultiPlayerIndividual(result)` | `isIndividualLayout && !isDuel` | The one test behind the player palette (the teams store's `perPlayer`), the per-player Timeline and the single-column Chat (`individual-field` on `<body>`, set by `setIndividualFieldLayout`) |
 | Both | `hasTeammates(result)` | teamplay in force AND not laid out per player | The aim tab's Team victim filter |
 
-The layout, semantics and both predicates live in `src/lib/result.js`
-(`app.js` reaches the first two through `MvdLib`).
+The layout, semantics and both predicates live in `src/lib/result.js`.
 
 `displayResults` puts an `individual-mode` class on `<body>` from the LAYOUT
 predicate. The CSS then hides **every team surface**: the Teams panel, the
@@ -1094,8 +1110,13 @@ shown. Clicking a row downloads the demo and runs the normal analysis
 pipeline; the user lands on the Summary tab.
 
 Search state is reflected in the URL so links are shareable. Supported
-params: `player`, `team`, `map`, `mode`, `tag`, `from`, `to`. For
-example:
+params: `player`, `team`, `map`, `mode`, `tag`, `from`, `to` (the URL
+keeps the filters of the last search that answered; a deep link's
+values are written into the form as its inputs hold them — the text
+fields trimmed when the search runs, an unknown `mode` selecting "Any",
+an impossible date left empty). An error from the hub shows on the status
+line under the form; a failed first page clears the list, a failed Load
+more keeps the rows already shown. For example:
 
 - `?player=nexus` opens the page on the Search tab with the player
   field pre-filled and the search auto-executed.
@@ -1175,7 +1196,7 @@ columns and cells are `src/lib/pickups.js`. Rows take their team colour
 from the `teams` store. The tables are rebuilt on the first frame the tab
 shows after the demo or the teams changed, and on a mode change, which
 also resets any column sort (the sortable headers are `src/ui/sortable.js`
-`makeSortable`, shared with `app.js`).
+`makeSortable`, which the load also runs over every static `.stats-table`).
 
 ## Pack Drops tab
 
@@ -1282,7 +1303,7 @@ are cached canvases) and `map-model.js`, which owns the page's one map view
 (mvd-map-view's `MvdMap`) and loads each demo into it — locs, streams,
 items, entities, bounds, player symbols, trails, the async
 `maps/<map>.json` geometry. The DOM-free parts are `src/lib/map.js`.
-`app.js`'s `displayResults` resets and loads it (`MvdMapTab.resetMap` /
+The load's `displayResults` (`src/app/load.js`) resets and loads it (`resetMap` /
 `loadMap`, from `loadMapAndRegions`) and again when the deferred buckets
 land; a load resets the view (pan, zoom, angles, follow, focus, learn
 mode, trail toggles). The model reads the region-control model and the
@@ -1622,7 +1643,7 @@ survives a new demo when that demo has the same team / player.
   weak/control). The live region *overlay* and *status* render on the Map
   and the control timeline on the Timeline tab; all three read the one
   **region-control model**, `src/state/regions.js` (`MvdState.regionControl`).
-  `app.js`'s `loadMapAndRegions` (on load and again when the deferred
+  The load's `loadMapAndRegions` (`src/app/load.js`; on load and again when the deferred
   buckets land) puts the demo's own regions in effect
   with `resetRegionControl` — which rebuilds the editor rows — and decides
   whether the editor shows (two sides only). A committed edit (an input's

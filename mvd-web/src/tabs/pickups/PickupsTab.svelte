@@ -2,8 +2,8 @@
     // The Pickups tab: weapon and item pickups per team and per player —
     // per-entity counts, the pack column, the Σ checked against KTX's own
     // counters, possession seconds (src/lib/pickups.js has the rules).
-    // app.js still toggles the `active` class like on every other
-    // .tab-content (onTabActivated).
+    // src/app/tabs.js toggles the `active` class like on every other
+    // .tab-content.
     //
     // The tables are rebuilt — once, on the next frame the tab shows — when
     // the demo or the teams changed, and at once on a mode change. Their

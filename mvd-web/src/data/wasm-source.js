@@ -116,7 +116,7 @@ export class DemoHandle {
             gameId: game ? game.id : null,
         };
         this.current = true;
-        this.result = null;         // the whole Result (legacy app.js reads it)
+        this.result = null;         // the whole Result
         this.timings = null;
         this.demoBlob = blob;       // the original demo, for the player
         this.gzipped = gzipped;

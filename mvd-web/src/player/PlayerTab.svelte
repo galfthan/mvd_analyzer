@@ -2,8 +2,8 @@
     // The Player tab: the engine with its POV and clip bars and the playlist
     // on the left, the pane column on the right, split by PaneForge (drag
     // the divider, or focus it and use the arrow keys; dragging the column
-    // shut hides it). app.js still toggles the `active` class like on every
-    // other .tab-content (onTabActivated).
+    // shut hides it). src/app/tabs.js toggles the `active` class like on every
+    // other .tab-content.
     import { PaneGroup, Pane, PaneResizer } from 'paneforge';
     import PlayerFrame from './PlayerFrame.svelte';
     import PovBar from './PovBar.svelte';

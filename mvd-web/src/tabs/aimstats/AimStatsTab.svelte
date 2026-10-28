@@ -4,8 +4,8 @@
     // Crosshair placement panel, the LG / SG crosshair-density images with
     // their yaw / pitch marginals and the LG ramp. src/lib/aim.js has the
     // table rules and markup, src/lib/aim-plot.js the binning, and
-    // density-canvas.js paints the images. app.js still toggles the `active`
-    // class like on every other .tab-content (onTabActivated).
+    // density-canvas.js paints the images. src/app/tabs.js toggles the `active`
+    // class like on every other .tab-content.
     //
     // The tab is built — once, on the next frame it shows — after the demo
     // or the teams changed; a new demo puts the filter back to All and the

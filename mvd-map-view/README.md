@@ -82,8 +82,9 @@ Size arrives only through `resize(cssW, cssH, dpr)` — the host measures
 whatever it wants (container, fullscreen element, iframe) and pushes the
 result in.
 
-Still in `app.js`: all measuring, all the DOM chrome, all loaders, and the
-DOM event glue that forwards pointer events into the component.
+In the host (mvd-web's Map tab, `mvd-web/src/tabs/map/`): all measuring,
+all the DOM chrome, all loaders, and the DOM event glue that forwards
+pointer events into the component.
 
 A note on data: the renderer reads item spawners from its own
 `state.items`, not from an analyzer Result — it has no notion of one, and in
@@ -106,13 +107,10 @@ the same "2D context as texture baker" category as the label atlas.
 import { normalizeLocationName, moverPoseAt } from 'mvd-map-view';
 ```
 
-mvd-web bundles this package with Vite (`mvd-web/src/main.js` imports
-`src/index.js` by relative path). `app.js` there is still a classic script,
-because `index.html` carries inline handlers that call its globals, so the
-entry publishes the namespace as `window.MapView`. Module scripts are
-deferred, so that runs after `app.js`'s top level but before
-`DOMContentLoaded`; every `MapView.*` call site is inside a function that
-runs later still.
+mvd-web bundles this package with Vite: its Map tab
+(`mvd-web/src/tabs/map/`), the Player tab's map pane and the Timeline
+import the modules under `src/` by relative path. No global is
+published.
 
 ## Tests
 

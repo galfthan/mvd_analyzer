@@ -1,5 +1,5 @@
-// The page's shared state. app.js reaches it as window.MvdState (published
-// by src/main.js); Svelte components import it.
+// The page's shared state. Components and src/app/ import it; src/main.js
+// publishes it as window.MvdState for the console and the headless checks.
 export { clock } from './clock.js';
 export { teams, setCanonicalTeams, teamIndexOf, colorOf, TEAM_PALETTE } from './teams.js';
 

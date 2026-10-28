@@ -11,15 +11,15 @@
 //   { stage, editable, locations, defs, regions, stats, bucketStates, teamA, teamB }
 // where
 //   stage      'loaded'   — the demo's own regions (Go's defaults), set by
-//                            app.js's loadMapAndRegions on load and again
+//                            loadMapAndRegions (src/app/load.js) on load and again
 //                            when the deferred buckets land.
 //              'resolved' — an edit's definitions resolved against the
 //                            locs, the recompute still running.
 //              'computed' — Go's control states for those regions.
 //   editable   the editor (and the Timeline's control timeline) is shown:
 //              region control needs two sides, so a
-//              field of more than two individual players gets none (app.js
-//              isMultiPlayerIndividual) though Go ships regions for it.
+//              field of more than two individual players gets none
+//              (isMultiPlayerIndividual) though Go ships regions for it.
 //   locations  timelineAnalysis.locationData, what definitions resolve against
 //   defs       the definitions in effect ({ name, locs } — as typed)
 //   regions    them resolved ({ name, points, centroidX, centroidY })
@@ -30,7 +30,7 @@ import { regionRowsFromRegions, readRegionDefs, resolveRegions, regionOverrideJS
 
 export const regionControl = store(null);
 
-// resetRegionControl sets the demo's own regions (app.js loadMapAndRegions).
+// resetRegionControl sets the demo's own regions (loadMapAndRegions, src/app/load.js).
 export function resetRegionControl(result, editable) {
     const rc = result?.timelineAnalysis?.regionControl;
     if (!rc || !rc.regions || rc.regions.length === 0) {

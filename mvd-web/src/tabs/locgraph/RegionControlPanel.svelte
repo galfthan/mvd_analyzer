@@ -2,15 +2,15 @@
     // The Region Control panel: the region definition editor (one row per
     // region — name and comma-separated locs — plus Add / Save… / Load…) and
     // the per-region control matrix. It renders the region-control model
-    // (src/state/regions.js): the demo's own regions when app.js puts them in
+    // (src/state/regions.js): the demo's own regions when the load puts them in
     // effect (on load and again when the deferred buckets land — which
     // rebuilds the rows from them), then each edit's recomputed control
     // states. A committed edit (an input's change, a remove, a load) puts the
-    // rows' definitions in effect through applyRegionDefs; app.js mirrors the
-    // model onto the Map and redraws it and the Timeline's Region Control.
+    // rows' definitions in effect through applyRegionDefs; the Map and the
+    // Timeline's Region Control read the same model.
     //
-    // Shown only while the model is editable (two sides — app.js
-    // initRegionControl decides). Without new control states the matrix keeps
+    // Shown only while the model is editable (two sides — the load's
+    // loadMapAndRegions decides, src/app/load.js). Without new control states the matrix keeps
     // what it last showed: a demo's defaults before its buckets land render
     // nothing, and an edit that leaves no region with stats leaves the last
     // table up.

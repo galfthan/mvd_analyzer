@@ -13,8 +13,9 @@ Fetched from unpkg at the exact pinned versions referenced by
 because each UMD bundle reads the previous one's `window` global
 (`cytoscape` is independent; `layout-base` → `window.layoutBase` →
 `cose-base` reads it and sets `window.coseBase` → `cytoscape-fcose` reads
-that and sets `window.cytoscapeFcose`, which `app.js`
-`registerCytoscapeExtensions()` hands to `cytoscape.use()`).
+that and sets `window.cytoscapeFcose`, which
+`registerCytoscapeExtensions()` in `src/tabs/locgraph/loc-graph-view.js`
+hands to `cytoscape.use()`).
 
 | File | Version | Source URL | sha256 | bytes |
 |---|---|---|---|---|

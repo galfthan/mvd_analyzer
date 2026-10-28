@@ -13,8 +13,9 @@
 //
 // Extraction is in progress. Today the class owns the state bag and the
 // camera, and mvd-web drives it through the same field names it used when
-// this was a module-level object in app.js — that equivalence is what keeps
-// the move verifiable a group at a time. The render methods follow.
+// this was a module-level object in the old app.js (since removed) — that
+// equivalence is what keeps the move verifiable a group at a time. The
+// render methods follow.
 
 import {
     newCamera, project, is3D, fit, setAngles, setOrbitCenter, toView, toWorld,

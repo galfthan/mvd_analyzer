@@ -5,8 +5,8 @@
     // Score, Weapons and Team Health/Armor. src/lib/timeline.js has the
     // series, the roster rows and the hover read-outs;
     // src/ui/timeline-canvas.js draws them; interaction.js is the zoom / pan
-    // / scrub / hover handling. app.js still toggles the `active` class like
-    // on every other .tab-content (onTabActivated).
+    // / scrub / hover handling. src/app/tabs.js toggles the `active` class like
+    // on every other .tab-content.
     //
     // The view window is the selected segment (MvdState.segment): the
     // unified bar selects one, a graph's Ctrl+wheel zoom and drag pan here
@@ -23,7 +23,7 @@
     // hidden.
     //
     // A field of more than two individual players (the teams store's
-    // perPlayer, the same isMultiPlayerIndividual app.js puts on <body> as
+    // perPlayer, the same isMultiPlayerIndividual src/app/load.js puts on <body> as
     // `individual-field`, which the CSS hides the two-sided panels off) has
     // no pair of sides: the three per-player views leave their <details>
     // under the team graphs and render in panels of their own, with taller
@@ -428,7 +428,7 @@
 
     function onTab(tab) {
         if (tab !== TAB) return;
-        // Run once app.js has made the tab visible (it follows the same
+        // Run once src/app/tabs.js has made the tab visible (it follows the same
         // store, after this), then again on the next frame and 120 ms later.
         queueMicrotask(reveal);
         requestAnimationFrame(reveal);

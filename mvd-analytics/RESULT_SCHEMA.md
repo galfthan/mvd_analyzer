@@ -2318,7 +2318,8 @@ states at any resolution, call
 | `B` | teamBControl |
 | `b` | teamBWeakControl |
 
-Control rule (faithful port of `mvd-web/static/app.js:classifyRegionState`):
+Control rule (`classifyRegionState` in `mvd-analytics/view/region_control.go`,
+originally a port of the frontend's own):
 "armed" = carrying RL or LG. Strong control = the dominant team has at
 least one armed player; weak = present but unarmed; contested = both
 present and armed. **Dead players are skipped** — gated on
@@ -3053,7 +3054,7 @@ truth. Integer storage:
    no float conversion at the boundary.
 5. **Tests**: write fixtures with int32-ms literals (`Time: 5000`,
    not `Time: 5.0`).
-6. **Frontend** (`mvd-web/static/app.js`): the field is int32 ms whether
+6. **Frontend** (`mvd-web/src/`): the field is int32 ms whether
    read from the raw schema or via the view layer — no `* 0.001` scaling.
 
 ### Append rules (the dedup invariant)

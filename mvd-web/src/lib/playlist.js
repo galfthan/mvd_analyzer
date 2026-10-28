@@ -1,6 +1,5 @@
 // playlist.js — the Player tab's clip model, kept free of DOM and page state
-// so it runs under `node --test`. app.js (a classic script) reaches it as
-// window.Playlist through the module bootstrap in index.html.
+// so it runs under `node --test`.
 //
 // A clip is { from, to, track, who, label, demo }:
 //   from / to  demo-relative whole seconds — the clock FTE's demo_jump and
@@ -20,7 +19,7 @@ export const HUB_GAMES_URL = 'https://hub.quakeworld.nu/games/';
 export const MAX_HUB_CLIPS = 20;
 export const PLAYLIST_VERSION = 1;
 
-// parseHubReplayUrl reads a link built by app.js hubReplayUrl() — the only
+// parseHubReplayUrl reads a link built by hubReplayUrl() (src/lib/hub-url.js) — the only
 // shape the page emits: /games/?gameId=N&from=F[&to=T]&track=U.
 export function parseHubReplayUrl(href) {
     let url;

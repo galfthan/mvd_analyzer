@@ -1,5 +1,5 @@
-// hub-url.js — the hub.quakeworld.nu replay link every tab builds (app.js
-// via window.MvdLib, the ported tabs directly). src/lib/playlist.js
+// hub-url.js — the hub.quakeworld.nu replay link every tab builds.
+// src/lib/playlist.js
 // parseHubReplayUrl reads it back, and src/player/hub-links.js routes a
 // click on one (a.viewer-link / a.hub-watch-link) to the Player tab.
 

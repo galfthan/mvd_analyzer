@@ -2,8 +2,8 @@
     // The Pack Drops tab: every RL / LG backpack drop with its fate, the
     // picker and the kills scored with it, hub links to the drop and the
     // run, and a filter row (src/lib/packdrops.js has the join and the
-    // statuses). app.js still toggles the `active` class like on every
-    // other .tab-content (onTabActivated).
+    // statuses). src/app/tabs.js toggles the `active` class like on every
+    // other .tab-content.
     //
     // The rows are built — once, on the next frame the tab shows — after the
     // demo changed; a filter change rebuilds them at once. They
@@ -56,7 +56,7 @@
         dirty = false;
         const result = demo.get()?.result;
         rows = result ? packDropRows(result) : [];
-        // hubInfo is set on the result by app.js loadDemo once the demo
+        // hubInfo is set on the result by loadDemo (src/app/load.js) once the demo
         // store has it, so it is read here rather than on the store update.
         ctx = {
             gameId: result?.hubInfo?.gameId,

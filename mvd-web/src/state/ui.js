@@ -1,5 +1,5 @@
-// ui.js — which tab is showing. The sidebar sets it; app.js follows it
-// (onTabActivated) and Svelte tabs read it.
+// ui.js — which tab is showing. The sidebar and the load set it;
+// src/app/tabs.js follows it (showing the tab, the URL) and the tabs read it.
 import { store } from './store.js';
 
 export const TABS = [
@@ -16,8 +16,8 @@ export const TABS = [
     { id: 'aimstats', label: 'Aim Stats', title: 'Aim Stats (experimental)' },
 ];
 
-// Setting the same tab again notifies too: app.js re-runs the tab's render
-// path, which is how it repaints after late data.
+// Setting the same tab again notifies too: each tab re-runs its show path,
+// which is how it repaints after late data.
 export const activeTab = store('search');
 
 export function selectTab(id) {

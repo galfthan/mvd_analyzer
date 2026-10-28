@@ -4,13 +4,13 @@
     // Metric selector, the loc graph (a Cytoscape.js diagram,
     // loc-graph-view.js) and the Loc Heatmap. src/lib/locgraph.js has the
     // graph's elements, style and layouts; src/lib/loc-heatmap.js the two
-    // matrices. app.js still toggles the `active` class like on every other
-    // .tab-content (onTabActivated).
+    // matrices. src/app/tabs.js toggles the `active` class like on every other
+    // .tab-content.
     //
     // The graph and the heatmap are built — once, the next time the tab shows
     // — after the demo or the teams changed; a new demo gets a fresh Cytoscape
     // instance. Each time the tab shows (now, on the next frame and 120 ms
-    // later, like app.js's other canvases) and when one of its panels comes
+    // later, like the other canvas tabs) and when one of its panels comes
     // back into view (onPanelReveal), the graph is resized and fitted. A
     // control change rebuilds at once: Filter / Edges / Min count / Layout
     // swap the element set and re-run the layout, Metric also rebuilds the
@@ -158,7 +158,7 @@
 
     function onTab(tab) {
         if (tab !== TAB) return;
-        // Run once app.js has made the tab visible (it follows the same
+        // Run once src/app/tabs.js has made the tab visible (it follows the same
         // store, after this), then again on the next frame and 120 ms later:
         // a container drawn during the display:none → block switch can
         // measure zero.

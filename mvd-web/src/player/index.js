@@ -4,7 +4,7 @@
 // components import from here.
 
 import { clock, demo, teams, activeTab, selectTab } from '../state/index.js';
-import { loadDemo } from '../legacy.js';
+import { loadDemo } from '../app/load.js';
 import { decodePlaylist } from '../lib/playlist.js';
 import { PlayerEngine } from './engine.js';
 import { createRunner } from './runner.js';

@@ -1,9 +1,8 @@
 <script>
-    // The page shell. The tab not yet ported (Search) is app.js's markup,
-    // kept in index.html's #legacy-dom and adopted into place here before
-    // app.js's DOMContentLoaded setup looks it up by id (src/main.js flushes
-    // the mount synchronously). The unified playback bar sits above the
-    // scrolling pane.
+    // The page shell: top bar, sidebar, and every tab in the scrolling
+    // pane (src/app/tabs.js shows the active one), with the unified
+    // playback bar above it. The Search tab comes last, where the legacy
+    // markup it replaced was put.
     import Topbar from './Topbar.svelte';
     import Sidebar from './Sidebar.svelte';
     import PlayerTab from '../player/PlayerTab.svelte';
@@ -16,9 +15,9 @@
     import LocGraphTab from '../tabs/locgraph/LocGraphTab.svelte';
     import TimelineTab from '../tabs/timeline/TimelineTab.svelte';
     import MapTab from '../tabs/map/MapTab.svelte';
+    import SearchTab from '../tabs/search/SearchTab.svelte';
     import PlaybackBar from '../ui/PlaybackBar.svelte';
     import Toast from '../player/Toast.svelte';
-    import { adopt } from './adopt.js';
 </script>
 
 <Topbar />
@@ -26,7 +25,7 @@
     <Sidebar />
     <main class="main">
         <PlaybackBar />
-        <div class="main-scroll" use:adopt={{ selector: '#legacy-dom > .tab-content' }}>
+        <div class="main-scroll">
             <SummaryTab />
             <ChatTab />
             <PackDropsTab />
@@ -37,6 +36,7 @@
             <TimelineTab />
             <PlayerTab />
             <MapTab />
+            <SearchTab />
         </div>
     </main>
 </div>

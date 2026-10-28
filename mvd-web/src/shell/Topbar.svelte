@@ -1,9 +1,14 @@
-<!-- app.js fills #topbar-demo-info and #version-tag by id. -->
+<script>
+    // The demo line comes from the load (src/lib/topbar.js), the version
+    // from the analyzer once it is up (src/app/overlay.js).
+    import { topbarDemo, buildVersion, buildStale } from '../state/shell.js';
+</script>
+
 <header class="topbar">
     <a class="topbar-brand" href="./" title="Reset and reload">MVD Analyzer</a>
-    <div class="topbar-demo-info" id="topbar-demo-info"></div>
+    <div class="topbar-demo-info" id="topbar-demo-info">{@html $topbarDemo}</div>
     <div class="topbar-spacer"></div>
-    <span class="topbar-version" id="version-tag" title="Build version"></span>
+    <span class="topbar-version" id="version-tag" title="Build version">{#if $buildVersion}{$buildVersion.tag} (<a href="https://github.com/galfthan/mvd_analyzer/commit/{encodeURIComponent($buildVersion.hash)}" target="_blank" rel="noopener">{$buildVersion.hash}</a>) — {$buildVersion.date}{/if}{#if $buildStale}{' — new version available, reload the page'}{/if}</span>
     <a class="topbar-link" href="https://mvdanalyzer.com/portal" target="_blank" rel="noopener" title="REST API &amp; MCP server — docs, keys, contact">API &amp; MCP</a>
     <a class="topbar-github" href="https://github.com/galfthan/mvd_analyzer" target="_blank" rel="noopener" aria-label="View source on GitHub" title="View source on GitHub">
         <svg height="20" width="20" viewBox="0 0 16 16" aria-hidden="true">

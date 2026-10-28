@@ -1,8 +1,8 @@
 // sortable.js — makeSortable(table): click a header to sort the table's
 // <tbody> rows by that column (rules in src/lib/sortable.js). It reorders
 // the row nodes in place, so it is for tables whose rows are built by hand
-// (app.js, and the ported tabs that build their rows as markup) — never
-// for rows a Svelte {#each} owns. app.js reaches it as MvdLib.makeSortable.
+// (the tabs that build their rows as markup, and every static .stats-table
+// the load sweeps, src/app/load.js) — never for rows a Svelte {#each} owns.
 
 import { nextSortDir, compareSortText } from '../lib/sortable.js';
 

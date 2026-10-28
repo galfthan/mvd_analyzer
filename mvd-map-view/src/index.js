@@ -1,11 +1,10 @@
 // mvd-map-view — the QuakeWorld map renderer from mvd-analyzer, as a
 // standalone component.
 //
-// Extraction is in progress. `MvdMap` owns the renderer state and the camera;
-// the per-frame composition and the pointer interaction still live in
-// mvd-web/static/app.js and move across group by group, verified against a
-// screenshot corpus at each step. The helpers below are exported directly
-// because app.js still calls them while that is true.
+// `MvdMap` owns the renderer state, the camera and the frame composition;
+// the host (mvd-web's Map tab, mvd-web/src/tabs/map/) owns the measuring,
+// the chrome and the pointer wiring. The helpers below are exported directly
+// because the host calls them.
 //
 // Everything here is dependency-free ESM and runs unchanged in a browser, in
 // a Web Worker, and under `node --test`. It loads nothing — see the loader

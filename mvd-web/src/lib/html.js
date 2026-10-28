@@ -1,5 +1,5 @@
-// html.js — HTML-string helpers shared by app.js (window.MvdLib) and the
-// Svelte tabs that build table rows as markup.
+// html.js — HTML-string helpers shared by the topbar and the Svelte tabs
+// that build table rows as markup.
 
 export function escapeHtml(s) {
     if (s == null) return '';

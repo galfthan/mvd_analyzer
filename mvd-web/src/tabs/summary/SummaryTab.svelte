@@ -3,10 +3,10 @@
     // box, Basic Stats / Weapon Stats / Item Pickups & Drops (per team and
     // per player, all from result.playerStats), Kills by Weapon, and — on a
     // recording that holds no match — the no-match panel at the top
-    // (src/lib/summary.js has the rules and the row markup). app.js still
-    // toggles the `active` class like on every other .tab-content
-    // (onTabActivated), and still owns the body classes the CSS hides
-    // panels by (duel-mode, individual-mode, no-team-rows, no-match: set in
+    // (src/lib/summary.js has the rules and the row markup). src/app/tabs.js
+    // toggles the `active` class like on every other .tab-content, and
+    // src/app/load.js owns the body classes the CSS hides panels by
+    // (duel-mode, individual-mode, no-team-rows, no-match: set in
     // displayResults, which is where the canonical team order is set too).
     //
     // The tab is built — once, on the next frame it shows — after the demo
@@ -214,7 +214,7 @@
     <div class="empty-state">Load or search a demo to begin.</div>
 
     <!-- result.noMatch (schema v74): this recording holds no analyzable
-         match. The .no-match body class (app.js) hides the stream-fed
+         match. The .no-match body class (src/app/load.js) hides the stream-fed
          tables below, which have nothing in them on such a demo. -->
     <div id="no-match-panel" class="panel no-match-panel" style:display={v.noMatch ? null : 'none'}>
         <h3 id="no-match-title">{v.noMatch?.title ?? ''}</h3>

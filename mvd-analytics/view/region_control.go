@@ -8,8 +8,8 @@ import (
 )
 
 // Region-control state codes used as a compact one-char-per-bucket
-// encoding for RegionControlResult.BucketStates. Mirror
-// classifyRegionState in mvd-web/static/app.js. Exported so consumers
+// encoding for RegionControlResult.BucketStates, as classifyRegionState
+// (below) assigns them. Exported so consumers
 // (frontend, MCP wrappers, tests) can decode the bucketStates strings.
 const (
 	RegionStateEmpty            byte = '_'

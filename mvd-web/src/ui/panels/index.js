@@ -5,9 +5,9 @@
 //
 // The panels stay where the tab's markup put them: order is the CSS
 // `order` property, collapse and close are classes. Nothing is moved, so
-// app.js — which hides panels a demo has no data for, by inline style or
-// by body class, and re-parents nodes between them — keeps working on the
-// same elements; a panel it hides takes its controls with it.
+// the tabs and the load's body classes — which hide panels a demo has no
+// data for, by inline style or by body class — keep working on the same
+// elements; a panel they hide takes its controls with it.
 
 import { mount } from 'svelte';
 import { activeTab } from '../../state/index.js';
@@ -43,7 +43,7 @@ function setupTab(tab) {
     mount(PanelBar, { target: tabEl, anchor: tabEl.firstChild, props: { tab, titles } });
 
     // Up / down step over the panels the viewer can see: closed ones and
-    // ones app.js hides for this demo would make a step look like nothing.
+    // ones hidden for this demo would make a step look like nothing.
     function step(id, dir) {
         const shown = panelLayouts.get()[tab].order.filter((p) => p === id ||
             (els[p] && !els[p].classList.contains('lp-closed') && getComputedStyle(els[p]).display !== 'none'));

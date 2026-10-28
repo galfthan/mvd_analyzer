@@ -4,8 +4,8 @@
     // entity filters — and the controls under it (trails, follow, the
     // overlays, 3D / fog / light / occlusion, the perf HUD and benchmark,
     // reset view, fullscreen). src/lib/map.js has the pure parts, sidebar.js
-    // the hand-built legend and region status. app.js still toggles the
-    // `active` class like on every other .tab-content (onTabActivated).
+    // the hand-built legend and region status. src/app/tabs.js toggles the
+    // `active` class like on every other .tab-content.
     //
     // The map draws only while the tab shows: on every frame of the page's
     // playback (src/state/playback.js — the follow camera moves with it), on
@@ -131,7 +131,7 @@
             return;
         }
         if (hudOn) startHudTimer();
-        // Run once app.js has made the tab visible (it follows the same
+        // Run once src/app/tabs.js has made the tab visible (it follows the same
         // store, after this), then again on the next frame and 120 ms later.
         queueMicrotask(reveal);
         requestAnimationFrame(reveal);

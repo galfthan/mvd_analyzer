@@ -4,7 +4,7 @@
 // trails, overlays, learn mode), and the Player tab's map pane copies its
 // DATA into its own MvdMap each frame (src/player/panes/map-sync.js).
 //
-// app.js's displayResults loads a demo into it (`loadMap`, again when the
+// The load's displayResults (src/app/load.js) loads a demo into it (`loadMap`, again when the
 // deferred 50 ms buckets land — the player positions, trails and region
 // states come from them) after `resetMap`; the region set in effect
 // (src/state/regions.js) and the team colours (src/state/teams.js) are read
@@ -36,8 +36,8 @@ const touch = () => {
     changed.set(changed.get() + 1);
 };
 
-// Learn mode (the static entity study view): the tab follows it, app.js
-// writes it to the URL (?learn=1) and sets it from a deep link. Every load
+// Learn mode (the static entity study view): the tab follows it, the URL
+// (src/app/url.js) writes it to the URL (?learn=1) and sets it from a deep link. Every load
 // starts in live mode.
 export const learnMode = store(false);
 

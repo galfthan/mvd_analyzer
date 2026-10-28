@@ -3,12 +3,12 @@
     // filter), the longest frag streaks, demo markers, the three view-query
     // rankings (top damage windows, top RL / LG kill bursts) and the four
     // highlight-catalogue tables (src/lib/keymoments.js has the rules and
-    // the row markup). app.js still toggles the `active` class like on every
-    // other .tab-content (onTabActivated).
+    // the row markup). src/app/tabs.js toggles the `active` class like on every
+    // other .tab-content.
     //
     // The tables are built — once, on the next frame the tab shows — after
     // the demo changed; a filter change rebuilds the powerup runs at once.
-    // Like app.js, nothing renders for a demo without timelineAnalysis. Rows
+    // Nothing renders for a demo without timelineAnalysis. Rows
     // are markup built by hand rather than an {#each}, because the shared
     // makeSortable (src/ui/sortable.js) sorts by moving row nodes. The ten
     // panels carry data-panel and sit directly in #tab-keymoments for
@@ -97,7 +97,7 @@
         clearAll();
         const result = handle?.result;
         if (!result?.timelineAnalysis) return;
-        // hubInfo is set on the result by app.js loadDemo once the demo
+        // hubInfo is set on the result by loadDemo (src/app/load.js) once the demo
         // store has it, so it is read here rather than on the store update.
         ctx = {
             gameId: result.hubInfo?.gameId,

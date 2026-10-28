@@ -1,6 +1,6 @@
 // result.js — small readers over a pipeline Result (schema:
-// mvd-analytics/RESULT_SCHEMA.md) shared by app.js (window.MvdLib) and the
-// Svelte side.
+// mvd-analytics/RESULT_SCHEMA.md) shared by the load orchestration
+// (src/app/) and the tabs.
 
 import { playerStatsRows } from './player-stats.js';
 
@@ -78,7 +78,7 @@ export function hasTeammates(result) {
     return isTeamBasedMode(result) && !isIndividualLayout(result);
 }
 
-// isDuel reports a 1v1. app.js's applyDuelModeUI toggles the "Per Team"
+// isDuel reports a 1v1. applyDuelModeUI (src/app/load.js) toggles the "Per Team"
 // aggregation panels and the standalone "Teams" summary off on one;
 // everything else (the per-player scoreboard, weapon stats, item pickups)
 // still renders normally, and the loc graph drops its team filters.
@@ -97,4 +97,20 @@ export function isDuel(result) {
     const players = playerStatsRows(result);
     if (!players.length) return false;
     return players.length === 2 && players.every(p => p.team === p.name);
+}
+
+// isMultiPlayerIndividual reports whether this demo is laid out one side per
+// player with MORE than two of them — a field rather than a matchup. Every
+// two-sided surface reads it: the "Team A ↑ / Team B ↓" timeline graphs, the
+// Chat tab's per-side say columns, region control, and the colour palette
+// (per-player rather than the four-entry team one — see PLAYER_PALETTE and
+// CLAUDE.md's team-colour rule). None of them has a pair of sides to name
+// here: the top two players are not a matchup and everyone else does not
+// appear at all. A two-participant match (a duel, or a 1v1 FFA) IS the
+// two-sided view and keeps every one of them. The test is "not a duel"
+// rather than "more than two": isDuel needs exactly two playerStats rows,
+// so an individual layout with fewer (one player alone on a server) takes
+// the field layout too — it has no pair of sides to show either.
+export function isMultiPlayerIndividual(result) {
+    return isIndividualLayout(result) && !isDuel(result);
 }

@@ -1,5 +1,5 @@
 // player-stats.js — readers over result.playerStats and the per-player
-// rows shared by app.js (window.MvdLib) and the Svelte tabs.
+// rows shared by the load (src/app/load.js), the topbar and the tabs.
 
 import { escapeHtml } from './html.js';
 

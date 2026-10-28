@@ -16,7 +16,7 @@ consistent with each other (and with the binaries).
 |---|---|---|
 | mvd-api | `localhost:8080` | `/v1/*`, `/docs*`, `/openapi.yaml`, `/healthz`, `/portal*` |
 | mvd-mcp | `localhost:8081` | `/mcp*` (streamable HTTP) |
-| mvd-web | static files, `/opt/mvd/web` | everything else (`/`, `/app.js`, `/analyzer.wasm`, …) |
+| mvd-web | static files, `/opt/mvd/web` | everything else (`/`, `/assets/*`, `/analyzer.wasm`, …) |
 
 mvd-mcp serves the MCP handler at exactly `/mcp` (and `/mcp/`); Caddy
 passes the path through unchanged, so there is no prefix strip to get

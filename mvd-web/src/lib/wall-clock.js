@@ -1,5 +1,5 @@
 // wall-clock.js — the match wall clock (streams.global, schema v72): the
-// Summary "Date" cell and, through window.MvdLib, the topbar date in app.js.
+// Summary "Date" cell and the topbar date (src/lib/topbar.js).
 //
 // The anchors are Unix epoch MILLISECONDS. The schema publishes no local-time
 // field on purpose: the stamp a demo carries was written in whatever zone the
