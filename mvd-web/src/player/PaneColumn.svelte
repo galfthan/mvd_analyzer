@@ -9,14 +9,23 @@
     import StackPane from './panes/StackPane.svelte';
     import MomentsPane from './panes/MomentsPane.svelte';
     import FeedPane from './panes/FeedPane.svelte';
+    import PlayersPane from './panes/PlayersPane.svelte';
+    import GraphPane from './panes/GraphPane.svelte';
     import { paneLayout, updateLayout, PANE_IDS } from './layout.js';
 
-    /** @type {Record<string, { title: string, component: import('svelte').Component }>} */
+    /** @type {Record<string, { title: string, component: import('svelte').Component<any>, props?: Record<string, unknown> }>} */
     const PANES = {
         map: { title: 'Map', component: MapPane },
-        stack: { title: 'Health / armor', component: StackPane },
+        players: { title: 'Players', component: PlayersPane },
+        stack: { title: 'Health / armor strips', component: StackPane },
         moments: { title: 'Moments', component: MomentsPane },
         feed: { title: 'Frag feed', component: FeedPane },
+        score: { title: 'Score', component: GraphPane, props: { kind: 'score' } },
+        'team-weapons': { title: 'Team weapons', component: GraphPane, props: { kind: 'team-weapons' } },
+        'team-ha': { title: 'Team health / armor', component: GraphPane, props: { kind: 'team-ha' } },
+        'weapons-pp': { title: 'Weapons per player', component: GraphPane, props: { kind: 'weapons-pp' } },
+        powerups: { title: 'Powerups', component: GraphPane, props: { kind: 'powerups' } },
+        regions: { title: 'Region control', component: GraphPane, props: { kind: 'regions' } },
     };
 
     let order = $derived($paneLayout.order);
@@ -48,7 +57,7 @@
         {#each order as id, i (id)}
             {@const P = PANES[id].component}
             <Pane {id} title={PANES[id].title} index={i} count={order.length}>
-                <P />
+                <P {...PANES[id].props} />
             </Pane>
         {/each}
     </div>

@@ -12,7 +12,8 @@
     // double-click clears it.
     //
     // It follows the clock on every tick (two style writes and a text). The
-    // Map tab moves the root element into its panel in fullscreen and back,
+    // Map and Player tabs move the root element into their panel in
+    // fullscreen and back,
     // so it is always rendered and hidden by style only.
     import { onMount } from 'svelte';
     import { clock, demo, activeTab, segment, playback, playAtSpeed, TABS_WITH_TIMELINE } from '../state/index.js';

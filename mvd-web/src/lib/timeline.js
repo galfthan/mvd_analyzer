@@ -212,6 +212,21 @@ export function indicatorPct(t, start, end) {
     return Math.max(0, Math.min(100, ((t - start) / range) * 100));
 }
 
+// rollingWindow: the span a Player-tab graph pane shows around the
+// playhead — `width` seconds, three quarters behind it, clamped into the
+// match; width 0 (or one longer than the match) is the whole match.
+/**
+ * @param {number} t
+ * @param {number} width
+ * @param {number} duration
+ * @returns {[number, number]}
+ */
+export function rollingWindow(t, width, duration) {
+    if (!(width > 0) || width >= duration) return [0, duration];
+    const start = Math.min(Math.max(0, t - width * 0.75), duration - width);
+    return [start, start + width];
+}
+
 // ─── Axis ticks ─────────────────────────────────────────────────────────────
 
 const NICE_TICK_INTERVALS = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1200, 1800, 3600];

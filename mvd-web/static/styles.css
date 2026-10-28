@@ -3346,6 +3346,40 @@ th.sortable.sort-desc::after {
     border-left-color: var(--pov-color, #888);
 }
 
+/* Player tab fullscreen (src/player/fullscreen.js): the panel fills the
+ * screen with the unified bar moved in on top; both columns scroll on
+ * their own and the player keeps room for its bars under it. */
+.player-panel--fullscreen {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    background: var(--bg-deep);
+    overflow: hidden;
+}
+
+.player-panel--fullscreen #unified-timeline {
+    margin: 0;
+    padding: 6px 10px;
+    flex: 0 0 auto;
+}
+
+.player-panel--fullscreen .player-layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-items: stretch;
+}
+
+.player-panel--fullscreen .player-layout > [data-pane] {
+    height: 100%;
+    overflow-y: auto;
+}
+
+.player-panel--fullscreen .player-frame-host {
+    max-height: calc(100vh - 210px);
+}
+
 /* Player tab layout: player + POV/clip bars + playlist on the left, the
  * pane column on the right — a PaneForge group (flex row, sizes inline). */
 .player-layout {

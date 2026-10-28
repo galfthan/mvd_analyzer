@@ -34,12 +34,18 @@ run out restarts it instead of leaving the player stuck (hub's player has
 the same dead end).
 
 Beside the player, a column of panes follows its clock and POV — the map
-(following whoever you watch; click a player to switch to them), a rolling
-health/armor strip per player, a list of the demo's moments (quad runs,
-streaks, highlights — click to play), and a frag feed (click a frag to
-watch it from the killer's view) — added, closed, reordered, collapsed and
-resized at will; the column itself can be widened, by dragging or with the
-arrow keys, or dragged shut to hide it.
+(following whoever you watch; click a player to switch to them; right-click
+for view / velocity arrows, trails, line of sight, PVS, occlusion and 3D),
+everyone's loc, health/armor, weapons, powerups and frags, a list of the
+demo's moments (quad runs, streaks, highlights — click to play), and a frag
+feed (click a frag to watch it from the killer's view). More can be added:
+the Timeline tab's score, team weapons, team health/armor, weapons per
+player, powerups and region control graphs over a window rolling with the
+playhead (click to seek), and a rolling health/armor strip per player.
+Panes are added, closed, reordered, collapsed and resized at will; the
+column itself can be widened, by dragging or with the arrow keys, or
+dragged shut to hide it. The whole tab goes fullscreen, playback bar
+included.
 
 The panels of the other tabs (Summary, Timeline, Locs & Regions, Key
 Moments, Pickups, Aim Stats) can be arranged the same way: reordered,

@@ -9,7 +9,7 @@ import {
     prepPlayerHAData, sharedStackMax, prepPlayerFragDeathData, fragDeathLabels, prepPlayerWeaponSpans,
     playerDropMarks, nextTeamStatusSort, compareTeamStatusRows, teamStatusRows, teamStatusHtml,
     hubWatchLinkHtml, hitDropMark, dropTooltipHtml, hitPowerupSpan, powerupTooltipHtml,
-    teamStrongColor, dimColor, GRAPH_COLORS, HR_DUR, TEAM_STATUS_SORT_DEFAULT,
+    teamStrongColor, dimColor, GRAPH_COLORS, HR_DUR, TEAM_STATUS_SORT_DEFAULT, rollingWindow,
 } from '../src/lib/timeline.js';
 import { segment } from '../src/state/timeline.js';
 
@@ -276,4 +276,12 @@ test('colours and the segment store', () => {
     segment.set(null);
     off();
     assert.deepEqual(seen, [null, { start: 1, end: 5 }, null]);
+});
+
+test('rollingWindow keeps the playhead three quarters in, inside the match', () => {
+    assert.deepEqual(rollingWindow(300, 120, 1200), [210, 330]);
+    assert.deepEqual(rollingWindow(10, 120, 1200), [0, 120], 'clamped at the start');
+    assert.deepEqual(rollingWindow(1190, 120, 1200), [1080, 1200], 'and at the end');
+    assert.deepEqual(rollingWindow(300, 0, 1200), [0, 1200], '0 is the whole match');
+    assert.deepEqual(rollingWindow(300, 1800, 1200), [0, 1200]);
 });

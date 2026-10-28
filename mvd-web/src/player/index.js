@@ -14,6 +14,7 @@ import { demoRefOf } from './demo-ref.js';
 import { playlist, addClips } from './playlist-store.js';
 import { installHubLinkRouting } from './hub-links.js';
 import { toast } from './toast.js';
+import { installFullscreen } from './fullscreen.js';
 
 export const engine = new PlayerEngine({ clock, demo, activeTab });
 export const runner = createRunner({ engine, demo, teams, selectTab, loadDemo, demoRefOf });
@@ -61,4 +62,5 @@ export function setupPlayer() {
     installHubLinkRouting({ runner, demo, addClips, toast });
     importPlaylistFromHash();
     importQueryFromHash();
+    installFullscreen();
 }

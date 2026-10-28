@@ -1064,8 +1064,13 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
 - **POV bar** under the player: `Auto` (FTE's stats autotrack) and one
   button per player in canonical team order and colour; the followed
   player stays lit under autotrack too. A sound toggle sits at its right
-  end (the player starts muted, as hub's does), and the show-panes button
-  while the pane column is hidden. The tab's controls share one compact
+  end (the player starts muted, as hub's does), then the fullscreen
+  toggle, and the show-panes button while the pane column is hidden.
+- **Fullscreen** (`fullscreen.js`): the whole player panel — the engine,
+  its bars, the clip finder, the playlist and the pane column — fills the
+  screen, each column scrolling on its own, and the unified playback bar
+  moves into it on top (as the Map tab's fullscreen does) and back out
+  however fullscreen ends. The tab's controls share one compact
   style (`.pt-btn`, `.pt-group` segments, `.pt-select` in `styles.css`).
 - **End of demo.** The demo runs a few seconds past the match end
   (scoreboard) and then FTE disconnects. The play button drops its ⏸, a
@@ -1082,8 +1087,10 @@ component inside a `Pane.svelte` frame and redraws at most once per
 animation frame on the page clock or the engine's status, only while the
 tab shows (`panes/tick.js`). The layout is a per-viewer convenience in
 `localStorage` (`mvd.playerPanes.v2`; the PoC's `v1` order is migrated):
-which panes are open and in what order (default Map / Health / armor /
-Moments / Frag feed), each pane's height and collapsed state, the column's
+which panes are open and in what order (default Map / Players / Moments /
+Frag feed — the rest are one "Add pane…" away), each pane's height,
+collapsed state and options (`opts`: the map's overlays, a graph's
+window), the column's
 share of the width (`split`, %, stored when a drag ends — a drag that
 shuts the column passes its minimum on the way) and whether it is shown.
 Headers drag by the grip to reorder; ↑ ↓ × (dim until hovered) move and
@@ -1095,13 +1102,32 @@ which would reload the engine's iframe.)
 
 - **Map** is its own `MvdMap` — its own canvas, camera and follow target —
   reading the Map tab's loaded data each frame (`panes/map-sync.js`: data
-  fields by reference, never view state). The crosshair toggle (*follow POV*) puts the camera on
+  fields by reference, never view state; the line-of-sight pairs once the
+  Map tab's lazy pass ran). The crosshair toggle (*follow POV*) puts the camera on
   the watched player whenever the POV changes — a pan holds until the next
   switch; clicking a player on the map switches the POV to them; drag pans,
-  right-drag orbits, the wheel zooms, double-click resets. Unmounting the
+  right-drag orbits, the wheel zooms, double-click resets. A right-click
+  that does not drag (or the sliders button) opens the overlay menu: follow,
+  view and velocity arrows, line of sight and PVS (running the Map tab's
+  `ensureLineOfSight` once per demo), occlusion, trails (none / the watched
+  player / everyone, the last 10 s), 3D and reset view; Escape or a click
+  elsewhere closes it. Unmounting the
   pane (close, collapse, hiding the column) releases its WebGL context
   (`MvdMap.dispose`).
-- **Health / armor**: one row per player in canonical team order and
+- **Players**: the Map tab's legend at the playhead — per team (canonical
+  order and colour, with its running frags) each player's loc, health /
+  armor, RL LG GL SNG SSG, quad / pent / ring and frags; dead players dim,
+  the watched one is lit, click a name to watch them. A field of
+  individuals is one list.
+- **Graph panes** (`GraphPane.svelte`, off by default): *Score*, *Team
+  weapons*, *Team health / armor*, *Weapons per player*, *Powerups* and
+  *Region control* — the Timeline tab's series and renderers over a window
+  that rolls with the playhead (1, 3 or 10 min, three quarters behind it,
+  `rollingWindow`) or the whole match, per pane. A line marks the
+  playhead (an element over the canvas, so a paused graph is not redrawn
+  to move it); click seeks. The two-sided graphs say so in a field of
+  individuals, where *Weapons per player* still works.
+- **Health / armor strips** (off by default): one row per player in canonical team order and
   colour — a rolling strip (45 s back, 15 s ahead, `renderMiniStack`, fixed
   0–300 scale) with the playhead, and the values at it. Click a name to
   watch them.

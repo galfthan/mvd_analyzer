@@ -10,7 +10,7 @@ globalThis.localStorage = {
 mem.set('mvd.playerPanes.v1', JSON.stringify(['feed', 'map', 'bogus', 'map']));
 
 const { store } = await import('../src/state/store.js');
-const { paneLayout, updateLayout, movePane, MAX_SPLIT } = await import('../src/player/layout.js');
+const { paneLayout, updateLayout, movePane, MAX_SPLIT, paneOpt, setPaneOpt } = await import('../src/player/layout.js');
 const { playlist, addClips, moveClip, removeClip, setRun, setLabel } = await import('../src/player/playlist-store.js');
 const { createRunner } = await import('../src/player/runner.js');
 const { demoRefOf } = await import('../src/player/demo-ref.js');
@@ -27,6 +27,18 @@ test('pane layout migrates the PoC order and sanitizes', () => {
     movePane('stack', 2);
     assert.deepEqual(paneLayout.get().order, ['feed', 'map', 'stack'], 'the dragged pane takes the target slot, both ways');
     assert.deepEqual(JSON.parse(mem.get('mvd.playerPanes.v2')).order, ['feed', 'map', 'stack']);
+});
+
+test('pane options persist and read back typed', () => {
+    setPaneOpt('map', 'vel', true);
+    setPaneOpt('score', 'window', 180);
+    const l = paneLayout.get();
+    assert.equal(paneOpt(l, 'map', 'vel', false), true);
+    assert.equal(paneOpt(l, 'map', 'los', false), false, 'unset falls back');
+    assert.equal(paneOpt(l, 'score', 'window', 'x'), 'x', 'another type falls back');
+    updateLayout((x) => { x.opts.bogus = { a: 1 }; x.opts.feed = 'nope'; });
+    assert.deepEqual(Object.keys(paneLayout.get().opts).sort(), ['map', 'score'], 'unknown panes and non-objects dropped');
+    assert.equal(JSON.parse(mem.get('mvd.playerPanes.v2')).opts.score.window, 180);
 });
 
 const demoA = { key: 'hub:1', gameId: 1, title: 'a', offset: 10 };
@@ -147,8 +159,8 @@ test('demoRefOf names the demo for the playlist', () => {
 test('map data sync shares data, not view state', () => {
     const geom = {};
     const src = { mapGeometry: geom, locationGroups: [], bounds: { minX: 0 }, frames: { count: 1 }, initialized: true,
-        followPlayer: 'x', currentTime: 5, canvas: 'src-canvas' };
-    const dst = { mapGeometry: null, bounds: null, frames: null, followPlayer: null, canvas: 'dst-canvas',
+        followPlayer: 'x', currentTime: 5, canvas: 'src-canvas', losByPair: { a: 1 }, trailStartTimes: { x: 3 } };
+    const dst = { mapGeometry: null, bounds: null, frames: null, followPlayer: null, canvas: 'dst-canvas', trailStartTimes: {},
         _floorModel: 'stale', _frameRecon: 'stale' };
     assert.equal(syncMapData(src, dst), true, 'new geometry asks for a refit');
     assert.equal(dst.mapGeometry, geom);
@@ -157,6 +169,8 @@ test('map data sync shares data, not view state', () => {
     assert.equal(dst._frameRecon, null);
     assert.equal(dst.followPlayer, null);
     assert.equal(dst.canvas, 'dst-canvas');
+    assert.equal(dst.losByPair, src.losByPair, 'line of sight is data');
+    assert.deepEqual(dst.trailStartTimes, {}, 'trail start times are each map\'s own');
     dst._floorModel = 'built';
     assert.equal(syncMapData(src, dst), false, 'nothing changed');
     assert.equal(dst._floorModel, 'built', 'caches survive an unchanged sync');

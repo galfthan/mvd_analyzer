@@ -1,7 +1,9 @@
 // map-sync.js — copies the Map tab's loaded map DATA into the Player tab's
 // own MvdMap (see MapPane.svelte). Data only, by reference: the view state
-// (canvas, camera, follow target, trail toggles, overlays) stays each map's
-// own. Fields named in mvd-map-view/src/map.js newState().
+// (canvas, camera, follow target, trail toggles and start times, overlays)
+// stays each map's own. Fields named in mvd-map-view/src/map.js newState();
+// the line-of-sight pairs are the Map tab's lazy pass (ensureLineOfSight),
+// shared once it has run.
 
 const DATA = [
     'locations', 'locTable', 'locationGroups', 'locationGroupByName',
@@ -9,7 +11,7 @@ const DATA = [
     'items', 'mapEntities', 'teleportArrows', 'bounds',
     'frames', 'bucketStates', 'projectiles', 'nails', 'beams', 'zRange',
     'teams', 'playerSymbols', 'posStreams', 'movers',
-    'fullTrails', 'deathEvents', 'dropEvents', 'trailStartTimes',
+    'fullTrails', 'deathEvents', 'dropEvents', 'losByPair', 'pvsByPair',
     'initialized',
 ];
 
