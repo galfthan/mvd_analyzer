@@ -14,6 +14,7 @@ import { mvdData } from './source.js';
 import { onAnalyzerReady, onAnalyzerFailed } from './overlay.js';
 import { updateUrlState, onClockTick } from './url.js';
 import { switchTab, setupTabs } from './tabs.js';
+import { installFullscreen } from './fullscreen.js';
 import { urlTab } from '../lib/url-state.js';
 import { loadDeepLink } from './load.js';
 
@@ -26,6 +27,7 @@ export function boot() {
     learnMode.subscribe(() => { if (subscribed) updateUrlState(); });
     subscribed = true;
     setupTabs();
+    installFullscreen();
 
     const params = new URLSearchParams(location.search);
     const hubId = params.get('gameId') || params.get('hub');

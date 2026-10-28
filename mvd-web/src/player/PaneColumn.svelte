@@ -1,10 +1,10 @@
 <script>
     // A column of panes: beside the player (`order`) or under it (`below`),
-    // in the user's order (drag a header onto another pane or this column's
-    // head, or ↑ ↓), each collapsible and resizable. The side column's width
-    // and hiding are PlayerTab's split; hidden, it renders nothing, so its
-    // map stops drawing.
-    import PanelRightClose from '@lucide/svelte/icons/panel-right-close';
+    // in the user's order (drag a header onto another pane or onto this
+    // column's "Add pane…" row at its foot, or ↑ ↓), each collapsible and
+    // resizable. The side column's width and hiding (the POV bar's toggle)
+    // are PlayerTab's split; hidden, it renders nothing, so its map stops
+    // drawing.
     import Pane from './Pane.svelte';
     import ClipFinder from './ClipFinder.svelte';
     import Playlist from './Playlist.svelte';
@@ -51,9 +51,9 @@
         if (id) updateLayout((l) => { l[column].push(id); });
     }
 
-    // Dropped on the head, a pane joins this column at the end.
+    // Dropped on the foot, a pane joins this column at the end.
     /** @param {DragEvent} e */
-    function dragOverHead(e) {
+    function dragOverFoot(e) {
         if (!/** @type {DataTransfer} */ (e.dataTransfer).types.includes('text/x-mvd-pane')) return;
         e.preventDefault();
         dragOver = true;
@@ -71,44 +71,43 @@
 
 {#if column === 'below' || !$paneLayout.hidden}
     <div class="player-panes" class:below={column === 'below'}>
-        <div class="column-head" class:drag-over={dragOver} role="group" aria-label="Pane column"
-            ondragover={dragOverHead} ondragleave={() => (dragOver = false)} ondrop={drop}>
-            {#if closed.length}
-                <select class="pt-select" title="Add a pane to this column" onchange={add}>
-                    <option value="">Add pane…</option>
-                    {#each closed as id (id)}
-                        <option value={id}>{PANES[id].title}</option>
-                    {/each}
-                </select>
-            {/if}
-            {#if column === 'order'}
-                <button class="pt-btn icon" title="Hide the panes" onclick={() => updateLayout((l) => { l.hidden = true; })}>
-                    <PanelRightClose size={16} />
-                </button>
-            {/if}
-        </div>
         {#each ids as id, i (id)}
             {@const P = PANES[id].component}
             <Pane {id} {column} title={titleOf(id)} index={i} count={ids.length}>
                 <P {...PANES[id].props} />
             </Pane>
         {/each}
+        <div class="column-add" class:drag-over={dragOver} role="group" aria-label="Add a pane to this column"
+            ondragover={dragOverFoot} ondragleave={() => (dragOver = false)} ondrop={drop}>
+            {#if closed.length}
+                <select class="pt-select" title="Add a pane to the end of this column" onchange={add}>
+                    <option value="">+ Add pane…</option>
+                    {#each closed as id (id)}
+                        <option value={id}>{PANES[id].title}</option>
+                    {/each}
+                </select>
+            {/if}
+        </div>
     </div>
 {/if}
 
 <style>
-    .column-head {
+    .column-add {
         display: flex;
-        gap: 6px;
-        justify-content: flex-end;
-        min-height: 24px;
+        justify-content: center;
+        min-height: 28px;
         border: 1px dashed transparent;
         border-radius: 4px;
     }
-    .column-head.drag-over {
+    .column-add.drag-over {
         border-color: var(--accent-cyan);
     }
-    .below .column-head {
-        order: 1;
+    .column-add .pt-select {
+        opacity: 0.6;
+        transition: opacity 0.15s;
+    }
+    .column-add .pt-select:hover,
+    .column-add .pt-select:focus {
+        opacity: 1;
     }
 </style>

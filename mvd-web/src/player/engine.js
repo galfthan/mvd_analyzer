@@ -98,6 +98,10 @@ export class PlayerEngine {
                 this.fte.suspend();
                 this.publish();
             }
+            // FTE takes the keyboard focus inside its frame; hidden, the
+            // frame would keep it and swallow every key the page's own
+            // shortcuts listen for (`f`, the map's Escape).
+            if (tab !== 'player' && this.iframe && document.activeElement === this.iframe) this.iframe.blur();
         });
         clock.subscribe(({ t, from }) => {
             if (from !== 'engine' && this.drives()) this.requestSeek(t);

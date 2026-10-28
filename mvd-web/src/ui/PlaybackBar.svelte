@@ -11,11 +11,13 @@
     // the segment is set on release. A click clears it and seeks there; a
     // double-click clears it.
     //
-    // It follows the clock on every tick (two style writes and a text). The
-    // Map and Player tabs move the root element into their panel in
-    // fullscreen and back,
-    // so it is always rendered and hidden by style only.
+    // It follows the clock on every tick (two style writes and a text). A
+    // tab's fullscreen (src/app/fullscreen.js) moves the root element into
+    // the tab's panel and back, so it is always rendered and hidden by style
+    // only; there it ends with the button out of fullscreen.
     import { onMount } from 'svelte';
+    import Minimize from '@lucide/svelte/icons/minimize';
+    import { fullscreenTab, toggleFullscreen } from '../app/fullscreen.js';
     import { clock, demo, activeTab, segment, playback, playAtSpeed, TABS_WITH_TIMELINE } from '../state/index.js';
     import { engine } from '../player/index.js';
     import { formatDuration } from '../lib/result.js';
@@ -194,5 +196,31 @@
             </div>
         </div>
         <span id="tl-segment-label" class="timeline-nav-segment">{label}</span>
+        {#if $fullscreenTab}
+            <button class="tl-exit-fs" title="Leave fullscreen (Esc or f)" aria-label="Leave fullscreen" onclick={() => toggleFullscreen()}>
+                <Minimize size={16} /> Exit
+            </button>
+        {/if}
     </div>
 </div>
+
+<style>
+    .tl-exit-fs {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: auto;
+        height: 24px;
+        padding: 0 8px;
+        background: none;
+        border: 1px solid rgba(0, 217, 255, 0.3);
+        border-radius: 3px;
+        color: #7a8ba8;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+    .tl-exit-fs:hover {
+        color: var(--accent-cyan);
+        border-color: var(--accent-cyan);
+    }
+</style>

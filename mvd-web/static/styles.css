@@ -3346,7 +3346,7 @@ th.sortable.sort-desc::after {
     border-left-color: var(--pov-color, #888);
 }
 
-/* Player tab fullscreen (src/player/fullscreen.js): the panel fills the
+/* Player tab fullscreen (src/app/fullscreen.js): the panel fills the
  * screen with the unified bar moved in on top; both columns scroll on
  * their own and the player keeps room for its bars under it. */
 .player-panel--fullscreen {

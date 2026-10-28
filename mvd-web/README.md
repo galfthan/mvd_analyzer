@@ -1064,13 +1064,11 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
 - **POV bar** under the player: `Auto` (FTE's stats autotrack) and one
   button per player in canonical team order and colour; the followed
   player stays lit under autotrack too. A sound toggle sits at its right
-  end (the player starts muted, as hub's does), then the fullscreen
-  toggle, and the show-panes button while the pane column is hidden.
-- **Fullscreen** (`fullscreen.js`): the whole player panel — the engine,
-  its bars and both pane columns — fills the
-  screen, each column scrolling on its own, and the unified playback bar
-  moves into it on top (as the Map tab's fullscreen does) and back out
-  however fullscreen ends. The tab's controls share one compact
+  end (the player starts muted, as hub's does), then the hide / show
+  toggle of the pane column beside the player.
+- **Fullscreen** (see *Fullscreen* under the playback bar): the whole
+  player panel — the engine, its bars and both pane columns — fills the
+  screen, each column scrolling on its own. The tab's controls share one compact
   style (`.pt-btn`, `.pt-group` segments, `.pt-select` in `styles.css`).
 - **End of demo.** The demo runs a few seconds past the match end
   (scoreboard) and then FTE disconnects. The play button drops its ⏸, a
@@ -1098,10 +1096,11 @@ overlays, a graph's window), the side column's
 share of the width (`split`, %, stored when a drag ends — a drag that
 shuts the column passes its minimum on the way) and whether it is shown.
 Headers drag by the grip to reorder, or onto the other column's panes or
-its head (the "Add pane…" strip); ↑ ↓, the move-across button and ×
+its foot; ↑ ↓, the move-across button and ×
 (dim until hovered) move and close, the chevron or title collapses, the
-bottom edge resizes (double-click: natural height), the side column's hide
-button folds it away and "Add pane…" reopens a closed pane. (dockview was tried for this and
+bottom edge resizes (double-click: natural height), the POV bar's toggle
+folds the side column away, and each column's foot, "+ Add pane…",
+reopens a closed pane at that column's end. (dockview was tried for this and
 dropped: ~390 KB, no stylesheet in its ESM build, and it reparents panels,
 which would reload the engine's iframe.)
 
@@ -1489,8 +1488,17 @@ The unified bar above the Timeline, Chat, Map, Key Moments and Player tabs
 is `src/ui/PlaybackBar.svelte` (arithmetic in `src/lib/playback-bar.js`):
 speed buttons, time, a scrub caret and a range select that sets the shared
 segment. Its buttons run the page's playback (`src/state/playback.js`) or,
-on the Player tab, the engine. In fullscreen the Map tab moves the bar into
-its panel and back.
+on the Player tab, the engine.
+
+**Fullscreen** is one feature for every tab that offers it
+(`src/app/fullscreen.js`; Map and Player, each naming its panel in
+`FULLSCREEN_PANELS`): the active tab's row in the tab bar carries the
+icon for it, and `f` toggles it (not while a field has the keys). The
+tab's panel fills the screen and the playback bar moves into it on top,
+ending with *Exit*, so the way out sits in the top-right corner (Esc
+works too); however fullscreen ends, the bar moves back. A tab reacts to
+the `fullscreenTab` store — the Map resizes its canvas, the Player's
+panel takes `player-panel--fullscreen`.
 
 ## Map-tab item overlay
 

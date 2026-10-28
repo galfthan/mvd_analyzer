@@ -2,7 +2,8 @@
     // The Map tab: the map canvas (mvd-map-view's MvdMap, map-model.js), its
     // sidebar — the legend, the items list, the region status, the learn-mode
     // entity filters — and the controls under it (trails, follow, the
-    // overlays, 3D / occlusion, reset view, fullscreen). src/lib/map.js has the pure parts, sidebar.js
+    // overlays, 3D / occlusion, reset view; fullscreen is src/app/fullscreen.js).
+    // src/lib/map.js has the pure parts, sidebar.js
     // the hand-built legend and region status. src/app/tabs.js toggles the
     // `active` class like on every other .tab-content.
     //
@@ -23,6 +24,7 @@
         panelItems, itemStatusCell, entityRows, entityRowsHtml, trailButtons, byName,
     } from '../../lib/map.js';
     import { view, mapData, changed, learnMode, resizeMap, ensureLineOfSight } from './map-model.js';
+    import { fullscreenTab } from '../../app/fullscreen.js';
     import { buildLegend, syncLegend, syncRegionStatus } from './sidebar.js';
 
     const TAB = 'map';
@@ -35,8 +37,6 @@
     // Bound at mount, before any handler or subscription runs.
     /** @type {HTMLCanvasElement} */
     let canvas;
-    /** @type {HTMLDivElement} */
-    let panel;
     /** @type {HTMLDivElement} */
     let legendEl;
     /** @type {HTMLDivElement} */
@@ -73,8 +73,6 @@
     let queued = false;
     let sidebarDirty = true;
     let lastFull = 0;
-    /** @type {{ parent: ParentNode | null, next: ChildNode | null } | null} */
-    let fsHome = null;
     /** @type {number | null} */
     let resizeRaf = null;
 
@@ -317,26 +315,14 @@
 
     // ─── Fullscreen ─────────────────────────────────────────────────────────
 
-    function toggleFullscreen() {
-        if (document.fullscreenElement === panel) document.exitFullscreen().catch(() => {});
-        else panel.requestFullscreen?.()?.catch(() => {});
-    }
-
-    // Whoever triggered it (the button, Escape, the browser): the unified bar
-    // moves into the fullscreen panel so playback stays usable, and back.
-    function onFullscreenChange() {
-        const on = document.fullscreenElement === panel;
+    // src/app/fullscreen.js puts the panel in or out (and moves the unified
+    // bar); the canvas follows the panel's new size.
+    /** @param {string | null} tab */
+    function onFullscreen(tab) {
+        const on = tab === 'map';
+        if (on === fullscreen) return;
         fullscreen = on;
         s.fullscreen = on;
-        const tl = document.getElementById('unified-timeline');
-        if (tl) {
-            if (on) {
-                if (!fsHome) fsHome = { parent: tl.parentNode, next: tl.nextSibling };
-                panel.insertBefore(tl, panel.firstChild);
-            } else if (fsHome?.parent) {
-                fsHome.parent.insertBefore(tl, fsHome.next);
-            }
-        }
         flushSync();
         resizeMap();
         s.renderDirty = true;
@@ -424,12 +410,11 @@
             playback.subscribe((p) => { s.isPlaying = p.playing; }),
             clock.subscribe(onClock),
             activeTab.subscribe(onTab),
+            fullscreenTab.subscribe(onFullscreen),
         ];
-        document.addEventListener('fullscreenchange', onFullscreenChange);
         return () => {
             offs.forEach((off) => off());
             canvas.removeEventListener('wheel', wheel);
-            document.removeEventListener('fullscreenchange', onFullscreenChange);
         };
     });
 </script>
@@ -438,7 +423,7 @@
 
 <div id="tab-map" class="tab-content">
     <div class="empty-state">Load or search a demo to begin.</div>
-    <div class="panel map-panel" class:map-panel--fullscreen={fullscreen} bind:this={panel}>
+    <div class="panel map-panel" class:map-panel--fullscreen={fullscreen}>
         <div class="map-main-content">
             <div class="map-canvas-container">
                 <canvas id="map-canvas" width="850" height="850" bind:this={canvas}
@@ -534,7 +519,6 @@
             <button id="map-occlude" class:active={flags.occl} title="Realistic occlusion — floors hide players, items and lines behind them (the default keeps everything visible)"
                 onclick={() => toggle('occl', () => (s.occludeActors = !s.occludeActors))}>Occl</button>
             <button id="map-reset-view" title="Reset pan / zoom / rotation" onclick={() => view.resetView()}>Reset view</button>
-            <button id="map-fullscreen" class:active={fullscreen} title="Toggle fullscreen" onclick={toggleFullscreen}>Fullscreen</button>
         </div>
         <div id="map-entities-table-wrap" class="map-entities-table-wrap" style:display={learn ? null : 'none'}>
             <table class="stats-table">

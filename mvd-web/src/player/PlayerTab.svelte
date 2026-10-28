@@ -11,6 +11,7 @@
     import ClipBar from './ClipBar.svelte';
     import PaneColumn from './PaneColumn.svelte';
     import { paneLayout, updateLayout, MIN_SPLIT, MAX_SPLIT } from './layout.js';
+    import { fullscreenTab } from '../app/fullscreen.js';
 
     // PaneForge takes the sizes once; the layout store follows its changes.
     const initial = paneLayout.get();
@@ -64,7 +65,7 @@
 
 <div id="tab-player" class="tab-content">
     <div class="empty-state">Load or search a demo to begin.</div>
-    <div class="panel player-panel">
+    <div class="panel player-panel" class:player-panel--fullscreen={$fullscreenTab === 'player'}>
         <PaneGroup direction="horizontal" class="player-layout" onLayoutChange={layoutChange}>
             <Pane order={1} minSize={100 - MAX_SPLIT}>
                 <div class="player-main">

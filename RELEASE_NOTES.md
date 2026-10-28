@@ -45,7 +45,9 @@ playhead (click to seek), and a rolling health/armor strip per player.
 Panes are added, closed, reordered, collapsed and resized at will; the
 column itself can be widened, by dragging or with the arrow keys, or
 dragged shut to hide it. The whole tab goes fullscreen, playback bar
-included.
+included — like the Map tab, from the icon on the tab's row in the tab
+bar or the `f` key, with *Exit* at the playback bar's right end (the Map
+tab's own Fullscreen button is gone).
 
 The panels of the other tabs (Summary, Timeline, Locs & Regions, Key
 Moments, Pickups, Aim Stats) can be arranged the same way: reordered,
