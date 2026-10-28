@@ -311,6 +311,26 @@ func getLives(this js.Value, args []js.Value) interface{} {
 	return respondJSON(v)
 }
 
+// getBackpacks returns the RL/LG backpack drops (view.Backpacks) in the
+// /backpacks envelope. Argument is an optional JSON string of
+// view.BackpackOptions.
+func getBackpacks(this js.Value, args []js.Value) interface{} {
+	if lastResult == nil {
+		return errorJSON("no demo analyzed yet")
+	}
+	var opts view.BackpackOptions
+	if len(args) >= 1 && args[0].String() != "" {
+		if err := json.Unmarshal([]byte(args[0].String()), &opts); err != nil {
+			return errorJSON("bad options JSON: " + err.Error())
+		}
+	}
+	bp, err := view.Backpacks(lastResult, opts)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	return respondJSON(view.BackpacksEnvelope{TimeUnit: view.UnitMs, Backpacks: bp})
+}
+
 // getHighlights returns the stored highlight catalogue narrowed by
 // view.HighlightsOptions Kinds / Players — the /highlights body at its
 // default airgib look-back (AirgibPreMs is not read here).
@@ -502,6 +522,7 @@ func main() {
 	js.Global().Set("getTopKills", js.FuncOf(getTopKills))
 	js.Global().Set("getLives", js.FuncOf(getLives))
 	js.Global().Set("getHighlights", js.FuncOf(getHighlights))
+	js.Global().Set("getBackpacks", js.FuncOf(getBackpacks))
 	js.Global().Set("getAnalysisTimings", js.FuncOf(getAnalysisTimings))
 	js.Global().Set("getDemoInfo", js.FuncOf(getDemoInfo))
 	js.Global().Set("wasmVersion", map[string]interface{}{

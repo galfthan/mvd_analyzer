@@ -81,3 +81,22 @@ test('presets name real sources and run end to end', async () => {
     const clips = await runQuery(best.query, view, result, demo);
     assert.deepEqual(clips.map((c) => c.label), ['Quad run · valla · 1 frag']);
 });
+
+test('a list of clip entries makes one clip per entry and row', () => {
+    const body = { backpacks: [
+        { time: 30000, player: 'bps', weapon: 'rl', fate: 'picked', picker: 'valla', pickupTime: 40000, pickerNextDeathTime: 90000, pickerRelation: 'enemy', pickerHadWeapon: false },
+        { time: 50000, player: 'valla', weapon: 'lg', fate: 'picked', picker: 'bps', pickupTime: 52000, pickerRelation: 'enemy', pickerHadWeapon: true },
+        { time: 60000, player: 'bps', weapon: 'lg', fate: 'expired' },
+    ] };
+    const all = PRESETS.find((p) => p.id === 'pack-drops');
+    const clips = clipsOf(all.query, body, result, demo);
+    assert.deepEqual(clips.map((c) => [c.from, c.to, c.who, c.label]), [
+        [28, 42, 'bps', 'RL pack · bps drops it'],
+        [47, 52, 'valla', 'RL pack · valla takes it (enemy)'],
+        [48, 62, 'valla', 'LG pack · valla drops it'],
+        [59, 64, 'bps', 'LG pack · bps takes it (enemy)'],
+        [58, 72, 'bps', 'LG pack · bps drops it'],
+    ], 'the drop\'s lead-up, then the pickup; an untaken pack gets one clip');
+    const worst = PRESETS.find((p) => p.id === 'packs-enemy-new');
+    assert.deepEqual(clipsOf(worst.query, body, result, demo).map((c) => c.from), [28, 47]);
+});

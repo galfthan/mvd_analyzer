@@ -302,7 +302,7 @@ computed on demand from the demo the WASM module still holds, so they
 fill in a moment after the rest of the tab has painted. The Go exports
 (`getTopWindows`, `getTopKills`) live on the worker's global like every
 other one, so the main page reaches them — and `getEvents`, `getLives`,
-`getHighlights`, the worker's other whitelisted view exports — through a `viewQuery` worker
+`getHighlights`, `getBackpacks`, the worker's other whitelisted view exports — through a `viewQuery` worker
 message (`DemoHandle.view`, `src/data/wasm-source.js`) — the same round-trip as region recompute
 and line of sight. **Top Damage Windows (10 s)** is the top 10 windows by bounded enemy
 damage (`metric=damageGiven`, `windowMs=10000`, `dmg=bounded` — the same
@@ -1122,14 +1122,18 @@ scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
 - **Make**: ⟦ In / Out ⟧ mark the player's time (keys `i` / `o`), *+ Add
   clip* (`c`) adds In→Out from the current POV (no marks: the last 10 s).
 - **Generate** from the loaded demo: quad runs, best quad runs,
-  frag streaks, quadbores, airgibs, telefrags, discharges — presets of the
-  clip finder below — and one player's frags (merged when 5 s apart or less).
+  frag streaks, RL/LG pack drops (all, the enemy took, a teammate took, the
+  enemy took without having the weapon — each pack as the dropper's last
+  12 s, then a 5 s look at the pickup from the picker's view), quadbores,
+  airgibs, telefrags, discharges — presets of the clip finder below — and
+  one player's frags (merged when 5 s apart or less).
 - **Clip finder** (`src/lib/clip-query.js`): a query is one mvd-api
-  endpoint (`events`, `highlights`, `top-kills`, `top-windows`, `lives`)
+  endpoint (`events`, `highlights`, `backpacks`, `top-kills`, `top-windows`, `lives`)
   with its query params under their API names, a `where` over the rows it
   returns (groups ORed, conditions inside a group ANDed, fields as dotted
   paths into the row), an optional rank + limit, the clip window (row
-  fields plus padding, the POV a row's player field) and a label template.
+  fields plus padding, the POV a row's player field — or a list of windows,
+  one clip each per row) and a label template.
   On the loaded demo it runs the same Go view through `DemoHandle.view`
   (`viewCall` maps the params onto the view's options, and defaults the
   damage family to bounded with the raw fallback the handlers apply). The
@@ -1277,27 +1281,25 @@ also resets any column sort (the sortable headers are `src/ui/sortable.js`
 
 ## Pack Drops tab
 
-The Pack Drops tab shows every RL / LG backpack drop as one row,
-joined with its pickup outcome. The drop side comes from
-`result.backpacks`; the pickup side from `result.weaponPickups` entries
-with `source == "backpack"`, joined on `(backpackEnt, dropTime)` —
-the compound key is needed because QW servers recycle backpack
-edict numbers across drops, so `entNum` alone would collide. A drop with
-no matching pickup is shown as `expired` only when KTX announced the
-removal itself — `//ktx expire <ent>`, which reaches the frontend as the
-drop row's own `fate: "expired"` (schema v72). Otherwise it is
+The Pack Drops tab shows every RL / LG backpack drop as one row with its
+pickup outcome, both read off the `result.backpacks` row itself (schema
+v77): `fate` with `picker` / `pickerTeam` / `pickupTime`, and on a `ktx`
+row the pickup's `pickerHadWeapon` / `pickerKills` /
+`pickerNextDeathTime`. The pipeline joins KTX's `//ktx bp` pickups onto
+the drops (`analyzer/backpack_pickups.go`); `packDropPickup()`
+(`src/lib/packdrops.js`) only converts those fields to seconds. A drop
+with no pickup is shown as `expired` only when KTX announced the removal
+itself (`//ktx expire <ent>`, `fate: "expired"`). Otherwise it is
 `unobserved`: over the archive that hint accounts for barely half the
 pickup-less drops, the rest being packs the recording simply ended on top
-of, and the table used to call all of them expired.
+of.
 
 On demos older than KTX 1.38 the drop side is RECONSTRUCTED rather than
-hinted (`backpacks[].source == "reconstructed"`, schema v72), and there is
-no `//ktx bp` for it to join to. Those rows carry their pickup side on the
-drop row instead — `fate` / `picker` / `pickerTeam` / `pickupTime`, read
-off the wire's backpack-entity track — and `packDropPickup()`
-(`src/lib/packdrops.js`) adapts those
-fields into the same row shape the join produces, so one renderer, one set
-of filters and one Picker column serve both provenances.
+hinted (`backpacks[].source == "reconstructed"`, schema v72) and its
+pickup side is read off the wire's backpack-entity track — the same
+fields, without the three `ktx`-only ones, so the Kills cell stays `-`.
+One renderer, one set of filters and one Picker column serve both
+provenances.
 
 Two things stay different on a reconstructed row, because the wire cannot
 say them: the status chip is a plain `picked` rather than

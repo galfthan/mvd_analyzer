@@ -120,7 +120,7 @@ function logWorkerTimings(t) {
 // side, cheap enough to answer per request. Whitelisted by name rather than
 // dispatching whatever the message asks for: the message body decides which
 // global is invoked, so the set of invokable globals is pinned here.
-const VIEW_QUERY_FNS = new Set(['getTopWindows', 'getTopKills', 'getLives', 'getHighlights', 'getEvents']);
+const VIEW_QUERY_FNS = new Set(['getTopWindows', 'getTopKills', 'getLives', 'getHighlights', 'getEvents', 'getBackpacks']);
 
 let wasmReady = false;
 

@@ -30,7 +30,7 @@ them. Code: `mvd-web/src/lib/clip-query.js` (model + runner),
 
 ```js
 {
-  source: 'events',                       // events | highlights | top-kills | top-windows | lives
+  source: 'events',                       // events | highlights | backpacks | top-kills | top-windows | lives
   params: { types: 'powerup' },           // the endpoint's query params, API names and form
   where: [[{ field: 'detail.powerup', op: '=', value: 'quad' }]],   // OR of AND-groups
   rank:  { by: 'detail.frags', desc: true, limit: 5 },             // optional
@@ -50,6 +50,11 @@ the source's defaults (`SOURCES` in clip-query.js).
    identical windows, POV and labels) before the generators were deleted.
    WASM gained `getLives` / `getHighlights`; the worker whitelists those and
    `getEvents`.
+1b. **Pack drops** — done. The drop↔pickup join moved into the pipeline
+   (schema v77, `backpacks[]` carries `fate` / `picker` /
+   `pickerRelation` / `pickerHadWeapon` / `pickerKills` on every demo), so
+   the four pack presets are plain `/backpacks` queries; a query's `clip`
+   may be a list (the drop from the dropper's view, then the pickup).
 2. **Saved presets** — save the current query under a name ("My presets" in
    the dropdown, `localStorage`), share one by link.
 3. **The pane, builder mode** — source picker, the endpoint's params, the

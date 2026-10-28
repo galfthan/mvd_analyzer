@@ -5,7 +5,7 @@
 //
 // A query is { source, params, where, rank, clip, label }:
 //   source   an endpoint under /v1/demos/{id}/: 'events', 'highlights',
-//            'top-kills', 'top-windows' or 'lives'
+//            'backpacks', 'top-kills', 'top-windows' or 'lives'
 //   params   that endpoint's query params, by their API names and in their
 //            API form (csv strings, ms) — sent as-is when the query runs
 //            against mvd-api, translated to the view's options (viewCall)
@@ -15,11 +15,15 @@
 //            into the row ('detail.frags', 'victims.0.name'); [] keeps all
 //   rank     optional { by, desc, limit }: order by that field (ties by
 //            time); without it clips play in time order
-//   clip     { from, before, to, after, pov }: the window runs from row field
-//            `from` minus `before` ms to field `to` plus `after` ms, tracking
-//            the player named by field `pov`; unset fields take the source's
+//   clip     { from, before, to, after, pov, label }: the window runs from row
+//            field `from` minus `before` ms to field `to` plus `after` ms,
+//            tracking the player named by field `pov`; unset fields take the
+//            source's. A list of them makes one clip per entry for each row
+//            (a pack's drop and its pickup), skipping an entry whose `from`
+//            field the row lacks.
 //   label    a template: {field} is the row's value, {field|s} a plural 's'
-//            unless the value is 1, {field|sec} ms as whole seconds
+//            unless the value is 1, {field|sec} ms as whole seconds,
+//            {field|upper} upper case; a clip entry's own label wins
 //
 // Rows, fields and params are the endpoint's own — mvd-api/openapi/openapi.yaml
 // is their reference. The finder adds no detection of its own.
@@ -31,15 +35,15 @@ import { makeClip } from './playlist.js';
  * @typedef {import('./playlist.js').Clip} Clip
  * @typedef {import('./playlist.js').ClipDemo} ClipDemo
  * @typedef {{ field: string, op: '=' | '!=' | '<' | '<=' | '>' | '>=' | '~', value: string | number }} Condition
- * @typedef {{ from?: string, before?: number, to?: string, after?: number, pov?: string }} ClipSpec
+ * @typedef {{ from?: string, before?: number, to?: string, after?: number, pov?: string, label?: string }} ClipSpec
  * @typedef {object} ClipQuery
  * @property {string} source
  * @property {Record<string, string | number>} [params]
  * @property {Condition[][]} [where]
  * @property {{ by: string, desc?: boolean, limit?: number }} [rank]
- * @property {ClipSpec} [clip]
+ * @property {ClipSpec | ClipSpec[]} [clip]
  * @property {string} [label]
- * @typedef {{ fn: string, opts: (p: Record<string, string | number>) => object, rows: (body: any) => any[], clip: Required<ClipSpec> }} Source
+ * @typedef {{ fn: string, opts: (p: Record<string, string | number>) => object, rows: (body: any) => any[], clip: Required<Omit<ClipSpec, 'label'>> }} Source
  * @typedef {(fn: string, opts: object) => Promise<any>} ViewFn
  */
 
@@ -63,6 +67,12 @@ export const SOURCES = {
         opts: (p) => ({ Kinds: csv(p.kinds), Players: csv(p.players) }),
         rows: (b) => [...(b?.discharges || []), ...(b?.quadbores || []), ...(b?.telefrags || []), ...(b?.airgibs || [])],
         clip: { from: 'time', before: 6000, to: 'time', after: 3000, pov: 'actor.name' },
+    },
+    backpacks: {
+        fn: 'getBackpacks',
+        opts: (p) => ({ Players: csv(p.players), Weapons: csv(p.weapons), From: int(p.from), To: int(p.to) }),
+        rows: (b) => b?.backpacks || [],
+        clip: { from: 'time', before: 8000, to: 'time', after: 2000, pov: 'player' },
     },
     'top-kills': {
         fn: 'getTopKills',
@@ -168,6 +178,7 @@ export function renderLabel(template, row) {
         const v = fieldOf(row, path.trim());
         if (filter === 's') return v === 1 ? '' : 's';
         if (filter === 'sec') return String(Math.round((Number(v) || 0) / 1000));
+        if (filter === 'upper') return v == null ? '?' : String(v).toUpperCase();
         return v == null ? '?' : String(v);
     });
 }
@@ -182,10 +193,10 @@ export function renderLabel(template, row) {
  */
 export function clipsOf(query, body, result, demo) {
     const src = SOURCES[query.source];
-    const spec = { ...src.clip, ...query.clip };
+    const specs = (Array.isArray(query.clip) ? query.clip : [query.clip || {}]).map((c) => ({ ...src.clip, ...c }));
     const ids = result?.timelineAnalysis?.playerUserIDs || {};
     const rows = src.rows(body).filter((r) => matches(r, query.where));
-    const start = (/** @type {any} */ r) => Number(fieldOf(r, spec.from)) || 0;
+    const start = (/** @type {any} */ r) => Number(fieldOf(r, specs[0].from)) || 0;
     const rank = query.rank;
     if (rank?.by) {
         const dir = rank.desc ? -1 : 1;
@@ -195,12 +206,14 @@ export function clipsOf(query, body, result, demo) {
         rows.sort((a, b) => start(a) - start(b));
     }
     const kept = rank?.limit ? rows.slice(0, rank.limit) : rows;
-    return kept.map((r) => {
+    return kept.flatMap((r) => specs.flatMap((spec) => {
+        const from = fieldOf(r, spec.from);
+        if (from == null) return [];
         const who = String(fieldOf(r, spec.pov) ?? '');
-        const fromMs = start(r) - spec.before;
-        const toMs = (Number(fieldOf(r, spec.to)) || start(r)) + spec.after;
-        return makeClip(result, demo, fromMs, toMs, ids[who], who, renderLabel(query.label || '', r));
-    });
+        const fromMs = Number(from) - spec.before;
+        const toMs = (Number(fieldOf(r, spec.to)) || Number(from)) + spec.after;
+        return [makeClip(result, demo, fromMs, toMs, ids[who], who, renderLabel(spec.label ?? query.label ?? '', r))];
+    }));
 }
 
 // runQuery runs a query on the demo the browser holds.
@@ -213,6 +226,14 @@ export function clipsOf(query, body, result, demo) {
 export async function runQuery(query, view, result, demo) {
     return clipsOf(query, await viewCall(view, query.source, query.params), result, demo);
 }
+
+// A pack's two clips: the lead-up to the drop from the dropper's view — why
+// they died with it — then a short look at the pickup from the picker's (a
+// pack nobody took has no pickupTime and gets only the first).
+/** @type {ClipSpec} */
+const PACK_DROP = { before: 12000, after: 2000, label: '{weapon|upper} pack · {player} drops it' };
+/** @type {ClipSpec} */
+const PACK_PICKUP = { from: 'pickupTime', before: 3000, to: 'pickupTime', after: 2000, pov: 'picker', label: '{weapon|upper} pack · {picker} takes it ({pickerRelation})' };
 
 // The presets the playlist's Generate menu offers.
 /** @type {Array<{ id: string, title: string, query: ClipQuery }>} */
@@ -242,6 +263,26 @@ export const PRESETS = [
             source: 'events', params: { types: 'streak' },
             clip: { before: 0, to: 'detail.endTime', after: 3000 },
             label: 'Streak · {player} · {detail.length} frags',
+        },
+    },
+    {
+        id: 'pack-drops', title: 'Pack drops (RL/LG)',
+        query: { source: 'backpacks', clip: [PACK_DROP, PACK_PICKUP] },
+    },
+    {
+        id: 'packs-enemy', title: 'Packs the enemy took',
+        query: { source: 'backpacks', where: [[{ field: 'pickerRelation', op: '=', value: 'enemy' }]], clip: [PACK_DROP, PACK_PICKUP] },
+    },
+    {
+        id: 'packs-team', title: 'Packs a teammate took',
+        query: { source: 'backpacks', where: [[{ field: 'pickerRelation', op: '=', value: 'team' }]], clip: [PACK_DROP, PACK_PICKUP] },
+    },
+    {
+        id: 'packs-enemy-new', title: 'Packs the enemy took without having the weapon',
+        query: {
+            source: 'backpacks',
+            where: [[{ field: 'pickerRelation', op: '=', value: 'enemy' }, { field: 'pickerHadWeapon', op: '=', value: 'false' }]],
+            clip: [PACK_DROP, PACK_PICKUP],
         },
     },
     {
