@@ -11,9 +11,23 @@
 // is only queryable while it is the current one: a new load() supersedes it
 // the moment its analyze is posted, and its view queries reject from then on
 // instead of silently answering for the newer demo.
+//
+// Loads can overlap (a slow hub download, then a quick local file): the
+// last load() ASKED FOR wins. Every older one rejects with a
+// SupersededError at its next step — before it posts its analyze (which
+// would replace the worker's demo under the newer one's handle), and after
+// its reply — whether it would have succeeded or failed, so a stale
+// failure never reports over the newer demo.
 
 import { WorkerClient } from './worker-client.js';
 import * as hub from './hub.js';
+
+export class SupersededError extends Error {
+    constructor() {
+        super('load superseded by a newer one');
+        this.superseded = true;
+    }
+}
 
 export class WasmSource {
     constructor(worker, { fetchImpl = (...a) => fetch(...a) } = {}) {
@@ -21,6 +35,7 @@ export class WasmSource {
         this.fetchImpl = fetchImpl;
         this.ready = this.client.ready;
         this.current = null;
+        this._loadSeq = 0;
         this._byReqId = new Map();
         this.client.onFollowup((msg) => this._onFollowup(msg));
     }
@@ -30,21 +45,36 @@ export class WasmSource {
     //          { game }         a hub row already in hand (search results)
     //          { gameId }       a hub game id, looked up first
     //   onStage('info' | 'download' | 'analyze') reports progress.
-    // Waits for the wasm if it is still loading.
-    async load(input, { onStage = () => {} } = {}) {
+    // Waits for the wasm if it is still loading. Rejects with a
+    // SupersededError once a newer load() was called.
+    async load(input, opts = {}) {
+        const seq = ++this._loadSeq;
+        const stale = () => seq !== this._loadSeq;
+        try {
+            return await this._load(input, opts, stale);
+        } catch (err) {
+            throw stale() ? new SupersededError() : err;
+        }
+    }
+
+    async _load(input, { onStage = () => {} }, stale) {
+        const live = () => { if (stale()) throw new SupersededError(); };
         await this.ready;
+        live();
         const net = {};
         let { bytes, name, game } = input;
         if (input.gameId != null) {
             onStage('info');
             const t = performance.now();
             game = await hub.fetchGame(input.gameId, this.fetchImpl);
+            live();
             net.gameInfoFetch = +(performance.now() - t).toFixed(1);
         }
         if (game) {
             onStage('download');
             const t = performance.now();
             bytes = await hub.downloadDemo(game, this.fetchImpl);
+            live();
             net.demoDownload = +(performance.now() - t).toFixed(1);
             name = hub.demoFilename(game);
         }
@@ -80,6 +110,9 @@ export class WasmSource {
         } catch (err) {
             fail(err);
         }
+        // Analysed, but a newer load was asked for meanwhile: the worker
+        // holds this demo until that one posts, and nobody shows it.
+        live();
         const tParse = performance.now();
         const result = JSON.parse(reply.json);
         if (result.error) fail(new Error(result.error));

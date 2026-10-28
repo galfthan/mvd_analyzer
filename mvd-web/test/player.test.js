@@ -106,13 +106,37 @@ test('runner loads another hub demo and carries on there', async () => {
     const demo = store({ ref: { key: 'hub:1', gameId: 1 }, result: {} });
     const teams = store({ order: [] });
     const loads = [];
-    const loadDemo = async (input) => { loads.push(input); demo.set({ ref: { key: 'hub:9', gameId: 9 }, result: {} }); };
+    const loadDemo = async (input) => {
+        loads.push(input);
+        const handle = { ref: { key: 'hub:9', gameId: 9 }, result: {} };
+        demo.set(handle);
+        return handle;
+    };
     const runner = createRunner({ engine, demo, teams, selectTab: () => {}, loadDemo, demoRefOf });
     runner.start([clip(40, 50, { demo: { key: 'hub:9', gameId: 9, title: 'b', offset: 0 } })], 0);
     await new Promise((r) => setTimeout(r, 0));
     assert.deepEqual(loads, [{ gameId: 9 }]);
     assert.ok(playlist.get().run, 'a demo the run loaded keeps it going');
     assert.deepEqual(engine.log.slice(-2), [['jump', 40], ['track', 'auto']]);
+});
+
+test('a demo the user picks while the run loads its own wins and ends the run', async () => {
+    const activeTab = store('player');
+    const engine = fakeEngine(activeTab);
+    const demo = store({ ref: { key: 'hub:1', gameId: 1 }, result: {} });
+    const teams = store({ order: [] });
+    let finish;
+    // The run's load is slow; the user's pick lands first, and the run's
+    // load then resolves null (superseded — load.js loadDemo).
+    const loadDemo = () => new Promise((r) => { finish = r; });
+    const runner = createRunner({ engine, demo, teams, selectTab: () => {}, loadDemo, demoRefOf });
+    runner.start([clip(40, 50, { demo: { key: 'hub:9', gameId: 9, title: 'b', offset: 0 } })], 0);
+    demo.set({ ref: { key: 'file:mine.mvd', gameId: null }, result: {} });
+    assert.ok(playlist.get().run, 'still loading: the run waits for its own load');
+    finish(null);
+    await new Promise((r) => setTimeout(r, 0));
+    assert.equal(playlist.get().run, null, 'the dropped load ends the run');
+    assert.ok(!engine.log.some(([k]) => k === 'jump'), 'nothing played on the user\'s demo');
 });
 
 test('demoRefOf names the demo for the playlist', () => {

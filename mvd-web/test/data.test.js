@@ -114,6 +114,53 @@ test('replies are matched by reqId, not arrival order', async () => {
     await assert.rejects(a, /A failed/);
 });
 
+test('overlapping loads: the last one asked for wins, a slow older one never posts', async () => {
+    let release;
+    const fetchImpl = async (url) => {
+        if (url.includes('supabase')) return { ok: true, json: async () => [{ id: 7, demo_sha256: 'abcd', timestamp: '2026-01-02T03:04:05Z' }] };
+        await new Promise((r) => { release = r; });
+        return { ok: true, arrayBuffer: async () => new Uint8Array([9]).buffer };
+    };
+    const w = new FakeWorker();
+    const src = new WasmSource(w, { fetchImpl });
+    w.reply({ type: 'ready' });
+    const stages = [];
+    const slow = src.load({ gameId: 7 }, { onStage: (s) => stages.push(s) });
+    while (!release) await tick();
+    const fast = await analyze(w, src, { match: { map: 'dm2' } }, 'b.mvd');
+    release();
+    await assert.rejects(slow, (e) => e.superseded === true);
+    assert.equal(w.posted.filter((m) => m.type === 'analyze').length, 1, 'the stale load never replaced the worker\'s demo');
+    assert.deepEqual(stages, ['info', 'download'], 'and reported no stage after the newer load began');
+    assert.equal(src.current, fast.handle);
+    assert.equal(fast.handle.current, true);
+});
+
+test('overlapping loads: an older analyze answering late is dropped, its failure too', async () => {
+    const { w, src } = await readySource();
+    const a = src.load({ bytes: new Uint8Array([1]), name: 'a.mvd' });
+    await tick();
+    const reqA = w.last('analyze');
+    const b = src.load({ bytes: new Uint8Array([2]), name: 'b.mvd' });
+    await tick();
+    const reqB = w.last('analyze');
+    w.reply({ type: 'result', reqId: reqA.reqId, json: '{}' });
+    await assert.rejects(a, (e) => e.superseded === true);
+    w.reply({ type: 'result', reqId: reqB.reqId, json: '{}' });
+    const hb = await b;
+    assert.equal(src.current, hb);
+
+    const c = src.load({ bytes: new Uint8Array([3]), name: 'c.mvd' });
+    await tick();
+    const reqC = w.last('analyze');
+    const d = src.load({ bytes: new Uint8Array([4]), name: 'd.mvd' });
+    await tick();
+    w.reply({ type: 'result', reqId: reqC.reqId, json: '{"error":"bad demo"}' });
+    await assert.rejects(c, (e) => e.superseded === true && !/bad demo/.test(e.message));
+    w.reply({ type: 'result', reqId: w.last('analyze').reqId, json: '{}' });
+    assert.equal(src.current, await d);
+});
+
 test('a wasm load failure rejects ready', async () => {
     const w = new FakeWorker();
     const src = new WasmSource(w);

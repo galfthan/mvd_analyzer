@@ -59,7 +59,10 @@ function setAnalysisStatus(result) {
 // loadDemo loads one demo through the data source (`input` is what
 // WasmSource.load takes: a file's bytes, a hub row, or a hub game id) and
 // renders it. Shared by the file drop, the hub box, search clicks and
-// playlist runs; throws on failure for the caller to report.
+// playlist runs. Resolves with the shown DemoHandle, or null when a newer
+// load was asked for before this one finished (the last pick wins — the
+// data source drops the older one, its failure included); throws on
+// failure for the caller to report.
 export async function loadDemo(input) {
     setStatus(loadStatus.get().text, 'status loading');
     const hubId = input.game?.id ?? input.gameId;
@@ -68,9 +71,15 @@ export async function loadDemo(input) {
     // total does not include the wasm load (logged on its own).
     await mvdData.ready;
     startLoadTiming();
-    const handle = await mvdData.load(input, {
-        onStage: (stage) => { setStatus(LOAD_STAGE_TEXT[stage], loadStatus.get().cls); },
-    });
+    let handle;
+    try {
+        handle = await mvdData.load(input, {
+            onStage: (stage) => { setStatus(LOAD_STAGE_TEXT[stage], loadStatus.get().cls); },
+        });
+    } catch (err) {
+        if (err.superseded) return null;
+        throw err;
+    }
     recordLoadTimings(handle.timings);
 
     setAnalysisStatus(handle.result);
@@ -89,6 +98,7 @@ export async function loadDemo(input) {
         (err) => console.warn('deferred buckets failed:', err.message));
 
     displayResults(result);
+    return handle;
 }
 
 // The load panel's three ways in. Each reports its own failure on the
