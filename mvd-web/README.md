@@ -1002,7 +1002,9 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   they are next shown.
 - **Playback buttons** map to `demo_setspeed` (0.2× / 1× / 5×; pressing the
   running speed pauses). `-1x` is disabled — FTE cannot play backwards.
-  Leaving the tab pauses the engine.
+  Leaving the tab pauses the engine and suspends its frame loop
+  (`FteController.suspend`; the hidden iframe otherwise keeps rendering at
+  60 fps), resumed on the way back.
 - **POV bar** under the player: `Auto` (FTE's stats autotrack) and one
   button per player in canonical team order and colour; the followed
   player stays lit under autotrack too. A sound toggle sits at its right

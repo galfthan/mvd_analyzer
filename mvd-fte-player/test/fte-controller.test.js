@@ -10,7 +10,7 @@ function fakeWin({ demoTime = 0, trackUserid = 3 } = {}) {
     const win = {
         commands: [],
         demoTime,
-        FTEC: { cbufadd: (cmd) => win.commands.push(cmd) },
+        FTEC: { cbufadd: (cmd) => win.commands.push(cmd), step: () => {} },
         Module: {
             getDemoTime: () => win.demoTime,
             getClientState: () => ({
@@ -155,4 +155,36 @@ test('unmute resumes audio and picks an audible volume', () => {
     assert.equal(resumed, 1);
     assert.equal(fte.isMuted(), false);
     assert.deepEqual(win.commands, ['volume 0\n', 'volume 0.1\n']);
+});
+
+test('suspend parks the frame loop after one more frame; resume restarts it once', () => {
+    // FTEC.step reschedules itself by name through requestAnimationFrame.
+    const frames = [];
+    const ran = [];
+    const win = fakeWin();
+    win.requestAnimationFrame = (fn) => frames.push(fn);
+    win.FTEC.step = (ts) => { ran.push(ts); win.requestAnimationFrame(win.FTEC.step); };
+    // The engine is up (its loop scheduled) before the controller exists.
+    const fte = new FteController(win);
+    const tick = (ts) => frames.shift()(ts);
+    win.requestAnimationFrame(win.FTEC.step);
+    tick(1);
+    fte.suspend();
+    tick(2); // the grace frame: commands queued before the suspend run
+    tick(3); // parked: nothing runs, nothing is rescheduled
+    assert.deepEqual(ran, [1, 2]);
+    assert.equal(frames.length, 0);
+    fte.resume();
+    assert.equal(frames.length, 1);
+    tick(4);
+    assert.deepEqual(ran, [1, 2, 4]);
+    // Suspended and resumed before the loop parked: the pending frame just
+    // carries on — no second loop.
+    fte.suspend();
+    fte.resume();
+    assert.equal(frames.length, 1);
+    tick(5);
+    assert.equal(frames.length, 1);
+    fte.resume();
+    assert.equal(frames.length, 1, 'resume without a suspend does nothing');
 });

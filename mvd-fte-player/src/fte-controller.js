@@ -30,6 +30,7 @@ export class FteController {
         this._volume = 0;
         this._lastVolume = 0;
         this._maxVolume = 0.2;
+        this._gate = this._gateFrameLoop();
     }
 
     get module() {
@@ -181,6 +182,45 @@ export class FteController {
         if (this.isUsingAutotrack()) this.enableAutotrack();
         else if (this._lastTrackUserId) this.track(this._lastTrackUserId);
         this.command('demo_setspeed', this._demoSpeed);
+    }
+
+    // Not in hub: suspend() stops the engine's frame loop while its page is
+    // not shown, resume() restarts it. FTE drives itself with its own loop
+    // (FTEC.step, rescheduling through requestAnimationFrame — emscripten's
+    // Module.pauseMainLoop exists in the build but does not drive it), and a
+    // hidden same-origin iframe keeps rendering at 60 fps. The controller
+    // gates the loop from the start by wrapping FTEC.step, which the loop
+    // reschedules by name: a suspended step
+    // parks instead of running (so no second loop can start), after one
+    // more frame so commands queued just before — the host's pause — have
+    // run. resume() restarts a parked loop; one that never parked carries on.
+    _gateFrameLoop() {
+        const ftec = this._win.FTEC;
+        const step = ftec.step;
+        const g = { suspended: false, grace: 0, parked: false };
+        ftec.step = (ts) => {
+            if (g.suspended && g.grace-- <= 0) {
+                g.parked = true;
+                return;
+            }
+            step(ts);
+        };
+        return g;
+    }
+
+    suspend() {
+        this._gate.suspended = true;
+        this._gate.grace = 1;
+    }
+
+    resume() {
+        const g = this._gate;
+        if (!g.suspended) return;
+        g.suspended = false;
+        if (g.parked) {
+            g.parked = false;
+            this._win.requestAnimationFrame(this._win.FTEC.step);
+        }
     }
 
     // Speed in percent: 100 = normal, 0 = paused.

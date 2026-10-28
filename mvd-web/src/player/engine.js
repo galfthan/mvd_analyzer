@@ -54,13 +54,17 @@ export class PlayerEngine {
             this.handle = handle;
             if (this.tabActive()) this.ensure();
         });
+        // Off the tab the engine is paused and its frame loop suspended: the
+        // hidden iframe would otherwise go on rendering every frame.
         activeTab.subscribe((tab) => {
             if (tab === 'player') {
+                this.fte?.resume();
                 this.ensure();
                 this.startSync();
             } else if (this.fte) {
                 this.stopSync();
                 this.fte.pause();
+                this.fte.suspend();
                 this.publish();
             }
         });
@@ -109,6 +113,7 @@ export class PlayerEngine {
                     if (this.clock.t > 0) this.jump(this.clock.t);
                     fte.pause();
                     if (this.tabActive()) this.startSync();
+                    else fte.suspend();
                     this.publish();
                     const onReady = this.onReady;
                     this.onReady = null;
