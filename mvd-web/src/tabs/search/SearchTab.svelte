@@ -98,7 +98,7 @@
                 <div class="search-pager">
                     <span class="search-pager-count">{pagerLabel($searchPaging)}</span>
                     {#if hasMore($searchPaging)}
-                        <button type="button" class="search-submit search-pager-more" onclick={() => runSearch(true)}>Load more</button>
+                        <button type="button" class="search-submit search-pager-more" disabled={$searchBusy} onclick={() => runSearch(true)}>Load more</button>
                     {/if}
                 </div>
             {/if}
