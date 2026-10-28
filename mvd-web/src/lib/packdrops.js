@@ -1,20 +1,15 @@
-// packdrops.js — the Pack Drops tab's DOM-free parts: the drop ↔ pickup
-// join, the status of each drop, the filter options and the filter, and
-// each row's markup.
+// packdrops.js — the Pack Drops tab's DOM-free parts: the status of each
+// drop, the filter options and the filter, and each row's markup.
 //
-// The table joins result.backpacks (the drop side from //ktx drop) with the
-// backpack-sourced entries in result.weaponPickups (the pickup side from
-// //ktx bp) by (backpackEnt, dropTime). A drop with no matching pickup is
-// shown as "expired" only when KTX said so in //ktx expire (published as
-// the drop row's own `fate`); otherwise it is "unobserved", because a pack
-// the recording ended on top of also has no pickup row.
-//
-// RECONSTRUCTED drops (backpacks[].source === 'reconstructed', demos older
-// than the //ktx drop hint) have no `//ktx bp` to join to, so their pickup
-// side rides the drop row itself: `fate` / `picker` / `pickerTeam` /
-// `pickupTime`, read off the wire's backpack-ENTITY track (schema v72).
-// packDropPickup below turns those fields into the same row shape the join
-// produces, so one renderer serves both provenances.
+// Every result.backpacks row carries its own pickup side (schema v77):
+// `fate` with `picker` / `pickerTeam` / `pickupTime`. On a `ktx` row that is
+// the //ktx bp pickup the pipeline joined onto the drop, with the pickup's
+// `pickerHadWeapon` / `pickerKills` / `pickerNextDeathTime`; on a
+// RECONSTRUCTED row (demos older than the //ktx drop hint) it is read off
+// the wire's backpack-ENTITY track, which cannot see those three. A drop
+// nobody is known to have taken is "expired" only when KTX said so in
+// //ktx expire, otherwise "unobserved", because a pack the recording ended
+// on top of has no pickup either.
 
 import { escapeHtml } from './html.js';
 import { formatDuration } from './result.js';
@@ -23,10 +18,9 @@ import { hubReplayUrl } from './hub-url.js';
 /**
  * A result.backpacks row (Result JSON); `time` is ms there and seconds on
  * the copy a PackDropRow carries.
- * @typedef {{ time: number, weapon: string, player?: string, team?: string, entNum?: number, source?: string, fate?: string, picker?: string, pickerTeam?: string, pickupTime?: number, [field: string]: any }} PackDrop
- * The pickup side of a drop: a backpack-sourced result.weaponPickups row
- * (times in seconds) or packDropPickup's adaptation of a reconstructed drop.
- * @typedef {{ player?: string, team?: string, time: number, nextDeathTime: number, kills: number | null, hadBefore?: boolean, [field: string]: any }} PackPickup
+ * @typedef {{ time: number, weapon: string, player?: string, team?: string, entNum?: number, source?: string, fate?: string, picker?: string, pickerTeam?: string, pickupTime?: number, pickerHadWeapon?: boolean, pickerKills?: number, pickerNextDeathTime?: number, [field: string]: any }} PackDrop
+ * The pickup side of a drop, times in seconds.
+ * @typedef {{ player?: string, team?: string, time: number, nextDeathTime: number, kills: number | null, hadBefore?: boolean }} PackPickup
  * @typedef {{ label: string, cls: string }} PackDropStatus
  * @typedef {{ drop: PackDrop, pickup: PackPickup | null, status: PackDropStatus }} PackDropRow
  * @typedef {'dropplayer' | 'dropteam' | 'pickplayer' | 'pickteam' | 'status'} FilterKey
@@ -35,22 +29,23 @@ import { hubReplayUrl } from './hub-url.js';
  * @typedef {{ gameId?: number | null, userIDs?: Record<string, number>, demoOffset: number }} HubLinkCtx
  */
 
-// packDropPickup adapts a reconstructed drop's own fate fields to the pickup
-// row shape. `kills` is null rather than 0: kill credit needs the `//ktx bp`
-// hint's HadBefore, which no reconstructed row has, and printing 0 would
-// claim the picker scored nothing with it.
+// packDropPickup reads a drop's pickup side (ms on the row) into seconds.
+// `kills` is null rather than 0 when the row has none: kill credit needs
+// the //ktx bp hint's HadBefore, which no reconstructed row has, and
+// printing 0 would claim the picker scored nothing with it.
 /**
- * @param {PackDrop} drop
+ * @param {PackDrop} drop  a Result row (times in ms)
  * @returns {PackPickup | null}
  */
 export function packDropPickup(drop) {
-    if (drop.source !== 'reconstructed' || drop.fate !== 'picked' || !drop.picker) return null;
+    if (drop.fate !== 'picked' || !drop.picker) return null;
     return {
         player: drop.picker,
         team: drop.pickerTeam || '',
         time: (drop.pickupTime || 0) * 0.001,
-        nextDeathTime: 0,
-        kills: null,
+        nextDeathTime: (drop.pickerNextDeathTime || 0) * 0.001,
+        kills: drop.pickerKills ?? null,
+        hadBefore: drop.pickerHadWeapon,
     };
 }
 
@@ -69,11 +64,10 @@ export function packDropStatusFor(drop, pickup) {
         if (drop.fate === 'expired') return { label: 'expired', cls: 'status-expired' };
         return { label: 'unobserved', cls: 'status-unobserved' };
     }
-    // A KTX row with no pickup row is NOT automatically expired, and this
-    // used to say it was. KTX states an expiry outright in `//ktx expire`,
-    // which the pipeline stamps as `fate: "expired"`; over the archive that
-    // hint accounts for only half the pickup-less drops, the rest being packs
-    // the recording ended on top of. Those get `unobserved`.
+    // A KTX row with no pickup is NOT automatically expired: KTX states an
+    // expiry outright in `//ktx expire` (`fate: "expired"`); over the archive
+    // that hint accounts for only half the pickup-less drops, the rest being
+    // packs the recording ended on top of. Those are `unobserved`.
     if (!pickup) {
         if (drop.fate === 'expired') return { label: 'expired', cls: 'status-expired' };
         return { label: 'unobserved', cls: 'status-unobserved' };
@@ -90,34 +84,14 @@ export function packDropStatusFor(drop, pickup) {
 
 // packDropRows: one { drop, pickup, status } per backpack, in the
 // section's order, times in seconds.
-//
-// Schema v57: backpacks[].time, weaponPickups[].time / .nextDeathTime /
-// .dropTime are int32 ms. The pickup↔drop join must happen in the
-// same time space — index against raw ms `dropTime` (an exact int)
-// before converting. After the join, convert ms→s so the hub links /
-// formatDuration further down (which expect seconds) are unchanged.
 /**
  * @param {import('./result.js').Result | null | undefined} result
  * @returns {PackDropRow[]}
  */
 export function packDropRows(result) {
-    /** @type {Record<string, any>} */
-    const pickupByKey = {};
-    for (const p of (result?.weaponPickups || [])) {
-        if (p.source === 'backpack' && p.backpackEnt) {
-            pickupByKey[`${p.backpackEnt}@${p.dropTime}`] = p;
-        }
-    }
-    return (result?.backpacks || []).map((/** @type {PackDrop} */ rawDrop) => {
-        const rawPickup = pickupByKey[`${rawDrop.entNum}@${rawDrop.time}`] || null;
-        // Convert ms→s on the per-row copy so downstream renderers see seconds.
-        const drop = { ...rawDrop, time: rawDrop.time * 0.001 };
-        const pickup = rawPickup ? {
-            ...rawPickup,
-            time: rawPickup.time * 0.001,
-            nextDeathTime: (rawPickup.nextDeathTime || 0) * 0.001,
-            dropTime: (rawPickup.dropTime || 0) * 0.001,
-        } : packDropPickup(rawDrop);
+    return (result?.backpacks || []).map((/** @type {PackDrop} */ raw) => {
+        const pickup = packDropPickup(raw);
+        const drop = { ...raw, time: raw.time * 0.001 };
         return { drop, pickup, status: packDropStatusFor(drop, pickup) };
     });
 }

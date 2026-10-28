@@ -232,6 +232,11 @@ var postNodeMeta = map[string]nodeMeta{
 		requires: []string{"backpacks:final", "timeline", "items"},
 		desc:     "Fate of each RECONSTRUCTED backpack drop, read off the wire's backpack-entity track: the pack that appears at the drop's time and place is bound to it, followed to where it lands, and its disappearance classified as `picked` (a live player's bounding box overlapped it, the same test the server ran before BackpackTouch — attributed when the evidence names one player), `expired` (KTX's 120 s SUB_Remove with nobody on it) or `unobserved`. Stamps `backpacks[].fate/picker/pickerTeam/pickupTime/entNum`. A hint-carrying demo is never touched: `//ktx bp` already names the picker in `weaponPickups`.",
 	},
+	"backpackPickupsPost": {
+		name: "backpack-pickups", mutates: true,
+		requires: []string{"backpacks:final", "weapon-pickups", "backpack-linkage"},
+		desc:     "Pickup side of each `ktx` backpack drop, stamped on the drop row: the `//ktx bp` weaponPickups row joined on (entNum, drop time) gives `fate: picked` with `picker`/`pickerTeam`/`pickupTime` and the pickup's `pickerHadWeapon`/`pickerKills`/`pickerNextDeathTime`; an unjoined row keeps `expired` from `//ktx expire` or becomes `unobserved`. Every row naming a picker also gets `pickerRelation` (self/team/enemy). Runs after backpack-linkage, the other writer of backpacks[].fate.",
+	},
 	"damageReconPost": {
 		name: "damage-recon", mutates: true,
 		requires: []string{"damage", "timeline", "shots", "frags:final", "metadata", "demoinfo"},

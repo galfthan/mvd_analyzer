@@ -4314,12 +4314,20 @@
   "backpacks": [
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "YA.RL",
       "origin": [
         726.75,
         -502,
         -256
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 68589,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 56924,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4328,12 +4336,20 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "YA.RL",
       "origin": [
         824.5,
         -343.875,
         -196.375
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 68589,
+      "pickerRelation": "self",
+      "pickerTeam": "42",
+      "pickupTime": 56610,
       "player": "42",
       "source": "ktx",
       "team": "42",
@@ -4342,12 +4358,20 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "middle",
       "origin": [
         477.25,
         -40.375,
         -198.375
       ],
+      "picker": "AHemlocksLie",
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 130700,
+      "pickerRelation": "self",
+      "pickerTeam": "AHemlocksLie",
+      "pickupTime": 87717,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4356,12 +4380,20 @@
     },
     {
       "entNum": 101,
+      "fate": "picked",
       "loc": "middle",
       "origin": [
         499.875,
         18.25,
         -192
       ],
+      "picker": "AHemlocksLie",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 130700,
+      "pickerRelation": "enemy",
+      "pickerTeam": "AHemlocksLie",
+      "pickupTime": 98596,
       "player": "42",
       "source": "ktx",
       "team": "42",
@@ -4370,12 +4402,20 @@
     },
     {
       "entNum": 102,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         368,
         -301.25,
         -387.75
       ],
+      "picker": "AHemlocksLie",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 130700,
+      "pickerRelation": "enemy",
+      "pickerTeam": "AHemlocksLie",
+      "pickupTime": 78249,
       "player": "42",
       "source": "ktx",
       "team": "42",
@@ -4384,12 +4424,20 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "middle",
       "origin": [
         527.125,
         195,
         -192
       ],
+      "picker": "AHemlocksLie",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 130700,
+      "pickerRelation": "enemy",
+      "pickerTeam": "AHemlocksLie",
+      "pickupTime": 98197,
       "player": "42",
       "source": "ktx",
       "team": "42",
@@ -4398,12 +4446,20 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "MH.high",
       "origin": [
         48.75,
         359.625,
         76.25
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 175868,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 145310,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4412,12 +4468,20 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         381.75,
         201.5,
         74.5
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 175868,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 150635,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4426,12 +4490,20 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         368.125,
         -572.75,
         -320
       ],
+      "picker": "AHemlocksLie",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 206208,
+      "pickerRelation": "enemy",
+      "pickerTeam": "AHemlocksLie",
+      "pickupTime": 177115,
       "player": "42",
       "source": "ktx",
       "team": "42",
@@ -4440,12 +4512,20 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "middle",
       "origin": [
         530.125,
         -169.5,
         -232.125
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 220026,
+      "pickerRelation": "self",
+      "pickerTeam": "42",
+      "pickupTime": 203521,
       "player": "42",
       "source": "ktx",
       "team": "42",
@@ -4454,12 +4534,20 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "GA",
       "origin": [
         757.375,
         278.625,
         -23
       ],
+      "picker": "AHemlocksLie",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 245675,
+      "pickerRelation": "enemy",
+      "pickerTeam": "AHemlocksLie",
+      "pickupTime": 221465,
       "player": "42",
       "source": "ktx",
       "team": "42",
@@ -4468,12 +4556,20 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         354,
         -1.75,
         6.25
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 367242,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 254649,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4482,12 +4578,20 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "middle",
       "origin": [
         398.125,
         -237.875,
         -183.875
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 367242,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 274026,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4496,12 +4600,20 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "YA.RL",
       "origin": [
         801.375,
         -208.875,
         -229
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 367242,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 312116,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4510,12 +4622,20 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -101.75,
         -356,
         -320
       ],
+      "picker": "42",
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 405683,
+      "pickerRelation": "self",
+      "pickerTeam": "42",
+      "pickupTime": 374115,
       "player": "42",
       "source": "ktx",
       "team": "42",
@@ -4524,12 +4644,20 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "LG",
       "origin": [
         758.875,
         -162.25,
         -272
       ],
+      "picker": "AHemlocksLie",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 396293,
+      "pickerRelation": "enemy",
+      "pickerTeam": "AHemlocksLie",
+      "pickupTime": 373853,
       "player": "42",
       "source": "ktx",
       "team": "42",
@@ -4538,12 +4666,20 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         125.875,
         61.875,
         106.75
       ],
+      "picker": "AHemlocksLie",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 427618,
+      "pickerRelation": "self",
+      "pickerTeam": "AHemlocksLie",
+      "pickupTime": 400125,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4552,12 +4688,20 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "middle",
       "origin": [
         516.625,
         179,
         -192
       ],
+      "picker": "AHemlocksLie",
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 446579,
+      "pickerRelation": "enemy",
+      "pickerTeam": "AHemlocksLie",
+      "pickupTime": 429673,
       "player": "42",
       "source": "ktx",
       "team": "42",
@@ -4566,12 +4710,20 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         173.75,
         -304,
         -385.5
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 544528,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 428686,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4580,12 +4732,20 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "YA.RL",
       "origin": [
         720.5,
         -366.125,
         -256
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 544528,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 470425,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4594,12 +4754,20 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         438.75,
         252.125,
         77
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 544528,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 499084,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4608,12 +4776,20 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         348.5,
         423.375,
         10.125
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 544528,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 515516,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4622,12 +4798,20 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "MH.high",
       "origin": [
         48,
         -342,
         -44.5
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 544528,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 528007,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4636,12 +4820,20 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         397.375,
         293.125,
         56.375
       ],
+      "picker": "AHemlocksLie",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 584008,
+      "pickerRelation": "self",
+      "pickerTeam": "AHemlocksLie",
+      "pickupTime": 549981,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -4650,12 +4842,20 @@
     },
     {
       "entNum": 102,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         448.5,
         119.75,
         23.5
       ],
+      "picker": "AHemlocksLie",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 584008,
+      "pickerRelation": "enemy",
+      "pickerTeam": "AHemlocksLie",
+      "pickupTime": 549513,
       "player": "42",
       "source": "ktx",
       "team": "42",
@@ -4664,12 +4864,19 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "yard.RL",
       "origin": [
         164.375,
         306.375,
         -273.125
       ],
+      "picker": "42",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "enemy",
+      "pickerTeam": "42",
+      "pickupTime": 584811,
       "player": "AHemlocksLie",
       "source": "ktx",
       "team": "AHemlocksLie",
@@ -14213,7 +14420,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 76,
+  "schemaVersion": 77,
   "shots": {
     "byPlayer": [
       {

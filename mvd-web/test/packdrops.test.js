@@ -8,24 +8,23 @@ import {
 
 const drop = (o) => ({ entNum: 7, time: 61000, player: 'a', team: 'red', weapon: 'rl', ...o });
 
-test('packDropRows joins a //ktx bp pickup on (backpackEnt, dropTime) in ms, then converts to s', () => {
+test('packDropRows reads each drop\'s own pickup side, converting ms to s', () => {
     const result = {
-        backpacks: [drop({}), drop({ entNum: 8, time: 90000, weapon: 'lg', fate: 'expired' }), drop({ entNum: 9, time: 95000 })],
-        weaponPickups: [
-            { source: 'backpack', backpackEnt: 7, dropTime: 61000, time: 63500, nextDeathTime: 80000, player: 'b', team: 'red', kills: 2 },
-            { source: 'backpack', backpackEnt: 7, dropTime: 1, time: 1, player: 'x' },
-            { source: 'world', backpackEnt: 9, dropTime: 95000, time: 96000, player: 'y' },
+        backpacks: [
+            drop({ source: 'ktx', fate: 'picked', picker: 'b', pickerTeam: 'red', pickupTime: 63500, pickerNextDeathTime: 80000, pickerKills: 2, pickerHadWeapon: false }),
+            drop({ source: 'ktx', entNum: 8, time: 90000, weapon: 'lg', fate: 'expired' }),
+            drop({ source: 'ktx', entNum: 9, time: 95000, fate: 'unobserved' }),
         ],
     };
     const rows = packDropRows(result);
     assert.equal(rows.length, 3);
     assert.equal(rows[0].drop.time, 61);
-    assert.deepEqual([rows[0].pickup.time, rows[0].pickup.nextDeathTime, rows[0].pickup.dropTime], [63.5, 80, 61]);
+    assert.deepEqual(rows[0].pickup, { player: 'b', team: 'red', time: 63.5, nextDeathTime: 80, kills: 2, hadBefore: false });
     assert.deepEqual(rows[0].status, { label: 'xfer', cls: 'status-xfer' });
     assert.equal(rows[1].pickup, null);
     assert.equal(rows[1].status.label, 'expired', 'KTX said so');
-    assert.equal(rows[2].pickup, null, 'a world pickup never joins');
-    assert.equal(rows[2].status.label, 'unobserved', 'no pickup row is not "expired"');
+    assert.equal(rows[2].pickup, null);
+    assert.equal(rows[2].status.label, 'unobserved', 'no pickup is not "expired"');
     assert.deepEqual(packDropRows({}), []);
 });
 
@@ -39,12 +38,12 @@ test('packDropStatusFor: xfer / enemy, with the weapon when the picker already h
 
 test('reconstructed drops carry their own fate; kills stay unknown', () => {
     const r = drop({ source: 'reconstructed', fate: 'picked', picker: 'b', pickerTeam: 'blue', pickupTime: 64000 });
-    assert.deepEqual(packDropPickup(r), { player: 'b', team: 'blue', time: 64, nextDeathTime: 0, kills: null });
+    assert.deepEqual(packDropPickup(r), { player: 'b', team: 'blue', time: 64, nextDeathTime: 0, kills: null, hadBefore: undefined });
     assert.equal(packDropStatusFor(r, packDropPickup(r)).label, 'picked');
     assert.equal(packDropPickup({ ...r, fate: 'expired' }), null);
     assert.equal(packDropStatusFor({ ...r, fate: 'expired' }, null).label, 'expired');
     assert.equal(packDropStatusFor({ ...r, fate: undefined }, null).label, 'unobserved');
-    assert.equal(packDropPickup(drop({ fate: 'picked', picker: 'b' })), null, 'only reconstructed rows');
+    assert.equal(packDropPickup(drop({ fate: 'picked' })), null, 'picked with nobody named');
     const [row] = packDropRows({ backpacks: [r] });
     assert.match(rowHtml(row, {}), /<td class="kills-cell">-<\/td>/);
 });

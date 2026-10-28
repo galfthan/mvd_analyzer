@@ -638,9 +638,12 @@ flowchart TB
   end
   subgraph d9["depth 9"]
     player_stats["player-stats"]
+    backpack_pickups["backpack-pickups"]
   end
   aim -->|"aim"| player_stats
+  backpack_linkage -->|"backpack-linkage"| backpack_pickups
   backpack_recon -->|"backpacks:final"| backpack_linkage
+  backpack_recon -->|"backpacks:final"| backpack_pickups
   backpack_recon -->|"backpacks:final"| player_stats
   backpacks -->|"backpacks"| backpack_recon
   clock -->|"clock"| backpacks
@@ -738,12 +741,12 @@ flowchart TB
   timeline -->|"timeline"| region_control
   timeline -->|"timeline"| shots
   timeline -->|"timeline"| wall_clock
+  weapon_pickups -->|"weapon-pickups"| backpack_pickups
   weapon_pickups -->|"weapon-pickups"| player_stats
   classDef post stroke:#2563eb,stroke-width:4px;
-  class frags_final,aim,highlights,match_final,loc_graph,no_match,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage post;
+  class frags_final,aim,highlights,match_final,loc_graph,no_match,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage,backpack_pickups post;
   classDef lazy stroke-dasharray:4 3;
   class los lazy;
-
 ```
 
 <!-- dag-mermaid:end -->

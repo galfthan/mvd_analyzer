@@ -510,12 +510,14 @@ backpacks (RL/LG drops attributed to the dropping player, each row
 stamped `source`: `ktx` from the `//ktx drop` hint, or `reconstructed`
 where the mod predates that hint — a replay of KTX's own `DropBackpack`
 rule from the death instant, the wielded-weapon stat and the death
-position, validated at 99.97% precision/recall against the hints; a
-reconstructed row also carries the pack's `fate` — `picked` with the
-`picker` named, `expired` at KTX's 120 s removal timeout, or
-`unobserved` — read off the wire's backpack-entity track, 100% precision
-and 96.1% recall against the `//ktx bp` hints and 100%/100% on `expired`
-against `//ktx expire`, which a `ktx` row carries as its own `fate`),
+position, validated at 99.97% precision/recall against the hints; every
+row carries the pack's `fate` — `picked` with the `picker` named and
+`pickerRelation` self/team/enemy, `expired` at KTX's 120 s removal
+timeout, or `unobserved` — on a `ktx` row (v77) copied from the `//ktx bp`
+pickup with its `pickerHadWeapon` / `pickerKills`, on a reconstructed row
+read off the wire's backpack-entity track, 100% precision and 96.1% recall
+against the `//ktx bp` hints and 100%/100% on `expired` against
+`//ktx expire`),
 weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
 effectiveness metric; joins to backpacks via `backpackEnt` ==

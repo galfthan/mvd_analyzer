@@ -617,9 +617,8 @@ ezQuake markup), `messageClean` (markup stripped). Cleaner shape than
 
 Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
 `player` (dropper), `team`, `weapon` (`rl`/`lg`), `origin` (XYZ), `loc`
-(resolved name), `entNum` (server edict) and `source` (schema v72); a
-`reconstructed` row additionally carries `fate` and its companions below,
-and a `ktx` row carries `fate: "expired"` when KTX announced the timeout.
+(resolved name), `entNum` (server edict) and `source` (schema v72), and
+its pickup side: `fate` and its companions below (every row since v77).
 (REST returns a `{timeUnit, backpacks}` envelope; the MCP tool passes it
 through.)
 
@@ -630,14 +629,17 @@ pipeline replays KTX's own `DropBackpack` rule instead — validated at
 the pickup side differently**:
 
 - A `ktx` row's `entNum` is the hinted edict and joins to
-  `weapon-pickups[].backpackEnt`, which is where its pickup lives.
-  `picker` / `pickerTeam` / `pickupTime` are absent. `fate` appears only
-  as `expired`, and only when KTX announced the 120 s removal in its third
-  backpack directive `//ktx expire` — the one statement the pickup join
-  cannot make. An ABSENT `fate` on a `ktx` row means "ask
-  `getWeaponPickups`", never "nobody took it": across the archive only
+  `weapon-pickups[].backpackEnt`; since v77 that join is stamped on the
+  row: `fate: "picked"` with `picker` / `pickerTeam` / `pickupTime` and the
+  pickup's `pickerHadWeapon` / `pickerKills` / `pickerNextDeathTime`.
+  `fate: "expired"` is KTX's third backpack directive `//ktx expire` (a pack
+  removed untaken at the 120 s timeout), and `unobserved` means neither
+  hint named the pack — never "nobody took it": across the archive only
   half the drops with no pickup row carry the expiry hint, the rest being
   packs the recording ended on top of.
+- Every row naming a `picker` carries `pickerRelation` (`self` when the
+  dropper took their own pack back, else `team` / `enemy`; every other
+  picker in a duel or FFA is an enemy).
 - A `reconstructed` row has no pickup hint to join to, so the pickup side
   is on the row itself (schema v72): `fate` (`picked` / `expired` /
   `unobserved`), plus `pickupTime` and `picker` / `pickerTeam` when the

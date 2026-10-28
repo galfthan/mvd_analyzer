@@ -5,6 +5,19 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (web-svelte) — schema v77: backpack drops say who took them
+
+Every RL/LG backpack drop now carries its own pickup side, on every demo:
+`fate` (`picked` / `expired` / `unobserved`), who picked it up and when,
+and `pickerRelation` — whether the picker was the dropper themselves (back
+from a respawn), a teammate or an enemy. On demos with KTX's backpack hints the drop also says whether the
+picker already had the weapon (`pickerHadWeapon`), the kills they made with
+it (`pickerKills`) and when they next died. Before, that half lived only in
+`/weapon-pickups` and every consumer had to join the two lists itself;
+`/backpacks` (and the MCP `getBackpacks` tool) now answers "packs the enemy
+took" or "RL packs the enemy took without having an RL" directly. The Pack
+Drops tab reads the same rows.
+
 ## unreleased (player-tab) — watch the demo in a Player tab
 
 No schema change; web UI only. A new **Player** tab plays the loaded demo

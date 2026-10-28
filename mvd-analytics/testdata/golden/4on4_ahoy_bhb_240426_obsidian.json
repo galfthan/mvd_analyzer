@@ -37214,12 +37214,20 @@
   "backpacks": [
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "MH.high",
       "origin": [
         -68.25,
         -766.125,
         -66.75
       ],
+      "picker": "ocoini",
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 162716,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 129650,
       "player": "ThundeR",
       "source": "ktx",
       "team": "BhB",
@@ -37228,12 +37236,20 @@
     },
     {
       "entNum": 117,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         485.25,
         562.125,
         -43.25
       ],
+      "picker": "sailorman",
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 179345,
+      "pickerRelation": "team",
+      "pickerTeam": "ahoy",
+      "pickupTime": 172909,
       "player": "nexus",
       "source": "ktx",
       "team": "ahoy",
@@ -37242,12 +37258,20 @@
     },
     {
       "entNum": 115,
+      "fate": "picked",
       "loc": "YA.SSG",
       "origin": [
         -188.125,
         -82.375,
         37
       ],
+      "picker": "ThundeR",
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 271403,
+      "pickerRelation": "team",
+      "pickerTeam": "BhB",
+      "pickupTime": 269759,
       "player": "rghst",
       "source": "ktx",
       "team": "BhB",
@@ -37256,12 +37280,20 @@
     },
     {
       "entNum": 109,
+      "fate": "picked",
       "loc": "YA.SSG",
       "origin": [
         -245.125,
         -58.75,
         -63.75
       ],
+      "picker": "Doomie",
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 406295,
+      "pickerRelation": "enemy",
+      "pickerTeam": "BhB",
+      "pickupTime": 403802,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -37270,12 +37302,20 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         657.25,
         407.875,
         -21
       ],
+      "picker": "nexus",
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 468721,
+      "pickerRelation": "self",
+      "pickerTeam": "ahoy",
+      "pickupTime": 450312,
       "player": "nexus",
       "source": "ktx",
       "team": "ahoy",
@@ -37284,12 +37324,20 @@
     },
     {
       "entNum": 107,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         536.125,
         518.5,
         -53.5
       ],
+      "picker": "ocoini",
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 532202,
+      "pickerRelation": "team",
+      "pickerTeam": "ahoy",
+      "pickupTime": 530473,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -37298,12 +37346,20 @@
     },
     {
       "entNum": 111,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         814.125,
         435.25,
         -39.125
       ],
+      "picker": "ocoini",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 532202,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 531402,
       "player": "rghst",
       "source": "ktx",
       "team": "BhB",
@@ -37312,12 +37368,20 @@
     },
     {
       "entNum": 109,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         736.875,
         476.25,
         -36
       ],
+      "picker": "sailorman",
+      "pickerHadWeapon": false,
+      "pickerKills": 5,
+      "pickerNextDeathTime": 582708,
+      "pickerRelation": "team",
+      "pickerTeam": "ahoy",
+      "pickupTime": 533213,
       "player": "ocoini",
       "source": "ktx",
       "team": "ahoy",
@@ -37326,12 +37390,20 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "YA.SSG",
       "origin": [
         -88.125,
         -8.25,
         -64
       ],
+      "picker": "KreatoR",
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 607927,
+      "pickerRelation": "enemy",
+      "pickerTeam": "BhB",
+      "pickupTime": 590095,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -37340,12 +37412,20 @@
     },
     {
       "entNum": 109,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         189.125,
         540.25,
         -64
       ],
+      "picker": "nexus",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 653167,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 610558,
       "player": "KreatoR",
       "source": "ktx",
       "team": "BhB",
@@ -37354,12 +37434,20 @@
     },
     {
       "entNum": 109,
+      "fate": "picked",
       "loc": "cross",
       "origin": [
         -533.25,
         -113.125,
         -86.375
       ],
+      "picker": "nexus",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 653167,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 643382,
       "player": "Doomie",
       "source": "ktx",
       "team": "BhB",
@@ -37368,12 +37456,20 @@
     },
     {
       "entNum": 115,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         231.875,
         431.875,
         -63
       ],
+      "picker": "Doomie",
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 676354,
+      "pickerRelation": "enemy",
+      "pickerTeam": "BhB",
+      "pickupTime": 653481,
       "player": "nexus",
       "source": "ktx",
       "team": "ahoy",
@@ -37382,12 +37478,20 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "MH.low",
       "origin": [
         570.25,
         -900.375,
         -164.875
       ],
+      "picker": "rghst",
+      "pickerHadWeapon": false,
+      "pickerKills": 6,
+      "pickerNextDeathTime": 701996,
+      "pickerRelation": "enemy",
+      "pickerTeam": "BhB",
+      "pickupTime": 672930,
       "player": "ocoini",
       "source": "ktx",
       "team": "ahoy",
@@ -37396,12 +37500,20 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         641,
         279.125,
         -64
       ],
+      "picker": "rghst",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 701996,
+      "pickerRelation": "team",
+      "pickerTeam": "BhB",
+      "pickupTime": 680782,
       "player": "Doomie",
       "source": "ktx",
       "team": "BhB",
@@ -37410,12 +37522,20 @@
     },
     {
       "entNum": 112,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         320,
         106,
         -30.5
       ],
+      "picker": "sailorman",
+      "pickerHadWeapon": false,
+      "pickerKills": 16,
+      "pickerNextDeathTime": 795767,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 703207,
       "player": "rghst",
       "source": "ktx",
       "team": "BhB",
@@ -37424,12 +37544,20 @@
     },
     {
       "entNum": 106,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         533,
         -347.75,
         -261.875
       ],
+      "picker": "ocoini",
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 800967,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 791035,
       "player": "KreatoR",
       "source": "ktx",
       "team": "BhB",
@@ -37438,12 +37566,20 @@
     },
     {
       "entNum": 114,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         732.625,
         400,
         7.875
       ],
+      "picker": "rghst",
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 848221,
+      "pickerRelation": "enemy",
+      "pickerTeam": "BhB",
+      "pickupTime": 801650,
       "player": "ocoini",
       "source": "ktx",
       "team": "ahoy",
@@ -37452,12 +37588,20 @@
     },
     {
       "entNum": 105,
+      "fate": "picked",
       "loc": "RL",
       "origin": [
         431.5,
         -412.5,
         -464
       ],
+      "picker": "sailorman",
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 977671,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 965041,
       "player": "rghst",
       "source": "ktx",
       "team": "BhB",
@@ -37466,12 +37610,20 @@
     },
     {
       "entNum": 112,
+      "fate": "picked",
       "loc": "lift",
       "origin": [
         -344,
         813,
         -248
       ],
+      "picker": "KreatoR",
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 1030604,
+      "pickerRelation": "enemy",
+      "pickerTeam": "BhB",
+      "pickupTime": 979295,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -37480,12 +37632,20 @@
     },
     {
       "entNum": 106,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         324.25,
         372,
         -63.25
       ],
+      "picker": "ocoini",
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 1029025,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 1012746,
       "player": "rghst",
       "source": "ktx",
       "team": "BhB",
@@ -37494,12 +37654,20 @@
     },
     {
       "entNum": 109,
+      "fate": "picked",
       "loc": "cross",
       "origin": [
         -660.625,
         -167.75,
         -56.25
       ],
+      "picker": "ThundeR",
+      "pickerHadWeapon": false,
+      "pickerKills": 8,
+      "pickerNextDeathTime": 1151719,
+      "pickerRelation": "enemy",
+      "pickerTeam": "BhB",
+      "pickupTime": 1076540,
       "player": "nexus",
       "source": "ktx",
       "team": "ahoy",
@@ -37508,12 +37676,20 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "YA.SSG",
       "origin": [
         -211.625,
         -176,
         -64
       ],
+      "picker": "rghst",
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 1146968,
+      "pickerRelation": "enemy",
+      "pickerTeam": "BhB",
+      "pickupTime": 1139974,
       "player": "nexus",
       "source": "ktx",
       "team": "ahoy",
@@ -37522,12 +37698,20 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         381.25,
         80,
         -63.875
       ],
+      "picker": "ocoini",
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 1150502,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 1146968,
       "player": "rghst",
       "source": "ktx",
       "team": "BhB",
@@ -37536,12 +37720,19 @@
     },
     {
       "entNum": 117,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         364.375,
         80,
         -63.75
       ],
+      "picker": "nexus",
+      "pickerHadWeapon": false,
+      "pickerKills": 8,
+      "pickerRelation": "team",
+      "pickerTeam": "ahoy",
+      "pickupTime": 1152931,
       "player": "ocoini",
       "source": "ktx",
       "team": "ahoy",
@@ -37550,12 +37741,20 @@
     },
     {
       "entNum": 101,
+      "fate": "picked",
       "loc": "lift",
       "origin": [
         -177.25,
         306.25,
         -480
       ],
+      "picker": "Doomie",
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 1188448,
+      "pickerRelation": "enemy",
+      "pickerTeam": "BhB",
+      "pickupTime": 1163686,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -95961,7 +96160,7 @@
       }
     ]
   },
-  "schemaVersion": 76,
+  "schemaVersion": 77,
   "shots": {
     "byPlayer": [
       {

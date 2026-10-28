@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "76"
+  version: "77"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -872,12 +872,13 @@ paths:
         are never mixed within one demo:
 
           * `ktx` — decoded from KTX's `//ktx drop` hint. `entNum` is the
-            hinted edict and joins to WeaponPickup.backpackEnt, which is
-            where that row's pickup lives; `picker`/`pickerTeam`/
-            `pickupTime` are absent. `fate` appears only as `expired`, and
-            only when KTX announced the 120 s removal in `//ktx expire` —
-            an absent `fate` here means "ask /weapon-pickups", NOT "nobody
-            took it".
+            hinted edict and joins to WeaponPickup.backpackEnt; since schema
+            v77 that join is already on the row: `fate: picked` with
+            `picker`/`pickerTeam`/`pickupTime` and the pickup's
+            `pickerHadWeapon`/`pickerKills`/`pickerNextDeathTime`. `expired`
+            when KTX announced the 120 s removal in `//ktx expire`,
+            `unobserved` when neither hint names the pack (NOT "nobody took
+            it").
           * `reconstructed` — replayed from the server's own drop rule on a
             demo whose mod never hinted. There is no pickup hint to join to,
             so the pickup side is carried on the row itself (schema v72):
@@ -885,7 +886,12 @@ paths:
             `picker`/`pickerTeam` when the wire named one, read off the
             bound backpack entity — whose edict number `entNum` now carries
             as well. A `reconstructed` `entNum` still joins to nothing;
-            it identifies the pack track, not a pickup row.
+            it identifies the pack track, not a pickup row. The three
+            `ktx`-only pickup figures are absent here.
+
+        Every row naming a `picker` carries `pickerRelation` (`self` /
+        `team` / `enemy`, relative to the dropper), so "packs the enemy took" is
+        `pickerRelation == enemy`.
 
         Always 200 — empty when none, which means either no pack dropped or
         the reconstruction stood down; the wire shape does not distinguish
@@ -5787,13 +5793,16 @@ components:
             which is evidence that nobody took the pack.
 
             A `reconstructed` row can carry any of the three, read off the
-            backpack-entity track. A `ktx` row carries only `expired`, and
-            only because KTX said so in `//ktx expire <ent>` — its other
-            outcomes are the /weapon-pickups join, so an ABSENT `fate` on a
-            `ktx` row means "ask that endpoint", never "nobody took it".
-            Read `source` for a `fate`'s provenance, exactly as for the row.
-            Measured against the `//ktx bp` and `//ktx expire` hints on 223
-            demos with every hint withheld: 100.00% precision and 96.13%
+            backpack-entity track. A `ktx` row (schema v77) is `picked` when
+            the `//ktx bp` pickup on /weapon-pickups joined to it (entNum +
+            drop time — the picker fields below are copied from that row),
+            `expired` when KTX said so in `//ktx expire <ent>`, and
+            `unobserved` otherwise: a demo can carry the drop hint and no
+            pickup hints at all, so no `//ktx bp` is not evidence that nobody
+            took it. Read `source` for a `fate`'s provenance, exactly as for
+            the row. On reconstructed rows, measured against the hints
+            withheld:
+            223 demos, 100.00% precision and 96.13%
             recall on picked-vs-not, 99.98% of named pickers correct.
           enum: [picked, expired, unobserved]
           type: string
@@ -5802,20 +5811,49 @@ components:
             Who took the pack (schema v72). Set only with `fate: picked`, and
             only when the evidence named exactly ONE player — two players on
             one pack with nothing to separate them leave this empty rather
-            than guess. Reconstructed rows only.
+            than guess. On a `ktx` row, the `//ktx bp` pickup's player
+            (schema v77; reconstructed rows since v72).
           type: string
+        pickerRelation:
+          description: >
+            The picker's side relative to the dropper (schema v77): `self`
+            when the dropper respawned and took their own pack back, `team`
+            when both carry the same team, else `enemy` — in a duel or FFA
+            every other picker is an enemy. Set whenever `picker` is.
+          enum: [self, team, enemy]
+          type: string
+        pickerHadWeapon:
+          description: >
+            Whether the picker already held the pack's weapon — the joined
+            /weapon-pickups row's `hadBefore` (schema v77). `ktx` rows only:
+            the entity track a reconstructed pickup is read from cannot say.
+          type: boolean
+        pickerKills:
+          description: >
+            Kills credited to this pickup — the joined /weapon-pickups row's
+            `kills` (0 when the picker already held the weapon; schema v77).
+            `ktx` rows only.
+          type: integer
+        pickerNextDeathTime:
+          description: >
+            The picker's next death, int32 ms since match start — the joined
+            /weapon-pickups row's `nextDeathTime`; absent if they never died
+            again (schema v77). `ktx` rows only.
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         pickerTeam:
           description: >
             Team of `picker`. Omitted when the picker has no team — an FFA
             or duel picker is named with no `pickerTeam`, so read its
-            absence as "teamless", not as "no picker". Reconstructed rows
-            only (schema v72).
+            absence as "teamless", not as "no picker". Set with `picker`
+            (reconstructed rows since v72, `ktx` rows since v77).
           type: string
         pickupTime:
           description: >
             When the pack left the wire, int32 ms since match start. Set with
-            `fate: picked` (with or without a `picker`). Reconstructed rows
-            only (schema v72).
+            `fate: picked` (with or without a `picker`; reconstructed rows
+            since v72, `ktx` rows since v77).
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer

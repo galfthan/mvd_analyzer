@@ -492,6 +492,10 @@ func NewDefaultRegistry() *Registry {
 	// and RL/LG possession streams, and the item timeline for the world
 	// spawner positions that disqualify a weapon-bit tie-break.
 	r.RegisterPostProcessor(backpackLinkagePost)
+	// Backpack pickups copies each `ktx` drop's `//ktx bp` pickup row onto
+	// the drop. It reads the finished weaponPickups section and runs after
+	// the linkage, the other pass that writes backpacks[].fate.
+	r.RegisterPostProcessor(backpackPickupsPost)
 
 	// Declare each node's Requires/Provides (dag.go), validate the wiring,
 	// and derive the execution order from it — the DAG turns silent

@@ -605,12 +605,20 @@
   "backpacks": [
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1815.75,
         -1183.125,
         33.125
       ],
+      "picker": "banan falco",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 54766,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 40532,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -619,12 +627,20 @@
     },
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         2539.25,
         -1607.75,
         35.125
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 65636,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 56168,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -633,12 +649,20 @@
     },
     {
       "entNum": 128,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         2565.125,
         -1903.75,
         41
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 65636,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 61520,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -647,12 +671,20 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         2585.75,
         -1590.125,
         58.375
       ],
+      "picker": "banan falco",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 202895,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 66220,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -661,12 +693,20 @@
     },
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1843.125,
         -1195.25,
         33.75
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 286113,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 246334,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -675,12 +715,20 @@
     },
     {
       "entNum": 130,
+      "fate": "picked",
       "loc": "platforms",
       "origin": [
         2201.625,
         -1668.125,
         5.875
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 352411,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 339282,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -689,12 +737,20 @@
     },
     {
       "entNum": 129,
+      "fate": "picked",
       "loc": "low.lift",
       "origin": [
         2544,
         -1039.75,
         1.5
       ],
+      "picker": "banan falco",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 387632,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 354671,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -703,12 +759,20 @@
     },
     {
       "entNum": 135,
+      "fate": "picked",
       "loc": "path.lift",
       "origin": [
         2514,
         -913.25,
         82
       ],
+      "picker": "banan falco",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 387632,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 381119,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -717,12 +781,20 @@
     },
     {
       "entNum": 133,
+      "fate": "picked",
       "loc": "RA.MH",
       "origin": [
         2678.625,
         -2163.125,
         148
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 417281,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 390164,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -731,12 +803,20 @@
     },
     {
       "entNum": 131,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1689.625,
         -895,
         -4
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 417281,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 412788,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -745,12 +825,20 @@
     },
     {
       "entNum": 135,
+      "fate": "picked",
       "loc": "platforms",
       "origin": [
         2071.625,
         -1695,
         37.25
       ],
+      "picker": "banan falco",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 429762,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 418684,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -759,12 +847,20 @@
     },
     {
       "entNum": 134,
+      "fate": "picked",
       "loc": "Quad.button",
       "origin": [
         1648,
         -716.875,
         0
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 472371,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 430878,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -773,12 +869,20 @@
     },
     {
       "entNum": 130,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1880.5,
         -887.25,
         38.5
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 494515,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 479527,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -787,12 +891,20 @@
     },
     {
       "entNum": 131,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1677.5,
         -1137.125,
         0.5
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 494515,
+      "pickerRelation": "self",
+      "pickerTeam": "betowen",
+      "pickupTime": 480339,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -801,12 +913,20 @@
     },
     {
       "entNum": 128,
+      "fate": "picked",
       "loc": "Quad.low",
       "origin": [
         2064,
         -400.125,
         87.25
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 514306,
+      "pickerRelation": "self",
+      "pickerTeam": "betowen",
+      "pickupTime": 497618,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -815,12 +935,20 @@
     },
     {
       "entNum": 134,
+      "fate": "picked",
       "loc": "Quad.low",
       "origin": [
         1984.25,
         -422.375,
         91.5
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 514306,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 497773,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -829,12 +957,20 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "tele",
       "origin": [
         2354.625,
         -79.25,
         -96.625
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 546604,
+      "pickerRelation": "self",
+      "pickerTeam": "betowen",
+      "pickupTime": 531662,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -843,12 +979,20 @@
     },
     {
       "entNum": 131,
+      "fate": "picked",
       "loc": "low.button",
       "origin": [
         2159.25,
         -2078.5,
         65.75
       ],
+      "picker": "banan falco",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 543383,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 521202,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -857,12 +1001,20 @@
     },
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         2468,
         -1362.125,
         74.75
       ],
+      "picker": "banan falco",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 543383,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 530968,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -871,12 +1023,20 @@
     },
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "big.stairs",
       "origin": [
         1957.375,
         -1365,
         96
       ],
+      "picker": "betowen",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 546604,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 544357,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -885,12 +1045,19 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "big.button",
       "origin": [
         1670.625,
         -1548.375,
         0
       ],
+      "picker": "banan falco",
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 547766,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -899,12 +1066,19 @@
     },
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "Quad.button",
       "origin": [
         1675.25,
         -838.625,
         -4
       ],
+      "picker": "banan falco",
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 596136,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -11351,7 +11525,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 76,
+  "schemaVersion": 77,
   "shots": {
     "byPlayer": [
       {
