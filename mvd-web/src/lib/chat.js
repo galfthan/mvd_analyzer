@@ -11,7 +11,7 @@ import { escapeHtml } from './html.js';
 export const CHAT_PX_PER_SEC = 17.5; // ~same density as the original 40s/700px window
 // The floor of a row's height when stacking rows (see stackRow).
 export const CHAT_ITEM_HEIGHT = 18;
-export const TICK_INTERVAL = 5;
+const TICK_INTERVAL = 5;
 
 // The match length in seconds; 600 when the result carries none.
 export function chatDuration(result) {

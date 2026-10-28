@@ -15,7 +15,7 @@ const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,
 // Page size for the search tab. The hub itself pages at 1000 (PostgREST
 // max-rows); 100 keeps a single response light (~90 KB) while "Load more"
 // walks offset pages until every match is shown.
-export const SEARCH_PAGE_SIZE = 100;
+const SEARCH_PAGE_SIZE = 100;
 
 export function parseGameId(input) {
     input = input.trim();

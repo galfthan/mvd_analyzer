@@ -6,7 +6,7 @@
 // perceptually uniform and safe for red/green colour-vision deficiency (no
 // red↔green crossover; intensity reads monotonically in greyscale too). Kept
 // in sync with the CSS gradient legend (.heatmap-legend-bar) in styles.css.
-export const HEAT_STOPS = [
+const HEAT_STOPS = [
     [0.00, [ 68,   1,  84]], // deep purple
     [0.25, [ 59,  82, 139]], // blue
     [0.50, [ 33, 145, 140]], // teal

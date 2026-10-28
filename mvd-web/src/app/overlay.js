@@ -23,7 +23,7 @@ export function hideLoadingOverlay() {
     if (overlay) overlay.style.display = 'none';
 }
 
-export function setLoadingOverlayMessage(text) {
+function setLoadingOverlayMessage(text) {
     const overlay = document.getElementById('wasm-loading');
     if (!overlay) return;
     // The subtitle is the second flex child (the small status line).

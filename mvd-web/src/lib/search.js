@@ -19,7 +19,7 @@ export const SEARCH_MODE_LABELS = {
 // match.gameMode: the row is a listing from hub.quakeworld.nu carrying its
 // own `mode` string, and no demo has been analysed at that point. It lives
 // here beside the facet table so the pair stays in step.
-export const SEARCH_INDIVIDUAL_MODES = new Set(['1on1', 'ffa']);
+const SEARCH_INDIVIDUAL_MODES = new Set(['1on1', 'ffa']);
 
 export const EMPTY_FILTERS = Object.freeze({ player: '', team: '', map: '', mode: '', tag: '', from: '', to: '' });
 

@@ -12,7 +12,7 @@ import { heatColorRGB } from './heat-color.js';
 // wider because horizontal aim is the story.
 export const AIM_X_HALF = 96; // ±3 hull widths
 export const AIM_Y_HALF = 64;
-export const AIM_HIST_BIN = 4;     // marginal-histogram bin width, qu
+const AIM_HIST_BIN = 4;     // marginal-histogram bin width, qu
 export const AIM_HULL_HALF_W = 16; // player collision box half-extents
 export const AIM_HULL_HALF_H = 28;
 
@@ -27,7 +27,7 @@ export const aimOffY = (c, i) => Math.sin(c.dpitch[i] * AIM_DEG) * c.dist[i];
 // aimSampleInFilter applies the victim filter to one crosshair sample. Only
 // hits can be team-attributed (misses attribute to enemies by construction),
 // and hitscan samples can never be self-hits — so 'self' matches nothing.
-export function aimSampleInFilter(c, i, filter) {
+function aimSampleInFilter(c, i, filter) {
     switch (filter) {
         case 'enemy': return !(c.team && c.team[i]);
         case 'team': return !!(c.team && c.team[i]);
@@ -60,17 +60,17 @@ export function aimNodataText(weapon, filter) {
 
 // Density-image parameters. The fine grid is what gets smoothed and painted;
 // the hover grid is coarser so the read-out counts are meaningful.
-export const AIM_IMG_CELL = 2;      // fine-grid bin, qu at the target
-export const AIM_IMG_SIGMA = 1.4;   // gaussian σ, in fine cells
+const AIM_IMG_CELL = 2;      // fine-grid bin, qu at the target
+const AIM_IMG_SIGMA = 1.4;   // gaussian σ, in fine cells
 export const AIM_IMG_SCALE = 5;     // display px per fine cell
-export const AIM_HOVER_BIN = 8;     // hover read-out bin, qu at the target
+const AIM_HOVER_BIN = 8;     // hover read-out bin, qu at the target
 
-export function aimClampIndex(v, n) { return Math.max(0, Math.min(n - 1, v)); }
+function aimClampIndex(v, n) { return Math.max(0, Math.min(n - 1, v)); }
 
 // Zero density keeps the surface colour and the lowest densities fade into
 // the ramp — matching the table heatmaps, where empty cells keep the page
 // background and only real values get the shared viridis heatColorRGB.
-export const AIM_IMG_FADE = 0.04; // density fraction over which the ramp fades in
+const AIM_IMG_FADE = 0.04; // density fraction over which the ramp fades in
 
 export function aimDensityRGB(t, bg) {
     const rgb = heatColorRGB(t);
@@ -224,8 +224,8 @@ export function aimMarginalHist(name, dirNote, unit, half, w, val, c, idx, bandH
 // next 10%, labelled in a small gutter), hover for the counts. A bin with
 // fires but no hits keeps a 2px stub so it reads as 0%, not as no data.
 // The last bin collects longer shafts.
-export const AIM_RAMP_BIN = 100; // ms
-export const AIM_RAMP_BINS = 12; // 0-1100 ms, then 1100+
+const AIM_RAMP_BIN = 100; // ms
+const AIM_RAMP_BINS = 12; // 0-1100 ms, then 1100+
 
 // { kind: 'ramp', yMax, cols: [{ title, height, opacity, stub }], axis }.
 export function aimRampHist(ramp, filter) {

@@ -15,7 +15,7 @@
 // weapon tables hand it to the cells on the projected WeaponAim (`filter`).
 
 import { escapeHtml } from './html.js';
-import { getAccuracyClass, RECON_ACCURACY_NOTE } from './accuracy.js';
+import { RECON_ACCURACY_NOTE } from './accuracy.js';
 import { getWeaponName } from './summary.js';
 import { playerStatsRows, teamOrder } from './player-stats.js';
 
@@ -38,10 +38,7 @@ export const RECON_ANYDAMAGE_NOTE = 'Counted as ANY fire that landed damage, spl
 // Column descriptors: {h: header, t: tooltip, cell: (WeaponAim) -> html}. The
 // Player column is prepended automatically (with the team-coloured stripe).
 // Every count column has a share-of-fires % twin: counts depend on how much a
-// player fired, so the percentages are what compare across players. hit% keeps
-// the accuracy colour classes; the miss-type shares stay plain, since whether
-// a high share is good depends on the weapon.
-const pctCell = p => `<span class="${getAccuracyClass(p)}">${p.toFixed(1)}%</span>`;
+// player fired, so the percentages are what compare across players.
 const pctPlain = p => `${p.toFixed(1)}%`;
 const shotShare = (n, w) => pctPlain(w.shots ? (n || 0) / w.shots * 100 : 0);
 
@@ -90,7 +87,7 @@ export const AIM_COL = {
     hitPct: {
         h: 'Hit %',
         t: 'Share of fires that connected, over the same hit count as the Hits column beside it — measured, reconstructed (marked) or —',
-        cell: w => aimHitsCell(w, n => pctCell(w.shots ? n / w.shots * 100 : 0)),
+        cell: w => aimHitsCell(w, n => pctPlain(w.shots ? n / w.shots * 100 : 0)),
         sort: w => { const v = aimHitsValue(w); return (v && w.shots) ? v.n / w.shots : -1; },
     },
     // `measured: true` marks a column that exists only where the wire damage
@@ -101,7 +98,7 @@ export const AIM_COL = {
     // reads as a measurement that contradicts it. aimCol swaps them for "—".
     fired: { h: 'Pellets Fired', t: 'Pellets fired (6 SG / 14 SSG per shot)', measured: true, cell: w => w.pellets || 0 },
     pHit: { h: 'Pellets Hit', t: 'Pellets that hit (matches the server)', measured: true, cell: w => w.pelletHits || 0 },
-    pAcc: { h: 'Pellet %', t: 'Per-pellet accuracy', measured: true, cell: w => pctCell(w.pellets ? (w.pelletHits || 0) / w.pellets * 100 : 0) },
+    pAcc: { h: 'Pellet %', t: 'Per-pellet accuracy', measured: true, cell: w => pctPlain(w.pellets ? (w.pelletHits || 0) / w.pellets * 100 : 0) },
     full: { h: 'Full', t: 'Fires where every pellet hit', measured: true, cell: w => w.full || 0 },
     partial: { h: 'Partial', t: 'Fires where some but not all pellets hit', measured: true, cell: w => w.partial || 0 },
     miss: { h: 'Miss', t: 'Fires where no pellet hit', measured: true, cell: w => w.miss || 0 },
@@ -189,7 +186,7 @@ export const AIM_TABLE_GROUPS = {
 // swings since schema v71 and the recon tier recovers its hits, and its
 // absence from this list was silently dropping every one of them — 107 swings
 // on one player in the committed corpus, with no table anywhere to show them.
-export const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl', 'ng', 'sng', 'axe'];
+const AIM_WEAPON_ORDER = ['lg', 'sg', 'ssg', 'rl', 'gl', 'ng', 'sng', 'axe'];
 
 // aimWeaponView projects a WeaponAim onto the active victim filter so the
 // AIM_COL cell functions stay bucket-agnostic. The analyzer emits the enemy
@@ -263,7 +260,7 @@ export function aimHitsValue(w) {
 // Why a cell has no number, in the reader's terms. Both branches are
 // reachable on a reconstructed demo: the tier covers lg/sg/ssg/axe/rl/gl and
 // stops there, and it carries no victim split for the toggle above to slice.
-export function aimHitsNote(w, filter) {
+function aimHitsNote(w, filter) {
     if (!w.reconTier) {
         return 'This demo carries no damage log to measure hits against, and none could be reconstructed from it.';
     }

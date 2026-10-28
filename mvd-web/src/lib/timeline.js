@@ -120,7 +120,7 @@ export function matchDurationSec(result) {
 // src/state/timeline.js), or the whole match when there is none. The unified
 // bar's range select and a graph's Ctrl+wheel zoom / drag pan both set it.
 
-export const MIN_VIEW_SPAN = 2; // seconds — don't zoom past this
+const MIN_VIEW_SPAN = 2; // seconds — don't zoom past this
 
 export function viewRange(segment, duration) {
     return segment ? [segment.start, segment.end] : [0, duration || 0];
@@ -155,7 +155,7 @@ export function indicatorPct(t, start, end) {
 
 // ─── Axis ticks ─────────────────────────────────────────────────────────────
 
-export const NICE_TICK_INTERVALS = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1200, 1800, 3600];
+const NICE_TICK_INTERVALS = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1200, 1800, 3600];
 
 export function pickTickInterval(duration, maxTicks) {
     const target = duration / maxTicks;
@@ -350,7 +350,7 @@ export function prepScoreData(fragEvents, startTime, endTime, teams, colors) {
 //
 // Rows of [{ start, end, state }] spans for the span renderer.
 
-export const POWERUP_TYPES = [
+const POWERUP_TYPES = [
     { key: 'quad', name: 'Quad' },
     { key: 'pent', name: 'Pent' },
     { key: 'ring', name: 'Ring' },
@@ -461,7 +461,7 @@ export function playersByTeam(view, teams, teamOf, individual) {
 }
 
 // One player's health, then armor in its type's colour.
-export function buildPlayerHASegments(h, a, at) {
+function buildPlayerHASegments(h, a, at) {
     const segs = [];
     if (h > 0) segs.push({ h, color: GRAPH_COLORS.HEALTH });
     if (a > 0) {

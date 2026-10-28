@@ -8,7 +8,7 @@ import {
     weaponKillBars, getWeaponName,
 } from '../src/lib/summary.js';
 import {
-    ktxHitsConvention, formatAccuracyCell, accOffKtxScale, anyAccOffKtxScale, ACC_OFF_SCALE_FOOTNOTE, getAccuracyClass,
+    ktxHitsConvention, formatAccuracyCell, accOffKtxScale, anyAccOffKtxScale, ACC_OFF_SCALE_FOOTNOTE,
 } from '../src/lib/accuracy.js';
 import { formatUtcStamp, formatAccuracyMs, matchWallClock, matchDateHtml } from '../src/lib/wall-clock.js';
 import { teamFragTotals, teamRowsInColourOrder } from '../src/lib/player-stats.js';
@@ -102,15 +102,13 @@ test('accuracy cell: withheld hits, off-scale mark, recon grade', () => {
     assert.equal(formatAccuracyCell(null, 'lg'), '-');
     assert.match(formatAccuracyCell({ byWeapon: { sng: { attacks: 40 } } }, 'sng'), /40 atk/);
     const ktx = formatAccuracyCell({ src: 'ktx', byWeapon: { rl: { attacks: 10, hits: 5, hitsConvention: 'directImpact' } } }, 'rl');
-    assert.match(ktx, /^<span class="accuracy-high" title="Hits = projectiles[^"]*">50\.0%<\/span>$/);
+    assert.match(ktx, /^<span title="Hits = projectiles[^"]*">50\.0%<\/span>$/);
     const recon = formatAccuracyCell({ src: 'reconstructed', byWeapon: { sg: { attacks: 4, hits: 1, hitsConvention: 'anyDamage' } } }, 'sg');
-    assert.match(recon, /^<span class="stat-recon"><span class="accuracy-medium" title="[^"]*Not on the server&#39;s own scale[^"]*Hits RECONSTRUCTED[^"]*">25\.0%<sup class="acc-off-scale">≠<\/sup><\/span><\/span>$/);
+    assert.match(recon, /^<span class="stat-recon"><span title="[^"]*Not on the server&#39;s own scale[^"]*Hits RECONSTRUCTED[^"]*">25\.0%<sup class="acc-off-scale">≠<\/sup><\/span><\/span>$/);
     assert.equal(accOffKtxScale({}, 'sg'), false);
     assert.equal(anyAccOffKtxScale([{ accuracy: { byWeapon: { ng: { attacks: 1, hits: 1, hitsConvention: 'pellets' } } } }]), false, 'ng has no column');
     assert.equal(accConventionNote([{ accuracy: { byWeapon: { sg: { attacks: 1, hits: 1, hitsConvention: 'anyDamage' } } } }], []), ACC_OFF_SCALE_FOOTNOTE);
     assert.equal(accConventionNote([], []), '');
-    assert.equal(getAccuracyClass(40), 'accuracy-high');
-    assert.equal(getAccuracyClass(25), 'accuracy-medium');
 });
 
 test('items rows and xfer', () => {

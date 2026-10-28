@@ -322,7 +322,7 @@ export function basicStatsTeamRows(teamRows, canonical) {
 // `accuracy` family, kills from `score.byWeapon` (the corrected frag log),
 // damage from `damage.byWeapon`, and eK from `score.byWeaponVsEnemyWeapon`.
 // A weapon the player never touched shows '-' in all four rather than zeros.
-export function formatWeaponCells(player, wn) {
+function formatWeaponCells(player, wn) {
     const acc = formatAccuracyCell(player.accuracy, wn);
     const kills = player.score?.byWeapon?.[wn] || 0;
     const dmg = player.damage?.byWeapon?.[wn] || 0;
@@ -541,7 +541,7 @@ function noMatchGameDirNote(nm) {
 // `detail` states is a structured field, and these are those fields —
 // `detail` is display-only by contract (unstable wording, never parsed), so
 // it is rendered verbatim and nothing is read back out of it.
-export function noMatchEvidence(nm) {
+function noMatchEvidence(nm) {
     const items = [];
     // Absent when the opening fullserverinfo dump carried no `status` key at
     // all, which is a different reading from any value it could have had.

@@ -9,8 +9,8 @@ import { isTab } from '../state/ui.js';
 // is labelled "Locs & Regions" and the URL prefers the matching
 // "locs-regions" slug. Old "loc-graph" links still resolve; new URLs are
 // written as "locs-regions".
-export const TAB_URL_TO_INTERNAL = { 'locs-regions': 'loc-graph' };
-export const TAB_INTERNAL_TO_URL = { 'loc-graph': 'locs-regions' };
+const TAB_URL_TO_INTERNAL = { 'locs-regions': 'loc-graph' };
+const TAB_INTERNAL_TO_URL = { 'loc-graph': 'locs-regions' };
 
 export function resolveTabName(name) {
     return TAB_URL_TO_INTERNAL[name] || name;

@@ -84,7 +84,7 @@ export function nodeWeightFor(node, filter, metric) {
 
 // Edges carry the same metric conditioning as nodes, so each metric is a
 // self-contained graph (its own nodes + edges).
-export function metricEdgeWeightsOf(edge, metric) {
+function metricEdgeWeightsOf(edge, metric) {
     if (metric === 'armed') return edge.armed || EMPTY_WEIGHTS;
     if (metric === 'unarmed') return edge.unarmed || EMPTY_WEIGHTS;
     if (metric === 'quad') return edge.quad || EMPTY_WEIGHTS;

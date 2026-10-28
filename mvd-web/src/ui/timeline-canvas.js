@@ -24,7 +24,7 @@ function canvasOf(c) {
 // setupGraphCanvas sizes a canvas for device-pixel drawing (its container's
 // width × cssHeight) and returns its context with both sizes; null without
 // a canvas.
-export function setupGraphCanvas(c, cssHeight) {
+function setupGraphCanvas(c, cssHeight) {
     const canvas = canvasOf(c);
     if (!canvas || !canvas.getContext) return null;
     const Wcss = canvas.parentElement.clientWidth;

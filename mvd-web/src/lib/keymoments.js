@@ -72,7 +72,7 @@ export function demoMarkers(result) {
     return (result?.timelineAnalysis?.demoMarkers || []).map(m => ({ ...m, time: m.time * 0.001 }));
 }
 
-export function powerupLabel(type) {
+function powerupLabel(type) {
     switch (type) {
         case 'quad': return 'Quad';
         case 'pent': return 'Pent';
@@ -177,7 +177,7 @@ export function markerRowHtml(marker, ctx) {
 // BOUNDED enemy damage (metric=damageGiven) so the table complements the
 // per-kill burst tables beside it: same family, same scoreboard semantics;
 // ties break on the window's frags (the view's complementary tie-break).
-export const TOP_RUN_WINDOW_MS = 10000;
+const TOP_RUN_WINDOW_MS = 10000;
 
 // [key, view fn, opts] per table; key is the table's id prefix.
 //
@@ -275,7 +275,7 @@ function topKillRowHtml(k, ctx) {
 
 // The Hub replay link from the actor's userid (the JSON key is `userId` on
 // HighlightPlayer).
-export function highlightWatchCell(ctx, timeSec, trackId) {
+function highlightWatchCell(ctx, timeSec, trackId) {
     if (!ctx.gameId) return '-';
     const fromTime = Math.max(0, Math.floor(timeSec + ctx.demoOffset) - 5);
     const toTime = Math.floor(timeSec + ctx.demoOffset) + 3;
@@ -311,7 +311,7 @@ export function highlightHad(p) {
 }
 
 // The shared "what they had" cell: stack + had.
-export function highlightStateCell(p) {
+function highlightStateCell(p) {
     const had = highlightHad(p);
     return `${highlightStack(p)}${had ? ' ' + had : ''}`;
 }

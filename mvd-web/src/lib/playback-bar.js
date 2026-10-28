@@ -6,7 +6,7 @@
 import { formatDuration } from './result.js';
 
 // A drag shorter than this is a click: it clears the segment and seeks.
-export const CLICK_MAX_S = 2;
+const CLICK_MAX_S = 2;
 
 // The speed buttons, in bar order, and their labels when not running.
 export const SPEED_BUTTONS = [

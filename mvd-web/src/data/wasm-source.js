@@ -22,7 +22,7 @@
 import { WorkerClient } from './worker-client.js';
 import * as hub from './hub.js';
 
-export class SupersededError extends Error {
+class SupersededError extends Error {
     constructor() {
         super('load superseded by a newer one');
         this.superseded = true;

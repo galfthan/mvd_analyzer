@@ -14,10 +14,10 @@
 // Times stay demo-relative in storage because both consumers (the engine
 // and hub links) speak it; the page converts to match time for display.
 
-export const HUB_GAMES_URL = 'https://hub.quakeworld.nu/games/';
+const HUB_GAMES_URL = 'https://hub.quakeworld.nu/games/';
 // hub.quakeworld.nu src/utils/game-url.ts MAX_CLIPS @ 5c96205c19c7
 export const MAX_HUB_CLIPS = 20;
-export const PLAYLIST_VERSION = 1;
+const PLAYLIST_VERSION = 1;
 
 // parseHubReplayUrl reads a link built by hubReplayUrl() (src/lib/hub-url.js) — the only
 // shape the page emits: /games/?gameId=N&from=F[&to=T]&track=U.

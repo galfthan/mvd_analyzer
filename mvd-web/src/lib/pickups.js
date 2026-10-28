@@ -30,14 +30,14 @@ import { holdCell, playerStatsRows, playerStatsTeamRows, sortByFragsDesc, teamOr
 // never to the spawn point the item came from — one column per kind no matter
 // how many pads the map has. MH has no entry on purpose: mega health is
 // consumed on pickup, so the section carries no hold stat for it.
-export const PICKUPS_WEAPON_KINDS = [
+const PICKUPS_WEAPON_KINDS = [
     { kind: 'rl',  label: 'RL',  ktxName: 'rl',  hasPack: true,  hold: 'weapons' },
     { kind: 'lg',  label: 'LG',  ktxName: 'lg',  hasPack: true,  hold: 'weapons' },
     { kind: 'gl',  label: 'GL',  ktxName: 'gl',  hasPack: false, hold: 'weapons' },
     { kind: 'sng', label: 'SNG', ktxName: 'sng', hasPack: false, hold: 'weapons' },
 ];
 
-export const PICKUPS_ITEM_KINDS = [
+const PICKUPS_ITEM_KINDS = [
     { kind: 'ra',   label: 'RA',   ktxName: 'ra',         hold: 'armor'    },
     { kind: 'ya',   label: 'YA',   ktxName: 'ya',         hold: 'armor'    },
     { kind: 'ga',   label: 'GA',   ktxName: 'ga',         hold: 'armor'    },

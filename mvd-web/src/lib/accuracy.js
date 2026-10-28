@@ -1,7 +1,7 @@
 // accuracy.js — the per-weapon accuracy cell of Summary's Weapon Stats and
 // the hit-count conventions behind its `≠` mark (README "The ≠ on an Acc
-// cell"). getAccuracyClass and RECON_ACCURACY_NOTE are shared with the Aim
-// Stats tab (src/lib/aim.js).
+// cell"). RECON_ACCURACY_NOTE is shared with the Aim Stats tab
+// (src/lib/aim.js).
 
 import { escapeHtml } from './html.js';
 
@@ -12,7 +12,7 @@ export const HOLD_WEAPON_NAMES = ['sg', 'ssg', 'sng', 'gl', 'rl', 'lg'];
 // weapon's percentage is on a different scale under each, which is why the
 // cell says so instead of leaving the reader to compare a KTX shotgun figure
 // with a fire-counted one six times smaller.
-export const HITS_CONVENTION_TITLES = {
+const HITS_CONVENTION_TITLES = {
     anyDamage: 'Hits = fires that landed damage by any path (splash included) — KTX\'s own convention for LG, NG/SNG and the axe',
     directImpact: 'Hits = projectiles that touched a player (KTX\'s own RL/GL convention) — reads far lower than an any-path count',
     pellets: 'Hits and attacks are PELLET counts (6 per SG fire, 14 per SSG), KTX\'s own unit for the shotguns',
@@ -70,7 +70,7 @@ export function ktxHitsConvention(weapon) {
 // block). This UI's parse always builds the projectile streams that classifier
 // reads, so a gl cell here is always on KTX's scale; a payload from a parse
 // without them says so in `hitsConvention` and is marked like any other cell.
-export const ACC_OFF_SCALE_MARK = '≠';
+const ACC_OFF_SCALE_MARK = '≠';
 // What one hit COUNTS under each convention, in the reader's terms. Both
 // halves of the mark's sentence are looked up here — ours from the row's own
 // `hitsConvention`, the server's from ktxHitsConvention(weapon) — so the note
@@ -81,7 +81,7 @@ const HITS_CONVENTION_PHRASES = {
     directImpact: 'only a projectile that TOUCHED a player',
     pellets: 'a PELLET (6 per SG fire, 14 per SSG), on both sides of the ratio',
 };
-export function accOffScaleNote(entry, wn) {
+function accOffScaleNote(entry, wn) {
     const ours = HITS_CONVENTION_PHRASES[entry.hitsConvention];
     const theirs = HITS_CONVENTION_PHRASES[ktxHitsConvention(wn)];
     const what = (ours && theirs) ? `a hit here is ${ours}, where KTX counts ${theirs}. ` : '';
@@ -102,15 +102,6 @@ export const ACC_OFF_SCALE_FOOTNOTE = `${ACC_OFF_SCALE_MARK} — counted on a di
 // a reconstructed hit count is, and the one caveat that comes with it.
 export const RECON_ACCURACY_NOTE = 'Hits RECONSTRUCTED — this demo carries no wire damage log, ' +
     'so the hits were recovered from the rebuilt one. As complete as the damage evidence (see the note above the table).';
-
-// The colour band of an accuracy percentage. Inert on the Summary cells
-// today (README: the only rule for these classes is scoped to an id no
-// longer in the DOM); anyone re-pointing it must scope it by convention.
-export function getAccuracyClass(acc) {
-    if (acc >= 40) return 'accuracy-high';
-    if (acc >= 25) return 'accuracy-medium';
-    return 'accuracy-low';
-}
 
 // Accuracy cell from a playerStats accuracy family. `hits` is ABSENT (not
 // zero) when neither the wire nor the reconstruction could link fires to
@@ -145,7 +136,7 @@ export function formatAccuracyCell(accuracy, wn) {
     if (recon) notes.push(RECON_ACCURACY_NOTE);
     const attr = notes.length ? ` title="${escapeHtml(notes.join(' · '))}"` : '';
     const mark = offScale ? `<sup class="acc-off-scale">${ACC_OFF_SCALE_MARK}</sup>` : '';
-    const cell = `<span class="${getAccuracyClass(parseFloat(pct))}"${attr}>${pct}%${mark}</span>`;
+    const cell = `<span${attr}>${pct}%${mark}</span>`;
     return recon ? `<span class="stat-recon">${cell}</span>` : cell;
 }
 

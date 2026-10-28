@@ -13,7 +13,7 @@ import { store } from './store.js';
 
 export const TEAM_PALETTE = ['#ff5050', '#50a0ff', '#4ecdc4', '#ffc107'];
 
-export const PLAYER_PALETTE = [
+const PLAYER_PALETTE = [
     '#ff5050', '#50a0ff', '#4ecdc4', '#ffc107',
     '#c084fc', '#7ee787', '#ff8fab', '#f97316',
     '#38bdf8', '#a3e635', '#e879f9', '#94a3b8',
