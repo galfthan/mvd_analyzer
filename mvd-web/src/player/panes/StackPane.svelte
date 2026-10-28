@@ -19,8 +19,10 @@
     const MAX = 300;
 
     let uid = 0;
-    // The 50 ms bucket view arrives after the rest of the result.
-    let view = $state(null);
+    // The 50 ms bucket view arrives after the rest of the result. Raw: a
+    // deep proxy over the whole columnar view makes every per-frame read go
+    // through a Proxy trap (and holds a second copy of the structure).
+    let view = $state.raw(null);
     $effect(() => {
         const handle = $demo;
         view = handle?.result?.timelineAnalysis?.bucketView || null;
