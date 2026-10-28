@@ -55,6 +55,7 @@
     let hudText = $state('');
     let hudOn = $state(false);
     let benchOn = $state(false);
+    let benchSaved = null;
 
     let colors = [];
     let icons = new Map();
@@ -128,6 +129,7 @@
     function onTab(tab) {
         if (tab !== TAB) {
             stopHudTimer();
+            abortBench(true);
             return;
         }
         if (hudOn) startHudTimer();
@@ -162,7 +164,10 @@
 
     function onData(d) {
         const next = d?.result ?? null;
-        if (next !== result) icons = new Map();
+        if (next !== result) {
+            icons = new Map();
+            abortBench(false);
+        }
         result = next;
         colors = teams.get().colors;
         noData = !!d && s.locations.length === 0;
@@ -367,6 +372,7 @@
         const duration = Number.isFinite(clock.duration) ? clock.duration : 0;
         const t0 = Math.min(30, (duration || 600) * 0.25);
         benchOn = true;
+        benchSaved = saved;
         view.perfCapture = true;
         clearTimeout(hudHideTimer);
         hudShown = true;
@@ -418,14 +424,9 @@
             prior = history.filter((r) => r.demo === record.demo && r.px === record.px);
             saveBenchHistory(history.concat([record]));
         }
-        const cam = view.camera;
         benchOn = false;
         view.perfCapture = hudOn;
-        Object.assign(cam, { cx: saved.cx, cy: saved.cy, zMid: saved.zMid, zoomK: saved.zoomK, panX: saved.panX, panY: saved.panY });
-        if (saved.focus) view.setFocusGroup(saved.focus);
-        if (saved.follow) view.setFollowPlayer(saved.follow);
-        view.setCamera(saved.yaw, saved.pitch);
-        clock.seek(saved.time);
+        restoreBenchView(saved);
         hudShown = true;
         if (noFrames) {
             hudText = 'bench: no GL frames rendered';
@@ -438,6 +439,28 @@
                 if (!hudOn && !benchOn) hudShown = false;
             }, 30000);
         }
+    }
+
+    // The camera, focus, follow and time the run started from.
+    function restoreBenchView(saved) {
+        const cam = view.camera;
+        Object.assign(cam, { cx: saved.cx, cy: saved.cy, zMid: saved.zMid, zoomK: saved.zoomK, panX: saved.panX, panY: saved.panY });
+        if (saved.focus) view.setFocusGroup(saved.focus);
+        if (saved.follow) view.setFollowPlayer(saved.follow);
+        view.setCamera(saved.yaw, saved.pitch);
+        clock.seek(saved.time);
+    }
+
+    // abortBench ends a run that lost its stage. Leaving the tab puts the
+    // view back as the run found it (`restore`); another demo does not —
+    // its load already reset the view, and the old demo's camera and time
+    // must not land on it.
+    function abortBench(restore) {
+        if (!benchOn) return;
+        benchOn = false;
+        view.perfCapture = hudOn;
+        if (restore) restoreBenchView(benchSaved);
+        hudText = 'bench: aborted';
     }
 
     // ─── Fullscreen ─────────────────────────────────────────────────────────
