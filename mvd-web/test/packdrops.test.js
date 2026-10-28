@@ -34,6 +34,9 @@ test('packDropStatusFor: xfer / enemy, with the weapon when the picker already h
     assert.equal(packDropStatusFor(d, { team: 'blue' }).cls, 'status-enemy');
     assert.equal(packDropStatusFor(d, { team: 'blue', hadBefore: true }).label, 'enemy LG');
     assert.equal(packDropStatusFor({ weapon: 'rl' }, { team: '' }).label, 'enemy', 'no team is not same team');
+    const own = { team: 'red', weapon: 'rl', fate: 'picked', pickerRelation: 'self' };
+    assert.deepEqual(packDropStatusFor(own, { team: 'red', hadBefore: false }), { label: 'self', cls: 'status-self' }, 'took their own pack back');
+    assert.equal(packDropStatusFor({ ...own, source: 'reconstructed' }, null).label, 'self', 'both provenances');
 });
 
 test('reconstructed drops carry their own fate; kills stay unknown', () => {

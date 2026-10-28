@@ -1355,7 +1355,7 @@ Picker, Pick Team, or Status label; each dropdown is populated
 from the distinct values present in the current demo, and
 selections persist across demo reloads when the same value is
 still available in the new data. The tab is Svelte
-(`src/tabs/packdrops/PackDropsTab.svelte`, the join, statuses, filters
+(`src/tabs/packdrops/PackDropsTab.svelte`, the statuses, filters
 and row markup in `src/lib/packdrops.js`); a Time cell seeks the shared
 clock, and the hub links are `a.viewer-link`, so a click plays the clip
 in the Player tab (`src/player/hub-links.js`).
@@ -1364,6 +1364,7 @@ Status column derivation:
 
 | condition                               | label        |
 |-----------------------------------------|--------------|
+| `fate == "picked"`, `pickerRelation == "self"` (the dropper took it back) | `self` |
 | drop `source == "reconstructed"`, `fate == "picked"` | `picked`     |
 | drop `source == "reconstructed"`, `fate == "expired"` | `expired`    |
 | drop `source == "reconstructed"`, any other `fate`    | `unobserved` |

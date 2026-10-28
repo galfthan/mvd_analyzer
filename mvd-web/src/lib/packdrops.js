@@ -18,7 +18,7 @@ import { hubReplayUrl } from './hub-url.js';
 /**
  * A result.backpacks row (Result JSON); `time` is ms there and seconds on
  * the copy a PackDropRow carries.
- * @typedef {{ time: number, weapon: string, player?: string, team?: string, entNum?: number, source?: string, fate?: string, picker?: string, pickerTeam?: string, pickupTime?: number, pickerHadWeapon?: boolean, pickerKills?: number, pickerNextDeathTime?: number, [field: string]: any }} PackDrop
+ * @typedef {{ time: number, weapon: string, player?: string, team?: string, entNum?: number, source?: string, fate?: string, picker?: string, pickerTeam?: string, pickerRelation?: string, pickupTime?: number, pickerHadWeapon?: boolean, pickerKills?: number, pickerNextDeathTime?: number, [field: string]: any }} PackDrop
  * The pickup side of a drop, times in seconds.
  * @typedef {{ player?: string, team?: string, time: number, nextDeathTime: number, kills: number | null, hadBefore?: boolean }} PackPickup
  * @typedef {{ label: string, cls: string }} PackDropStatus
@@ -59,6 +59,9 @@ export function packDropStatusFor(drop, pickup) {
     // pickup row. Three outcomes, and `unobserved` is deliberately not
     // `expired`: "we could not see the pickup side" is a different fact from
     // "nobody took it".
+    // The dropper respawned and took their own pack back — neither a
+    // transfer to a teammate nor a loss to the enemy.
+    if (drop.fate === 'picked' && drop.pickerRelation === 'self') return { label: 'self', cls: 'status-self' };
     if (drop.source === 'reconstructed') {
         if (drop.fate === 'picked') return { label: 'picked', cls: 'status-picked' };
         if (drop.fate === 'expired') return { label: 'expired', cls: 'status-expired' };
