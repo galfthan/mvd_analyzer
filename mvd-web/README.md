@@ -1130,8 +1130,8 @@ scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
 - **Clip finder** (`src/lib/clip-query.js`): a query is one mvd-api
   endpoint (`events`, `highlights`, `backpacks`, `top-kills`, `top-windows`, `lives`)
   with its query params under their API names, a `where` over the rows it
-  returns (groups ORed, conditions inside a group ANDed, fields as dotted
-  paths into the row), an optional rank + limit, the clip window (row
+  returns (an and / or / not tree of conditions — `= != < <= > >=`,
+  `~` contains, `in` any of — fields as dotted paths into the row), an optional rank + limit, the clip window (row
   fields plus padding, the POV a row's player field — or a list of windows,
   one clip each per row) and a label template.
   On the loaded demo it runs the same Go view through `DemoHandle.view`

@@ -10,9 +10,10 @@
 //            API form (csv strings, ms) — sent as-is when the query runs
 //            against mvd-api, translated to the view's options (viewCall)
 //            when it runs on the demo the browser holds
-//   where    rows to keep: a list of groups ORed together, each a list of
-//            conditions ANDed — { field, op, value }, field a dotted path
-//            into the row ('detail.frags', 'victims.0.name'); [] keeps all
+//   where    rows to keep: an expression tree — { and: [...] }, { or: [...] },
+//            { not: expr } or a condition { field, op, value }, field a
+//            dotted path into the row ('detail.frags', 'victims.0.name');
+//            absent keeps all
 //   rank     optional { by, desc, limit }: order by that field (ties by
 //            time); without it clips play in time order
 //   clip     { from, before, to, after, pov, label }: the window runs from row
@@ -34,12 +35,14 @@ import { makeClip } from './playlist.js';
  * @typedef {import('./result.js').Result} Result
  * @typedef {import('./playlist.js').Clip} Clip
  * @typedef {import('./playlist.js').ClipDemo} ClipDemo
- * @typedef {{ field: string, op: '=' | '!=' | '<' | '<=' | '>' | '>=' | '~', value: string | number }} Condition
+ * @typedef {string | number | boolean} Scalar
+ * @typedef {{ field: string, op: '=' | '!=' | '<' | '<=' | '>' | '>=' | '~' | 'in', value: Scalar | Scalar[] }} Condition
+ * @typedef {Condition | { and: Expr[] } | { or: Expr[] } | { not: Expr }} Expr
  * @typedef {{ from?: string, before?: number, to?: string, after?: number, pov?: string, label?: string }} ClipSpec
  * @typedef {object} ClipQuery
  * @property {string} source
  * @property {Record<string, string | number>} [params]
- * @property {Condition[][]} [where]
+ * @property {Expr} [where]
  * @property {{ by: string, desc?: boolean, limit?: number }} [rank]
  * @property {ClipSpec | ClipSpec[]} [clip]
  * @property {string} [label]
@@ -135,21 +138,24 @@ export function fieldOf(row, path) {
     return v;
 }
 
+// Comparisons: numbers as numbers when the row's value is one, everything
+// else as case-insensitive text; `~` is a substring on text and membership
+// on a list, `in` is "equals any of" a list.
 /**
- * @param {any} row
- * @param {Condition} c
+ * @param {unknown} v
+ * @param {string} op
+ * @param {Scalar} want
  */
-function test(row, c) {
-    const v = fieldOf(row, c.field);
-    if (c.op === '~') {
-        const want = String(c.value).toLowerCase();
-        if (Array.isArray(v)) return v.some((x) => String(x).toLowerCase() === want);
-        return v != null && String(v).toLowerCase().includes(want);
+function compare(v, op, want) {
+    if (op === '~') {
+        const w = String(want).toLowerCase();
+        if (Array.isArray(v)) return v.some((x) => String(x).toLowerCase() === w);
+        return v != null && String(v).toLowerCase().includes(w);
     }
-    const num = typeof v === 'number' && c.value !== '' && Number.isFinite(Number(c.value));
+    const num = typeof v === 'number' && want !== '' && Number.isFinite(Number(want));
     const a = num ? v : String(v ?? '').toLowerCase();
-    const b = num ? Number(c.value) : String(c.value).toLowerCase();
-    switch (c.op) {
+    const b = num ? Number(want) : String(want).toLowerCase();
+    switch (op) {
         case '=': return a === b;
         case '!=': return a !== b;
         case '<': return a < b;
@@ -162,11 +168,17 @@ function test(row, c) {
 
 /**
  * @param {any} row
- * @param {Condition[][] | undefined} where
+ * @param {Expr | undefined} where
+ * @returns {boolean}
  */
 export function matches(row, where) {
-    if (!where?.length) return true;
-    return where.some((group) => group.every((c) => test(row, c)));
+    if (!where) return true;
+    if ('and' in where) return where.and.every((e) => matches(row, e));
+    if ('or' in where) return where.or.some((e) => matches(row, e));
+    if ('not' in where) return !matches(row, where.not);
+    const v = fieldOf(row, where.field);
+    if (where.op === 'in') return (Array.isArray(where.value) ? where.value : [where.value]).some((w) => compare(v, '=', w));
+    return compare(v, where.op, /** @type {Scalar} */ (where.value));
 }
 
 /**
@@ -242,7 +254,7 @@ export const PRESETS = [
         id: 'quad-runs', title: 'Quad runs',
         query: {
             source: 'events', params: { types: 'powerup' },
-            where: [[{ field: 'detail.powerup', op: '=', value: 'quad' }]],
+            where: { field: 'detail.powerup', op: '=', value: 'quad' },
             clip: { before: 3000, to: 'detail.endTime', after: 2000 },
             label: 'Quad run · {player} · {detail.frags} frag{detail.frags|s}',
         },
@@ -251,7 +263,7 @@ export const PRESETS = [
         id: 'best-quad-runs', title: 'Best quad runs (most frags)',
         query: {
             source: 'events', params: { types: 'powerup' },
-            where: [[{ field: 'detail.powerup', op: '=', value: 'quad' }, { field: 'detail.frags', op: '>', value: 0 }]],
+            where: { and: [{ field: 'detail.powerup', op: '=', value: 'quad' }, { field: 'detail.frags', op: '>', value: 0 }] },
             rank: { by: 'detail.frags', desc: true, limit: 5 },
             clip: { before: 3000, to: 'detail.endTime', after: 2000 },
             label: 'Quad run · {player} · {detail.frags} frag{detail.frags|s}',
@@ -271,17 +283,17 @@ export const PRESETS = [
     },
     {
         id: 'packs-enemy', title: 'Packs the enemy took',
-        query: { source: 'backpacks', where: [[{ field: 'pickerRelation', op: '=', value: 'enemy' }]], clip: [PACK_DROP, PACK_PICKUP] },
+        query: { source: 'backpacks', where: { field: 'pickerRelation', op: '=', value: 'enemy' }, clip: [PACK_DROP, PACK_PICKUP] },
     },
     {
         id: 'packs-team', title: 'Packs a teammate took',
-        query: { source: 'backpacks', where: [[{ field: 'pickerRelation', op: '=', value: 'team' }]], clip: [PACK_DROP, PACK_PICKUP] },
+        query: { source: 'backpacks', where: { field: 'pickerRelation', op: '=', value: 'team' }, clip: [PACK_DROP, PACK_PICKUP] },
     },
     {
         id: 'packs-enemy-new', title: 'Packs the enemy took without having the weapon',
         query: {
             source: 'backpacks',
-            where: [[{ field: 'pickerRelation', op: '=', value: 'enemy' }, { field: 'pickerHadWeapon', op: '=', value: 'false' }]],
+            where: { and: [{ field: 'pickerRelation', op: '=', value: 'enemy' }, { field: 'pickerHadWeapon', op: '=', value: false }] },
             clip: [PACK_DROP, PACK_PICKUP],
         },
     },

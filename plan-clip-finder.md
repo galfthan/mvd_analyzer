@@ -23,8 +23,12 @@ them. Code: `mvd-web/src/lib/clip-query.js` (model + runner),
   API unchanged.
 - **A pane** in the Player column, probably above the playlist; placement
   is settled once it exists.
-- **OR, no nesting.** `where` is a list of groups ORed together, each a
-  list of conditions ANDed. Arbitrary grouping waits for a use case.
+- **A general boolean expression.** `where` is a tree — `{and: [...]}`,
+  `{or: [...]}`, `{not: …}` and conditions — stored as JSON (presets, share
+  links, and later the API). The builder edits the tree directly (nested
+  groups with an and/or toggle and a not); text mode parses an expression
+  with jsep (MIT, AST only, nothing is evaluated) and converts that AST to
+  the tree, rejecting anything else (calls, assignments).
 
 ## Query
 
@@ -32,15 +36,17 @@ them. Code: `mvd-web/src/lib/clip-query.js` (model + runner),
 {
   source: 'events',                       // events | highlights | backpacks | top-kills | top-windows | lives
   params: { types: 'powerup' },           // the endpoint's query params, API names and form
-  where: [[{ field: 'detail.powerup', op: '=', value: 'quad' }]],   // OR of AND-groups
+  where: { and: [{ field: 'detail.powerup', op: '=', value: 'quad' },
+                 { not: { field: 'detail.frags', op: '<', value: 1 } }] },
   rank:  { by: 'detail.frags', desc: true, limit: 5 },             // optional
   clip:  { from: 'time', before: 3000, to: 'detail.endTime', after: 2000, pov: 'player' },
   label: 'Quad run · {player} · {detail.frags} frag{detail.frags|s}',
 }
 ```
 
-Ops: `= != < <= > >=` (numbers compare as numbers, text case-insensitively)
-and `~` (substring on text, membership on a list). Unset `clip` fields take
+Ops: `= != < <= > >=` (numbers compare as numbers, text case-insensitively),
+`~` (substring on text, membership on a list) and `in` (equals any of a
+list). An empty `and` is true, an empty `or` false. Unset `clip` fields take
 the source's defaults (`SOURCES` in clip-query.js).
 
 ## Steps
@@ -58,10 +64,11 @@ the source's defaults (`SOURCES` in clip-query.js).
 2. **Saved presets** — save the current query under a name ("My presets" in
    the dropdown, `localStorage`), share one by link.
 3. **The pane, builder mode** — source picker, the endpoint's params, the
-   where rows (with an "or" divider between groups), rank, clip padding,
+   where tree (groups with an and/or toggle, a not, nested groups), rank, clip padding,
    live result count / preview rows, "Add to playlist" and "Save as preset".
    Field pickers list the fields the endpoint's rows actually carry.
-4. **Text mode** — the same query as editable text (JSON or a compact
-   one-line form), round-tripping with the builder.
+4. **Text mode** — the where tree as an expression
+   (`weapon = "rl" and (pickerRelation = "enemy" or not pickerHadWeapon)`),
+   parsed with jsep, round-tripping with the builder.
 
 Later, separate: the multi-demo search over mvd-api.

@@ -6,16 +6,25 @@ import { SOURCES, PRESETS, viewCall, matches, renderLabel, clipsOf, runQuery } f
 const demo = { key: 'hub:7', gameId: 7, title: 'dm2', offset: 10 };
 const result = { streams: { global: { demoOffset: 10000 } }, timelineAnalysis: { playerUserIDs: { bps: 3, valla: 4 } } };
 
-test('where ORs its groups and ANDs inside one', () => {
-    const row = { player: 'bps', detail: { frags: 3, powerup: 'quad' }, weapons: ['rl', 'LG'] };
+test('where is an and / or / not tree of conditions', () => {
+    const row = { player: 'bps', detail: { frags: 3, powerup: 'quad' }, weapons: ['rl', 'LG'], had: false };
     const quad = { field: 'detail.powerup', op: '=', value: 'QUAD' };
-    assert.equal(matches(row, []), true, 'no conditions keep every row');
-    assert.equal(matches(row, [[quad, { field: 'detail.frags', op: '>=', value: 3 }]]), true);
-    assert.equal(matches(row, [[quad, { field: 'detail.frags', op: '>', value: '3' }]]), false, 'numbers compare as numbers');
-    assert.equal(matches(row, [[{ field: 'player', op: '=', value: 'valla' }], [quad]]), true, 'second group matches');
-    assert.equal(matches(row, [[{ field: 'weapons', op: '~', value: 'lg' }]]), true, '~ is membership on a list');
-    assert.equal(matches(row, [[{ field: 'player', op: '~', value: 'B' }]]), true, '~ is a substring on text');
-    assert.equal(matches(row, [[{ field: 'missing.deep', op: '!=', value: 'x' }]]), true);
+    const valla = { field: 'player', op: '=', value: 'valla' };
+    assert.equal(matches(row, undefined), true, 'no expression keeps every row');
+    assert.equal(matches(row, quad), true, 'a bare condition');
+    assert.equal(matches(row, { and: [quad, { field: 'detail.frags', op: '>=', value: 3 }] }), true);
+    assert.equal(matches(row, { and: [quad, { field: 'detail.frags', op: '>', value: '3' }] }), false, 'numbers compare as numbers');
+    assert.equal(matches(row, { or: [valla, quad] }), true);
+    assert.equal(matches(row, { and: [quad, { or: [valla, { not: { field: 'had', op: '=', value: true } }] }] }), true, 'a and (b or not c)');
+    assert.equal(matches(row, { not: quad }), false);
+    assert.equal(matches(row, { and: [] }), true, 'empty and is true');
+    assert.equal(matches(row, { or: [] }), false, 'empty or is false');
+    assert.equal(matches(row, { field: 'player', op: 'in', value: ['valla', 'BPS'] }), true, 'in is any of');
+    assert.equal(matches(row, { field: 'detail.frags', op: 'in', value: [1, 2] }), false);
+    assert.equal(matches(row, { field: 'weapons', op: '~', value: 'lg' }), true, '~ is membership on a list');
+    assert.equal(matches(row, { field: 'player', op: '~', value: 'B' }), true, '~ is a substring on text');
+    assert.equal(matches(row, { field: 'had', op: '=', value: false }), true, 'booleans');
+    assert.equal(matches(row, { field: 'missing.deep', op: '!=', value: 'x' }), true);
 });
 
 test('label templates fill fields, plurals and seconds', () => {
