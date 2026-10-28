@@ -1,7 +1,7 @@
 // The Player tab's controller: one engine, one playlist runner, the hub link
-// routing and the share-link import. app.js reaches the engine as
-// window.MvdPlayer (the timeline's speed buttons drive it while it is the
-// clock); components import from here.
+// routing and the share-link import. The unified bar's speed buttons
+// (src/ui/PlaybackBar.svelte) drive the engine while it is the clock;
+// components import from here.
 
 import { clock, demo, teams, activeTab, selectTab } from '../state/index.js';
 import { loadDemo } from '../legacy.js';

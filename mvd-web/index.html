@@ -34,35 +34,10 @@
          here by src/main.js. -->
     <div id="app"></div>
 
-    <!-- Tabs not yet ported to Svelte: app.js's markup, adopted into the
-         shell's main pane (src/shell/adopt.js) before DOMContentLoaded. -->
+    <!-- The tab not yet ported to Svelte (Search): app.js's markup, adopted
+         into the shell's main pane (src/shell/adopt.js) before
+         DOMContentLoaded. -->
     <div id="legacy-dom" hidden>
-
-            <!-- Unified Timeline Widget (visible on Timeline/Chat/Map tabs).
-                 Lives at the top of .main outside the scroll container so it
-                 stays put without needing position:sticky — Firefox composited
-                 sticky-promoted siblings through stale snapshots. -->
-            <div id="unified-timeline" class="panel timeline-nav-panel" style="display: none;">
-                <div class="timeline-nav-row">
-                    <div class="timeline-playback-controls">
-                        <button id="tl-rev" title="Reverse playback (1x)">-1x</button>
-                        <button id="tl-slow" title="Play 0.2x (slow motion)">0.2x</button>
-                        <button id="tl-play-pause" title="Play/Pause">1x</button>
-                        <button id="tl-5x" title="Play 5x speed">5x</button>
-                    </div>
-                    <span id="tl-current-time" class="timeline-nav-time">0:00</span>
-                    <div class="timeline-nav-bar-wrapper" id="tl-bar-wrapper">
-                        <div class="timeline-nav-bar" id="tl-bar">
-                            <div class="timeline-nav-track" id="tl-track"></div>
-                            <div class="timeline-selection-overlay" id="tl-selection-overlay"></div>
-                            <div class="timeline-nav-cursor" id="tl-cursor"></div>
-                        </div>
-                        <div class="timeline-nav-caret" id="tl-caret" title="Drag to set current time">▲</div>
-                        <div class="timeline-nav-axis" id="tl-axis"></div>
-                    </div>
-                    <span id="tl-segment-label" class="timeline-nav-segment"></span>
-                </div>
-            </div>
 
             <!-- Search Tab (first; always available even when no demo loaded) -->
             <div id="tab-search" class="tab-content active">
@@ -118,98 +93,6 @@
                     </form>
                     <div id="search-status" class="status"></div>
                     <div id="search-results" class="search-results"></div>
-                </div>
-            </div>
-
-            <!-- Map Tab -->
-            <div id="tab-map" class="tab-content">
-                <div class="empty-state">Load or search a demo to begin.</div>
-                <div class="panel map-panel">
-                    <div class="map-main-content">
-                        <div class="map-canvas-container">
-                            <canvas id="map-canvas" width="850" height="850"></canvas>
-                            <div id="map-perf-hud" class="map-perf-hud" style="display: none;"></div>
-                            <div id="map-no-data" class="map-no-data" style="display: none;">
-                                <p>No location data available for this map.</p>
-                                <p>Player positions will still be shown.</p>
-                            </div>
-                        </div>
-                        <div class="map-sidebar">
-                            <div class="map-legend" id="map-legend">
-                                <h4>Players</h4>
-                            </div>
-                            <div id="map-entities-panel" class="map-entities-panel" style="display: none;">
-                                <h4>Map entities</h4>
-                                <div class="map-entity-filters">
-                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="weapon" checked><span class="map-entity-swatch" style="background:#ff6b6b"></span>Weapons</label>
-                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="armor" checked><span class="map-entity-swatch" style="background:#ffc107"></span>Armor</label>
-                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="health" checked><span class="map-entity-swatch" style="background:#00c853"></span>Health</label>
-                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="ammo" checked><span class="map-entity-swatch" style="background:#b0a070"></span>Ammo</label>
-                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="powerup" checked><span class="map-entity-swatch" style="background:#2196f3"></span>Powerups</label>
-                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="teleporter" checked><span class="map-entity-swatch" style="background:#b388ff"></span>Teleporters</label>
-                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="spawn"><span class="map-entity-swatch" style="background:#888"></span>Spawns</label>
-                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="button"><span class="map-entity-swatch" style="background:#ff9800"></span>Buttons</label>
-                                    <label class="map-entity-filter"><input type="checkbox" class="map-entity-cb" data-cat="door"><span class="map-entity-swatch" style="background:#a1887f"></span>Doors</label>
-                                </div>
-                                <p class="map-entity-hint">Static map layout. Arrows link teleport entrance → exit.</p>
-                            </div>
-                            <div class="map-sidebar-row">
-                                <div id="map-items-panel" class="map-items-panel" style="display: none;">
-                                    <h4>Items</h4>
-                                    <table class="map-items-table" id="map-items-table">
-                                        <tbody id="map-items-body"></tbody>
-                                    </table>
-                                </div>
-                                <div id="region-status-panel" style="display: none;">
-                                    <h4>Region Status</h4>
-                                    <div id="region-status-body"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="map-track-controls">
-                        <button id="map-learn-toggle" class="map-learn-toggle" title="Study the map's item & teleporter layout" style="display: none;">Learn map</button>
-                        <span class="map-track-sep" aria-hidden="true"></span>
-                        <span class="map-trail-label">Trails:</span>
-                        <button id="map-trails-all">All</button>
-                        <button id="map-trails-none">None</button>
-                        <details id="map-trails-dropdown" class="map-trails-dropdown">
-                            <summary>Players</summary>
-                            <div id="map-trails-players" class="map-trails-players-panel"></div>
-                        </details>
-                        <select id="map-trail-duration" class="map-trail-select">
-                            <option value="5">5s</option>
-                            <option value="10" selected>10s</option>
-                            <option value="30">30s</option>
-                            <option value="60">1min</option>
-                            <option value="300">5min</option>
-                            <option value="1200">20min</option>
-                        </select>
-                        <button id="map-reset-tracks">Clear</button>
-                        <span class="map-track-sep" aria-hidden="true"></span>
-                        <span class="map-trail-label">Follow:</span>
-                        <select id="map-follow" class="map-trail-select"></select>
-                        <button id="map-view-arrows" title="Per-player arrows showing where each player is looking">View</button>
-                        <button id="map-vel-arrows" title="Per-player arrows showing each player's velocity (length ∝ speed)">Vel</button>
-                        <button id="map-los" title="Line-of-sight: lines between players who can see each other (white = mutual, red/blue = one-way). BSP-backed maps only.">LOS</button>
-                        <button id="map-pvs" title="Potential visibility (PVS): thin lines between players the server would have sent to each other on the wire (mvdsv per-client entity cull — fat PVS vs the opponent's box leaves). Superset of LOS; the gap (in PVS but not LOS) means same vis region without a direct sightline. BSP-backed maps only.">PVS</button>
-                        <button id="map-3d-toggle" title="Tilt the map into 3D — right-drag (or Ctrl+drag) to rotate freely">3D</button>
-                        <button id="map-fog" title="Depth fog — the far side of the map fades into the dark (reads best in a tilted view)">Fog</button>
-                        <button id="map-light" title="Directional shading on the floors — tops brighten, sides fall off by facing">Light</button>
-                        <button id="map-occlude" title="Realistic occlusion — floors hide players, items and lines behind them (the default keeps everything visible)">Occl</button>
-                        <button id="map-perf" title="Render performance overlay — fps, frame-time split (CPU build / GL submit / blit / GPU) and per-frame draw stats">FPS</button>
-                        <button id="map-bench" title="Map render benchmark — plays the demo while the camera runs a fixed 18 s spin / tilt / zoom script, then reports fps and frame-time percentiles (logged to the console; compared against earlier runs of the same demo)">Bench</button>
-                        <button id="map-reset-view" title="Reset pan / zoom / rotation">Reset view</button>
-                        <button id="map-fullscreen" title="Toggle fullscreen">Fullscreen</button>
-                    </div>
-                    <div id="map-entities-table-wrap" class="map-entities-table-wrap" style="display: none;">
-                        <table class="stats-table">
-                            <thead>
-                                <tr><th>Class</th><th>Type</th><th>Name</th><th>Loc</th><th>Destination</th></tr>
-                            </thead>
-                            <tbody id="map-entities-table-body"></tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
 

@@ -3,8 +3,9 @@
 // armor, powerups, region control and the per-player drill-downs), the
 // shared view range, the team-status rows and their markup, and the hover
 // read-outs. The tab (src/tabs/timeline/) and the canvas renderers
-// (src/ui/timeline-canvas.js) draw them. The Map tab (app.js, through
-// MvdLib) reads the running frag counts and the hub watch link from here.
+// (src/ui/timeline-canvas.js) draw them. The Map tab's legend
+// (src/tabs/map/sidebar.js) reads the running frag counts and the hub watch
+// link from here.
 //
 // Times are match-relative SECONDS throughout: the Result ships int32 ms
 // (schema v8), converted once at intake (timelineEvents).

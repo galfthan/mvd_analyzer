@@ -1,15 +1,14 @@
 <script>
     // The map, following the player you watch. A second MvdMap with its own
     // canvas, camera and follow target; the map DATA (geometry, locs,
-    // frames, items, trails…) is the Map tab's, which app.js's initMapView
-    // and the async loaders fill — read from it each frame (syncMapData)
-    // until the Map tab's loading moves into src/. Click a player on the map
+    // frames, items, trails…) is the Map tab's (src/tabs/map/map-model.js),
+    // read from it each frame (syncMapData). Click a player on the map
     // to watch them; drag pans, right-drag orbits, the wheel zooms,
     // double-click resets the view.
     import Crosshair from '@lucide/svelte/icons/crosshair';
     import { MvdMap } from '../../../../mvd-map-view/src/index.js';
     import { clock, demo, teams } from '../../state/index.js';
-    import { mapTabView } from '../../legacy.js';
+    import { view as mapTabView } from '../../tabs/map/map-model.js';
     import { engine } from '../index.js';
     import { paneLayout } from '../layout.js';
     import { onFrame } from './tick.js';
@@ -37,12 +36,12 @@
     // draw syncs the Map tab's data in and renders at the clock's time.
     function draw() {
         if (!map) return;
-        const src = mapTabView();
-        empty = !src?.state.initialized;
+        const src = mapTabView;
+        empty = !src.state.initialized;
         if (empty) return;
         if (syncMapData(src.state, map.state) || needsFit) {
-            // The world's mid height comes from the loc z-range app.js
-            // computed for the Map tab's camera.
+            // The world's mid height comes from the loc z-range the Map
+            // tab's camera was given.
             map.camera.zMidDefault = src.camera.zMidDefault;
             if (needsFit) {
                 needsFit = false;

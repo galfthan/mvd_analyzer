@@ -1,9 +1,6 @@
 // reveal.js — what a tab does when one of its panels comes back into view
 // (expanded or reopened, src/ui/panels): a canvas drawn while its panel was
-// hidden may need painting again. A ported tab registers its own redraw
-// here; a tab still in app.js falls back to app.js's renderTabContent.
-
-import { rerenderTab } from '../../legacy.js';
+// hidden may need painting again. Each tab registers its own redraw here.
 
 const handlers = new Map();
 
@@ -18,5 +15,4 @@ export function onPanelReveal(tab, fn) {
 export function panelRevealed(tab) {
     const fn = handlers.get(tab);
     if (fn) fn();
-    else rerenderTab(tab);
 }

@@ -33,6 +33,11 @@ REPO = pathlib.Path(__file__).resolve().parents[2]
 # multi-second worker raycast on first use, and shooting before it lands made
 # those shots depend on scheduler luck (the only nondeterminism ever seen in
 # this harness).
+# The Map tab's map view (src/tabs/map/map-model.js, window.MvdMapTab): draw
+# it now at the clock's time.
+REDRAW = ("MvdMapTab.view.state.renderDirty = true; "
+          "MvdMapTab.view.render(MvdMapTab.view.state.currentTime)")
+
 STATES = [
     ("default3d", ""),
     ("topdown", "document.getElementById('map-3d-toggle').click()"),
@@ -40,12 +45,12 @@ STATES = [
     ("viewarrows", "document.getElementById('map-view-arrows').click()"),
     ("velarrows", "document.getElementById('map-vel-arrows').click()"),
     ("los", "document.getElementById('map-los').click()",
-     "mapState && !mapState.losPending"),
+     "!MvdMapTab.view.state.losPending"),
     ("pvs", "document.getElementById('map-pvs').click()",
-     "mapState && !mapState.losPending"),
+     "!MvdMapTab.view.state.losPending"),
     ("learn", "document.getElementById('map-learn-toggle').click()"),
-    ("rotated", "setMapCamera(1.9, 0.6); renderMap(mapState.currentTime)"),
-    ("zoomed", "_wtc.zoomK = 2.5; markMapDirty(); renderMap(mapState.currentTime)"),
+    ("rotated", "MvdMapTab.view.setCamera(1.9, 0.6)"),
+    ("zoomed", "MvdMapTab.view.camera.zoomK = 2.5; " + REDRAW),
 ]
 
 
@@ -106,7 +111,7 @@ def interact(page, out_dir, label, t):
 
 def capture(page, out_dir, label, times):
     for t in times:
-        page.evaluate(f"setCurrentTime({t})")
+        page.evaluate(f"MvdState.clock.seek({t})")
         interact(page, out_dir, label, t)
         for name, js, *rest in STATES:
             if js:
@@ -115,7 +120,7 @@ def capture(page, out_dir, label, times):
             if rest:
                 page.wait_for_function(rest[0], timeout=120_000)
                 page.wait_for_timeout(120)
-            page.evaluate("renderMap(mapState.currentTime)")
+            page.evaluate(REDRAW)
             page.wait_for_timeout(60)
             path = out_dir / f"{label}-t{t}-{name}.png"
             page.locator("#map-canvas").screenshot(path=str(path))
@@ -165,7 +170,8 @@ def main():
             page.wait_for_selector("#file-input", state="attached")
             # The app rejects a file dropped before the WASM module is live
             # ("Analyzer is still loading"), so gate on the worker's ready flag.
-            page.wait_for_function("typeof wasmReady !== 'undefined' && wasmReady", timeout=60_000)
+            page.wait_for_function("window.mvdData", timeout=60_000)
+            page.evaluate("mvdData.ready.then(() => true)")
             page.set_input_files("#file-input", os.path.abspath(args.demo))
             # displayResults() drops the no-demo class, but two inputs the map
             # needs land later: the BSP geometry on its own fetch, and the 50 ms
@@ -174,8 +180,8 @@ def main():
             # with no players in it.
             page.wait_for_selector("body:not(.no-demo)", timeout=180_000)
             if not args.no_geometry:
-                page.wait_for_function("mapState && mapState.mapGeometry", timeout=60_000)
-            page.wait_for_function("timelineState && timelineState.bucketView", timeout=120_000)
+                page.wait_for_function("MvdMapTab.view.state.mapGeometry", timeout=60_000)
+            page.wait_for_function("MvdMapTab.view.state.frames", timeout=120_000)
             page.wait_for_timeout(500)
             capture(page, out_dir, label, times)
             browser.close()

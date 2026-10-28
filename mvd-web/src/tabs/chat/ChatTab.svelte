@@ -8,7 +8,7 @@
     // Nothing runs while the tab is hidden. The columns are rebuilt — once,
     // on the next frame the tab shows — when the demo, the teams or the
     // "Hide team chat" filter changed; a clock tick only moves the line and
-    // the scroll (the Map tab's playback and the Player engine tick at
+    // the scroll (the page's playback and the Player engine tick at
     // display rate).
     import { onMount } from 'svelte';
     import { clock, demo, teams, activeTab, colorOf } from '../../state/index.js';

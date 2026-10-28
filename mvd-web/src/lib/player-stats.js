@@ -14,7 +14,7 @@ export function fragsOfRow(p) {
 
 // Return a new array of players sorted by frags descending. The sort is
 // stable (equal-frag players keep input order); this frag-sorted order is the
-// canonical TEAM_COLORS source, so its semantics must not change.
+// canonical team order (src/state/teams.js), so its semantics must not change.
 export function sortByFragsDesc(players) {
     return [...players].sort((a, b) => fragsOfRow(b) - fragsOfRow(a));
 }

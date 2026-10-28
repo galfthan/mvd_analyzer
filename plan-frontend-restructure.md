@@ -55,6 +55,24 @@ orchestration the ported tabs share with the Map — `displayResults`, the
 body classes (`individual-field` included: the tab takes the same test
 from the teams store's `perPlayer`), `setCanonicalTeams`, the topbar —
 stays in `app.js` until the Map is ported.
+The Map followed (`src/tabs/map/`: `MapTab.svelte`, `sidebar.js` for the
+hand-built legend and region status, `map-model.js` for the page's one
+`MvdMap` and the demo load into it; `src/lib/map.js` for the symbols,
+bounds, legend cells, region rows, items, entity table, canvas size and
+perf / bench read-outs). It closes the seams the earlier ports left: the
+unified bar is `src/ui/PlaybackBar.svelte` (`src/lib/playback-bar.js`),
+the playback loop a store, `src/state/playback.js`
+(`MvdState.playback`, `playAtSpeed`, `stopPlayback` — it stops itself on
+a tab without the bar, on the Player tab and on a new demo); the Map reads
+the region-control model and the teams store directly
+(`onRegionControlChanged`, `TEAM_COLORS` and `timelineState` are gone);
+the Player tab's map pane imports the model instead of going through
+`legacy.js` (which keeps only `loadDemo`), and `reveal.js` has no
+`app.js` fallback. `app.js` keeps the Search tab, loading, the
+`displayResults` orchestration (it calls `MvdMapTab.resetMap` /
+`loadMap` and puts the demo's regions in effect), tab switching and the
+URL state (`?learn=` through `MvdMapTab.learnMode`). The map draws only
+while its tab shows.
 C covers the clock, teams and current-demo stores. D renders the top bar,
 sidebar and layout in Svelte with the active tab in a store; the load
 overlay and search stay legacy until their tabs are ported. E is the
@@ -230,7 +248,7 @@ and panes `MapPane`, `HealthArmorPane`, `MomentsPane`, `FragFeedPane`.
 | D | Svelte shell (sidebar, tabs, overlay, search) with `LegacyTab` hosts | all tabs work inside the new shell |
 | E | Player tab in Svelte, panes on dockview, own Map pane instance | Player tab section deleted from `app.js` → **player-tab can merge** |
 | F0 | Arrangeable panels on the multi-panel tabs (Summary, Timeline, Locs & regions, Key moments, Pickups, Aim) | done |
-| F | Remaining tabs, smallest/least coupled first: Chat (done), Pack drops (done), Pickups (done), Key moments (done), Summary (done), Aim (done), Locs & regions (done), Timeline (done), Map | each port deletes its `app.js` section; done when `app.js` is gone |
+| F | Remaining tabs, smallest/least coupled first: Chat (done), Pack drops (done), Pickups (done), Key moments (done), Summary (done), Aim (done), Locs & regions (done), Timeline (done), Map (done), Search | each port deletes its `app.js` section; done when `app.js` is gone |
 
 Not everything in `app.js` becomes a component. The parts without a DOM
 (playerStats accessors, bucket-view accessors, the data-preparation

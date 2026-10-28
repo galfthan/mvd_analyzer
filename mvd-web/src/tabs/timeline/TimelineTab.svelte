@@ -8,9 +8,9 @@
     // / scrub / hover handling. app.js still toggles the `active` class like
     // on every other .tab-content (onTabActivated).
     //
-    // The view window is the selected segment (MvdState.segment): app.js's
+    // The view window is the selected segment (MvdState.segment): the
     // unified bar selects one, a graph's Ctrl+wheel zoom and drag pan here
-    // set it, and app.js mirrors it onto the bar and the URL. A segment
+    // set it, and the bar shows it. A segment
     // change redraws at once; a demo, teams, buckets or region change
     // redraws on the next frame the tab shows. Each time the tab shows (now,
     // on the next frame and 120 ms later — a canvas drawn during the
@@ -18,8 +18,8 @@
     // one of its panels comes back into view (onPanelReveal), everything is
     // drawn again: a canvas sizes itself from its container. The clock moves
     // only the current-time lines, the per-player frag labels and the
-    // rosters — at once on a seek, every 200 ms (trailing) under the Map
-    // tab's playback loop or the Player engine. Nothing runs while the tab is
+    // rosters — at once on a seek, every 200 ms (trailing) under the page's
+    // playback (src/state/playback.js) or the Player engine. Nothing runs while the tab is
     // hidden.
     //
     // A field of more than two individual players (the teams store's
@@ -447,7 +447,7 @@
             return;
         }
         if (!shown()) return;
-        // The Map tab's playback loop and the Player engine tick every
+        // The page's playback and the Player engine tick every
         // frame: follow them at 200 ms.
         if (from === 'playback' || from === 'engine') {
             if (!syncTimer) {

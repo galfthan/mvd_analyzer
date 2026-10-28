@@ -2,18 +2,17 @@
 // for the current demo, and Go's control states for them. The Locs &
 // Regions tab edits it (its region editor and control matrix,
 // src/tabs/locgraph/); the Timeline's Region Control panel
-// (src/tabs/timeline/) reads it, and app.js mirrors it onto the Map's state
-// (mapState.controlRegions / locToRegion / regionToGroups / bucketStates /
-// regionControlStats / teamA / teamB), which the Map overlay and region
-// status read.
+// (src/tabs/timeline/) reads it, and the Map's model
+// (src/tabs/map/map-model.js) copies it onto the map view
+// (controlRegions / locToRegion / regionToGroups / bucketStates), which the
+// Map overlay and region status read.
 //
 // The value is null when the demo has no regions, else
 //   { stage, editable, locations, defs, regions, stats, bucketStates, teamA, teamB }
 // where
 //   stage      'loaded'   — the demo's own regions (Go's defaults), set by
-//                            app.js's initRegionControl on load and again
-//                            when the deferred buckets land; app.js has
-//                            already written mapState itself.
+//                            app.js's loadMapAndRegions on load and again
+//                            when the deferred buckets land.
 //              'resolved' — an edit's definitions resolved against the
 //                            locs, the recompute still running.
 //              'computed' — Go's control states for those regions.
@@ -31,7 +30,7 @@ import { regionRowsFromRegions, readRegionDefs, resolveRegions, regionOverrideJS
 
 export const regionControl = store(null);
 
-// resetRegionControl sets the demo's own regions (app.js initRegionControl).
+// resetRegionControl sets the demo's own regions (app.js loadMapAndRegions).
 export function resetRegionControl(result, editable) {
     const rc = result?.timelineAnalysis?.regionControl;
     if (!rc || !rc.regions || rc.regions.length === 0) {
@@ -85,8 +84,8 @@ export async function applyRegionDefs(handle, defs) {
     });
 }
 
-// reapplyRegions applies the definitions in effect again — app.js calls it
-// when the map geometry arrives, so the overlay's region → loc-group lookup
+// reapplyRegions applies the definitions in effect again — the Map's model
+// calls it when the map geometry arrives, so the overlay's region → loc-group lookup
 // is rebuilt against the new groups.
 export function reapplyRegions(handle) {
     const cur = regionControl.get();

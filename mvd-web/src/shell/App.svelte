@@ -1,8 +1,9 @@
 <script>
-    // The page shell. Tabs not yet ported are app.js's markup, kept in
-    // index.html's #legacy-dom and adopted into place here before app.js's
-    // DOMContentLoaded setup looks them up by id (src/main.js flushes the
-    // mount synchronously).
+    // The page shell. The tab not yet ported (Search) is app.js's markup,
+    // kept in index.html's #legacy-dom and adopted into place here before
+    // app.js's DOMContentLoaded setup looks it up by id (src/main.js flushes
+    // the mount synchronously). The unified playback bar sits above the
+    // scrolling pane.
     import Topbar from './Topbar.svelte';
     import Sidebar from './Sidebar.svelte';
     import PlayerTab from '../player/PlayerTab.svelte';
@@ -14,6 +15,8 @@
     import AimStatsTab from '../tabs/aimstats/AimStatsTab.svelte';
     import LocGraphTab from '../tabs/locgraph/LocGraphTab.svelte';
     import TimelineTab from '../tabs/timeline/TimelineTab.svelte';
+    import MapTab from '../tabs/map/MapTab.svelte';
+    import PlaybackBar from '../ui/PlaybackBar.svelte';
     import Toast from '../player/Toast.svelte';
     import { adopt } from './adopt.js';
 </script>
@@ -21,7 +24,8 @@
 <Topbar />
 <div class="layout">
     <Sidebar />
-    <main class="main" use:adopt={{ selector: '#legacy-dom > #unified-timeline', first: true }}>
+    <main class="main">
+        <PlaybackBar />
         <div class="main-scroll" use:adopt={{ selector: '#legacy-dom > .tab-content' }}>
             <SummaryTab />
             <ChatTab />
@@ -32,6 +36,7 @@
             <LocGraphTab />
             <TimelineTab />
             <PlayerTab />
+            <MapTab />
         </div>
     </main>
 </div>

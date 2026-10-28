@@ -42,8 +42,8 @@ in a chat host, not in `make test`.
 
 Two consequences for anyone moving code in here:
 
-- The geometry fetch in `app.js` (`initMapView`) stays host-side when the
-  rest of that function moves.
+- The geometry fetch stays host-side (mvd-web's
+  `src/tabs/map/map-model.js`, `loadMap`).
 - The component takes its canvas **and its size** explicitly. It must never
   measure a container or listen for window resizes — the MCP host controls
   the iframe's dimensions and reports changes via `ui/notifications/size-changed`,

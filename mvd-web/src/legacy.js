@@ -8,18 +8,3 @@
 export function loadDemo(input) {
     return window.loadDemo(input);
 }
-
-// The Map tab's MvdMap: the Player tab's map pane reads its loaded data
-// (geometry, locs, frames, items…) — app.js's initMapView and the async
-// loaders fill it.
-export function mapTabView() {
-    return window.legacyMapView || null;
-}
-
-// rerenderTab(tab) redraws a tab's canvases (app.js renderTabContent): a
-// panel expanded or reopened (src/ui/panels/reveal.js, for a tab that has
-// not registered its own redraw) may hold a canvas drawn at zero width
-// while it was hidden. Goes when the Map tab is ported.
-export function rerenderTab(tab) {
-    return window.renderTabContent?.(tab);
-}
