@@ -33,7 +33,7 @@ import {
     reconstructBucketPlayers, reconstructBucketTeams,
 } from './frames.js';
 import { decodeRegionStateChar } from './regions.js';
-import { GlWorld, buildLiquidFaces, parseColor, DEPTH_SCALE } from './glworld.js';
+import { GlWorld, buildLiquidFaces, buildLiquidVolume, parseColor, DEPTH_SCALE } from './glworld.js';
 import { GlAtlas } from './glatlas.js';
 
 // Fixed light for face shading — high, slightly off-axis so faces pointing
@@ -55,15 +55,18 @@ const MOVER_FILL_ACTIVE = 'rgba(150, 170, 215, 0.95)';
 const MOVER_RIDE_Z_BELOW = 24; // tolerance under the top (interp / step noise)
 const MOVER_RIDE_Z_ABOVE = 56; // ~player height above the top
 
-// Liquid volumes (water/slime/lava) from corpus v4: each face Lambert-shaded
-// so the top surface reads brighter than the descending sides, painted back to
-// front so the body reads as a 3D volume rather than a flat silhouette.
+// Liquids (water/slime/lava) from corpus v4: each surface face
+// Lambert-shaded so the top reads brighter than the descending sides,
+// painted back to front. Corpus v5 adds the closed volume, rendered as an
+// absorption haze in the same hue (LIQUID_HAZE_RGB, 0..1).
 const LIQUID_BASE = {
     water: [64, 128, 255],
     slime: [80, 200, 80],
     lava:  [255, 120, 40],
 };
 const LIQUID_ALPHA = 0.15; // per-face; back-to-front stacking deepens it
+const LIQUID_HAZE_RGB = Object.fromEntries(Object.entries(LIQUID_BASE)
+    .map(([k, c]) => [k, c.map((v) => v / 255)]));
 
 // Colours for the weapon-fire overlays.
 const PROJECTILE_COLORS = { rl: '#ff7733', gl: '#66cc44' };
@@ -344,9 +347,11 @@ export function newState() {
         // 0..1 directional shading strength on the floor model (0 gives the
         // flat look). occludeActors: depth-test overlays/actors against the
         // world — realistic occlusion instead of the analyzer's
-        // everyone-always-visible default.
+        // everyone-always-visible default. liquidHaze: opacity scale of the
+        // liquid volume haze (0 off, 1 default; needs corpus v5 volumes).
         fog: 1,
         worldLight: 0.6,
+        liquidHaze: 1,
         occludeActors: false,
         showLos: false,
         showPvs: false,
@@ -633,9 +638,10 @@ export class MvdMap {
         if (s._liquidFacesGeom !== geom) {
             s._liquidFaces = buildLiquidFaces(geom && geom.liquids,
                                               LIQUID_BASE, LIQUID_ALPHA, SOLID_LIGHT);
+            s._liquidVolume = buildLiquidVolume(geom && geom.liquids);
             s._liquidFacesGeom = geom;
         }
-        glw.syncLiquids(s._liquidFaces);
+        glw.syncLiquids(s._liquidFaces, s._liquidVolume);
         const canvas = s.canvas;
         const cssW = s.canvasCssW || canvas.width;
         const cssH = s.canvasCssH || canvas.height;
@@ -854,6 +860,8 @@ export class MvdMap {
                 this.camera.zMidDefault || 0];
             dyn.fogLead = FOG_LEAD * halfDiag;
         }
+        dyn.liquidHaze = s.liquidHaze;
+        dyn.liquidColors = LIQUID_HAZE_RGB;
         dyn.occludeActors = s.occludeActors;
         return dyn;
     }

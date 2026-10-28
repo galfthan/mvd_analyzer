@@ -171,16 +171,20 @@ type LocRegion struct {
 // block. All readers stay presence-based: a v4 reader handles v1–v3 files
 // (missing fields read as empty), and v1–v3 readers ignore the new
 // fields, so a mixed-version corpus is fine in production.
-const GeometryVersion = 4
+// Version 5 adds LiquidMesh.Volume (the closed liquid cells), again
+// presence-based: without it the viewer draws the surfaces with no haze.
+const GeometryVersion = 5
 
-// LiquidMesh is one liquid volume's triangle soup. Liquids come from the
-// engine's turbulent '*' textures (excluding teleporters) at any
-// orientation — the side faces give the pool its volume — so they are not
-// split per loc and never run the floor/ceiling heuristics. Tris layout
-// matches LocRegion.Tris (9 floats/triangle).
+// LiquidMesh is one liquid kind's geometry. Tris are the visible surfaces:
+// the engine's turbulent '*' texture faces (excluding teleporters) at any
+// orientation, not split per loc and never run through the floor/ceiling
+// heuristics. Volume is the liquid itself as closed convex cells (the
+// hull-0 liquid leaves, see liquidVolumes), outward-wound, for the viewer's
+// absorption haze. Both match LocRegion.Tris (9 floats/triangle).
 type LiquidMesh struct {
-	Kind string    `json:"kind"` // "water" | "slime" | "lava"
-	Tris []float32 `json:"tris"`
+	Kind   string    `json:"kind"` // "water" | "slime" | "lava"
+	Tris   []float32 `json:"tris"`
+	Volume []float32 `json:"volume,omitempty"`
 }
 
 // SubModelMesh is the static geometry of one brush model (Models[ID],
@@ -234,6 +238,7 @@ type Stats struct {
 	DegenerateTris int // fan triangles dropped for sub-minTriArea area
 	LiquidFaces    int // worldspawn '*' faces routed into Liquids
 	LiquidTris     int // triangles emitted across all LiquidMesh
+	LiquidVolTris  int // closed-volume triangles across all LiquidMesh.Volume
 	SubModelMeshes int // brush-model meshes emitted into SubModels
 	SubModelTris   int // triangles emitted across all SubModelMesh
 	FacesPruned    int // floor faces dropped by usage pruning (BuildPruned)
@@ -302,20 +307,20 @@ func buildRegions(mapName string, b *bsp.BSP, finder *loc.Finder, p Params, usag
 	// Liquid triangles accumulated per kind ("water"/"slime"/"lava").
 	liquidTris := make(map[string][]float32)
 
-	// Liquid face rings, gathered up front for usage pruning: a floor face
-	// under a liquid surface is a pool bottom, which floor-contact samples
-	// never reach (a swimming player is not on ground), so pruning would
-	// drop every one of them and leave the pool bottomless.
+	// Liquid face rings, gathered up front. Usage pruning needs them: a
+	// floor face under a liquid surface is a pool bottom, which
+	// floor-contact samples never reach (a swimming player is not on
+	// ground), so pruning would drop every one of them and leave the pool
+	// bottomless. The volume extraction needs them to tell real liquid
+	// cells from teleporters (see liquidVolumes).
 	var liquidRings [][]bsp.Vec3
-	if usage != nil {
-		for faceIdx := firstFace; faceIdx < endFace; faceIdx++ {
-			face := b.Faces[faceIdx]
-			if int(face.PlaneID) >= len(b.Planes) || !isLiquidTex(b.FaceTexName(face)) {
-				continue
-			}
-			if ring, ok := assembleRing(b, face); ok && len(ring) >= 3 {
-				liquidRings = append(liquidRings, ring)
-			}
+	for faceIdx := firstFace; faceIdx < endFace; faceIdx++ {
+		face := b.Faces[faceIdx]
+		if int(face.PlaneID) >= len(b.Planes) || !isLiquidTex(b.FaceTexName(face)) {
+			continue
+		}
+		if ring, ok := assembleRing(b, face); ok && len(ring) >= 3 {
+			liquidRings = append(liquidRings, ring)
 		}
 	}
 
@@ -536,10 +541,17 @@ func buildRegions(mapName string, b *bsp.BSP, finder *loc.Finder, p Params, usag
 	// rest pose is not a stable bound).
 
 	// Liquids: emit one mesh per kind in a stable order.
+	volumes := liquidVolumes(b, liquidRings, &stats.DegenerateTris)
 	for _, kind := range []string{"water", "slime", "lava"} {
-		if tris := liquidTris[kind]; len(tris) > 0 {
-			result.Liquids = append(result.Liquids, LiquidMesh{Kind: kind, Tris: tris})
+		tris, vol := liquidTris[kind], volumes[kind]
+		if len(tris) == 0 && len(vol) == 0 {
+			continue
 		}
+		if tris == nil {
+			tris = []float32{}
+		}
+		stats.LiquidVolTris += len(vol) / 9
+		result.Liquids = append(result.Liquids, LiquidMesh{Kind: kind, Tris: tris, Volume: vol})
 	}
 
 	// SubModels: every brush model (Models[1:]) — lifts, doors, plats,

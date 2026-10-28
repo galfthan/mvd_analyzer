@@ -123,6 +123,11 @@ that downstream consumers render, summarise, or feed to an agent.
   `liquids` (water/slime/lava volume meshes from the engine's turbulent
   `*` textures) and `submodels` (brush-model lifts/doors, keyed by their
   `*id` index and posed at runtime from the result's mover streams) (v4).
+  Version 5 adds `liquids[].volume`: the liquid itself as closed convex
+  cells — every water/slime/lava leaf of the BSP's hull-0 tree, built by
+  clipping the half-spaces on its root path, wound outward — for the
+  viewer's volumetric haze. qbsp makes teleporter fields liquid too, so
+  only cells connected to a visible (non-teleport) `*` surface are kept.
   (A v3 top-level `walls` list fed a since-removed occluding "solid"
   render; walls are still classified for diagnostics but no longer
   emitted.) Degenerate zero-area fan triangles are dropped. Extraction thresholds

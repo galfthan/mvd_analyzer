@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
     parseColor, makeWorldTransform, entryDepth,
-    buildEntryVertices, sortedIndices, buildLiquidFaces,
+    buildEntryVertices, sortedIndices, buildLiquidFaces, buildLiquidVolume,
     GlWorld, DEPTH_SCALE,
 } from '../src/glworld.js';
 import { newCamera, refreshTrig, fit, project } from '../src/camera.js';
@@ -78,7 +78,7 @@ test('sortedIndices orders entries back to front for the camera', () => {
     assert.deepEqual([...idx], [3, 4, 5, 0, 1, 2, 6, 7, 8]);
 });
 
-test('buildLiquidFaces quantises the shade exactly like drawLiquidVolume', () => {
+test('buildLiquidFaces quantises the shade to tenths', () => {
     const light = [0, 0, 1];
     // A flat top face (normal +z): |n·l| = 1 → shade 1.0.
     const flat = { kind: 'water', tris: [0, 0, 0, 10, 0, 0, 10, 10, 0] };
@@ -89,6 +89,19 @@ test('buildLiquidFaces quantises the shade exactly like drawLiquidVolume', () =>
     assert.equal(faces.length, 2, 'degenerate/null volumes dropped');
     assert.equal(faces[0].fill, 'rgba(64, 128, 255, 0.15)');
     assert.equal(faces[1].fill, `rgba(${Math.round(255 * 0.5)}, ${Math.round(120 * 0.5)}, ${Math.round(40 * 0.5)}, 0.15)`);
+});
+
+test('buildLiquidVolume interleaves cells with the kind channel mask', () => {
+    assert.equal(buildLiquidVolume(null), null);
+    assert.equal(buildLiquidVolume([{ kind: 'water', tris: [0, 0, 0, 1, 0, 0, 1, 1, 0] }]), null,
+        'pre-v5 liquids (surfaces only) have no volume');
+    const v = buildLiquidVolume([
+        { kind: 'water', tris: [], volume: [0, 0, 0, 1, 0, 0, 1, 1, 0, 7] },
+        { kind: 'lava', tris: [], volume: [5, 6, 7, 5, 6, 8, 5, 7, 8] },
+    ]);
+    assert.equal(v.length, 6 * 7, 'two whole triangles; the trailing partial float is dropped');
+    assert.deepEqual([...v.subarray(0, 7)], [0, 0, 0, 1, 0, 0, 0], 'water → r');
+    assert.deepEqual([...v.subarray(21, 28)], [5, 6, 7, 0, 0, 1, 0], 'lava → b');
 });
 
 test('create() returns null on a missing or broken context, never throws', () => {

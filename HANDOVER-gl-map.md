@@ -120,14 +120,21 @@ liquid volume haze, is always on:
   world (`state.occludeActors`); floors hide players/items/lines behind
   them. Known nit: screen-space arrowhead triangles carry z=0, so they
   can clip oddly in this mode — fix if the mode survives review.
-- **Liquid volume** — `_drawLiquidVolume`: liquid faces are BSP `*`
-  surfaces, not closed volumes, so haze opacity comes from the depth
-  between the nearest liquid surface and the opaque world behind it
-  (`_sceneDepth` renders floors + movers depth-only into a texture each
-  frame when liquids exist). Faces draw front-to-back under a stencil so
-  only the nearest surface per pixel contributes. Where nothing opaque
-  lies behind (side views into a pool with no floor face behind it) the
-  haze runs to `LIQUID_VOLUME_MAX`.
+- **Liquid volume** — `_drawLiquidVolume`: true volumetric absorption.
+  mapgen (geometry v5) exports each liquid as its closed convex BSP cells
+  (`LiquidMesh.volume`, the hull-0 water/slime/lava leaves; teleporter
+  fields, which qbsp also makes liquid, are dropped by requiring a
+  connection to a visible `*` surface). Per frame the cells draw into a
+  float target (RGBA32F with `EXT_float_blend`, else RGBA16F; no
+  `EXT_color_buffer_float` → surfaces only): back faces add their depth,
+  front faces subtract it, each clamped to the opaque world
+  (`_sceneDepth`: floors + movers depth-only), so each channel holds the
+  ray's path length through water / slime / lava. A full-screen pass
+  turns that into Beer–Lambert opacity (`LIQUID_VOLUME_LENGTH`,
+  `LIQUID_VOLUME_MAX` × `state.liquidHaze`) under the surfaces. Side views
+  see the body of water too, not just a tinted top. Maps whose JSON
+  predates v5 (no BSP provisioned locally — everything but the 29
+  deployed maps) render surfaces only.
 
 The owner said: *"Do not focus on adding new effects, that is part of
 next steps done together"* — so 3D player models and the perspective /

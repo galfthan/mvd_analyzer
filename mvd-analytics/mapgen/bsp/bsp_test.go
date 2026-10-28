@@ -309,3 +309,29 @@ func TestParseTexinfos_TrailingPartial(t *testing.T) {
 		t.Errorf("got %#v, want one texinfo miptex=3", got)
 	}
 }
+
+func TestParseTree_V29(t *testing.T) {
+	var nb, lb []byte
+	// Node: plane 3, front child node 1, back child leaf 2 (-3).
+	nb = appendI32(nb, 3)
+	nb = appendI16(nb, 1, -3)
+	nb = appendI16(nb, 0, 0, 0, 0, 0, 0)
+	nb = appendU16(nb, 0, 0)
+	// Leaves: solid, water.
+	for _, c := range []int32{-2, -3} {
+		lb = appendI32(lb, c, -1)
+		lb = appendI16(lb, 0, 0, 0, 0, 0, 0)
+		lb = appendU16(lb, 0, 0)
+		lb = append(lb, 0, 0, 0, 0)
+	}
+	nodes, leafs := parseTree(nb, lb, "")
+	if len(nodes) != 1 || nodes[0].PlaneNum != 3 || nodes[0].Children != [2]int32{1, -3} {
+		t.Errorf("nodes = %+v", nodes)
+	}
+	if len(leafs) != 2 || leafs[1].Contents != -3 {
+		t.Errorf("leafs = %+v", leafs)
+	}
+	if n, l := parseTree(nb[:5], lb, ""); n != nil || l != nil {
+		t.Errorf("partial node lump: got %v %v, want nil", n, l)
+	}
+}

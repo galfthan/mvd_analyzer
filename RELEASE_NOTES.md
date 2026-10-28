@@ -25,8 +25,14 @@ player models, first-person camera). A machine without WebGL2 sees a
 **Map effects.** Depth fog and directional floor shading are always on
 (their toolbar buttons are gone); fog is anchored to the map centre, so
 it no longer shifts with where the view was panned before tilting.
-Liquids gain a depth-based absorption haze under their surfaces — deep
-water reads denser than shallow. For that the map geometry now keeps pool
+Liquids render as volumes: mapgen exports each pool's real 3D shape (the
+BSP's closed liquid cells, geometry version 5) and the map measures how
+far every view ray travels through water, slime or lava before it hits a
+floor, so pools read as bodies of liquid from any angle — deep water
+denser than shallow, with visible sides — under the existing surfaces
+(opacity adjustable via `state.liquidHaze`). The 29 maps with deployed
+BSPs carry the volumes; the rest of the corpus keeps surfaces only until
+regenerated. The map geometry also keeps pool
 bottoms: usage pruning never drops a floor under a liquid surface (no
 player ever stood there, so every pool used to be bottomless), and the
 pruned corpus was regenerated against newer and more demos

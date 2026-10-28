@@ -1166,11 +1166,15 @@ body reads as a 3D volume with visible depth (water blue, slime green,
 lava orange). The per-face alpha is kept low (`LIQUID_ALPHA`) so the
 volume reads as a faint tint rather than dominating the floor under it.
 They draw live above the region fills and below the outlines/players.
-Under the surfaces sits an absorption haze in the liquid's colour whose
-opacity grows with the depth from the nearest liquid surface down to the
-opaque world behind it (a scene-depth prepass; `LIQUID_VOLUME_LENGTH` /
-`LIQUID_VOLUME_MAX` in `glworld.js`), so deep pools read darker and
-denser than shallow edges.
+Version-5 geometry adds each liquid's closed volume (`liquids[].volume`),
+rendered as a volumetric absorption haze in the liquid's colour under the
+surfaces: the renderer accumulates every view ray's path length through
+the volume, stopped at the first floor (a scene-depth prepass), and
+converts it to opacity (`LIQUID_VOLUME_LENGTH` / `LIQUID_VOLUME_MAX` in
+`glworld.js`, scaled by `state.liquidHaze`). Deep pools read denser than
+shallow edges and a pool seen from the side shows its body of water.
+Needs float render targets (`EXT_color_buffer_float`); without them, or
+for pre-v5 files, only the surfaces draw.
 
 Depth fog (`state.fog`) and directional floor shading
 (`state.worldLight`) are always on; they have no toolbar buttons. Fog
@@ -1314,7 +1318,8 @@ triangle list for the since-removed Solid mode — the generator no longer
 emits it, though the reader still tolerates it in older files), or
 version 4 (adds optional `liquids` water/slime/lava volume meshes and
 `submodels` brush-model lifts/doors, and drops degenerate zero-area
-triangles). The frontend is presence-based and accepts every version
+triangles), or version 5 (adds `liquids[].volume`, the closed liquid
+cells for the volume haze). The frontend is presence-based and accepts every version
 (v1 — 6 floats, XY only — is flattened to each region's median z on load;
 missing `walls`/`liquids`/`submodels` simply render nothing). A
 usage-pruned file carries a `pruned` provenance block.
