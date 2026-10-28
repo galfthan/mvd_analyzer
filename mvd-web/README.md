@@ -661,11 +661,9 @@ gap (~4x on RL, ~1.5x on GL — `RECON_ANYDAMAGE_NOTE` in `src/lib/aim.js`, appe
 to `RECON_ACCURACY_NOTE` (`src/lib/accuracy.js`) for those two weapons only, since everywhere else
 the two conventions coincide and the sentence would invent a difference).
 
-Note that `getAccuracyClass` (`accuracy-high/medium/low`) is currently
-inert on these cells — the only rule for those classes is scoped to
-`#accuracy-table`, an id no longer in the DOM — so the colour thresholds
-are not, today, a second cross-convention trap. Anyone re-pointing that
-rule must scope the thresholds by convention first.
+Neither cell carries a good / bad colour band: one set of thresholds
+across conventions would be a second cross-convention trap. Anyone adding
+one must scope the thresholds by convention first.
 
 ### The match wall clock
 
