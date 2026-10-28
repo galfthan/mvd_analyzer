@@ -72,7 +72,7 @@ the source's defaults (`SOURCES` in clip-query.js).
    where tree (groups with an and/or toggle, a not, nested groups), rank, clip padding,
    live result count / preview rows, "Add to playlist" and "Save as preset".
    Field pickers list the fields the endpoint's rows actually carry.
-4. **Text mode** — done (`src/lib/clip-expr-text.js`, jsep 1.4.0): the where tree as an expression
+4. **Text mode** — done (since folded into Code's `keep` line) (`src/lib/clip-expr-text.js`, jsep 1.4.0): the where tree as an expression
    (`weapon = "rl" and (pickerRelation = "enemy" or not pickerHadWeapon)`),
    parsed with jsep, round-tripping with the builder.
 5. **Usability pass** — done: the finder and the playlist became panes
@@ -85,5 +85,15 @@ the source's defaults (`SOURCES` in clip-query.js).
    the fields that name a player; *Code* edits the whole query as text,
    one line per stage (`src/lib/clip-query-text.js`), which is also a
    readable form to share. Order without a field keeps the earliest N.
+   The filter-only Text switch was dropped once Code covered it.
+
+Candidate next: **presets with knobs.** Most players will never open the
+stages; a preset could declare one or two of its values as knobs ("Best
+quad runs: top [5]", "Packs: weapon [RL], taken by [enemy]") shown above
+a collapsed "how it works", the stages staying one click away. Also
+considered: a peek at the first rows under stage 1 (click a cell to
+filter on it), value suggestions from the spec's enums and the rows'
+distinct values, and a human title per param / field as an `x-title` in
+openapi.yaml (API names stay underneath).
 
 Later, separate: the multi-demo search over mvd-api.

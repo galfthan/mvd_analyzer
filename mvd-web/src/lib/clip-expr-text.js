@@ -1,4 +1,5 @@
-// clip-expr-text.js — the clip finder's filter as text, e.g.
+// clip-expr-text.js — the clip finder's filter as text (the `keep` line of
+// its Code view, src/lib/clip-query-text.js), e.g.
 //   weapon = "rl" and (pickerRelation = enemy or not pickerHadWeapon)
 // parsed with jsep (MIT, https://github.com/EricSmekens/jsep) into its
 // syntax tree and converted to the stored expression tree

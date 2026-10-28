@@ -39,7 +39,7 @@ talks to it through a JS shim.
   split, [Lucide](https://lucide.dev) icons, imported one per file
   (`@lucide/svelte/icons/<name>`) so only the icons used ship, and
   [jsep](https://github.com/EricSmekens/jsep) (MIT), the expression parser
-  behind the clip finder's filter text and *Code* view. Their node tests
+  behind the clip finder's *Code* view (its `keep` line). Their node tests
   skip where `npm ci` has not run.
 - `static/` — copied into `dist/` as-is (Vite's `publicDir`).
   - `styles.css` — the stylesheet.
@@ -1181,11 +1181,11 @@ scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
   `ExprGroup.svelte`) runs a query in four boxed stages joined by the
   count each passes on (`stages()`): **1 Find rows** — the source and its
   params; **2 Keep rows where** — the filter as nested *all of* / *any
-  of* groups with *not*, or under *Text* as an expression like
-  `weapon = rl and (pickerRelation = enemy or not pickerHadWeapon)`
-  (`src/lib/clip-expr-text.js`: jsep parses, the syntax tree is converted
-  to the stored one and anything outside the small grammar is an error;
-  text that does not parse keeps the last good filter); **3 Order** — a
+  of* groups with *not* (as text it is Code's `keep` line, e.g.
+  `weapon = rl and (pickerRelation = enemy or not pickerHadWeapon)` —
+  `src/lib/clip-expr-text.js`: jsep parses, the syntax tree is converted
+  to the stored one and anything outside the small grammar is an error);
+  **3 Order** — a
   field, highest or lowest first, keep the first N; **4 Clips from each
   row** — from / to a row field with seconds of padding, *watch* (the
   fields whose values name a player of this demo), a label, *+ clip* for

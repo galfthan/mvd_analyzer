@@ -1,14 +1,14 @@
 <script module>
     // What the finder holds survives its pane being collapsed or moved.
-    /** @type {{ title: string, presetId: string, about: string, aboutKey: string, draft: import('../lib/clip-query.js').Draft | null, code: boolean, textMode: boolean }} */
-    const memo = { title: '', presetId: '', about: '', aboutKey: '', draft: null, code: false, textMode: false };
+    /** @type {{ title: string, presetId: string, about: string, aboutKey: string, draft: import('../lib/clip-query.js').Draft | null, code: boolean }} */
+    const memo = { title: '', presetId: '', about: '', aboutKey: '', draft: null, code: false };
 </script>
 
 <script>
     // The clip finder: a clip query (src/lib/clip-query.js) over the loaded
     // demo, in four stages, each showing how many rows it passes on — find
     // rows (an mvd-api endpoint and its params), keep the rows a filter
-    // matches, order them and keep the first N, cut clips from each row.
+    // (and / or / not groups) matches, order them and keep the first N, cut clips from each row.
     // Every source, param and field is documented from the API spec
     // (api-docs.js). Load a preset, name and save your own, share it as a
     // link, edit it all as code, add the clips to the playlist.
@@ -24,9 +24,8 @@
     import { demo, teams, colorOf } from '../state/index.js';
     import { formatDuration } from '../lib/result.js';
     import {
-        SOURCES, PRESETS, viewCall, stages, fieldPaths, fieldOf, toDraft, fromDraft, encodeQuery, toEditTree, toExpr,
+        SOURCES, PRESETS, viewCall, stages, fieldPaths, fieldOf, toDraft, fromDraft, encodeQuery,
     } from '../lib/clip-query.js';
-    import { parseExpr, exprToText } from '../lib/clip-expr-text.js';
     import { parseQueryText, queryToText } from '../lib/clip-query-text.js';
     import { miniMarkdown } from '../lib/mini-md.js';
     import { runner, currentRef } from './index.js';
@@ -52,11 +51,10 @@
     let aboutKey = $state(first.aboutKey);
     let draft = $state(/** @type {Draft} */ (first.draft));
     let code = $state(memo.code);           // the whole query as text
-    let textMode = $state(memo.textMode);   // the filter as text
     let info = $state(false);
 
     $effect(() => {
-        Object.assign(memo, { title, presetId, about, aboutKey, draft: $state.snapshot(draft), code, textMode });
+        Object.assign(memo, { title, presetId, about, aboutKey, draft: $state.snapshot(draft), code });
     });
 
     loadApiDocs();
@@ -73,42 +71,13 @@
         about = from.about || '';
         draft = toDraft(q);
         aboutKey = JSON.stringify(fromDraft(draft));
-        exprText = exprToText(q.where);
-        exprError = '';
         codeText = queryToText(q, t);
         codeError = '';
     }
 
-    // ── The filter as text (src/lib/clip-expr-text.js): what the text
-    // parses to replaces the builder's tree; text that does not parse leaves
-    // the last good tree in force and says why.
-    let exprText = $state(exprToText(toExpr(/** @type {Draft} */ (first.draft).where)));
-    let exprError = $state('');
-
-    /** @param {boolean} on */
-    function setTextMode(on) {
-        if (on) {
-            exprText = exprToText(toExpr(draft.where));
-            exprError = '';
-        }
-        textMode = on;
-    }
-
-    /** @param {Event & { currentTarget: HTMLTextAreaElement }} e */
-    function editText(e) {
-        exprText = e.currentTarget.value;
-        const r = parseExpr(exprText);
-        if (r.error) {
-            exprError = r.error;
-            return;
-        }
-        exprError = '';
-        draft.where = toEditTree(r.expr);
-    }
-
-    // ── The whole query as code (src/lib/clip-query-text.js), the same
-    // way: good text replaces the draft and the name, bad text says which
-    // line and keeps the last good query running.
+    // The whole query as code (src/lib/clip-query-text.js): good text
+    // replaces the draft and the name, bad text says which line and keeps
+    // the last good query running.
     let codeText = $state(queryToText(fromDraft(/** @type {Draft} */ (first.draft)), first.title));
     let codeError = $state('');
 
@@ -117,8 +86,6 @@
         if (on) {
             codeText = queryToText(fromDraft(draft), title);
             codeError = '';
-        } else {
-            exprText = exprToText(toExpr(draft.where));
         }
         code = on;
     }
@@ -373,19 +340,7 @@
                 <span class="cf-step">2</span><span class="cf-heading">Keep rows where</span>
                 <span class="muted cf-note">nothing set: keep every row</span>
             </div>
-            <div class="cf-row">
-                <span class="pt-group">
-                    <button class="pt-btn" class:active={!textMode} onclick={() => setTextMode(false)}>Builder</button>
-                    <button class="pt-btn" class:active={textMode} title={'e.g. weapon = rl and (pickerRelation = enemy or not pickerHadWeapon)'} onclick={() => setTextMode(true)}>Text</button>
-                </span>
-            </div>
-            {#if textMode}
-                <textarea class="cf-text" rows="3" spellcheck="false" value={exprText} oninput={editText}
-                    placeholder={'weapon = rl and (pickerRelation = enemy or not pickerHadWeapon) — and, or, not, ( ), = != < <= > >= ~ (contains), in [a, b]'}></textarea>
-                {#if exprError}<span class="cf-error">{exprError}</span>{/if}
-            {:else}
-                <ExprGroup bind:group={draft.where} fields="cf-fields" />
-            {/if}
+            <ExprGroup bind:group={draft.where} fields="cf-fields" />
         </section>
         <div class="cf-flow"><ArrowDown size={13} /> {#if run}{count(run.kept.length, 'row')} kept{/if}</div>
 

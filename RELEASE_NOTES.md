@@ -67,7 +67,7 @@ The **clip finder** builds those lists from any of six API endpoints
 (events, highlights, backpacks, top kills, top windows, lives) in four
 visible stages, each saying how many rows it passes on: find rows (the
 endpoint and its params), keep the rows that match a filter (built from
-and / or / not groups, or typed as an expression), order them and keep
+and / or / not groups), order them and keep
 the first N, and cut one or more clips from each row (from / to a row's
 time with padding, watching a player the row names, with a label
 template). Every source, param and row field is explained from the API
