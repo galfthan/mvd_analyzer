@@ -55,12 +55,17 @@ export function resetRegionControl(result, editable) {
 // the locs, then recompute control through the data layer (`handle`, the
 // current DemoHandle — view.RegionControl in the WASM, built and shipped
 // with this JS). A failed recompute is logged and leaves the resolved
-// regions in place with the previous control states.
+// regions in place with the previous control states. A reply that lands
+// after the model was replaced — a later edit, the demo's own regions put
+// back when the deferred buckets land (resetRegionControl), another demo —
+// is dropped: merged into the newer model it would pair this edit's
+// regions with that model's definitions.
 export async function applyRegionDefs(handle, defs) {
     const cur = regionControl.get();
     if (!cur) return;
     const regions = resolveRegions(defs, cur.locations);
-    regionControl.set({ ...cur, stage: 'resolved', defs, regions });
+    const resolved = { ...cur, stage: 'resolved', defs, regions };
+    regionControl.set(resolved);
 
     let res;
     try {
@@ -69,14 +74,14 @@ export async function applyRegionDefs(handle, defs) {
         console.warn('recomputeRegionControl:', err.message);
         return;
     }
+    if (regionControl.get() !== resolved) return;
     if (res.error) {
         console.warn('recomputeRegionControl:', res.error);
         return;
     }
     regionControl.set({
-        ...regionControl.get(),
+        ...resolved,
         stage: 'computed',
-        regions,
         stats: res.stats || null,
         bucketStates: res.bucketStates || null,
         teamA: res.teamA,

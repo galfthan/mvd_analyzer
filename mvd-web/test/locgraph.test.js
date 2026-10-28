@@ -246,6 +246,34 @@ test('region model: reset, apply in two steps, failure, re-apply', async () => {
     assert.deepEqual(seen.slice(0, 6), [null, null, 'loaded', 'loaded', 'loaded', 'resolved']);
 });
 
+test('region model: a recompute landing after the model was reset is dropped', async () => {
+    resetRegionControl(TEAM2, true);
+    let reply;
+    const handle = { recomputeRegions: () => new Promise((r) => { reply = r; }) };
+    const def = { name: 'one', locs: [TEAM2.timelineAnalysis.regionControl.regions[0].points[0].name] };
+    const pending = applyRegionDefs(handle, [def]);
+    assert.equal(regionControl.get().stage, 'resolved');
+    // The deferred buckets land: the demo's own regions are put back.
+    resetRegionControl(TEAM2, true);
+    const reset = regionControl.get();
+    reply(JSON.stringify({ stats: { x: 1 }, bucketStates: { one: 'A' }, teamA: 'a', teamB: 'b' }));
+    await pending;
+    assert.equal(regionControl.get(), reset, 'the reset model stands, unmixed with the edit');
+
+    // Two edits in flight: only the later one's answer is applied.
+    const replies = [];
+    const h2 = { recomputeRegions: () => new Promise((r) => { replies.push(r); }) };
+    const first = applyRegionDefs(h2, [def]);
+    const second = applyRegionDefs(h2, []);
+    replies[0](JSON.stringify({ stats: { first: 1 } }));
+    await first;
+    assert.equal(regionControl.get().stage, 'resolved');
+    replies[1](JSON.stringify({ stats: { second: 1 } }));
+    await second;
+    assert.deepEqual([regionControl.get().stage, regionControl.get().stats, regionControl.get().defs], ['computed', { second: 1 }, []]);
+    regionControl.set(null);
+});
+
 // Go names region control's sides in demoInfo.teams order
 // (view/region_control.go inferTeamsFromMatch); the canonical order is the
 // frag order. These two demos have the demoInfo-first team LOSING, so Go's
