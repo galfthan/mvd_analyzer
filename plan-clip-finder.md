@@ -61,9 +61,10 @@ the source's defaults (`SOURCES` in clip-query.js).
    `pickerRelation` / `pickerHadWeapon` / `pickerKills` on every demo), so
    the four pack presets are plain `/backpacks` queries; a query's `clip`
    may be a list (the drop from the dropper's view, then the pickup).
-2. **Saved presets** — save the current query under a name ("My presets" in
-   the dropdown, `localStorage`), share one by link.
-3. **The pane, builder mode** — source picker, the endpoint's params, the
+2. **Saved presets** — done: "My presets" in the Generate menu and the
+   finder's *Start from…*, `localStorage`, shared as `#clipquery=` links.
+3. **The pane, builder mode** — done, as a collapsible section above the
+   playlist — source picker, the endpoint's params, the
    where tree (groups with an and/or toggle, a not, nested groups), rank, clip padding,
    live result count / preview rows, "Add to playlist" and "Save as preset".
    Field pickers list the fields the endpoint's rows actually carry.

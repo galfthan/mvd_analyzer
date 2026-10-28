@@ -159,7 +159,7 @@ function decodeRows(doc) {
 }
 
 /** @param {string} text */
-function base64UrlEncode(text) {
+export function base64UrlEncode(text) {
     const bytes = new TextEncoder().encode(text);
     let bin = '';
     for (const b of bytes) bin += String.fromCharCode(b);
@@ -167,7 +167,7 @@ function base64UrlEncode(text) {
 }
 
 /** @param {string} str */
-function base64UrlDecode(str) {
+export function base64UrlDecode(str) {
     const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
     const bin = atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4));
     return new TextDecoder().decode(Uint8Array.from(bin, (ch) => ch.charCodeAt(0)));

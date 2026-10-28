@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { SOURCES, PRESETS, viewCall, matches, renderLabel, clipsOf, runQuery } from '../src/lib/clip-query.js';
+import {
+    SOURCES, PRESETS, viewCall, matches, renderLabel, clipsOf, runQuery,
+    fieldPaths, toEditTree, toExpr, validateQuery, encodeQuery, decodeQuery, toDraft, fromDraft,
+} from '../src/lib/clip-query.js';
 
 const demo = { key: 'hub:7', gameId: 7, title: 'dm2', offset: 10 };
 const result = { streams: { global: { demoOffset: 10000 } }, timelineAnalysis: { playerUserIDs: { bps: 3, valla: 4 } } };
@@ -108,4 +111,56 @@ test('a list of clip entries makes one clip per entry and row', () => {
     ], 'the drop\'s lead-up, then the pickup; an untaken pack gets one clip');
     const worst = PRESETS.find((p) => p.id === 'packs-enemy-new');
     assert.deepEqual(clipsOf(worst.query, body, result, demo).map((c) => c.from), [28, 47]);
+});
+
+test('fieldPaths lists leaf paths, lists of objects by their first element', () => {
+    const rows = [{ time: 1, actor: { name: 'a' }, victims: [{ name: 'b', killed: true }], weapons: ['rl'] }, { extra: 2 }];
+    assert.deepEqual(fieldPaths(rows), ['actor.name', 'extra', 'time', 'victims.0.killed', 'victims.0.name', 'weapons']);
+});
+
+test('the edit tree round-trips the stored one and types its values', () => {
+    const expr = { and: [
+        { field: 'weapon', op: '=', value: 'rl' },
+        { not: { or: [{ field: 'pickerRelation', op: 'in', value: ['team', 'self'] }, { field: 'pickerKills', op: '>', value: 2 }] } },
+        { not: { field: 'pickerHadWeapon', op: '=', value: true } },
+    ] };
+    const tree = toEditTree(expr);
+    assert.equal(tree.items[1].not, true);
+    assert.equal(tree.items[1].items[0].value, 'team, self');
+    assert.deepEqual(toExpr(tree), expr);
+    assert.equal(toExpr(toEditTree(undefined)), undefined, 'empty keeps all');
+    const t2 = toEditTree(undefined);
+    t2.items.push({ kind: 'cond', field: '', op: '=', value: 'x' }, { kind: 'cond', field: 'n', op: '<', value: ' 7 ' });
+    assert.deepEqual(toExpr(t2), { field: 'n', op: '<', value: 7 }, 'a condition with no field is dropped, a group of one unwrapped');
+});
+
+test('validateQuery keeps good queries and refuses malformed ones', () => {
+    for (const p of PRESETS) assert.deepEqual(validateQuery(p.query), p.query, p.id);
+    assert.equal(validateQuery({ source: 'nope' }), null);
+    assert.equal(validateQuery({ source: 'toString' }), null, 'no prototype keys');
+    assert.equal(validateQuery({ source: 'events', params: { evil: 'x' } }), null, 'unknown param');
+    assert.equal(validateQuery({ source: 'events', where: { field: 'a', op: 'eval', value: 1 } }), null, 'unknown op');
+    assert.equal(validateQuery({ source: 'events', where: { and: [{ field: 'a', op: '=', value: {} }] } }), null, 'object value');
+    let deep = { field: 'a', op: '=', value: 1 };
+    for (let i = 0; i < 12; i++) deep = { not: deep };
+    assert.equal(validateQuery({ source: 'events', where: deep }), null, 'too deep');
+    assert.equal(validateQuery({ source: 'events', clip: [{}, {}, {}, {}, {}] }), null, 'too many windows');
+    assert.equal(validateQuery({ source: 'events', rank: { by: 'x', limit: -1 } }), null);
+});
+
+test('encodeQuery / decodeQuery carry a titled query through a link', () => {
+    const q = PRESETS.find((p) => p.id === 'packs-enemy-new').query;
+    assert.deepEqual(decodeQuery(encodeQuery(q, 'worst packs ä')), { title: 'worst packs ä', query: q });
+    assert.equal(decodeQuery('!!!'), null);
+    assert.equal(decodeQuery(Buffer.from(JSON.stringify({ v: 1, q: { source: 'x' } })).toString('base64url')), null);
+});
+
+test('the builder draft round-trips every preset', () => {
+    for (const p of PRESETS) assert.deepEqual(fromDraft(toDraft(p.query)), p.query, p.id);
+    const d = toDraft({ source: 'lives' });
+    d.params.minMs = ' 60000 ';
+    d.params.bogus = 'x';
+    d.clips[0].before = '1.5';
+    d.rank = { by: 'damageGiven', desc: true, limit: '3' };
+    assert.deepEqual(fromDraft(d), { source: 'lives', params: { minMs: '60000' }, rank: { by: 'damageGiven', desc: true, limit: 3 }, clip: { before: 1500 } });
 });

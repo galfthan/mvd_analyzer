@@ -1140,6 +1140,19 @@ scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
   finder adds no detection of its own: rows and fields are the endpoint's,
   `mvd-api/openapi/openapi.yaml` is their reference. Plan:
   [`plan-clip-finder.md`](../plan-clip-finder.md).
+- **The clip finder section** above the playlist (`ClipFinder.svelte`,
+  the filter editor `ExprGroup.svelte`; collapsed or open per browser)
+  edits a query as a form: *Start from…* a preset, the source and its
+  params (hints from the API), the filter as nested *all of* / *any of*
+  groups with *not*, the rank, one or more clip windows per row and the
+  label. Field boxes suggest the paths the endpoint's rows actually carry.
+  Results update as you type (the endpoint is re-queried only when the
+  source or a param changes): click one to play it, shift-click to add it,
+  or *Add N to playlist*. *Save as preset* keeps the query in this browser
+  (`mvd.clipPresets.v1`) and lists it under Generate → *My presets*;
+  *Link* copies `?gameId=…&tab=player#clipquery=<base64url JSON>`, which
+  opens the query in the finder (validated first — `validateQuery` refuses
+  unknown sources, params and operators and oversized trees).
 - **Edit**: label inline, drag or ↑ ↓ to reorder, × to remove. The list
   persists in `localStorage` (`mvd.playlist.v1`).
 - **Play all / ▶ on a row**: a scripted run — seek, POV, play; advance when

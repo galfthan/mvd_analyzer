@@ -13,6 +13,7 @@
         playerFragClips, singleHubGame, hubClipsUrl, encodePlaylist, MAX_HUB_CLIPS,
     } from '../lib/playlist.js';
     import { PRESETS, runQuery } from '../lib/clip-query.js';
+    import { userPresets } from './clip-presets.js';
     import { runner, currentRef } from './index.js';
     import { playlist, addClips, setLabel, moveClip, removeClip, clearClips } from './playlist-store.js';
     import { toast } from './toast.js';
@@ -46,7 +47,8 @@
         let out = [];
         let what = '';
         if (value.startsWith('preset:')) {
-            const p = PRESETS.find((x) => x.id === value.slice(7));
+            const id = value.slice(7);
+            const p = PRESETS.find((x) => x.id === id) || $userPresets.find((x) => x.id === id);
             if (!p) return;
             what = p.title.toLowerCase();
             try {
@@ -159,6 +161,13 @@
                 {#each PRESETS as p (p.id)}
                     <option value="preset:{p.id}">{p.title}</option>
                 {/each}
+                {#if $userPresets.length}
+                    <optgroup label="My presets">
+                        {#each $userPresets as p (p.id)}
+                            <option value="preset:{p.id}">{p.title}</option>
+                        {/each}
+                    </optgroup>
+                {/if}
                 {#if players.length}
                     <optgroup label="Frags of…">
                         {#each players as name (name)}
@@ -201,6 +210,6 @@
         {/each}
     </ol>
     {#if !clips.length}
-        <div class="player-clip-hint">No clips yet — mark In/Out above, shift-click a Hub link on any tab, or pick Generate.</div>
+        <div class="player-clip-hint">No clips yet — mark In/Out above, shift-click a Hub link on any tab, pick Generate, or build a query in the clip finder.</div>
     {/if}
 </div>

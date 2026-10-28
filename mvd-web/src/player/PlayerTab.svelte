@@ -1,5 +1,5 @@
 <script>
-    // The Player tab: the engine with its POV and clip bars and the playlist
+    // The Player tab: the engine with its POV and clip bars, the clip finder and the playlist
     // on the left, the pane column on the right, split by PaneForge (drag
     // the divider, or focus it and use the arrow keys; dragging the column
     // shut hides it). src/app/tabs.js toggles the `active` class like on every
@@ -9,6 +9,7 @@
     import PovBar from './PovBar.svelte';
     import ClipBar from './ClipBar.svelte';
     import Playlist from './Playlist.svelte';
+    import ClipFinder from './ClipFinder.svelte';
     import PaneColumn from './PaneColumn.svelte';
     import { paneLayout, updateLayout, MIN_SPLIT, MAX_SPLIT } from './layout.js';
 
@@ -71,6 +72,7 @@
                     <PlayerFrame />
                     <PovBar />
                     <ClipBar />
+                    <ClipFinder />
                     <Playlist />
                 </div>
             </Pane>

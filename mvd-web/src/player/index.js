@@ -1,11 +1,13 @@
 // The Player tab's controller: one engine, one playlist runner, the hub link
-// routing and the share-link import. The unified bar's speed buttons
+// routing and the share-link imports (playlists and clip queries). The unified bar's speed buttons
 // (src/ui/PlaybackBar.svelte) drive the engine while it is the clock;
 // components import from here.
 
 import { clock, demo, teams, activeTab, selectTab } from '../state/index.js';
 import { loadDemo } from '../app/load.js';
 import { decodePlaylist } from '../lib/playlist.js';
+import { decodeQuery } from '../lib/clip-query.js';
+import { openInFinder } from './clip-presets.js';
 import { PlayerEngine } from './engine.js';
 import { createRunner } from './runner.js';
 import { demoRefOf } from './demo-ref.js';
@@ -40,7 +42,23 @@ function importPlaylistFromHash() {
         : 'Those clips are already in your playlist');
 }
 
+// A query link's #clipquery= on page load: open it in the clip finder (not
+// saved — the viewer can save it as a preset from there).
+function importQueryFromHash() {
+    const m = location.hash.match(/^#clipquery=([A-Za-z0-9_-]+)$/);
+    if (!m) return;
+    history.replaceState(null, '', location.pathname + location.search);
+    const decoded = decodeQuery(m[1]);
+    if (!decoded) {
+        toast('That clip query link is not one this page can read');
+        return;
+    }
+    openInFinder(decoded.title, decoded.query);
+    toast(`Opened ${decoded.title ? `"${decoded.title}"` : 'a clip query'} in the clip finder`);
+}
+
 export function setupPlayer() {
     installHubLinkRouting({ runner, demo, addClips, toast });
     importPlaylistFromHash();
+    importQueryFromHash();
 }

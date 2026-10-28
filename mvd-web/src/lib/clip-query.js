@@ -29,7 +29,7 @@
 // Rows, fields and params are the endpoint's own — mvd-api/openapi/openapi.yaml
 // is their reference. The finder adds no detection of its own.
 
-import { makeClip } from './playlist.js';
+import { makeClip, base64UrlEncode, base64UrlDecode } from './playlist.js';
 
 /**
  * @typedef {import('./result.js').Result} Result
@@ -46,8 +46,18 @@ import { makeClip } from './playlist.js';
  * @property {{ by: string, desc?: boolean, limit?: number }} [rank]
  * @property {ClipSpec | ClipSpec[]} [clip]
  * @property {string} [label]
- * @typedef {{ fn: string, opts: (p: Record<string, string | number>) => object, rows: (body: any) => any[], clip: Required<Omit<ClipSpec, 'label'>> }} Source
+ * @typedef {{ fn: string, params: Record<string, string>, opts: (p: Record<string, string | number>) => object, rows: (body: any) => any[], clip: Required<Omit<ClipSpec, 'label'>> }} Source
  * @typedef {(fn: string, opts: object) => Promise<any>} ViewFn
+ * @typedef {{ kind: 'cond', field: string, op: Condition['op'], value: string }} EditCond
+ * @typedef {{ kind: 'group', op: 'and' | 'or', not: boolean, items: Array<EditGroup | EditCond> }} EditGroup
+ * @typedef {{ from: string, before: string, to: string, after: string, pov: string, label: string }} DraftClip
+ * @typedef {object} Draft  the builder's form: every field as typed text, times in seconds
+ * @property {string} source
+ * @property {Record<string, string>} params
+ * @property {EditGroup} where
+ * @property {{ by: string, desc: boolean, limit: string }} rank
+ * @property {DraftClip[]} clips
+ * @property {string} label
  */
 
 /** @param {string | number | undefined} v */
@@ -55,36 +65,42 @@ const csv = (v) => (v == null || v === '' ? undefined : String(v).split(',').map
 /** @param {string | number | undefined} v */
 const int = (v) => (v == null || v === '' ? undefined : Number(v));
 
-// The params each endpoint takes, mapped onto the view options the WASM
-// export reads (mvd-api's handlers do the same mapping in Go).
+// The params each endpoint takes (name → a hint for the builder), mapped
+// onto the view options the WASM export reads (mvd-api's handlers do the
+// same mapping in Go).
 /** @type {Record<string, Source>} */
 export const SOURCES = {
     events: {
         fn: 'getEvents',
+        params: { types: 'frag, powerup, streak, spawn, death, weapon, item, pickup, airgib, discharge, quadbore, telefrag, damage, …', players: 'names, comma-separated', from: 'ms', to: 'ms' },
         opts: (p) => ({ StartTime: int(p.from), EndTime: int(p.to), Players: csv(p.players), Types: csv(p.types) }),
         rows: (b) => b?.events || [],
         clip: { from: 'time', before: 3000, to: 'time', after: 3000, pov: 'player' },
     },
     highlights: {
         fn: 'getHighlights',
+        params: { kinds: 'discharge, quadbore, telefrag, airgib', players: 'names, comma-separated' },
         opts: (p) => ({ Kinds: csv(p.kinds), Players: csv(p.players) }),
         rows: (b) => [...(b?.discharges || []), ...(b?.quadbores || []), ...(b?.telefrags || []), ...(b?.airgibs || [])],
         clip: { from: 'time', before: 6000, to: 'time', after: 3000, pov: 'actor.name' },
     },
     backpacks: {
         fn: 'getBackpacks',
+        params: { weapons: 'rl, lg', players: 'droppers, comma-separated', from: 'ms', to: 'ms' },
         opts: (p) => ({ Players: csv(p.players), Weapons: csv(p.weapons), From: int(p.from), To: int(p.to) }),
         rows: (b) => b?.backpacks || [],
         clip: { from: 'time', before: 8000, to: 'time', after: 2000, pov: 'player' },
     },
     'top-kills': {
         fn: 'getTopKills',
+        params: { weapons: 'rl, lg, gl, …', players: 'names', gapMs: 'ms between hits (3000)', contestedMs: 'ms (4000)', limit: '20', dmg: 'bounded | raw' },
         opts: (p) => ({ Weapons: csv(p.weapons), Players: csv(p.players), GapMs: int(p.gapMs), ContestedMs: int(p.contestedMs), Limit: int(p.limit), Dmg: p.dmg }),
         rows: (b) => b?.kills || [],
         clip: { from: 'time', before: 5000, to: 'time', after: 2000, pov: 'killer' },
     },
     'top-windows': {
         fn: 'getTopWindows',
+        params: { metric: 'frags | deaths | netFrags | damageGiven | damageTaken | netDamage | shots | hits', mode: 'fixed | gap', windowMs: 'ms (30000)', gapMs: 'ms (gap mode)', players: 'names', limit: '10', perPlayer: 'per player cap', dmg: 'bounded | raw' },
         opts: (p) => ({
             Metric: p.metric, Mode: p.mode, WindowMs: int(p.windowMs), GapMs: int(p.gapMs),
             Players: csv(p.players), Limit: int(p.limit), PerPlayer: int(p.perPlayer), Dmg: p.dmg,
@@ -94,6 +110,7 @@ export const SOURCES = {
     },
     lives: {
         fn: 'getLives',
+        params: { players: 'names', from: 'ms', to: 'ms', minMs: 'shortest life, ms', dmg: 'bounded | raw' },
         opts: (p) => ({ Players: csv(p.players), From: int(p.from), To: int(p.to), MinMs: int(p.minMs), Dmg: p.dmg }),
         rows: (b) => b?.lives || [],
         clip: { from: 'start', before: 0, to: 'end', after: 2000, pov: 'player' },
@@ -137,6 +154,8 @@ export function fieldOf(row, path) {
     }
     return v;
 }
+
+export const OPS = /** @type {const} */ (['=', '!=', '<', '<=', '>', '>=', '~', 'in']);
 
 // Comparisons: numbers as numbers when the row's value is one, everything
 // else as case-insensitive text; `~` is a substring on text and membership
@@ -314,3 +333,273 @@ export const PRESETS = [
         query: { source: 'highlights', params: { kinds: 'discharge' }, label: 'Discharge · {actor.name} · {enemyKills} kill{enemyKills|s}' },
     },
 ];
+
+// fieldPaths lists the dotted paths a builder can offer for rows: every leaf
+// of the first rows, a list of objects by its first element
+// ('victims.0.name'), a list of values as itself.
+/**
+ * @param {any[]} rows
+ * @returns {string[]}
+ */
+export function fieldPaths(rows) {
+    const out = new Set();
+    /**
+     * @param {any} v
+     * @param {string} path
+     * @param {number} depth
+     */
+    const walk = (v, path, depth) => {
+        if (v && typeof v === 'object' && !Array.isArray(v) && depth < 4) {
+            for (const k of Object.keys(v)) walk(v[k], path ? `${path}.${k}` : k, depth + 1);
+        } else if (Array.isArray(v) && v.length && v[0] && typeof v[0] === 'object' && depth < 4) {
+            walk(v[0], `${path}.0`, depth + 1);
+        } else if (path) {
+            out.add(path);
+        }
+    };
+    for (const r of rows.slice(0, 200)) walk(r, '', 0);
+    return [...out].sort();
+}
+
+// ── The builder's editable tree ─────────────────────────────────────────────
+//
+// The builder edits groups (an and / or over items, optionally negated) and
+// conditions with their value as typed text; toExpr turns that back into the
+// stored tree, typing values (numbers, true / false, comma lists for `in`),
+// dropping conditions with no field and unwrapping a group of one.
+
+/** @param {string} text */
+function typed(text) {
+    const t = text.trim();
+    if (/^-?\d+(\.\d+)?$/.test(t)) return Number(t);
+    if (t === 'true' || t === 'false') return t === 'true';
+    return t;
+}
+
+/**
+ * @param {Expr | undefined} expr
+ * @returns {EditGroup}
+ */
+export function toEditTree(expr) {
+    /** @type {(e: Expr) => EditGroup | EditCond} */
+    const node = (e) => {
+        if ('and' in e || 'or' in e) {
+            const or = 'or' in e;
+            return { kind: 'group', op: or ? 'or' : 'and', not: false, items: (or ? /** @type {{ or: Expr[] }} */ (e).or : /** @type {{ and: Expr[] }} */ (e).and).map(node) };
+        }
+        if ('not' in e) {
+            const inner = node(e.not);
+            if (inner.kind === 'group' && !inner.not) return { ...inner, not: true };
+            return { kind: 'group', op: 'and', not: true, items: [inner] };
+        }
+        return { kind: 'cond', field: e.field, op: e.op, value: Array.isArray(e.value) ? e.value.join(', ') : String(e.value) };
+    };
+    if (!expr) return { kind: 'group', op: 'and', not: false, items: [] };
+    const root = node(expr);
+    return root.kind === 'group' ? root : { kind: 'group', op: 'and', not: false, items: [root] };
+}
+
+/**
+ * @param {EditGroup} root
+ * @returns {Expr | undefined}
+ */
+export function toExpr(root) {
+    /** @type {(n: EditGroup | EditCond) => Expr | null} */
+    const node = (n) => {
+        if (n.kind === 'cond') {
+            if (!n.field.trim()) return null;
+            const value = n.op === 'in' ? n.value.split(',').map(typed).filter((v) => v !== '') : typed(n.value);
+            return { field: n.field.trim(), op: n.op, value };
+        }
+        const items = /** @type {Expr[]} */ (n.items.map(node).filter(Boolean));
+        if (items.length === 1) return n.not ? { not: items[0] } : items[0];
+        /** @type {Expr} */
+        const g = n.op === 'or' ? { or: items } : { and: items };
+        return n.not ? { not: g } : g;
+    };
+    const e = node(root);
+    if (e && 'and' in e && !e.and.length) return undefined;
+    return e || undefined;
+}
+
+/** @param {number | undefined} ms */
+const secText = (ms) => (ms == null ? '' : String(ms / 1000));
+
+/**
+ * @param {ClipQuery} q
+ * @returns {Draft}
+ */
+export function toDraft(q) {
+    const specs = q.clip == null ? [{}] : Array.isArray(q.clip) ? q.clip : [q.clip];
+    return {
+        source: q.source,
+        params: Object.fromEntries(Object.entries(q.params || {}).map(([k, v]) => [k, String(v)])),
+        where: toEditTree(q.where),
+        rank: { by: q.rank?.by || '', desc: q.rank?.desc ?? true, limit: q.rank?.limit ? String(q.rank.limit) : '' },
+        clips: specs.map((c) => ({
+            from: c.from || '', before: secText(c.before), to: c.to || '', after: secText(c.after), pov: c.pov || '', label: c.label || '',
+        })),
+        label: q.label || '',
+    };
+}
+
+/**
+ * @param {Draft} d
+ * @returns {ClipQuery}
+ */
+export function fromDraft(d) {
+    /** @type {ClipQuery} */
+    const q = { source: d.source };
+    const params = Object.fromEntries(Object.entries(d.params).filter(([k, v]) => v.trim() && Object.hasOwn(SOURCES[d.source]?.params || {}, k)).map(([k, v]) => [k, v.trim()]));
+    if (Object.keys(params).length) q.params = params;
+    const where = toExpr(d.where);
+    if (where) q.where = where;
+    if (d.rank.by.trim()) {
+        const limit = Number.parseInt(d.rank.limit, 10);
+        q.rank = { by: d.rank.by.trim(), desc: d.rank.desc, ...(limit > 0 ? { limit } : {}) };
+    }
+    const specs = d.clips.map((c) => {
+        /** @type {ClipSpec} */
+        const spec = {};
+        for (const k of /** @type {const} */ (['from', 'to', 'pov', 'label'])) if (c[k].trim()) spec[k] = c[k].trim();
+        for (const k of /** @type {const} */ (['before', 'after'])) {
+            const sec = Number.parseFloat(c[k]);
+            if (Number.isFinite(sec)) spec[k] = Math.round(sec * 1000);
+        }
+        return spec;
+    });
+    if (specs.length > 1) q.clip = specs;
+    else if (specs.length && Object.keys(specs[0]).length) q.clip = specs[0];
+    if (d.label.trim()) q.label = d.label.trim();
+    return q;
+}
+
+// ── Untrusted queries: share links and stored presets ───────────────────────
+
+const MAX_TEXT = 300;
+/** @param {unknown} v */
+const text = (v) => (typeof v === 'string' && v.length <= MAX_TEXT ? v : null);
+/** @param {unknown} v */
+const scalar = (v) => (typeof v === 'number' && Number.isFinite(v)) || typeof v === 'boolean' || text(v) != null;
+
+/**
+ * @param {unknown} e
+ * @param {number} depth
+ * @param {{ n: number }} budget
+ * @returns {Expr | null}
+ */
+function cleanExpr(e, depth, budget) {
+    if (!e || typeof e !== 'object' || depth > 8 || ++budget.n > 200) return null;
+    const o = /** @type {Record<string, any>} */ (e);
+    for (const k of /** @type {const} */ (['and', 'or'])) {
+        if (k in o) {
+            if (!Array.isArray(o[k])) return null;
+            const items = o[k].map((/** @type {unknown} */ x) => cleanExpr(x, depth + 1, budget));
+            return items.includes(null) ? null : /** @type {Expr} */ ({ [k]: items });
+        }
+    }
+    if ('not' in o) {
+        const inner = cleanExpr(o.not, depth + 1, budget);
+        return inner && { not: inner };
+    }
+    const field = text(o.field);
+    if (!field || !OPS.includes(o.op)) return null;
+    const ok = Array.isArray(o.value) ? o.value.length <= 50 && o.value.every(scalar) : scalar(o.value);
+    return ok ? { field, op: o.op, value: o.value } : null;
+}
+
+/**
+ * @param {unknown} c
+ * @returns {ClipSpec | null}
+ */
+function cleanSpec(c) {
+    if (!c || typeof c !== 'object') return null;
+    const o = /** @type {Record<string, any>} */ (c);
+    /** @type {ClipSpec} */
+    const out = {};
+    for (const k of /** @type {const} */ (['from', 'to', 'pov', 'label'])) {
+        if (o[k] == null) continue;
+        const t = text(o[k]);
+        if (t == null) return null;
+        out[k] = t;
+    }
+    for (const k of /** @type {const} */ (['before', 'after'])) {
+        if (o[k] == null) continue;
+        if (typeof o[k] !== 'number' || !Number.isFinite(o[k]) || Math.abs(o[k]) > 600000) return null;
+        out[k] = o[k];
+    }
+    return out;
+}
+
+// validateQuery returns a clean copy of a query from outside the page (a
+// share link, localStorage), or null when anything in it is malformed —
+// unknown source or param, a bad operator, an oversized tree.
+/**
+ * @param {unknown} raw
+ * @returns {ClipQuery | null}
+ */
+export function validateQuery(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const q = /** @type {Record<string, any>} */ (raw);
+    const src = typeof q.source === 'string' && Object.hasOwn(SOURCES, q.source) ? SOURCES[q.source] : null;
+    if (!src) return null;
+    /** @type {ClipQuery} */
+    const out = { source: q.source };
+    if (q.params != null) {
+        if (typeof q.params !== 'object') return null;
+        /** @type {Record<string, string | number>} */
+        const params = {};
+        for (const [k, v] of Object.entries(q.params)) {
+            if (!Object.hasOwn(src.params, k) || !(typeof v === 'number' || text(v) != null)) return null;
+            params[k] = v;
+        }
+        out.params = params;
+    }
+    if (q.where != null) {
+        const w = cleanExpr(q.where, 0, { n: 0 });
+        if (!w) return null;
+        out.where = w;
+    }
+    if (q.rank != null) {
+        const by = text(q.rank?.by);
+        const limit = q.rank.limit;
+        if (!by || (limit != null && !(Number.isInteger(limit) && limit > 0 && limit <= 1000))) return null;
+        out.rank = { by, desc: !!q.rank.desc, ...(limit ? { limit } : {}) };
+    }
+    if (q.clip != null) {
+        const specs = (Array.isArray(q.clip) ? q.clip : [q.clip]).map(cleanSpec);
+        if (!specs.length || specs.length > 4 || specs.includes(null)) return null;
+        out.clip = Array.isArray(q.clip) ? /** @type {ClipSpec[]} */ (specs) : /** @type {ClipSpec} */ (specs[0]);
+    }
+    if (q.label != null) {
+        const l = text(q.label);
+        if (l == null) return null;
+        out.label = l;
+    }
+    return out;
+}
+
+const QUERY_VERSION = 1;
+
+/**
+ * @param {ClipQuery} query
+ * @param {string} [title]
+ */
+export function encodeQuery(query, title = '') {
+    return base64UrlEncode(JSON.stringify({ v: QUERY_VERSION, t: title, q: query }));
+}
+
+/**
+ * @param {string} str
+ * @returns {{ title: string, query: ClipQuery } | null}
+ */
+export function decodeQuery(str) {
+    try {
+        const doc = JSON.parse(base64UrlDecode(str));
+        if (doc?.v !== QUERY_VERSION) return null;
+        const query = validateQuery(doc.q);
+        return query && { title: text(doc.t) || '', query };
+    } catch {
+        return null;
+    }
+}
