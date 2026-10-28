@@ -112,7 +112,10 @@ export function resetMap() {
     view.setFrames(null);
     if (s.canvas) s.ctx.clearRect(0, 0, s.canvas.width, s.canvas.height);
     Object.assign(s, {
-        locations: [], locationGroups: null, mapGeometry: null, locTable: [''],
+        // regionToGroups too: it is rebuilt only when regions are applied
+        // against geometry, so on a map without geometry JSON the previous
+        // map's groups (and their floors) would stay tinted.
+        locations: [], locationGroups: null, mapGeometry: null, locTable: [''], regionToGroups: {},
         bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 },
         fullTrails: {}, trailStartTimes: {}, enabledPlayers: {}, dropEvents: [],
         teams: [], playerSymbols: {}, followPlayer: null, zRange: null,
