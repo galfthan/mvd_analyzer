@@ -2,8 +2,7 @@
     // The Map tab: the map canvas (mvd-map-view's MvdMap, map-model.js), its
     // sidebar — the legend, the items list, the region status, the learn-mode
     // entity filters — and the controls under it (trails, follow, the
-    // overlays, 3D / fog / light / occlusion, the perf HUD and benchmark,
-    // reset view, fullscreen). src/lib/map.js has the pure parts, sidebar.js
+    // overlays, 3D / occlusion, reset view, fullscreen). src/lib/map.js has the pure parts, sidebar.js
     // the hand-built legend and region status. src/app/tabs.js toggles the
     // `active` class like on every other .tab-content.
     //
@@ -17,23 +16,20 @@
     // hidden.
     import { onMount, flushSync } from 'svelte';
     import {
-        DEFAULT_YAW, DEFAULT_PITCH, PITCH_MAX, is3D, ITEM_MARKER_STYLES, benchCameraAt, refreshTrig, summarizeBench,
+        DEFAULT_YAW, DEFAULT_PITCH, PITCH_MAX, is3D, ITEM_MARKER_STYLES,
     } from '../../../../mvd-map-view/src/index.js';
-    import { teams, activeTab, clock, regionControl, playback, stopPlayback } from '../../state/index.js';
+    import { teams, activeTab, clock, regionControl, playback } from '../../state/index.js';
     import {
-        panelItems, itemStatusCell, entityRows, entityRowsHtml, trailButtons, byName, perfHudText, benchDemoKey, benchText,
+        panelItems, itemStatusCell, entityRows, entityRowsHtml, trailButtons, byName,
     } from '../../lib/map.js';
     import { view, mapData, changed, learnMode, resizeMap, ensureLineOfSight } from './map-model.js';
     import { buildLegend, syncLegend, syncRegionStatus } from './sidebar.js';
 
     const TAB = 'map';
-    const BENCH_HISTORY_KEY = 'mvd-map-bench-history';
     const s = view.state;
 
     /**
      * @typedef {import('../../lib/map.js').MapItem & { loc?: string }} Item
-     * @typedef {{ yaw: number, pitch: number, zoomK: number, panX: number, panY: number,
-     *     cx: number, cy: number, zMid: number, time: number, follow: string | null, focus: string | null }} BenchView
      */
 
     // Bound at mount, before any handler or subscription runs.
@@ -56,7 +52,7 @@
     let hasEntities = $state(false);
     let noData = $state(false);
     let tilted = $state(false);
-    let flags = $state({ view: false, vel: false, los: false, pvs: false, fog: false, light: false, occl: false });
+    let flags = $state({ view: false, vel: false, los: false, pvs: false, occl: false });
     /** @type {string | null} */
     let pendingBtn = $state(null);
     let trails = $state.raw({ all: false, none: true, some: false });
@@ -69,12 +65,6 @@
     /** @type {Array<{ text: string, cls: string, taken: boolean }>} */
     let itemCells = $state.raw([]);
     let entityHtml = $state('');
-    let hudShown = $state(false);
-    let hudText = $state('');
-    let hudOn = $state(false);
-    let benchOn = $state(false);
-    /** @type {BenchView | null} */
-    let benchSaved = null;
 
     /** @type {string[]} */
     let colors = [];
@@ -83,12 +73,6 @@
     let queued = false;
     let sidebarDirty = true;
     let lastFull = 0;
-    /** @type {Array<Record<string, any>>} MvdMap.lastFrameStats samples */
-    let samples = [];
-    /** @type {ReturnType<typeof setInterval> | null} */
-    let hudTimer = null;
-    /** @type {ReturnType<typeof setTimeout> | undefined} */
-    let hudHideTimer = undefined;
     /** @type {{ parent: ParentNode | null, next: ChildNode | null } | null} */
     let fsHome = null;
     /** @type {number | null} */
@@ -98,22 +82,10 @@
 
     // ─── Drawing ────────────────────────────────────────────────────────────
 
-    // A frame the redraw-skip elided leaves lastFrameStats as it was: the
-    // unchanged timestamp dedupes it, so the HUD counts presented frames.
-    function sample() {
-        if (!hudOn && !benchOn) return;
-        const fs = view.lastFrameStats;
-        if (!fs) return;
-        if (samples.length > 0 && samples[samples.length - 1].t === fs.t) return;
-        samples.push(fs);
-        if (samples.length > 600) samples.splice(0, samples.length - 300);
-    }
-
     // Nothing to draw before the first demo.
     function draw() {
         if (!s.initialized) return;
         view.render(s.currentTime);
-        sample();
     }
 
     function syncSidebar() {
@@ -154,12 +126,7 @@
 
     /** @param {string} tab */
     function onTab(tab) {
-        if (tab !== TAB) {
-            stopHudTimer();
-            abortBench(true);
-            return;
-        }
-        if (hudOn) startHudTimer();
+        if (tab !== TAB) return;
         // Run once src/app/tabs.js has made the tab visible (it follows the same
         // store, after this), then again on the next frame and 120 ms later.
         queueMicrotask(reveal);
@@ -193,10 +160,7 @@
     /** @param {{ result: import('../../lib/result.js').Result } | null} d */
     function onData(d) {
         const next = d?.result ?? null;
-        if (next !== result) {
-            icons = new Map();
-            abortBench(false);
-        }
+        if (next !== result) icons = new Map();
         result = next;
         colors = teams.get().colors;
         noData = !!d && s.locations.length === 0;
@@ -351,178 +315,6 @@
         redraw();
     }
 
-    // ─── Perf HUD and benchmark ─────────────────────────────────────────────
-
-    function hudTick() {
-        if (!benchOn) hudText = perfHudText(samples, performance.now());
-    }
-
-    function startHudTimer() {
-        if (!hudTimer) hudTimer = setInterval(hudTick, 250);
-    }
-
-    function stopHudTimer() {
-        clearInterval(hudTimer ?? undefined);
-        hudTimer = null;
-    }
-
-    function toggleHud() {
-        hudOn = !hudOn;
-        hudShown = hudOn;
-        view.perfCapture = hudOn || benchOn;
-        if (hudOn) {
-            samples = [];
-            hudTick();
-            startHudTimer();
-            // Seed a sample so the HUD is live before the user touches anything.
-            s.renderDirty = true;
-            draw();
-        } else {
-            stopHudTimer();
-        }
-    }
-
-    /** @returns {Array<Record<string, any>>} */
-    function loadBenchHistory() {
-        try {
-            const list = JSON.parse(localStorage.getItem(BENCH_HISTORY_KEY) || '[]');
-            return Array.isArray(list) ? list : [];
-        } catch {
-            return [];
-        }
-    }
-
-    /** @param {Array<Record<string, any>>} list */
-    function saveBenchHistory(list) {
-        try {
-            localStorage.setItem(BENCH_HISTORY_KEY, JSON.stringify(list.slice(-30)));
-        } catch { /* storage unavailable — the console log still has the run */ }
-    }
-
-    // runBench plays the demo at 1× from a fixed early time while the camera
-    // runs a fixed 18 s spin / tilt / zoom script (benchCameraAt), then
-    // reports fps and frame-time percentiles, against earlier runs of the
-    // same demo at the same surface size (localStorage).
-    function runBench() {
-        if (benchOn || !result) return;
-        if (playback.get().playing) stopPlayback();
-        const cam = view.camera;
-        /** @type {BenchView} */
-        const saved = {
-            yaw: cam.yaw, pitch: cam.pitch, zoomK: cam.zoomK, panX: cam.panX, panY: cam.panY,
-            cx: cam.cx, cy: cam.cy, zMid: cam.zMid,
-            time: s.currentTime, follow: s.followPlayer, focus: s.focusGroupName,
-        };
-        if (saved.follow) view.setFollowPlayer(null);
-        if (saved.focus) view.setFocusGroup(null);
-        cam.panX = 0;
-        cam.panY = 0;
-        view.refit();
-        cam.zMid = cam.zMidDefault || 0;
-        const duration = Number.isFinite(clock.duration) ? clock.duration : 0;
-        const t0 = Math.min(30, (duration || 600) * 0.25);
-        benchOn = true;
-        benchSaved = saved;
-        view.perfCapture = true;
-        clearTimeout(hudHideTimer);
-        hudShown = true;
-        hudText = 'benchmarking… (18 s)';
-        /** @type {Array<Record<string, any>>} */
-        const runSamples = [];
-        const start = performance.now();
-        let lastTick = start;
-        const step = () => {
-            if (!benchOn) return;
-            const now = performance.now();
-            const elapsed = (now - start) / 1000;
-            const pose = benchCameraAt(elapsed);
-            if (pose.done) {
-                finishBench(saved, runSamples);
-                return;
-            }
-            // The angles directly, not through setCamera: its cardinal yaw
-            // snap would freeze the sweep at every 90° crossing.
-            cam.yaw = pose.yaw;
-            cam.pitch = pose.pitch;
-            refreshTrig(cam);
-            cam.zoomK = pose.zoomK;
-            cam.panX = 0;
-            cam.panY = 0;
-            s.currentTime = t0 + elapsed;
-            s.renderDirty = true;
-            draw();
-            const fs = view.lastFrameStats;
-            if (fs) runSamples.push(Object.assign({ dtMs: now - lastTick }, fs));
-            lastTick = now;
-            requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
-    }
-
-    /**
-     * @param {BenchView} saved
-     * @param {Array<Record<string, any>>} runSamples
-     */
-    function finishBench(saved, runSamples) {
-        const summary = summarizeBench(runSamples);
-        const noFrames = summary.frames === 0;
-        const record = Object.assign({
-            demo: benchDemoKey(result, teams.get().order, Number.isFinite(clock.duration) ? clock.duration : 0),
-            px: canvas ? `${canvas.width}x${canvas.height}` : '?',
-            date: new Date().toISOString(),
-        }, summary);
-        /** @type {Array<Record<string, any>>} */
-        let prior = [];
-        if (!noFrames) {
-            // No GL frames presented (context lost / no geometry): not a run.
-            console.log('[map-bench] ' + JSON.stringify(record));
-            const history = loadBenchHistory();
-            prior = history.filter((r) => r.demo === record.demo && r.px === record.px);
-            saveBenchHistory(history.concat([record]));
-        }
-        benchOn = false;
-        view.perfCapture = hudOn;
-        restoreBenchView(saved);
-        hudShown = true;
-        if (noFrames) {
-            hudText = 'bench: no GL frames rendered';
-            return;
-        }
-        hudText = benchText(record, summary, prior[prior.length - 1]);
-        if (!hudOn) {
-            // Leave the results up a while; the FPS toggle owns the HUD otherwise.
-            hudHideTimer = setTimeout(() => {
-                if (!hudOn && !benchOn) hudShown = false;
-            }, 30000);
-        }
-    }
-
-    // The camera, focus, follow and time the run started from.
-    /** @param {BenchView} saved */
-    function restoreBenchView(saved) {
-        const cam = view.camera;
-        Object.assign(cam, { cx: saved.cx, cy: saved.cy, zMid: saved.zMid, zoomK: saved.zoomK, panX: saved.panX, panY: saved.panY });
-        if (saved.focus) view.setFocusGroup(saved.focus);
-        if (saved.follow) view.setFollowPlayer(saved.follow);
-        view.setCamera(saved.yaw, saved.pitch);
-        clock.seek(saved.time);
-    }
-
-    // abortBench ends a run that lost its stage. Leaving the tab puts the
-    // view back as the run found it (`restore`); another demo does not —
-    // its load already reset the view, and the old demo's camera and time
-    // must not land on it. The HUD goes with it unless the FPS overlay
-    // owns it.
-    /** @param {boolean} restore */
-    function abortBench(restore) {
-        if (!benchOn) return;
-        benchOn = false;
-        view.perfCapture = hudOn;
-        // runBench sets benchSaved as it sets benchOn.
-        if (restore) restoreBenchView(/** @type {BenchView} */ (benchSaved));
-        if (!hudOn) hudShown = false;
-    }
-
     // ─── Fullscreen ─────────────────────────────────────────────────────────
 
     function toggleFullscreen() {
@@ -638,7 +430,6 @@
             offs.forEach((off) => off());
             canvas.removeEventListener('wheel', wheel);
             document.removeEventListener('fullscreenchange', onFullscreenChange);
-            stopHudTimer();
         };
     });
 </script>
@@ -652,7 +443,6 @@
             <div class="map-canvas-container">
                 <canvas id="map-canvas" width="850" height="850" bind:this={canvas}
                     onmousedown={down} oncontextmenu={(e) => e.preventDefault()} ondblclick={dblclick}></canvas>
-                <div id="map-perf-hud" class="map-perf-hud" style:display={hudShown ? null : 'none'}>{hudText}</div>
                 <div id="map-no-data" class="map-no-data" style:display={noData ? 'block' : 'none'}>
                     <p>No location data available for this map.</p>
                     <p>Player positions will still be shown.</p>
@@ -741,14 +531,8 @@
             <button id="map-pvs" class:active={flags.pvs} class:pending={pendingBtn === 'pvs'} title="Potential visibility (PVS): thin lines between players the server would have sent to each other on the wire (mvdsv per-client entity cull — fat PVS vs the opponent's box leaves). Superset of LOS; the gap (in PVS but not LOS) means same vis region without a direct sightline. BSP-backed maps only."
                 onclick={() => toggleVis('pvs')}>PVS</button>
             <button id="map-3d-toggle" class:active={tilted} title="Tilt the map into 3D — right-drag (or Ctrl+drag) to rotate freely" onclick={toggle3D}>3D</button>
-            <button id="map-fog" class:active={flags.fog} title="Depth fog — the far side of the map fades into the dark (reads best in a tilted view)"
-                onclick={() => toggle('fog', () => (s.fog = s.fog > 0 ? 0 : 1) > 0)}>Fog</button>
-            <button id="map-light" class:active={flags.light} title="Directional shading on the floors — tops brighten, sides fall off by facing"
-                onclick={() => toggle('light', () => (s.worldLight = s.worldLight > 0 ? 0 : 0.6) > 0)}>Light</button>
             <button id="map-occlude" class:active={flags.occl} title="Realistic occlusion — floors hide players, items and lines behind them (the default keeps everything visible)"
                 onclick={() => toggle('occl', () => (s.occludeActors = !s.occludeActors))}>Occl</button>
-            <button id="map-perf" class:active={hudOn} title="Render performance overlay — fps, frame-time split (CPU build / GL submit / blit / GPU) and per-frame draw stats" onclick={toggleHud}>FPS</button>
-            <button id="map-bench" class:active={benchOn} title="Map render benchmark — plays the demo while the camera runs a fixed 18 s spin / tilt / zoom script, then reports fps and frame-time percentiles (logged to the console; compared against earlier runs of the same demo)" onclick={runBench}>Bench</button>
             <button id="map-reset-view" title="Reset pan / zoom / rotation" onclick={() => view.resetView()}>Reset view</button>
             <button id="map-fullscreen" class:active={fullscreen} title="Toggle fullscreen" onclick={toggleFullscreen}>Fullscreen</button>
         </div>

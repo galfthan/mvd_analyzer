@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import {
     mapTeams, assignPlayerSymbols, mapBounds, dropEventsOf, posStreamsOf, mapCanvasSize, MAP_CANVAS_BASE_WIDTH,
     legendTeams, legendRowHtml, teamFragsAt, stackCell, weaponsText, regionStateLabel, regionStatusRows,
-    panelItems, itemStatusCell, entityRows, entityRowsHtml, trailButtons, perfHudText, benchDemoKey, benchText,
+    panelItems, itemStatusCell, entityRows, entityRowsHtml, trailButtons,
 } from '../src/lib/map.js';
 import {
     barAxisTicks, barPct, barTime, dragSpan, isClick, overlayBox, segmentLabel, speedButtons, SPEED_BUTTONS,
@@ -129,19 +129,10 @@ test('entity table: shown categories, teleporters entrance → exit', () => {
     assert.equal(entityRowsHtml([{ cls: 'A', type: '<', name: '', loc: '', source: '' }]), '<tr><td>A</td><td>&lt;</td><td></td><td></td><td></td></tr>');
 });
 
-test('trail buttons, perf HUD and the benchmark read-outs', () => {
+test('trail buttons', () => {
     assert.deepEqual(trailButtons([], {}), { all: false, none: true, some: false });
     assert.deepEqual(trailButtons(['a', 'b'], { a: true }), { all: false, none: false, some: true });
     assert.deepEqual(trailButtons(['a', 'b'], { a: true, b: true }), { all: true, none: false, some: false });
-    assert.equal(perfHudText([], 1000), 'map idle — play or drag to sample');
-    const s = { t: 900, buildMs: 1, submitMs: 2, blitMs: 3, draws: 4, worldTris: 5, points: 6, lineSegs: 7, sprites: 8, streamBytes: 2048 };
-    assert.equal(perfHudText([{ t: -500 }, s], 1000).split('\n')[0], '1 fps');
-    assert.match(perfHudText([s], 1000), /gpu — ms/);
-    assert.equal(benchDemoKey({ match: { map: 'dm3' } }, ['a', 'b'], 1199.6), 'dm3|a+b|1200s');
-    const summary = { avgFps: 60, frames: 100, longFrames: 1, frameMs: { p50: 16, p95: 17, max: 30 }, buildMs: { p50: 1 }, submitMs: { p50: 2 }, draws: { avg: 9 } };
-    const text = benchText({ demo: 'k', avgFps: 60 }, summary, { date: '2026-01-02T00:00', avgFps: 50 });
-    assert.match(text, /^bench k\n60 fps avg {2}100 frames {2}1 hitches\n/);
-    assert.match(text, /vs 2026-01-02: 50 fps \(\+10\.0\)\nfull record in the console$/);
 });
 
 test('playback bar: axis, cursor, pointer time, drag, overlay, buttons', () => {

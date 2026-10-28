@@ -67,6 +67,22 @@ type ClipNode struct {
 	Children [2]int32
 }
 
+// Node is one node of the render (hull 0) BSP tree (the NODES lump),
+// trimmed to what a point-contents walk needs. A child >= 0 is another Node
+// index; a child < 0 is the leaf -(child+1) in Leafs. v29 stores children
+// as int16 (sign-extended here), BSP2/2PSB as int32.
+type Node struct {
+	PlaneNum int32
+	Children [2]int32
+}
+
+// Leaf is one hull-0 leaf (the LEAFS lump), trimmed to its CONTENTS_* code
+// (CONTENTS_EMPTY = -1, SOLID = -2, WATER = -3, SLIME = -4, LAVA = -5, SKY
+// = -6). Leaf 0 is the shared solid leaf.
+type Leaf struct {
+	Contents int32
+}
+
 // Texinfo is the BSP texinfo lump record (40 bytes on disk). Only the
 // miptex index is decoded — the projection vectors and flags are not
 // needed to classify liquid / trigger faces by texture name.
@@ -74,9 +90,10 @@ type Texinfo struct {
 	MipTex int32 // index into the miptex directory (TexNames); -1 = none
 }
 
-// BSP holds the decoded lumps we care about. Texinfos and TexNames are
-// best-effort: a malformed texture lump leaves them empty rather than
-// failing the parse (floor-geometry extraction never needs textures).
+// BSP holds the decoded lumps we care about. Texinfos, TexNames, Nodes and
+// Leafs are best-effort: a malformed lump leaves them empty rather than
+// failing the parse (floor-geometry extraction needs neither textures nor
+// the render tree).
 type BSP struct {
 	Version   int32
 	Planes    []Plane
@@ -86,6 +103,8 @@ type BSP struct {
 	Surfedges []int32
 	Models    []Model
 	ClipNodes []ClipNode
+	Nodes     []Node // hull-0 tree; empty if the lump failed to parse
+	Leafs     []Leaf
 	Texinfos  []Texinfo // by texinfo index (Face.TexinfoID)
 	TexNames  []string  // by miptex index (Texinfo.MipTex)
 }

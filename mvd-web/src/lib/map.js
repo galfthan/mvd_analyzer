@@ -3,7 +3,7 @@
 // player symbols, the world bounds, the backpack drops, the position
 // streams — and what the sidebar shows next to it: the legend cells, the
 // region status rows, the items list, the learn-mode entity table, the trail
-// and follow controls, the canvas size and the perf / benchmark read-outs.
+// and follow controls and the canvas size.
 // Times are seconds (the page clock), as the map view's are.
 
 import { playerStatsRows } from './player-stats.js';
@@ -428,66 +428,3 @@ export function trailButtons(names, enabled) {
 }
 
 export const byName = (/** @type {string} */ a, /** @type {string} */ b) => a.localeCompare(b);
-
-// ─── Perf HUD and benchmark ─────────────────────────────────────────────────
-
-// perfHudText: the last second of frame samples (MvdMap.lastFrameStats).
-/**
- * @param {Array<Record<string, number>>} samples
- * @param {number} now
- */
-export function perfHudText(samples, now) {
-    const recent = samples.filter(s => now - s.t < 1000);
-    if (recent.length === 0) return 'map idle — play or drag to sample';
-    const avg = (/** @type {string} */ field) => {
-        let sum = 0, n = 0;
-        for (const s of recent) {
-            if (typeof s[field] === 'number') { sum += s[field]; n++; }
-        }
-        return n > 0 ? sum / n : null;
-    };
-    const ms1 = (/** @type {number | null} */ v) => v === null ? '—' : v.toFixed(1);
-    const last = recent[recent.length - 1];
-    return `${recent.length} fps\n` +
-        `build ${ms1(avg('buildMs'))}  submit ${ms1(avg('submitMs'))}` +
-        `  blit ${ms1(avg('blitMs'))}  gpu ${ms1(avg('gpuMs'))} ms\n` +
-        `draws ${last.draws}  tris ${last.worldTris}  pts ${last.points}` +
-        `  segs ${last.lineSegs}  spr ${last.sprites}\n` +
-        `stream ${(last.streamBytes / 1024).toFixed(0)} KiB/frame`;
-}
-
-// benchDemoKey: "the same demo" across sessions — the Result has no file
-// name, so map + teams + rounded duration.
-/**
- * @param {Result | null | undefined} result
- * @param {string[] | null | undefined} teams
- * @param {number | null | undefined} duration
- */
-export function benchDemoKey(result, teams, duration) {
-    const map = result?.demoInfo?.map || result?.match?.map || '?';
-    return `${map}|${(teams || []).join('+')}|${Math.round(duration || 0)}s`;
-}
-
-// benchText: a run's read-out, against the newest earlier run at the same
-// surface size when there is one.
-/**
- * @param {Record<string, any>} record   a bench run's record (mvd-map-view bench.js)
- * @param {Record<string, any>} summary
- * @param {Record<string, any> | null | undefined} prev
- */
-export function benchText(record, summary, prev) {
-    const f = summary.frameMs || {};
-    let text =
-        `bench ${record.demo}\n` +
-        `${summary.avgFps} fps avg  ${summary.frames} frames  ` +
-        `${summary.longFrames} hitches\n` +
-        `frame ms p50 ${f.p50} p95 ${f.p95} max ${f.max}\n` +
-        `build p50 ${summary.buildMs?.p50}  submit p50 ${summary.submitMs?.p50}` +
-        (summary.gpuMs ? `  gpu p50 ${summary.gpuMs.p50}` : '') + '\n' +
-        `draws avg ${summary.draws.avg}`;
-    if (prev) {
-        const d = (record.avgFps - prev.avgFps).toFixed(1);
-        text += `\nvs ${prev.date.slice(0, 10)}: ${prev.avgFps} fps (${Number(d) >= 0 ? '+' : ''}${d})`;
-    }
-    return text + '\nfull record in the console';
-}

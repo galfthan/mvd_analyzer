@@ -117,3 +117,74 @@ func TestDistPointToPolygonXY(t *testing.T) {
 		t.Errorf("outside +x: dist=%v nearest=(%v,%v), want 20 (64,32)", d, cx, cy)
 	}
 }
+
+// buildPoolBSP: a pool-bottom floor quad (0..64, 0..64) at z=0 under a
+// '*water' surface at z=64, plus a dry floor quad (128..192) at z=0.
+func buildPoolBSP() *bsp.BSP {
+	quad := func(base uint32) []bsp.Edge {
+		return []bsp.Edge{
+			{V: [2]uint32{base, base + 1}},
+			{V: [2]uint32{base + 1, base + 2}},
+			{V: [2]uint32{base + 2, base + 3}},
+			{V: [2]uint32{base + 3, base}},
+		}
+	}
+	edges := []bsp.Edge{{V: [2]uint32{0, 0}}}
+	for f := 0; f < 3; f++ {
+		edges = append(edges, quad(uint32(f*4))...)
+	}
+	var surfedges []int32
+	for i := int32(1); i <= 12; i++ {
+		surfedges = append(surfedges, i)
+	}
+	faces := make([]bsp.Face, 3)
+	texinfos := make([]bsp.Texinfo, 3)
+	for i := range faces {
+		faces[i] = bsp.Face{PlaneID: uint32(i), FirstEdge: int32(i * 4), NumEdges: 4, TexinfoID: uint32(i)}
+		texinfos[i] = bsp.Texinfo{MipTex: int32(i)}
+	}
+	return &bsp.BSP{
+		Version: 29,
+		Planes: []bsp.Plane{
+			{Normal: bsp.Vec3{Z: 1}, Dist: 0, Type: 2},
+			{Normal: bsp.Vec3{Z: 1}, Dist: 64, Type: 2},
+			{Normal: bsp.Vec3{Z: 1}, Dist: 0, Type: 2},
+		},
+		Vertices: []bsp.Vec3{
+			{X: 0, Y: 0, Z: 0}, {X: 64, Y: 0, Z: 0}, {X: 64, Y: 64, Z: 0}, {X: 0, Y: 64, Z: 0}, // pool bottom
+			{X: 0, Y: 0, Z: 64}, {X: 64, Y: 0, Z: 64}, {X: 64, Y: 64, Z: 64}, {X: 0, Y: 64, Z: 64}, // water surface
+			{X: 128, Y: 0, Z: 0}, {X: 192, Y: 0, Z: 0}, {X: 192, Y: 64, Z: 0}, {X: 128, Y: 64, Z: 0}, // dry floor
+		},
+		Edges:     edges,
+		Surfedges: surfedges,
+		Faces:     faces,
+		Models:    []bsp.Model{{FirstFace: 0, NumFaces: 3}},
+		Texinfos:  texinfos,
+		TexNames:  []string{"floor1", "*water1", "floor1"},
+	}
+}
+
+func TestBuildPruned_KeepsFloorUnderLiquid(t *testing.T) {
+	b := buildPoolBSP()
+	finder := loc.NewFinder("test", []loc.Location{
+		{X: 32, Y: 32, Z: 24, Name: "pool"},
+		{X: 160, Y: 32, Z: 24, Name: "dry"},
+	})
+
+	// Nobody stood anywhere: a swimmer never touches the pool bottom.
+	u := NewFloorUsage()
+	u.AddDemo()
+
+	regions, stats := BuildPruned("test", b, finder, Params{}, u)
+
+	if stats.FacesUnderLiq != 1 || stats.FacesPruned != 1 {
+		t.Errorf("FacesUnderLiq = %d, FacesPruned = %d, want 1, 1", stats.FacesUnderLiq, stats.FacesPruned)
+	}
+	names := map[string]bool{}
+	for _, l := range regions.Locs {
+		names[l.Name] = true
+	}
+	if !names["pool"] || names["dry"] {
+		t.Errorf("loc regions = %v, want pool only (dry floor pruned)", names)
+	}
+}

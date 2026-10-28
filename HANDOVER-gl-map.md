@@ -104,12 +104,15 @@ label-dense learn view, atlas text vs canvas text); typical steps ~0.02%.
 
 ## Effects PoC — REVIEW WITH OWNER BEFORE BUILDING ON IT
 
-Three toggles exist (buttons after "3D" in the map toolbar), all
-default-OFF; with them off the shot corpus is byte-identical to step 6:
+Fog and Light are now always on (owner's call, no buttons); Occl is
+still a toolbar toggle, default off. The FPS/Bench buttons were removed
+(the mvd-map-view measurement hooks remain). A fourth effect, the
+liquid volume haze, is always on:
 
 - **Fog** — depth fog in the world fragment shader (floors, movers,
-  liquids, tints), density scaled from the map's world radius
-  (`state.fog` 0..1).
+  liquids, tints), starting a little in front of the fixed map centre (`FOG_LEAD`)
+  (not the orbit pivot, which moves with pan history), density scaled
+  from the map's world radius (`state.fog` 0..1).
 - **Light** — directional Lambert baked into floor vertex colours at
   build time (`state.worldLight` 0..1; rebuilds the floor batch on
   change; 0 reproduces the flat look bit-for-bit).
@@ -117,6 +120,21 @@ default-OFF; with them off the shot corpus is byte-identical to step 6:
   world (`state.occludeActors`); floors hide players/items/lines behind
   them. Known nit: screen-space arrowhead triangles carry z=0, so they
   can clip oddly in this mode — fix if the mode survives review.
+- **Liquid volume** — `_drawLiquidVolume`: true volumetric absorption.
+  mapgen (geometry v5) exports each liquid as its closed convex BSP cells
+  (`LiquidMesh.volume`, the hull-0 water/slime/lava leaves; teleporter
+  fields, which qbsp also makes liquid, are dropped by requiring a
+  connection to a visible `*` surface). Per frame the cells draw into a
+  float target (RGBA32F with `EXT_float_blend`, else RGBA16F; no
+  `EXT_color_buffer_float` → surfaces only): back faces add their depth,
+  front faces subtract it, each clamped to the opaque world
+  (`_sceneDepth`: floors + movers depth-only), so each channel holds the
+  ray's path length through water / slime / lava. A full-screen pass
+  turns that into Beer–Lambert opacity (`LIQUID_VOLUME_LENGTH`,
+  `LIQUID_VOLUME_MAX` × `state.liquidHaze`) under the surfaces. Side views
+  see the body of water too, not just a tinted top. Maps whose JSON
+  predates v5 (no BSP provisioned locally — everything but the 29
+  deployed maps) render surfaces only.
 
 The owner said: *"Do not focus on adding new effects, that is part of
 next steps done together"* — so 3D player models and the perspective /

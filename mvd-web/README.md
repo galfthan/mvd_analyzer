@@ -1484,24 +1484,6 @@ WebGL2 sees a "WebGL2 required" notice on the map tab (everything else in
 the app still works), and software rasterisers (SwiftShader/llvmpipe) are
 accepted as the slow-but-working fallback.
 
-**Render-performance tools** — two toolbar buttons instrument the GL
-renderer. **FPS** toggles a live overlay over the canvas: presented
-map-frames per second and the per-frame cost split (CPU command build /
-GL submit / blit / GPU time where the browser exposes
-`EXT_disjoint_timer_query_webgl2`), plus draw-call and primitive counts
-from `GlWorld.stats`. **Bench** (`runBench` in
-`src/tabs/map/MapTab.svelte`) plays the demo from a
-fixed timestamp (min(30 s, 25 % of duration)) while the camera follows a
-deterministic 18-second spin / tilt / zoom script
-(`benchCameraAt`, `mvd-map-view/src/bench.js`), records every frame's
-timings, restores the user's view, and reports avg fps, frame-time p50/p95/max and hitch count.
-Each run is logged to the console as a single JSON line and kept in
-localStorage (last 30), keyed by map+teams+duration and canvas size, so
-re-running after a renderer change on the same demo shows the fps delta
-against the previous run. Leaving the tab mid-run aborts it and puts the
-view back; loading another demo aborts it too (nothing is restored onto
-the new demo). Neither records a run.
-
 **Occupied-region overlay** — a region a living player currently stands
 in is tinted by the team(s) present (`computeOccupiedOverlay` in
 `mvd-map-view/src/map.js`, drawn by the GL pass): one
@@ -1599,6 +1581,20 @@ body reads as a 3D volume with visible depth (water blue, slime green,
 lava orange). The per-face alpha is kept low (`LIQUID_ALPHA`) so the
 volume reads as a faint tint rather than dominating the floor under it.
 They draw live above the region fills and below the outlines/players.
+Version-5 geometry adds each liquid's closed volume (`liquids[].volume`),
+rendered as a volumetric absorption haze in the liquid's colour under the
+surfaces: the renderer accumulates every view ray's path length through
+the volume, stopped at the first floor (a scene-depth prepass), and
+converts it to opacity (`LIQUID_VOLUME_LENGTH` / `LIQUID_VOLUME_MAX` in
+`glworld.js`, scaled by `state.liquidHaze`). Deep pools read denser than
+shallow edges and a pool seen from the side shows its body of water.
+Needs float render targets (`EXT_color_buffer_float`); without them, or
+for pre-v5 files, only the surfaces draw.
+
+Depth fog (`state.fog`) and directional floor shading
+(`state.worldLight`) are always on; they have no toolbar buttons. Fog
+starts a little in front of the map centre and thickens toward the far
+side.
 
 Everything is drawn through one orbit-camera orthographic projection
 (`project` in `mvd-map-view/src/camera.js`): floor geometry uses the per-vertex heights
@@ -1776,7 +1772,8 @@ triangle list for the since-removed Solid mode — the generator no longer
 emits it, though the reader still tolerates it in older files), or
 version 4 (adds optional `liquids` water/slime/lava volume meshes and
 `submodels` brush-model lifts/doors, and drops degenerate zero-area
-triangles). The frontend is presence-based and accepts every version
+triangles), or version 5 (adds `liquids[].volume`, the closed liquid
+cells for the volume haze). The frontend is presence-based and accepts every version
 (v1 — 6 floats, XY only — is flattened to each region's median z on load;
 missing `walls`/`liquids`/`submodels` simply render nothing). A
 usage-pruned file carries a `pruned` provenance block.
