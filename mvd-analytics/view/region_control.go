@@ -858,8 +858,10 @@ func walkRegionGrid(
 	return stateBuf
 }
 
-// classifyRegionState is the seven-state decision rule. Faithful port
-// of mvd-web/static/app.js: classifyRegionState.
+// classifyRegionState is the seven-state decision rule. Ported from the
+// legacy frontend's classifyRegionState (mvd-web/static/app.js, since
+// removed); this is now its only implementation — the web UI reads the
+// states Go computes.
 func classifyRegionState(aWpn, aNo, bWpn, bNo int) byte {
 	aT := aWpn + aNo
 	bT := bWpn + bNo

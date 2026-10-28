@@ -94,7 +94,9 @@ the state container.
 
 The intended end state is a `MvdMap` class taking geometry, a static entity
 corpus, and a windowed frame source, with the host application owning only
-the chrome around the canvas. The design is in `plans/plan-embeddable-map.md`.
+the chrome around the canvas. The extraction's design notes were never
+committed (they lived in the gitignored `plans/`);
+[`HANDOVER-map-view.md`](../HANDOVER-map-view.md) records where it stands.
 
 `src/draw.js` is no longer a scene layer: the whole scene renders through
 `src/glworld.js`, and what remains in draw.js are the icon rasterisers the

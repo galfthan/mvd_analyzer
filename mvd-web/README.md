@@ -46,8 +46,11 @@ talks to it through a JS shim.
     per-map `.loc` corpus and `fetchBspSync(mapName)` for the per-map
     BSP used by the visibility-aware loc attribution (locvis). Sync
     XHR is still allowed inside Web Workers.
-  - `wasm_exec.js` — Go runtime glue, copied from the Go toolchain at
-    build time.
+  - `wasm_exec.js` — Go runtime glue. `make build` overwrites it in
+    `dist/` with the building toolchain's own copy (`$GOROOT/lib/wasm/`,
+    or `misc/wasm/` before Go 1.24), so it always matches
+    `analyzer.wasm`; this committed copy is only the fallback when the
+    toolchain has neither.
   - `vendor/` — the frontend's only third-party runtime code, vendored
     (no CDN): Cytoscape + fcose for the loc graph and the Rajdhani/Inter
     web fonts. Pinned, sha256-recorded and committed; see
@@ -62,7 +65,9 @@ talks to it through a JS shim.
     of the Damned") and never a file key; the topbar and the Summary
     map cell show the shortname and carry the title only as the map
     cell's tooltip — nothing else reads it.
-  - `probe.html` — tiny dev page used to probe runtime features.
+  - `probe.html` — the QTV proxy probe: a standalone dev page for
+    reverse-engineering the `wss://fteqtv.quake.world` handshake (pick a
+    candidate, watch the frames). Not linked from the app.
 - `dist/fte-player/` (built from the sibling [`mvd-fte-player/`](../mvd-fte-player/README.md))
   — the FTE demo player page the **Player** tab embeds; see
   [Player tab](#player-tab).
@@ -81,13 +86,17 @@ make serve                    # build + python3 -m http.server 8080
 ```
 dist/
   analyzer.wasm               ~4 MB, the WASM bundle
-  wasm_exec.js                Go glue
+  wasm_exec.js                Go glue, from the building toolchain
   index.html, assets/         the page + Vite's hashed bundles
   styles.css, worker.js       frontend copied from static/
+  probe.html                  the QTV proxy probe (dev page, from static/)
   fte-player/                 the Player tab's engine page
   vendor/                     vendored Cytoscape + fcose + web fonts
+                              (and its README.md, the pin record)
   maps/                       pre-generated map geometry
   locs/                       .loc files copied from mvd-analytics/loc/data
+  mapents/                    per-map entity corpus copied from
+                              mvd-analytics/mapents/data (Learn map)
   bsps/                       BSP files from `make bsps` for the locvis
                               visibility filter (skipped if bsps/ is empty)
 ```
@@ -113,6 +122,25 @@ container (it has `curl` and `bash`), fetches the ~14 competitive-map
 BSPs from the public mirrors documented in `scripts/fetch-bsps.sh`, and
 verifies each sha256 — a missing or corrupt BSP hard-fails the deploy,
 which is preferred to a silent V1-everywhere regression.
+
+## Tests
+
+`make test` runs them after the Go tests when `node` is on `PATH` (and
+says SKIP otherwise):
+
+```bash
+node --test mvd-map-view/test/*.test.js mvd-fte-player/test/*.test.js mvd-web/test/*.test.js
+cd mvd-web && npm run check     # svelte-check over the components (needs npm ci)
+```
+
+The node tests (`mvd-web/test/`) cover the DOM-free modules — `src/lib/`,
+`src/state/`, `src/data/`, the playlist runner — with node's built-in
+runner and no `node_modules`. Many of them load real Results from
+`mvd-analytics/testdata/golden/*.json` and pin values out of them (team
+orders, region sides, row counts), so **a golden regen
+(`-update-golden`) can break them**: rerun `make test` after
+regenerating and update the JS expectation alongside the golden when the
+change is intended.
 
 ## Layout
 
@@ -691,7 +719,7 @@ CTF server is laid out individually and genuinely was teamplay. So:
 
 | Question | Helper | Reads | Decides |
 |---|---|---|---|
-| Layout | `isIndividualLayout(result)` | `match.sources.teams === 'individual'` — authoritative, no fallback: the page only ever renders the Result its bundled WASM just produced from a `.mvd` (index.html `accept`), so a Result is always at this build's schema version | Which panels exist, which palette, the scoreboard shape |
+| Layout | `isIndividualLayout(result)` | `match.sources.teams === 'individual'` — authoritative, no fallback: the page only ever renders the Result its bundled WASM just produced from a `.mvd` (the Search tab's file input `accept`, `src/tabs/search/SearchTab.svelte`), so a Result is always at this build's schema version | Which panels exist, which palette, the scoreboard shape |
 | Semantics | `isTeamBasedMode(result)` | `match.gameMode.teamBased === true` — same, no fallback | Whether a same-team quantity can exist |
 | Field | `isMultiPlayerIndividual(result)` | `isIndividualLayout && !isDuel` | The one test behind the player palette (the teams store's `perPlayer`), the per-player Timeline and the single-column Chat (`individual-field` on `<body>`, set by `setIndividualFieldLayout`) |
 | Both | `hasTeammates(result)` | teamplay in force AND not laid out per player | The aim tab's Team victim filter |
@@ -884,8 +912,8 @@ Several panels need a paragraph explaining what their numbers mean and
 where they come from — Item Pickups & Drops (Summary), Region Control and
 Loc Heatmap (Locs & Regions), and both Aim panels. That prose is kept in
 full, but collapsed, so a panel opens with its table rather than with a
-wall of text. The idiom is a single one in the tab markup (`index.html`, or
-the tab's Svelte component once ported):
+wall of text. The idiom is a single one in the tab's markup (its Svelte
+component under `src/tabs/<name>/`):
 
 ```html
 <details class="panel-info">
@@ -918,9 +946,9 @@ to the default layout. The arrangement is saved per viewer in
 `localStorage` (`mvd.panels.v1`, every tab under one key): it stays in
 this browser across visits and demos, and nothing is sent anywhere.
 
-The panels are the tabs' existing markup, tagged `data-panel="<id>"` in
-`index.html` (or a ported tab's component, which renders them as direct
-children of its `#tab-<name>`); `src/ui/panels/config.js` names each tab's panels, their
+The panels are the tabs' own markup, tagged `data-panel="<id>"` in each
+tab's Svelte component (which renders them as direct children of its
+`#tab-<name>`); `src/ui/panels/config.js` names each tab's panels, their
 titles and default order. Nothing is moved in the DOM: the order is the
 CSS `order` property (a panelized tab lays out as a flex column; Key
 Moments keeps its grid) and collapse / close are classes. The tabs keep
@@ -963,9 +991,9 @@ is no UI for it. Stages reported, in load order:
 The breakdown reflects **time-to-interactive** — it ends when the Summary
 and non-bucket tabs are painted. The deferred 50 ms bucket build
 (`getDefaultBuckets` + `recomputeRegionControl`) runs after that and is
-logged on its own line (`deferred bucket build (off critical path)`),
-followed by a `Timeline/Map ready` line when `onBucketsReady`
-finishes wiring those tabs.
+logged on its own line when `onBucketsReady` has re-run the Map and
+regions with it: `[mvd-timing] Timeline/Map ready — <n> ms of bucket work
+ran off the critical path` (`src/app/load.js`).
 
 This exists to replace guesswork about where load time goes (e.g. "is
 loc the slowest?") with measured data before optimizing. It is what
@@ -1402,8 +1430,9 @@ the stem is a direct visual readout of `H`. Falls back to a barycentric
 scan of the floor geometry (`playerFloorZ`, memoised) when `H` is absent
 (no BSP) or `NoFloor` (over a void).
 
-**Floor model (the default view)** — the floor is a flat, near-opaque,
-depth-sorted model (`buildFloorModel`): every region renders in one
+**Floor model (the default view)** — the floor is a flat, opaque model
+(`buildFloorModel`, drawn depth-buffered by the WebGL backend below):
+every region renders in one
 neutral backdrop tone by default (colouring each loc by its own hue was
 visual noise — colour now means *a player is here*, see the occupied
 overlay below), with no Lambert/normal shading — from overhead it reads
@@ -1414,7 +1443,7 @@ floor reads as a solid 10u slab. `floorBoundaryEdges` finds that boundary
 — the true perimeter plus internal step risers); interior loc-region
 boundaries are shared by two triangles and excluded, so no walls appear
 inside a continuous floor. `floorBoundaryWalls` extrudes the edges into
-side triangles. Because everything is **near-opaque and painter-sorted**,
+side triangles. Because the floors are **opaque and depth-buffered**,
 a higher floor cleanly *covers* a lower one rather than tinting it through
 translucency (the translucent stacking used to read as "shading"); the box
 sides read as solid thickness, not a dark smear. Players, items, liquids
@@ -1437,18 +1466,22 @@ renderer. **FPS** toggles a live overlay over the canvas: presented
 map-frames per second and the per-frame cost split (CPU command build /
 GL submit / blit / GPU time where the browser exposes
 `EXT_disjoint_timer_query_webgl2`), plus draw-call and primitive counts
-from `GlWorld.stats`. **Bench** (`runMapBenchmark`) plays the demo from a
+from `GlWorld.stats`. **Bench** (`runBench` in
+`src/tabs/map/MapTab.svelte`) plays the demo from a
 fixed timestamp (min(30 s, 25 % of duration)) while the camera follows a
 deterministic 18-second spin / tilt / zoom script
-(`MapView.benchCameraAt`), records every frame's timings, restores the
-user's view, and reports avg fps, frame-time p50/p95/max and hitch count.
+(`benchCameraAt`, `mvd-map-view/src/bench.js`), records every frame's
+timings, restores the user's view, and reports avg fps, frame-time p50/p95/max and hitch count.
 Each run is logged to the console as a single JSON line and kept in
 localStorage (last 30), keyed by map+teams+duration and canvas size, so
 re-running after a renderer change on the same demo shows the fps delta
-against the previous run.
+against the previous run. Leaving the tab mid-run aborts it and puts the
+view back; loading another demo aborts it too (nothing is restored onto
+the new demo). Neither records a run.
 
 **Occupied-region overlay** — a region a living player currently stands
-in is tinted by the team(s) present (`drawOccupiedRegionsOverlay`): one
+in is tinted by the team(s) present (`computeOccupiedOverlay` in
+`mvd-map-view/src/map.js`, drawn by the GL pass): one
 team → that team's canonical colour, both teams → white (contested),
 drawn live over the neutral floor with a brighter outline and bold label.
 This is the *only* place a region takes on colour, so a coloured patch
@@ -1465,8 +1498,8 @@ lists each team's players **by name**, not in roster order; its column
 headers stay `makeSortable`-clickable for any other order.
 
 **View / velocity arrows** — two optional per-player toggles, **View**
-and **Vel**, draw 3D arrows from each player's origin (`drawPlayerArrows`
-/ `drawWorldArrow`). View is a fixed-length (64u) facing indicator built
+and **Vel**, draw 3D arrows from each player's origin (`_glPlayerArrows`
+/ `_glWorldArrow` in `mvd-map-view/src/map.js`). View is a fixed-length (64u) facing indicator built
 from the stream's `vya`/`vp` view angles (Quake forward vector). Vel
 encodes the stream's `vx`/`vy`/`vz` velocity with length proportional to
 speed (5 u/s per world unit) in the player's team colour, hidden below
@@ -1474,8 +1507,8 @@ speed (5 u/s per world unit) in the player's team colour, hidden below
 arrowhead at the projected tip, so they tilt correctly with the view.
 
 **LOS / PVS overlays** — two optional per-player toggles, **LOS** and
-**PVS**, draw inter-player visibility lines on the map (`drawLosLines` →
-`drawVisLines`). **LOS** is geometric line of sight: a line between two
+**PVS**, draw inter-player visibility lines on the map
+(`_collectVisLines`, collected into the GL dynamic pass `_glDynamic`). **LOS** is geometric line of sight: a line between two
 players who currently have a clear sightline (origin-to-origin ray
 against the map's BSP clip hull and any moving movers); it is
 directional, so a one-way sightline shows on the looker's side only.
@@ -1515,8 +1548,8 @@ within the posed footprint and z within a player-height window of its top,
 stands out like an occupied region. One fill at one alpha → no per-face
 double-blend, no painter-sort flicker. A mover sampled `vis=false` is hidden. Missing
 either piece (older geometry, or a demo with no movers) is a graceful
-no-op. Code: `drawMovers` / `moverPoseAt` / `moverMeshFaces` /
-`drawMoverMesh`.
+no-op. Code: the movers section of `_glDynamic` / `moverPoseAt` /
+`moverMeshFaces` / `playerOnMover` (`mvd-map-view/src/map.js`).
 
 **Weapon fire** — with `streams.projectiles` / `streams.beams` (schema
 v40, built by the WASM map analysis), rocket/grenade flights and LG bolts
@@ -1530,12 +1563,14 @@ yellow dots) render the same way and are now built by the web parse too
 (`BuildNails` in `cmd/wasm/main.go`, added alongside `BuildShotStreams`):
 the map overlay lights up automatically and the Aim tab's ng/sng blocks
 fill in. Nails are the highest-volume stream but add only ~3–4% to the
-parse, all in browser memory (no extra download). Code: `drawProjectiles`
-/ `drawBeams` / `drawFlightDots`.
+parse, all in browser memory (no extra download). Code: the weapon-fire
+section of `_glDynamic` (`collectFlights` for rockets / grenades / nails,
+then the beams) in `mvd-map-view/src/map.js`.
 
 **Liquids** — version-4 geometry also carries `liquids` (water/slime/lava
 volume meshes). Rendered as a shaded, depth-sorted translucent solid
-(`drawLiquidVolume`): each face is Lambert-shaded so the top surface reads
+(`buildLiquidFaces` in `mvd-map-view/src/glworld.js`, blended by the GL
+backend): each face is Lambert-shaded so the top surface reads
 brighter than the descending sides, and faces paint back-to-front, so the
 body reads as a 3D volume with visible depth (water blue, slime green,
 lava orange). The per-face alpha is kept low (`LIQUID_ALPHA`) so the
@@ -1548,10 +1583,10 @@ in the version-2 map JSON, so each floor renders at its real level, and
 player tracks, player symbols, items, death/drop markers, loc labels and
 the region-control / occupancy overlays all project through the same
 transform. At exact top-down (the **3D** toggle's other state) the
-projection degenerates to the old 2D transform — pixel-identical to the
-previous 2D map — and the painter's sort (projected camera depth)
-degenerates to the old z-sort. Opaque markers (players, items, entities)
-are depth-sorted per frame.
+projection degenerates to the old 2D transform. Depth is the GL depth
+buffer's: opaque floors and markers (players, items, entities) are
+depth-tested, and only the blended layers (liquids, the focus fade) keep
+a back-to-front sort.
 
 Version-1 geometry files (e.g. a stale browser cache) are upgraded on
 load by `normalizeMapGeometry`, which flattens each region to its median
@@ -1559,8 +1594,9 @@ z — top-down looks identical, 3D shows flat-per-region floors.
 Version-2+ files work fully. The
 height-based player-symbol size scaling (higher = up to 25% larger) is a
 2D-only cue and is disabled while the camera is tilted. Camera state
-lives in `_wtc` (`yaw`, `pitch`, orbit center `cx/cy/zMid`); rotation
-goes through `setMapCamera`.
+lives in the map's `camera` (`MvdMap.camera`: `yaw`, `pitch`, orbit
+center `cx/cy/zMid`, `zoomK`, `panX/panY`); rotation goes through
+`MvdMap.setCamera` (`setMapCamera` in `mvd-map-view/src/camera.js`).
 
 ## Map-tab "Learn map" mode
 
@@ -1576,8 +1612,8 @@ A sidebar checklist toggles categories (Weapons, Armor, Health, Ammo,
 Powerups, Teleporters, Spawns, Buttons, Doors); spawns/buttons/doors
 start off to reduce clutter. Teleporters draw an arrow from each
 entrance to its exit (paired by `teleportSrc.target` ==
-`teleportDst.targetName`). Entities reuse the same `worldToCanvas`
-transform and item palette as playback, so they sit exactly where
+`teleportDst.targetName`). Entities reuse the same projection (`project`,
+`MvdMap.toCanvas`) and item palette as playback, so they sit exactly where
 players do. The corpus is fetched in-browser by `fetchMapEntsSync`
 (`worker.js`) from `mapents/<map>.json` (deployed by `make build`); the
 toggle is hidden when no corpus exists for the map.

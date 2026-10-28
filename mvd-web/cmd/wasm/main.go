@@ -135,7 +135,8 @@ func getDemoInfo(this js.Value, args []js.Value) interface{} {
 // frontend's Timeline/Map panels read (50 ms, all fields, legacy
 // "first-sample-of-bucket" reducers, team aggregates). Columnar always
 // emits the raw loc index "li". See mvd-analytics/view/columnar.go for
-// the shape and the app.js accessors that consume it.
+// the shape and mvd-map-view/src/frames.js for the JS accessors that
+// consume it.
 func getDefaultBuckets(this js.Value, args []js.Value) interface{} {
 	if lastResult == nil {
 		return errorJSON("no demo analyzed yet")

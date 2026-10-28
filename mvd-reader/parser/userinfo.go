@@ -312,8 +312,9 @@ func cleanString(s string) string {
 }
 
 // StripChatMarkup removes ezQuake chat markup that survives
-// Q-normalisation, leaving plain readable text. Mirrors qw-web's
-// formatQuakeMessage (in static/app.js) minus the HTML span generation.
+// Q-normalisation, leaving plain readable text. Mirrors the web UI's
+// formatQuakeMessage (mvd-web/src/lib/chat.js) minus the HTML span
+// generation.
 //
 // Removed in order:
 //

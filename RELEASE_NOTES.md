@@ -63,6 +63,15 @@ on Search). Only a shared link's own demo takes the link's tab, time and
 range. A link whose `tab=` names no tab now opens on Summary instead of
 Search.
 
+Region control now names and colours each side correctly when the team
+listed first in the demo lost (the Map's region status named the other
+team, and the Map overlay, the Timeline's control rows and the Locs &
+Regions matrix used the other team's colour — a bug the old page had
+too). Picking a second demo while the first is still loading now always
+ends on the second; the previous map's floors and region tints no longer
+carry over onto a map without geometry; and the Player engine stops
+rendering in the background while another tab is showing.
+
 ## unreleased (gl-map) — the map renders entirely through WebGL2
 
 No schema change; web UI only. Supersedes the hybrid described in the entry

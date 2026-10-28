@@ -858,10 +858,12 @@ mvd-analyzer/
     No mvd-analytics import — outputs are opaque JSON pass-through
 
   mvd-web/                 Module: browser UX + WASM glue (Layer 3, frontend)
-    index.html, src/       Vite + Svelte: app/ (load, URL, tabs), shell/, tabs/, player/ (Player tab), data/, state/, lib/
+    index.html, src/       Vite + Svelte: app/ (load, URL, tabs), shell/, tabs/, player/ (Player tab), data/, state/, lib/, ui/ (shared widgets: playback bar, panels)
     static/                worker.js, styles.css, vendor/, maps/ (copied as-is)
+    test/                  node --test unit tests for the DOM-free modules
     cmd/wasm/              WASM entry (exports analyzeMVD to JS)
 
+  mvd-map-view/            ESM: the embeddable WebGL2 map renderer (MvdMap) the Map tab and the Player map pane draw with
   mvd-fte-player/          ESM: FTE demo player page for the Player tab (port of hub's, MIT)
 
   demos/                   Corpus for regression + manual testing (untracked)
@@ -880,6 +882,7 @@ mvd-analyzer/
 - [mvd-mcp/README.md](mvd-mcp/README.md) — stdio MCP shim, distribution
 - [mvd-mcp/CLAUDE_DESKTOP.md](mvd-mcp/CLAUDE_DESKTOP.md) — Claude Desktop / Claude Code config snippets
 - [mvd-web/README.md](mvd-web/README.md) — browser UI, build and deploy
+- [mvd-map-view/README.md](mvd-map-view/README.md) — the map renderer package (MvdMap): API, data it takes, embedding
 - [mvd-fte-player/README.md](mvd-fte-player/README.md) — the embedded FTE demo player behind the Player tab
 
 ## Testing
@@ -952,6 +955,12 @@ git add mvd-analytics/testdata/golden/    # commit alongside the analyzer change
 (The `-update-golden` flag is registered only in the analyzer test
 package; wider scopes like `./mvd-analytics/...` fail in `mapgen` with
 "flag provided but not defined".)
+
+The frontend's node tests (`mvd-web/test/`, run by `make test` when node
+is on `PATH`) read the same `mvd-analytics/testdata/golden/*.json` and pin
+values out of them, so rerun `make test` after a regen and update a JS
+expectation that the intended change moved — see
+[mvd-web/README.md § Tests](mvd-web/README.md#tests).
 
 The pipeline also has a CLI for ad-hoc bulk diffs:
 

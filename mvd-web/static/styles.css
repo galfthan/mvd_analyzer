@@ -1,6 +1,7 @@
 :root {
-    /* Team palette (used by the JS layer too — see TEAM_PALETTE in app.js).
-     * These are only the pre-load defaults: displayResults() re-points
+    /* Team palette (used by the JS layer too — see TEAM_PALETTE in
+     * src/state/teams.js). These are only the pre-load defaults: the teams
+     * store's mirror in src/main.js re-points
      * --team-a..--team-d at the per-match, name-assigned colours
      * (assignTeamColors), so don't use them for anything that isn't
      * literally "the colour of team at index N". */
@@ -25,9 +26,9 @@
 
 }
 
-/* Utility class for elements toggled via classList. Existing show/hide
- * logic in app.js sets el.style.display directly, so this class is only
- * picked up by call sites that use classList.add/remove('hidden'). */
+/* Utility class for elements toggled via classList. Most show/hide logic
+ * sets display directly (an inline style or Svelte's style:display), so
+ * this class is only picked up by call sites that use the 'hidden' class. */
 .hidden {
     display: none;
 }
@@ -140,7 +141,7 @@ body.no-demo .topbar-demo-info { display: none; }
     color: var(--accent-cyan);
 }
 
-/* Inner <a> rendered by setVersionTag in app.js for the commit hash */
+/* Inner <a> the top bar (src/shell/Topbar.svelte) renders for the commit hash */
 .topbar-version a {
     color: inherit;
     text-decoration: none;
@@ -756,8 +757,9 @@ body.no-team-rows #tab-summary .per-player-heading {
  * Region control is NOT listed here, and NOT because its data is missing:
  * the result ships `timelineAnalysis.regionControl.regions` for every demo,
  * since the region geometry is a property of the map. It needs a binary side
- * layout, so app.js's initRegionControl hides its two panels itself whenever
- * the layout is individual with more than two participants. */
+ * layout, so its panels hide themselves off the region-control model's
+ * `editable` (src/state/regions.js) whenever the layout is individual with
+ * more than two participants. */
 body.individual-mode .team-aggregate-panel,
 body.individual-mode .team-aggregate-heading,
 body.individual-mode .team-aggregate-table,
@@ -2394,7 +2396,8 @@ body.graph-scrubbing * {
     position: absolute;
     left: 0;
     right: 0;
-    /* background-color set inline by updateScoreTimeline from TEAM_COLORS */
+    /* background-color was set inline by the legacy app.js's
+     * updateScoreTimeline; nothing renders .score-bar-fill since the port */
 }
 
 .score-bar-fill.positive {
@@ -2406,9 +2409,10 @@ body.graph-scrubbing * {
 }
 
 /* Selected-range suffix on a timeline heading. It has no fixed home: the
- * individual layout hides the Weapons panel, so app.js moves this span into
- * the promoted "Weapons per player" heading — hence the margin instead of a
- * literal space in the markup. */
+ * individual layout hides the Weapons panel, so the Timeline tab
+ * (src/tabs/timeline/TimelineTab.svelte) renders this span into the promoted
+ * "Weapons per player" heading — hence the margin instead of a literal
+ * space in the markup. */
 #time-range-label {
     margin-left: 0.4em;
     font-size: 0.85rem;

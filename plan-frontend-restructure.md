@@ -93,13 +93,14 @@ status / hub box are stores (`src/state/shell.js`). `app.js`,
 console and the headless checks only.
 C covers the clock, teams and current-demo stores. D renders the top bar,
 sidebar and layout in Svelte with the active tab in a store; the load
-overlay and search stay legacy until their tabs are ported. E is the
+overlay and search stayed legacy until their tabs were ported (both are
+in `src/` now — see above). E is the
 Player tab in `src/player/`. Decided in E: no dockview (see below), and
 no separate `pov` store — the engine's `status` store carries the tracked
-player, which is all the panes need. The URL state stays legacy until a
-ported tab needs it.
-Branch: to be created off `player-tab`. The Player tab does not merge
-until at least phases A–E below are done.
+player, which is all the panes need. The URL state stayed legacy until
+the Search port (`src/app/url.js` now).
+Branch: `web-svelte`, created off `player-tab`; the Player tab merges
+with it.
 
 ## Why
 
@@ -112,7 +113,7 @@ canvas, the tab switch mounts/unmounts panes. Movable / collapsible /
 resizable panes and side panels are where that stops working.
 
 What already works and is kept as-is: `mvd-map-view`, `mvd-fte-player`
-and `static/playlist.js` — small framework-free ESM modules with their
+and `playlist.js` (then `static/playlist.js`, now `src/lib/playlist.js`) — small framework-free ESM modules with their
 own node tests. The new code wraps them; it does not rewrite them.
 
 ## Goals and non-goals
@@ -141,11 +142,14 @@ Non-goals (for this plan):
   `@sveltejs/vite-plugin-svelte`, `svelte`, `svelte-check`. Plain JS with
   JSDoc types, no TypeScript, to match the rest of the repo.
 - Source in `mvd-web/src/`; files served as-is (worker.js, wasm_exec.js,
-  maps/, vendor/) move to `mvd-web/public/`.
+  maps/, vendor/) were to move to `mvd-web/public/`. As built they stayed
+  in `mvd-web/static/`, which `vite.config.js` names as Vite's
+  `publicDir`.
 - `mvd-map-view` and `mvd-fte-player` are imported by relative path (Vite
   bundles them). `fte-player/player.html` stays a separate page at the
-  same URL — the iframe needs it — as a second Vite entry or copied
-  through `public/`.
+  same URL — the iframe needs it. As built it is neither a Vite entry nor
+  in `publicDir`: `make build` copies `mvd-fte-player/`'s `player.html`,
+  `config.cfg` and `src/*.js` into `dist/fte-player/` as-is.
 - **dist/ layout stays the same** for everything fetched at runtime by URL:
   `analyzer.wasm`, `worker.js`, `bsps/`, `locs/`, `mapents/`, `maps/`,
   `fte-player/`. Vite's hashed bundles go to `dist/assets/`.
@@ -156,9 +160,10 @@ Non-goals (for this plan):
   netlify.toml or `.nvmrc`). Cache headers stay `no-cache` everywhere
   (Netlify merges overlapping header rules, so an `immutable` rule for the
   hashed `dist/assets/*` would combine with `/*`'s `no-cache`).
-- `make test`: node becomes required for mvd-web (today it is skipped
-  without node). Adds `svelte-check`. Pure modules (data layer, stores,
-  playlist) keep `node --test`.
+- `make test`: node was to become required for mvd-web. As built it is
+  not: `make test` runs the node tests and `svelte-check` when node is on
+  `PATH` and skips them (loudly) otherwise, so a Go-only checkout still
+  passes. Pure modules (data layer, stores, playlist) keep `node --test`.
 
 ## Data layer (`mvd-web/src/data/`)
 
@@ -222,7 +227,10 @@ DemoHandle
   file drop, version tag.
 - **Legacy tabs**: a `LegacyTab` host component that owns the tab's
   existing markup and calls `app.js`'s init/render for it, so unported tabs
-  work unchanged inside the new shell.
+  work unchanged inside the new shell. (As built there was no `LegacyTab`:
+  an `adopt` action moved the unported tabs' markup from `index.html`'s
+  `#legacy-dom` into the shell and `app.js` kept driving it by id. Both
+  went with `app.js`.)
 - **Panes**: dockview-core was the first choice and was dropped after the
   spike: ~390 KB minified (the page bundle is ~80 KB), its ESM build ships
   no stylesheet, and it moves panels between DOM parents — which reloads
@@ -263,8 +271,8 @@ and panes `MapPane`, `HealthArmorPane`, `MomentsPane`, `FragFeedPane`.
 | A | Tooling: Vite + Svelte build, `app.js` loaded unchanged, Netlify green | deploy preview behaves exactly like today |
 | B | Data layer + `WasmSource`; `app.js` loads demos through it (legacy bridge) | no direct worker/hub calls left in `app.js` |
 | C | Stores: clock, teams, pov, urlState; legacy code reads/writes through them | `setCurrentTime` / `TEAM_COLORS` are thin wrappers |
-| D | Svelte shell (sidebar, tabs, overlay, search) with `LegacyTab` hosts | all tabs work inside the new shell |
-| E | Player tab in Svelte, panes on dockview, own Map pane instance | Player tab section deleted from `app.js` → **player-tab can merge** |
+| D | Svelte shell (sidebar, tabs, overlay, search) with `LegacyTab` hosts (as built: the `adopt` action, see above) | all tabs work inside the new shell |
+| E | Player tab in Svelte, panes on dockview (as built: our own pane column, see above), own Map pane instance | Player tab section deleted from `app.js` → **player-tab can merge** |
 | F0 | Arrangeable panels on the multi-panel tabs (Summary, Timeline, Locs & regions, Key moments, Pickups, Aim) | done |
 | F | Remaining tabs, smallest/least coupled first: Chat, Pack drops, Pickups, Key moments, Summary, Aim, Locs & regions, Timeline, Map, Search — **done** (2026-10-28) | each port deletes its `app.js` section; done when `app.js` is gone — **it is** |
 
@@ -340,5 +348,6 @@ that likely covers each (`mvd-api/openapi/openapi.yaml`):
 
 - PR shape: one PR with the Player tab plus phases A–E, then one PR per
   tab in F? Or land A–D first on its own, with the Player tab after?
-- dockview vs our own pane column — decide after the spike.
+- ~~dockview vs our own pane column — decide after the spike.~~ Decided
+  in E: our own pane column (see "Shell and panes").
 - Port all tabs before merging `player-tab`, or only through E?

@@ -348,9 +348,9 @@ func TestColumnarSizeReport(t *testing.T) {
 }
 
 // TestDumpColumnarJSON writes matched columnar + row JSON for one 4on4 to
-// /tmp so the JS accessor logic in app.js can be validated against real
-// Go-generated data offline. Env-gated (mirrors the golden -update-golden
-// pattern); a no-op in normal runs.
+// /tmp so the JS accessor logic (mvd-map-view/src/frames.js) can be
+// validated against real Go-generated data offline. Env-gated (mirrors the
+// golden -update-golden pattern); a no-op in normal runs.
 func TestDumpColumnarJSON(t *testing.T) {
 	if os.Getenv("DUMP_COLUMNAR") == "" {
 		t.Skip("set DUMP_COLUMNAR=1 to dump /tmp/col.json + /tmp/row.json")
