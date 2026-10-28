@@ -1653,10 +1653,14 @@ survives a new demo when that demo has the same team / player.
   recomputed through the data layer (`DemoHandle.recomputeRegions`, the
   `recomputeRegionControl` WASM bridge) and published again;
   the Map's model (`src/tabs/map/map-model.js`) copies both steps onto
-  its map view (`controlRegions`, `locToRegion`, `regionToGroups`,
-  `bucketStates`) and the tab redraws when it shows; the Timeline's Region
-  Control panel reads the model too (`src/tabs/timeline/`, redrawn once
-  the recompute lands). When the
+  its map view (`controlRegions`, `controlSides`, `locToRegion`,
+  `regionToGroups`, `bucketStates`) and the tab redraws when it shows; the
+  Timeline's Region Control panel reads the model too (`src/tabs/timeline/`,
+  redrawn once the recompute lands). Go names the two sides itself
+  (`teamA` / `teamB`, in demoInfo team order — not the frag order), so
+  every surface resolves each side to its canonical colour index **by
+  name** (`regionSides` in `src/lib/regions.js`) rather than treating side
+  A as index 0. When the
   map geometry arrives, `applyMapGeometry` re-applies the regions in effect
   (`reapplyRegions`) so the overlay's region → loc-group lookup points at
   the new groups. Region edits are not persisted: a reload or another

@@ -7,6 +7,17 @@
 // { name, points: [{x,y,z,name}], centroidX, centroidY } — the shape Go
 // ships in timelineAnalysis.regionControl.regions.
 
+// regionSides: the canonical index (= colour index, src/state/teams.js) of
+// region control's side A and side B. Go names the sides itself
+// (rc.teamA / rc.teamB — view/region_control.go inferTeamsFromMatch takes
+// them in demoInfo.teams order), and that is not the frag order: wherever
+// demoInfo's first team lost, Go's side A is canonical index 1. So every
+// teamA* / teamB* state is coloured and named through this, by name, never
+// as index 0 / 1.
+export function regionSides(order, rc) {
+    return [order.indexOf(rc.teamA), order.indexOf(rc.teamB)];
+}
+
 // The editor's rows for a set of resolved regions: one per region, its
 // distinct loc names comma-joined.
 export function regionRowsFromRegions(regions) {

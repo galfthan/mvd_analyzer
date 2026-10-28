@@ -82,9 +82,12 @@ test('legend: teams in colour order, players by name, cells', () => {
 
 test('region status: labels and the players in each region', () => {
     const colors = ['#a', '#b'];
-    assert.deepEqual(regionStateLabel('teamAWeakControl', ['red'], colors), ['red (weak)', '#a']);
-    assert.deepEqual(regionStateLabel('teamBControl', [], colors), ['B', '#b']);
-    assert.deepEqual(regionStateLabel(undefined, [], colors), ['Empty', '#555']);
+    assert.deepEqual(regionStateLabel('teamAWeakControl', ['red'], colors, [0, 1]), ['red (weak)', '#a']);
+    assert.deepEqual(regionStateLabel('teamBControl', [], colors, [0, 1]), ['B', '#b']);
+    assert.deepEqual(regionStateLabel(undefined, [], colors, [0, 1]), ['Empty', '#555']);
+    // Go's side A is canonical index 1: its name and colour are index 1's.
+    assert.deepEqual(regionStateLabel('teamAControl', ['blue', 'red'], colors, [1, 0]), ['red', '#b']);
+    assert.deepEqual(regionStateLabel('teamBWeakControl', ['blue', 'red'], colors, [1, 0]), ['blue (weak)', '#a']);
     const rows = regionStatusRows({
         regions: [{ name: 'RA' }, { name: 'YA' }],
         states: { RA: 'contested' },
@@ -93,7 +96,7 @@ test('region status: labels and the players in each region', () => {
             dead: { x: 1, y: 1, h: 0, loc: 'ra' }, nowhere: { x: 0, y: 0, loc: 'ra' },
         },
         locOf: (d) => d.loc, locToRegion: { ra: 'RA' },
-        symbols: { p: { teamIdx: 1 }, q: { teamIdx: 0 } }, teams: ['red', 'blue'], colors,
+        symbols: { p: { teamIdx: 1 }, q: { teamIdx: 0 } }, teams: ['red', 'blue'], colors, sides: [0, 1],
     });
     assert.deepEqual(rows.map((r) => [r.name, r.label, r.players.map((p) => p.name)]), [['RA', 'Contested', ['q', 'p']], ['YA', 'Empty', []]]);
 });
@@ -222,4 +225,19 @@ test('playback: the loop moves the clock, toggles, wraps, stops at 0 and on a ta
     } finally {
         performance.now = realNow;
     }
+});
+
+test('region status: Go\'s side A named and coloured by name, not as index 0', () => {
+    // 1on1 skull: demoInfo lists AHemlocksLie first, 42 won the frags.
+    const r = golden('1on1_42_ahemlockslie_240426_skull');
+    const rc = r.timelineAnalysis.regionControl;
+    const teams = ['42', 'AHemlocksLie'];
+    const colors = ['#a', '#b'];
+    const sides = [teams.indexOf(rc.teamA), teams.indexOf(rc.teamB)];
+    const rows = regionStatusRows({
+        regions: [{ name: 'X' }], states: { X: 'teamAControl' }, playerData: null,
+        locOf: () => null, locToRegion: {}, symbols: {}, teams, colors, sides,
+    });
+    assert.equal(rc.teamA, 'AHemlocksLie');
+    assert.deepEqual([rows[0].label, rows[0].color], ['AHemlocksLie', '#b']);
 });

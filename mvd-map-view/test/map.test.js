@@ -786,3 +786,19 @@ test('the trail collector pulls a trail start back when the clock rewinds past i
     dyn = map._glDynamic(1);
     assert.equal(dyn.lines.length, 1, 'full window → the segment is emitted');
 });
+
+test('computeControlFills colours each side by controlSides, not by 0 / 1', () => {
+    const map = new MvdMap();
+    map.teamColors = ['#ff0000', '#0000ff'];
+    const group = { name: 'ra', tris: new Array(9).fill(0) };
+    map.state.controlRegions = [{ name: 'R' }, { name: 'S' }];
+    map.state.regionToGroups = { R: [group], S: [group] };
+    const fills = (sides) => {
+        map.state.controlSides = sides;
+        return map.computeControlFills({ R: 'teamAControl', S: 'teamBWeakControl' }).map((f) => f.tint);
+    };
+    assert.deepEqual(fills([0, 1]), ['rgba(255, 0, 0, 0.24)', 'rgba(0, 0, 255, 0.14)']);
+    // Side A is the canonical index 1 (the host's demo where Go's first
+    // side lost): side A takes index 1's colour.
+    assert.deepEqual(fills([1, 0]), ['rgba(0, 0, 255, 0.24)', 'rgba(255, 0, 0, 0.14)']);
+});

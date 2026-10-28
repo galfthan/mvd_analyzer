@@ -33,6 +33,7 @@
     import { demo, teams, activeTab, clock, segment, regionControl } from '../../state/index.js';
     import { reconstructBucketPlayers, bucketIndexAtTime } from '../../../../mvd-map-view/src/frames.js';
     import { formatDuration } from '../../lib/result.js';
+    import { regionSides } from '../../lib/regions.js';
     import {
         timelineEvents, fragsAt, viewRange, clampSegment, indicatorPct, axisTicks,
         prepWeaponsData, computeBackpackDrops, prepHealthArmorData, prepScoreData,
@@ -297,8 +298,10 @@
             return;
         }
         rcShown = true;
-        const ca = teamStrongColor(colors[0]);
-        const cb = teamStrongColor(colors[1]);
+        // Go's side A is not necessarily canonical index 0 (regionSides).
+        const [ia, ib] = regionSides(order, data);
+        const ca = teamStrongColor(colors[ia]);
+        const cb = teamStrongColor(colors[ib]);
         rcLegend = { a: data.teamA, b: data.teamB, ca, cb };
         flushSync();
         renderSpansTimeline(el.region, el.regionLabels, {

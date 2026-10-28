@@ -175,8 +175,9 @@ export function buildLocHeatmap(result, metric, teamOrder, duel) {
 // state (Empty excluded — it is filler, not a control state, and would swamp
 // the scale), so a row uses the full colormap; the printed % stays absolute.
 // `stats` is Go's per-region stats; the team names ride at the parent level
-// of Go's shape, not on each region, so they come in separately.
-export function buildRegionHeatmap(regions, stats, teamAName, teamBName) {
+// of Go's shape, not on each region, so they come in separately, with
+// `sides`, their canonical (colour) indices (lib/regions.js regionSides).
+export function buildRegionHeatmap(regions, stats, teamAName, teamBName, sides) {
     if (!regions || !regions.length || !stats) return null;
     // Only the regions Go returned stats for count (a stats object with none
     // of them is nothing to show).
@@ -184,17 +185,18 @@ export function buildRegionHeatmap(regions, stats, teamAName, teamBName) {
     const teamA = teamAName || 'Team A';
     const teamB = teamBName || 'Team B';
 
-    // Columns: teamA control/weak (red underline) | contested/cont.weak/empty
-    // (neutral) | teamB weak/control (blue underline). `label` is the header
-    // text, `full` the title; the team-named columns carry the team identity.
+    // Columns: teamA control/weak (side A's colour underline) |
+    // contested/cont.weak/empty (neutral) | teamB weak/control (side B's).
+    // `label` is the header text, `full` the title; the team-named columns
+    // carry the team identity.
     const columns = [
-        { label: teamA,        full: `${teamA} control`,      key: 'teamAControl',     team: teamA, teamIdx: 0 },
-        { label: `${teamA} wk`, full: `${teamA} weak control`, key: 'teamAWeakControl', team: teamA, teamIdx: 0 },
+        { label: teamA,        full: `${teamA} control`,      key: 'teamAControl',     team: teamA, teamIdx: sides[0] },
+        { label: `${teamA} wk`, full: `${teamA} weak control`, key: 'teamAWeakControl', team: teamA, teamIdx: sides[0] },
         { label: 'Cont',       full: 'Contested',             key: 'contested',        team: '',    teamIdx: -1 },
         { label: 'Cont wk',    full: 'Contested (weak)',      key: 'weakContested',    team: '',    teamIdx: -1 },
         { label: 'Empty',      full: 'Empty (no players)',    key: 'empty',            team: '',    teamIdx: -1, noHeat: true },
-        { label: `${teamB} wk`, full: `${teamB} weak control`, key: 'teamBWeakControl', team: teamB, teamIdx: 1 },
-        { label: teamB,        full: `${teamB} control`,      key: 'teamBControl',     team: teamB, teamIdx: 1 },
+        { label: `${teamB} wk`, full: `${teamB} weak control`, key: 'teamBWeakControl', team: teamB, teamIdx: sides[1] },
+        { label: teamB,        full: `${teamB} control`,      key: 'teamBControl',     team: teamB, teamIdx: sides[1] },
     ];
 
     const rows = [];

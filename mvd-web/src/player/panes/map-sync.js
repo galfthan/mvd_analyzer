@@ -5,7 +5,7 @@
 
 const DATA = [
     'locations', 'locTable', 'locationGroups', 'locationGroupByName',
-    'controlRegions', 'regionToGroups', 'mapGeometry', 'submodelMeshes',
+    'controlRegions', 'controlSides', 'regionToGroups', 'mapGeometry', 'submodelMeshes',
     'items', 'mapEntities', 'teleportArrows', 'bounds',
     'frames', 'bucketStates', 'projectiles', 'nails', 'beams', 'zRange',
     'teams', 'playerSymbols', 'posStreams', 'movers',

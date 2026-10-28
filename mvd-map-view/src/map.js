@@ -301,6 +301,7 @@ export function newState() {
         locationGroupByName: null,
         controlRegions: null, // region-control definitions (host-supplied)
         regionToGroups: {},   // region name -> [loc groups] for the control overlay
+        controlSides: [0, 1], // teamColors index of control side A / side B (host-resolved)
         mapGeometry: null,    // BSP-derived per-loc polygons (optional)
         submodelMeshes: null, // { submodelId -> tris } from corpus v4 geom.submodels
         items: null,          // item spawners with their phase timelines
@@ -1544,6 +1545,7 @@ export class MvdMap {
         const regionByName = {};
         for (const r of regions) regionByName[r.name] = r;
 
+        const [hexA, hexB] = this.state.controlSides.map(i => this.teamColors[i]);
         const fills = [];
         for (const [regionName, state] of Object.entries(controlStates)) {
             const groups = this.state.regionToGroups[regionName];
@@ -1551,10 +1553,10 @@ export class MvdMap {
 
             let baseAlpha, hex;
             switch (state) {
-                case 'teamAControl':     baseAlpha = 0.24; hex = this.teamColors[0]; break;
-                case 'teamAWeakControl': baseAlpha = 0.14; hex = this.teamColors[0]; break;
-                case 'teamBControl':     baseAlpha = 0.24; hex = this.teamColors[1]; break;
-                case 'teamBWeakControl': baseAlpha = 0.14; hex = this.teamColors[1]; break;
+                case 'teamAControl':     baseAlpha = 0.24; hex = hexA; break;
+                case 'teamAWeakControl': baseAlpha = 0.14; hex = hexA; break;
+                case 'teamBControl':     baseAlpha = 0.24; hex = hexB; break;
+                case 'teamBWeakControl': baseAlpha = 0.14; hex = hexB; break;
                 case 'contested':        baseAlpha = 0.14; hex = '#ffffff'; break;
                 case 'weakContested':    baseAlpha = 0.07; hex = '#ffffff'; break;
                 default: continue; // empty

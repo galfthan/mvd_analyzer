@@ -198,14 +198,16 @@ export function weaponsText(data) {
 
 // ─── Region status ──────────────────────────────────────────────────────────
 
-// regionStateLabel: a control state's label and colour (team A / B are the
-// first two of the canonical order).
-export function regionStateLabel(state, teams, colors) {
+// regionStateLabel: a control state's label and colour. `sides` is the
+// canonical index of Go's side A / side B (lib/regions.js regionSides) —
+// `teams` and `colors` are in the canonical order.
+export function regionStateLabel(state, teams, colors, sides) {
+    const [a, b] = sides;
     switch (state) {
-        case 'teamAControl': return [teams[0] || 'A', colors[0]];
-        case 'teamAWeakControl': return [(teams[0] || 'A') + ' (weak)', colors[0]];
-        case 'teamBControl': return [teams[1] || 'B', colors[1]];
-        case 'teamBWeakControl': return [(teams[1] || 'B') + ' (weak)', colors[1]];
+        case 'teamAControl': return [teams[a] || 'A', colors[a]];
+        case 'teamAWeakControl': return [(teams[a] || 'A') + ' (weak)', colors[a]];
+        case 'teamBControl': return [teams[b] || 'B', colors[b]];
+        case 'teamBWeakControl': return [(teams[b] || 'B') + ' (weak)', colors[b]];
         case 'contested': return ['Contested', '#ffffff'];
         case 'weakContested': return ['Contested (weak)', '#bbbbbb'];
         default: return ['Empty', '#555'];
@@ -214,7 +216,7 @@ export function regionStateLabel(state, teams, colors) {
 
 // regionStatusRows: per region its state and the living players in it
 // (team A first). `locOf(data)` resolves a player's loc name.
-export function regionStatusRows({ regions, states, playerData, locOf, locToRegion, symbols, teams, colors }) {
+export function regionStatusRows({ regions, states, playerData, locOf, locToRegion, symbols, teams, colors, sides }) {
     const inRegion = {};
     for (const r of regions) inRegion[r.name] = [];
     if (playerData) {
@@ -230,7 +232,7 @@ export function regionStatusRows({ regions, states, playerData, locOf, locToRegi
         }
     }
     return regions.map((r) => {
-        const [label, color] = regionStateLabel(states[r.name] || 'empty', teams, colors);
+        const [label, color] = regionStateLabel(states[r.name] || 'empty', teams, colors, sides);
         const players = inRegion[r.name] || [];
         players.sort((a, b) => a.teamIdx - b.teamIdx);
         return { name: r.name, label, color, players };

@@ -16,7 +16,7 @@
     // table up.
     import { onMount, tick } from 'svelte';
     import { demo, teams, regionControl, applyRegionDefs } from '../../state/index.js';
-    import { regionRowsFromRegions, readRegionDefs, regionFileJSON, regionFileName, parseRegionFile } from '../../lib/regions.js';
+    import { regionRowsFromRegions, readRegionDefs, regionFileJSON, regionFileName, parseRegionFile, regionSides } from '../../lib/regions.js';
     import { buildRegionHeatmap } from '../../lib/loc-heatmap.js';
     import { mapFileKey } from '../../lib/result.js';
     import { fillHeatmapTable, clearHeatmapTable } from './heatmap-table.js';
@@ -45,8 +45,9 @@
     }
 
     function renderMatrix(m) {
-        const data = buildRegionHeatmap(m.regions, m.stats, m.teamA, m.teamB);
-        if (data) fillHeatmapTable(table, data, 'Region', teams.get().colors);
+        const t = teams.get();
+        const data = buildRegionHeatmap(m.regions, m.stats, m.teamA, m.teamB, regionSides(t.order, m));
+        if (data) fillHeatmapTable(table, data, 'Region', t.colors);
     }
 
     function apply() {

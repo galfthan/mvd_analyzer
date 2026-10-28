@@ -84,7 +84,7 @@ export function syncRegionStatus(el, view, time, colors, icons) {
     const rows = regionStatusRows({
         regions: s.controlRegions, states, playerData: frame ? frame.p : null,
         locOf: (d) => view.resolvePlayerLoc(d), locToRegion: s.locToRegion,
-        symbols: s.playerSymbols, teams: s.teams || [], colors,
+        symbols: s.playerSymbols, teams: s.teams || [], colors, sides: s.controlSides,
     });
     for (const r of rows) {
         const row = document.createElement('div');

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 
 import {
     locMetricAvailability, keptLocMetric, locFilterOptions, keptLocFilter, parseLocFilter, metricWeightsOf,
@@ -10,8 +10,9 @@ import {
 import { buildLocHeatmap, buildRegionHeatmap, heatmapTableHtml, contrastInk, shortName, canonicalTeams } from '../src/lib/loc-heatmap.js';
 import {
     regionRowsFromRegions, readRegionDefs, resolveRegions, locToRegionOf, regionToGroupsOf, regionOverrideJSON,
-    regionFileJSON, regionFileName, parseRegionFile,
+    regionFileJSON, regionFileName, parseRegionFile, regionSides,
 } from '../src/lib/regions.js';
+import { canonicalTeamOrder } from '../src/lib/canonical-teams.js';
 import { regionControl, resetRegionControl, applyRegionDefs, reapplyRegions } from '../src/state/regions.js';
 import { isDuel } from '../src/lib/result.js';
 
@@ -141,7 +142,7 @@ test('loc heatmap: team columns then players, per-column normalisation', () => {
 
 test('region heatmap: per-row normalisation, Empty unshaded, team names', () => {
     const rc = TEAM2.timelineAnalysis.regionControl;
-    const h = buildRegionHeatmap(rc.regions, rc.stats, rc.teamA, rc.teamB);
+    const h = buildRegionHeatmap(rc.regions, rc.stats, rc.teamA, rc.teamB, [0, 1]);
     assert.equal(h.columns[0].label, rc.teamA);
     assert.equal(h.columns[6].label, rc.teamB);
     assert.equal(h.rows.length, rc.regions.filter((r) => rc.stats[r.name]).length);
@@ -149,10 +150,10 @@ test('region heatmap: per-row normalisation, Empty unshaded, team names', () => 
         assert.equal(r.cells[4].i, 0);
         assert.ok(r.cells.every((c) => c.i <= 1));
     }
-    assert.equal(buildRegionHeatmap(rc.regions, rc.stats, null, '').columns[0].label, 'Team A');
-    assert.equal(buildRegionHeatmap(rc.regions, {}, 'a', 'b'), null);
-    assert.equal(buildRegionHeatmap([], rc.stats, 'a', 'b'), null);
-    assert.equal(buildRegionHeatmap(rc.regions, null, 'a', 'b'), null);
+    assert.equal(buildRegionHeatmap(rc.regions, rc.stats, null, '', [0, 1]).columns[0].label, 'Team A');
+    assert.equal(buildRegionHeatmap(rc.regions, {}, 'a', 'b', [0, 1]), null);
+    assert.equal(buildRegionHeatmap([], rc.stats, 'a', 'b', [0, 1]), null);
+    assert.equal(buildRegionHeatmap(rc.regions, null, 'a', 'b', [0, 1]), null);
     const html = heatmapTableHtml(h, 'Region', COLORS);
     assert.match(html.head, new RegExp(`border-bottom: 3px solid ${COLORS[0]}`));
     assert.match(html.rows[0], /% of match"/);
@@ -243,4 +244,41 @@ test('region model: reset, apply in two steps, failure, re-apply', async () => {
     assert.equal(regionControl.get(), null);
     off();
     assert.deepEqual(seen.slice(0, 6), [null, null, 'loaded', 'loaded', 'loaded', 'resolved']);
+});
+
+// Go names region control's sides in demoInfo.teams order
+// (view/region_control.go inferTeamsFromMatch); the canonical order is the
+// frag order. These two demos have the demoInfo-first team LOSING, so Go's
+// side A is canonical index 1 and must take index 1's name and colour.
+test('region control sides resolve by name where Go\'s side A lost', () => {
+    for (const name of ['4on4_fish_tbg_170426_schloss', '1on1_42_ahemlockslie_240426_skull']) {
+        const r = golden(name);
+        const rc = r.timelineAnalysis.regionControl;
+        const { order } = canonicalTeamOrder(r);
+        assert.equal(rc.teamA, r.demoInfo.teams[0], name);
+        assert.notEqual(order[0], rc.teamA, `${name}: demoInfo's first team is not the frag winner`);
+        const sides = regionSides(order, rc);
+        assert.deepEqual(sides, [1, 0], name);
+        const h = buildRegionHeatmap(rc.regions, rc.stats, rc.teamA, rc.teamB, sides);
+        assert.deepEqual(h.columns.map((c) => c.teamIdx), [1, 1, -1, -1, -1, 0, 0], name);
+        const html = heatmapTableHtml(h, 'Region', COLORS);
+        const underlines = [...html.head.matchAll(/border-bottom: 3px solid (#[0-9a-f]+)/g)].map((m) => m[1]);
+        assert.deepEqual(underlines, [COLORS[1], COLORS[1], COLORS[0], COLORS[0]], name);
+    }
+});
+
+// Every golden demo that ships region control names both of its sides in
+// the canonical order, so regionSides never answers -1 on real data.
+test('region control sides: both resolve on every golden demo', () => {
+    const dir = new URL('../../mvd-analytics/testdata/golden/', import.meta.url);
+    let seen = 0;
+    for (const f of readdirSync(dir).filter((f) => f.endsWith('.json'))) {
+        const r = JSON.parse(readFileSync(new URL(f, dir)));
+        const rc = r.timelineAnalysis?.regionControl;
+        if (!rc?.regions?.length) continue;
+        seen++;
+        const sides = regionSides(canonicalTeamOrder(r).order, rc);
+        assert.ok(sides[0] >= 0 && sides[1] >= 0 && sides[0] !== sides[1], `${f}: ${sides}`);
+    }
+    assert.ok(seen >= 10);
 });

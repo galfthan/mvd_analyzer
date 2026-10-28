@@ -19,7 +19,7 @@ import {
 import { store } from '../../state/store.js';
 import { clock, demo, teams, regionControl, reapplyRegions } from '../../state/index.js';
 import { mapFileKey } from '../../lib/result.js';
-import { locToRegionOf, regionToGroupsOf } from '../../lib/regions.js';
+import { locToRegionOf, regionToGroupsOf, regionSides } from '../../lib/regions.js';
 import { mapTeams, assignPlayerSymbols, mapBounds, dropEventsOf, posStreamsOf, mapCanvasSize } from '../../lib/map.js';
 
 export const view = new MvdMap();
@@ -45,7 +45,18 @@ export const learnMode = store(false);
 // at it, an orbit pivots on the followed player there).
 clock.subscribe(({ t }) => { view.state.currentTime = t; });
 
-teams.subscribe((t) => { view.teamColors = t.colors; });
+// Region control's side A / side B are Go's (rc.teamA / rc.teamB), resolved
+// to their canonical colour index by name — so again whenever either the
+// canonical order or the region set changes.
+const syncControlSides = () => {
+    const rc = regionControl.get();
+    view.state.controlSides = rc ? regionSides(teams.get().order, rc) : [0, 1];
+};
+
+teams.subscribe((t) => {
+    view.teamColors = t.colors;
+    syncControlSides();
+});
 
 // The region set in effect → the overlay and the region status. The demo's
 // own regions ('loaded') arrive after each load; an edit on Locs & Regions
@@ -54,6 +65,7 @@ teams.subscribe((t) => { view.teamColors = t.colors; });
 // players) keeps no control regions, so neither shows.
 regionControl.subscribe((rc) => {
     const s = view.state;
+    syncControlSides();
     if (!rc) {
         s.controlRegions = null;
         s.locToRegion = {};
