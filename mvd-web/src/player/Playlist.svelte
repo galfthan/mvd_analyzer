@@ -150,7 +150,6 @@
 
 <div class="player-playlist">
     <div class="player-playlist-head">
-        <h3>Playlist <span class="muted">{clips.length ? `(${clips.length})` : ''}</span></h3>
         <span class="pt-group">
             <button class="pt-btn" title="Play the clips in order, here" disabled={!clips.length} onclick={() => runner.start(clips, 0)}><Play size={14} /> Play all</button>
             <button class="pt-btn" title="Stop the scripted run" disabled={!run} onclick={() => runner.stop()}><Square size={13} /> Stop</button>

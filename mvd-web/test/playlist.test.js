@@ -67,6 +67,9 @@ test('playlistStep advances on playback crossing `to`, not on a seek past it', (
     assert.deepEqual(playlistStep(clips, 1, 59.95, 60.1, true), { type: 'end' });
     assert.deepEqual(playlistStep(clips, 0, 12, 55, true), { type: 'follow', index: 1 }, 'seek into another clip');
     assert.deepEqual(playlistStep(clips, 0, null, 20.05, true), { type: 'none' }, 'just jumped');
+    const overlap = [{ from: 10, to: 20 }, { from: 17, to: 25 }];
+    assert.deepEqual(playlistStep(overlap, 0, 19.9, 20.05, true), { type: 'next', index: 1 }, 'playing into an overlapping next clip still advances to it');
+    assert.deepEqual(playlistStep(overlap, 0, 12, 22, true), { type: 'follow', index: 1 }, 'a seek into it follows');
 });
 
 // playerFragClips runs against a real pipeline result when the golden

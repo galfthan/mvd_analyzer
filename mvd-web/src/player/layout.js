@@ -1,7 +1,8 @@
-// layout.js — the Player tab's pane column: which panes are open, in what
+// layout.js — the Player tab's panes, in two columns: `order` beside the
+// player and `below` under it. Which panes are open in each, in what
 // order, each one's height, collapsed state and options (the map's
-// overlays, a graph's window), the column's share of the tab's width (a
-// percentage, PaneForge's unit) and whether it is shown. A per-viewer
+// overlays, a graph's window), the side column's share of the tab's width
+// (a percentage, PaneForge's unit) and whether it is shown. A per-viewer
 // convenience kept in localStorage.
 
 import { store } from '../state/store.js';
@@ -11,7 +12,8 @@ const OLD_KEY = 'mvd.playerPanes.v1';   // an order array, the PoC's format
 
 /**
  * @typedef {object} PaneLayout
- * @property {string[]} order                 open pane ids, top to bottom
+ * @property {string[]} order                 the side column's pane ids, top to bottom
+ * @property {string[]} below                 the panes under the player, top to bottom
  * @property {Record<string, boolean>} collapsed
  * @property {Record<string, number>} heights  pane id → body height in px
  * @property {Record<string, Record<string, unknown>>} opts  pane id → its options
@@ -19,15 +21,18 @@ const OLD_KEY = 'mvd.playerPanes.v1';   // an order array, the PoC's format
  * @property {boolean} hidden
  */
 
-// Every pane there is; the column starts with a few, the rest are one
-// "Add pane…" away.
+// Every pane there is; the columns start with a few, the rest are one
+// "Add pane…" away. A pane is open in at most one column.
 export const PANE_IDS = [
+    'finder', 'playlist',
     'map', 'players', 'stack', 'moments', 'feed',
     'score', 'team-weapons', 'team-ha', 'weapons-pp', 'powerups', 'regions',
 ];
+/** @typedef {'order' | 'below'} Column */
 /** @type {PaneLayout} */
 const DEFAULT = {
-    order: ['map', 'players', 'moments', 'feed'],
+    order: ['map', 'players', 'team-weapons'],
+    below: ['finder', 'playlist'],
     collapsed: {},
     heights: {},          // pane id → body height in px; unset = natural
     opts: {},
@@ -44,8 +49,15 @@ export const MAX_SPLIT = 60;
 function sanitize(v) {
     /** @type {PaneLayout & { width?: unknown }} */
     const out = { ...DEFAULT, ...(v && typeof v === 'object' ? v : {}) };
+    // A layout stored before the finder and the playlist were panes has no
+    // `below`: they open there.
     const order = Array.isArray(out.order) ? out.order : DEFAULT.order;
-    out.order = order.filter((/** @type {string} */ id, /** @type {number} */ i) => PANE_IDS.includes(id) && order.indexOf(id) === i);
+    const below = Array.isArray(out.below) ? out.below : DEFAULT.below;
+    const seen = new Set();
+    /** @param {unknown[]} ids */
+    const clean = (ids) => /** @type {string[]} */ (ids.filter((id) => typeof id === 'string' && PANE_IDS.includes(id) && !seen.has(id) && seen.add(id)));
+    out.below = clean(below);
+    out.order = clean(order);
     out.collapsed = { ...(out.collapsed || {}) };
     out.heights = { ...(out.heights || {}) };
     out.opts = Object.fromEntries(Object.entries(out.opts && typeof out.opts === 'object' ? out.opts : {})
@@ -79,18 +91,39 @@ export function updateLayout(fn) {
     paneLayout.set(clean);
 }
 
-// movePane: the dragged pane takes the target's slot, so dropping on the
-// pane below moves it down.
+/**
+ * @param {PaneLayout} layout
+ * @param {string} id
+ * @returns {Column | null}
+ */
+export function columnOf(layout, id) {
+    return layout.order.includes(id) ? 'order' : layout.below.includes(id) ? 'below' : null;
+}
+
+// movePane puts a pane at `toIndex` of a column, from wherever it is: the
+// dragged pane takes the target's slot, so dropping on the pane below moves
+// it down; an index past the end appends.
 /**
  * @param {string} id
+ * @param {Column} column
  * @param {number} toIndex
  */
-export function movePane(id, toIndex) {
+export function movePane(id, column, toIndex) {
     updateLayout((l) => {
-        const from = l.order.indexOf(id);
-        if (from < 0 || toIndex < 0 || toIndex >= l.order.length || from === toIndex) return;
-        l.order.splice(from, 1);
-        l.order.splice(toIndex, 0, id);
+        const from = columnOf(l, id);
+        if (!from || toIndex < 0) return;
+        if (from === column && (toIndex >= l[column].length || l[column].indexOf(id) === toIndex)) return;
+        l[from] = l[from].filter((x) => x !== id);
+        l[column].splice(Math.min(toIndex, l[column].length), 0, id);
+    });
+}
+
+// showPane opens a pane, expanded, where it is or else under the player.
+/** @param {string} id */
+export function showPane(id) {
+    updateLayout((l) => {
+        if (!columnOf(l, id)) l.below.push(id);
+        delete l.collapsed[id];
     });
 }
 

@@ -4,6 +4,7 @@
 
 import { store } from '../state/store.js';
 import { validateQuery } from '../lib/clip-query.js';
+import { showPane } from './layout.js';
 
 /**
  * @typedef {import('../lib/clip-query.js').ClipQuery} ClipQuery
@@ -55,9 +56,9 @@ export function deletePreset(id) {
     save(userPresets.get().filter((p) => p.id !== id));
 }
 
-// The query handed to the finder from outside it (a preset pick, a link):
-// { title, query, n } — n changes on every hand-over so the same preset
-// picked twice still reloads.
+// The query handed to the finder from outside it (a link): { title, query,
+// n }, until the finder takes it — opening its pane, which mounts it, if
+// it is closed or collapsed.
 export const finderInput = store(/** @type {{ title: string, query: ClipQuery, n: number } | null} */ (null));
 
 /**
@@ -66,4 +67,5 @@ export const finderInput = store(/** @type {{ title: string, query: ClipQuery, n
  */
 export function openInFinder(title, query) {
     finderInput.set({ title, query: structuredClone(query), n: (finderInput.get()?.n || 0) + 1 });
+    showPane('finder');
 }

@@ -39,8 +39,8 @@ talks to it through a JS shim.
   split, [Lucide](https://lucide.dev) icons, imported one per file
   (`@lucide/svelte/icons/<name>`) so only the icons used ship, and
   [jsep](https://github.com/EricSmekens/jsep) (MIT), the expression parser
-  behind the clip finder's text mode. Its node test skips where `npm ci`
-  has not run.
+  behind the clip finder's filter text and *Code* view. Their node tests
+  skip where `npm ci` has not run.
 - `static/` — copied into `dist/` as-is (Vite's `publicDir`).
   - `styles.css` — the stylesheet.
   - `worker.js` — wraps the WASM module in a Web Worker so analysis
@@ -1067,7 +1067,7 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   end (the player starts muted, as hub's does), then the fullscreen
   toggle, and the show-panes button while the pane column is hidden.
 - **Fullscreen** (`fullscreen.js`): the whole player panel — the engine,
-  its bars, the clip finder, the playlist and the pane column — fills the
+  its bars and both pane columns — fills the
   screen, each column scrolling on its own, and the unified playback bar
   moves into it on top (as the Map tab's fullscreen does) and back out
   however fullscreen ends. The tab's controls share one compact
@@ -1079,27 +1079,33 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
 
 ### Panes
 
-A column beside the player (`PaneColumn.svelte`), split from it by a
-PaneForge group in `PlayerTab.svelte`: drag the divider (or focus it and
-use the arrow keys) to resize, drag it shut to hide the column; below
-1100 px the column stacks under the player instead. Each pane is a Svelte
+Two columns of panes (`PaneColumn.svelte`, `column` = `order` or
+`below`): one beside the player, split from it by a PaneForge group in
+`PlayerTab.svelte` — drag the divider (or focus it and use the arrow keys)
+to resize, drag it shut to hide the column; below 1100 px it stacks under
+the player instead — and one under the player's bars. Every pane can open
+in either column (one at a time). Each pane is a Svelte
 component inside a `Pane.svelte` frame and redraws at most once per
 animation frame on the page clock or the engine's status, only while the
 tab shows (`panes/tick.js`). The layout is a per-viewer convenience in
-`localStorage` (`mvd.playerPanes.v2`; the PoC's `v1` order is migrated):
-which panes are open and in what order (default Map / Players / Moments /
-Frag feed — the rest are one "Add pane…" away), each pane's height,
-collapsed state and options (`opts`: the map's overlays, a graph's
-window), the column's
+`localStorage` (`mvd.playerPanes.v2`; the PoC's `v1` order is migrated;
+a layout stored before the finder and the playlist were panes gets them
+under the player): which panes are open in each column and in what order
+(default Map / Players / Team weapons beside the player, Clip finder /
+Playlist under it — the rest are one "Add pane…" away in either column),
+each pane's height, collapsed state and options (`opts`: the map's
+overlays, a graph's window), the side column's
 share of the width (`split`, %, stored when a drag ends — a drag that
 shuts the column passes its minimum on the way) and whether it is shown.
-Headers drag by the grip to reorder; ↑ ↓ × (dim until hovered) move and
-close, the chevron or title collapses, the bottom edge resizes
-(double-click: natural height), the column head's hide button folds the
-column away and "Add pane…" reopens a closed pane. (dockview was tried for this and
+Headers drag by the grip to reorder, or onto the other column's panes or
+its head (the "Add pane…" strip); ↑ ↓, the move-across button and ×
+(dim until hovered) move and close, the chevron or title collapses, the
+bottom edge resizes (double-click: natural height), the side column's hide
+button folds it away and "Add pane…" reopens a closed pane. (dockview was tried for this and
 dropped: ~390 KB, no stylesheet in its ESM build, and it reparents panels,
 which would reload the engine's iframe.)
 
+- **Clip finder** and **Playlist**: see *Clips and the playlist* below.
 - **Map** is its own `MvdMap` — its own canvas, camera and follow target —
   reading the Map tab's loaded data each frame (`panes/map-sync.js`: data
   fields by reference, never view state; the line-of-sight pairs once the
@@ -1150,7 +1156,7 @@ scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
 
 - **Make**: ⟦ In / Out ⟧ mark the player's time (keys `i` / `o`), *+ Add
   clip* (`c`) adds In→Out from the current POV (no marks: the last 10 s).
-- **Generate** from the loaded demo: quad runs, best quad runs,
+- **Generate** (in the playlist's head) from the loaded demo: quad runs, best quad runs,
   frag streaks, RL/LG pack drops (all, the enemy took, a teammate took, the
   enemy took without having the weapon — each pack as the dropper's last
   12 s, then a 5 s look at the pickup from the picker's view), quadbores,
@@ -1160,7 +1166,9 @@ scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
   endpoint (`events`, `highlights`, `backpacks`, `top-kills`, `top-windows`, `lives`)
   with its query params under their API names, a `where` over the rows it
   returns (an and / or / not tree of conditions — `= != < <= > >=`,
-  `~` contains, `in` any of — fields as dotted paths into the row), an optional rank + limit, the clip window (row
+  `~` contains, `in` any of — fields as dotted paths into the row), an
+  optional order + limit (`rank`: sort by a field, keep the first N; a
+  limit alone keeps the earliest), the clip window (row
   fields plus padding, the POV a row's player field — or a list of windows,
   one clip each per row) and a label template.
   On the loaded demo it runs the same Go view through `DemoHandle.view`
@@ -1169,29 +1177,62 @@ scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
   finder adds no detection of its own: rows and fields are the endpoint's,
   `mvd-api/openapi/openapi.yaml` is their reference. Plan:
   [`plan-clip-finder.md`](../plan-clip-finder.md).
-- **The clip finder section** above the playlist (`ClipFinder.svelte`,
-  the filter editor `ExprGroup.svelte`; collapsed or open per browser)
-  edits a query as a form: *Start from…* a preset, the source and its
-  params (hints from the API), the filter as nested *all of* / *any of*
-  groups with *not* — or, under *Text*, as an expression like
+- **The clip finder pane** (`ClipFinder.svelte`, the filter editor
+  `ExprGroup.svelte`) runs a query in four boxed stages joined by the
+  count each passes on (`stages()`): **1 Find rows** — the source and its
+  params; **2 Keep rows where** — the filter as nested *all of* / *any
+  of* groups with *not*, or under *Text* as an expression like
   `weapon = rl and (pickerRelation = enemy or not pickerHadWeapon)`
   (`src/lib/clip-expr-text.js`: jsep parses, the syntax tree is converted
   to the stored one and anything outside the small grammar is an error;
-  text that does not parse keeps the last good filter) — the rank, one or
-  more clip windows per row and the label. Field boxes suggest the paths the endpoint's rows actually carry.
-  Results update as you type (the endpoint is re-queried only when the
-  source or a param changes): click one to play it, shift-click to add it,
-  or *Add N to playlist*. *Save as preset* keeps the query in this browser
-  (`mvd.clipPresets.v1`) and lists it under Generate → *My presets*;
-  *Link* copies `?gameId=…&tab=player#clipquery=<base64url JSON>`, which
-  opens the query in the finder (validated first — `validateQuery` refuses
-  unknown sources, params and operators and oversized trees).
+  text that does not parse keeps the last good filter); **3 Order** — a
+  field, highest or lowest first, keep the first N; **4 Clips from each
+  row** — from / to a row field with seconds of padding, *watch* (the
+  fields whose values name a player of this demo), a label, *+ clip* for
+  another clip per row, and the default label. Its head holds the
+  query's name (what Save stores it as), *Load…* (the built-in presets,
+  each with a line saying what it finds, and *My presets*), *Save*
+  (`mvd.clipPresets.v1`, same name replaces; listed under Generate → *My
+  presets* too), delete for your own, *Link*, *Builder | Code* and *Add N
+  to playlist*. *Code* is the whole query as text, one line per stage
+  (`src/lib/clip-query-text.js`):
+
+  ```
+  name   "Best quad runs (most frags)"
+  source events types=powerup
+  keep   detail.powerup = "quad" and detail.frags > 0
+  order  detail.frags desc first 5
+  clip   from=-3s to=detail.endTime+2s
+  label  "Quad run · {player} · {detail.frags} frag{detail.frags|s}"
+  ```
+
+  Text that does not read says which line and why, and leaves the last
+  good query running. **The API reference is the finder's help**:
+  `src/lib/api-docs.json` is the summary, description, params (description,
+  allowed values, default) and row fields (description, type, values) of
+  each source, extracted from `mvd-api/openapi/openapi.yaml` and pinned by
+  `mvd-api/webdocs_test.go` (regenerate with `go test ./mvd-api -run
+  TestWebAPIDocs -args -update-webdocs`; the same file checks every param
+  `SOURCES` offers is documented). It loads lazily (`src/player/api-docs.js`)
+  into tooltips, the param value lists and the field suggestions, and the
+  ⓘ page per source (rendered by `src/lib/mini-md.js`, which escapes
+  first). Results update as you type (the endpoint is re-queried only when
+  the source or a param changes): click one to play it, shift-click to add
+  it. *Link* copies `?gameId=…&tab=player#clipquery=<base64url JSON>`,
+  which opens the query in the finder, reopening its pane if needed
+  (validated first — `validateQuery` refuses unknown sources, params and
+  operators and oversized trees). Collapsing or moving the pane keeps the
+  query.
 - **Edit**: label inline, drag or ↑ ↓ to reorder, × to remove. The list
   persists in `localStorage` (`mvd.playlist.v1`).
 - **Play all / ▶ on a row**: a scripted run — seek, POV, play; advance when
   playback crosses the clip's `to` (not on a seek past it), follow a manual
-  seek into another clip (hub's `useClipListPlayback` rules,
-  `playlistStep`). A clip of another hub demo loads that demo
+  seek into another clip, taking its POV (hub's `useClipListPlayback`
+  rules, `playlistStep` — except that crossing `to` wins over landing in
+  an overlapping next clip, which hub would follow without its jump or
+  POV). Each clip change shows `ClipCard.svelte` over the player: a dip to
+  black that lifts once the jump has landed, and the clip's place in the
+  run, label and watched player for a couple of seconds. A clip of another hub demo loads that demo
   (`loadDemo`) and carries on; a clip of another local file is
   skipped with a note.
 - **Copy hub link**: one `hub.quakeworld.nu/games/?gameId=…&clip=F-T:U…`

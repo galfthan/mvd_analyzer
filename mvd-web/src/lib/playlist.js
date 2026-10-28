@@ -176,14 +176,18 @@ export function base64UrlDecode(str) {
 // ── Scripted playback ───────────────────────────────────────────────────────
 
 // playlistStep decides what the in-page runner does on one clock tick,
-// mirroring hub's useClipListPlayback (src/features/demo-player/clips/
+// after hub's useClipListPlayback (src/features/demo-player/clips/
 // use-clip-playback.ts @ 5c96205c19c7):
-//   - a manual seek into another clip makes that clip the active one
-//     ({ type: 'follow', index });
 //   - playback crossing the active clip's `to` — not a seek past it, hence
 //     the < 1.5 s step — advances ({ type: 'next', index }) or, on the
 //     last clip, ends the run ({ type: 'end' });
+//   - a manual seek into another clip makes that clip the active one
+//     ({ type: 'follow', index });
 //   - otherwise { type: 'none' }.
+// Unlike hub, crossing the end wins over landing in another clip: the
+// next clip often overlaps the end of this one (a pack's pickup, seconds
+// after its drop), and following into it would keep this clip's POV and
+// skip the next one's lead-in.
 // `prev` is the previous tick's clock (null right after a jump).
 /**
  * @param {Array<Pick<Clip, 'from' | 'to'>>} clips
@@ -196,15 +200,12 @@ export function base64UrlDecode(str) {
 export function playlistStep(clips, index, prev, now, playing) {
     const active = clips[index];
     if (!active) return { type: 'end' };
-    const inActive = now >= active.from && now < active.to;
-    if (!inActive) {
-        const other = clips.findIndex((c, i) => i !== index && now >= c.from && now < c.to);
-        if (other !== -1) return { type: 'follow', index: other };
+    if (playing && prev != null && prev < active.to && now >= active.to && now - prev < 1.5) {
+        return index + 1 < clips.length ? { type: 'next', index: index + 1 } : { type: 'end' };
     }
-    if (!playing || prev == null) return { type: 'none' };
-    const reachedEnd = prev < active.to && now >= active.to && now - prev < 1.5;
-    if (!reachedEnd) return { type: 'none' };
-    return index + 1 < clips.length ? { type: 'next', index: index + 1 } : { type: 'end' };
+    if (now >= active.from && now < active.to) return { type: 'none' };
+    const other = clips.findIndex((c, i) => i !== index && now >= c.from && now < c.to);
+    return other !== -1 ? { type: 'follow', index: other } : { type: 'none' };
 }
 
 // ── Generated clips ─────────────────────────────────────────────────────────

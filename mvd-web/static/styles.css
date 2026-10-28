@@ -3585,12 +3585,6 @@ th.sortable.sort-desc::after {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-top: 6px;
-}
-
-.player-playlist-head h3 {
-    margin: 0 8px 0 0;
-    font-size: 15px;
 }
 
 .playlist-items {

@@ -10,7 +10,7 @@ globalThis.localStorage = {
 mem.set('mvd.playerPanes.v1', JSON.stringify(['feed', 'map', 'bogus', 'map']));
 
 const { store } = await import('../src/state/store.js');
-const { paneLayout, updateLayout, movePane, MAX_SPLIT, paneOpt, setPaneOpt } = await import('../src/player/layout.js');
+const { paneLayout, updateLayout, movePane, showPane, MAX_SPLIT, paneOpt, setPaneOpt } = await import('../src/player/layout.js');
 const { playlist, addClips, moveClip, removeClip, setRun, setLabel } = await import('../src/player/playlist-store.js');
 const { createRunner } = await import('../src/player/runner.js');
 const { demoRefOf } = await import('../src/player/demo-ref.js');
@@ -18,15 +18,27 @@ const { syncMapData } = await import('../src/player/panes/map-sync.js');
 
 test('pane layout migrates the PoC order and sanitizes', () => {
     assert.deepEqual(paneLayout.get().order, ['feed', 'map'], 'v1 order kept, unknown and duplicate ids dropped');
+    assert.deepEqual(paneLayout.get().below, ['finder', 'playlist'], 'a layout from before the finder and playlist were panes gets them under the player');
     updateLayout((l) => { l.split = 99999; l.width = 420; l.order.push('stack', 'stack'); });
     assert.equal(paneLayout.get().split, MAX_SPLIT);
     assert.equal(paneLayout.get().width, undefined, 'the old px width is dropped');
     assert.deepEqual(paneLayout.get().order, ['feed', 'map', 'stack']);
-    movePane('stack', 0);
+    movePane('stack', 'order', 0);
     assert.deepEqual(paneLayout.get().order, ['stack', 'feed', 'map']);
-    movePane('stack', 2);
+    movePane('stack', 'order', 2);
     assert.deepEqual(paneLayout.get().order, ['feed', 'map', 'stack'], 'the dragged pane takes the target slot, both ways');
     assert.deepEqual(JSON.parse(mem.get('mvd.playerPanes.v2')).order, ['feed', 'map', 'stack']);
+    movePane('playlist', 'order', 1);
+    assert.deepEqual([paneLayout.get().order, paneLayout.get().below], [['feed', 'playlist', 'map', 'stack'], ['finder']], 'across columns');
+    movePane('playlist', 'below', 99);
+    assert.deepEqual(paneLayout.get().below, ['finder', 'playlist'], 'past the end appends');
+    updateLayout((l) => { l.below.push('map'); l.collapsed.finder = true; l.below = l.below.filter((x) => x !== 'finder'); });
+    assert.deepEqual([paneLayout.get().order, paneLayout.get().below], [['feed', 'stack'], ['playlist', 'map']], 'a pane is in one column only — the column under the player wins');
+    showPane('finder');
+    assert.deepEqual(paneLayout.get().below, ['playlist', 'map', 'finder'], 'a closed pane opens under the player');
+    assert.equal(paneLayout.get().collapsed.finder, undefined, 'expanded');
+    showPane('stack');
+    assert.deepEqual(paneLayout.get().order, ['feed', 'stack'], 'an open pane stays where it is');
 });
 
 test('pane options persist and read back typed', () => {

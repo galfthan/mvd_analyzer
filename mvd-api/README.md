@@ -264,7 +264,9 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 The per-endpoint reference (every operation, parameter, full field-level
 response schema, and error code) is the OpenAPI document the server
 serves at `/openapi.yaml`, browsable at `/docs` — drift-tested against
-the code, so it can't go stale. [`API.md`](API.md) is the high-level
+the code, so it can't go stale. The web clip finder documents its six sources
+from the same spec, through an extract (`mvd-web/src/lib/api-docs.json`)
+that `webdocs_test.go` regenerates (`-update-webdocs`) and pins. [`API.md`](API.md) is the high-level
 guide around it:
 
 - **Getting started** — demo addressing, auto-load, the typical flow.

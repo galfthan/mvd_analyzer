@@ -153,7 +153,10 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             : playlistStep(local.map((i) => run.clips[i]), li, run.prev, demoT, fte.isPlaying());
         run.prev = demoT;
         if (step.type === 'follow') {
+            // A seek into another clip: it is the active one, with its POV.
+            const next = run.clips[local[step.index]];
             setRun({ ...run, index: local[step.index] });
+            if (next.track !== run.clips[run.index].track) engine.track(next.track);
         } else if (step.type === 'next' || step.type === 'end') {
             if (run.index + 1 < run.clips.length) {
                 playClip(run.index + 1);

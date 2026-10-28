@@ -1,16 +1,20 @@
 <script>
-    // One pane in the column: a header (drag to reorder, click the title to
-    // collapse, ↑ ↓ ×) and a body whose height the bottom handle resizes.
+    // One pane in a column: a header (drag to reorder or onto the other
+    // column, click the title to collapse, ↑ ↓, move across, ×) and a body
+    // whose height the bottom handle resizes.
     import GripVertical from '@lucide/svelte/icons/grip-vertical';
     import ChevronDown from '@lucide/svelte/icons/chevron-down';
     import ChevronRight from '@lucide/svelte/icons/chevron-right';
     import ArrowUp from '@lucide/svelte/icons/arrow-up';
     import ArrowDown from '@lucide/svelte/icons/arrow-down';
     import X from '@lucide/svelte/icons/x';
+    import PanelRight from '@lucide/svelte/icons/panel-right';
+    import PanelBottom from '@lucide/svelte/icons/panel-bottom';
     import { paneLayout, updateLayout, movePane } from './layout.js';
 
-    /** @type {{ id: string, title: string, index: number, count: number, children: import('svelte').Snippet }} */
-    let { id, title, index, count, children } = $props();
+    /** @type {{ id: string, title: string, column: import('./layout.js').Column, index: number, count: number, children: import('svelte').Snippet }} */
+    let { id, title, column, index, count, children } = $props();
+    let other = $derived(/** @type {import('./layout.js').Column} */ (column === 'order' ? 'below' : 'order'));
 
     let collapsed = $derived(!!$paneLayout.collapsed[id]);
     let height = $derived($paneLayout.heights[id] ?? null);
@@ -23,7 +27,7 @@
     }
 
     function close() {
-        updateLayout((l) => { l.order = l.order.filter((x) => x !== id); });
+        updateLayout((l) => { l[column] = l[column].filter((x) => x !== id); });
     }
 
     // A drag event carries dataTransfer.
@@ -47,7 +51,7 @@
         const from = /** @type {DataTransfer} */ (e.dataTransfer).getData('text/x-mvd-pane');
         if (!from || from === id) return;
         e.preventDefault();
-        movePane(from, index);
+        movePane(from, column, index);
     }
 
     // Bottom handle: drag to set the body height; double-click resets it to
@@ -85,8 +89,11 @@
         </button>
         <span class="title" role="button" tabindex="-1" onclick={toggle} onkeydown={() => {}}>{title}</span>
         <span class="acts">
-            <button title="Move up" disabled={index === 0} onclick={() => movePane(id, index - 1)}><ArrowUp size={14} /></button>
-            <button title="Move down" disabled={index === count - 1} onclick={() => movePane(id, index + 1)}><ArrowDown size={14} /></button>
+            <button title="Move up" disabled={index === 0} onclick={() => movePane(id, column, index - 1)}><ArrowUp size={14} /></button>
+            <button title="Move down" disabled={index === count - 1} onclick={() => movePane(id, column, index + 1)}><ArrowDown size={14} /></button>
+            <button title={column === 'order' ? 'Move under the player' : 'Move beside the player'} onclick={() => movePane(id, other, $paneLayout[other].length)}>
+                {#if column === 'order'}<PanelBottom size={14} />{:else}<PanelRight size={14} />{/if}
+            </button>
             <button title="Close pane" onclick={close}><X size={14} /></button>
         </span>
     </div>

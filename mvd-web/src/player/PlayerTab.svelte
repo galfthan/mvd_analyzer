@@ -1,6 +1,7 @@
 <script>
-    // The Player tab: the engine with its POV and clip bars, the clip finder and the playlist
-    // on the left, the pane column on the right, split by PaneForge (drag
+    // The Player tab: the engine with its POV and clip bars and a pane
+    // column under them (the clip finder and the playlist to start with) on
+    // the left, the side pane column on the right, split by PaneForge (drag
     // the divider, or focus it and use the arrow keys; dragging the column
     // shut hides it). src/app/tabs.js toggles the `active` class like on every
     // other .tab-content.
@@ -8,8 +9,6 @@
     import PlayerFrame from './PlayerFrame.svelte';
     import PovBar from './PovBar.svelte';
     import ClipBar from './ClipBar.svelte';
-    import Playlist from './Playlist.svelte';
-    import ClipFinder from './ClipFinder.svelte';
     import PaneColumn from './PaneColumn.svelte';
     import { paneLayout, updateLayout, MIN_SPLIT, MAX_SPLIT } from './layout.js';
 
@@ -72,15 +71,14 @@
                     <PlayerFrame />
                     <PovBar />
                     <ClipBar />
-                    <ClipFinder />
-                    <Playlist />
+                    <PaneColumn column="below" />
                 </div>
             </Pane>
             <PaneResizer class="player-split" onDraggingChange={draggingChange} title="Drag to resize the panes · drag shut to hide them" />
             <Pane order={2} bind:this={column} defaultSize={initial.hidden ? 0 : initial.split}
                 minSize={MIN_SPLIT} maxSize={MAX_SPLIT} collapsible collapsedSize={0}
                 onCollapse={() => setHidden(true)} onExpand={() => setHidden(false)}>
-                <PaneColumn />
+                <PaneColumn column="order" />
             </Pane>
         </PaneGroup>
     </div>

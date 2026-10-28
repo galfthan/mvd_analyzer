@@ -57,7 +57,25 @@ or one player's frags; play the list right there as a script (across hub
 demos too), or export it as one hub link (hub's multi-clip format) or a
 share link to this page. Every hub link on the other tabs now plays its
 clip in the Player tab; shift-click adds it to the playlist, ctrl-click
-still opens hub.
+still opens hub. Moving from clip to clip, the player dips to black over
+the jump and shows the next clip's title (its place in the list, its label
+and whose view it is); a clip that overlaps the end of the one before it
+(a pack's pickup, seconds after its drop) now switches to its own POV
+instead of carrying on with the previous one.
+
+The **clip finder** builds those lists from any of six API endpoints
+(events, highlights, backpacks, top kills, top windows, lives) in four
+visible stages, each saying how many rows it passes on: find rows (the
+endpoint and its params), keep the rows that match a filter (built from
+and / or / not groups, or typed as an expression), order them and keep
+the first N, and cut one or more clips from each row (from / to a row's
+time with padding, watching a player the row names, with a label
+template). Every source, param and row field is explained from the API
+reference itself (tooltips, value lists and an ⓘ page per source). Load
+a preset, name and save your own, share it as a link, or edit the whole
+query as a few lines of code. The finder and the playlist are panes like
+the ones beside the player: they start under it, and any pane can sit in
+either column.
 
 Under the hood the page is now built with Vite, and the shell and every
 tab are Svelte, with demo loading behind one data layer

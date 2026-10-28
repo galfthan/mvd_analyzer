@@ -1,0 +1,1115 @@
+{
+  "backpacks": {
+    "summary": "RL/LG backpack drops",
+    "description": "RL/LG backpack drops: time, dropper, weapon (rl/lg), origin XYZ (the pack's own position, 24 units below the victim's origin) and resolved loc. Each row names its provenance in `source`, and the two are never mixed within one demo:\n\n  * `ktx` — decoded from KTX's `//ktx drop` hint. `entNum` is the\n    hinted edict and joins to WeaponPickup.backpackEnt; since schema\n    v77 that join is already on the row: `fate: picked` with\n    `picker`/`pickerTeam`/`pickupTime` and the pickup's\n    `pickerHadWeapon`/`pickerKills`/`pickerNextDeathTime`. `expired`\n    when KTX announced the 120 s removal in `//ktx expire`,\n    `unobserved` when neither hint names the pack (NOT \"nobody took\n    it\").\n  * `reconstructed` — replayed from the server's own drop rule on a\n    demo whose mod never hinted. There is no pickup hint to join to,\n    so the pickup side is carried on the row itself (schema v72):\n    `fate` (`picked`/`expired`/`unobserved`) plus `pickupTime` and\n    `picker`/`pickerTeam` when the wire named one, read off the\n    bound backpack entity — whose edict number `entNum` now carries\n    as well. A `reconstructed` `entNum` still joins to nothing;\n    it identifies the pack track, not a pickup row. The three\n    `ktx`-only pickup figures are absent here.\n\nEvery row naming a `picker` carries `pickerRelation` (`self` / `team` / `enemy`, relative to the dropper), so \"packs the enemy took\" is `pickerRelation == enemy`.\nAlways 200 — empty when none, which means either no pack dropped or the reconstruction stood down; the wire shape does not distinguish the two.",
+    "params": {
+      "from": {
+        "description": "Window start, match-relative integer MILLISECONDS. 0 / omitted = no lower bound. Endpoints treat the window as inclusive on both ends. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "label": {
+        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "type": "string"
+      },
+      "players": {
+        "description": "CSV of player display names. Case-SENSITIVE (QW names are case-significant). Omit for all players. Filter semantics are per-endpoint (e.g. killer-or-victim on /frags, speaker on /chat).",
+        "type": "array"
+      },
+      "to": {
+        "description": "Window end, match-relative integer MILLISECONDS. 0 / omitted = no upper bound. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "weapon": {
+        "description": "Deprecated legacy alias of `weapons` (the pre-16.2 singular spelling). Ignored when `weapons` is present.",
+        "type": "array"
+      },
+      "weapons": {
+        "description": "CSV of weapon codes (case-insensitive). Core codes: rl, lg, gl, ssg,\nsng, ng, sg, axe; on /damage the pseudo-codes tele/stomp select the\npositional instant kills (which carry no real weapon).\n\nEach endpoint validates against its OWN closed vocabulary and returns\n400 `invalid_param` (listing the valid set) for an unknown token — no\nmore silent empty result:\n\n- **/frags** additionally accepts the obituary environmental / cause\n  codes (hook, rail, squish, explobox, fall, lava, slime, water,\n  world, tele, stomp, unknown, suicide, teamkill);\n- **/damage** the death-type + environmental codes (hook, explobox,\n  squish, lava, slime, drown, fall, trigger, suicide, unknown);\n- **/backpacks** accepts rl/lg only;\n- **/weapon-pickups** ssg,ng,sng,gl,rl,lg;\n- **/top-kills** filters the KILLING weapon (which is also the\n  burst's own weapon) and accepts only the burst-capable subset —\n  the core codes plus `unknown`. Positional (tele/stomp/squish),\n  environmental and bookkeeping causes are REJECTED here: no damage\n  event can anchor them, so the token would be a valid filter that\n  structurally selects nothing.\n\n`water` and `drown` are the SAME cause under the two logs' different\nspellings and are accepted interchangeably wherever either is valid,\nso you need not know which log backs the endpoint you are calling.\n\nOn `/frags`, `teamkill` selects only the teamkills whose obituary\nphrasing has no cause in it (\"X checks his glasses\" and its siblings,\nwhich KTX picks at random). KTX's team branch tests three deathtypes\nby name before that random pick, and those keep their real code —\nfilter `tele` (teammate telefrag), `stomp` (teammate jump/crush) or\n`squish` (teammate mover crush) for them, and `isTeamKill` to\nseparate any of these from the enemy-facing rows carrying the same\ncode.\n\nThe pre-16.2 singular spelling `weapon` is an accepted legacy alias;\n`weapons` wins when both are present.",
+        "type": "array"
+      }
+    },
+    "fields": {
+      "entNum": {
+        "description": "Server entity/edict number — stable id within a match. On a `ktx` row it comes from the wire hint and joins to WeaponPickup.backpackEnt. On a `reconstructed` row it is the backpack-model entity the linkage bound to the drop and joins to nothing (that row's pickup side is `fate`/`picker` below). 0 means no entity was identified; never treat 0 as an edict.",
+        "type": "integer"
+      },
+      "fate": {
+        "description": "What the wire showed happening to the pack (schema v72). `picked` — the pack entity left the wire with a live player's bounding box overlapping it, the same test the server runs before BackpackTouch; `pickupTime` is when, and `picker` is set only when the evidence named exactly one player. `expired` — SUB_Remove took it at KTX's 120 s timeout, untaken: the one outcome that is positively not a pickup. `unobserved` — no entity bound to the drop, or it was still on the wire when the recording stopped, or it left early with nobody on it; none of which is evidence that nobody took the pack.\nA `reconstructed` row can carry any of the three, read off the backpack-entity track. A `ktx` row (schema v77) is `picked` when the `//ktx bp` pickup on /weapon-pickups joined to it (entNum + drop time — the picker fields below are copied from that row), `expired` when KTX said so in `//ktx expire <ent>`, and `unobserved` otherwise: a demo can carry the drop hint and no pickup hints at all, so no `//ktx bp` is not evidence that nobody took it. Read `source` for a `fate`'s provenance, exactly as for the row. On reconstructed rows, measured against the hints withheld: 223 demos, 100.00% precision and 96.13% recall on picked-vs-not, 99.98% of named pickers correct.",
+        "type": "string",
+        "enum": [
+          "picked",
+          "expired",
+          "unobserved"
+        ]
+      },
+      "loc": {
+        "description": "Nearest named location from the map .loc file.",
+        "type": "string"
+      },
+      "origin": {
+        "description": "World-space origin [x,y,z], map units.",
+        "type": "array"
+      },
+      "picker": {
+        "description": "Who took the pack (schema v72). Set only with `fate: picked`, and only when the evidence named exactly ONE player — two players on one pack with nothing to separate them leave this empty rather than guess. On a `ktx` row, the `//ktx bp` pickup's player (schema v77; reconstructed rows since v72).",
+        "type": "string"
+      },
+      "pickerHadWeapon": {
+        "description": "Whether the picker already held the pack's weapon — the joined /weapon-pickups row's `hadBefore` (schema v77). `ktx` rows only: the entity track a reconstructed pickup is read from cannot say.",
+        "type": "boolean"
+      },
+      "pickerKills": {
+        "description": "Kills credited to this pickup — the joined /weapon-pickups row's `kills` (0 when the picker already held the weapon; schema v77). `ktx` rows only.",
+        "type": "integer"
+      },
+      "pickerNextDeathTime": {
+        "description": "The picker's next death, int32 ms since match start — the joined /weapon-pickups row's `nextDeathTime`; absent if they never died again (schema v77). `ktx` rows only.",
+        "type": "integer"
+      },
+      "pickerRelation": {
+        "description": "The picker's side relative to the dropper (schema v77): `self` when the dropper respawned and took their own pack back, `team` when both carry the same team, else `enemy` — in a duel or FFA every other picker is an enemy. Set whenever `picker` is.",
+        "type": "string",
+        "enum": [
+          "self",
+          "team",
+          "enemy"
+        ]
+      },
+      "pickerTeam": {
+        "description": "Team of `picker`. Omitted when the picker has no team — an FFA or duel picker is named with no `pickerTeam`, so read its absence as \"teamless\", not as \"no picker\". Set with `picker` (reconstructed rows since v72, `ktx` rows since v77).",
+        "type": "string"
+      },
+      "pickupTime": {
+        "description": "When the pack left the wire, int32 ms since match start. Set with `fate: picked` (with or without a `picker`; reconstructed rows since v72, `ktx` rows since v77).",
+        "type": "integer"
+      },
+      "player": {
+        "description": "Player display name.",
+        "type": "string"
+      },
+      "source": {
+        "description": "Where this row came from (schema v72). `ktx` — decoded from KTX's `//ktx drop` hint, which fires exactly once per real pack and is emitted only by KTX >= 1.38 (49% of the archive). `reconstructed` — replayed from DropBackpack's own rule (the victim's wielded weapon at the death instant, dropped at their last broadcast position) on a demo whose mod never hinted. The two are never mixed within one demo; a reconstructed section stands down entirely rather than guess where the evidence is unmeasurable.",
+        "type": "string",
+        "enum": [
+          "ktx",
+          "reconstructed"
+        ]
+      },
+      "team": {
+        "description": "Team name.",
+        "type": "string"
+      },
+      "time": {
+        "description": "Event/sample time, int32 ms since match start.",
+        "type": "integer"
+      },
+      "weapon": {
+        "description": "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg).",
+        "type": "string"
+      }
+    }
+  },
+  "events": {
+    "summary": "Unified event stream",
+    "description": "Discrete match events (frags, spawns, pickups, powerups, streaks,\nchat, demo markers, …) in one time-ordered list. `detail` is\npolymorphic per event type. Omit `types` for the default set\n(includes `pickup`, `demomark`, `airgib`, `discharge`, `quadbore`, and `pause`).\n\nThree event types worth spelling out:\n\n- **`demomark`** events are the bookmarks players insert in-game with\n  `/demomark`; a warmup mark carries a negative `time`, and a mark\n  inserted by a spectator carries `detail.spectator: true`.\n- **`airgib`** events are direct enemy rocket hits landed on an\n  airborne victim (the Key Moments highlight list): `player` is the\n  attacker (rocketeer) and `detail` carries `victim`,\n  `attackerTeam?`/`victimTeam?`, `height` (victim feet above the floor\n  at the hit), `heightAboveAttacker?`, `loc?`, `damage` (raw), and\n  `lethal: true` when the hit killed.\n- **`discharge`** / **`quadbore`** events (in the default set, like\n  `airgib` — the `frag` event carries only the score delta, so\n  nothing else in the feed says a death was a discharge) are the\n  highlight-catalogue kinds: `player` is the actor and `detail`\n  carries `victims` (names), `enemyKills`, `teamKills`,\n  `actorKilled?`, `damage?`, `team?`, plus `cells?` on a discharge\n  and `weapon`, `quadHeldMs`, `quadFrags` on a quadbore. The full\n  rows with every participant's state are `/highlights`.\n- **`pause`** events mark a game-clock freeze segment and carry NO\n  `player` (so a `players=` filter excludes them);\n  `detail.durationMs` is the real wall-clock ms the pause consumed.",
+    "params": {
+      "from": {
+        "description": "Window start, match-relative integer MILLISECONDS. 0 / omitted = no lower bound. Endpoints treat the window as inclusive on both ends. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "label": {
+        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "type": "string"
+      },
+      "loc": {
+        "description": "Loc rendering — `name` (default) resolves loc indices to names; `index` returns raw LocTable indices (decode via /loc-table).",
+        "type": "string",
+        "enum": [
+          "name",
+          "index"
+        ]
+      },
+      "players": {
+        "description": "CSV of player display names. Case-SENSITIVE (QW names are case-significant). Omit for all players. Filter semantics are per-endpoint (e.g. killer-or-victim on /frags, speaker on /chat).",
+        "type": "array"
+      },
+      "to": {
+        "description": "Window end, match-relative integer MILLISECONDS. 0 / omitted = no upper bound. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "types": {
+        "description": "CSV of event types: frag, powerup, streak, spawn, death, weapon, item, chat, pickup (the default set), plus the opt-in high-frequency / dedicated lenses damage, health, armor, loc, telefrag, stomp, discharge, quadbore. Omit for the default set. An unknown type value 400s (invalid_param) rather than silently matching nothing.",
+        "type": "array",
+        "enum": [
+          "frag",
+          "powerup",
+          "streak",
+          "spawn",
+          "death",
+          "weapon",
+          "item",
+          "chat",
+          "pickup",
+          "demomark",
+          "airgib",
+          "pause",
+          "damage",
+          "telefrag",
+          "stomp",
+          "health",
+          "armor",
+          "loc",
+          "discharge",
+          "quadbore"
+        ]
+      }
+    },
+    "fields": {
+      "detail.actorKilled": {
+        "description": "discharge/quadbore: the actor died in the event.",
+        "type": "boolean"
+      },
+      "detail.attackerTeam": {
+        "description": "airgib attacker (rocketeer) team.",
+        "type": "string"
+      },
+      "detail.bounded": {
+        "description": "KTX-scoreboard bounded value — on damage events the stored per-hit reconstruction (present only when it differs from the raw damage)",
+        "type": "integer"
+      },
+      "detail.cells": {
+        "description": "discharge: the discharger's cells before firing (35 × cells radius damage).",
+        "type": "integer"
+      },
+      "detail.clean": {
+        "description": "chat message",
+        "type": "string"
+      },
+      "detail.damage": {
+        "description": "Raw/unbound wire damage amount, including overkill (see bounded for the KTX-scoreboard value).",
+        "type": "integer"
+      },
+      "detail.delta": {
+        "description": "frag delta (frag) or value change (health/armor)",
+        "type": "integer"
+      },
+      "detail.dropper": {
+        "description": "Backpack dropper name.",
+        "type": "string"
+      },
+      "detail.duration": {
+        "description": "streak duration",
+        "type": "integer"
+      },
+      "detail.durationMs": {
+        "description": "pause real wall-clock ms consumed (pause events).",
+        "type": "integer"
+      },
+      "detail.endTime": {
+        "description": "int32 ms (powerup/streak)",
+        "type": "integer"
+      },
+      "detail.enemyKills": {
+        "description": "discharge/quadbore: enemies killed.",
+        "type": "integer"
+      },
+      "detail.entNum": {
+        "description": "Server entity/edict number — stable id within a match.",
+        "type": "integer"
+      },
+      "detail.frags": {
+        "description": "frags during the powerup run",
+        "type": "integer"
+      },
+      "detail.gain": {
+        "description": "weapon/item code gained (interval start)",
+        "type": "string"
+      },
+      "detail.height": {
+        "description": "airgib victim feet above the floor at the hit (units).",
+        "type": "number"
+      },
+      "detail.heightAboveAttacker": {
+        "description": "airgib victim origin minus shooter origin at the hit (units; negative = victim below shooter); omitted when 0.",
+        "type": "number"
+      },
+      "detail.isEnv": {
+        "description": "Environmental / world-sourced.",
+        "type": "boolean"
+      },
+      "detail.isSelf": {
+        "description": "Attacker == victim.",
+        "type": "boolean"
+      },
+      "detail.isSplash": {
+        "description": "Indirect hit (e.g. rocket splash).",
+        "type": "boolean"
+      },
+      "detail.isTeam": {
+        "description": "Same team, not self.",
+        "type": "boolean"
+      },
+      "detail.item": {
+        "description": "spawner instance name (pickup)",
+        "type": "string"
+      },
+      "detail.kind": {
+        "description": "Item kind — compact vocabulary (rl/lg/ra/mh/quad/…).",
+        "type": "string"
+      },
+      "detail.length": {
+        "description": "streak length",
+        "type": "integer"
+      },
+      "detail.lethal": {
+        "description": "airgib hit killed the victim (matching rocket frag near the hit).",
+        "type": "boolean"
+      },
+      "detail.li": {
+        "description": "raw LocTable index (loc=index mode)",
+        "type": "integer"
+      },
+      "detail.loc": {
+        "description": "Nearest named location from the map .loc file.",
+        "type": "string"
+      },
+      "detail.lose": {
+        "description": "weapon/item code lost (interval end)",
+        "type": "string"
+      },
+      "detail.powerup": {
+        "description": "Powerup type.",
+        "type": "string"
+      },
+      "detail.quadFrags": {
+        "description": "quadbore: the actor's kills in that quad run before the bore.",
+        "type": "integer"
+      },
+      "detail.quadHeldMs": {
+        "description": "quadbore: ms since the quad pickup when the actor died.",
+        "type": "integer"
+      },
+      "detail.source": {
+        "description": "Source.",
+        "type": "string",
+        "enum": [
+          "world",
+          "backpack",
+          "unknown"
+        ]
+      },
+      "detail.team": {
+        "description": "Team name.",
+        "type": "string"
+      },
+      "detail.teamKills": {
+        "description": "discharge/quadbore: teammates killed.",
+        "type": "integer"
+      },
+      "detail.text": {
+        "description": "chat message",
+        "type": "string"
+      },
+      "detail.value": {
+        "description": "new value (health/armor/loc index)",
+        "type": "integer"
+      },
+      "detail.victim": {
+        "description": "Victim (killed player) name.",
+        "type": "string"
+      },
+      "detail.victimTeam": {
+        "description": "airgib victim team.",
+        "type": "string"
+      },
+      "detail.victimWep": {
+        "description": "Victim weapon class at hit time (sg|mid|lg|rl|both).",
+        "type": "string"
+      },
+      "detail.victims": {
+        "description": "discharge/quadbore: names of everyone else the event touched (killed or hurt).",
+        "type": "array"
+      },
+      "detail.weapon": {
+        "description": "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg).",
+        "type": "string"
+      },
+      "player": {
+        "description": "Player display name.",
+        "type": "string"
+      },
+      "time": {
+        "description": "Match-relative time, int32 ms.",
+        "type": "integer"
+      },
+      "type": {
+        "description": "Type discriminator.",
+        "type": "string"
+      }
+    }
+  },
+  "highlights": {
+    "summary": "Highlight catalogue (discharges, quadbores, telefrags, airgibs)",
+    "description": "The stored highlight catalogue (`highlights`): every LG water discharge, every quadbore (self-kill by own rocket/grenade while holding quad), every telefrag (incl. the pentagram deflections and spawnicides) and every airgib, as four lists of one row shape. Each row carries an `actor`, its `victims`, enemy/team kill counters, the damage-log figure and the evidence `sources`; every participant carries their relation to the actor and their state read one millisecond before the event — health, armor (+ type), stack, weapons, wielded weapon, powerups, loc — so toplists are a client-side sort (discharges by `enemyKills`/`damage`/`cells`, quadbores by `quadHeldMs` ascending against KTX's 30 s quad, telefrags by `victims[0].stack`, airgibs by `heightAboveAttacker`).\n\nAll four lists are always present — `[]` when the match had none or `kinds` excluded them; `kinds` echoes the filter. `players` keeps rows whose actor or a victim is named. `preMs` re-runs only the airgib detection. 422 `highlights_unavailable` when the demo has no match streams or no frag log to build the catalogue from.",
+    "params": {
+      "kinds": {
+        "description": "CSV of highlight kinds to keep: discharge, quadbore, telefrag, airgib. Omit for all four. The unrequested lists still come back, empty; the envelope's `kinds` echoes what applied. An unknown kind 400s (invalid_param).",
+        "type": "array",
+        "enum": [
+          "discharge",
+          "quadbore",
+          "telefrag",
+          "airgib"
+        ]
+      },
+      "label": {
+        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "type": "string"
+      },
+      "players": {
+        "description": "CSV of player display names. Case-SENSITIVE (QW names are case-significant). Omit for all players. Filter semantics are per-endpoint (e.g. killer-or-victim on /frags, speaker on /chat).",
+        "type": "array"
+      },
+      "preMs": {
+        "description": "Pre-hit look-back in MILLISECONDS: every position sample in the window [hit-preMs, hit-40ms] must read at or above the airborne height threshold; the tick preceding the window decides when the window holds no sample near its start (old coarse-tick demos, recording holes), and a grounded reading beside the hit vetoes. Values at or below 40 collapse to a point check at the pre-impact boundary. Default 100. The gate exists because the KTX damage entry is stamped at (or one frame after) the physics frame in which the rocket's own knockback already moved the victim, so the sample nearest the damage time reports players who were STANDING at impact as hundreds of units airborne. `preMs=0` turns the pre-hit gate off (hit-time sample only, the pre-v73 detection); values above 1000 are rejected with 400 `invalid_param`, since a look-back that long lands before the flight that made the hit an airgib at all. The response echoes the effective value in `preMs`.",
+        "type": "integer",
+        "default": 100
+      }
+    },
+    "fields": {
+      "actor.activeWeapon": {
+        "description": "The weapon wielded; absent when the wire never said.",
+        "type": "string",
+        "enum": [
+          "sg",
+          "ssg",
+          "ng",
+          "sng",
+          "gl",
+          "rl",
+          "lg",
+          "axe"
+        ]
+      },
+      "actor.armor": {
+        "description": "Armor just before the event.",
+        "type": "integer"
+      },
+      "actor.armorType": {
+        "description": "Armor type worn; absent when none.",
+        "type": "string",
+        "enum": [
+          "ga",
+          "ya",
+          "ra"
+        ]
+      },
+      "actor.damage": {
+        "description": "Damage-log figure for this player in the event (raw family); absent without a log. On a telefrag victim: KTX's own armor+health figure (Damage.Telefrags[].bounded) when the demo carries it.",
+        "type": "integer"
+      },
+      "actor.health": {
+        "description": "Health just before the event. Absent when no stream recorded a value (stateSource absent).",
+        "type": "integer"
+      },
+      "actor.killed": {
+        "description": "Died in this event.",
+        "type": "boolean"
+      },
+      "actor.loc": {
+        "description": "Nearest named location from the map .loc file at the instant.",
+        "type": "string"
+      },
+      "actor.name": {
+        "description": "Player display name (or the placeholder \"teammate\" for the party an unattributed team-kill print did not name).",
+        "type": "string"
+      },
+      "actor.powerups": {
+        "description": "Powerups held.",
+        "type": "array"
+      },
+      "actor.relation": {
+        "description": "Side relative to the event's actor: self (the actor), team (same team) or enemy. In an individual layout (duel, FFA) every other player is enemy.",
+        "type": "string",
+        "enum": [
+          "self",
+          "team",
+          "enemy"
+        ]
+      },
+      "actor.stack": {
+        "description": "health + armor — the telefrag ranking scalar.",
+        "type": "integer"
+      },
+      "actor.stateSource": {
+        "description": "Where the vitals came from: stream (the player's own health/armor streams) or spawn (the player had just spawned and the spawn stats had not reached the wire — the streams still read the previous life's corpse — so the vitals are the spawn state 100/0). Absent when there was no stream to read (every vital absent).",
+        "type": "string",
+        "enum": [
+          "stream",
+          "spawn"
+        ]
+      },
+      "actor.survived": {
+        "description": "The pentagram holder a deflected teleporter died on (deflect rows).",
+        "type": "boolean"
+      },
+      "actor.team": {
+        "description": "Team name.",
+        "type": "string"
+      },
+      "actor.userId": {
+        "description": "UserID (Hub viewer link) resolved at the event's own instant.",
+        "type": "integer"
+      },
+      "actor.weapons": {
+        "description": "Tracked inventory held (the STAT_ITEMS bits the streams track).",
+        "type": "array"
+      },
+      "cells": {
+        "description": "discharge: the discharger's cells just before firing — the discharge deals 35 × cells radius damage, so this is its magnitude. Absent when the stream has no sample.",
+        "type": "integer"
+      },
+      "damage": {
+        "description": "Damage-log total dealt to the victims (raw family); absent without a log or when none was dealt.",
+        "type": "integer"
+      },
+      "damageEnemy": {
+        "description": "Given damage to ENEMY victims in the BOUNDED family (each hit capped by the death-value rule, so a lethal radius hit counts what the victim could absorb, not the raw overkill), summed over every enemy hit — killed or not. Set on discharges; absent without a damage log.",
+        "type": "integer"
+      },
+      "damageTeam": {
+        "description": "Given damage to TEAM victims in the BOUNDED family, summed over every teammate hit — killed or not. Set on discharges; absent without a damage log.",
+        "type": "integer"
+      },
+      "enemyKills": {
+        "description": "Killed victims with relation enemy.",
+        "type": "integer"
+      },
+      "height": {
+        "description": "airgib: victim feet above the floor at the hit, map units.",
+        "type": "number"
+      },
+      "heightAboveAttacker": {
+        "description": "airgib: victim origin minus shooter origin at the hit, map units (negative = below).",
+        "type": "number"
+      },
+      "kind": {
+        "description": "Highlight kind.",
+        "type": "string",
+        "enum": [
+          "discharge",
+          "quadbore",
+          "telefrag",
+          "airgib"
+        ]
+      },
+      "quadFrags": {
+        "description": "quadbore: the actor's non-suicide kills between the pickup and the bore.",
+        "type": "integer"
+      },
+      "quadHeldMs": {
+        "description": "quadbore: ms since the quad pickup when the actor died; KTX quad lasts 30 000 ms, so 30000 − quadHeldMs is the quad thrown away.",
+        "type": "integer"
+      },
+      "sources": {
+        "description": "Evidence the row rests on: frags (an obituary named it) and/or damage (the damage log carried it, wire or reconstructed).",
+        "type": "array"
+      },
+      "teamKills": {
+        "description": "Killed victims with relation team.",
+        "type": "integer"
+      },
+      "teleKind": {
+        "description": "telefrag: telefrag (the actor killed the victim), deflect (the actor teleported onto a pentagram holder and died — KTX dtTELE2/dtTELE3) or spawnicide (dtTELE4).",
+        "type": "string",
+        "enum": [
+          "telefrag",
+          "deflect",
+          "spawnicide"
+        ]
+      },
+      "time": {
+        "description": "Event instant, int32 ms since match start.",
+        "type": "integer"
+      },
+      "victims.0.activeWeapon": {
+        "description": "The weapon wielded; absent when the wire never said.",
+        "type": "string",
+        "enum": [
+          "sg",
+          "ssg",
+          "ng",
+          "sng",
+          "gl",
+          "rl",
+          "lg",
+          "axe"
+        ]
+      },
+      "victims.0.armor": {
+        "description": "Armor just before the event.",
+        "type": "integer"
+      },
+      "victims.0.armorType": {
+        "description": "Armor type worn; absent when none.",
+        "type": "string",
+        "enum": [
+          "ga",
+          "ya",
+          "ra"
+        ]
+      },
+      "victims.0.damage": {
+        "description": "Damage-log figure for this player in the event (raw family); absent without a log. On a telefrag victim: KTX's own armor+health figure (Damage.Telefrags[].bounded) when the demo carries it.",
+        "type": "integer"
+      },
+      "victims.0.health": {
+        "description": "Health just before the event. Absent when no stream recorded a value (stateSource absent).",
+        "type": "integer"
+      },
+      "victims.0.killed": {
+        "description": "Died in this event.",
+        "type": "boolean"
+      },
+      "victims.0.loc": {
+        "description": "Nearest named location from the map .loc file at the instant.",
+        "type": "string"
+      },
+      "victims.0.name": {
+        "description": "Player display name (or the placeholder \"teammate\" for the party an unattributed team-kill print did not name).",
+        "type": "string"
+      },
+      "victims.0.powerups": {
+        "description": "Powerups held.",
+        "type": "array"
+      },
+      "victims.0.relation": {
+        "description": "Side relative to the event's actor: self (the actor), team (same team) or enemy. In an individual layout (duel, FFA) every other player is enemy.",
+        "type": "string",
+        "enum": [
+          "self",
+          "team",
+          "enemy"
+        ]
+      },
+      "victims.0.stack": {
+        "description": "health + armor — the telefrag ranking scalar.",
+        "type": "integer"
+      },
+      "victims.0.stateSource": {
+        "description": "Where the vitals came from: stream (the player's own health/armor streams) or spawn (the player had just spawned and the spawn stats had not reached the wire — the streams still read the previous life's corpse — so the vitals are the spawn state 100/0). Absent when there was no stream to read (every vital absent).",
+        "type": "string",
+        "enum": [
+          "stream",
+          "spawn"
+        ]
+      },
+      "victims.0.survived": {
+        "description": "The pentagram holder a deflected teleporter died on (deflect rows).",
+        "type": "boolean"
+      },
+      "victims.0.team": {
+        "description": "Team name.",
+        "type": "string"
+      },
+      "victims.0.userId": {
+        "description": "UserID (Hub viewer link) resolved at the event's own instant.",
+        "type": "integer"
+      },
+      "victims.0.weapons": {
+        "description": "Tracked inventory held (the STAT_ITEMS bits the streams track).",
+        "type": "array"
+      },
+      "weapon": {
+        "description": "quadbore: the weapon.",
+        "type": "string",
+        "enum": [
+          "rl",
+          "gl"
+        ]
+      }
+    }
+  },
+  "lives": {
+    "summary": "Every player's lives, spawn to death",
+    "description": "One row per spawn-to-death run — the natural unit of QuakeWorld\nanalysis — carrying the same per-interval stats block `/top-windows`\nuses, plus `endReason`, `spawnLoc`, `deathLoc`, `killedBy`,\n`deathWeapon`, `itemsTaken` and `weaponsHeld`.\n\n**Segmentation & attribution.** Segmentation comes from\n`streams.players[].alive` (schema v64). Two attribution rules matter\nif you sum per-life stats:\n\n- a kill made POSTHUMOUSLY — a rocket landing after its shooter died,\n  measured 76-197 ms later on real demos — is credited to the life\n  that fired it;\n- an event on the boundary between two TOUCHING lives (a\n  same-millisecond death and respawn) goes to the life that was\n  ending.\n\n`durationMs` is ALIVE time and is not extended by the posthumous\nwindow.\n\n**What the sums reconcile against.** Every stat here is built from the\nper-event LOGS, so an unfiltered response sums, on the frag side, to\nthat player's `/frags` `frags[]` rows, and on the damage side to\n`/damage`'s NON-SUMMARY aggregate for them. It does NOT sum:\n\n- to `/damage`'s `events[]` rows: a telefrag or stomp folds its value\n  into the totals without a per-hit row of its own, so on a demo with\n  any positional kill the `events[]` sum comes in low by exactly that\n  fold;\n- to an unfiltered BOUNDED SUMMARY either — that response substitutes\n  KTX's end-of-match scoreboard for the per-hit reconstruction these\n  rows are built from;\n- and not necessarily to a scoreboard aggregate such as `/frags`'\n  `byPlayer`, which has other sources — a death detected from\n  `DF_DEAD` / `STAT_HEALTH` with no obituary counts there and leaves\n  no log row for any life to carry.\n\nOn `wipeout_3on2_red_vs_blue[q3dm6qw]` three players' per-life deaths\nsum to 3/4/7 against a `byPlayer` 4/5/9, and the frag log itself holds\n3/4/7 — the lives are faithful to their source.\n\n**One demo class breaks the identity outright**, and says so by\nreading zero. Where two wire slots resolve to the same player NAME,\nthat player's per-player stream is keyed with a `#slot` suffix while\nthe event logs keep the bare name, so nothing in their lives rows can\nmatch: every stat there — kills, deaths, damage, shots — is 0, and\ntheir pickups attach to no life at all rather than to the wrong\nslot's. `/top-windows` is unaffected (its subjects come from the log\nnames directly).\n\n**`deaths` is not a 0/1 flag.** It is the count of death rows\nattributed to the life. It is usually 1; it is 0 whenever no frag-log\nrow names the player at that instant, INCLUDING on lives whose\n`endReason` is `death` (four such rows on the demo above), so do not\ninfer one field from the other; and it can EXCEED 1, because a life\ncarries both the death that ended it and any death recorded during the\ndead gap that followed, which is the KTX `dtTELE2` deflection\n(measured across 11558 corpus lives: 12 with 2 deaths, one with 3).\nNever treat it as a 0/1 flag — read `endReason` for how the life\nended.\n\n**Rates.** Each row carries its attribution window explicitly as\n`attrStart`/`attrEnd`, which is WIDER than `durationMs` (alive time\nonly) — divide a count by `attrEnd − attrStart` for an exact rate.\n\n**Filtering.** `from`/`to` keep lives OVERLAPPING the window, not only\nthose contained; note that a filtered response does NOT reconcile —\neach selected life still carries its whole attribution window, and\n`minMs` drops a life together with the events in its window. They are\ntherefore not a response-size control either; that is `summary`. An\nINVERTED window (`from` > `to`) selects nothing and returns\n`lives: []`, matching `/frags`, `/damage` and `/top-windows`.\n\n**Measuredness.** Every numeric stat is emitted even at zero; read the\nenvelope's `measured` block, never a field's absence, to tell an\nunmeasured source from a measured zero. A demo with no damage stream\nstill yields lives — there, and only there, the envelope's\n`dmg`/`boundedMode` echoes are absent.\n\n**Errors.** 422 `lives_unavailable` when the demo carries no\nper-player streams to segment, and equally when it has streams but\nliveness was never MEASURABLE on any of them. The second case would\notherwise serve `lives: []`, which reads as \"nobody ever lived\" — a\ndifferent and false claim from \"we could not tell\".\n`measured.liveness` carries the same fact on the responses that do get\nserved. 422 `bounded_unavailable` for an EXPLICIT `dmg=bounded` on a\ndemo whose bounded reconstruction was skipped; a defaulted one falls\nback to `raw` and says so in `dmg`.",
+    "params": {
+      "dmg": {
+        "description": "Damage family for the on-demand damage endpoints (`/top-windows`,\n`/lives`, `/top-kills`):\n\n- `raw` — the unbound wire values;\n- `bounded` — KTX-scoreboard semantics (armor absorbed + health capped\n  to remaining).\n\nDefault (unset): `bounded`, falling back to `raw` on a demo whose\nbounded reconstruction was skipped; an EXPLICIT `dmg=bounded` there is\na 422 `bounded_unavailable` naming the demo's `boundedMode`.\n\n**On the interval endpoints it selects the family of the whole STATS\nBLOCK**, so it applies under EVERY `/top-windows` metric and not only\nthe damage ones — a window picked by `metric=frags` still reports\n`damageGiven`, and that number has a family. Both rules above hold\nunder every metric too: the skipped-demo 422 fires for an explicit\n`dmg=bounded` whatever the metric, and a defaulted one falls back to\n`raw` whatever the metric. On `/top-kills` it selects the family of\nboth `damage` and `returnDamage`, so one response is one family there\ntoo — and since `damage` is the RANKING key, the two families can\norder the list differently. The resolved family comes back as the\nresponse's own `dmg` — read it rather than assuming the default took.\n\n**Two values, not three:** `both` is a response SHAPE — raw fields\nplus a parallel `bounded` nest, as `/damage` returns it — and these\nendpoints have no such shape. One interval stats block — one kill\nburst — carries one set of damage numbers, and a quantity that RANKS\nhas to rank on a single family, so `both` is rejected with a 400 here\nfor every metric and on every one of the three endpoints.",
+        "type": "string",
+        "enum": [
+          "raw",
+          "bounded"
+        ]
+      },
+      "from": {
+        "description": "Window start, match-relative integer MILLISECONDS. 0 / omitted = no lower bound. Endpoints treat the window as inclusive on both ends. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "label": {
+        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "type": "string"
+      },
+      "minMs": {
+        "description": "Drop lives shorter than this many integer milliseconds (default 0, keep all). Useful for filtering out spawn-frag lives.",
+        "type": "integer",
+        "default": 0
+      },
+      "players": {
+        "description": "CSV of player display names. Case-SENSITIVE (QW names are case-significant). Omit for all players. Filter semantics are per-endpoint (e.g. killer-or-victim on /frags, speaker on /chat).",
+        "type": "array"
+      },
+      "summary": {
+        "description": "Size control. `/lives` returns one row per spawn-to-death run and a\nwhole 4on4 match is ~400 of them (~240 KB), of which ~40% is per-row\ncollections. Note that `from`/`to` only SELECT rows here — each kept\nrow still carries its whole attribution window — so they are not a\nsize control on their own.\n\n**What `summary=true` keeps:** EVERY ROW and every scalar (the counts,\nthe durations, `endReason`, `spawnLoc`/`deathLoc`,\n`killedBy`/`deathWeapon`, `mainWeapon`, `weaponsHeld`).\n\n**What it drops:** the per-row breakdown collections — `itemsTaken`,\n`locs`, `eventLocs`, `victims`, `byWeapon`, `damageByWeapon`.\n\n**One consequence to know:** `itemsTaken` is `null` on every summary\nrow. In a summary response that null means \"not requested\" and says\nNOTHING about the demo — the envelope's `measured.items` remains the\nauthority on whether an item timeline exists. Re-ask with\n`summary=false` (plus `players` / `from` / `to`) for the detail of the\nlives you care about.",
+        "type": "boolean",
+        "default": false
+      },
+      "to": {
+        "description": "Window end, match-relative integer MILLISECONDS. 0 / omitted = no upper bound. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      }
+    },
+    "fields": {
+      "attrEnd": {
+        "description": "End of the attribution window. The window is the life PLUS the\ndead gap that follows it (and, for the first and last lives, out\nto the match edges), so that a posthumous rocket counts for the\nlife that fired it.\n\n**It is wider than `durationMs`**, which measures `end − start` —\nALIVE time — and this is the one asymmetry in the row: a\nper-second rate computed from a count over `durationMs` reads\nHIGH — slightly when summed across a whole match, by tens of\npercent on a single row where a short life is followed by a long\ndead gap — while `attrEnd − attrStart` is the span the counts\nactually cover.\n\n**Truncated recordings.** On a POV or otherwise truncated\nrecording the final life's window can contain events its player\nearned while provably still present: liveness is clipped using the\nplayer's OWN samples, spawns and deaths, and a killer-side\nobituary is deliberately not counted as presence evidence.\n\n**Tiling.** One player's windows tile the match end to end\n(half-open at exactly one side apiece), so no instant belongs to\ntwo of them and none to none. On a demo with no match window the\nlast life's `attrEnd` is the int32 ceiling: there is no match end\nto bound it, and everything after the last life belongs to it.",
+        "type": "integer"
+      },
+      "attrStart": {
+        "description": "Start of the ATTRIBUTION WINDOW — the span every event field in the stats block was counted over. Always present: `0` is the legitimate value on every player's first life, so an omit-on-zero rule would delete the commonest one.",
+        "type": "integer"
+      },
+      "byWeapon": {
+        "description": "Kills by weapon.",
+        "type": "object"
+      },
+      "damageByWeapon": {
+        "description": "Enemy damage given, by weapon. EXCLUDES telefrags and stomps (they carry no weapon), exactly as `/damage`'s `byWeapon` does, so this sums to at most `damageGiven` rather than to it.",
+        "type": "object"
+      },
+      "damageGiven": {
+        "description": "To enemies. INCLUDES telefrag / stomp value, exactly as `/damage` does, so per-interval damage reconciles against that endpoint.",
+        "type": "integer"
+      },
+      "damageGivenSelf": {
+        "description": "Self damage, e.g. own rocket splash.",
+        "type": "integer"
+      },
+      "damageGivenTeam": {
+        "description": "Damage dealt to teammates.",
+        "type": "integer"
+      },
+      "damageTaken": {
+        "description": "From ALL sources — enemy, team, self, world — and including telefrag / stomp value.",
+        "type": "integer"
+      },
+      "deathLoc": {
+        "description": "Loc the life ended in.",
+        "type": "string"
+      },
+      "deathWeapon": {
+        "description": "Weapon or cause that ended the life.",
+        "type": "string"
+      },
+      "deaths": {
+        "description": "Death rows from the FRAG LOG naming this player as victim inside\nthe attribution window. Sums, over an unfiltered `/lives`\nresponse, to that player's rows in `/frags`' `frags[]` — not\nnecessarily to `/frags`' `byPlayer` scoreboard, which counts\ndeaths the log never recorded.\n\n**Not capped at 1 on `/lives`, and NOT a flag for `endReason`:**\n\n- it can be 0 on a life whose `endReason` is `death` (the death\n  was seen only by the `DF_DEAD` / `STAT_HEALTH` detectors and no\n  obituary named it — four such rows on\n  `wipeout_3on2_red_vs_blue[q3dm6qw]`);\n- it can EXCEED 1, because a life carries both the death that\n  ended it and any death recorded during the dead gap that\n  followed (the KTX `dtTELE2` deflection — measured across 11558\n  corpus lives: 12 rows with 2 deaths, one with 3).",
+        "type": "integer"
+      },
+      "durationMs": {
+        "description": "end − start.\n\nFor a life this is ALIVE TIME ONLY, while every event field below\ncovers the wider attribution window (the life plus the dead gap\nthat follows it, so a posthumous rocket counts for the life that\nfired it) — the row's `attrStart` / `attrEnd` carry that window,\nso divide by `attrEnd − attrStart` for an exact rate. A rate\nderived from a count and this duration therefore reads HIGH:\nslightly when summed across a whole match, by tens of percent on a\nsingle row where a short life is followed by a long dead gap.\n\nFor a top window the two coincide and there is no separate window\nto publish.",
+        "type": "integer"
+      },
+      "end": {
+        "description": "Death, or match end.",
+        "type": "integer"
+      },
+      "endReason": {
+        "description": "How the life ended. `death` — a recorded death. `matchEnd` — the player was still alive. `leftGame` — the player's position track ended (they quit, or the recording lost them); liveness is clipped to observed presence, so on a truncated recording this means \"the recording stopped seeing them\", not \"they stopped playing\". Always present: an absent `killedBy` used to conflate all three.",
+        "type": "string",
+        "enum": [
+          "death",
+          "matchEnd",
+          "leftGame"
+        ]
+      },
+      "eventLocs.0.count": {
+        "description": "Event count, on `eventLocs`.",
+        "type": "integer"
+      },
+      "eventLocs.0.loc": {
+        "description": "Loc name.",
+        "type": "string"
+      },
+      "eventLocs.0.ms": {
+        "description": "Dwell, on `locs`.",
+        "type": "integer"
+      },
+      "hits": {
+        "description": "Fires that connected.",
+        "type": "integer"
+      },
+      "index": {
+        "description": "0-based, per player, in time order.",
+        "type": "integer"
+      },
+      "itemsTaken": {
+        "description": "Every item picked up in the life's attribution window, in time order. **`null` means the demo carries no item timeline** (the same signal as `measured.items: false`); `[]` means it has one and this life took nothing. With `summary=true` it is `null` on every row regardless of the demo — there, only `measured.items` speaks."
+      },
+      "killedBy": {
+        "description": "Who ended it. Absent when `endReason` is not `death`, and also on a death seen only by the health/DF_DEAD detectors with no obituary naming it — read `endReason`, not this field, to tell those apart. That second state is REACHABLE (the two detectors exist precisely because each sees deaths the other misses) but is not currently observed: across the 42 cached corpus demos, 0 of the 11364 death-ended lives — of 11558 lives in total — lack an obituary.",
+        "type": "string"
+      },
+      "kills": {
+        "description": "Enemy kills. Suicides and teamkills excluded.",
+        "type": "integer"
+      },
+      "locs.0.count": {
+        "description": "Event count, on `eventLocs`.",
+        "type": "integer"
+      },
+      "locs.0.loc": {
+        "description": "Loc name.",
+        "type": "string"
+      },
+      "locs.0.ms": {
+        "description": "Dwell, on `locs`.",
+        "type": "integer"
+      },
+      "mainWeapon": {
+        "description": "Weapon with the most kills; ties broken by name so the value is stable.",
+        "type": "string"
+      },
+      "player": {
+        "description": "The player whose life this is.",
+        "type": "string"
+      },
+      "shots": {
+        "description": "Weapon fires in the interval.",
+        "type": "integer"
+      },
+      "spawnLoc": {
+        "description": "Loc the life began in; absent without loc data.",
+        "type": "string"
+      },
+      "start": {
+        "description": "Spawn, match-relative ms.",
+        "type": "integer"
+      },
+      "suicides": {
+        "description": "Self-inflicted deaths, a subset of `deaths`.",
+        "type": "integer"
+      },
+      "team": {
+        "description": "Their team at match end; absent in a demo with no team labels.",
+        "type": "string"
+      },
+      "teamKills": {
+        "description": "Teammates killed. Never scores, but shown for context.",
+        "type": "integer"
+      },
+      "victims": {
+        "description": "Kills per victim. Sums to `kills`.",
+        "type": "object"
+      },
+      "weaponsHeld": {
+        "description": "Which of rl/lg/gl/ssg/sng the player held at any point while ALIVE in this life, in that order. Clipped to the alive interval, not to the attribution window: KTX does not clear the weapon bits on death, so a corpse still reads as armed. Absent means \"held none of them\", not \"unknown\".",
+        "type": "array"
+      }
+    }
+  },
+  "top-kills": {
+    "summary": "The match's hardest kill bursts",
+    "description": "The highlight-reel view: every enemy kill ranked by how hard the burst\nthat produced it hit. Neighbours — `/frags` is the exhaustive kill LOG\nwith no damage figure, `/damage` the whole-match aggregates plus the\nper-hit log, `/top-windows` the best fixed-length stretches; this one\nranks individual KILLS.\n\n**What a burst is.** For each enemy kill, the contiguous run of\n**killing-weapon** hits the killer landed on that victim leading up to\nit, summed in the requested damage family. The run is clipped below by\nthe start of the victim's current life.\n\n**The burst is the KILLING WEAPON's run, and that is the question this\nendpoint answers** — \"how hard was this burst with this weapon\".\nMeasured over 1,866 enemy kills, on ~8% of them that UNDERSTATES what\nproduced the kill: a rocket softens, a shotgun finishes, and the row\nreads `weapon: sg, damage: 16` for a kill that took 250 across\nweapons. Deliberate, not a defect. \"What did the kill take across\nweapons\" stays a `/damage` question. A different-weapon hit landing\ninside the run neither joins it nor breaks it.\n\n**`gapMs` is a CAPTURE gap — narrow with `maxGapMs`, not with\n`gapMs`.** The default 3000 is generous on purpose: truncation is\nunrecoverable downstream while over-merge is filterable. To get the\ntighter per-weapon burst your product wants, keep the rows whose\n`maxGapMs` is within that weapon's cadence (LG ≈ 1200 ms, RL ≈\n2300 ms) — every KEPT row then carries its gap-`g` value EXACTLY,\nbecause dropping hits from a run only widens gaps. An over-merged row\n(`maxGapMs > g`) is dropped by that filter, not truncated, and a row\noutside this response's `limit` cannot re-enter — `?gapMs=g` on this\nendpoint is the exact tighter walk when either matters. Lowering\n`gapMs` as a display knob instead loses damage: a baked 1200 ms gap truncated 11% of rl and 23% of sg bursts,\nworst measured a 291-damage triple-rocket kill reported as **2**.\n`spanMs` is the DISPLAY figure (\"291 dmg in 1.7 s\") and is not a valid\nnarrowing rule — 21 of the 24 over-merged rl bursts in the corpus pass\na `span <= 2×gap` test.\n\n**Positional kills produce no row.** A telefrag, stomp or squish\ncarries no damage event, so there is no run to sum and no honest\nfigure to rank by; they are absent from this ranking only (13 of 1,879\nmeasured kills) and still present in `/frags` and in `/damage`'s\n`telefrags` / `stomps`.\n\n**Kills by an already-dead killer stay in**, deliberately: the walk\nconsults the VICTIM's liveness and never the killer's, so a rocket in\nflight when its shooter died still ranks. Measured 38 of 1,866 —\nposthumous rockets and mutual frags, exactly the highlights this\nendpoint exists to surface.\n\n**`returnDamage` is a value, not a flag.** It is what the victim dealt\nback to this killer over the `contestedMs` window before the kill —\nany weapon, same damage family. The server owns the window; the\nthreshold that calls a kill \"contested\" is yours.\n\n**Ranking & filters.** Rows are ranked by `damage`, ties broken by the\nearlier kill then by killer / victim name, so the response is stable.\n`minDamage` filters on that same figure; `weapons` filters the KILLING\nweapon (burst-capable tokens only: rl, lg, gl, ssg, sng, ng, sg, axe,\nunknown — a positional or environmental cause cannot anchor a burst\nand is rejected, not silently empty); `players`\nrestricts the KILLER — there is deliberately no victim-side filter,\nwhich would be a different question. `from`/`to` bound the KILL\ninstant, not the burst: a kept row's run may reach back before `from`.\n\n**Errors.** 422 `top_kills_unavailable` when the demo lacks any of the\nthree sources — the frag log, the damage log, or measurable liveness.\nThe last is not pedantry: at the 3000 ms capture gap the walk crosses\nthe victim's previous death on 4% of measured kills, and without the\nlife clip those bursts absorb the victim's PREVIOUS life. Since the\nlist is ranked BY damage, the contaminated rows are exactly the ones\nthat reach the top, and a consumer holding only this response could\nnot tell them apart. 422 `bounded_unavailable` for an EXPLICIT\n`dmg=bounded` on a demo whose bounded reconstruction was skipped; a\ndefaulted one falls back to `raw` and says so in `dmg`.",
+    "params": {
+      "contestedMs": {
+        "description": "The window each row's `returnDamage` sums the victim's damage back over, in integer MILLISECONDS before the kill (default 4000, max 30000). It sets the WINDOW only — `returnDamage` is a value, not a flag, so the threshold that calls a kill \"contested\" stays yours. Out-of-range values (below 1, including an explicit 0, or above 30000) are REJECTED with a 400 naming the range. The resolved value is echoed on the response.",
+        "type": "integer",
+        "default": 4000
+      },
+      "dmg": {
+        "description": "Damage family for the on-demand damage endpoints (`/top-windows`,\n`/lives`, `/top-kills`):\n\n- `raw` — the unbound wire values;\n- `bounded` — KTX-scoreboard semantics (armor absorbed + health capped\n  to remaining).\n\nDefault (unset): `bounded`, falling back to `raw` on a demo whose\nbounded reconstruction was skipped; an EXPLICIT `dmg=bounded` there is\na 422 `bounded_unavailable` naming the demo's `boundedMode`.\n\n**On the interval endpoints it selects the family of the whole STATS\nBLOCK**, so it applies under EVERY `/top-windows` metric and not only\nthe damage ones — a window picked by `metric=frags` still reports\n`damageGiven`, and that number has a family. Both rules above hold\nunder every metric too: the skipped-demo 422 fires for an explicit\n`dmg=bounded` whatever the metric, and a defaulted one falls back to\n`raw` whatever the metric. On `/top-kills` it selects the family of\nboth `damage` and `returnDamage`, so one response is one family there\ntoo — and since `damage` is the RANKING key, the two families can\norder the list differently. The resolved family comes back as the\nresponse's own `dmg` — read it rather than assuming the default took.\n\n**Two values, not three:** `both` is a response SHAPE — raw fields\nplus a parallel `bounded` nest, as `/damage` returns it — and these\nendpoints have no such shape. One interval stats block — one kill\nburst — carries one set of damage numbers, and a quantity that RANKS\nhas to rank on a single family, so `both` is rejected with a 400 here\nfor every metric and on every one of the three endpoints.",
+        "type": "string",
+        "enum": [
+          "raw",
+          "bounded"
+        ]
+      },
+      "from": {
+        "description": "Window start, match-relative integer MILLISECONDS. 0 / omitted = no lower bound. Endpoints treat the window as inclusive on both ends. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "gapMs": {
+        "description": "The burst walk's CAPTURE gap, in integer MILLISECONDS (default 3000,\nmax 5000): a hit joins the run while it lands within `gapMs` of the\nrun's earliest hit so far.\n\n**Do not lower this to get tighter bursts** — filter the response by\n`maxGapMs` instead. The default is generous because truncation is\nunrecoverable downstream while over-merge is filterable, and keeping\nthe rows with `maxGapMs <= g` gives every KEPT row its gap-`g` value\nEXACTLY. A run with `maxGapMs > g` is dropped by that filter, not\ntruncated — the true gap-`g` walk would report its shorter suffix\ninstead — so the narrowed list is the gap-`g` ranking restricted to\nintact runs. A baked 1200 ms gap truncated 11% of rl and 23% of sg\nbursts. The parameter exists for the exact server-side recompute\n(`gapMs=g` when the truncated remainders matter), not as the display\nknob.\n\nOut-of-range values are REJECTED with a 400 naming the range, never\nclamped: below 1 (including an explicit `gapMs=0` — an omitted MCP\ninteger arrives as 0, which must not look deliberate) and above 5000,\nbeyond which a \"burst\" is two fights. The resolved value is echoed on\nthe response.",
+        "type": "integer",
+        "default": 3000
+      },
+      "label": {
+        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "type": "string"
+      },
+      "limit": {
+        "description": "Rows returned (default 20, max 200). A NEGATIVE value means uncapped. Out-of-range values are REJECTED with a 400, never silently clamped: an explicit `limit=0` (0 cannot mean \"uncapped\" — an omitted MCP integer arrives as 0, which would make a forgotten argument look deliberate) and any `limit` above the 200 maximum. The default is 20 rather than `/top-windows`' 10 because the per-weapon `maxGapMs` narrowing this endpoint expects thins the list.",
+        "type": "integer",
+        "default": 20
+      },
+      "minDamage": {
+        "description": "Drop kill bursts below this much burst damage (default 0, keep all) — the same figure the rows are ranked by, in the resolved `dmg` family. A negative value is rejected with a 400: 0 already means \"no filter\", since a burst's damage is non-negative.",
+        "type": "integer",
+        "default": 0
+      },
+      "players": {
+        "description": "CSV of player display names. Case-SENSITIVE (QW names are case-significant). Omit for all players. Filter semantics are per-endpoint (e.g. killer-or-victim on /frags, speaker on /chat).",
+        "type": "array"
+      },
+      "to": {
+        "description": "Window end, match-relative integer MILLISECONDS. 0 / omitted = no upper bound. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "weapons": {
+        "description": "CSV of weapon codes (case-insensitive). Core codes: rl, lg, gl, ssg,\nsng, ng, sg, axe; on /damage the pseudo-codes tele/stomp select the\npositional instant kills (which carry no real weapon).\n\nEach endpoint validates against its OWN closed vocabulary and returns\n400 `invalid_param` (listing the valid set) for an unknown token — no\nmore silent empty result:\n\n- **/frags** additionally accepts the obituary environmental / cause\n  codes (hook, rail, squish, explobox, fall, lava, slime, water,\n  world, tele, stomp, unknown, suicide, teamkill);\n- **/damage** the death-type + environmental codes (hook, explobox,\n  squish, lava, slime, drown, fall, trigger, suicide, unknown);\n- **/backpacks** accepts rl/lg only;\n- **/weapon-pickups** ssg,ng,sng,gl,rl,lg;\n- **/top-kills** filters the KILLING weapon (which is also the\n  burst's own weapon) and accepts only the burst-capable subset —\n  the core codes plus `unknown`. Positional (tele/stomp/squish),\n  environmental and bookkeeping causes are REJECTED here: no damage\n  event can anchor them, so the token would be a valid filter that\n  structurally selects nothing.\n\n`water` and `drown` are the SAME cause under the two logs' different\nspellings and are accepted interchangeably wherever either is valid,\nso you need not know which log backs the endpoint you are calling.\n\nOn `/frags`, `teamkill` selects only the teamkills whose obituary\nphrasing has no cause in it (\"X checks his glasses\" and its siblings,\nwhich KTX picks at random). KTX's team branch tests three deathtypes\nby name before that random pick, and those keep their real code —\nfilter `tele` (teammate telefrag), `stomp` (teammate jump/crush) or\n`squish` (teammate mover crush) for them, and `isTeamKill` to\nseparate any of these from the enemy-facing rows carrying the same\ncode.\n\nThe pre-16.2 singular spelling `weapon` is an accepted legacy alias;\n`weapons` wins when both are present.",
+        "type": "array"
+      }
+    },
+    "fields": {
+      "damage": {
+        "description": "The run's summed damage in the envelope's `dmg` family — the value that ranked this row.",
+        "type": "integer"
+      },
+      "hits": {
+        "description": "How many damage events the run holds.",
+        "type": "integer"
+      },
+      "killer": {
+        "description": "Who made the kill; the frag log's name.",
+        "type": "string"
+      },
+      "maxGapMs": {
+        "description": "The largest gap between consecutive hits in the run, `0` when `hits` is 1. This is the EXACT client-side narrowing filter: a kept row (`maxGapMs <= g`) carries its gap-`g` value verbatim; an over-merged row is dropped by the filter rather than truncated (request `gapMs=g` for the exact tighter walk).",
+        "type": "integer"
+      },
+      "rank": {
+        "description": "1-based position in this response.",
+        "type": "integer"
+      },
+      "returnDamage": {
+        "description": "What the victim dealt back to this killer over the `contestedMs` window before the kill: any weapon, same damage family. A value, not a flag — you own the threshold that calls a kill contested.",
+        "type": "integer"
+      },
+      "spanMs": {
+        "description": "`time` minus the run's first hit — the DISPLAY figure (\"291 dmg in 1.7 s\"). Not a valid rule for narrowing to a tighter gap; use `maxGapMs`.",
+        "type": "integer"
+      },
+      "team": {
+        "description": "The KILLER's team at match end; absent in a demo with no team labels.",
+        "type": "string"
+      },
+      "time": {
+        "description": "The kill instant, match-relative ms — also the run's last hit.",
+        "type": "integer"
+      },
+      "victim": {
+        "description": "Who died.",
+        "type": "string"
+      },
+      "victimWep": {
+        "description": "The victim's weapon class (`sg`|`mid`|`lg`|`rl`|`both`) at the killing hit, straight from that damage event — the same field `/damage` reports. Absent when the wire carried none.",
+        "type": "string"
+      },
+      "weapon": {
+        "description": "The killing weapon, which IS the burst's weapon (see the endpoint description).",
+        "type": "string"
+      }
+    }
+  },
+  "top-windows": {
+    "summary": "Each player's best stretches of the match",
+    "description": "Top-scoring windows under one of two segmentations, chosen with\n`mode`. Each has a one-sentence contract:\n\n- `mode=fixed` (the default) — \"in these `windowMs` milliseconds this\n  player scored higher on `metric` than in any other stretch of the\n  same length.\"\n- `mode=gap` — \"a window is a maximal run of scoring events in which\n  consecutive events are no more than `gapMs` apart; its score is\n  their sum.\"\n\n`windowMs` is fixed mode's main knob — 5000 gives damage bursts, 30000\ngives hot streaks. `gapMs` is gap mode's, is REQUIRED there and has no\ndefault; each mode rejects the other's knob with a 400. There is\ndeliberately no adaptive mode with a tuning constant in it; for the\nnaturally variable-length unit use `/lives`, and for a fixed grid use\n`/buckets`.\n\n**Everything below applies to BOTH modes** — metric vocabulary,\nranking and the tie-break, both caps, `weapons=` scoping, `minScore`,\nthe stats block, measuredness and the damage family — except where the\ntext names `windowMs`. What gap mode changes is only where a window\nstarts and ends: rows are the runs themselves (so they are disjoint\nper player by construction, with no overlap suppression), `end` is the\nrun's last event rather than `start + windowMs`, a run of one event is\na legitimate row with `durationMs` 0, and a run may span the player's\nown death — `/lives` is the per-life view. See the `mode` and `gapMs`\nparameters for the per-metric starting points and the rest of the\ncontract.\n\n**`/top-windows mode=gap` vs `/top-kills`.** They are adjacent but not\nsubstitutes: `/top-kills` is the per-KILL view (each row one kill plus\nthe killing-weapon burst that produced it, kill-anchored, clipped at\nthe killer's life start, with `returnDamage` and `maxGapMs`), while\ngap windows are the per-STRETCH view (best sustained output, no kill\nrequired — a 300-damage stretch with zero kills is a row — and rows\nnever overlap). At `metric=frags&weapons=rl&gapMs=3000` the two do\ncollapse onto each other, and there gap mode is the wrong tool: RL\ninter-kill gaps run p50 ≈ 11.8 s, so 85% of clusters would be\nsingletons. Use frag gaps of 8000-15000 for multi-kill stretches, or\ndamage gaps around 3000 for rampages.\n\n**`from`/`to` bound where a window may START, not what it covers** —\nthe one place this endpoint departs from the shared parameter\ndescription. A window anchored at or before `to` still runs the full\n`windowMs` past it, so `to=1000&windowMs=30000` returns the best\nwindow ANCHORED in the first second, which covers up to 31 s, not\n\"the best window inside the first second\". This is deliberate:\nscoring is clipped to the same span the row reports, so a row's\n`score` and its stats block always describe one identical interval.\nTo constrain what a window COVERS, shrink `windowMs`.\n\n**Anchoring & shape.** Windows are anchored at REAL event times, not\na grid, so \"the best 30 s\" is exact rather than snapped. They are\nnon-overlapping per player and returned as ONE FLAT LIST, each row\ncarrying `player`, `team` and a 1-based `rank`.\n\n**Ordering: `score` first, then a fixed complementary metric.** Ties\non `score` are the common case — on `metric=frags` most of a page\nholds the same small integer — so rows tied on the metric are ranked\nby the other half of the same moment: `damageGiven` under\n`frags`/`netFrags`/`shots`/`hits`, `frags` under\n`damageGiven`/`netDamage`, `damageTaken` under `deaths`, `deaths`\nunder `damageTaken`; then earlier start, then player name. There is\nno parameter for it. The secondary is read UNSCOPED and in the\nresponse's own damage family (the `dmg` echo), so it is exactly the\nsame-named field of the row's stats block — `weapons=` narrows the\nscore but never the tie-break. It also decides WHICH of a player's\noverlapping equal-scoring candidates survives, so a window may now be\nthe stretch that ENDS on the scoring event rather than the one that\nstarts on it, when that stretch carries more of the complementary\nmetric. Demos with no stream for the secondary (no damage log under\n`metric=frags`) simply tie at 0 and fall through to the positional\nkeys.\n\n**Caps & defaults.** Two independent caps shape it:\n\n- `perPlayer` (max windows from any one player) is applied BEFORE\n  `limit` (the total), so `perPlayer=3&limit=10` means \"the top 10,\n  at most 3 from anyone\" rather than \"the top 3 of the first three\n  players\".\n- The defaults — `limit=10`, `perPlayer=0` — make a bare call the\n  match-wide top 10.\n\n**`weapons=` and scoring.** `weapons` scopes the SCORING events only:\nthe stats block still describes everything that happened in the\nwindow, so with `metric=damageGiven&weapons=lg` the `score` is a\nsubset of `damageGiven`. The envelope's `scoredBy` (once, not per\nrow — it is the same rule for every window) says which is which.\nValid weapon tokens depend on the metric's own source (the frag log\nknows `hook` and `water`, the damage log `explobox` and `drown`, the\nshot stream only what can be fired); `water` and `drown` are accepted\ninterchangeably.\n\n- Suicides and teamkills never score, though they do appear in the\n  stats block.\n- Telefrags and stomps DO score, under every metric they contribute\n  to: their value folds into `damageGiven`/`damageTaken` as `/damage`\n  reports it and is scored on the same terms, which is why an\n  UNFILTERED row's `score` equals the same-named field of its own\n  stats block exactly. `weapons` is the only thing that makes the two\n  diverge, and it selects positional kills too — `weapons=tele`\n  scores telefrags alone.\n- The one exclusion is `damageByWeapon`, matching `/damage`'s own\n  `byWeapon`: a positional kill carries no wire weapon.\n\n**Measuredness.** Every numeric stat is emitted even at zero; read\nthe envelope's `measured` block, never a field's absence, to tell an\nunmeasured source from a measured zero.\n\n**`dmg` — the damage family.** `dmg` selects the family of the whole\nSTATS BLOCK and so applies under EVERY metric, not only the damage\nones — a window picked by `metric=frags` still reports `damageGiven`.\nThe resolved family and the demo's reconstruction state come back on\nthe envelope as `dmg` and `boundedMode`, exactly as `/damage` echoes\nthem; read `dmg` rather than assuming the `bounded` default took,\nsince it silently becomes `raw` on a demo whose reconstruction was\nskipped.\n\n**Errors.** 422 `top_windows_unavailable` when the demo carries no\nsource stream for the chosen metric, and 422 `bounded_unavailable` —\nunder any metric — for an EXPLICIT `dmg=bounded` on a demo whose\nbounded reconstruction was skipped. Missing loc data omits\n`locs`/`eventLocs` only and never fails the request.",
+    "params": {
+      "dmg": {
+        "description": "Damage family for the on-demand damage endpoints (`/top-windows`,\n`/lives`, `/top-kills`):\n\n- `raw` — the unbound wire values;\n- `bounded` — KTX-scoreboard semantics (armor absorbed + health capped\n  to remaining).\n\nDefault (unset): `bounded`, falling back to `raw` on a demo whose\nbounded reconstruction was skipped; an EXPLICIT `dmg=bounded` there is\na 422 `bounded_unavailable` naming the demo's `boundedMode`.\n\n**On the interval endpoints it selects the family of the whole STATS\nBLOCK**, so it applies under EVERY `/top-windows` metric and not only\nthe damage ones — a window picked by `metric=frags` still reports\n`damageGiven`, and that number has a family. Both rules above hold\nunder every metric too: the skipped-demo 422 fires for an explicit\n`dmg=bounded` whatever the metric, and a defaulted one falls back to\n`raw` whatever the metric. On `/top-kills` it selects the family of\nboth `damage` and `returnDamage`, so one response is one family there\ntoo — and since `damage` is the RANKING key, the two families can\norder the list differently. The resolved family comes back as the\nresponse's own `dmg` — read it rather than assuming the default took.\n\n**Two values, not three:** `both` is a response SHAPE — raw fields\nplus a parallel `bounded` nest, as `/damage` returns it — and these\nendpoints have no such shape. One interval stats block — one kill\nburst — carries one set of damage numbers, and a quantity that RANKS\nhas to rank on a single family, so `both` is rejected with a 400 here\nfor every metric and on every one of the three endpoints.",
+        "type": "string",
+        "enum": [
+          "raw",
+          "bounded"
+        ]
+      },
+      "from": {
+        "description": "Window start, match-relative integer MILLISECONDS. 0 / omitted = no lower bound. Endpoints treat the window as inclusive on both ends. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "gapMs": {
+        "description": "Gap mode's knob, in integer MILLISECONDS: consecutive scoring events\nno more than `gapMs` apart belong to the same window.\n\n**REQUIRED under `mode=gap`, with deliberately NO default** — omitting\nit is a 400. The metrics' event cadences are too far apart for one\nvalue to serve them: measured over the 44-demo corpus, per-player\ninter-KILL gaps run p50 ≈ 11-12 s while inter-damage-event gaps run\np50 ≈ 1.0-1.1 s, so the value that reads as \"a streak\" on frags\ndissolves damage into phase-length blobs, and the value that reads as\n\"a rampage\" on damage leaves 85% of RL frag clusters singletons.\nRequiring it also keeps the mode honest: you state what \"kept doing\nit\" means rather than inheriting a constant nobody can justify.\n\n**Measured starting points: ~10000 for the frag metrics\n(`frags`/`deaths`/`netFrags`), ~3000 for the damage and shot\nmetrics.** At `metric=frags` a gap of 8000-15000 reads as a streak\n(top clusters 18-22 kills); at `metric=damageGiven` a gap of\n2000-3000 reads as a rampage (~900 damage over 13-21 s) and 8000\nalready merges whole map phases.\n\n**Range 1..the match duration**, `windowMs`' rule exactly, and an\nout-of-range value is REJECTED with a 400 naming the bound rather than\nclamped. The floor covers an explicit `gapMs=0` (an omitted MCP\ninteger arrives as 0, which must not look deliberate) and any negative\nvalue; the ceiling is the match duration, past which every one of a\nplayer's events joins a single window.\n\n**Rejected under `mode=fixed`** with a 400 — an explicit conflict, not\na silent drop, since the response echoes only its own mode's knob and\nso could not show that anything was discarded.",
+        "type": "integer"
+      },
+      "label": {
+        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "type": "string"
+      },
+      "limit": {
+        "description": "Total windows returned across all players (default 10, max 200).\nApplied AFTER `perPlayer`. A NEGATIVE value means uncapped.\n\nOut-of-range values are REJECTED with a 400, never silently clamped: an\nexplicit `limit=0` (0 cannot mean \"uncapped\" — an omitted MCP integer\narrives as 0, which would make a forgotten argument look deliberate)\nand any `limit` above the 200 maximum.",
+        "type": "integer",
+        "default": 10
+      },
+      "metric": {
+        "description": "What a top window is ranked by — any SUMMABLE per-event quantity. Ratios (accuracy, efficiency) are deliberately absent: they do not sum, so \"the best window\" is undefined for them; they ride the per-window stats block instead. `netFrags` (kills − deaths) is usually what people mean by hot — five kills bought with four deaths is a trade, not a run. `deaths` finds a player's WORST stretch. Case-insensitive.\n**`shots`/`hits` want a `weapons=` filter.** A \"shot\" is one discrete fire (an LG beam tick and a rocket each count 1), so the unfiltered sum is dominated by fast-cycling weapons; and hits are counted only for weapons whose fires LINK to damage (axe/sg/ssg/lg always, rl/gl via projectile tracking, ng/sng only when nail decoding ran), so the unfiltered figure mixes measured and unmeasured weapons. A rocket's SPLASH is a hit here — including a rocket jump's self-splash, which the stats split out as selfHits — and that is NOT KTX's rl/gl convention: KTX counts only rockets that TOUCHED a player (ktx/src/weapons.c:994, :1329) and reads ~4x lower, so never diff this against a demoinfo `acc.rl.hits`. For RL windows `metric=damageGiven&weapons=rl` is the quality signal (enemy-only by definition), while `metric=hits&weapons=lg` is the LG tracking signal (each cell counts the same; raw damage ≈ 30×hits, bounded discounts the killing cell's overkill).",
+        "type": "string",
+        "enum": [
+          "frags",
+          "deaths",
+          "netFrags",
+          "damageGiven",
+          "damageTaken",
+          "netDamage",
+          "shots",
+          "hits"
+        ],
+        "default": "frags"
+      },
+      "minScore": {
+        "description": "Drop windows scoring below this many points OF THE CHOSEN METRIC (default 1) — a score threshold, not a duration; the ms-valued filter on the sibling `/lives` is `minMs`. Matters most for the net metrics, which can go negative — a window nobody would call hot. An explicit `minScore=0` is a MEANINGFUL request (keep the windows that broke even) and is honoured, not treated as \"unset\".",
+        "type": "integer",
+        "default": 1
+      },
+      "mode": {
+        "description": "The SEGMENTATION — how a window's boundaries are decided (default\n`fixed`, so a request written before this parameter existed is\nunchanged). Case-insensitive; the resolved value is echoed on every\nresponse, `fixed` ones included.\n\n- `fixed` — every window is exactly `windowMs` long. \"In these\n  `windowMs` ms this player scored higher on `metric` than in any\n  other stretch of the same length.\"\n- `gap` — a window is a maximal run of scoring events in which\n  consecutive events are no more than `gapMs` apart; its score is\n  their sum. The stretch lasts as long as the player kept doing it,\n  not as long as a stopwatch says. A gap of EXACTLY `gapMs` joins and\n  `gapMs+1` splits; a run of one event is a legitimate window with\n  `durationMs` 0.\n\nEach mode takes exactly ONE knob and REJECTS the other's with a 400\nrather than ignoring it: `gapMs` under `mode=fixed`, and `windowMs`\nunder `mode=gap`. `gapMs` is REQUIRED under `mode=gap` and has no\ndefault.\n\nGap-mode specifics worth knowing before you read the rows:\n\n- Signed metrics (`netFrags`, `netDamage`) cluster on ALL their\n  events, negatives included — a death both extends the run and\n  lowers its score. That is \"net\" as the fight went, and it is what\n  keeps `score` equal to the same-named stat.\n- A cluster MAY SPAN THE PLAYER'S OWN DEATH (kill, die, respawn, kill\n  again within `gapMs` is one window). `/lives` is the per-life view.\n- Clusters are disjoint per player by construction, so unlike fixed\n  mode there is no overlap suppression to reason about.\n- `from`/`to` still bound where a window may START — here, its first\n  event; the run may end past `to`. Note the consequence on the\n  `from` side: a cluster whose first event precedes `from` is not\n  returned AT ALL, its post-`from` mass included — `from` never\n  re-anchors a cluster. Slicing a match into `from`/`to` panes\n  therefore drops straddling clusters rather than truncating them.",
+        "type": "string",
+        "enum": [
+          "fixed",
+          "gap"
+        ],
+        "default": "fixed"
+      },
+      "perPlayer": {
+        "description": "Maximum windows contributed by any ONE player. Applied BEFORE `limit`,\nso `perPlayer=3&limit=10` is \"the top 10 with at most 3 from anyone\".\nSet it to spread a leaderboard across the roster; omit it for a pure\nmatch-wide ranking in which one dominant player may own every row.\n\n**Name-keyed.** The cap is keyed on the player NAME, so a human the\nserver scored as two players (a reconnect renamed `(N)<name>`) can\noccupy twice the quota. `/player-stats`' `identity` is what lets you\ndetect that — two names, one identity; the cap itself is deliberately\nleft name-keyed.\n\n**Same rule as `limit`, deliberately:** omitted is the default\n(uncapped), a NEGATIVE value means uncapped, and an explicit\n`perPlayer=0` is REJECTED with a 400 — an omitted MCP integer arrives\nas 0, and 0 must not make a forgotten argument look like a deliberate\none.",
+        "type": "integer",
+        "default": 0
+      },
+      "players": {
+        "description": "CSV of player display names. Case-SENSITIVE (QW names are case-significant). Omit for all players. Filter semantics are per-endpoint (e.g. killer-or-victim on /frags, speaker on /chat).",
+        "type": "array"
+      },
+      "to": {
+        "description": "Window end, match-relative integer MILLISECONDS. 0 / omitted = no upper bound. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "weapons": {
+        "description": "CSV of weapon codes (case-insensitive). Core codes: rl, lg, gl, ssg,\nsng, ng, sg, axe; on /damage the pseudo-codes tele/stomp select the\npositional instant kills (which carry no real weapon).\n\nEach endpoint validates against its OWN closed vocabulary and returns\n400 `invalid_param` (listing the valid set) for an unknown token — no\nmore silent empty result:\n\n- **/frags** additionally accepts the obituary environmental / cause\n  codes (hook, rail, squish, explobox, fall, lava, slime, water,\n  world, tele, stomp, unknown, suicide, teamkill);\n- **/damage** the death-type + environmental codes (hook, explobox,\n  squish, lava, slime, drown, fall, trigger, suicide, unknown);\n- **/backpacks** accepts rl/lg only;\n- **/weapon-pickups** ssg,ng,sng,gl,rl,lg;\n- **/top-kills** filters the KILLING weapon (which is also the\n  burst's own weapon) and accepts only the burst-capable subset —\n  the core codes plus `unknown`. Positional (tele/stomp/squish),\n  environmental and bookkeeping causes are REJECTED here: no damage\n  event can anchor them, so the token would be a valid filter that\n  structurally selects nothing.\n\n`water` and `drown` are the SAME cause under the two logs' different\nspellings and are accepted interchangeably wherever either is valid,\nso you need not know which log backs the endpoint you are calling.\n\nOn `/frags`, `teamkill` selects only the teamkills whose obituary\nphrasing has no cause in it (\"X checks his glasses\" and its siblings,\nwhich KTX picks at random). KTX's team branch tests three deathtypes\nby name before that random pick, and those keep their real code —\nfilter `tele` (teammate telefrag), `stomp` (teammate jump/crush) or\n`squish` (teammate mover crush) for them, and `isTeamKill` to\nseparate any of these from the enemy-facing rows carrying the same\ncode.\n\nThe pre-16.2 singular spelling `weapon` is an accepted legacy alias;\n`weapons` wins when both are present.",
+        "type": "array"
+      },
+      "windowMs": {
+        "description": "FIXED MODE'S knob: the window length in integer MILLISECONDS (default\n30000). 5000 gives damage bursts, 30000 hot streaks, 120000 map-phase\ndominance. Sweep it — there is no single right value and the API does\nnot pick one for you.\n\n**Rejected under `mode=gap`** with a 400 (that mode's knob is\n`gapMs`), and absent from a gap response, where a fixed length would\nbe a lie.\n\n**Bounded on both sides**, and an out-of-range value is REJECTED with\na 400 naming the bound rather than clamped.\n\n- The floor is 1 (`windowMs=0` and any negative value alike; omit the\n  parameter for the default).\n- The CEILING IS THE MATCH DURATION — see `/overview`'s `matchEnd` —\n  because a window at least that long is simply the whole match, and a\n  longer one would break the `end = start + windowMs` identity every\n  row is documented by (the response would have to clamp `end`,\n  leaving a `durationMs` covering time that does not exist).",
+        "type": "integer",
+        "default": 30000
+      }
+    },
+    "fields": {
+      "byWeapon": {
+        "description": "Kills by weapon.",
+        "type": "object"
+      },
+      "damageByWeapon": {
+        "description": "Enemy damage given, by weapon. EXCLUDES telefrags and stomps (they carry no weapon), exactly as `/damage`'s `byWeapon` does, so this sums to at most `damageGiven` rather than to it.",
+        "type": "object"
+      },
+      "damageGiven": {
+        "description": "To enemies. INCLUDES telefrag / stomp value, exactly as `/damage` does, so per-interval damage reconciles against that endpoint.",
+        "type": "integer"
+      },
+      "damageGivenSelf": {
+        "description": "Self damage, e.g. own rocket splash.",
+        "type": "integer"
+      },
+      "damageGivenTeam": {
+        "description": "Damage dealt to teammates.",
+        "type": "integer"
+      },
+      "damageTaken": {
+        "description": "From ALL sources — enemy, team, self, world — and including telefrag / stomp value.",
+        "type": "integer"
+      },
+      "deaths": {
+        "description": "Death rows from the FRAG LOG naming this player as victim inside\nthe attribution window. Sums, over an unfiltered `/lives`\nresponse, to that player's rows in `/frags`' `frags[]` — not\nnecessarily to `/frags`' `byPlayer` scoreboard, which counts\ndeaths the log never recorded.\n\n**Not capped at 1 on `/lives`, and NOT a flag for `endReason`:**\n\n- it can be 0 on a life whose `endReason` is `death` (the death\n  was seen only by the `DF_DEAD` / `STAT_HEALTH` detectors and no\n  obituary named it — four such rows on\n  `wipeout_3on2_red_vs_blue[q3dm6qw]`);\n- it can EXCEED 1, because a life carries both the death that\n  ended it and any death recorded during the dead gap that\n  followed (the KTX `dtTELE2` deflection — measured across 11558\n  corpus lives: 12 rows with 2 deaths, one with 3).",
+        "type": "integer"
+      },
+      "durationMs": {
+        "description": "end − start.\n\nFor a life this is ALIVE TIME ONLY, while every event field below\ncovers the wider attribution window (the life plus the dead gap\nthat follows it, so a posthumous rocket counts for the life that\nfired it) — the row's `attrStart` / `attrEnd` carry that window,\nso divide by `attrEnd − attrStart` for an exact rate. A rate\nderived from a count and this duration therefore reads HIGH:\nslightly when summed across a whole match, by tens of percent on a\nsingle row where a short life is followed by a long dead gap.\n\nFor a top window the two coincide and there is no separate window\nto publish.",
+        "type": "integer"
+      },
+      "end": {
+        "description": "Under `mode=fixed`, `start + windowMs` (the identity holds over REST because `windowMs` is capped at the match duration; the view clamps `end` at the int32 ceiling for in-process callers, who face no such cap). Under `mode=gap` it is the run's LAST scoring event, so the row is as long as the stretch was and `end == start` on a single-event run.",
+        "type": "integer"
+      },
+      "eventLocs.0.count": {
+        "description": "Event count, on `eventLocs`.",
+        "type": "integer"
+      },
+      "eventLocs.0.loc": {
+        "description": "Loc name.",
+        "type": "string"
+      },
+      "eventLocs.0.ms": {
+        "description": "Dwell, on `locs`.",
+        "type": "integer"
+      },
+      "hits": {
+        "description": "Fires that connected.",
+        "type": "integer"
+      },
+      "kills": {
+        "description": "Enemy kills. Suicides and teamkills excluded.",
+        "type": "integer"
+      },
+      "locs.0.count": {
+        "description": "Event count, on `eventLocs`.",
+        "type": "integer"
+      },
+      "locs.0.loc": {
+        "description": "Loc name.",
+        "type": "string"
+      },
+      "locs.0.ms": {
+        "description": "Dwell, on `locs`.",
+        "type": "integer"
+      },
+      "mainWeapon": {
+        "description": "Weapon with the most kills; ties broken by name so the value is stable.",
+        "type": "string"
+      },
+      "player": {
+        "description": "The player who scored in this window.",
+        "type": "string"
+      },
+      "rank": {
+        "description": "1-based position in this response.",
+        "type": "integer"
+      },
+      "score": {
+        "description": "The metric total over the window — the value that selected and ranked it. WITHOUT a `weapons` filter it equals the same-named stat below exactly (telefrags and stomps score just as they fold); with one it is a SUBSET of that stat. The envelope's `scoredBy` says exactly what produced it.",
+        "type": "integer"
+      },
+      "shots": {
+        "description": "Weapon fires in the interval.",
+        "type": "integer"
+      },
+      "start": {
+        "description": "Match-relative ms.",
+        "type": "integer"
+      },
+      "suicides": {
+        "description": "Self-inflicted deaths, a subset of `deaths`.",
+        "type": "integer"
+      },
+      "team": {
+        "description": "Their team at match end; absent in a demo with no team labels.",
+        "type": "string"
+      },
+      "teamKills": {
+        "description": "Teammates killed. Never scores, but shown for context.",
+        "type": "integer"
+      },
+      "victims": {
+        "description": "Kills per victim. Sums to `kills`.",
+        "type": "object"
+      }
+    }
+  }
+}
