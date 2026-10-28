@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 
 import { canonicalTeamOrder, fallbackTeamOrder, canonicalPlayers } from '../src/lib/canonical-teams.js';
 import { topbarView } from '../src/lib/topbar.js';
-import { urlQuery, parseSeg, parseTime, resolveTabName } from '../src/lib/url-state.js';
+import { urlQuery, parseSeg, parseTime, resolveTabName, urlTab } from '../src/lib/url-state.js';
 import { isMultiPlayerIndividual } from '../src/lib/result.js';
 import { SEARCH_FIELDS } from '../src/data/hub.js';
 
@@ -65,4 +65,7 @@ test('url state: what is written, and the deep-link readers', () => {
     assert.equal(parseTime(null), null);
     assert.equal(resolveTabName('locs-regions'), 'loc-graph');
     assert.equal(resolveTabName('map'), 'map');
+    assert.equal(urlTab('locs-regions'), 'loc-graph');
+    assert.equal(urlTab('timeline'), 'timeline');
+    for (const none of ['bogus', '', null]) assert.equal(urlTab(none), null, `${none}: counts as no ?tab=`);
 });

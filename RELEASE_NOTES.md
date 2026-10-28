@@ -54,6 +54,15 @@ and region status show the current time as soon as the full timeline has
 loaded and after a region edit, instead of blank or old values until the
 clock next moved.
 
+Loading a second demo no longer inherits the first one's URL state: a
+search click, upload, hub-box load or playlist run now always starts on
+Summary at 0:00 with no range selected (before, the previous demo's tab,
+time, range and learn mode were applied to it — a range past the new
+demo's end left the Timeline empty, and a load started from Search stayed
+on Search). Only a shared link's own demo takes the link's tab, time and
+range. A link whose `tab=` names no tab now opens on Summary instead of
+Search.
+
 ## unreleased (gl-map) — the map renders entirely through WebGL2
 
 No schema change; web UI only. Supersedes the hybrid described in the entry

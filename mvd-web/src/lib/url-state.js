@@ -3,6 +3,8 @@
 // segment, ?learn=1 the map's learn mode, and the Search tab's filters.
 // The legacy ?hub= is read as ?gameId= and never written.
 
+import { isTab } from '../state/ui.js';
+
 // Tab URL aliases. The loc tab's internal id stayed "loc-graph", but the tab
 // is labelled "Locs & Regions" and the URL prefers the matching
 // "locs-regions" slug. Old "loc-graph" links still resolve; new URLs are
@@ -12,6 +14,13 @@ export const TAB_INTERNAL_TO_URL = { 'loc-graph': 'locs-regions' };
 
 export function resolveTabName(name) {
     return TAB_URL_TO_INTERNAL[name] || name;
+}
+
+// urlTab: the tab a URL's ?tab= names (alias resolved), null when it names
+// none — an unknown ?tab= is treated as no ?tab= at all.
+export function urlTab(name) {
+    const id = resolveTabName(name || '');
+    return isTab(id) ? id : null;
 }
 
 // urlQuery → the query string (no '?', '' when nothing is worth keeping).

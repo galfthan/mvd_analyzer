@@ -22,8 +22,9 @@ import { makeSortable } from '../ui/sortable.js';
 import { mvdData } from './source.js';
 import { startLoadTiming, recordLoadTimings, timeRender, finishLoadTiming } from './timing.js';
 import { hideLoadingOverlay, analyzerHasFailed } from './overlay.js';
-import { applyUrlState } from './url.js';
+import { applyUrlState, updateUrlState } from './url.js';
 import { switchTab, activeTabName } from './tabs.js';
+import { urlTab } from '../lib/url-state.js';
 
 // The DemoHandle behind the page: its view queries, region recompute and
 // line of sight answer for that demo only.
@@ -62,8 +63,10 @@ function setAnalysisStatus(result) {
 // playlist runs. Resolves with the shown DemoHandle, or null when a newer
 // load was asked for before this one finished (the last pick wins — the
 // data source drops the older one, its failure included); throws on
-// failure for the caller to report.
-export async function loadDemo(input) {
+// failure for the caller to report. `deepLink` is the boot's ?gameId= load
+// (loadDeepLink), the one load that takes the URL's tab / time / segment /
+// learn mode; every other load starts on Summary at 0:00.
+export async function loadDemo(input, { deepLink = false } = {}) {
     setStatus(loadStatus.get().text, 'status loading');
     const hubId = input.game?.id ?? input.gameId;
     if (hubId != null) hubInput.set(String(hubId));
@@ -97,7 +100,7 @@ export async function loadDemo(input) {
         (info) => { if (handle === currentDemo) onBucketsReady(info); },
         (err) => console.warn('deferred buckets failed:', err.message));
 
-    displayResults(result);
+    displayResults(result, deepLink);
     return handle;
 }
 
@@ -113,7 +116,17 @@ export async function uploadFile(file) {
     }
 }
 
-export async function loadFromHub() {
+export function loadFromHub() {
+    return loadHubInput(false);
+}
+
+// loadDeepLink is the boot's auto-load of a ?gameId= link (src/app/boot.js):
+// the hub box's load, plus the link's URL state.
+export function loadDeepLink() {
+    return loadHubInput(true);
+}
+
+async function loadHubInput(deepLink) {
     const input = hubInput.get().trim();
     if (!input) {
         alert('Please enter a game ID or URL');
@@ -124,7 +137,7 @@ export async function loadFromHub() {
     hubBusy.set(true);
 
     try {
-        await loadDemo({ gameId: parseGameId(input) });
+        await loadDemo({ gameId: parseGameId(input) }, { deepLink });
     } catch (error) {
         setLoadError(error);
         // If we were holding the loading overlay up for a deep-link auto-load,
@@ -163,7 +176,7 @@ function onBucketsReady(data) {
     }
 }
 
-function displayResults(result) {
+function displayResults(result, deepLink) {
     // Wipe every store and JS-side state object that could carry data from
     // a previous demo. Critical when swapping between demos with different
     // shapes (e.g. 4on4 → FFA where teams/regions/etc. are absent and would
@@ -172,10 +185,11 @@ function displayResults(result) {
 
     document.body.classList.remove('no-demo');
 
-    // Land the user on the Summary tab after a fresh load, unless the URL
-    // explicitly asks for a different tab (deep links like ?tab=map should
-    // win — applyUrlState() is called later and will switch tabs again).
-    if (!new URLSearchParams(location.search).get('tab')) {
+    // Land the user on the Summary tab after a fresh load, unless this is
+    // the deep link and it names a tab (?tab=map should win —
+    // applyUrlState() is called later and switches to it). Any other load
+    // ignores the URL: it still describes the previous demo.
+    if (!(deepLink && urlTab(new URLSearchParams(location.search).get('tab')))) {
         switchTab('summary');
     }
 
@@ -222,8 +236,10 @@ function displayResults(result) {
     // Make all static tables sortable
     document.querySelectorAll('.stats-table').forEach(makeSortable);
 
-    // Apply URL state (tab, time, segment) if present
-    applyUrlState();
+    // The deep link's URL state (tab, time, segment, learn mode); any other
+    // load writes the URL afresh for this demo.
+    if (deepLink) applyUrlState();
+    else updateUrlState();
 
     // Reveal the now-populated UI (overlay may already be hidden if the
     // demo was loaded interactively rather than via ?gameId=).

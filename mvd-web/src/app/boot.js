@@ -14,7 +14,8 @@ import { mvdData } from './source.js';
 import { onAnalyzerReady, onAnalyzerFailed } from './overlay.js';
 import { updateUrlState, onClockTick } from './url.js';
 import { switchTab, setupTabs } from './tabs.js';
-import { loadFromHub } from './load.js';
+import { urlTab } from '../lib/url-state.js';
+import { loadDeepLink } from './load.js';
 
 export function boot() {
     // Shared state (src/state/) the URL keeps (?t=, ?seg=, ?learn=). The
@@ -28,7 +29,8 @@ export function boot() {
 
     const params = new URLSearchParams(location.search);
     const hubId = params.get('gameId') || params.get('hub');
-    const requestedTab = params.get('tab');
+    // An unknown ?tab= counts as none.
+    const requestedTab = urlTab(params.get('tab'));
 
     // Pick the initial active tab. When deep-linking to a demo we want
     // the destination tab to be active even before the demo finishes
@@ -46,7 +48,7 @@ export function boot() {
     // The load waits for the analyzer itself.
     if (hubId) {
         hubInput.set(hubId);
-        loadFromHub();
+        loadDeepLink();
     }
 
     // Auto-populate search filters from the URL. Only auto-RUN the

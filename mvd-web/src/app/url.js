@@ -1,7 +1,8 @@
 // url.js — URL state sharing (the rules in src/lib/url-state.js). Every
 // change worth keeping (tab, clock, segment, learn mode, a search) calls
-// updateUrlState(), which writes the URL at most every 500 ms; a load
-// applies the URL's ?seg= / ?t= / ?tab= / ?learn= once the demo is in.
+// updateUrlState(), which writes the URL at most every 500 ms. Only the
+// boot's deep-link load (?gameId=) applies the URL's ?seg= / ?t= / ?tab= /
+// ?learn= once the demo is in; any later load starts clean.
 
 import { clock } from '../state/clock.js';
 import { demo } from '../state/demo.js';
@@ -42,8 +43,9 @@ export function updateUrlState() {
     }, 500);
 }
 
-// applyUrlState puts a demo's URL state (segment, time, tab, learn mode) in
-// effect once it has loaded.
+// applyUrlState puts the deep-linked demo's URL state (segment, time, tab,
+// learn mode) in effect once it has loaded. Never for a later load: the URL
+// then still describes the previous demo.
 export function applyUrlState() {
     const params = new URLSearchParams(location.search);
 

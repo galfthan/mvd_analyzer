@@ -1129,6 +1129,16 @@ The demo-load URL parameter is `gameId` (matching hub.quakeworld.nu's
 own URL scheme); the legacy `?hub=<id>` form is still accepted on read
 for any links that already exist in the wild.
 
+**Which load reads the URL.** Only the deep-link load the page starts
+with (`?gameId=` at boot, `loadDeepLink` in `src/app/load.js`) applies
+the URL's `tab`, `t`, `seg` and `learn` (`applyUrlState`). Every later
+load — a search click, an upload or drop, the hub box, a playlist run —
+starts clean: Summary tab, 0:00, no segment, live map, and the URL is
+rewritten for the new demo (the previous demo's `t` / `seg` / `tab`
+never carry over). A `?tab=` that names no tab counts as no `?tab=`: a
+deep link with one lands on Summary, a page without a demo stays on
+Search.
+
 ## Loc files at runtime
 
 WASM builds do not embed the `.loc` corpus (would add ~6.7 MB to the
