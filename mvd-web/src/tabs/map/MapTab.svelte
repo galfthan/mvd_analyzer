@@ -454,13 +454,14 @@
     // abortBench ends a run that lost its stage. Leaving the tab puts the
     // view back as the run found it (`restore`); another demo does not —
     // its load already reset the view, and the old demo's camera and time
-    // must not land on it.
+    // must not land on it. The HUD goes with it unless the FPS overlay
+    // owns it.
     function abortBench(restore) {
         if (!benchOn) return;
         benchOn = false;
         view.perfCapture = hudOn;
         if (restore) restoreBenchView(benchSaved);
-        hudText = 'bench: aborted';
+        if (!hudOn) hudShown = false;
     }
 
     // ─── Fullscreen ─────────────────────────────────────────────────────────
