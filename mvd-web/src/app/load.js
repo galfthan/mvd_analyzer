@@ -60,9 +60,11 @@ function setAnalysisStatus(result) {
 // loadDemo loads one demo through the data source (`input` is what
 // WasmSource.load takes: a file's bytes, a hub row, or a hub game id) and
 // renders it. Shared by the file drop, the hub box, search clicks and
-// playlist runs. Resolves with the shown DemoHandle, or null when a newer
+// playlist runs. Resolves true once the demo is shown, false when a newer
 // load was asked for before this one finished (the last pick wins — the
-// data source drops the older one, its failure included); throws on
+// data source drops the older one, its failure included). A flag, not the
+// handle: window.loadDemo hands its answer to the headless checks, which
+// would serialise the whole Result. Throws on
 // failure for the caller to report. `deepLink` is the boot's ?gameId= load
 // (loadDeepLink), the one load that takes the URL's tab / time / segment /
 // learn mode; every other load starts on Summary at 0:00.
@@ -80,7 +82,7 @@ export async function loadDemo(input, { deepLink = false } = {}) {
             onStage: (stage) => { setStatus(LOAD_STAGE_TEXT[stage], loadStatus.get().cls); },
         });
     } catch (err) {
-        if (err.superseded) return null;
+        if (err.superseded) return false;
         throw err;
     }
     recordLoadTimings(handle.timings);
@@ -101,7 +103,7 @@ export async function loadDemo(input, { deepLink = false } = {}) {
         (err) => console.warn('deferred buckets failed:', err.message));
 
     displayResults(result, deepLink);
-    return handle;
+    return true;
 }
 
 // The load panel's three ways in. Each reports its own failure on the

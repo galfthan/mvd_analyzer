@@ -73,9 +73,9 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
         const run = playlist.get().run;
         toast(`Loading ${c.demo.title || `game ${c.demo.gameId}`}…`);
         loadingRun = run;
-        let handle;
+        let shown;
         try {
-            handle = await loadDemo({ gameId: c.demo.gameId });
+            shown = await loadDemo({ gameId: c.demo.gameId });
         } catch (err) {
             toast(`Could not load game ${c.demo.gameId}: ${err.message}`);
             if (playlist.get().run === run) stop();
@@ -87,7 +87,7 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
         // The user loaded another demo meanwhile, and the last pick wins
         // (loadDemo dropped this one): the run ends, as it does on any demo
         // the user loads.
-        if (!handle) {
+        if (!shown) {
             stop();
             return;
         }
