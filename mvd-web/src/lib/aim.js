@@ -19,8 +19,6 @@ import { getAccuracyClass, RECON_ACCURACY_NOTE } from './accuracy.js';
 import { getWeaponName } from './summary.js';
 import { playerStatsRows, teamOrder } from './player-stats.js';
 
-export const AIM_VICTIM_KINDS = ['all', 'enemy', 'team', 'self'];
-
 // The line under the player picker: how this demo's misses were attributed.
 export function aimModeText(pa) {
     return pa.mode === 'duel'
