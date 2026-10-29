@@ -1375,11 +1375,6 @@ table tbody tr:hover {
 }
 
 /* Timeline Analysis Tab */
-.timeline-nav-panel {
-    margin-bottom: 12px;
-    padding: 18px 15px 4px 15px;
-}
-
 .team-status-panel {
     margin-bottom: 12px;
     padding: 8px 15px;
@@ -1433,119 +1428,6 @@ table tbody tr:hover {
 .armor-ra { color: var(--armor-ra); }
 .armor-ya { color: var(--armor-ya); }
 .armor-ga { color: var(--armor-ga); }
-
-.timeline-nav-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.timeline-nav-time {
-    font-family: monospace;
-    font-size: 0.9rem;
-    color: var(--accent-cyan);
-    min-width: 50px;
-    text-align: center;
-    line-height: 24px;
-}
-
-.timeline-nav-bar-wrapper {
-    flex: 1;
-    position: relative;
-    user-select: none;
-    padding-bottom: 7px;
-}
-
-.timeline-nav-bar {
-    position: relative;
-    height: 24px;
-    background: #1a2744;
-    border-radius: 4px;
-    cursor: crosshair;
-}
-
-.timeline-nav-track {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 4px;
-}
-
-.timeline-nav-caret {
-    position: absolute;
-    top: 24px;
-    font-size: 14px;
-    line-height: 1;
-    color: var(--accent-cyan);
-    cursor: grab;
-    z-index: 10;
-    transform: translateX(-50%);
-    padding: 0 6px;
-    text-shadow: 0 0 4px rgba(0, 217, 255, 0.5);
-}
-
-.timeline-nav-caret:active {
-    cursor: grabbing;
-}
-
-.timeline-selection-overlay {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    background: rgba(0, 217, 255, 0.15);
-    border-left: 2px solid rgba(0, 217, 255, 0.6);
-    border-right: 2px solid rgba(0, 217, 255, 0.6);
-    pointer-events: none;
-    z-index: 3;
-    display: none;
-    border-radius: 2px;
-}
-
-.timeline-nav-cursor {
-    position: absolute;
-    top: -2px;
-    bottom: -2px;
-    width: 3px;
-    background: var(--accent-cyan);
-    border-radius: 2px;
-    pointer-events: none;
-    z-index: 5;
-    box-shadow: 0 0 6px rgba(0, 217, 255, 0.5);
-}
-
-.timeline-nav-segment {
-    font-family: monospace;
-    font-size: 0.9rem;
-    color: #888;
-    white-space: nowrap;
-    min-width: 90px;
-    margin-top: 2px;
-}
-
-.timeline-nav-axis {
-    position: relative;
-    height: 16px;
-    font-size: 0.9rem;
-    color: #666;
-    font-family: monospace;
-}
-
-.timeline-nav-axis span {
-    position: absolute;
-    top: 0;
-    transform: translateX(-50%);
-    white-space: nowrap;
-}
-
-.timeline-nav-axis span:first-child {
-    transform: none;
-}
-
-.timeline-nav-axis span:last-child {
-    transform: translateX(-100%);
-}
 
 .current-time-indicator {
     position: absolute;
@@ -2142,38 +2024,6 @@ th.sortable.sort-desc::after {
     content: ' ▼';
     opacity: 0.8;
     color: var(--accent-cyan);
-}
-
-/* Timeline playback controls */
-.timeline-playback-controls {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-right: 8px;
-}
-
-.timeline-playback-controls button {
-    background: none;
-    border: 1px solid rgba(0, 217, 255, 0.3);
-    color: #7a8ba8;
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: 0 9px;
-    border-radius: 3px;
-    height: 24px;
-    line-height: 22px;
-    transition: all 0.15s;
-}
-
-.timeline-playback-controls button:hover {
-    color: var(--accent-cyan);
-    border-color: var(--accent-cyan);
-}
-
-.timeline-playback-controls button.active {
-    color: var(--accent-cyan);
-    border-color: var(--accent-cyan);
-    background: rgba(0, 217, 255, 0.15);
 }
 
 /* Map legend table */

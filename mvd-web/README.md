@@ -414,8 +414,8 @@ the current demo — the worker holds one.
 Shared state is in `src/state/` (`window.MvdState`): `clock` (the one
 match clock — every view follows it; the page's playback publishes as
 `'playback'`, the Player engine as `'engine'`, a demo reset as `'reset'`),
-`playback` (`playback.js`: the page's own play loop — the speed the
-unified bar's buttons run, -1 / 0.2 / 1 / 5×, once per display frame;
+`playback` (`playback.js`: the page's own play loop — at the speed the
+unified bar's dropdown sets, -1 / 0.2 / 0.5 / 1 / 2 / 5×, once per display frame;
 forward wraps at the end, reverse stops at 0, a tab without the bar, the
 Player tab and a new demo stop it), `teams` (the canonical team order and
 colours; `src/main.js` mirrors them onto the `--team-a..d` CSS
@@ -1036,7 +1036,7 @@ engine ([`mvd-fte-player`](../mvd-fte-player/README.md), ported from hub's
 player), hosted in a **same-origin** iframe so the page drives it directly
 through `iframe.contentWindow` — seek, POV and speed are instant commands,
 not reloads of a hub embed. `src/player/engine.js` owns it (the unified
-bar's speed buttons drive it while it is the clock); the map pane reads the
+bar's play / pause and speed drive it while it is the clock); the map pane reads the
 Map tab's loaded data (`src/tabs/map/map-model.js`), and the Health / armor
 pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
 
@@ -1056,8 +1056,9 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   ticks move the unified bar's cursor and time; the URL's `t=` follows
   every 200 ms, and the hidden Map, Timeline and Chat tabs redraw when
   they are next shown.
-- **Playback buttons** map to `demo_setspeed` (0.2× / 1× / 5×; pressing the
-  running speed pauses). `-1x` is disabled — FTE cannot play backwards.
+- **Play / pause and the speed** (the unified bar) map to `demo_setspeed`
+  (the dropdown's speed in percent; 0 pauses). `-1×` is disabled — FTE
+  cannot play backwards.
   Leaving the tab pauses the engine and suspends its frame loop
   (`FteController.suspend`; the hidden iframe otherwise keeps rendering at
   60 fps), resumed on the way back.
@@ -1497,10 +1498,19 @@ a seek at once, playback every 200 ms, and catch up when the tab shows.
 Learn mode is a store (`MvdMapTab.learnMode`) so the URL can keep it.
 
 The unified bar above the Timeline, Chat, Map, Key Moments and Player tabs
-is `src/ui/PlaybackBar.svelte` (arithmetic in `src/lib/playback-bar.js`):
-speed buttons, time, a scrub caret and a range select that sets the shared
-segment. Its buttons run the page's playback (`src/state/playback.js`) or,
-on the Player tab, the engine.
+is `src/ui/PlaybackBar.svelte` (arithmetic in `src/lib/playback-bar.js`),
+one 34 px row: play / pause (or Space, when no field or button has the
+keys), a speed dropdown (-1 / 0.2 / 0.5 / 1 / 2 / 5×; paused, it sets the
+speed the next play runs at), the time over the match length, and a thin
+scrubber — the played part, a round playhead, minute marks, the selected
+segment, and the time under the pointer floating above it. A press within
+10 px of the playhead grabs it (drag to scrub); anywhere else a press
+that moves 4 px or more selects a range (the shared segment, set on
+release), and one that does not clears the segment and seeks there;
+double-click clears. Pointer capture keeps a drag going off the bar. Play
+and speed run the page's playback (`src/state/playback.js`) or, on the
+Player tab, the engine (`setRate` / `togglePlay`; it keeps the chosen
+rate, since FTE's speed reads 0 while paused).
 
 **Fullscreen** is one feature for every tab that offers it
 (`src/app/fullscreen.js`; Map and Player, each naming its panel in

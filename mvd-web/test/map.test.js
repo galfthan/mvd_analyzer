@@ -8,7 +8,7 @@ import {
     panelItems, itemStatusCell, entityRows, entityRowsHtml, trailButtons,
 } from '../src/lib/map.js';
 import {
-    barAxisTicks, barPct, barTime, dragSpan, isClick, overlayBox, segmentLabel, speedButtons, SPEED_BUTTONS,
+    barAxisTicks, barPct, barTime, dragSpan, isDrag, nearKnob, overlayBox, segmentLabel, transport, SPEEDS,
 } from '../src/lib/playback-bar.js';
 import { ITEM_MARKER_STYLES } from '../../mvd-map-view/src/map.js';
 
@@ -148,19 +148,23 @@ test('playback bar: axis, cursor, pointer time, drag, overlay, buttons', () => {
     assert.equal(barTime(50, { left: 100, width: 200 }, 600), 0);
     assert.equal(barTime(50, { left: 100, width: 0 }, 600), null);
     assert.deepEqual(dragSpan(30, 10), { start: 10, end: 30 });
-    assert.ok(isClick({ start: 10, end: 12 }));
-    assert.ok(!isClick({ start: 10, end: 12.5 }));
+    assert.ok(!isDrag(100, 103), 'a press that moves under 4 px is a click');
+    assert.ok(isDrag(100, 96));
+    const rect = { left: 100, width: 200 };
+    assert.ok(nearKnob(150, rect, 150, 600), 'on the playhead');
+    assert.ok(nearKnob(160, rect, 150, 600), '10 px off still grabs');
+    assert.ok(!nearKnob(161, rect, 150, 600));
+    assert.ok(!nearKnob(150, rect, 150, 0), 'no duration, no playhead');
     assert.deepEqual(overlayBox({ start: 30, end: 90 }, 600), { left: '5%', width: '10%' });
     assert.equal(overlayBox({ start: 30, end: 90 }, 0), null);
     assert.equal(segmentLabel({ start: 65, end: 130 }), '1:05 – 2:10');
     assert.equal(segmentLabel(null), '');
-    const own = speedButtons({ drives: false, engine: {}, playing: true, speed: 5 });
-    assert.deepEqual(own.map((b) => [b.id, b.text, b.active, b.disabled]), [
-        ['tl-rev', '-1x', false, false], ['tl-slow', '0.2x', false, false], ['tl-play-pause', '1x', false, false], ['tl-5x', '⏸', true, false],
-    ]);
-    const eng = speedButtons({ drives: true, engine: { playing: true, speed: 100 }, playing: true, speed: 5 });
-    assert.deepEqual(eng.map((b) => [b.text, b.disabled]), [['-1x', true], ['0.2x', false], ['⏸', false], ['5x', false]]);
-    assert.equal(SPEED_BUTTONS.length, 4);
+    const own = transport({ drives: false, engine: { playing: false, rate: 100 }, playing: true, speed: 5 });
+    assert.deepEqual([own.playing, own.speed], [true, 5]);
+    assert.deepEqual(own.speeds.map((s) => [s.label, s.disabled]), SPEEDS.map((v) => [`${v}×`, false]));
+    const eng = transport({ drives: true, engine: { playing: false, rate: 20 }, playing: true, speed: 5 });
+    assert.deepEqual([eng.playing, eng.speed], [false, 0.2], 'the engine\'s rate, kept while paused');
+    assert.deepEqual(eng.speeds.filter((s) => s.disabled).map((s) => s.value), [-1], 'the engine cannot play backwards');
 });
 
 test('playback: the loop moves the clock, toggles, wraps, stops at 0 and on a tab', async () => {
@@ -173,42 +177,45 @@ test('playback: the loop moves the clock, toggles, wraps, stops at 0 and on a ta
     performance.now = () => now;
     const crank = (ms) => { now += ms; const f = frames; frames = []; f.forEach((fn) => fn()); };
     try {
-        const { clock, activeTab, playback, playAtSpeed, stopPlayback } = await import('../src/state/index.js');
+        const { clock, activeTab, playback, setPlaybackSpeed, startPlayback, togglePlayback, stopPlayback } = await import('../src/state/index.js');
         const seen = [];
         const off = clock.subscribe(({ from }) => seen.push(from));
         clock.setDuration(100);
         activeTab.set('map');
         clock.seek(10);
-        playAtSpeed(5);
+        setPlaybackSpeed(5);
+        assert.ok(!playback.get().playing, 'a speed alone does not start it');
+        togglePlayback();
         crank(10); // under a frame: skipped
         assert.equal(clock.t, 10);
         crank(190);
         assert.ok(Math.abs(clock.t - 11) < 1e-9, `5x over 0.2 s (${clock.t})`);
         assert.equal(seen.at(-1), 'playback');
-        playAtSpeed(1); // a speed change keeps playing
+        setPlaybackSpeed(1); // a speed change keeps playing
         crank(1000);
         assert.ok(Math.abs(clock.t - 12) < 1e-9);
-        playAtSpeed(1); // the running speed again: pause, with an untagged seek
+        togglePlayback(); // pause, with an untagged seek
         assert.deepEqual(playback.get(), { playing: false, speed: 1 });
         assert.equal(seen.at(-1), null);
         crank(1000);
         assert.ok(Math.abs(clock.t - 12) < 1e-9, 'paused');
         clock.seek(99.9);
-        playAtSpeed(1);
+        startPlayback();
         crank(200);
         assert.equal(clock.t, 0, 'past the end: back to the start');
         assert.ok(playback.get().playing);
         clock.seek(0.5);
-        playAtSpeed(-1);
+        setPlaybackSpeed(-1);
         crank(1000);
         assert.equal(clock.t, 0);
         assert.ok(!playback.get().playing, 'reverse stops at 0');
-        playAtSpeed(1);
+        setPlaybackSpeed(1);
+        startPlayback();
         activeTab.set('chat');
         assert.ok(playback.get().playing, 'a tab with the bar keeps it');
         activeTab.set('summary');
         assert.ok(!playback.get().playing, 'a tab without it stops it');
-        playAtSpeed(1);
+        startPlayback();
         activeTab.set('player');
         assert.ok(!playback.get().playing, 'the Player engine is the clock there');
         stopPlayback();

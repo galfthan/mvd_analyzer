@@ -1,8 +1,9 @@
 // playback.js — the page's own playback: a loop that moves the clock at a
-// speed (-1, 0.2, 1 or 5 ×) once per display frame, tagged 'playback', so
-// every view that follows the clock moves with it (the Map tab draws each of
-// those frames; the Timeline and Chat follow at their own pace). The unified
-// bar (src/ui/PlaybackBar.svelte) starts and stops it. While the Player tab
+// speed (SPEEDS in src/lib/playback-bar.js) once per display frame, tagged
+// 'playback', so every view that follows the clock moves with it (the Map
+// tab draws each of those frames; the Timeline and Chat follow at their own
+// pace). The unified bar (src/ui/PlaybackBar.svelte) starts and stops it
+// and sets its speed. While the Player tab
 // shows, its engine is the clock instead and this loop does not run.
 //
 // Forward past the end wraps to the start; reverse stops at 0. A tab without
@@ -27,20 +28,24 @@ export const playback = store({ playing: false, speed: 1 });
 let raf = null;
 let last = 0;
 
-// playAtSpeed starts playback at `speed`, or changes the speed; pressing the
-// running speed again pauses.
+// setPlaybackSpeed changes the speed; playing, at once, paused, for the
+// next start.
 /** @param {number} speed */
-export function playAtSpeed(speed) {
-    const { playing, speed: cur } = playback.get();
-    if (playing && cur === speed) {
-        stopPlayback();
-        return;
-    }
+export function setPlaybackSpeed(speed) {
+    playback.set({ playing: playback.get().playing, speed });
+}
+
+export function startPlayback() {
+    const { playing, speed } = playback.get();
+    if (playing) return;
     playback.set({ playing: true, speed });
-    if (!playing) {
-        last = performance.now();
-        raf = requestAnimationFrame(step);
-    }
+    last = performance.now();
+    raf = requestAnimationFrame(step);
+}
+
+export function togglePlayback() {
+    if (playback.get().playing) stopPlayback();
+    else startPlayback();
 }
 
 /** @param {number} [at] */

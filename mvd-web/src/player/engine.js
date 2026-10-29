@@ -26,7 +26,8 @@ import { demoOffsetSec, mapFileKey, userIdOf, nameOfUserId } from '../lib/result
  * @typedef {object} EngineStatus
  * @property {boolean} ready
  * @property {boolean} playing
- * @property {number} speed        demo speed, percent
+ * @property {number} speed        demo speed, percent (0 while paused)
+ * @property {number} rate         the speed play runs at, percent
  * @property {boolean} ended
  * @property {number | null} track  the tracked userid
  * @property {boolean} autotrack
@@ -44,7 +45,7 @@ const SEEK_SETTLE_MS = 2000;
 const CLOCK_WAIT_MS = 30000;
 
 /** @type {EngineStatus} */
-const IDLE = { ready: false, playing: false, speed: 100, ended: false, track: null, autotrack: false, muted: true };
+const IDLE = { ready: false, playing: false, speed: 100, rate: 100, ended: false, track: null, autotrack: false, muted: true };
 
 export class PlayerEngine {
     /**
@@ -55,6 +56,9 @@ export class PlayerEngine {
         this.activeTab = activeTab;
         // What the POV bar, the timeline's speed buttons and the panes show.
         this.status = store({ ...IDLE });
+        // The speed play runs at (percent): kept here, since FTE's own speed
+        // reads 0 while paused.
+        this.rate = 100;
         /** @type {DemoHandle | null} */
         this.handle = null;
         /** @type {HTMLElement | null} */
@@ -233,6 +237,7 @@ export class PlayerEngine {
             ready: true,
             playing: fte.isPlaying(),
             speed: fte.getDemoSpeed(),
+            rate: this.rate,
             ended: fte.hasEnded(),
             track: fte.getTrackUserid(),
             autotrack: fte.isUsingAutotrack(),
@@ -283,23 +288,30 @@ export class PlayerEngine {
         return this.clock.t + this.offset();
     }
 
-    // The timeline's speed buttons, mapped onto demo_setspeed (percent).
-    // Same toggle semantics as the map's playback: pressing the running
-    // speed pauses. Play after the demo ran out starts over at match start.
+    // The playback bar's speed (× 1), mapped onto demo_setspeed (percent):
+    // playing, it changes at once; paused, the next play runs at it. FTE
+    // cannot play backwards.
     /** @param {number} speed */
-    setSpeed(speed) {
-        const fte = this.fte;
-        if (!fte || speed < 0) return;
-        const pct = Math.round(speed * 100);
-        if (fte.hasEnded()) this.jump(0);
-        if (fte.isPlaying() && fte.getDemoSpeed() === pct) fte.pause();
-        else fte.setDemoSpeed(pct);
+    setRate(speed) {
+        if (!(speed > 0)) return;
+        this.rate = Math.round(speed * 100);
+        if (this.fte?.isPlaying()) this.fte.setDemoSpeed(this.rate);
         this.publish();
     }
 
     play() {
-        if (this.fte && !this.fte.isPlaying()) this.fte.play();
+        if (this.fte && !this.fte.isPlaying()) this.fte.setDemoSpeed(this.rate);
         this.publish();
+    }
+
+    // The bar's play / pause. Play after the demo ran out starts over at
+    // match start (a caller that jumps first, like the runner, uses play).
+    togglePlay() {
+        const fte = this.fte;
+        if (!fte) return;
+        if (fte.isPlaying()) return this.pause();
+        if (fte.hasEnded()) this.jump(0);
+        this.play();
     }
 
     pause() {

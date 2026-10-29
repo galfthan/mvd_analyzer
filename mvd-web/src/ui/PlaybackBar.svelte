@@ -1,38 +1,40 @@
 <script>
     // The unified playback bar above the Timeline, Chat, Map, Key Moments and
-    // Player tabs (TABS_WITH_TIMELINE): the speed buttons, the time, a scrub
-    // caret and a range select. src/lib/playback-bar.js has its arithmetic.
+    // Player tabs (TABS_WITH_TIMELINE): play / pause, the speed, the time,
+    // and a thin scrubber — the played part, a round playhead, minute marks,
+    // the selected segment, and the time under the pointer floating above
+    // it. src/lib/playback-bar.js has its arithmetic.
     //
-    // The speed buttons run the page's own playback (src/state/playback.js)
-    // or, while the Player engine is the clock (the Player tab), the engine.
-    // The range a drag selects is the shared segment (src/state/timeline.js)
-    // — the Timeline tab's view window, which that tab's zoom and pan set
-    // too; while the drag is in progress the bar shows its own preview and
-    // the segment is set on release. A click clears it and seeks there; a
-    // double-click clears it.
+    // On the scrubber a press near the playhead grabs it (drag to scrub);
+    // anywhere else a press that moves selects a range — the shared segment
+    // (src/state/timeline.js), the Timeline tab's view window too, set on
+    // release (the bar previews it meanwhile) — and one that does not move
+    // clears the segment and seeks there. A double-click clears it.
     //
-    // It follows the clock on every tick (two style writes and a text). A
+    // Play / pause and the speed run the page's own playback
+    // (src/state/playback.js) or, while the Player engine is the clock (the
+    // Player tab), the engine. Space toggles play / pause when no field or
+    // button has the keys.
+    //
+    // It follows the clock on every tick (a few style writes and a text). A
     // tab's fullscreen (src/app/fullscreen.js) moves the root element into
     // the tab's panel and back, so it is always rendered and hidden by style
     // only; there it ends with the button out of fullscreen.
     import { onMount } from 'svelte';
+    import { fade } from 'svelte/transition';
+    import Play from '@lucide/svelte/icons/play';
+    import Pause from '@lucide/svelte/icons/pause';
     import Minimize from '@lucide/svelte/icons/minimize';
     import { fullscreenTab, toggleFullscreen } from '../app/fullscreen.js';
-    import { clock, demo, activeTab, segment, playback, playAtSpeed, TABS_WITH_TIMELINE } from '../state/index.js';
+    import {
+        clock, demo, activeTab, segment, playback, setPlaybackSpeed, togglePlayback, TABS_WITH_TIMELINE,
+    } from '../state/index.js';
     import { engine } from '../player/index.js';
     import { formatDuration } from '../lib/result.js';
     import { matchDurationSec } from '../lib/timeline.js';
     import {
-        barAxisTicks, barPct, barTime, dragSpan, isClick, overlayBox, segmentLabel, speedButtons,
+        barAxisTicks, barPct, barTime, dragSpan, isDrag, nearKnob, overlayBox, segmentLabel, transport,
     } from '../lib/playback-bar.js';
-
-    /** @type {Record<string, string>} */
-    const TITLES = {
-        'tl-rev': 'Reverse playback (1x)',
-        'tl-slow': 'Play 0.2x (slow motion)',
-        'tl-play-pause': 'Play/Pause',
-        'tl-5x': 'Play 5x speed',
-    };
 
     /** @type {HTMLDivElement} */
     let bar;
@@ -40,114 +42,118 @@
     let tab = $state('search');
     let duration = $state(0);
     let time = $state('0:00');
-    let left = $state(/** @type {string | null} */ (null));
+    let pct = $state(0);
     // `engine` is not read while `drives` is false.
-    let buttons = $state.raw(speedButtons({ drives: false, engine: /** @type {any} */ ({}), playing: false, speed: 1 }));
+    let tp = $state.raw(transport({ drives: false, engine: /** @type {any} */ ({}), playing: false, speed: 1 }));
 
-    // The overlay keeps its last left / width while hidden, as the bar always
-    // has; it has no style at all until the first segment change.
-    let ovDisplay = $state(/** @type {string | null} */ (null));
-    let ovLeft = $state(/** @type {string | null} */ (null));
-    let ovWidth = $state(/** @type {string | null} */ (null));
-    let label = $state('');
+    // The segment as shown: the store's, or a drag's preview.
+    let shownSeg = $state.raw(/** @type {{ start: number, end: number } | null} */ (null));
+    // The pointer over the scrubber: its x (px into the bar) and time.
+    let hover = $state.raw(/** @type {{ x: number, t: number } | null} */ (null));
+    let overKnob = $state(false);
 
-    // A range drag (dragStart, the preview it shows) or a caret drag.
-    let dragging = false;
-    let dragStart = 0;
-    let caretDragging = false;
+    /** @type {null | { mode: 'knob' | 'press' | 'select', x0: number, t0: number }} */
+    let drag = null;
+    let grabbing = $state(false);
 
     const shown = $derived(!!result && TABS_WITH_TIMELINE.includes(tab));
-    const ticks = $derived(barAxisTicks(duration));
-
-    /** @param {{ start: number, end: number } | null} seg */
-    function showSegment(seg) {
-        if (!seg) {
-            ovDisplay = 'none';
-            label = '';
-            return;
-        }
-        const box = overlayBox(seg, duration);
-        if (box) {
-            ovDisplay = 'block';
-            ovLeft = box.left;
-            ovWidth = box.width;
-        }
-        label = segmentLabel(seg);
-    }
+    const marks = $derived(barAxisTicks(duration).slice(1, -1));
+    const box = $derived(shownSeg ? overlayBox(shownSeg, duration) : null);
+    const label = $derived(segmentLabel(shownSeg));
+    const total = $derived(formatDuration(duration));
 
     /** @param {number} t */
     function follow(t) {
-        const pct = barPct(t, duration);
-        if (pct !== null) left = `${pct}%`;
+        const p = barPct(t, duration);
+        if (p !== null) pct = p;
         time = formatDuration(Math.max(0, t));
     }
 
-    function refreshButtons() {
+    function refresh() {
         const p = playback.get();
-        buttons = speedButtons({ drives: engine.drives(), engine: engine.status.get(), playing: p.playing, speed: p.speed });
+        tp = transport({ drives: engine.drives(), engine: engine.status.get(), playing: p.playing, speed: p.speed });
     }
 
-    /** @param {number} speed */
-    function press(speed) {
-        if (engine.drives()) engine.setSpeed(speed);
-        else playAtSpeed(speed);
+    function togglePlay() {
+        if (engine.drives()) engine.togglePlay();
+        else togglePlayback();
     }
 
-    /** @param {MouseEvent} e */
+    /** @param {Event & { currentTarget: HTMLSelectElement }} e */
+    function pickSpeed(e) {
+        const v = Number(e.currentTarget.value);
+        if (engine.drives()) engine.setRate(v);
+        else setPlaybackSpeed(v);
+        e.currentTarget.blur();
+    }
+
+    /** @param {PointerEvent} e */
     const timeAt = (e) => barTime(e.clientX, bar.getBoundingClientRect(), duration);
 
-    /** @param {MouseEvent} e */
-    function barDown(e) {
+    /** @param {PointerEvent} e */
+    function track(e) {
+        const r = bar.getBoundingClientRect();
+        const t = barTime(e.clientX, r, duration);
+        hover = t === null ? null : { x: e.clientX - r.left, t };
+        overKnob = nearKnob(e.clientX, r, clock.t, duration);
+    }
+
+    /** @param {PointerEvent} e */
+    function down(e) {
+        if (e.button !== 0) return;
         const t = timeAt(e);
         if (t === null) return;
-        dragging = true;
-        dragStart = t;
-        showSegment(null);
+        bar.setPointerCapture(e.pointerId);
+        const knob = nearKnob(e.clientX, bar.getBoundingClientRect(), clock.t, duration);
+        drag = { mode: knob ? 'knob' : 'press', x0: e.clientX, t0: t };
+        grabbing = knob;
         e.preventDefault();
     }
 
-    /** @param {MouseEvent} e */
-    function caretDown(e) {
-        caretDragging = true;
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    /** @param {MouseEvent} e */
+    /** @param {PointerEvent} e */
     function move(e) {
-        if (caretDragging) {
-            const t = timeAt(e);
-            if (t !== null) clock.seek(t);
-            return;
-        }
-        if (!dragging) return;
+        track(e);
+        if (!drag) return;
         const t = timeAt(e);
         if (t === null) return;
-        const span = dragSpan(dragStart, t);
-        if (!isClick(span)) showSegment(span);
+        if (drag.mode === 'knob') {
+            clock.seek(t);
+        } else if (drag.mode === 'select' || isDrag(drag.x0, e.clientX)) {
+            drag.mode = 'select';
+            shownSeg = dragSpan(drag.t0, t);
+        }
     }
 
-    /** @param {MouseEvent} e */
+    /** @param {PointerEvent} e */
     function up(e) {
-        if (caretDragging) {
-            caretDragging = false;
-            return;
-        }
-        if (!dragging) return;
-        dragging = false;
+        if (!drag) return;
+        const { mode, t0 } = drag;
+        drag = null;
+        grabbing = false;
         const t = timeAt(e);
-        if (t === null) return;
-        const span = dragSpan(dragStart, t);
-        if (isClick(span)) {
+        if (mode === 'press') {
             segment.set(null);
-            clock.seek(t);
-        } else {
-            segment.set(span);
+            clock.seek(t0);
+        } else if (mode === 'select' && t !== null) {
+            segment.set(dragSpan(t0, t));
         }
+    }
+
+    function cancel() {
+        drag = null;
+        grabbing = false;
+        shownSeg = segment.get();
+    }
+
+    /** @param {KeyboardEvent} e */
+    function key(e) {
+        if (!shown || e.key !== ' ' || e.ctrlKey || e.metaKey || e.altKey) return;
+        if (/** @type {Element} */ (e.target).closest?.('input, textarea, select, button, a, [contenteditable]')) return;
+        e.preventDefault();
+        togglePlay();
     }
 
     onMount(() => {
-        let first = true;
         const offs = [
             demo.subscribe((h) => {
                 result = h?.result ?? null;
@@ -156,60 +162,204 @@
             }),
             activeTab.subscribe((t) => {
                 tab = t;
-                refreshButtons();
+                refresh();
             }),
             clock.subscribe(({ t }) => follow(t)),
             segment.subscribe((seg) => {
-                if (first) return;
-                if (!dragging) showSegment(seg);
+                if (!drag) shownSeg = seg;
             }),
-            playback.subscribe(refreshButtons),
-            engine.status.subscribe(refreshButtons),
+            playback.subscribe(refresh),
+            engine.status.subscribe(refresh),
         ];
-        first = false;
         return () => offs.forEach((off) => off());
     });
 </script>
 
-<svelte:document onmousemove={move} onmouseup={up} />
+<svelte:window onkeydown={key} />
 
-<div id="unified-timeline" class="panel timeline-nav-panel" style:display={shown ? null : 'none'}>
-    <div class="timeline-nav-row">
-        <div class="timeline-playback-controls">
-            {#each buttons as b (b.id)}
-                <button id={b.id} title={TITLES[b.id]} class:active={b.active} disabled={b.disabled} onclick={() => press(b.speed)}>{b.text}</button>
-            {/each}
+<div id="unified-timeline" class="panel pb" style:display={shown ? null : 'none'}>
+    <button class="pb-play" title={tp.playing ? 'Pause (space)' : 'Play (space)'} aria-label={tp.playing ? 'Pause' : 'Play'} onclick={togglePlay}>
+        {#if tp.playing}<Pause size={16} fill="currentColor" />{:else}<Play size={16} fill="currentColor" />{/if}
+    </button>
+    <select class="pb-speed" title="Playback speed" value={tp.speed} onchange={pickSpeed}>
+        {#each tp.speeds as s (s.value)}
+            <option value={s.value} disabled={s.disabled}>{s.label}</option>
+        {/each}
+    </select>
+    <span class="pb-time"><span class="now">{time}</span> / {total}</span>
+    <!-- svelte-ignore a11y_no_static_element_interactions: a pointer scrubber; play / pause and the speed are the controls -->
+    <div class="pb-scrub" class:knob-hover={overKnob} class:grabbing bind:this={bar}
+        onpointerdown={down} onpointermove={move} onpointerup={up} onpointercancel={cancel}
+        onpointerleave={() => { if (!drag) { hover = null; overKnob = false; } }}
+        ondblclick={() => segment.set(null)}>
+        <div class="pb-track">
+            <div class="pb-played" style:width="{pct}%"></div>
+            {#each marks as m, i (i)}<span class="pb-mark" style:left="{m.pct}%"></span>{/each}
+            {#if box}<div class="pb-sel" style:left={box.left} style:width={box.width}></div>{/if}
         </div>
-        <span id="tl-current-time" class="timeline-nav-time">{time}</span>
-        <div class="timeline-nav-bar-wrapper" id="tl-bar-wrapper">
-            <!-- svelte-ignore a11y_no_static_element_interactions: a pointer scrubber; the speed buttons and the caret are the controls -->
-            <div class="timeline-nav-bar" id="tl-bar" bind:this={bar} onmousedown={barDown} ondblclick={() => segment.set(null)}>
-                <div class="timeline-nav-track" id="tl-track"></div>
-                <div class="timeline-selection-overlay" id="tl-selection-overlay"
-                    style:display={ovDisplay} style:left={ovLeft} style:width={ovWidth}></div>
-                <div class="timeline-nav-cursor" id="tl-cursor" style:left={left}></div>
-            </div>
-            <!-- svelte-ignore a11y_no_static_element_interactions: dragged with the pointer -->
-            <div class="timeline-nav-caret" id="tl-caret" title="Drag to set current time" style:left={left} onmousedown={caretDown}>▲</div>
-            <div class="timeline-nav-axis" id="tl-axis">
-                {#each ticks as tick, i (i)}<span style:left="{tick.pct}%">{tick.label}</span>{/each}
-            </div>
-        </div>
-        <span id="tl-segment-label" class="timeline-nav-segment">{label}</span>
-        {#if $fullscreenTab}
-            <button class="tl-exit-fs" title="Leave fullscreen (Esc or f)" aria-label="Leave fullscreen" onclick={() => toggleFullscreen()}>
-                <Minimize size={16} /> Exit
-            </button>
+        <div class="pb-knob" style:left="{pct}%"></div>
+        {#if hover}
+            <div class="pb-hover-line" style:left="{hover.x}px"></div>
+            <div class="pb-readout" style:left="{hover.x}px" transition:fade={{ duration: 100 }}>{formatDuration(hover.t)}</div>
         {/if}
     </div>
+    <!-- Always there, so the scrubber keeps its width while a drag adds the label. -->
+    <span class="pb-seg" title={label ? 'The selected segment (double-click the bar to clear)' : null}>{label}</span>
+    {#if $fullscreenTab}
+        <button class="pb-exit-fs" title="Leave fullscreen (Esc or f)" aria-label="Leave fullscreen" onclick={() => toggleFullscreen()}>
+            <Minimize size={16} /> Exit
+        </button>
+    {/if}
 </div>
 
 <style>
-    .tl-exit-fs {
+    .pb {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        padding: 4px 12px;
+        height: 34px;
+        box-sizing: border-box;
+    }
+    .pb-play {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 26px;
+        padding: 0;
+        background: none;
+        border: none;
+        border-radius: 4px;
+        color: var(--accent-cyan);
+        cursor: pointer;
+    }
+    .pb-play:hover {
+        background: rgba(0, 217, 255, 0.15);
+    }
+    .pb-speed {
+        height: 22px;
+        padding: 0 2px;
+        background: var(--bg-deep);
+        color: #9ab;
+        border: 1px solid rgba(0, 217, 255, 0.25);
+        border-radius: 3px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .pb-time {
+        font-family: monospace;
+        font-size: 12px;
+        color: #778;
+        white-space: nowrap;
+    }
+    .pb-time .now {
+        color: var(--accent-cyan);
+    }
+    .pb-scrub {
+        position: relative;
+        flex: 1;
+        height: 22px;
+        cursor: pointer;
+        touch-action: none;
+        user-select: none;
+    }
+    .pb-scrub.knob-hover {
+        cursor: grab;
+    }
+    .pb-scrub.grabbing {
+        cursor: grabbing;
+    }
+    .pb-track {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: 4px;
+        transform: translateY(-50%);
+        background: #1f2e4d;
+        border-radius: 2px;
+        transition: height 0.12s ease;
+    }
+    .pb-scrub:hover .pb-track,
+    .pb-scrub.grabbing .pb-track {
+        height: 7px;
+    }
+    .pb-played {
+        position: absolute;
+        inset: 0 auto 0 0;
+        background: rgba(0, 217, 255, 0.55);
+        border-radius: 2px;
+    }
+    .pb-mark {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: rgba(255, 255, 255, 0.12);
+    }
+    .pb-sel {
+        position: absolute;
+        top: -3px;
+        bottom: -3px;
+        background: rgba(255, 210, 80, 0.28);
+        border-left: 2px solid #ffd250;
+        border-right: 2px solid #ffd250;
+        border-radius: 2px;
+        box-sizing: border-box;
+    }
+    .pb-knob {
+        position: absolute;
+        top: 50%;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--accent-cyan);
+        box-shadow: 0 0 6px rgba(0, 217, 255, 0.6);
+        transform: translate(-50%, -50%);
+        transition: width 0.12s ease, height 0.12s ease;
+        pointer-events: none;
+    }
+    .pb-scrub.knob-hover .pb-knob,
+    .pb-scrub.grabbing .pb-knob {
+        width: 16px;
+        height: 16px;
+    }
+    .pb-hover-line {
+        position: absolute;
+        top: 3px;
+        bottom: 3px;
+        width: 1px;
+        background: rgba(255, 255, 255, 0.35);
+        pointer-events: none;
+    }
+    .pb-readout {
+        position: absolute;
+        bottom: calc(100% + 2px);
+        transform: translateX(-50%);
+        padding: 1px 6px;
+        border-radius: 3px;
+        background: #0b1222;
+        border: 1px solid rgba(0, 217, 255, 0.35);
+        color: #dde;
+        font-family: monospace;
+        font-size: 11px;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 30;
+    }
+    .pb-seg {
+        min-width: 13ch;
+        font-family: monospace;
+        font-size: 12px;
+        color: #ffd250;
+        white-space: nowrap;
+    }
+    .pb-exit-fs {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        margin-left: auto;
         height: 24px;
         padding: 0 8px;
         background: none;
@@ -219,7 +369,7 @@
         font-size: 0.85rem;
         cursor: pointer;
     }
-    .tl-exit-fs:hover {
+    .pb-exit-fs:hover {
         color: var(--accent-cyan);
         border-color: var(--accent-cyan);
     }

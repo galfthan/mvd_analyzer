@@ -1,24 +1,24 @@
 // playback-bar.js — the unified playback bar's DOM-free parts
-// (src/ui/PlaybackBar.svelte): the axis, the cursor position, a pointer x as
-// a time, what a drag across the bar selects and the speed buttons' state.
-// Times are match seconds.
+// (src/ui/PlaybackBar.svelte): the minute marks, the playhead's position, a
+// pointer x as a time, whether a press grabs the playhead or starts a
+// selection, what a drag selects and the transport's state (play / pause
+// and the speed). Times are match seconds.
 
 import { formatDuration } from './result.js';
 
 /** @typedef {{ start: number, end: number }} Span  match seconds */
 
-// A drag shorter than this is a click: it clears the segment and seeks.
-const CLICK_MAX_S = 2;
+// A press that moves less than this (px) is a click: it clears the segment
+// and seeks. Pixels, not match time, so it feels the same on every demo.
+export const DRAG_MIN_PX = 4;
+// A press this close (px) to the playhead grabs it instead of selecting.
+export const KNOB_GRAB_PX = 10;
 
-// The speed buttons, in bar order, and their labels when not running.
-export const SPEED_BUTTONS = [
-    { id: 'tl-rev', speed: -1, label: '-1x' },
-    { id: 'tl-slow', speed: 0.2, label: '0.2x' },
-    { id: 'tl-play-pause', speed: 1, label: '1x' },
-    { id: 'tl-5x', speed: 5, label: '5x' },
-];
+// The speeds the dropdown offers (× 1). -1 plays backwards — the page's
+// own playback only; the Player engine cannot.
+export const SPEEDS = [-1, 0.2, 0.5, 1, 2, 5];
 
-// barAxisTicks: 4–10 evenly spaced labels, about one a minute.
+// barAxisTicks: 4–10 evenly spaced marks, about one a minute.
 /**
  * @param {number} duration
  * @returns {Array<{ pct: number, label: string }>}
@@ -65,8 +65,24 @@ export function dragSpan(t0, t) {
     return { start: Math.min(t0, t), end: Math.max(t0, t) };
 }
 
-/** @param {Span} span */
-export const isClick = (span) => span.end - span.start <= CLICK_MAX_S;
+/**
+ * @param {number} x0  where the press started (clientX)
+ * @param {number} x
+ */
+export const isDrag = (x0, x) => Math.abs(x - x0) >= DRAG_MIN_PX;
+
+// nearKnob: a pointer this close to the playhead at `t` grabs it.
+/**
+ * @param {number} clientX
+ * @param {{ left: number, width: number }} rect
+ * @param {number} t
+ * @param {number} duration
+ */
+export function nearKnob(clientX, rect, t, duration) {
+    const pct = barPct(t, duration);
+    if (pct === null || !(rect.width > 0)) return false;
+    return Math.abs(clientX - (rect.left + (pct / 100) * rect.width)) <= KNOB_GRAB_PX;
+}
 
 // overlayBox: the selection overlay's left / width (percent), null without a
 // duration.
@@ -85,18 +101,18 @@ export function segmentLabel(seg) {
     return seg ? `${formatDuration(seg.start)} – ${formatDuration(seg.end)}` : '';
 }
 
-// speedButtons: each button's text, highlight and disabled state. While the
-// Player engine is the clock (`drives`) its status rules and it cannot play
-// backwards; otherwise the page's own playback (src/state/playback.js) does.
-// The running speed shows a pause glyph.
+// transport: whether it plays, the speed it runs (or will run) at, and the
+// speeds on offer. While the Player engine is the clock (`drives`) its
+// status rules — its `rate` is the speed play runs at, kept while paused —
+// and it cannot play backwards; otherwise the page's own playback
+// (src/state/playback.js) does.
 /**
- * @param {{ drives: boolean, engine: { playing: boolean, speed: number }, playing: boolean, speed: number }} state
+ * @param {{ drives: boolean, engine: { playing: boolean, rate: number }, playing: boolean, speed: number }} state
  */
-export function speedButtons({ drives, engine, playing, speed }) {
-    const on = drives ? engine.playing : playing;
-    const current = drives ? engine.speed / 100 : speed;
-    return SPEED_BUTTONS.map((b) => {
-        const active = on && current === b.speed;
-        return { ...b, active, text: active ? '⏸' : b.label, disabled: drives && b.speed < 0 };
-    });
+export function transport({ drives, engine, playing, speed }) {
+    return {
+        playing: drives ? engine.playing : playing,
+        speed: drives ? engine.rate / 100 : speed,
+        speeds: SPEEDS.map((v) => ({ value: v, label: `${v}×`, disabled: drives && v < 0 })),
+    };
 }

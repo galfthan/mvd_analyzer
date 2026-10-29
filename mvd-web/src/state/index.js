@@ -7,4 +7,4 @@ export { demo } from './demo.js';
 export { TABS, activeTab, selectTab } from './ui.js';
 export { regionControl, resetRegionControl, applyRegionDefs, reapplyRegions } from './regions.js';
 export { segment } from './timeline.js';
-export { TABS_WITH_TIMELINE, playback, playAtSpeed, stopPlayback } from './playback.js';
+export { TABS_WITH_TIMELINE, playback, setPlaybackSpeed, startPlayback, togglePlayback, stopPlayback } from './playback.js';
