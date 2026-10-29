@@ -1251,7 +1251,9 @@ plain click plays that clip in the Player tab (a one-clip run that stops at
 keep the browser's "open hub in a new tab". Links exist only for hub demos
 (they need a gameId) — a locally loaded file has none.
 
-The plan and the open questions are in [`plan-player-tab.md`](../plan-player-tab.md).
+The plan and the open questions are in [`plan-player-tab.md`](../plan-player-tab.md);
+the next round (playback bar, selection = clip, slow motion, Player pane,
+light player) in [`plan-player-next.md`](../plan-player-next.md).
 
 ## Demo search
 
