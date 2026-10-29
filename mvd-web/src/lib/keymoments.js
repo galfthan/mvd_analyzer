@@ -11,7 +11,7 @@
 // are demo-relative; the tables show match time).
 
 import { escapeHtml } from './html.js';
-import { hubReplayUrl } from './hub-url.js';
+import { hubReplayUrl, hubLinkHtml } from './hub-url.js';
 import { formatDuration } from './result.js';
 
 /**
@@ -128,9 +128,6 @@ export function formatMarkerTime(seconds) {
     return formatDuration(seconds);
 }
 
-/** @param {string} url */
-const hubAnchor = (url) => `<a href="${url}" target="_blank" class="viewer-link">Hub</a>`;
-
 // ─── Stored tables: powerup runs, frag streaks, demo markers ───────────────
 
 /**
@@ -146,7 +143,7 @@ export function powerupRunRowHtml(event, ctx) {
     if (ctx.gameId && event.playerUserID) {
         const fromTime = Math.max(0, Math.floor(event.time + ctx.demoOffset) - 10);
         const toTime = Math.floor(event.endTime + ctx.demoOffset) + 5;
-        watchCell = hubAnchor(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: toTime, track: event.playerUserID }));
+        watchCell = hubLinkHtml(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: toTime, track: event.playerUserID }));
     }
     return `
             <td class="time-cell time-link">${formatDuration(event.time)}</td>
@@ -168,7 +165,7 @@ export function streakRowHtml(streak, ctx) {
     if (ctx.gameId) {
         const fromTime = Math.max(0, Math.floor(streak.time + ctx.demoOffset));
         const toTime = Math.floor(streak.endTime + ctx.demoOffset) + 3;
-        watchCell = hubAnchor(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: toTime, track: streak.playerUserID || 0 }));
+        watchCell = hubLinkHtml(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: toTime, track: streak.playerUserID || 0 }));
     }
     const mainWep = streak.ewep ? streak.ewep.toUpperCase() : '-';
     return `
@@ -190,7 +187,7 @@ export function markerRowHtml(marker, ctx) {
     let watchCell = '-';
     if (ctx.gameId) {
         const fromTime = Math.max(0, Math.floor(marker.time + ctx.demoOffset) - 10);
-        watchCell = hubAnchor(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: fromTime + 20, track: marker.playerUserID || 0 }));
+        watchCell = hubLinkHtml(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: fromTime + 20, track: marker.playerUserID || 0 }));
     }
     // A spectator's mark has no meaningful team (and its userID is not a
     // useful Hub track target, but the link still frames the right time
@@ -264,7 +261,7 @@ export function topWatchCell(playerName, fromSec, toSec, ctx) {
     // Match-relative → demo-relative (Hub time includes countdown/warmup).
     const from = Math.max(0, Math.floor(fromSec + ctx.demoOffset));
     const to = Math.floor(toSec + ctx.demoOffset);
-    return hubAnchor(hubReplayUrl({ gameId: ctx.gameId, from, to, track: trackId }));
+    return hubLinkHtml(hubReplayUrl({ gameId: ctx.gameId, from, to, track: trackId }));
 }
 
 // The rows of one view reply (null when the query failed), each with its
@@ -360,7 +357,7 @@ function highlightWatchCell(ctx, timeSec, trackId) {
     if (!ctx.gameId) return '-';
     const fromTime = Math.max(0, Math.floor(timeSec + ctx.demoOffset) - 5);
     const toTime = Math.floor(timeSec + ctx.demoOffset) + 3;
-    return hubAnchor(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: toTime, track: trackId || 0 }));
+    return hubLinkHtml(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: toTime, track: trackId || 0 }));
 }
 
 // "health/armor+type" ("118/180ra", "100/0"); "?" when the streams never

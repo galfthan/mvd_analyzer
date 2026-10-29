@@ -1,7 +1,7 @@
-// hub-url.js — the hub.quakeworld.nu replay link every tab builds.
-// src/lib/playlist.js
-// parseHubReplayUrl reads it back, and src/player/hub-links.js routes a
-// click on one (a.viewer-link / a.hub-watch-link) to the Player tab.
+// hub-url.js — the hub.quakeworld.nu replay link every tab builds, and
+// its anchor (hubLinkHtml). src/lib/playlist.js parseHubReplayUrl reads it
+// back, and src/player/hub-links.js routes a click on one (a.hub-link) to
+// the Player tab.
 
 // Build a hub.quakeworld.nu replay URL. `to` is optional — omit it for a
 // single "jump here" link (hubWatchLinkHtml) and pass it for a windowed
@@ -34,4 +34,19 @@ export function hubReplayUrl({ gameId, from, to, track }) {
     if (to != null) url += `&to=${to}`;
     url += `&track=${track}`;
     return url;
+}
+
+export const HUB_LINK_TITLE = 'Play in the Player tab · Shift: add to the playlist · Ctrl: open on hub';
+
+// hubLinkHtml: the anchor every tab shows for a replay URL. It reads
+// "play"; holding Shift or Ctrl relabels it "+add" / "hub" (the classes
+// src/player/hub-links.js puts on <html>, styles.css swaps the label).
+// `compact` is the small inline form of the roster tables.
+/**
+ * @param {string} url
+ * @param {boolean} [compact]
+ */
+export function hubLinkHtml(url, compact = false) {
+    const cls = compact ? 'hub-link hub-link--compact' : 'hub-link';
+    return `<a href="${url}" target="_blank" class="${cls}" title="${HUB_LINK_TITLE}"><span class="hub-link-label">play</span></a>`;
 }

@@ -12,6 +12,7 @@ import {
     teamStrongColor, dimColor, GRAPH_COLORS, HR_DUR, TEAM_STATUS_SORT_DEFAULT, rollingWindow,
 } from '../src/lib/timeline.js';
 import { segment } from '../src/state/timeline.js';
+import { hubLinkHtml } from '../src/lib/hub-url.js';
 
 const golden = (name) => JSON.parse(readFileSync(new URL(`../../mvd-analytics/testdata/golden/${name}.json`, import.meta.url)));
 const TEAM2 = golden('2on2_nani_pora_210426_dm6');
@@ -245,7 +246,7 @@ test('team status rows and markup', () => {
     assert.equal(hubWatchLinkHtml('x', 10, null, {}, 0), '');
     assert.equal(hubWatchLinkHtml('x', 10, { gameId: 1 }, {}, 0), '');
     assert.equal(hubWatchLinkHtml('x', 10.7, { gameId: 1 }, { x: 5 }, 2),
-        '<a href="https://hub.quakeworld.nu/games/?gameId=1&from=12&track=5" target="_blank" class="hub-watch-link" title="Watch in Hub">hub</a>');
+        hubLinkHtml('https://hub.quakeworld.nu/games/?gameId=1&from=12&track=5', true));
 });
 
 test('hover read-outs', () => {

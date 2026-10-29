@@ -72,7 +72,7 @@
         <button class="pt-btn" title="Add In→Out from the current POV to the playlist (key: c). Without marks: the last 10 s."
             onclick={addClip}><Plus size={14} /> Add clip</button>
     </span>
-    <span class="player-clip-hint">Hub links elsewhere: click plays here · shift-click adds to the playlist · ctrl/middle-click opens hub</span>
+    <span class="player-clip-hint">play links elsewhere: click plays here · shift-click adds to the playlist · ctrl/middle-click opens hub</span>
 </div>
 
 <style>

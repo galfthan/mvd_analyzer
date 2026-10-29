@@ -1,15 +1,15 @@
-// hub-links.js — every hub link on the other tabs (hubReplayUrl:
-// a.viewer-link, a.hub-watch-link) for the loaded demo: a plain click plays
-// the clip in the Player tab, shift-click adds it to the playlist, and
-// ctrl/cmd-click and middle-click keep the browser's own "open hub in a new
-// tab". Capture phase, so a row's own click handler (seek the cursor) does
-// not also fire.
+// hub-links.js — every hub link on the other tabs (hubLinkHtml: a.hub-link,
+// labelled "play") for the loaded demo: a plain click plays the clip in the
+// Player tab, shift-click adds it to the playlist, and ctrl/cmd-click and
+// middle-click keep the browser's own "open hub in a new tab". Capture
+// phase, so a row's own click handler (seek the cursor) does not also fire.
+// While Shift or Ctrl/Cmd is held, <html> carries `mod-add` / `mod-hub` and
+// the links read "+add" / "hub" (styles.css).
 
 import { parseHubReplayUrl } from '../lib/playlist.js';
 import { formatDuration, nameOfUserId } from '../lib/result.js';
 
-const SELECTOR = 'a.viewer-link, a.hub-watch-link';
-const TITLE = 'Click: play in the Player tab · Shift-click: add to playlist · Ctrl/middle-click: open on hub';
+const SELECTOR = 'a.hub-link';
 const DEFAULT_S = 15;
 
 /**
@@ -49,8 +49,18 @@ export function installHubLinkRouting({ runner, demo, addClips, toast }) {
             runner.start([c], 0, true);
         }
     }, true);
-    document.addEventListener('mouseover', (e) => {
-        const a = /** @type {HTMLAnchorElement | null | undefined} */ (/** @type {Element} */ (e.target).closest?.(SELECTOR));
-        if (a && a.title !== TITLE) a.title = TITLE;
-    }, true);
+
+    // The pointer's own flags too: a key pressed or released while another
+    // window had focus sends no key event here.
+    const root = document.documentElement.classList;
+    /** @param {{ shiftKey: boolean, ctrlKey: boolean, metaKey: boolean }} e */
+    const mods = (e) => {
+        const hub = e.ctrlKey || e.metaKey;
+        root.toggle('mod-hub', hub);
+        root.toggle('mod-add', e.shiftKey && !hub);
+    };
+    window.addEventListener('keydown', mods, true);
+    window.addEventListener('keyup', mods, true);
+    window.addEventListener('pointermove', mods, { capture: true, passive: true });
+    window.addEventListener('blur', () => root.remove('mod-hub', 'mod-add'));
 }

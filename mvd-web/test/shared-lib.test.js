@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { firstSortDir, nextSortDir, compareSortText } from '../src/lib/sortable.js';
 import { fragsOfRow, sortByFragsDesc, teamOrder, holdCell, playerStatsRows } from '../src/lib/player-stats.js';
-import { hubReplayUrl } from '../src/lib/hub-url.js';
+import { hubReplayUrl, hubLinkHtml } from '../src/lib/hub-url.js';
 import { escapeHtml } from '../src/lib/html.js';
 import { parseHubReplayUrl } from '../src/lib/playlist.js';
 
@@ -39,4 +39,10 @@ test('hubReplayUrl round-trips through parseHubReplayUrl; escapeHtml', () => {
     assert.equal(hubReplayUrl({ gameId: 9, from: 10, track: 4 }), 'https://hub.quakeworld.nu/games/?gameId=9&from=10&track=4');
     assert.equal(escapeHtml(`<a href="x">'&`), '&lt;a href=&quot;x&quot;&gt;&#39;&amp;');
     assert.equal(escapeHtml(null), '');
+});
+
+test('hubLinkHtml: one "play" anchor for every tab, the compact form for the roster tables', () => {
+    const a = hubLinkHtml('https://hub.quakeworld.nu/games/?gameId=1&from=2&track=3');
+    assert.match(a, /^<a href="https:\/\/hub\.quakeworld\.nu\/games\/\?gameId=1&from=2&track=3" target="_blank" class="hub-link" title="[^"]*Shift[^"]*Ctrl[^"]*"><span class="hub-link-label">play<\/span><\/a>$/);
+    assert.match(hubLinkHtml('u', true), /class="hub-link hub-link--compact"/);
 });

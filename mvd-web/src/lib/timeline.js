@@ -16,7 +16,7 @@ import {
 import { decodeRegionStateChar } from '../../../mvd-map-view/src/regions.js';
 import { lowerBoundIndex } from '../../../mvd-map-view/src/util.js';
 import { escapeHtml } from './html.js';
-import { hubReplayUrl } from './hub-url.js';
+import { hubReplayUrl, hubLinkHtml } from './hub-url.js';
 import { formatDuration, demoOffsetSec } from './result.js';
 import { playerStatsRows } from './player-stats.js';
 
@@ -957,7 +957,7 @@ export function hubWatchLinkHtml(playerName, time, hubInfo, playerUserIDs, demoO
     if (!trackId) return '';
     const from = Math.floor(time + (demoOffset || 0));
     const url = hubReplayUrl({ gameId: hubInfo.gameId, from, track: trackId });
-    return `<a href="${url}" target="_blank" class="hub-watch-link" title="Watch in Hub">hub</a>`;
+    return hubLinkHtml(url, true);
 }
 
 // teamStatusHtml: one side's roster table at `time` — the team name and frag

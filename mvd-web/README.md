@@ -1243,13 +1243,17 @@ scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
 
 ### Hub links on the other tabs
 
-Every hub link built by `hubReplayUrl` (`.viewer-link`, `.hub-watch-link`)
-for the **loaded** demo is rerouted by one capture-phase click handler
-(`src/player/hub-links.js`):
-plain click plays that clip in the Player tab (a one-clip run that stops at
-`to`), shift-click adds it to the playlist, ctrl/cmd-click and middle-click
-keep the browser's "open hub in a new tab". Links exist only for hub demos
-(they need a gameId) — a locally loaded file has none.
+Every tab draws its replay links with one helper, `hubLinkHtml`
+(`src/lib/hub-url.js`: `a.hub-link`, labelled **play**, one tooltip; the
+roster tables' small inline form is `.hub-link--compact`). One
+capture-phase click handler (`src/player/hub-links.js`) reroutes them for
+the **loaded** demo: plain click plays that clip in the Player tab (a
+one-clip run that stops at `to`), shift-click adds it to the playlist,
+ctrl/cmd-click and middle-click keep the browser's "open hub in a new
+tab". While Shift or Ctrl/Cmd is held the links say so — they read
+**+add** or **hub** (`mod-add` / `mod-hub` on `<html>`, set from key and
+pointer events, cleared on blur). Links exist only for hub demos (they
+need a gameId) — a locally loaded file has none.
 
 The plan and the open questions are in [`plan-player-tab.md`](../plan-player-tab.md);
 the next round (playback bar, selection = clip, slow motion, Player pane,
@@ -1425,7 +1429,7 @@ selections persist across demo reloads when the same value is
 still available in the new data. The tab is Svelte
 (`src/tabs/packdrops/PackDropsTab.svelte`, the statuses, filters
 and row markup in `src/lib/packdrops.js`); a Time cell seeks the shared
-clock, and the hub links are `a.viewer-link`, so a click plays the clip
+clock, and its play links are `a.hub-link`, so a click plays the clip
 in the Player tab (`src/player/hub-links.js`).
 
 Status column derivation:

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { hubLinkHtml } from '../src/lib/hub-url.js';
 
 import {
     packDropPickup, packDropStatusFor, packDropRows, filterOptions, filterRows, countText,
@@ -68,10 +69,10 @@ test('filterOptions / filterRows / countText', () => {
     assert.equal(countText(1, 2), '1 of 2 drops');
 });
 
-test('hubAnchor: demo-relative whole seconds, viewer-link, "-" without a hub game or userid', () => {
+test('hubAnchor: demo-relative whole seconds, a play link, "-" without a hub game or userid', () => {
     const ctx = { gameId: 5, userIDs: { a: 11 }, demoOffset: 15.5 };
     assert.equal(hubAnchor(ctx, 51, 63, 'a'),
-        '<a href="https://hub.quakeworld.nu/games/?gameId=5&from=66&to=78&track=11" target="_blank" class="viewer-link">Hub</a>');
+        hubLinkHtml('https://hub.quakeworld.nu/games/?gameId=5&from=66&to=78&track=11'));
     assert.match(hubAnchor(ctx, -20, 1, 'a'), /from=0&/);
     assert.equal(hubAnchor({ ...ctx, gameId: null }, 1, 2, 'a'), '-');
     assert.equal(hubAnchor(ctx, 1, 2, 'nobody'), '-');

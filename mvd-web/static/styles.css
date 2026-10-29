@@ -2144,22 +2144,6 @@ th.sortable.sort-desc::after {
     color: var(--accent-cyan);
 }
 
-/* Hub viewer [w] link */
-.hub-watch-link {
-    color: #7a8ba8;
-    text-decoration: none;
-    font-size: 0.75rem;
-    font-weight: 600;
-    opacity: 0.6;
-    transition: opacity 0.15s;
-    cursor: pointer;
-}
-
-.hub-watch-link:hover {
-    opacity: 1;
-    color: var(--accent-cyan);
-}
-
 /* Timeline playback controls */
 .timeline-playback-controls {
     display: flex;
@@ -2261,21 +2245,52 @@ th.sortable.sort-desc::after {
 .powerup-cell.pent { color: #ff5050; }
 .powerup-cell.ring { color: #ffeb3b; }
 
-.viewer-link {
+/* Hub replay links (hubLinkHtml): "play", relabelled while Shift / Ctrl
+   is held (src/player/hub-links.js puts mod-add / mod-hub on <html>). */
+.hub-link {
     color: var(--accent-cyan);
     text-decoration: none;
-    padding: 5px 14px;
+    padding: 3px 12px;
     border: 1px solid rgba(0, 217, 255, 0.4);
     border-radius: 5px;
     font-size: 0.85rem;
     font-weight: 500;
-    transition: all 0.2s ease;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
 }
 
-.viewer-link:hover {
+.hub-link:hover {
     background: var(--accent-cyan);
     color: var(--bg-deep);
-    box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+}
+
+.hub-link--compact {
+    padding: 0 4px;
+    border-color: transparent;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #7a8ba8;
+}
+
+.mod-add .hub-link .hub-link-label,
+.mod-hub .hub-link .hub-link-label {
+    display: none;
+}
+
+.mod-add .hub-link::after {
+    content: '+add';
+}
+
+.mod-hub .hub-link::after {
+    content: 'hub';
+}
+
+.mod-add .hub-link {
+    border-color: #6bd66b;
+}
+
+.mod-hub .hub-link {
+    border-color: #f0b43c;
 }
 
 .keymoments-grid.active {

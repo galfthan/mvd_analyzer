@@ -13,7 +13,7 @@
 
 import { escapeHtml } from './html.js';
 import { formatDuration } from './result.js';
-import { hubReplayUrl } from './hub-url.js';
+import { hubReplayUrl, hubLinkHtml } from './hub-url.js';
 
 /**
  * A result.backpacks row (Result JSON); `time` is ms there and seconds on
@@ -162,7 +162,7 @@ export function hubAnchor(ctx, from, to, trackName) {
     const f = Math.max(0, Math.floor(from + ctx.demoOffset));
     const t = Math.floor(to + ctx.demoOffset);
     const url = hubReplayUrl({ gameId: ctx.gameId, from: f, to: t, track: trackId });
-    return `<a href="${url}" target="_blank" class="viewer-link">Hub</a>`;
+    return hubLinkHtml(url);
 }
 
 // The cells of one row (a <tr>'s innerHTML). The drop link starts 10 s
