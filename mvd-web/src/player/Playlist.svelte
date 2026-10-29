@@ -14,6 +14,7 @@
         playerFragClips, singleHubGame, hubClipsUrl, encodePlaylist, MAX_HUB_CLIPS,
     } from '../lib/playlist.js';
     import { PRESETS, runQuery } from '../lib/clip-query.js';
+    import { presetRuns } from './preset-runs.js';
     import { userPresets } from './clip-presets.js';
     import { runner, currentRef } from './index.js';
     import { playlist, addClips, setLabel, moveClip, removeClip, clearClips } from './playlist-store.js';
@@ -156,8 +157,10 @@
         <select class="pt-select" title="Append generated clips from this demo" onchange={generate}>
             <option value="">Generate…</option>
             {#if ref}
+                <!-- With its count once it has run (preset-runs.js); an empty one is left out. -->
                 {#each PRESETS as p (p.id)}
-                    <option value="preset:{p.id}">{p.title}</option>
+                    {@const n = $presetRuns[p.id]?.rows}
+                    {#if n !== 0}<option value="preset:{p.id}">{p.title}{n != null ? ` (${n})` : ''}</option>{/if}
                 {/each}
                 {#if $userPresets.length}
                     <optgroup label="My presets">
@@ -208,6 +211,6 @@
         {/each}
     </ol>
     {#if !clips.length}
-        <div class="player-clip-hint">No clips yet — select a stretch on the playback bar and press its + clip (or c), shift-click a play link on any tab, pick Generate, or build a query in the clip finder.</div>
+        <div class="player-clip-hint">No clips yet — add them from the Moments pane (every quad run, streak, top kill, airgib… of this demo, with its + for a whole group), pick Generate, select a stretch on the playback bar and press its + clip (or c), shift-click a play link on any tab, or build a query in the clip finder.</div>
     {/if}
 </div>

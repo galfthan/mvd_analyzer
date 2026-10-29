@@ -1035,11 +1035,11 @@ tabs (plan: [`plan-map-player-merge.md`](../plan-map-player-merge.md)).
 Its head switches between two **preset views** (`src/player/layout.js`):
 
 - **Map** — mainly the map: a large Map pane in the main column, Players,
-  Items and Region status beside it, and no Player pane, so the demo
+  Moments, Items and Region status beside it, and no Player pane, so the demo
   engine does not load (the page's own playback is the clock: instant
   scrubbing, −1×). A fresh visit starts here.
 - **Player** — mainly the demo player: the Player pane and the playlist,
-  the Map, Players and Team weapons beside them.
+  the Map, Players, Moments and Team weapons beside them.
 
 Each view is its own saved pane layout (`mvd.playerPanes.v4`:
 `{ preset, layouts: { map, player } }`; a pre-preset layout becomes the
@@ -1135,8 +1135,7 @@ tab shows (`panes/tick.js`). The layout is a per-viewer convenience in
 `localStorage` (`mvd.playerPanes.v3`; a `v2` layout, from before the
 player was a pane, gets it on top of the main column, and the PoC's `v1`
 order is migrated): which panes are open in each column and in what
-order (default Player / Playlist in the main column, Map / Players /
-Team weapons in the side one — the Clip finder and the rest are one
+order (the views' defaults above — the Clip finder and the rest are one
 "Add pane…" away in either column),
 each pane's height, collapsed state and options (`opts`: the map's
 overlays, a graph's window), the side column's
@@ -1212,7 +1211,10 @@ Player pane avoids that.)
   order; the ones under the playhead are lit, and a closed group's head
   shows a dot when the playhead is in one of its clips. Click plays a
   clip, shift-click adds it; a group's + adds all of them. The open
-  groups are the pane's option (quad runs to start with).
+  groups are the pane's option (quad runs to start with). On by default
+  in both views. The runs are `src/player/preset-runs.js`'s: every
+  built-in preset run once per demo (and canonical team order), shared
+  with Generate.
 - **Frag feed**: the last 12 frags up to the playhead, newest first, the
   last 4 s lit. Click one to watch it from the killer's view.
 
@@ -1238,7 +1240,9 @@ drops it).
   Keys there: `i` / `o` set the selection's start / end at the playhead
   (keeping the other edge when it is still on its side, else 10 s away),
   `c` adds it (no selection: the last 10 s).
-- **Generate** (in the playlist's head) from the loaded demo: quad, best
+- **Generate** (in the playlist's head; each built-in preset with the
+  number of rows it found in this demo, the empty ones left out — the
+  Moments pane lists those too) from the loaded demo: quad, best
   quad, pent and ring runs, frag streaks, top damage windows, top RL / LG
   kills (the Key Moments tab's queries), demo markers, RL/LG pack drops (all, the enemy took, a teammate took, the
   enemy took without having the weapon — each pack as the dropper's last

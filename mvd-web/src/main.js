@@ -13,6 +13,7 @@ import App from './shell/App.svelte';
 import * as MvdState from './state/index.js';
 import { engine, setupPlayer } from './player/index.js';
 import { setupSelectionClip } from './player/selection-clip.js';
+import { setupPresetRuns } from './player/preset-runs.js';
 import * as MvdMapTab from './tabs/map/map-model.js';
 import { setupPanels } from './ui/panels/index.js';
 import { mvdData } from './app/source.js';
@@ -35,6 +36,7 @@ MvdState.teams.subscribe((t) => {
 mount(App, { target: /** @type {HTMLElement} */ (document.getElementById('app')) });
 flushSync();
 setupPlayer();
+setupPresetRuns();
 setupSelectionClip();
 // The viewer's panel arrangement on the multi-panel tabs.
 setupPanels();

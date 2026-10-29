@@ -39,7 +39,7 @@ export const PANE_IDS = [
 /** @typedef {'order' | 'below'} Column */
 /** @type {PaneLayout} */
 const PLAYER_DEFAULT = {
-    order: ['map', 'players', 'team-weapons'],
+    order: ['map', 'players', 'moments', 'team-weapons'],
     below: ['player', 'playlist'],
     collapsed: {},
     heights: {},          // pane id → body height in px; unset = natural
@@ -50,7 +50,7 @@ const PLAYER_DEFAULT = {
 /** @type {PaneLayout} */
 const MAP_DEFAULT = {
     ...PLAYER_DEFAULT,
-    order: ['players', 'items', 'region-status'],
+    order: ['players', 'moments', 'items', 'region-status'],
     below: ['map'],
     split: 34,
 };

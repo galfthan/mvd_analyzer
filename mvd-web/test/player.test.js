@@ -18,7 +18,7 @@ const { syncMapData } = await import('../src/player/panes/map-sync.js');
 
 test('pane layout migrates the PoC order and sanitizes', () => {
     assert.equal(preset.get(), 'map', 'a fresh visit starts in the Map view');
-    assert.deepEqual([paneLayout.get().below, paneLayout.get().order], [['map'], ['players', 'items', 'region-status']]);
+    assert.deepEqual([paneLayout.get().below, paneLayout.get().order], [['map'], ['players', 'moments', 'items', 'region-status']]);
     setPreset('player');
     assert.equal(preset.get(), 'player');
     assert.deepEqual(paneLayout.get().order, ['feed', 'map'], 'a pre-preset layout is the Player view: v1 order kept, unknown and duplicate ids dropped');
@@ -240,14 +240,14 @@ test('presets: each view keeps its own layout; reset restores the one in use', a
     mem.delete('mvd.playerPanes.v4');
     mem.delete('mvd.playerPanes.v2');
     const p = await import('../src/player/layout.js?presets');
-    p.updateLayout((l) => { l.order.push('moments'); });
-    assert.ok(p.paneLayout.get().order.includes('moments'));
+    p.updateLayout((l) => { l.order.push('stack'); });
+    assert.ok(p.paneLayout.get().order.includes('stack'));
     p.setPreset('player');
-    assert.ok(!p.paneLayout.get().order.includes('moments'), 'the Player view is untouched');
+    assert.ok(!p.paneLayout.get().order.includes('stack'), 'the Player view is untouched');
     p.setPreset('map');
-    assert.ok(p.paneLayout.get().order.includes('moments'), 'back to the Map view as it was left');
+    assert.ok(p.paneLayout.get().order.includes('stack'), 'back to the Map view as it was left');
     p.resetPreset();
-    assert.deepEqual(p.paneLayout.get().order, ['players', 'items', 'region-status']);
+    assert.deepEqual(p.paneLayout.get().order, ['players', 'moments', 'items', 'region-status']);
     assert.equal(JSON.parse(mem.get('mvd.playerPanes.v4')).preset, 'map');
     p.setPreset('bogus');
     assert.equal(p.preset.get(), 'map', 'an unknown view changes nothing');

@@ -6,14 +6,15 @@
     // its clips in time order. The ones the playhead is inside are lit (a
     // dot on a closed group's head). Click plays a clip, shift-click adds
     // it; a group's + adds all of them. Which groups are open is the pane's
-    // option.
+    // option. The runs are preset-runs.js's, shared with Generate.
     import ChevronRight from '@lucide/svelte/icons/chevron-right';
     import ChevronDown from '@lucide/svelte/icons/chevron-down';
     import ListPlus from '@lucide/svelte/icons/list-plus';
     import { demo, teams, colorOf } from '../../state/index.js';
+    import { presetRuns } from '../preset-runs.js';
     import { formatDuration } from '../../lib/result.js';
-    import { PRESETS, viewCall, stages } from '../../lib/clip-query.js';
-    import { runner, currentRef, engine } from '../index.js';
+    import { PRESETS } from '../../lib/clip-query.js';
+    import { runner, engine } from '../index.js';
     import { addClips } from '../playlist-store.js';
     import { paneLayout, paneOpt, setPaneOpt } from '../layout.js';
     import { toast } from '../toast.js';
@@ -27,28 +28,8 @@
         'airgibs', 'discharges', 'quadbores', 'telefrags', 'pack-drops',
     ].map((id) => /** @type {(typeof PRESETS)[number]} */ (PRESETS.find((p) => p.id === id)));
 
-    // Per group: its rows' count and clips; null while it runs.
-    let found = $state(/** @type {Record<string, { rows: number, clips: Clip[] } | null>} */ ({}));
-    $effect(() => {
-        $teams;
-        const handle = $demo;
-        const ref = handle ? currentRef() : null;
-        found = Object.fromEntries(GROUPS.map((g) => [g.id, null]));
-        if (!handle || !ref) return;
-        let live = true;
-        const view = handle.view.bind(handle);
-        for (const g of GROUPS) {
-            // A source this demo lacks (no highlights section) finds nothing.
-            viewCall(view, g.query.source, g.query.params)
-                .then((body) => {
-                    const r = stages(g.query, body, handle.result, ref);
-                    return { rows: r.ranked.length, clips: [...r.clips].sort((a, b) => a.from - b.from) };
-                })
-                .catch(() => ({ rows: 0, clips: [] }))
-                .then((v) => { if (live) found[g.id] = v; });
-        }
-        return () => { live = false; };
-    });
+    // Per group: its rows' count and clips (null while it runs).
+    let found = $derived($presetRuns);
 
     let open = $derived(new Set(paneOpt($paneLayout, 'moments', 'open', 'quad-runs').split(',').filter(Boolean)));
 
