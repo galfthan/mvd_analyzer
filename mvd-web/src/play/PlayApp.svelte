@@ -33,17 +33,29 @@
     // The page's own clock and stores: one demo at a time, always "on the
     // Player tab".
     const clock = createClock();
+    let picks = 0;
+    /** @type {{ gameId: number, handle: Promise<import('./light-demo.js').LightHandle> } | null} */
+    let pending = null;
     const demo = store(/** @type {any} */ (null));
     const engine = new PlayerEngine({ clock, demo, activeTab: store('player') });
     const runner = createRunner({
         engine, demo, teams, demoRefOf,
         segment: store(/** @type {{ start: number, end: number } | null} */ (null)),
         selectTab: () => {},
-        // A hub clip's demo: download it and hand it to the engine.
+        // A hub clip's demo: download it and hand it to the engine — unless
+        // it is the one loaded, or a later pick superseded this one (the
+        // last pick wins, as loadDemo's does on the full page).
         // (The runner only ever asks for a hub clip's demo by gameId.)
         loadDemo: async (/** @type {any} */ { gameId }) => {
+            const pick = ++picks;
+            if (demo.get()?.ref.gameId === gameId) return true;
+            // A second pick of the demo still downloading shares its download.
             const offset = clips.find((c) => c.demo?.gameId === gameId)?.demo.offset || 0;
-            demo.set(await loadLightDemo(gameId, offset));
+            const mine = pending && pending.gameId === gameId ? pending : { gameId, handle: loadLightDemo(gameId, offset) };
+            pending = mine;
+            const handle = await mine.handle.finally(() => { if (pending === mine) pending = null; });
+            if (pick !== picks) return false;
+            demo.set(handle);
             return true;
         },
     });

@@ -145,7 +145,9 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             if (playlist.get().run === run) stop();
             return;
         } finally {
-            loadingRun = null;
+            // A newer run may be loading its own demo by now; it is still
+            // the one carried on.
+            if (loadingRun === run) loadingRun = null;
         }
         if (playlist.get().run !== run) return;
         // The user loaded another demo meanwhile, and the last pick wins

@@ -1074,8 +1074,12 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   `clipAncestors`). No placeholder — the pane closed or collapsed, its
   column hidden, scrolled out of view — hides the layer; the engine runs
   on, since it is the tab's clock. While the pointer is down elsewhere
-  (the split, a pane resize) or a pane is being dragged, the layer lets
-  events through so the iframe does not swallow them.
+  (the split, a pane resize) or a pane is being dragged (until the drag's
+  own end — a drag cancels its pointer at once), the layer lets events
+  through so the iframe does not swallow them. A pane height set or reset
+  looks the clipping ancestors up again. The wheel over the picture
+  scrolls the column under it (a fixed layer's iframe would hand it to the
+  viewport, which does not scroll).
 - **POV bar** in the Player pane, under the picture: `Auto` (FTE's stats
   autotrack) and one button per player in canonical team order and
   colour; the followed player stays lit under autotrack too. A sound
@@ -1301,7 +1305,9 @@ result carries just the map (hub's game row) and the demo offset (from
 the clips). The page lists the clips (label, who, length, slow motion,
 demo), starts the run at once (muted, as the tab does), and has play /
 pause, previous / next and sound; a click on a clip plays from it. Clips
-of a local file are listed as skipped. *Open in the full analyzer* (head
+of a local file are listed as skipped. A click while a demo downloads
+wins over the run that asked first (and shares its download when it is
+the same demo). *Open in the full analyzer* (head
 and foot) goes to this page's Player tab with the same playlist.
 
 ### Hub links on the other tabs
