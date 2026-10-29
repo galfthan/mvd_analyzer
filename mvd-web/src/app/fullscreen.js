@@ -11,7 +11,6 @@ import { activeTab } from '../state/ui.js';
 
 /** @type {Record<string, string>} tab id → the panel that goes fullscreen */
 export const FULLSCREEN_PANELS = {
-    map: '#tab-map .map-panel',
     player: '#tab-player .player-panel',
 };
 

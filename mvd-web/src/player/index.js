@@ -6,7 +6,7 @@
 import { clock, demo, teams, activeTab, selectTab, segment, setPlaybackGate } from '../state/index.js';
 import { store } from '../state/store.js';
 import { playerSlot } from './player-slot.js';
-import { showPane } from './layout.js';
+import { paneLayout, setPreset, columnOf, showPane } from './layout.js';
 import { loadDemo } from '../app/load.js';
 import { decodePlaylist } from '../lib/playlist.js';
 import { decodeQuery } from '../lib/clip-query.js';
@@ -38,11 +38,16 @@ playerSlot.subscribe((el) => {
 export const engine = new PlayerEngine({ clock, demo, activeTab, wanted });
 setPlaybackGate(() => engine.drives());
 
-// A clip plays in the engine: on the Player tab, with a Player pane open.
+// A clip plays in the engine: on the Watch tab, with a Player pane open —
+// the Player view when the view in use has none (or has it collapsed).
 /** @param {string} tab */
 function showPlayer(tab) {
     selectTab(tab);
-    if (!playerSlot.get()) showPane('player');
+    /** @param {import('./layout.js').PaneLayout} l */
+    const shows = (l) => !!columnOf(l, 'player') && !l.collapsed.player && !(l.hidden && columnOf(l, 'player') === 'order');
+    if (!shows(paneLayout.get())) setPreset('player');
+    // The viewer's Player view may have it closed too.
+    if (!shows(paneLayout.get())) showPane('player');
 }
 export const runner = createRunner({ engine, demo, teams, selectTab: showPlayer, loadDemo, demoRefOf, segment });
 

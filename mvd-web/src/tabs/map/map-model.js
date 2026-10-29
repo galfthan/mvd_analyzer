@@ -1,17 +1,18 @@
-// map-model.js — the Map tab's map view (mvd-map-view's MvdMap) and the
-// demo's data in it. One instance for the page: the Map tab draws it
-// (MapTab.svelte attaches the canvas and owns the view state: camera,
-// trails, overlays, learn mode), and the Player tab's map pane copies its
-// DATA into its own MvdMap each frame (src/player/panes/map-sync.js).
+// map-model.js — the demo's map data, held in one headless MvdMap
+// (mvd-map-view) for the page: it is never drawn. Every map pane of the
+// Watch tab copies its DATA into its own MvdMap each frame
+// (src/player/panes/map-sync.js); the panes that list players, items,
+// regions and entities read it, and its lookups (frameAt, itemStatus,
+// resolvePlayerLoc, regionControlAt) answer for them. Learn mode and the
+// entity filters live here too.
 //
 // The load's displayResults (src/app/load.js) loads a demo into it (`loadMap`, again when the
 // deferred 50 ms buckets land — the player positions, trails and region
 // states come from them) after `resetMap`; the region set in effect
 // (src/state/regions.js) and the team colours (src/state/teams.js) are read
-// from their stores. Loading is data only: nothing is drawn here. The tab
-// redraws on `changed` when it shows.
+// from their stores. Loading is data only: nothing is drawn here.
 //
-// The pure parts (symbols, bounds, drops, canvas size) are src/lib/map.js.
+// The pure parts (symbols, bounds, drops) are src/lib/map.js.
 
 import {
     MvdMap, DEFAULT_YAW, DEFAULT_PITCH, refreshTrig, computeMapZRange, computeRegionStacking, buildVisByPair,
@@ -20,7 +21,7 @@ import { store } from '../../state/store.js';
 import { clock, demo, teams, regionControl, reapplyRegions } from '../../state/index.js';
 import { mapFileKey } from '../../lib/result.js';
 import { locToRegionOf, regionToGroupsOf, regionSides } from '../../lib/regions.js';
-import { mapTeams, assignPlayerSymbols, mapBounds, dropEventsOf, posStreamsOf, mapCanvasSize } from '../../lib/map.js';
+import { mapTeams, assignPlayerSymbols, mapBounds, dropEventsOf, posStreamsOf } from '../../lib/map.js';
 
 export const view = new MvdMap();
 
@@ -93,24 +94,10 @@ regionControl.subscribe((rc) => {
     touch();
 });
 
-// resizeMap sizes the canvas: the fullscreen panel's canvas container when
-// the map is fullscreen, the fixed width at the world's aspect otherwise.
-export function resizeMap() {
-    const s = view.state;
-    const canvas = s.canvas;
-    if (!canvas) return;
-    const fse = document.fullscreenElement;
-    const fs = !!(fse && fse.classList && fse.classList.contains('map-panel'));
-    const rect = fs && canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : null;
-    const [w, h] = mapCanvasSize(fs, rect, s.bounds);
-    view.resize(w, h, window.devicePixelRatio || 1);
-}
-
 // resetMap drops the previous demo's data before a load.
 export function resetMap() {
     const s = view.state;
     view.setFrames(null);
-    if (s.canvas) s.ctx.clearRect(0, 0, s.canvas.width, s.canvas.height);
     Object.assign(s, {
         // regionToGroups too: it is rebuilt only when regions are applied
         // against geometry, so on a map without geometry JSON the previous
@@ -194,11 +181,9 @@ export function loadMap(result) {
     cam.pitch = DEFAULT_PITCH;
     refreshTrig(cam);
     s.followPlayer = null;
-    resizeMap();
 
     s.teams = mapTeams(teams.get().order, result);
     s.playerSymbols = assignPlayerSymbols(result, s.teams);
-    if (!s.initialized && s.canvas) s.canvas.style.cursor = 'grab';
     s.initialized = true;
     view.rebuildTrails();
     s.dropEvents = dropEventsOf(result);

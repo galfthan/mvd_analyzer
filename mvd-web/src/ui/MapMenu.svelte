@@ -1,6 +1,5 @@
 <script>
-    // The map's right-click menu, shared by the Map tab and the Player tab's
-    // map pane: a list of items (checks, radios, actions, separators) at a
+    // The map's right-click menu (the Watch tab's map panes): a list of items (checks, radios, actions, separators) at a
     // point of its container, kept inside it. A click on an item runs it
     // and leaves the menu open (so several overlays can be toggled in a
     // row) unless the item closes it; a click elsewhere or Escape closes.

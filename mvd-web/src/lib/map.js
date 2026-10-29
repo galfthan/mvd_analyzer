@@ -153,29 +153,6 @@ export function posStreamsOf(result) {
     return out;
 }
 
-// ─── Canvas size ────────────────────────────────────────────────────────────
-
-// The canvas width outside fullscreen.
-export const MAP_CANVAS_BASE_WIDTH = 850;
-
-// mapCanvasSize: fullscreen fills the panel's canvas container (`rect`);
-// otherwise a fixed width with the height from the world's aspect, capped.
-/**
- * @param {boolean} fullscreen
- * @param {{ width: number, height: number } | null | undefined} rect
- * @param {MapBounds | null | undefined} bounds
- * @returns {[number, number]}
- */
-export function mapCanvasSize(fullscreen, rect, bounds) {
-    if (fullscreen && rect) {
-        return [Math.max(300, Math.floor(rect.width)), Math.max(200, Math.floor(rect.height))];
-    }
-    const worldW = bounds ? bounds.maxX - bounds.minX : 0;
-    const worldH = bounds ? bounds.maxY - bounds.minY : 0;
-    const w = MAP_CANVAS_BASE_WIDTH;
-    return [w, worldW > 0 ? Math.round(Math.max(400, Math.min(850, w * (worldH / worldW)))) : 700];
-}
-
 // ─── Legend ─────────────────────────────────────────────────────────────────
 
 // legendTeams: one block per team in colour order, its players in name

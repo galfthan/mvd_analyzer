@@ -7,11 +7,13 @@
 import { activeTab, selectTab } from '../state/ui.js';
 import { resolveTabName } from '../lib/url-state.js';
 import { updateUrlState } from './url.js';
+import { setPreset, isPreset } from '../player/layout.js';
 
-// switchTab takes a URL tab name too (the locs-regions alias); an unknown
-// name changes nothing.
+// switchTab takes a URL tab name too (the locs-regions alias; map / player
+// open the Watch tab in that view); an unknown name changes nothing.
 /** @param {string} name */
 export function switchTab(name) {
+    if (isPreset(name)) setPreset(name);
     selectTab(resolveTabName(name));
 }
 

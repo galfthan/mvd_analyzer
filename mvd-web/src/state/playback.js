@@ -21,7 +21,7 @@ import { segment } from './timeline.js';
 import { crossedEnd } from '../lib/playback-bar.js';
 
 // The tabs the bar shows on.
-export const TABS_WITH_TIMELINE = ['timeline', 'chat', 'map', 'keymoments', 'player'];
+export const TABS_WITH_TIMELINE = ['timeline', 'chat', 'keymoments', 'player'];
 
 // A frame closer than this to the last one is skipped (~60 fps).
 const FRAME_MS = 16;

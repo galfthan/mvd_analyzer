@@ -865,7 +865,7 @@ mvd-analyzer/
     test/                  node --test unit tests for the DOM-free modules
     cmd/wasm/              WASM entry (exports analyzeMVD to JS)
 
-  mvd-map-view/            ESM: the embeddable WebGL2 map renderer (MvdMap) the Map tab and the Player map pane draw with
+  mvd-map-view/            ESM: the embeddable WebGL2 map renderer (MvdMap) the Watch tab's map panes draw with
   mvd-fte-player/          ESM: FTE demo player page for the Player tab (port of hub's, MIT)
 
   demos/                   Corpus for regression + manual testing (untracked)

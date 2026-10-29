@@ -14,7 +14,6 @@
     import AimStatsTab from '../tabs/aimstats/AimStatsTab.svelte';
     import LocGraphTab from '../tabs/locgraph/LocGraphTab.svelte';
     import TimelineTab from '../tabs/timeline/TimelineTab.svelte';
-    import MapTab from '../tabs/map/MapTab.svelte';
     import SearchTab from '../tabs/search/SearchTab.svelte';
     import PlaybackBar from '../ui/PlaybackBar.svelte';
     import Toast from '../player/Toast.svelte';
@@ -35,7 +34,6 @@
             <LocGraphTab />
             <TimelineTab />
             <PlayerTab />
-            <MapTab />
             <SearchTab />
         </div>
     </main>

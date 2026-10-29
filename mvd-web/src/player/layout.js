@@ -1,14 +1,20 @@
-// layout.js — the Player tab's panes, in two columns: `below`, the main
-// one (the Player pane's by default; the name is from before the player
-// was a pane, when it sat under it), and `order`, the side one. Which panes are open in each, in what
-// order, each one's height, collapsed state and options (the map's
+// layout.js — the Map / Player tab's panes, in two columns: `below`, the
+// main one (the name is from before the player was a pane, when it sat
+// under it), and `order`, the side one. Which panes are open in each, in
+// what order, each one's height, collapsed state and options (the map's
 // overlays, a graph's window), the side column's share of the tab's width
-// (a percentage, PaneForge's unit) and whether it is shown. A per-viewer
-// convenience kept in localStorage.
+// (a percentage, PaneForge's unit) and whether it is shown.
+//
+// The tab has preset views — `map` (mainly the map, no engine) and
+// `player` (mainly the demo player) — each its own layout: rearranging
+// edits the preset in use, resetPreset() restores it, setPreset() switches
+// (`paneLayout` is always the one in use). A fresh visit starts in `map`.
+// A per-viewer convenience kept in localStorage.
 
 import { store } from '../state/store.js';
 
-const KEY = 'mvd.playerPanes.v3';
+const KEY = 'mvd.playerPanes.v4';        // { preset, layouts: { map, player } }
+const V3_KEY = 'mvd.playerPanes.v3';     // one layout, before the presets
 const V2_KEY = 'mvd.playerPanes.v2';    // before the player was a pane
 const OLD_KEY = 'mvd.playerPanes.v1';   // an order array, the PoC's format
 
@@ -32,7 +38,7 @@ export const PANE_IDS = [
 ];
 /** @typedef {'order' | 'below'} Column */
 /** @type {PaneLayout} */
-const DEFAULT = {
+const PLAYER_DEFAULT = {
     order: ['map', 'players', 'team-weapons'],
     below: ['player', 'playlist'],
     collapsed: {},
@@ -41,14 +47,30 @@ const DEFAULT = {
     split: 30,            // the column's % of the width, when shown
     hidden: false,
 };
+/** @type {PaneLayout} */
+const MAP_DEFAULT = {
+    ...PLAYER_DEFAULT,
+    order: ['players', 'items', 'region-status'],
+    below: ['map'],
+    split: 34,
+};
+
+/** @typedef {'map' | 'player'} Preset */
+/** @type {Record<Preset, PaneLayout>} */
+const PRESET_DEFAULTS = { map: MAP_DEFAULT, player: PLAYER_DEFAULT };
+export const PRESET_IDS = /** @type {Preset[]} */ (['map', 'player']);
+/** @param {unknown} id @returns {id is Preset} */
+export const isPreset = (id) => PRESET_IDS.includes(/** @type {Preset} */ (id));
+
 export const MIN_SPLIT = 18;
 export const MAX_SPLIT = 60;
 
 /**
  * @param {unknown} v  a stored layout, untrusted
+ * @param {PaneLayout} [DEFAULT]  the preset's default
  * @returns {PaneLayout}
  */
-function sanitize(v) {
+function sanitize(v, DEFAULT = PLAYER_DEFAULT) {
     /** @type {PaneLayout & { width?: unknown }} */
     const out = { ...DEFAULT, ...(v && typeof v === 'object' ? v : {}) };
     // A layout stored before the finder and the playlist were panes has no
@@ -70,35 +92,75 @@ function sanitize(v) {
     return out;
 }
 
+// legacyLayout: a layout stored before the presets (v3, v2 or the PoC's
+// v1), null when there is none. It becomes the Player preset.
+function legacyLayout() {
+    const v = JSON.parse(localStorage.getItem(V3_KEY) || 'null');
+    if (v) return sanitize(v);
+    // A layout from before the player was a pane gets it on top of the
+    // main column, where the player was.
+    const v2 = JSON.parse(localStorage.getItem(V2_KEY) || 'null');
+    if (v2) {
+        const l = sanitize(v2);
+        if (!columnOf(l, 'player')) l.below.unshift('player');
+        return l;
+    }
+    const old = JSON.parse(localStorage.getItem(OLD_KEY) || 'null');
+    if (Array.isArray(old)) return sanitize({ order: old });
+    return null;
+}
+
+/** @returns {{ preset: Preset, layouts: Record<Preset, PaneLayout> }} */
 function load() {
     try {
         const v = JSON.parse(localStorage.getItem(KEY) || 'null');
-        if (v) return sanitize(v);
-        // A layout from before the player was a pane gets it on top of the
-        // main column, where the player was.
-        const v2 = JSON.parse(localStorage.getItem(V2_KEY) || 'null');
-        if (v2) {
-            const l = sanitize(v2);
-            if (!columnOf(l, 'player')) l.below.unshift('player');
-            return l;
+        if (v && typeof v === 'object') {
+            return {
+                preset: isPreset(v.preset) ? v.preset : 'map',
+                layouts: { map: sanitize(v.layouts?.map, MAP_DEFAULT), player: sanitize(v.layouts?.player, PLAYER_DEFAULT) },
+            };
         }
-        const old = JSON.parse(localStorage.getItem(OLD_KEY) || 'null');
-        if (Array.isArray(old)) return sanitize({ order: old });
+        return { preset: 'map', layouts: { map: sanitize(null, MAP_DEFAULT), player: legacyLayout() || sanitize(null) } };
     } catch { /* storage blocked or corrupt: defaults */ }
-    return sanitize(null);
+    return { preset: 'map', layouts: { map: sanitize(null, MAP_DEFAULT), player: sanitize(null) } };
 }
 
-export const paneLayout = store(load());
+const all = load();
+export const preset = store(all.preset);
+export const paneLayout = store(all.layouts[all.preset]);
+
+function save() {
+    try {
+        localStorage.setItem(KEY, JSON.stringify(all));
+    } catch { /* per-viewer convenience */ }
+}
 
 /** @param {(layout: PaneLayout) => void} fn */
 export function updateLayout(fn) {
-    const next = sanitize(structuredClone(paneLayout.get()));
+    const base = PRESET_DEFAULTS[all.preset];
+    const next = sanitize(structuredClone(paneLayout.get()), base);
     fn(next);
-    const clean = sanitize(next);
-    try {
-        localStorage.setItem(KEY, JSON.stringify(clean));
-    } catch { /* per-viewer convenience */ }
+    const clean = sanitize(next, base);
+    all.layouts[all.preset] = clean;
+    save();
     paneLayout.set(clean);
+}
+
+// setPreset shows a preset's layout (as the viewer left it).
+/** @param {string} id */
+export function setPreset(id) {
+    if (!isPreset(id) || id === all.preset) return;
+    all.preset = id;
+    save();
+    preset.set(id);
+    paneLayout.set(all.layouts[id]);
+}
+
+// resetPreset puts the preset in use back to its default layout.
+export function resetPreset() {
+    all.layouts[all.preset] = sanitize(null, PRESET_DEFAULTS[all.preset]);
+    save();
+    paneLayout.set(all.layouts[all.preset]);
 }
 
 /**

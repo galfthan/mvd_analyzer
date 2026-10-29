@@ -1,5 +1,7 @@
 <script>
-    // The Player tab: two columns of panes split by PaneForge — the main one
+    // The Map / Player tab ("Watch"): a Map | Player switch between its
+    // preset views (layout.js: each preset a saved layout; Reset restores
+    // the one in use), then two columns of panes split by PaneForge — the main one
     // (layout `below`: the Player pane and the playlist to start with) and
     // the side one (`order`; drag the divider, or focus it and use the arrow
     // keys; dragging the column shut hides it). The engine itself is not in
@@ -10,7 +12,8 @@
     import { PaneGroup, Pane, PaneResizer } from 'paneforge';
     import PlayerLayer from './PlayerLayer.svelte';
     import PaneColumn from './PaneColumn.svelte';
-    import { paneLayout, updateLayout, MIN_SPLIT, MAX_SPLIT } from './layout.js';
+    import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
+    import { paneLayout, updateLayout, preset, setPreset, resetPreset, MIN_SPLIT, MAX_SPLIT } from './layout.js';
     import { fullscreenTab } from '../app/fullscreen.js';
 
     // PaneForge takes the sizes once; the layout store follows its changes.
@@ -30,6 +33,14 @@
             column.expand();
             column.resize(split);
         }
+    });
+
+    // Another preset (or a reset) brings its own split.
+    $effect(() => {
+        $preset;
+        $paneLayout;
+        if (!column || $paneLayout.hidden || column.isCollapsed()) return;
+        if (Math.abs(column.getSize() - $paneLayout.split) > 0.5) column.resize($paneLayout.split);
     });
 
     /** @param {boolean} hidden */
@@ -66,6 +77,15 @@
 <div id="tab-player" class="tab-content">
     <div class="empty-state">Load or search a demo to begin.</div>
     <div class="panel player-panel" class:player-panel--fullscreen={$fullscreenTab === 'player'}>
+        <div class="watch-head">
+            <span class="pt-group" role="group" aria-label="View">
+                <button class="pt-btn" class:active={$preset === 'map'} aria-pressed={$preset === 'map'}
+                    title="Mainly the map: the map large, players, items and regions beside it — no demo player to load" onclick={() => setPreset('map')}>Map</button>
+                <button class="pt-btn" class:active={$preset === 'player'} aria-pressed={$preset === 'player'}
+                    title="Mainly the demo player: the game view and the playlist, the map beside them" onclick={() => setPreset('player')}>Player</button>
+            </span>
+            <button class="pt-btn icon" title="Put this view's panes back as they were" onclick={() => resetPreset()}><RotateCcw size={14} /></button>
+        </div>
         <PaneGroup direction="horizontal" class="player-layout" onLayoutChange={layoutChange}>
             <Pane order={1} minSize={100 - MAX_SPLIT}>
                 <PaneColumn column="below" />
@@ -80,3 +100,11 @@
         <PlayerLayer />
     </div>
 </div>
+
+<style>
+    .watch-head {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+</style>

@@ -1028,16 +1028,35 @@ loc the slowest?") with measured data before optimizing. It is what
 surfaced the two big costs — the parse event pass and the (now deferred)
 bucket build.
 
-## Player tab
+## Watch tab (the Map and Player views)
 
-The first tab ported to Svelte: `src/player/` (`PlayerTab.svelte` and its
-components, mounted by the shell). It watches the loaded demo in the FTE
+One tab, **Watch** (internal id `player`), replaced the Map and Player
+tabs (plan: [`plan-map-player-merge.md`](../plan-map-player-merge.md)).
+Its head switches between two **preset views** (`src/player/layout.js`):
+
+- **Map** — mainly the map: a large Map pane in the main column, Players,
+  Items and Region status beside it, and no Player pane, so the demo
+  engine does not load (the page's own playback is the clock: instant
+  scrubbing, −1×). A fresh visit starts here.
+- **Player** — mainly the demo player: the Player pane and the playlist,
+  the Map, Players and Team weapons beside them.
+
+Each view is its own saved pane layout (`mvd.playerPanes.v4`:
+`{ preset, layouts: { map, player } }`; a pre-preset layout becomes the
+Player view): rearranging edits the view in use, the ↺ button puts it
+back to its default, and switching returns to a view as it was left.
+`?tab=map` and `?tab=player` open the tab in that view (the two old tabs'
+links keep working), and the URL writes the view in use. Playing a clip
+switches to the Player view when the view in use shows no Player pane.
+
+`src/player/` (`PlayerTab.svelte` and its components, mounted by the
+shell) was the first tab ported to Svelte. It watches the loaded demo in the FTE
 engine ([`mvd-fte-player`](../mvd-fte-player/README.md), ported from hub's
 player), hosted in a **same-origin** iframe so the page drives it directly
 through `iframe.contentWindow` — seek, POV and speed are instant commands,
 not reloads of a hub embed. `src/player/engine.js` owns it (the unified
-bar's play / pause and speed drive it while it is the clock); the map pane reads the
-Map tab's loaded data (`src/tabs/map/map-model.js`), and the Health / armor
+bar's play / pause and speed drive it while it is the clock); the map panes read the
+map model's data (`src/tabs/map/map-model.js`), and the Health / armor
 pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
 
 - **Lazy, and only with a Player pane.** The iframe (≈6 MB of wasm plus
@@ -1135,14 +1154,14 @@ Player pane avoids that.)
 
 - **Clip finder** and **Playlist**: see *Clips and the playlist* below.
 - **Map** is its own `MvdMap` — its own canvas, camera and follow target —
-  reading the Map tab's loaded data each frame (`panes/map-sync.js`: data
+  reading the map model's data each frame (`panes/map-sync.js`: data
   fields by reference, never view state; the line-of-sight pairs once the
-  Map tab's lazy pass ran). The crosshair toggle (*follow POV*) puts the camera on
+  model's lazy pass ran). The crosshair toggle (*follow POV*) puts the camera on
   the watched player whenever the POV changes — a pan holds until the next
   switch; clicking a player on the map switches the POV to them; drag pans,
   right-drag orbits, the wheel zooms, double-click resets. A right-click
   that does not drag (or the sliders button) opens the overlay menu: follow,
-  view and velocity arrows, line of sight and PVS (running the Map tab's
+  view and velocity arrows, line of sight and PVS (running the map model's
   `ensureLineOfSight` once per demo), occlusion, trails (none / the watched
   player / everyone, the last 10 s), 3D and reset view; Escape or a click
   elsewhere closes it. With no engine (no Player pane — the Map preset)
@@ -1213,8 +1232,8 @@ from storage and share links, and the hub link, which has no such thing,
 drops it).
 
 - **Make**: the playback bar's selection is the clip. Where a POV is at
-  hand — the Player tab (the engine's; Auto counts) and the Map tab (the
-  followed player) — a *+ clip · who* pill beside the selection's in the
+  hand — the Watch tab: the engine's POV (Auto counts), or with no engine
+  the player the map follows — a *+ clip · who* pill beside the selection's in the
   playback bar adds it from that POV (`src/player/selection-clip.js`).
   Keys there: `i` / `o` set the selection's start / end at the playhead
   (keeping the other edge when it is still on its side, else 10 s away),
@@ -1570,32 +1589,23 @@ The `Drop` and `Run` columns are hub.quakeworld.nu replay links.
 `Run` spans 3 s before pickup to the picker's next death (or +15 s
 if they survived to match end), tracking the picker.
 
-## Map tab
+## The map model and the playback bar
 
-`src/tabs/map/`: `MapTab.svelte` (the canvas, the sidebar — legend, items,
-region status, learn-mode entity filters — and the controls under the
-map), `sidebar.js` (the legend and the region status, built by hand:
-`makeSortable` sorts the legend by moving its rows, and the region icons
-are cached canvases) and `map-model.js`, which owns the page's one map view
-(mvd-map-view's `MvdMap`) and loads each demo into it — locs, streams,
-items, entities, bounds, player symbols, trails, the async
-`maps/<map>.json` geometry. The DOM-free parts are `src/lib/map.js`.
-The load's `displayResults` (`src/app/load.js`) resets and loads it (`resetMap` /
-`loadMap`, from `loadMapAndRegions`) and again when the deferred buckets
-land; a load resets the view (pan, zoom, angles, follow, focus, learn
-mode, trail toggles). The model reads the region-control model and the
-team colours from their stores, and the Player tab's map pane copies its
-data into its own `MvdMap` each frame.
+`src/tabs/map/`: `map-model.js` holds the page's map data in one
+headless `MvdMap` (mvd-map-view) — locs, streams, items, entities,
+bounds, player symbols, trails, the async `maps/<map>.json` geometry —
+and `sidebar.js` builds the Players and Region status panes' contents by
+hand (`makeSortable` sorts the legend by moving its rows; the region
+icons are cached canvases). The DOM-free parts are `src/lib/map.js`. The
+load's `displayResults` (`src/app/load.js`) resets and loads it
+(`resetMap` / `loadMap`, from `loadMapAndRegions`) and again when the
+deferred buckets land. The model reads the region-control model and the
+team colours from their stores; every map pane copies its data into its
+own `MvdMap` each frame and draws at most once per animation frame while
+the tab shows. Learn mode is a store (`MvdMapTab.learnMode`) so the URL
+can keep it.
 
-The map draws only while the tab shows: on every frame of the page's
-playback (in the playback loop's own frame, so the follow camera moves
-with it), on the next frame after a seek or a change (geometry, a region
-edit, line of sight landing, a control), and each time the tab shows (now,
-a frame and 120 ms later). The legend, items list and region status follow
-a seek at once, playback every 200 ms, and catch up when the tab shows.
-Learn mode is a store (`MvdMapTab.learnMode`) so the URL can keep it.
-
-The unified bar above the Timeline, Chat, Map, Key Moments and Player tabs
+The unified bar above the Timeline, Chat, Key Moments and Watch tabs
 is `src/ui/PlaybackBar.svelte` (arithmetic in `src/lib/playback-bar.js`),
 laid out like a video player's: a thin scrubber across the top — the
 played part, a round playhead, minute marks, the selected segment, and
@@ -1625,35 +1635,34 @@ clears it on stop unless the user picked another meanwhile), so the
 Timeline tab zooms to it too.
 
 **Fullscreen** is one feature for every tab that offers it
-(`src/app/fullscreen.js`; Map and Player, each naming its panel in
+(`src/app/fullscreen.js`; the Watch tab, naming its panel in
 `FULLSCREEN_PANELS`): the active tab's row in the tab bar carries the
 icon for it, and `f` toggles it (not while a field has the keys). The
 tab's panel fills the screen and the playback bar moves into it on top,
 ending with *Exit*, so the way out sits in the top-right corner (Esc
 works too); however fullscreen ends, the bar moves back. A tab reacts to
-the `fullscreenTab` store — the Map resizes its canvas, the Player's
-panel takes `player-panel--fullscreen`.
+the `fullscreenTab` store — the Watch tab's panel takes
+`player-panel--fullscreen`.
 
-## Map-tab item overlay
+## Map item overlay
 
 When the result contains an `items` field (any MVD source — KTX,
-ktpro, CustomTF, etc.), the map tab renders every tracked item as a
-small square and surfaces a sidebar panel listing each item with
+ktpro, CustomTF, etc.), the map renders every tracked item as a
+small square and the Items pane lists each item with
 live status (`up` or countdown to respawn) and its loc region.
 Armors render as solid-filled coloured squares (RA/YA/GA); weapons,
 MH and powerups are black squares with a coloured outline matching
 the timeline palette plus a short text label (RL, LG, MH, Q, P, …).
 Items currently taken are dimmed on the map and highlighted-dim in
-the sidebar so verifying the event stream against gameplay is
-visual. The panel updates live during playback every 200 ms, with the
-legend and the region status (`src/tabs/map/MapTab.svelte`).
+the pane so verifying the event stream against gameplay is
+visual (`src/player/panes/ItemsPane.svelte`).
 
-## Map-tab 3D view
+## Map 3D view
 
 The map opens in a default **isometric** view — yaw 45°, tilted 55°
 from top-down (≈ the true isometric angle), so floors at different
 heights separate at a glance and the layout reads from a corner. The
-**3D** button toggles between this isometric view and the classic
+**3D** item of the map's right-click menu toggles between this isometric view and the classic
 top-down 2D view; right-drag (or Ctrl/Cmd+drag) rotates freely —
 horizontal motion spins the map (yaw), vertical motion tilts it (pitch,
 from top-down all the way to a horizontal side elevation at 0°). Yaw
@@ -1838,13 +1847,12 @@ Needs float render targets (`EXT_color_buffer_float`); without them, or
 for pre-v5 files, only the surfaces draw.
 
 Directional floor shading (`state.worldLight`) is always on. Depth fog
-(`state.fog`) is an option, off by default (the toolbar's *Fog*, the
-right-click menu's, the map pane's): it starts a little in front of the
+(`state.fog`) is an option, off by default (the map's right-click
+menu): it starts a little in front of the
 map centre and thickens toward the far side.
 
 A right-click on the map that does not drag (a right-drag orbits) opens
-the overlay menu (`src/ui/MapMenu.svelte`, shared with the Player tab's
-map pane): view / velocity arrows, line of sight, PVS, occlusion, fog,
+the overlay menu (`src/ui/MapMenu.svelte`, filled by the map pane): view / velocity arrows, line of sight, PVS, occlusion, fog,
 trails, 3D and reset view; a click elsewhere or Escape closes it.
 
 Everything is drawn through one orbit-camera orthographic projection
@@ -1868,7 +1876,7 @@ lives in the map's `camera` (`MvdMap.camera`: `yaw`, `pitch`, orbit
 center `cx/cy/zMid`, `zoomK`, `panX/panY`); rotation goes through
 `MvdMap.setCamera` (`setMapCamera` in `mvd-map-view/src/camera.js`).
 
-## Map-tab "Learn map" mode
+## Map "Learn map" mode
 
 When the result contains a `mapEntities` field (the static per-map
 layout from the embedded corpus — see

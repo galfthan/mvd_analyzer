@@ -6,7 +6,7 @@
     // read from it each frame (syncMapData). Click a player on the map
     // to watch them; drag pans, right-drag orbits, the wheel zooms,
     // double-click resets the view. A right-click (or the sliders button)
-    // opens the overlay menu (MapMenu, the Map tab's too) — view / velocity
+    // opens the overlay menu (MapMenu) — view / velocity
     // arrows, trails, line of sight, PVS, occlusion, fog and 3D — kept in
     // the pane's options (layout.js); with no engine the menu also picks
     // whom to follow, and it holds the Map tab's trail length, clear and

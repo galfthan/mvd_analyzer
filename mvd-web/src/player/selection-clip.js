@@ -1,12 +1,12 @@
 // selection-clip.js — the selected segment as a clip: the playback bar's
-// "+ clip" under the selection and the keys i / o / c. A clip needs a POV,
-// so it is offered where one is: the Player tab (the engine's — Auto
-// counts) and the Map tab (the followed player). `selectionPov` is that
-// POV, null elsewhere.
+// "+ clip" and the keys i / o / c. A clip needs a POV, so it is offered
+// where one is: the Watch tab — the engine's (Auto counts) when it is up,
+// else the player the map follows (follow.js). `selectionPov` is that POV,
+// null elsewhere.
 
 import { store } from '../state/store.js';
 import { activeTab, demo, segment, clock } from '../state/index.js';
-import { view } from '../tabs/map/map-model.js';
+import { mapFollow } from './follow.js';
 import { formatDuration, nameOfUserId } from '../lib/result.js';
 import { markIn, markOut } from '../lib/playback-bar.js';
 import { engine, currentRef } from './index.js';
@@ -20,16 +20,14 @@ export const selectionPov = store(/** @type {Pov | null} */ (null));
 /** @returns {Pov | null} */
 function povNow() {
     const tab = activeTab.get();
-    if (tab === 'player') {
+    if (tab !== 'player') return null;
+    if (engine.drives()) {
         const track = engine.povTrack();
         return { track, who: track === 'auto' ? '' : nameOfUserId(demo.get()?.result, track) || '' };
     }
-    if (tab === 'map') {
-        const name = view.state.followPlayer;
-        const id = name ? demo.get()?.result?.timelineAnalysis?.playerUserIDs?.[name] : null;
-        return id ? { track: id, who: name } : null;
-    }
-    return null;
+    const name = mapFollow.get();
+    const id = name ? demo.get()?.result?.timelineAnalysis?.playerUserIDs?.[name] : null;
+    return id && name ? { track: id, who: name } : null;
 }
 
 function refresh() {
@@ -68,6 +66,6 @@ export function setupSelectionClip() {
     activeTab.subscribe(refresh);
     demo.subscribe(refresh);
     engine.status.subscribe(refresh);
-    view.on('follow', refresh);
+    mapFollow.subscribe(refresh);
     window.addEventListener('keydown', onKey);
 }

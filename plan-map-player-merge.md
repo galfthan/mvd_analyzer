@@ -33,3 +33,10 @@ fresh visit starts in the Map preset.
    used, go.
 
 Each step: `make test`, build, headless checks, docs, push.
+
+## Status (2026-10-29)
+
+Built and pushed: 1 engine only with a Player pane 2ccde0a · 2 the Map
+tab's panels as panes 7a291e4 · 3 the map pane does the Map tab's map
+c795347 · 4 presets replace the tabs (this commit). The tab is labelled
+**Watch**. Verified headless (Playwright + SwiftShader).

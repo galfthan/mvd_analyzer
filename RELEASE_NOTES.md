@@ -23,8 +23,16 @@ opens a light player page that plays the clips without loading the
 analyzer, with a link on to the full Player tab. Hub links everywhere
 read **play** (Shift: **+add**, Ctrl / Cmd: **hub**), the clip finder
 starts closed and shows its clips beside the stages, and the map's depth
-fog is an option again — off by default — on the Map tab's toolbar and a
-new right-click menu.
+fog is an option again — off by default — in the map's right-click menu.
+
+The **Map and Player tabs are now one, Watch**, with two preset views:
+*Map* (a large map, the players' table, items and region status — no demo
+player to load, so it opens instantly and scrubs freely) and *Player*
+(the game view and the playlist, the map beside). Each view remembers how
+you arranged it; old `?tab=map` / `?tab=player` links open the matching
+view, and playing any clip switches to the Player view. The map's
+toolbar controls moved into its right-click menu (follow, trails, learn
+the map), and the Map tab's player table replaced the Player tab's.
 
 ## unreleased (web-svelte) — schema v77: backpack drops say who took them
 

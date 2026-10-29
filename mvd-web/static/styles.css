@@ -2031,14 +2031,6 @@ th.sortable.sort-desc::after {
     text-align: right;
 }
 
-.map-player-trail-cb {
-    width: 14px;
-    height: 14px;
-    cursor: pointer;
-    margin: 0;
-    padding: 0;
-}
-
 /* Scrollbar styling */
 ::-webkit-scrollbar {
     width: 8px;
@@ -2403,69 +2395,6 @@ th.sortable.sort-desc::after {
     text-align: center;
 }
 
-/* Map View Styles */
-.map-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-/* Fullscreen layout: the whole .map-panel becomes the fullscreen element.
-   Top bar stays at top, .map-main-content grows to fill remaining height,
-   canvas grows to fill the available width (minus sidebar), sidebar keeps
-   its max-width. The region-control table below the canvas is hidden in
-   fullscreen to free vertical space. */
-.map-panel--fullscreen {
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    padding: 10px;
-    background: var(--bg-deep);
-    overflow: hidden;
-}
-
-.map-panel--fullscreen .map-main-content {
-    flex: 1 1 auto;
-    min-height: 0;
-}
-
-.map-panel--fullscreen .map-canvas-container {
-    flex: 1 1 auto;
-    min-width: 0;
-    min-height: 0;
-    display: flex;
-    align-items: stretch;
-}
-
-.map-panel--fullscreen #map-canvas {
-    width: 100%;
-    height: 100%;
-}
-
-/* Sidebar needs to fit the items panel (218 px) + region-status side by
- * side, so its min-width has to be wide enough that region-status gets
- * a usable column. The map shrinks to give it that room; on larger
- * screens the sidebar still tops out at max-width and the rest goes to
- * the canvas. */
-.map-panel--fullscreen .map-sidebar {
-    max-height: 100%;
-    overflow-y: auto;
-    min-width: 500px;
-    max-width: 780px;
-}
-
-.map-panel--fullscreen #region-control-panel {
-    display: none !important;
-}
-
-/* Relocated unified timeline: pin to the bottom of the fullscreen map panel,
-   shrunk to one row of controls so it never eats canvas space. */
-.map-panel--fullscreen #unified-timeline {
-    margin: 0;
-    padding: 6px 10px;
-    flex: 0 0 auto;
-}
-
 .locgraph-panel {
     display: flex;
     flex-direction: column;
@@ -2556,147 +2485,6 @@ th.sortable.sort-desc::after {
     white-space: normal;
 }
 
-.map-track-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.map-track-sep {
-    display: inline-block;
-    width: 1px;
-    height: 22px;
-    background: #3a3a55;
-    margin: 0 4px;
-}
-
-/* Trails → Players dropdown: uses <details> so it toggles natively, no JS
-   needed to show/hide the panel itself. */
-.map-trails-dropdown {
-    position: relative;
-}
-
-.map-trails-dropdown > summary {
-    list-style: none;
-    cursor: pointer;
-    background: transparent;
-    border: 1px solid #666;
-    color: #888;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    user-select: none;
-    transition: all 0.2s;
-}
-
-.map-trails-dropdown > summary::-webkit-details-marker { display: none; }
-
-.map-trails-dropdown > summary:hover {
-    border-color: var(--accent-cyan);
-    color: var(--accent-cyan);
-}
-
-.map-trails-dropdown[open] > summary {
-    border-color: var(--accent-cyan);
-    color: var(--accent-cyan);
-}
-
-.map-trails-dropdown > summary::after {
-    content: ' ▾';
-    font-size: 0.75rem;
-    opacity: 0.8;
-}
-
-.map-trails-players-panel {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    background: #16213e;
-    border: 1px solid rgba(0, 217, 255, 0.3);
-    border-radius: 6px;
-    padding: 8px 10px;
-    min-width: 180px;
-    max-height: 360px;
-    overflow-y: auto;
-    z-index: 30;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.map-trails-players-panel label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    color: #d0d0e0;
-    cursor: pointer;
-    padding: 2px 0;
-}
-
-.map-trails-players-panel input[type="checkbox"] {
-    width: 14px;
-    height: 14px;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.map-trails-players-panel .map-trails-player-name {
-    font-weight: 600;
-}
-
-.map-trail-label {
-    color: #888;
-    font-size: 0.9rem;
-}
-
-.map-track-controls button {
-    background: transparent;
-    border: 1px solid #666;
-    color: #888;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-}
-
-.map-track-controls button:hover {
-    border-color: var(--accent-cyan);
-    color: var(--accent-cyan);
-}
-
-/* Every toggle button in the map controls reads its state the same way:
-   highlighted (filled cyan) while active, plain otherwise. Covers Learn map,
-   View, Vel, 3D, Fullscreen, and the Trails All / None buttons. */
-.map-track-controls button.active {
-    border-color: var(--accent-cyan);
-    color: var(--bg-deep);
-    background: var(--accent-cyan);
-}
-
-/* LOS computes lazily on first toggle; show a wait cue while the worker runs
-   the (potentially multi-second) raycast pass. */
-.map-track-controls button.pending {
-    opacity: 0.6;
-    cursor: progress;
-}
-
-/* The Trails "Players" dropdown summary highlights when a custom subset of
-   players is selected (neither All nor None). */
-.map-trails-dropdown > summary.active {
-    border-color: var(--accent-cyan);
-    color: var(--bg-deep);
-    background: var(--accent-cyan);
-}
-
-/* Learn-map sidebar: category filter checklist. */
-.map-entities-panel {
-    margin-bottom: 12px;
-}
-
 .map-entity-filters {
     display: flex;
     flex-direction: column;
@@ -2727,59 +2515,6 @@ th.sortable.sort-desc::after {
     display: inline-block;
 }
 
-.map-entity-hint {
-    margin: 8px 0 0;
-    font-size: 0.75rem;
-    color: #777;
-    line-height: 1.3;
-}
-
-/* Below-map entity table (learn mode): standard .stats-table styling,
-   expands with the tab (no inner scrollbar). */
-.map-entities-table-wrap {
-    margin-top: 12px;
-}
-
-.map-trail-select {
-    background: var(--bg-deep);
-    border: 1px solid #666;
-    color: #ccc;
-    padding: 5px 8px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    cursor: pointer;
-}
-
-.map-trail-select:hover,
-.map-trail-select:focus {
-    border-color: var(--accent-cyan);
-    outline: none;
-}
-
-.map-player-trail-cb {
-    width: 14px;
-    height: 14px;
-    cursor: pointer;
-}
-
-.map-main-content {
-    display: flex;
-    gap: 20px;
-}
-
-.map-canvas-container {
-    position: relative;
-    flex-shrink: 0;
-}
-
-#map-canvas {
-    background: #0a0a15;
-    border: 1px solid rgba(0, 217, 255, 0.15);
-    border-radius: 6px;
-    display: block;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4), inset 0 0 30px rgba(0, 0, 0, 0.3);
-}
-
 .map-no-data {
     position: absolute;
     top: 50%;
@@ -2795,24 +2530,6 @@ th.sortable.sort-desc::after {
     margin-bottom: 5px;
 }
 
-.map-sidebar {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    min-width: 320px;
-    max-width: 720px;
-}
-
-/* Players panel sits alone (full sidebar width); below it, Items and
- * Region Status share a flex row so their combined width matches the
- * Players panel above. */
-.map-sidebar-row {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-}
-
 .map-legend {
     background: #16213e;
     border-radius: 8px;
@@ -2823,39 +2540,6 @@ th.sortable.sort-desc::after {
  * "120 RA" using the existing .armor-{ra,ya,ga} colour classes. */
 .team-status-table .stack-h {
     color: #ffffff;
-}
-
-#region-status-panel {
-    background: #16213e;
-    border-radius: 8px;
-    padding: 15px;
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-#region-status-panel h4 {
-    color: var(--accent-cyan);
-    margin-bottom: 8px;
-    font-size: 0.95rem;
-}
-
-/* Items panel — narrow column to the right of the player table. Three
- * columns only: swatch, loc, status. The item name is conveyed by the
- * swatch's colour and inline label (RL/LG/MH/Q/P/...) so we drop the
- * dedicated name column to keep the panel narrow. */
-.map-items-panel {
-    background: #16213e;
-    border-radius: 8px;
-    padding: 12px;
-    flex: 0 0 auto;
-    width: 218px;
-    min-width: 195px;
-}
-
-.map-items-panel h4 {
-    color: var(--accent-cyan);
-    margin-bottom: 8px;
-    font-size: 0.95rem;
 }
 
 .map-items-table {
@@ -3061,14 +2745,6 @@ th.sortable.sort-desc::after {
 }
 
 @media (max-width: 900px) {
-    .map-main-content {
-        flex-direction: column;
-    }
-
-    .map-sidebar {
-        max-width: none;
-        flex-direction: row;
-    }
 
     .map-legend {
         flex: 1;

@@ -10,14 +10,18 @@ globalThis.localStorage = {
 mem.set('mvd.playerPanes.v1', JSON.stringify(['feed', 'map', 'bogus', 'map']));
 
 const { store } = await import('../src/state/store.js');
-const { paneLayout, updateLayout, movePane, showPane, MAX_SPLIT, paneOpt, setPaneOpt } = await import('../src/player/layout.js');
+const { paneLayout, updateLayout, movePane, showPane, MAX_SPLIT, paneOpt, setPaneOpt, preset, setPreset } = await import('../src/player/layout.js');
 const { playlist, addClips, moveClip, removeClip, setRun, setLabel } = await import('../src/player/playlist-store.js');
 const { createRunner } = await import('../src/player/runner.js');
 const { demoRefOf } = await import('../src/player/demo-ref.js');
 const { syncMapData } = await import('../src/player/panes/map-sync.js');
 
 test('pane layout migrates the PoC order and sanitizes', () => {
-    assert.deepEqual(paneLayout.get().order, ['feed', 'map'], 'v1 order kept, unknown and duplicate ids dropped');
+    assert.equal(preset.get(), 'map', 'a fresh visit starts in the Map view');
+    assert.deepEqual([paneLayout.get().below, paneLayout.get().order], [['map'], ['players', 'items', 'region-status']]);
+    setPreset('player');
+    assert.equal(preset.get(), 'player');
+    assert.deepEqual(paneLayout.get().order, ['feed', 'map'], 'a pre-preset layout is the Player view: v1 order kept, unknown and duplicate ids dropped');
     assert.deepEqual(paneLayout.get().below, ['player', 'playlist'], 'a layout from before the main column gets the default: the player and the playlist (the finder is off)');
     updateLayout((l) => { l.below = ['finder', 'playlist']; });
     updateLayout((l) => { l.split = 99999; l.width = 420; l.order.push('stack', 'stack'); });
@@ -28,7 +32,7 @@ test('pane layout migrates the PoC order and sanitizes', () => {
     assert.deepEqual(paneLayout.get().order, ['stack', 'feed', 'map']);
     movePane('stack', 'order', 2);
     assert.deepEqual(paneLayout.get().order, ['feed', 'map', 'stack'], 'the dragged pane takes the target slot, both ways');
-    assert.deepEqual(JSON.parse(mem.get('mvd.playerPanes.v3')).order, ['feed', 'map', 'stack']);
+    assert.deepEqual(JSON.parse(mem.get('mvd.playerPanes.v4')).layouts.player.order, ['feed', 'map', 'stack']);
     movePane('playlist', 'order', 1);
     assert.deepEqual([paneLayout.get().order, paneLayout.get().below], [['feed', 'playlist', 'map', 'stack'], ['finder']], 'across columns');
     movePane('playlist', 'below', 99);
@@ -51,7 +55,7 @@ test('pane options persist and read back typed', () => {
     assert.equal(paneOpt(l, 'score', 'window', 'x'), 'x', 'another type falls back');
     updateLayout((x) => { x.opts.bogus = { a: 1 }; x.opts.feed = 'nope'; });
     assert.deepEqual(Object.keys(paneLayout.get().opts).sort(), ['map', 'score'], 'unknown panes and non-objects dropped');
-    assert.equal(JSON.parse(mem.get('mvd.playerPanes.v3')).opts.score.window, 180);
+    assert.equal(JSON.parse(mem.get('mvd.playerPanes.v4')).layouts.player.opts.score.window, 180);
 });
 
 const demoA = { key: 'hub:1', gameId: 1, title: 'a', offset: 10 };
@@ -225,10 +229,28 @@ test('map data sync shares data, not view state', () => {
 });
 
 test('a layout from before the player was a pane gets it on top of the main column', async () => {
-    mem.delete('mvd.playerPanes.v3');
+    mem.delete('mvd.playerPanes.v4');
     mem.set('mvd.playerPanes.v2', JSON.stringify({ order: ['map'], below: ['finder', 'playlist'], split: 30 }));
     const fresh = await import('../src/player/layout.js?v2-migration');
+    fresh.setPreset('player');
     assert.deepEqual([fresh.paneLayout.get().order, fresh.paneLayout.get().below], [['map'], ['player', 'finder', 'playlist']]);
+});
+
+test('presets: each view keeps its own layout; reset restores the one in use', async () => {
+    mem.delete('mvd.playerPanes.v4');
+    mem.delete('mvd.playerPanes.v2');
+    const p = await import('../src/player/layout.js?presets');
+    p.updateLayout((l) => { l.order.push('moments'); });
+    assert.ok(p.paneLayout.get().order.includes('moments'));
+    p.setPreset('player');
+    assert.ok(!p.paneLayout.get().order.includes('moments'), 'the Player view is untouched');
+    p.setPreset('map');
+    assert.ok(p.paneLayout.get().order.includes('moments'), 'back to the Map view as it was left');
+    p.resetPreset();
+    assert.deepEqual(p.paneLayout.get().order, ['players', 'items', 'region-status']);
+    assert.equal(JSON.parse(mem.get('mvd.playerPanes.v4')).preset, 'map');
+    p.setPreset('bogus');
+    assert.equal(p.preset.get(), 'map', 'an unknown view changes nothing');
 });
 
 test('slotBox: the layer over the slot, clipped to its scrolling ancestors', async () => {

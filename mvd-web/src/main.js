@@ -3,7 +3,7 @@
 // What it publishes on window is for the browser console and the headless
 // checks only — no page code reads these globals:
 //   MvdState   the shared stores (src/state/index.js)
-//   MvdMapTab  the Map tab's map view and loader (src/tabs/map/map-model.js)
+//   MvdMapTab  the map model: the demo's map data and its loader (src/tabs/map/map-model.js)
 //   MvdPlayer  the Player tab's engine (src/player/engine.js)
 //   mvdData    the data source (src/app/source.js)
 //   loadDemo   load and render a demo: { gameId } / { game } / { bytes, name }

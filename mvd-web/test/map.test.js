@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 import {
-    mapTeams, assignPlayerSymbols, mapBounds, dropEventsOf, posStreamsOf, mapCanvasSize, MAP_CANVAS_BASE_WIDTH,
+    mapTeams, assignPlayerSymbols, mapBounds, dropEventsOf, posStreamsOf,
     legendTeams, legendRowHtml, teamFragsAt, stackCell, weaponsText, regionStateLabel, regionStatusRows,
     panelItems, itemStatusCell, entityRows, entityRowsHtml, trailButtons,
 } from '../src/lib/map.js';
@@ -56,13 +56,6 @@ test('drops in seconds; position streams with samples only', () => {
     const pos = { t: [1] };
     assert.deepEqual(posStreamsOf({ streams: { players: [{ name: 'a', pos }, { name: 'b', pos: { t: [] } }, null] } }), { a: pos });
     assert.deepEqual(posStreamsOf(null), {});
-});
-
-test('mapCanvasSize: fixed width at the world aspect, or the fullscreen box', () => {
-    assert.deepEqual(mapCanvasSize(false, null, { minX: 0, maxX: 1000, minY: 0, maxY: 500 }), [MAP_CANVAS_BASE_WIDTH, 425]);
-    assert.deepEqual(mapCanvasSize(false, null, { minX: 0, maxX: 1000, minY: 0, maxY: 100 }), [850, 400]);
-    assert.deepEqual(mapCanvasSize(false, null, { minX: 0, maxX: 0, minY: 0, maxY: 0 }), [850, 700]);
-    assert.deepEqual(mapCanvasSize(true, { width: 1200.7, height: 150 }, null), [1200, 200]);
 });
 
 test('legend: teams in colour order, players by name, cells', () => {

@@ -65,7 +65,10 @@ test('url state: what is written, and the deep-link readers', () => {
     assert.equal(parseTime('x'), null);
     assert.equal(parseTime(null), null);
     assert.equal(resolveTabName('locs-regions'), 'loc-graph');
-    assert.equal(resolveTabName('map'), 'map');
+    assert.equal(resolveTabName('map'), 'player', 'the Map tab is the Watch tab in its Map view');
+    assert.equal(urlTab('map'), 'player');
+    assert.equal(urlQuery({ activeTab: 'player', preset: 'map', t: 0 }, null, SEARCH_FIELDS), 'tab=map', 'the Watch tab is written as its view');
+    assert.equal(urlQuery({ activeTab: 'player', preset: 'player', t: 0 }, null, SEARCH_FIELDS), 'tab=player');
     assert.equal(urlTab('locs-regions'), 'loc-graph');
     assert.equal(urlTab('timeline'), 'timeline');
     for (const none of ['bogus', '', null]) assert.equal(urlTab(none), null, `${none}: counts as no ?tab=`);
