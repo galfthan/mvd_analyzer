@@ -111,7 +111,7 @@ test('highlight tables: default orders and sort columns', () => {
     assert.deepEqual(air.map(a => a.time), [1000, 2000]);
     const ah = tbl.airgibs.rowHtml(air[0], hub);
     assert.match(ah, /airgib-lethal/);
-    assert.equal(href(ah), 'https://hub.quakeworld.nu/games/?gameId=42&from=6&to=14&track=7');
+    assert.equal(href(ah), 'https://hub.quakeworld.nu/games/?gameId=42&from=8&to=14&track=7', 'an airgib: 2.5 s before the hit');
 
     const armedQuad = { killed: true, relation: 'enemy', weapons: ['rl'], powerups: ['quad'] };
     assert.equal(dischargeValue({ victims: [armedQuad, { ...armedQuad, relation: 'team' }, { ...armedQuad, killed: false }] }), 2);

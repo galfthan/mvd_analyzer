@@ -417,7 +417,7 @@ export const PRESETS = [
     },
     {
         id: 'airgibs', title: 'Airgibs', about: 'Direct rocket hits on enemies in mid-air.',
-        query: { source: 'highlights', params: { kinds: 'airgib' }, clip: { slow: {} }, label: 'Airgib · {actor.name} → {victims.0.name}' },
+        query: { source: 'highlights', params: { kinds: 'airgib' }, clip: { before: 2500, slow: {} }, label: 'Airgib · {actor.name} → {victims.0.name}' },
     },
     {
         id: 'telefrags', title: 'Telefrags', about: 'Kills by teleporting onto someone.',

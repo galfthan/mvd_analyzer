@@ -346,16 +346,20 @@ function topKillRowHtml(k, ctx) {
 // table opens on its default sort column (HIGHLIGHT_TABLES), its rows laid
 // out in that order; every row carries `t`, its seek time in seconds.
 
+const AIRGIB_LEAD_S = 2.5;
+
 // The Hub replay link from the actor's userid (the JSON key is `userId` on
-// HighlightPlayer).
+// HighlightPlayer): `lead` seconds before the moment (5 s; an airgib, owner's
+// call, 2.5 s — the shot itself is the point) to 3 s after.
 /**
  * @param {RowCtx} ctx
  * @param {number} timeSec
  * @param {number | undefined} trackId
+ * @param {number} [lead]
  */
-function highlightWatchCell(ctx, timeSec, trackId) {
+function highlightWatchCell(ctx, timeSec, trackId, lead = 5) {
     if (!ctx.gameId) return '-';
-    const fromTime = Math.max(0, Math.floor(timeSec + ctx.demoOffset) - 5);
+    const fromTime = Math.max(0, Math.floor(timeSec + ctx.demoOffset - lead));
     const toTime = Math.floor(timeSec + ctx.demoOffset) + 3;
     return hubLinkHtml(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: toTime, track: trackId || 0 }));
 }
@@ -475,7 +479,7 @@ function airgibRowHtml(a, ctx) {
             <td data-sort-value="${a.lethal ? 1 : 0}">${lethalCell}</td>
             <td>${a.state ? highlightStateCell(a.state) : ''}</td>
             <td class="time-cell time-link" data-sort-value="${a.time}">${formatDuration(a.t)}</td>
-            <td>${highlightWatchCell(ctx, a.t, a.attackerUserID)}</td>
+            <td>${highlightWatchCell(ctx, a.t, a.attackerUserID, AIRGIB_LEAD_S)}</td>
         `;
 }
 
