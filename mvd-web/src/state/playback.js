@@ -4,7 +4,8 @@
 // tab draws each of those frames; the Timeline and Chat follow at their own
 // pace). The unified bar (src/ui/PlaybackBar.svelte) starts and stops it
 // and sets its speed. While the Player tab
-// shows, its engine is the clock instead and this loop does not run.
+// shows with its engine up, the engine is the clock instead and this loop
+// does not run (setPlaybackGate).
 //
 // Playing into the selected segment's end stops there (crossedEnd).
 // Forward past the end wraps to the start; reverse stops at 0. A tab without
@@ -27,6 +28,14 @@ const FRAME_MS = 16;
 
 export const playback = store({ playing: false, speed: 1 });
 
+// The Player engine, while it is the clock, keeps this loop off
+// (src/player/index.js sets the gate: engine.drives).
+let gate = () => false;
+/** @param {() => boolean} fn */
+export function setPlaybackGate(fn) {
+    gate = fn;
+}
+
 /** @type {number | null} */
 let raf = null;
 let last = 0;
@@ -40,7 +49,7 @@ export function setPlaybackSpeed(speed) {
 
 export function startPlayback() {
     const { playing, speed } = playback.get();
-    if (playing) return;
+    if (playing || gate()) return;
     playback.set({ playing: true, speed });
     last = performance.now();
     raf = requestAnimationFrame(step);
@@ -61,6 +70,10 @@ export function stopPlayback(at = clock.t) {
 }
 
 function step() {
+    if (gate()) {
+        stopPlayback();
+        return;
+    }
     raf = requestAnimationFrame(step);
     const now = performance.now();
     const elapsed = (now - last) / 1000;
@@ -83,7 +96,7 @@ function step() {
 }
 
 activeTab.subscribe((tab) => {
-    if (!TABS_WITH_TIMELINE.includes(tab) || tab === 'player') stopPlayback();
+    if (!TABS_WITH_TIMELINE.includes(tab)) stopPlayback();
 });
 
 demo.subscribe(() => {

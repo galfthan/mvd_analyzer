@@ -102,8 +102,9 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             return playClip(index + 1);
         }
         showSpan(c);
-        if (engine.activeTab.get() !== 'player') {
-            // The engine's iframe was hidden: showing it costs a repaint
+        if (!engine.active()) {
+            // The engine's iframe was hidden (or not there: selectTab
+            // opens a Player pane too): showing it costs a repaint
             // (seconds under software GL), and a jump sent before that
             // repaint plays on through it — the backward jump overshoots
             // its target and the controller's POV restore never sees the

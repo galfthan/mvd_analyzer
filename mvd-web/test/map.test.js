@@ -194,7 +194,7 @@ test('playback: the loop moves the clock, toggles, wraps, stops at 0 and on a ta
     performance.now = () => now;
     const crank = (ms) => { now += ms; const f = frames; frames = []; f.forEach((fn) => fn()); };
     try {
-        const { clock, activeTab, playback, segment, setPlaybackSpeed, startPlayback, togglePlayback, stopPlayback } = await import('../src/state/index.js');
+        const { clock, activeTab, playback, segment, setPlaybackSpeed, startPlayback, togglePlayback, stopPlayback, setPlaybackGate } = await import('../src/state/index.js');
         const seen = [];
         const off = clock.subscribe(({ from }) => seen.push(from));
         clock.setDuration(100);
@@ -234,7 +234,13 @@ test('playback: the loop moves the clock, toggles, wraps, stops at 0 and on a ta
         assert.ok(!playback.get().playing, 'a tab without it stops it');
         startPlayback();
         activeTab.set('player');
-        assert.ok(!playback.get().playing, 'the Player engine is the clock there');
+        assert.ok(playback.get().playing, 'the Player tab without its engine plays on');
+        setPlaybackGate(() => true);
+        crank(20);
+        assert.ok(!playback.get().playing, 'the Player engine up: it is the clock');
+        startPlayback();
+        assert.ok(!playback.get().playing, 'and the loop does not start');
+        setPlaybackGate(() => false);
         activeTab.set('map');
         segment.set({ start: 10, end: 20 });
         clock.seek(19.5);

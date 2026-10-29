@@ -49,11 +49,14 @@ const IDLE = { ready: false, playing: false, speed: 100, rate: 100, ended: false
 
 export class PlayerEngine {
     /**
-     * @param {{ clock: Clock, demo: import('../state/store.js').Store<DemoHandle | null>, activeTab: TabStore }} deps
+     * @param {{ clock: Clock, demo: import('../state/store.js').Store<DemoHandle | null>, activeTab: TabStore, wanted?: import('../state/store.js').Store<boolean> }} deps
+     *   `wanted`: whether something shows the engine (the Player tab: a
+     *   Player pane is open); without, the engine is dropped. Default: always.
      */
-    constructor({ clock, demo, activeTab }) {
+    constructor({ clock, demo, activeTab, wanted = store(true) }) {
         this.clock = clock;
         this.activeTab = activeTab;
+        this.wanted = wanted;
         // What the POV bar, the playback bar and the panes show.
         this.status = store({ ...IDLE });
         // The speed play runs at (percent): kept here, since FTE's own speed
@@ -91,38 +94,50 @@ export class PlayerEngine {
             if (handle === this.handle) return;
             this.teardown();
             this.handle = handle;
-            if (this.tabActive()) this.ensure();
+            if (this.active()) this.ensure();
         });
-        // Off the tab the engine is paused and its frame loop suspended: the
-        // hidden iframe would otherwise go on rendering every frame.
-        activeTab.subscribe((tab) => {
-            if (tab === 'player') {
-                this.fte?.resume();
-                this.ensure();
-                this.startSync();
-            } else if (this.fte) {
-                this.stopSync();
-                this.fte.pause();
-                this.fte.suspend();
-                this.publish();
-            }
-            // FTE takes the keyboard focus inside its frame; hidden, the
-            // frame would keep it and swallow every key the page's own
-            // shortcuts listen for (`f`, the map's Escape).
-            if (tab !== 'player' && this.iframe && document.activeElement === this.iframe) this.iframe.blur();
-        });
+        activeTab.subscribe(() => this.syncActive());
+        wanted.subscribe(() => this.syncActive());
         clock.subscribe(({ t, from }) => {
             if (from !== 'engine' && this.drives()) this.requestSeek(t);
         });
     }
 
-    tabActive() {
-        return this.activeTab.get() === 'player';
+    // On the Player tab, with something showing the engine.
+    active() {
+        return this.activeTab.get() === 'player' && this.wanted.get();
     }
 
-    // The engine is the page clock while it is up and its tab is showing.
+    // Unwanted, the engine is dropped (it loads again when wanted); off the
+    // tab it is paused and its frame loop suspended — the hidden iframe
+    // would otherwise go on rendering every frame.
+    syncActive() {
+        if (!this.wanted.get()) {
+            if (this.iframe) this.teardown();
+        } else if (this.active()) {
+            this.fte?.resume();
+            this.ensure();
+            this.startSync();
+        } else if (this.fte) {
+            this.stopSync();
+            this.fte.pause();
+            this.fte.suspend();
+            this.publish();
+        }
+        // FTE takes the keyboard focus inside its frame; hidden, the frame
+        // would keep it and swallow every key the page's own shortcuts
+        // listen for (`f`, the map's Escape).
+        if (!this.active() && this.iframe && document.activeElement === this.iframe) this.iframe.blur();
+    }
+
+    // The engine is the page clock while it is up and active.
     drives() {
-        return !!this.fte && this.tabActive();
+        return !!this.fte && this.active();
+    }
+
+    // Wanted on the tab but not up yet: the clock waits for it.
+    loading() {
+        return this.active() && !this.fte;
     }
 
     offset() {
@@ -133,7 +148,7 @@ export class PlayerEngine {
     /** @param {HTMLElement} el */
     attachHost(el) {
         this.host = el;
-        if (this.tabActive()) this.ensure();
+        if (this.active()) this.ensure();
     }
 
     ensure() {
@@ -157,7 +172,7 @@ export class PlayerEngine {
                     // entry hub's ?from= gives.
                     if (this.clock.t > 0) this.jump(this.clock.t);
                     fte.pause();
-                    if (this.tabActive()) this.startSync();
+                    if (this.active()) this.startSync();
                     else fte.suspend();
                     this.publish();
                     const onReady = this.onReady;
@@ -375,7 +390,7 @@ export class PlayerEngine {
         if (this.fte) fn();
         else {
             this.onReady = fn;
-            if (this.tabActive()) this.ensure();
+            if (this.active()) this.ensure();
         }
     }
 }

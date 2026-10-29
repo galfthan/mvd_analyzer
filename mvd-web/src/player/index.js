@@ -3,7 +3,10 @@
 // (src/ui/PlaybackBar.svelte) drive the engine while it is the clock;
 // components import from here.
 
-import { clock, demo, teams, activeTab, selectTab, segment } from '../state/index.js';
+import { clock, demo, teams, activeTab, selectTab, segment, setPlaybackGate } from '../state/index.js';
+import { store } from '../state/store.js';
+import { playerSlot } from './player-slot.js';
+import { showPane } from './layout.js';
 import { loadDemo } from '../app/load.js';
 import { decodePlaylist } from '../lib/playlist.js';
 import { decodeQuery } from '../lib/clip-query.js';
@@ -16,8 +19,32 @@ import { playlist, addClips } from './playlist-store.js';
 import { installHubLinkRouting } from './hub-links.js';
 import { toast } from './toast.js';
 
-export const engine = new PlayerEngine({ clock, demo, activeTab });
-export const runner = createRunner({ engine, demo, teams, selectTab, loadDemo, demoRefOf, segment });
+// The engine is wanted while a Player pane shows its placeholder. Gone, it
+// is dropped after a grace — a pane moved to the other column, or
+// collapsed and opened again, remounts its placeholder at once.
+const UNLOAD_GRACE_MS = 1500;
+const wanted = store(false);
+/** @type {ReturnType<typeof setTimeout> | undefined} */
+let unloadTimer;
+playerSlot.subscribe((el) => {
+    clearTimeout(unloadTimer);
+    if (el) {
+        if (!wanted.get()) wanted.set(true);
+    } else if (wanted.get()) {
+        unloadTimer = setTimeout(() => wanted.set(false), UNLOAD_GRACE_MS);
+    }
+});
+
+export const engine = new PlayerEngine({ clock, demo, activeTab, wanted });
+setPlaybackGate(() => engine.drives());
+
+// A clip plays in the engine: on the Player tab, with a Player pane open.
+/** @param {string} tab */
+function showPlayer(tab) {
+    selectTab(tab);
+    if (!playerSlot.get()) showPane('player');
+}
+export const runner = createRunner({ engine, demo, teams, selectTab: showPlayer, loadDemo, demoRefOf, segment });
 
 export function currentRef() {
     return runner.currentRef();

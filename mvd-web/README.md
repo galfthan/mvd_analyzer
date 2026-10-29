@@ -1040,9 +1040,16 @@ bar's play / pause and speed drive it while it is the clock); the map pane reads
 Map tab's loaded data (`src/tabs/map/map-model.js`), and the Health / armor
 pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
 
-- **Lazy.** The iframe (≈6 MB of wasm plus assets from `a.quake.world`) is
-  created on the first visit to the tab, and dropped when the `demo` store
-  changes to the next demo.
+- **Lazy, and only with a Player pane.** The iframe (≈6 MB of wasm plus
+  assets from `a.quake.world`) is created on the first visit to the tab
+  with a Player pane open, dropped when the `demo` store changes to the
+  next demo, and dropped too when no Player pane shows its placeholder for
+  1.5 s (`wanted` in `src/player/index.js`: the grace keeps a pane moved
+  or collapsed and reopened from reloading it). Without the engine the
+  page's own playback drives the clock on this tab as on any other
+  (instant scrubbing, −1×); with it up, `setPlaybackGate` keeps that loop
+  off. Playing a clip (a play link, a moment, the playlist) opens a Player
+  pane when none is open.
 - **No second download.** The data layer keeps a copy of the analysed bytes
   as a Blob (`DemoHandle.demoBlob`; the analyze transfers the original
   buffer), handed to the engine as a `blob:` URL — so locally loaded files
@@ -1333,7 +1340,9 @@ need a gameId) — a locally loaded file has none.
 
 The plan and the open questions are in [`plan-player-tab.md`](../plan-player-tab.md);
 the next round (playback bar, selection = clip, slow motion, Player pane,
-light player) in [`plan-player-next.md`](../plan-player-next.md).
+light player) in [`plan-player-next.md`](../plan-player-next.md); merging the
+Map tab into this one as preset views in
+[`plan-map-player-merge.md`](../plan-map-player-merge.md).
 
 ## Demo search
 

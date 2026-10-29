@@ -88,6 +88,7 @@ function fakeEngine(activeTab) {
         getDemoElapsedTime() { return this.t; }, isPlaying() { return this.playing; }, hasEnded() { return this.ended; } };
     return {
         fte, log, activeTab,
+        active: () => activeTab.get() === 'player',
         clock: { seek: (t) => log.push(['seek', t]) },
         offset: () => 10,
         seeking: () => false,

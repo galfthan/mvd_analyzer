@@ -85,9 +85,9 @@
     }
 
     function togglePlay() {
-        // The Player tab plays the engine; until it is up there is nothing
-        // to play (the page's own loop would fight it once it is).
-        if (tab === 'player' && !engine.drives()) return;
+        // The Player tab with a Player pane plays the engine; until it is up
+        // there is nothing to play (the page's own loop would fight it).
+        if (engine.loading()) return;
         if (!tp.playing) {
             const from = replayFrom(segment.get(), clock.t, tp.speed);
             if (from != null) clock.seek(from);
