@@ -227,6 +227,29 @@ export function rollingWindow(t, width, duration) {
     return [start, start + width];
 }
 
+// SELECTION_WINDOW: a graph window that is the selected segment, or the
+// whole match when there is none — the graph panes' default.
+export const SELECTION_WINDOW = -1;
+
+// paneWindow: a graph pane's [start, end] — the segment (or the match) for
+// SELECTION_WINDOW, else rollingWindow.
+/**
+ * @param {number} t
+ * @param {number} width  seconds, 0 for the match, SELECTION_WINDOW
+ * @param {number} duration
+ * @param {{ start: number, end: number } | null | undefined} seg
+ * @returns {[number, number]}
+ */
+export function paneWindow(t, width, duration, seg) {
+    if (width === SELECTION_WINDOW) return seg && seg.end > seg.start ? [seg.start, seg.end] : [0, duration];
+    return rollingWindow(t, width, duration);
+}
+
+// The window choices of the graph panes.
+export const PANE_WINDOWS = /** @type {Array<[number, string]>} */ ([
+    [SELECTION_WINDOW, 'selection / match'], [60, '1 min'], [180, '3 min'], [600, '10 min'], [0, 'match'],
+]);
+
 // ─── Axis ticks ─────────────────────────────────────────────────────────────
 
 const NICE_TICK_INTERVALS = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1200, 1800, 3600];

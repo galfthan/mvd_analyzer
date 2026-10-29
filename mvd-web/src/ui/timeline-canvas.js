@@ -116,12 +116,13 @@ function fillStackedColumn(ctx, px, segs, from, dir, scale, maxValue) {
 //   dropMarks  [{ time, color, isTop }] (optional — the weapon graph's RL / LG
 //              drops), dots in a strip reserved at the top and bottom of the
 //              plot so bars never overlap them.
+//   height     the canvas height in CSS px (default DIVERGING_GRAPH_LAYOUT.H)
 /**
  * @param {CanvasRef} c
- * @param {{ startTime: number, endTime: number, dataPoints: StackPoint[], maxValue: number, dropMarks?: Array<{ time: number, color: string, isTop: boolean }> }} opts
+ * @param {{ startTime: number, endTime: number, dataPoints: StackPoint[], maxValue: number, dropMarks?: Array<{ time: number, color: string, isTop: boolean }>, height?: number }} opts
  */
-export function renderDivergingGraph(c, { startTime, endTime, dataPoints, maxValue, dropMarks }) {
-    const setup = setupGraphCanvas(c, DIVERGING_GRAPH_LAYOUT.H);
+export function renderDivergingGraph(c, { startTime, endTime, dataPoints, maxValue, dropMarks, height }) {
+    const setup = setupGraphCanvas(c, height || DIVERGING_GRAPH_LAYOUT.H);
     if (!setup) return;
     const { ctx, Wcss, W, H, dpr } = setup;
 

@@ -9,7 +9,7 @@ import {
     prepPlayerHAData, sharedStackMax, prepPlayerFragDeathData, fragDeathLabels, prepPlayerWeaponSpans,
     playerDropMarks, nextTeamStatusSort, compareTeamStatusRows, teamStatusRows, teamStatusHtml,
     hubWatchLinkHtml, hitDropMark, dropTooltipHtml, hitPowerupSpan, powerupTooltipHtml,
-    teamStrongColor, dimColor, GRAPH_COLORS, HR_DUR, TEAM_STATUS_SORT_DEFAULT, rollingWindow,
+    teamStrongColor, dimColor, GRAPH_COLORS, HR_DUR, TEAM_STATUS_SORT_DEFAULT, rollingWindow, paneWindow, SELECTION_WINDOW,
 } from '../src/lib/timeline.js';
 import { segment } from '../src/state/timeline.js';
 import { hubLinkHtml } from '../src/lib/hub-url.js';
@@ -285,4 +285,11 @@ test('rollingWindow keeps the playhead three quarters in, inside the match', () 
     assert.deepEqual(rollingWindow(1190, 120, 1200), [1080, 1200], 'and at the end');
     assert.deepEqual(rollingWindow(300, 0, 1200), [0, 1200], '0 is the whole match');
     assert.deepEqual(rollingWindow(300, 1800, 1200), [0, 1200]);
+});
+
+test('paneWindow: the selection, else the match, by default; the rolling windows otherwise', () => {
+    assert.deepEqual(paneWindow(300, SELECTION_WINDOW, 1200, { start: 100, end: 160 }), [100, 160]);
+    assert.deepEqual(paneWindow(300, SELECTION_WINDOW, 1200, null), [0, 1200], 'no selection: the match');
+    assert.deepEqual(paneWindow(300, 120, 1200, { start: 100, end: 160 }), [210, 330], 'a rolling window ignores the selection');
+    assert.deepEqual(paneWindow(300, 0, 1200, null), [0, 1200]);
 });
