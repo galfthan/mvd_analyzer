@@ -1162,8 +1162,8 @@ drops it).
 
 - **Make**: the playback bar's selection is the clip. Where a POV is at
   hand — the Player tab (the engine's; Auto counts) and the Map tab (the
-  followed player) — a *+ clip · who · from – to* pill hangs under the
-  selection and adds it from that POV (`src/player/selection-clip.js`).
+  followed player) — a *+ clip · who* pill beside the selection's in the
+  playback bar adds it from that POV (`src/player/selection-clip.js`).
   Keys there: `i` / `o` set the selection's start / end at the playhead
   (keeping the other edge when it is still on its side, else 10 s away),
   `c` adds it (no selection: the last 10 s).
@@ -1221,7 +1221,7 @@ drops it).
   source events types=powerup
   keep   detail.powerup = "quad" and detail.frags > 0
   order  detail.frags desc first 5
-  clip   from=-3s to=detail.endTime+2s slow=time-1s..time+1s@0.3
+  clip   from=-3s to=detail.endTime+2s
   label  "Quad run · {player} · {detail.frags} frag{detail.frags|s}"
   ```
 
@@ -1517,11 +1517,13 @@ Learn mode is a store (`MvdMapTab.learnMode`) so the URL can keep it.
 
 The unified bar above the Timeline, Chat, Map, Key Moments and Player tabs
 is `src/ui/PlaybackBar.svelte` (arithmetic in `src/lib/playback-bar.js`),
-one 34 px row: play / pause (or Space, when no field or button has the
-keys), a speed dropdown (-1 / 0.2 / 0.5 / 1 / 2 / 5×; paused, it sets the
-speed the next play runs at), the time over the match length, and a thin
-scrubber — the played part, a round playhead, minute marks, the selected
-segment, and the time under the pointer floating above it. A press within
+laid out like a video player's: a thin scrubber across the top — the
+played part, a round playhead, minute marks, the selected segment, and
+the time under the pointer floating above it — and under it play / pause
+(or Space, when no field or button has the keys) and pills: the speed
+(-1 / 0.2 / 0.5 / 1 / 2 / 5×; paused, it sets the speed the next play
+runs at), the time over the match length, the selection (× clears it)
+and *+ clip*. A press within
 10 px of the playhead grabs it (drag to scrub); anywhere else a press
 that moves 4 px or more selects a range (the shared segment, set on
 release), and one that does not clears the segment and seeks there;

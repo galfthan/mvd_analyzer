@@ -1,9 +1,11 @@
 <script>
     // The unified playback bar above the Timeline, Chat, Map, Key Moments and
-    // Player tabs (TABS_WITH_TIMELINE): play / pause, the speed, the time,
-    // and a thin scrubber — the played part, a round playhead, minute marks,
-    // the selected segment, and the time under the pointer floating above
-    // it. src/lib/playback-bar.js has its arithmetic.
+    // Player tabs (TABS_WITH_TIMELINE), laid out like a video player's: a
+    // thin scrubber across the top — the played part, a round playhead,
+    // minute marks, the selected segment, and the time under the pointer
+    // floating above it — and under it play / pause and pills for the
+    // speed, the time, the selection and "+ clip". src/lib/playback-bar.js
+    // has its arithmetic.
     //
     // On the scrubber a press near the playhead grabs it (drag to scrub);
     // anywhere else a press that moves selects a range — the shared segment
@@ -12,8 +14,8 @@
     // clears the segment and seeks there. A double-click clears it. A new
     // selection seeks to its start, and playback stops at its end (a
     // selection plays like a clip; play there starts it over). Where a
-    // POV is at hand (src/player/selection-clip.js) a "+ clip" pill hangs
-    // under the selection.
+    // POV is at hand (src/player/selection-clip.js) a "+ clip" pill adds it to
+    // the playlist.
     //
     // Play / pause and the speed run the page's own playback
     // (src/state/playback.js) or, while the Player engine is the clock (the
@@ -34,6 +36,7 @@
         clock, demo, activeTab, segment, playback, setPlaybackSpeed, togglePlayback, TABS_WITH_TIMELINE,
     } from '../state/index.js';
     import Plus from '@lucide/svelte/icons/plus';
+    import X from '@lucide/svelte/icons/x';
     import { engine } from '../player/index.js';
     import { selectionPov, addSelectionClip } from '../player/selection-clip.js';
     import { formatDuration } from '../lib/result.js';
@@ -194,15 +197,6 @@
 <svelte:window onkeydown={key} />
 
 <div id="unified-timeline" class="panel pb" style:display={shown ? null : 'none'}>
-    <button class="pb-play" title={tp.playing ? 'Pause (space)' : 'Play (space)'} aria-label={tp.playing ? 'Pause' : 'Play'} onclick={togglePlay}>
-        {#if tp.playing}<Pause size={16} fill="currentColor" />{:else}<Play size={16} fill="currentColor" />{/if}
-    </button>
-    <select class="pb-speed" title="Playback speed" value={tp.speed} onchange={pickSpeed}>
-        {#each tp.speeds as s (s.value)}
-            <option value={s.value} disabled={s.disabled}>{s.label}</option>
-        {/each}
-    </select>
-    <span class="pb-time"><span class="now">{time}</span> / {total}</span>
     <!-- svelte-ignore a11y_no_static_element_interactions: a pointer scrubber; play / pause and the speed are the controls -->
     <div class="pb-scrub" class:knob-hover={overKnob} class:grabbing bind:this={bar}
         onpointerdown={down} onpointermove={move} onpointerup={up} onpointercancel={cancel}
@@ -214,37 +208,55 @@
             {#if box}<div class="pb-sel" style:left={box.left} style:width={box.width}></div>{/if}
         </div>
         <div class="pb-knob" style:left="{pct}%"></div>
-        {#if box && $selectionPov && !selecting}
-            <!-- The selection from the current POV, as a clip -->
-            <button class="pb-clip" style:left="calc({box.left} + {box.width} / 2)"
-                title="Add the selection to the playlist, watched from {$selectionPov.who || 'Auto'} (key: c; i / o set its start / end at the playhead)"
-                onpointerdown={(e) => e.stopPropagation()} onclick={addSelectionClip} transition:fade={{ duration: 120 }}>
-                <Plus size={12} /> clip · {$selectionPov.who || 'Auto'} · {label}
-            </button>
-        {/if}
         {#if hover}
             <div class="pb-hover-line" style:left="{hover.x}px"></div>
             <div class="pb-readout" style:left="{hover.x}px" transition:fade={{ duration: 100 }}>{formatDuration(hover.t)}</div>
         {/if}
     </div>
-    <!-- Always there, so the scrubber keeps its width while a drag adds the label. -->
-    <span class="pb-seg" title={label ? 'The selected segment (double-click the bar to clear)' : null}>{label}</span>
-    {#if $fullscreenTab}
-        <button class="pb-exit-fs" title="Leave fullscreen (Esc or f)" aria-label="Leave fullscreen" onclick={() => toggleFullscreen()}>
-            <Minimize size={16} /> Exit
+    <div class="pb-row">
+        <button class="pb-play" title={tp.playing ? 'Pause (space)' : 'Play (space)'} aria-label={tp.playing ? 'Pause' : 'Play'} onclick={togglePlay}>
+            {#if tp.playing}<Pause size={16} fill="currentColor" />{:else}<Play size={16} fill="currentColor" />{/if}
         </button>
-    {/if}
+        <select class="pb-pill pb-speed" title="Playback speed" value={tp.speed} onchange={pickSpeed}>
+            {#each tp.speeds as s (s.value)}
+                <option value={s.value} disabled={s.disabled}>{s.label}</option>
+            {/each}
+        </select>
+        <span class="pb-pill pb-time"><span class="now">{time}</span> / {total}</span>
+        {#if label}
+            <span class="pb-pill pb-seg" title="The selected segment: playback stops at its end (double-click the bar to clear)" transition:fade={{ duration: 120 }}>
+                {label}
+                <button class="pb-x" title="Clear the selection" aria-label="Clear the selection" onclick={() => segment.set(null)}><X size={12} /></button>
+            </span>
+            {#if $selectionPov && !selecting}
+                <!-- The selection from the current POV, as a clip -->
+                <button class="pb-pill pb-clip" title="Add the selection to the playlist, watched from {$selectionPov.who || 'Auto'} (key: c; i / o set its start / end at the playhead)"
+                    onclick={addSelectionClip} transition:fade={{ duration: 120 }}>
+                    <Plus size={12} /> clip · {$selectionPov.who || 'Auto'}
+                </button>
+            {/if}
+        {/if}
+        {#if $fullscreenTab}
+            <button class="pb-exit-fs" title="Leave fullscreen (Esc or f)" aria-label="Leave fullscreen" onclick={() => toggleFullscreen()}>
+                <Minimize size={16} /> Exit
+            </button>
+        {/if}
+    </div>
 </div>
 
 <style>
     .pb {
         display: flex;
-        align-items: center;
-        gap: 10px;
+        flex-direction: column;
+        gap: 2px;
         margin-bottom: 10px;
-        padding: 4px 12px;
-        height: 34px;
-        box-sizing: border-box;
+        padding: 2px 12px 5px;
+    }
+    .pb-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 26px;
     }
     .pb-play {
         display: inline-flex;
@@ -262,29 +274,63 @@
     .pb-play:hover {
         background: rgba(0, 217, 255, 0.15);
     }
-    .pb-speed {
+    .pb-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
         height: 22px;
-        padding: 0 2px;
-        background: var(--bg-deep);
-        color: #9ab;
-        border: 1px solid rgba(0, 217, 255, 0.25);
-        border-radius: 3px;
+        padding: 0 10px;
+        border-radius: 11px;
+        border: none;
+        background: rgba(255, 255, 255, 0.07);
+        color: #bcd;
         font-size: 12px;
+        white-space: nowrap;
+        box-sizing: border-box;
+    }
+    .pb-speed {
+        padding: 0 4px 0 8px;
         cursor: pointer;
+        color-scheme: dark;
     }
     .pb-time {
         font-family: monospace;
-        font-size: 12px;
-        color: #778;
-        white-space: nowrap;
+        color: #889;
     }
     .pb-time .now {
         color: var(--accent-cyan);
     }
+    .pb-seg {
+        font-family: monospace;
+        color: #ffd250;
+        background: rgba(255, 210, 80, 0.12);
+        padding-right: 4px;
+    }
+    .pb-x {
+        display: inline-flex;
+        padding: 1px;
+        background: none;
+        border: none;
+        border-radius: 50%;
+        color: inherit;
+        cursor: pointer;
+    }
+    .pb-x:hover {
+        background: rgba(255, 210, 80, 0.25);
+    }
+    .pb-clip {
+        border: 1px solid #ffd250;
+        background: #2a2410;
+        color: #ffd250;
+        cursor: pointer;
+    }
+    .pb-clip:hover {
+        background: #ffd250;
+        color: #1a1505;
+    }
     .pb-scrub {
         position: relative;
-        flex: 1;
-        height: 22px;
+        height: 18px;
         cursor: pointer;
         touch-action: none;
         user-select: none;
@@ -373,37 +419,8 @@
         pointer-events: none;
         z-index: 30;
     }
-    .pb-clip {
-        position: absolute;
-        top: calc(100% + 4px);
-        transform: translateX(-50%);
-        z-index: 30;
-        display: inline-flex;
-        align-items: center;
-        gap: 3px;
-        height: 20px;
-        padding: 0 8px;
-        border-radius: 10px;
-        border: 1px solid #ffd250;
-        background: #2a2410;
-        color: #ffd250;
-        font-size: 11px;
-        white-space: nowrap;
-        cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    }
-    .pb-clip:hover {
-        background: #ffd250;
-        color: #1a1505;
-    }
-    .pb-seg {
-        min-width: 13ch;
-        font-family: monospace;
-        font-size: 12px;
-        color: #ffd250;
-        white-space: nowrap;
-    }
     .pb-exit-fs {
+        margin-left: auto;
         display: inline-flex;
         align-items: center;
         gap: 4px;
