@@ -340,12 +340,56 @@ export const PRESETS = [
         },
     },
     {
+        id: 'pent-runs', title: 'Pent runs', about: 'Every pentagram, from the pickup until it runs out, watched from the player who took it.',
+        query: {
+            source: 'events', params: { types: 'powerup' },
+            where: { field: 'detail.powerup', op: '=', value: 'pent' },
+            clip: { before: 3000, to: 'detail.endTime', after: 2000 },
+            label: 'Pent run · {player} · {detail.frags} frag{detail.frags|s}',
+        },
+    },
+    {
+        id: 'ring-runs', title: 'Ring runs', about: 'Every ring of shadows, from the pickup until it runs out, watched from the player who took it.',
+        query: {
+            source: 'events', params: { types: 'powerup' },
+            where: { field: 'detail.powerup', op: '=', value: 'ring' },
+            clip: { before: 3000, to: 'detail.endTime', after: 2000 },
+            label: 'Ring run · {player} · {detail.frags} frag{detail.frags|s}',
+        },
+    },
+    {
         id: 'frag-streaks', title: 'Frag streaks', about: 'Every frag streak, from its first frag to three seconds after its last.',
         query: {
             source: 'events', params: { types: 'streak' },
             clip: { before: 0, to: 'detail.endTime', after: 3000 },
             label: 'Streak · {player} · {detail.length} frags',
         },
+    },
+    {
+        id: 'top-damage', title: 'Top damage windows (10 s)', about: 'The Key Moments tab\'s ten 10-second stretches with the most enemy damage dealt.',
+        query: {
+            source: 'top-windows', params: { metric: 'damageGiven', windowMs: '10000', limit: '10', dmg: 'bounded' },
+            clip: { before: 1000, after: 0 },
+            label: 'Damage window · {player} · {damageGiven} dmg',
+        },
+    },
+    {
+        id: 'top-rl-kills', title: 'Top RL kills', about: 'The Key Moments tab\'s hardest rocket kill bursts: the run of RL hits on the victim up to the kill.',
+        query: {
+            source: 'top-kills', params: { weapons: 'rl', gapMs: '2300', limit: '10', dmg: 'bounded' },
+            label: 'RL kill · {killer} → {victim} · {damage} dmg',
+        },
+    },
+    {
+        id: 'top-lg-kills', title: 'Top LG kills', about: 'The Key Moments tab\'s hardest lightning kill bursts.',
+        query: {
+            source: 'top-kills', params: { weapons: 'lg', gapMs: '1200', limit: '5', dmg: 'bounded' },
+            label: 'LG kill · {killer} → {victim} · {damage} dmg',
+        },
+    },
+    {
+        id: 'demo-markers', title: 'Demo markers', about: 'The /demomark bookmarks players dropped during the game.',
+        query: { source: 'events', params: { types: 'demomark' }, clip: { before: 5000, after: 15000 }, label: 'Demo marker · {player}' },
     },
     {
         id: 'pack-drops', title: 'Pack drops (RL/LG)', about: 'Every RL / LG pack dropped: the 12 s before the death that dropped it, then a short look at whoever took it.',

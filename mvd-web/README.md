@@ -1158,10 +1158,15 @@ Player pane avoids that.)
   colour — a rolling strip (45 s back, 15 s ahead, `renderMiniStack`, fixed
   0–300 scale) with the playhead, and the values at it. Click a name to
   watch them.
-- **Moments**: the demo's quad runs, frag streaks and highlights (the
-  clips of those Generate presets) in time order; the ones under the playhead
-  are lit and the list keeps the next one in view. Click plays the clip,
-  shift-click adds it to the playlist.
+- **Moments**: two levels. The groups are the Key Moments and Pack Drops
+  tabs' tables — quad / pent / ring runs, frag streaks, top damage windows,
+  top RL and LG kills, demo markers, airgibs, discharges, quadbores,
+  telefrags, pack drops — each a clip finder preset, with the number of
+  rows it found (dim at none). An opened group lists its clips in time
+  order; the ones under the playhead are lit, and a closed group's head
+  shows a dot when the playhead is in one of its clips. Click plays a
+  clip, shift-click adds it; a group's + adds all of them. The open
+  groups are the pane's option (quad runs to start with).
 - **Frag feed**: the last 12 frags up to the playhead, newest first, the
   last 4 s lit. Click one to watch it from the killer's view.
 
@@ -1187,8 +1192,9 @@ drops it).
   Keys there: `i` / `o` set the selection's start / end at the playhead
   (keeping the other edge when it is still on its side, else 10 s away),
   `c` adds it (no selection: the last 10 s).
-- **Generate** (in the playlist's head) from the loaded demo: quad runs, best quad runs,
-  frag streaks, RL/LG pack drops (all, the enemy took, a teammate took, the
+- **Generate** (in the playlist's head) from the loaded demo: quad, best
+  quad, pent and ring runs, frag streaks, top damage windows, top RL / LG
+  kills (the Key Moments tab's queries), demo markers, RL/LG pack drops (all, the enemy took, a teammate took, the
   enemy took without having the weapon — each pack as the dropper's last
   12 s, then a 5 s look at the pickup from the picker's view), quadbores,
   airgibs, telefrags, discharges — presets of the clip finder below — and

@@ -1,54 +1,74 @@
 <script>
-    // Every generated clip of the demo (quad runs, streaks, the highlights)
-    // in time order: the ones the playhead is inside are lit, and the list
-    // scrolls to keep the next one in view. Click plays the clip;
-    // shift-click adds it to the playlist.
+    // The demo's moments in two levels: the groups — the Key Moments and
+    // Pack Drops tabs' tables, each a clip finder preset (powerup runs,
+    // streaks, top damage windows and kills, demo markers, the highlights,
+    // pack drops) — with how many rows each found, and under an opened group
+    // its clips in time order. The ones the playhead is inside are lit (a
+    // dot on a closed group's head). Click plays a clip, shift-click adds
+    // it; a group's + adds all of them. Which groups are open is the pane's
+    // option.
+    import ChevronRight from '@lucide/svelte/icons/chevron-right';
+    import ChevronDown from '@lucide/svelte/icons/chevron-down';
+    import ListPlus from '@lucide/svelte/icons/list-plus';
     import { demo, teams, colorOf } from '../../state/index.js';
     import { formatDuration } from '../../lib/result.js';
-    import { PRESETS, runQuery } from '../../lib/clip-query.js';
+    import { PRESETS, viewCall, stages } from '../../lib/clip-query.js';
     import { runner, currentRef, engine } from '../index.js';
     import { addClips } from '../playlist-store.js';
+    import { paneLayout, paneOpt, setPaneOpt } from '../layout.js';
     import { toast } from '../toast.js';
     import { onFrame } from './tick.js';
 
-    const KINDS = ['quad-runs', 'frag-streaks', 'quadbores', 'airgibs', 'telefrags', 'discharges'];
+    /** @typedef {import('../../lib/playlist.js').Clip} Clip */
 
-    let clips = $state(/** @type {import('../../lib/playlist.js').Clip[]} */ ([]));
+    const GROUPS = [
+        'quad-runs', 'pent-runs', 'ring-runs', 'frag-streaks',
+        'top-damage', 'top-rl-kills', 'top-lg-kills', 'demo-markers',
+        'airgibs', 'discharges', 'quadbores', 'telefrags', 'pack-drops',
+    ].map((id) => /** @type {(typeof PRESETS)[number]} */ (PRESETS.find((p) => p.id === id)));
+
+    // Per group: its rows' count and clips; null while it runs.
+    let found = $state(/** @type {Record<string, { rows: number, clips: Clip[] } | null>} */ ({}));
     $effect(() => {
         $teams;
         const handle = $demo;
         const ref = handle ? currentRef() : null;
-        clips = [];
+        found = Object.fromEntries(GROUPS.map((g) => [g.id, null]));
         if (!handle || !ref) return;
         let live = true;
         const view = handle.view.bind(handle);
-        // A source this demo lacks (no highlights section) just adds nothing.
-        Promise.all(PRESETS.filter((p) => KINDS.includes(p.id))
-            .map((p) => runQuery(p.query, view, handle.result, ref).catch(() => [])))
-            .then((lists) => { if (live) clips = lists.flat().sort((a, b) => a.from - b.from); });
+        for (const g of GROUPS) {
+            // A source this demo lacks (no highlights section) finds nothing.
+            viewCall(view, g.query.source, g.query.params)
+                .then((body) => {
+                    const r = stages(g.query, body, handle.result, ref);
+                    return { rows: r.ranked.length, clips: [...r.clips].sort((a, b) => a.from - b.from) };
+                })
+                .catch(() => ({ rows: 0, clips: [] }))
+                .then((v) => { if (live) found[g.id] = v; });
+        }
         return () => { live = false; };
     });
 
+    let open = $derived(new Set(paneOpt($paneLayout, 'moments', 'open', 'quad-runs').split(',').filter(Boolean)));
+
+    /** @param {string} id */
+    function toggle(id) {
+        const next = new Set(open);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        setPaneOpt('moments', 'open', [...next].join(','));
+    }
+
     let demoT = $state(0);
-    let list = $state(/** @type {HTMLOListElement | undefined} */ (undefined));
     $effect(() => onFrame((t) => { demoT = t + engine.offset(); }));
 
-    let next = $derived.by(() => {
-        const i = clips.findIndex((c) => c.from > demoT);
-        return i < 0 ? clips.length : i;
-    });
-
-    // Keep the next moment in view, but only scroll when it changes.
-    $effect(() => {
-        const anchor = /** @type {HTMLElement | undefined} */ (list?.children[Math.max(0, next - 1)]);
-        // An anchor is a child of the list, so the list is there.
-        const ol = /** @type {HTMLOListElement} */ (list);
-        if (anchor) ol.scrollTop = Math.max(0, anchor.offsetTop - ol.offsetTop - 40);
-    });
+    /** @param {Clip} c */
+    const isNow = (c) => demoT >= c.from && demoT < c.to;
 
     /**
      * @param {MouseEvent | KeyboardEvent} e
-     * @param {(typeof clips)[number]} c
+     * @param {Clip} c
      */
     function click(e, c) {
         if (e.shiftKey) {
@@ -58,30 +78,132 @@
             runner.start([c], 0, true);
         }
     }
+
+    /** @param {(typeof GROUPS)[number]} g */
+    function addGroup(g) {
+        const clips = found[g.id]?.clips || [];
+        if (!clips.length) return;
+        addClips(clips.map((c) => ({ ...c, demo: { ...c.demo } })));
+        toast(`Added ${clips.length} clip${clips.length === 1 ? '' : 's'}: ${g.title}`);
+    }
 </script>
 
-{#if clips.length}
-    <ol class="pp-feed pp-moments" bind:this={list}>
-        {#each clips as c (c)}
-            <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
-            <li class:recent={demoT >= c.from && demoT < c.to} title="Click: play · Shift-click: add to playlist"
-                role="button" tabindex="0" onclick={(e) => click(e, c)}
-                onkeydown={(e) => e.key === 'Enter' && click(e, c)}>
-                <span class="t">{formatDuration(Math.max(0, c.from - c.demo.offset))}</span>
-                <span style:color={c.who ? colorOf($teams, c.who, $teams.perPlayer) : '#ccc'}>{c.label}</span>
+{#if $demo}
+    <ul class="mg">
+        {#each GROUPS as g (g.id)}
+            {@const f = found[g.id]}
+            {@const n = f?.rows ?? null}
+            {@const isOpen = open.has(g.id) && !!n}
+            <li class="mg-group" class:empty={n === 0}>
+                <div class="mg-head">
+                    <button class="mg-toggle" disabled={!n} title={g.about} onclick={() => toggle(g.id)}>
+                        {#if isOpen}<ChevronDown size={13} />{:else}<ChevronRight size={13} />{/if}
+                        <span class="mg-title">{g.title}</span>
+                        {#if !isOpen && f?.clips.some(isNow)}<span class="mg-now" title="The playhead is in one of these"></span>{/if}
+                    </button>
+                    <span class="mg-count">{n ?? '…'}</span>
+                    <button class="mg-add" disabled={!f?.clips.length} title="Add all {f?.clips.length ?? ''} clips to the playlist" onclick={() => addGroup(g)}><ListPlus size={13} /></button>
+                </div>
+                {#if isOpen && f}
+                    <ol class="pp-feed mg-clips">
+                        {#each f.clips as c (c)}
+                            <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
+                            <li class:recent={isNow(c)} title="Click: play · Shift-click: add to playlist"
+                                role="button" tabindex="0" onclick={(e) => click(e, c)}
+                                onkeydown={(e) => e.key === 'Enter' && click(e, c)}>
+                                <span class="t">{formatDuration(Math.max(0, c.from - c.demo.offset))}</span>
+                                <span style:color={c.who ? colorOf($teams, c.who, $teams.perPlayer) : '#ccc'}>{c.label}</span>
+                            </li>
+                        {/each}
+                    </ol>
+                {/if}
             </li>
         {/each}
-    </ol>
+    </ul>
 {:else}
-    <div class="player-clip-hint">No quad runs, streaks or highlights in this demo.</div>
+    <div class="player-clip-hint">Load a demo to see its moments.</div>
 {/if}
 
 <style>
-    .pp-moments {
-        max-height: 260px;
-        overflow-y: auto;
+    .mg {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 12px;
     }
-    :global(.player-pane-body.sized) .pp-moments {
+    .mg-head {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 1px 2px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .mg-toggle {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+        padding: 2px 0;
+        background: none;
+        border: none;
+        color: #cdd;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+    .mg-toggle:hover:not(:disabled) .mg-title {
+        color: var(--accent-cyan);
+    }
+    .mg-toggle:disabled {
+        cursor: default;
+    }
+    .mg-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .mg-now {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent-cyan);
+        flex: none;
+    }
+    .mg-count {
+        min-width: 2.5em;
+        padding: 0 7px;
+        border-radius: 9px;
+        background: rgba(0, 217, 255, 0.12);
+        color: var(--accent-cyan);
+        font-family: monospace;
+        text-align: center;
+    }
+    .mg-add {
+        display: inline-flex;
+        padding: 2px;
+        background: none;
+        border: none;
+        color: #889;
+        cursor: pointer;
+    }
+    .mg-add:hover:not(:disabled) {
+        color: var(--accent-cyan);
+    }
+    .mg-add:disabled {
+        opacity: 0.25;
+        cursor: default;
+    }
+    .mg-group.empty .mg-toggle,
+    .mg-group.empty .mg-count {
+        opacity: 0.4;
+    }
+    .mg-clips {
+        max-height: 220px;
+        overflow-y: auto;
+        margin: 2px 0 6px 16px;
+    }
+    :global(.player-pane-body.sized) .mg-clips {
         max-height: none;
     }
 </style>
