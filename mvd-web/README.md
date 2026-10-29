@@ -1062,15 +1062,18 @@ map model's data (`src/tabs/map/map-model.js`), and the Health / armor
 pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
 
 - **Lazy, and only with a Player pane.** The iframe (≈6 MB of wasm plus
-  assets from `a.quake.world`) is created on the first visit to the tab
-  with a Player pane open, dropped when the `demo` store changes to the
-  next demo, and dropped too when no Player pane shows its placeholder for
-  1.5 s (`wanted` in `src/player/index.js`: the grace keeps a pane moved
-  or collapsed and reopened from reloading it). Without the engine the
-  page's own playback drives the clock on this tab as on any other
-  (instant scrubbing, −1×); with it up, `setPlaybackGate` keeps that loop
-  off. Playing a clip (a play link, a moment, the playlist) opens a Player
-  pane when none is open.
+  assets from `a.quake.world`) is created on the first visit to the Map or
+  Player tab whose layout shows a Player pane (open, not collapsed, not in
+  a hidden side column — `wanted` in `src/player/index.js`, read from the
+  layout, so a tab switch counts at once), and dropped when the `demo`
+  store changes to the next demo. Unwanted, the engine is paused and its
+  frame loop suspended at once, and dropped after 20 s (a quick Map ↔
+  Player switch keeps it). Without it the page's own playback drives the
+  clock on these tabs as on any other (instant scrubbing, −1×); while it
+  is wanted there, up or still loading, `setPlaybackGate` keeps that loop
+  off. Playing a clip opens the Player tab and shows its Player pane (un-
+  hiding the side column it is in); the runner gives up with a note if the
+  pane still does not show after ~30 two-frame waits.
 - **No second download.** The data layer keeps a copy of the analysed bytes
   as a Blob (`DemoHandle.demoBlob`; the analyze transfers the original
   buffer), handed to the engine as a `blob:` URL — so locally loaded files
@@ -1179,6 +1182,9 @@ Player pane avoids that.)
 - **Map entities** (`panes/EntitiesPane.svelte`): learn mode's category
   filters (the map model's `entityFilters`) and the table of the map's
   static entities, with a button into learn mode.
+- Every pane draws through `panes/tick.js`: at most once per animation
+  frame, only while the Map or Player tab shows, and a frame queued
+  before the pane unmounts is cancelled.
 - **Players** (`panes/LegendPane.svelte`): the Map tab's legend as a
   pane — one sortable table per team (canonical order and colour, the
   team's running frags in its title), each player's symbol, loc, health +

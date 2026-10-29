@@ -195,12 +195,15 @@ export function movePane(id, column, toIndex) {
     });
 }
 
-// showPane opens a pane, expanded, where it is or else in the main column.
+// showPane opens a pane, expanded and shown, where it is or else in the
+// main column.
 /** @param {string} id */
 export function showPane(id) {
     updateLayout((l) => {
         if (!columnOf(l, id)) l.below.push(id);
         delete l.collapsed[id];
+        // In a hidden side column it would not show.
+        if (columnOf(l, id) === 'order') l.hidden = false;
     });
 }
 

@@ -33,6 +33,8 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
     /** @type {Run | null} */
     let loadingRun = null;   // the run whose next clip's demo is being loaded
     let awaitingFrames = false;   // a clip waits for the shown engine to repaint
+    let showTries = 0;            // two-frame waits for the engine to become active
+    const MAX_SHOW_TRIES = 30;
 
     const currentRef = () => demoRefOf(demo.get(), teams.get().order);
     /** @param {Clip} c */
@@ -111,6 +113,14 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             // clock arrive. Jump once frames flow again.
             // The engine's sync poll starts with the tab; until the jump is
             // sent its clock is the old one, so the run must not step on it.
+            // selectTab shows the pane; should it still not be active after
+            // a second or so, the run stops rather than ask again forever.
+            if (++showTries > MAX_SHOW_TRIES) {
+                showTries = 0;
+                toast('The Player pane cannot show — open it to play clips');
+                stop();
+                return;
+            }
             selectTab('player');
             const pending = playlist.get().run;
             awaitingFrames = true;
@@ -120,6 +130,7 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             }));
             return;
         }
+        showTries = 0;
         if (!engine.fte) {
             // Engine still booting: park the cursor at the clip (the opening
             // jump goes there) and start once it is up.

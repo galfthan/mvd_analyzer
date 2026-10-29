@@ -110,13 +110,11 @@ export class PlayerEngine {
         return WATCH_TABS.includes(this.activeTab.get()) && this.wanted.get();
     }
 
-    // Unwanted, the engine is dropped (it loads again when wanted); off the
-    // tab it is paused and its frame loop suspended — the hidden iframe
-    // would otherwise go on rendering every frame.
+    // Off its tab or unwanted it is paused and its frame loop suspended —
+    // the hidden iframe would otherwise go on rendering every frame (the
+    // host drops it after a while unwanted: src/player/index.js).
     syncActive() {
-        if (!this.wanted.get()) {
-            if (this.iframe) this.teardown();
-        } else if (this.active()) {
+        if (this.active()) {
             this.fte?.resume();
             this.ensure();
             this.startSync();

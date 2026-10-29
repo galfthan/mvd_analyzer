@@ -5,7 +5,6 @@
 
 import { clock, demo, teams, activeTab, selectTab, segment, setPlaybackGate } from '../state/index.js';
 import { store } from '../state/store.js';
-import { playerSlot } from './player-slot.js';
 import { paneLayout, columnOf, showPane } from './layout.js';
 import { loadDemo } from '../app/load.js';
 import { decodePlaylist } from '../lib/playlist.js';
@@ -19,33 +18,41 @@ import { playlist, addClips } from './playlist-store.js';
 import { installHubLinkRouting } from './hub-links.js';
 import { toast } from './toast.js';
 
-// The engine is wanted while a Player pane shows its placeholder. Gone, it
-// is dropped after a grace — a pane moved to the other column, or
-// collapsed and opened again, remounts its placeholder at once.
-const UNLOAD_GRACE_MS = 1500;
-const wanted = store(false);
-/** @type {ReturnType<typeof setTimeout> | undefined} */
-let unloadTimer;
-playerSlot.subscribe((el) => {
-    clearTimeout(unloadTimer);
-    if (el) {
-        if (!wanted.get()) wanted.set(true);
-    } else if (wanted.get()) {
-        unloadTimer = setTimeout(() => wanted.set(false), UNLOAD_GRACE_MS);
-    }
+// The engine is wanted while the layout shown (the Map or Player tab's)
+// shows a Player pane — open, not collapsed, not in a hidden side column.
+// It follows the layout, not the pane's placeholder: that remounts a
+// microtask later (and on a move across columns), which left an engine
+// playing on the Map tab or booting for nothing. Unwanted, the engine is
+// paused and suspended at once, and dropped after UNLOAD_AFTER_MS away
+// (a quick Map ↔ Player switch keeps it).
+const UNLOAD_AFTER_MS = 20000;
+/** @param {import('./layout.js').PaneLayout} l */
+const showsPlayer = (l) => !!columnOf(l, 'player') && !l.collapsed.player && !(l.hidden && columnOf(l, 'player') === 'order');
+const wanted = store(showsPlayer(paneLayout.get()));
+paneLayout.subscribe((l) => {
+    const on = showsPlayer(l);
+    if (on !== wanted.get()) wanted.set(on);
 });
 
 export const engine = new PlayerEngine({ clock, demo, activeTab, wanted });
-setPlaybackGate(() => engine.drives());
+// The engine, up or loading, is the clock on its tab: the page's loop
+// stays off.
+setPlaybackGate(() => engine.active());
+
+/** @type {ReturnType<typeof setTimeout> | undefined} */
+let unloadTimer;
+wanted.subscribe((on) => {
+    clearTimeout(unloadTimer);
+    if (!on) unloadTimer = setTimeout(() => { if (!wanted.get()) engine.teardown(); }, UNLOAD_AFTER_MS);
+});
 
 // A clip plays in the engine: on the Player tab (its view), with its
-// Player pane open — the viewer may have closed or collapsed it.
+// Player pane shown — the viewer may have closed or collapsed it, or
+// hidden the side column it is in.
 /** @param {string} tab */
 function showPlayer(tab) {
     selectTab(tab);
-    const l = paneLayout.get();
-    const shown = !!columnOf(l, 'player') && !l.collapsed.player && !(l.hidden && columnOf(l, 'player') === 'order');
-    if (!shown) showPane('player');
+    if (!showsPlayer(paneLayout.get())) showPane('player');
 }
 export const runner = createRunner({ engine, demo, teams, selectTab: showPlayer, loadDemo, demoRefOf, segment });
 

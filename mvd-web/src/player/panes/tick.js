@@ -10,15 +10,18 @@ import { engine } from '../index.js';
  * @returns {() => void} the unsubscribe
  */
 export function onFrame(draw) {
-    let queued = false;
+    let queued = 0;
     const schedule = () => {
         if (queued || !isWatchTab(activeTab.get())) return;
-        queued = true;
-        requestAnimationFrame(() => {
-            queued = false;
+        queued = requestAnimationFrame(() => {
+            queued = 0;
             draw(clock.t);
         });
     };
     const offs = [clock.subscribe(schedule), activeTab.subscribe(schedule), engine.status.subscribe(schedule)];
-    return () => offs.forEach((off) => off());
+    // A frame already queued must not draw into an unmounted pane.
+    return () => {
+        offs.forEach((off) => off());
+        cancelAnimationFrame(queued);
+    };
 }
