@@ -3299,7 +3299,6 @@ th.sortable.sort-desc::after {
     min-width: 0;
 }
 
-.player-clip-bar,
 .player-playlist-head {
     display: flex;
     flex-wrap: wrap;

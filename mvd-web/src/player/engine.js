@@ -54,7 +54,7 @@ export class PlayerEngine {
     constructor({ clock, demo, activeTab }) {
         this.clock = clock;
         this.activeTab = activeTab;
-        // What the POV bar, the timeline's speed buttons and the panes show.
+        // What the POV bar, the playback bar and the panes show.
         this.status = store({ ...IDLE });
         // The speed play runs at (percent): kept here, since FTE's own speed
         // reads 0 while paused.

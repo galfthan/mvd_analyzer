@@ -106,10 +106,12 @@ test('runner plays clips in order and steps on crossing `to`', () => {
     const engine = fakeEngine(activeTab);
     const demo = store({ ref: { key: 'hub:1', gameId: 1 }, result: { streams: { global: { demoOffset: 10000 } } } });
     const teams = store({ order: [] });
-    const runner = createRunner({ engine, demo, teams, selectTab: (t) => activeTab.set(t), loadDemo: async () => {}, demoRefOf });
+    const segment = store(null);
+    const runner = createRunner({ engine, demo, teams, selectTab: (t) => activeTab.set(t), loadDemo: async () => {}, demoRefOf, segment });
     const clips = [clip(100, 110, { track: 7 }), clip(200, 210, { demo: { key: 'file:x', gameId: null } }), clip(300, 310)];
     runner.start(clips, 0);
     assert.deepEqual(engine.log.slice(0, 2), [['jump', 100], ['track', 7]]);
+    assert.deepEqual(segment.get(), { start: 90, end: 100 }, 'the clip playing is the segment, in match time');
     engine.tick(109.9);
     engine.tick(110.05);
     // clip 2 is another local file: skipped, so clip 3 plays
@@ -118,8 +120,13 @@ test('runner plays clips in order and steps on crossing `to`', () => {
     engine.tick(309.5);
     engine.tick(310.1);
     assert.equal(playlist.get().run, null, 'the last clip ends the run');
+    assert.equal(segment.get(), null, 'and clears its segment');
     assert.deepEqual(engine.log.at(-1), ['pause']);
 
+    runner.start([clip(100, 110)], 0, true);
+    segment.set({ start: 1, end: 2 });
+    runner.stop();
+    assert.deepEqual(segment.get(), { start: 1, end: 2 }, 'a segment the user chose meanwhile stays');
     runner.start([clip(100, 110)], 0, true);
     demo.set({ ref: { key: 'hub:2', gameId: 2 }, result: {} });
     assert.equal(playlist.get().run, null, 'loading another demo by hand ends a run');
@@ -136,7 +143,7 @@ test('runner loads another hub demo and carries on there', async () => {
         demo.set({ ref: { key: 'hub:9', gameId: 9 }, result: {} });
         return true;
     };
-    const runner = createRunner({ engine, demo, teams, selectTab: () => {}, loadDemo, demoRefOf });
+    const runner = createRunner({ engine, demo, teams, selectTab: () => {}, loadDemo, demoRefOf, segment: store(null) });
     runner.start([clip(40, 50, { demo: { key: 'hub:9', gameId: 9, title: 'b', offset: 0 } })], 0);
     await new Promise((r) => setTimeout(r, 0));
     assert.deepEqual(loads, [{ gameId: 9 }]);
@@ -153,7 +160,7 @@ test('a demo the user picks while the run loads its own wins and ends the run', 
     // The run's load is slow; the user's pick lands first, and the run's
     // load then resolves false (superseded — load.js loadDemo).
     const loadDemo = () => new Promise((r) => { finish = r; });
-    const runner = createRunner({ engine, demo, teams, selectTab: () => {}, loadDemo, demoRefOf });
+    const runner = createRunner({ engine, demo, teams, selectTab: () => {}, loadDemo, demoRefOf, segment: store(null) });
     runner.start([clip(40, 50, { demo: { key: 'hub:9', gameId: 9, title: 'b', offset: 0 } })], 0);
     demo.set({ ref: { key: 'file:mine.mvd', gameId: null }, result: {} });
     assert.ok(playlist.get().run, 'still loading: the run waits for its own load');

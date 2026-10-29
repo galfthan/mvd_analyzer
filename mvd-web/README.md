@@ -1149,14 +1149,20 @@ which would reload the engine's iframe.)
 
 `src/lib/playlist.js` (node tests in `mvd-web/test/`) holds the pure parts;
 `src/player/playlist-store.js` the list and the run, `runner.js` the
-scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
+scripted playback, `Playlist.svelte` and the playback bar's selection
+(`selection-clip.js`) the UI. A clip is
 `{ from, to, track, who, label, demo }` with `from`/`to` in
 **demo-relative** whole seconds — the engine's and hub's clock — and
 `demo = { key, gameId, title, offset }` (`hub:<gameId>` or
 `file:<name>`; `offset` converts to match time for display).
 
-- **Make**: ⟦ In / Out ⟧ mark the player's time (keys `i` / `o`), *+ Add
-  clip* (`c`) adds In→Out from the current POV (no marks: the last 10 s).
+- **Make**: the playback bar's selection is the clip. Where a POV is at
+  hand — the Player tab (the engine's; Auto counts) and the Map tab (the
+  followed player) — a *+ clip · who · from – to* pill hangs under the
+  selection and adds it from that POV (`src/player/selection-clip.js`).
+  Keys there: `i` / `o` set the selection's start / end at the playhead
+  (keeping the other edge when it is still on its side, else 10 s away),
+  `c` adds it (no selection: the last 10 s).
 - **Generate** (in the playlist's head) from the loaded demo: quad runs, best quad runs,
   frag streaks, RL/LG pack drops (all, the enemy took, a teammate took, the
   enemy took without having the weapon — each pack as the dropper's last
@@ -1511,6 +1517,14 @@ double-click clears. Pointer capture keeps a drag going off the bar. Play
 and speed run the page's playback (`src/state/playback.js`) or, on the
 Player tab, the engine (`setRate` / `togglePlay`; it keeps the chosen
 rate, since FTE's speed reads 0 while paused).
+
+A selection plays like a clip: a new one seeks to its start, playback
+that runs into its end stops there (the page's loop, and the engine
+outside a playlist run — `crossedEnd`; a step over 2 s is a seek and does
+not count), and play pressed at the end starts it over. A playlist clip
+that plays is the selection (the runner sets it, in match time, and
+clears it on stop unless the user picked another meanwhile), so the
+Timeline tab zooms to it too.
 
 **Fullscreen** is one feature for every tab that offers it
 (`src/app/fullscreen.js`; Map and Player, each naming its panel in

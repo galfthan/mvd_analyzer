@@ -1,5 +1,5 @@
 <script>
-    // The Player tab: the engine with its POV and clip bars and a pane
+    // The Player tab: the engine with its POV bar and a pane
     // column under them (the clip finder and the playlist to start with) on
     // the left, the side pane column on the right, split by PaneForge (drag
     // the divider, or focus it and use the arrow keys; dragging the column
@@ -8,7 +8,6 @@
     import { PaneGroup, Pane, PaneResizer } from 'paneforge';
     import PlayerFrame from './PlayerFrame.svelte';
     import PovBar from './PovBar.svelte';
-    import ClipBar from './ClipBar.svelte';
     import PaneColumn from './PaneColumn.svelte';
     import { paneLayout, updateLayout, MIN_SPLIT, MAX_SPLIT } from './layout.js';
     import { fullscreenTab } from '../app/fullscreen.js';
@@ -71,7 +70,6 @@
                 <div class="player-main">
                     <PlayerFrame />
                     <PovBar />
-                    <ClipBar />
                     <PaneColumn column="below" />
                 </div>
             </Pane>

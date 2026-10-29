@@ -116,3 +116,49 @@ export function transport({ drives, engine, playing, speed }) {
         speeds: SPEEDS.map((v) => ({ value: v, label: `${v}×`, disabled: drives && v < 0 })),
     };
 }
+
+// A clock step longer than this (s) is a seek, not playback: it does not
+// "reach" a segment's end.
+const MAX_PLAY_STEP_S = 2;
+
+// crossedEnd: playback ran from inside the segment to its end or past it —
+// where it stops (a selection plays like a clip).
+/**
+ * @param {Span | null | undefined} seg
+ * @param {number | null} prev  the clock before this step
+ * @param {number} t
+ */
+export function crossedEnd(seg, prev, t) {
+    if (!seg || prev == null) return false;
+    return prev >= seg.start && prev < seg.end && t >= seg.end && t - prev <= MAX_PLAY_STEP_S;
+}
+
+// replayFrom: play pressed while paused at (or past) the segment's end
+// starts over at its start; null plays on from where it is.
+/**
+ * @param {Span | null | undefined} seg
+ * @param {number} t
+ */
+export function replayFrom(seg, t) {
+    return seg && t >= seg.end - 0.5 ? seg.start : null;
+}
+
+// The i / o keys: the selection's start or end at the playhead, keeping
+// the other edge when it is still on its side (else `len` seconds away).
+const MARK_LEN_S = 10;
+/**
+ * @param {Span | null | undefined} seg
+ * @param {number} t
+ * @returns {Span}
+ */
+export function markIn(seg, t) {
+    return { start: t, end: seg && seg.end > t ? seg.end : t + MARK_LEN_S };
+}
+/**
+ * @param {Span | null | undefined} seg
+ * @param {number} t
+ * @returns {Span}
+ */
+export function markOut(seg, t) {
+    return { start: seg && seg.start < t ? seg.start : Math.max(0, t - MARK_LEN_S), end: t };
+}

@@ -9,6 +9,7 @@ import {
 } from '../src/lib/map.js';
 import {
     barAxisTicks, barPct, barTime, dragSpan, isDrag, nearKnob, overlayBox, segmentLabel, transport, SPEEDS,
+    crossedEnd, replayFrom, markIn, markOut,
 } from '../src/lib/playback-bar.js';
 import { ITEM_MARKER_STYLES } from '../../mvd-map-view/src/map.js';
 
@@ -165,6 +166,19 @@ test('playback bar: axis, cursor, pointer time, drag, overlay, buttons', () => {
     const eng = transport({ drives: true, engine: { playing: false, rate: 20 }, playing: true, speed: 5 });
     assert.deepEqual([eng.playing, eng.speed], [false, 0.2], 'the engine\'s rate, kept while paused');
     assert.deepEqual(eng.speeds.filter((s) => s.disabled).map((s) => s.value), [-1], 'the engine cannot play backwards');
+    const seg = { start: 10, end: 20 };
+    assert.ok(crossedEnd(seg, 19.9, 20.05), 'playing into the end');
+    assert.ok(!crossedEnd(seg, 5, 20.5), 'from before the segment: no');
+    assert.ok(!crossedEnd(seg, 12, 40), 'a seek out of it: no');
+    assert.ok(!crossedEnd(null, 19.9, 20.1));
+    assert.ok(!crossedEnd(seg, null, 20.1));
+    assert.equal(replayFrom(seg, 20.02), 10, 'paused at the end: play starts it over');
+    assert.equal(replayFrom(seg, 15), null);
+    assert.equal(replayFrom(null, 15), null);
+    assert.deepEqual(markIn(seg, 15), { start: 15, end: 20 }, 'i keeps the end');
+    assert.deepEqual(markIn(seg, 25), { start: 25, end: 35 }, 'past the end: 10 s');
+    assert.deepEqual(markOut(seg, 15), { start: 10, end: 15 });
+    assert.deepEqual(markOut(null, 4), { start: 0, end: 4 });
 });
 
 test('playback: the loop moves the clock, toggles, wraps, stops at 0 and on a tab', async () => {
@@ -177,7 +191,7 @@ test('playback: the loop moves the clock, toggles, wraps, stops at 0 and on a ta
     performance.now = () => now;
     const crank = (ms) => { now += ms; const f = frames; frames = []; f.forEach((fn) => fn()); };
     try {
-        const { clock, activeTab, playback, setPlaybackSpeed, startPlayback, togglePlayback, stopPlayback } = await import('../src/state/index.js');
+        const { clock, activeTab, playback, segment, setPlaybackSpeed, startPlayback, togglePlayback, stopPlayback } = await import('../src/state/index.js');
         const seen = [];
         const off = clock.subscribe(({ from }) => seen.push(from));
         clock.setDuration(100);
@@ -218,6 +232,14 @@ test('playback: the loop moves the clock, toggles, wraps, stops at 0 and on a ta
         startPlayback();
         activeTab.set('player');
         assert.ok(!playback.get().playing, 'the Player engine is the clock there');
+        activeTab.set('map');
+        segment.set({ start: 10, end: 20 });
+        clock.seek(19.5);
+        startPlayback();
+        crank(1000);
+        assert.equal(clock.t, 20, 'playing into the segment end stops there');
+        assert.ok(!playback.get().playing);
+        segment.set(null);
         stopPlayback();
         off();
     } finally {

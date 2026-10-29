@@ -9,7 +9,11 @@
     // anywhere else a press that moves selects a range — the shared segment
     // (src/state/timeline.js), the Timeline tab's view window too, set on
     // release (the bar previews it meanwhile) — and one that does not move
-    // clears the segment and seeks there. A double-click clears it.
+    // clears the segment and seeks there. A double-click clears it. A new
+    // selection seeks to its start, and playback stops at its end (a
+    // selection plays like a clip; play there starts it over). Where a
+    // POV is at hand (src/player/selection-clip.js) a "+ clip" pill hangs
+    // under the selection.
     //
     // Play / pause and the speed run the page's own playback
     // (src/state/playback.js) or, while the Player engine is the clock (the
@@ -29,11 +33,13 @@
     import {
         clock, demo, activeTab, segment, playback, setPlaybackSpeed, togglePlayback, TABS_WITH_TIMELINE,
     } from '../state/index.js';
+    import Plus from '@lucide/svelte/icons/plus';
     import { engine } from '../player/index.js';
+    import { selectionPov, addSelectionClip } from '../player/selection-clip.js';
     import { formatDuration } from '../lib/result.js';
     import { matchDurationSec } from '../lib/timeline.js';
     import {
-        barAxisTicks, barPct, barTime, dragSpan, isDrag, nearKnob, overlayBox, segmentLabel, transport,
+        barAxisTicks, barPct, barTime, dragSpan, isDrag, nearKnob, overlayBox, segmentLabel, transport, replayFrom,
     } from '../lib/playback-bar.js';
 
     /** @type {HTMLDivElement} */
@@ -55,6 +61,7 @@
     /** @type {null | { mode: 'knob' | 'press' | 'select', x0: number, t0: number }} */
     let drag = null;
     let grabbing = $state(false);
+    let selecting = $state(false);
 
     const shown = $derived(!!result && TABS_WITH_TIMELINE.includes(tab));
     const marks = $derived(barAxisTicks(duration).slice(1, -1));
@@ -75,6 +82,10 @@
     }
 
     function togglePlay() {
+        if (!tp.playing) {
+            const from = replayFrom(segment.get(), clock.t);
+            if (from != null) clock.seek(from);
+        }
         if (engine.drives()) engine.togglePlay();
         else togglePlayback();
     }
@@ -120,6 +131,7 @@
             clock.seek(t);
         } else if (drag.mode === 'select' || isDrag(drag.x0, e.clientX)) {
             drag.mode = 'select';
+            selecting = true;
             shownSeg = dragSpan(drag.t0, t);
         }
     }
@@ -130,18 +142,22 @@
         const { mode, t0 } = drag;
         drag = null;
         grabbing = false;
+        selecting = false;
         const t = timeAt(e);
         if (mode === 'press') {
             segment.set(null);
             clock.seek(t0);
         } else if (mode === 'select' && t !== null) {
-            segment.set(dragSpan(t0, t));
+            const span = dragSpan(t0, t);
+            segment.set(span);
+            clock.seek(span.start);
         }
     }
 
     function cancel() {
         drag = null;
         grabbing = false;
+        selecting = false;
         shownSeg = segment.get();
     }
 
@@ -198,6 +214,14 @@
             {#if box}<div class="pb-sel" style:left={box.left} style:width={box.width}></div>{/if}
         </div>
         <div class="pb-knob" style:left="{pct}%"></div>
+        {#if box && $selectionPov && !selecting}
+            <!-- The selection from the current POV, as a clip -->
+            <button class="pb-clip" style:left="calc({box.left} + {box.width} / 2)"
+                title="Add the selection to the playlist, watched from {$selectionPov.who || 'Auto'} (key: c; i / o set its start / end at the playhead)"
+                onpointerdown={(e) => e.stopPropagation()} onclick={addSelectionClip} transition:fade={{ duration: 120 }}>
+                <Plus size={12} /> clip · {$selectionPov.who || 'Auto'} · {label}
+            </button>
+        {/if}
         {#if hover}
             <div class="pb-hover-line" style:left="{hover.x}px"></div>
             <div class="pb-readout" style:left="{hover.x}px" transition:fade={{ duration: 100 }}>{formatDuration(hover.t)}</div>
@@ -348,6 +372,29 @@
         white-space: nowrap;
         pointer-events: none;
         z-index: 30;
+    }
+    .pb-clip {
+        position: absolute;
+        top: calc(100% + 4px);
+        transform: translateX(-50%);
+        z-index: 30;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        height: 20px;
+        padding: 0 8px;
+        border-radius: 10px;
+        border: 1px solid #ffd250;
+        background: #2a2410;
+        color: #ffd250;
+        font-size: 11px;
+        white-space: nowrap;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    .pb-clip:hover {
+        background: #ffd250;
+        color: #1a1505;
     }
     .pb-seg {
         min-width: 13ch;

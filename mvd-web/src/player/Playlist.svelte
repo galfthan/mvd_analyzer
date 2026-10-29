@@ -209,6 +209,6 @@
         {/each}
     </ol>
     {#if !clips.length}
-        <div class="player-clip-hint">No clips yet — mark In/Out above, shift-click a play link on any tab, pick Generate, or build a query in the clip finder.</div>
+        <div class="player-clip-hint">No clips yet — select a stretch on the playback bar and press its + clip (or c), shift-click a play link on any tab, pick Generate, or build a query in the clip finder.</div>
     {/if}
 </div>

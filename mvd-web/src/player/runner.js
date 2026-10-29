@@ -2,7 +2,9 @@
 // and step to the next one when playback crosses its end (the stepping rules
 // are hub's, in src/lib/playlist.js playlistStep). A clip of another hub
 // demo loads that demo and carries on there; a clip of another local file
-// is skipped with a note.
+// is skipped with a note. The clip playing is the selected segment (the
+// playback bar shows it, the Timeline tab zooms to it); stopping clears it
+// unless the user selected another meanwhile.
 
 import { playlistStep } from '../lib/playlist.js';
 import { playlist, setRun } from './playlist-store.js';
@@ -21,10 +23,11 @@ import { toast } from './toast.js';
  * @property {(id: string) => void} selectTab
  * @property {typeof import('../app/load.js').loadDemo} loadDemo
  * @property {typeof import('./demo-ref.js').demoRefOf} demoRefOf
+ * @property {import('../state/store.js').Store<{ start: number, end: number } | null>} segment
  */
 
 /** @param {RunnerDeps} deps */
-export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRefOf }) {
+export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRefOf, segment }) {
     /** @type {Run | null} */
     let loadingRun = null;   // the run whose next clip's demo is being loaded
     let awaitingFrames = false;   // a clip waits for the shown engine to repaint
@@ -47,8 +50,19 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
         playClip(index);
     }
 
+    /** @type {{ start: number, end: number } | null} */
+    let shownSpan = null;   // the segment this run set, while it is still the segment
+    /** @param {Clip} c  a clip of the current demo */
+    function showSpan(c) {
+        const off = engine.offset();
+        shownSpan = { start: Math.max(0, c.from - off), end: Math.max(0, c.to - off) };
+        segment.set(shownSpan);
+    }
+
     function stop() {
         setRun(null);
+        if (shownSpan && segment.get() === shownSpan) segment.set(null);
+        shownSpan = null;
     }
 
     /**
@@ -67,6 +81,7 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             toast(`Skipping "${c.label}" — load ${c.demo?.title || 'its demo'} to play it`);
             return playClip(index + 1);
         }
+        showSpan(c);
         if (engine.activeTab.get() !== 'player') {
             // The engine's iframe was hidden: showing it costs a repaint
             // (seconds under software GL), and a jump sent before that
@@ -156,6 +171,7 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             // A seek into another clip: it is the active one, with its POV.
             const next = run.clips[local[step.index]];
             setRun({ ...run, index: local[step.index] });
+            showSpan(next);
             if (next.track !== run.clips[run.index].track) engine.track(next.track);
         } else if (step.type === 'next' || step.type === 'end') {
             if (run.index + 1 < run.clips.length) {

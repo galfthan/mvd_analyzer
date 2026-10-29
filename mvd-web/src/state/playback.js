@@ -6,6 +6,7 @@
 // and sets its speed. While the Player tab
 // shows, its engine is the clock instead and this loop does not run.
 //
+// Playing into the selected segment's end stops there (crossedEnd).
 // Forward past the end wraps to the start; reverse stops at 0. A tab without
 // the bar, the Player tab, and a new demo stop it. Stopping seeks the clock
 // to where it stopped (an untagged seek), which is what makes the views
@@ -15,6 +16,8 @@ import { store } from './store.js';
 import { clock } from './clock.js';
 import { activeTab } from './ui.js';
 import { demo } from './demo.js';
+import { segment } from './timeline.js';
+import { crossedEnd } from '../lib/playback-bar.js';
 
 // The tabs the bar shows on.
 export const TABS_WITH_TIMELINE = ['timeline', 'chat', 'map', 'keymoments', 'player'];
@@ -64,7 +67,13 @@ function step() {
     if (elapsed < FRAME_MS / 1000) return;
     last = now;
     const duration = Number.isFinite(clock.duration) ? clock.duration : 600;
-    let t = clock.t + elapsed * playback.get().speed;
+    const prev = clock.t;
+    let t = prev + elapsed * playback.get().speed;
+    const seg = segment.get();
+    if (seg && crossedEnd(seg, prev, t)) {
+        stopPlayback(seg.end);
+        return;
+    }
     if (t > duration) t = 0;
     if (t < 0) {
         stopPlayback(0);
