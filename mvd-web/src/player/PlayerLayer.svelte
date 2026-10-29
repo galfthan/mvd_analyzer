@@ -10,6 +10,7 @@
     import { onMount } from 'svelte';
     import PlayerFrame from './PlayerFrame.svelte';
     import { activeTab } from '../state/index.js';
+    import { engine } from './index.js';
     import { playerSlot, slotBox, clipAncestors } from './player-slot.js';
 
     /** @type {HTMLDivElement} */
@@ -85,5 +86,5 @@
 </script>
 
 <div class="player-layer" class:pass-through={passThrough} bind:this={layer} style="visibility:hidden">
-    <PlayerFrame />
+    <PlayerFrame {engine} />
 </div>

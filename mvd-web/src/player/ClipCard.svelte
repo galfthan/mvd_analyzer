@@ -5,8 +5,10 @@
     // place in the run, label and who it watches — fading out after a
     // couple of seconds.
     import { playlist } from './playlist-store.js';
-    import { teams, colorOf } from '../state/index.js';
-    import { engine } from './index.js';
+    import { teams, colorOf } from '../state/teams.js';
+
+    /** @type {{ engine: import('./engine.js').PlayerEngine }} */
+    let { engine } = $props();
 
     const CARD_MS = 2600;
     const VEIL_MIN_MS = 250;

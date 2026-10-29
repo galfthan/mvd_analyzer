@@ -94,18 +94,16 @@
         copyText(hubClipsUrl(gameId, clips), 'Hub link');
     }
 
-    // Share link: this page, opening the first clip's hub demo in the
-    // Player tab, with the whole playlist in the fragment (#playlist=…).
+    // Share link: the light player (play.html, no analyzer) with the whole
+    // playlist in the fragment (#playlist=…); it links on to this page's
+    // Player tab with the same playlist.
     function copyShareLink() {
         if (!clips.length) {
             toast('The playlist is empty');
             return;
         }
-        const first = clips.find((c) => c.demo?.gameId);
-        const params = new URLSearchParams();
-        if (first) params.set('gameId', String(first.demo.gameId));
-        params.set('tab', 'player');
-        copyText(`${location.origin}${location.pathname}?${params}#playlist=${encodePlaylist(clips)}`, 'Share link');
+        const dir = location.pathname.replace(/[^/]*$/, '');
+        copyText(`${location.origin}${dir}play.html#playlist=${encodePlaylist(clips)}`, 'Share link');
     }
 
     function clear() {
@@ -179,7 +177,7 @@
         </select>
         <span class="pt-group">
             <button class="pt-btn" title="Copy one hub.quakeworld.nu link playing every clip (one hub demo, up to 20 clips)" onclick={copyHubLink}><Link size={14} /> Hub link</button>
-            <button class="pt-btn" title="Copy a link to this page carrying the playlist" onclick={copyShareLink}><Share2 size={14} /> Share link</button>
+            <button class="pt-btn" title="Copy a link to a light player of these clips (no analysis to wait for; it links on to the full analyzer)" onclick={copyShareLink}><Share2 size={14} /> Share link</button>
         </span>
         <button class="pt-btn icon" title="Remove every clip" disabled={!clips.length} onclick={clear}><Trash2 size={15} /></button>
         <span class="player-clip-hint">

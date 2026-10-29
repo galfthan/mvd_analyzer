@@ -1278,9 +1278,28 @@ drops it).
 - **Copy hub link**: one `hub.quakeworld.nu/games/?gameId=…&clip=F-T:U…`
   link (hub's own multi-clip format) when every clip is from one hub demo;
   hub reads the first 20.
-- **Copy share link**: this page with `?gameId=<first hub clip>&tab=player`
-  and the whole playlist in `#playlist=<base64url JSON>`; opening it appends
-  the clips not already in the viewer's list.
+- **Copy share link**: the light player, `play.html#playlist=<base64url
+  JSON>` (below). This page still reads `?gameId=…&tab=player#playlist=…`
+  — the light player's *Open in the full analyzer* link — and appends the
+  clips not already in the viewer's list.
+
+### The light player (`play.html`)
+
+A shared playlist opens in a page of its own that plays the clips with
+their labels and loads **no analyzer** (no wasm, no worker, no analysis to
+wait for) — only the engine and the demos. It is Vite's second entry
+(`play.html`, `src/play/`, ~7 KB of its own plus the shared engine /
+runner chunk). It reuses the Player tab's `PlayerEngine`, `createRunner`,
+`PlayerFrame` and `ClipCard` (both take the engine as a prop, so nothing
+pulls in `src/player/index.js` and through it the analyzer), with its own
+clock and stores; `light-demo.js` stands in for the data layer: a hub
+demo's bytes (`fetchGame` + `downloadDemo`) and a minimal handle whose
+result carries just the map (hub's game row) and the demo offset (from
+the clips). The page lists the clips (label, who, length, slow motion,
+demo), starts the run at once (muted, as the tab does), and has play /
+pause, previous / next and sound; a click on a clip plays from it. Clips
+of a local file are listed as skipped. *Open in the full analyzer* (head
+and foot) goes to this page's Player tab with the same playlist.
 
 ### Hub links on the other tabs
 
