@@ -1151,10 +1151,14 @@ which would reload the engine's iframe.)
 `src/player/playlist-store.js` the list and the run, `runner.js` the
 scripted playback, `Playlist.svelte` and the playback bar's selection
 (`selection-clip.js`) the UI. A clip is
-`{ from, to, track, who, label, demo }` with `from`/`to` in
-**demo-relative** whole seconds — the engine's and hub's clock — and
+`{ from, to, track, who, label, demo, slow? }` with `from`/`to` in
+**demo-relative** whole seconds — the engine's and hub's clock —
 `demo = { key, gameId, title, offset }` (`hub:<gameId>` or
-`file:<name>`; `offset` converts to match time for display).
+`file:<name>`; `offset` converts to match time for display), and an
+optional slow-motion window `slow = { from, to, speed }` (demo seconds in
+0.1 s steps, clamped into the clip, speed 0.05–1×; `cleanSlow` vets it
+from storage and share links, and the hub link, which has no such thing,
+drops it).
 
 - **Make**: the playback bar's selection is the clip. Where a POV is at
   hand — the Player tab (the engine's; Auto counts) and the Map tab (the
@@ -1200,7 +1204,10 @@ scripted playback, `Playlist.svelte` and the playback bar's selection
   **3 Order** — a
   field, highest or lowest first, keep the first N; **4 Clips from each
   row** — from / to a row field with seconds of padding, *watch* (the
-  fields whose values name a player of this demo), a label, *+ clip* for
+  fields whose values name a player of this demo), a label, *slow-mo*
+  (at / to a row field with seconds either side and a speed — by default
+  a second either side of the clip's `from` field at 0.3×; the quadbore,
+  airgib, telefrag and discharge presets have it on), *+ clip* for
   another clip per row, and the default label. Its head holds the
   query's name (what Save stores it as), *Load…* (the built-in presets,
   each with a line saying what it finds, and *My presets*), *Save*
@@ -1214,7 +1221,7 @@ scripted playback, `Playlist.svelte` and the playback bar's selection
   source events types=powerup
   keep   detail.powerup = "quad" and detail.frags > 0
   order  detail.frags desc first 5
-  clip   from=-3s to=detail.endTime+2s
+  clip   from=-3s to=detail.endTime+2s slow=time-1s..time+1s@0.3
   label  "Quad run · {player} · {detail.frags} frag{detail.frags|s}"
   ```
 
@@ -1235,6 +1242,11 @@ scripted playback, `Playlist.svelte` and the playback bar's selection
   (validated first — `validateQuery` refuses unknown sources, params and
   operators and oversized trees). Collapsing or moving the pane keeps the
   query.
+- **Slow motion**: a run plays a clip's `slow` window at its speed (the
+  runner, `slowAt`, through `engine.slowTo`) and at the viewer's speed
+  again after it; a pause drops it and play inside the window slows
+  again. The bar's speed stays the viewer's. A playlist row with one
+  shows a snail.
 - **Edit**: label inline, drag or ↑ ↓ to reorder, × to remove. The list
   persists in `localStorage` (`mvd.playlist.v1`).
 - **Play all / ▶ on a row**: a scripted run — seek, POV, play; advance when
