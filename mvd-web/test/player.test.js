@@ -18,7 +18,8 @@ const { syncMapData } = await import('../src/player/panes/map-sync.js');
 
 test('pane layout migrates the PoC order and sanitizes', () => {
     assert.deepEqual(paneLayout.get().order, ['feed', 'map'], 'v1 order kept, unknown and duplicate ids dropped');
-    assert.deepEqual(paneLayout.get().below, ['finder', 'playlist'], 'a layout from before the finder and playlist were panes gets them under the player');
+    assert.deepEqual(paneLayout.get().below, ['playlist'], 'a layout from before the panes under the player gets the default: the playlist (the finder is off)');
+    updateLayout((l) => { l.below.unshift('finder'); });
     updateLayout((l) => { l.split = 99999; l.width = 420; l.order.push('stack', 'stack'); });
     assert.equal(paneLayout.get().split, MAX_SPLIT);
     assert.equal(paneLayout.get().width, undefined, 'the old px width is dropped');

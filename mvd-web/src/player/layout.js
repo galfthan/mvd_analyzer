@@ -21,8 +21,8 @@ const OLD_KEY = 'mvd.playerPanes.v1';   // an order array, the PoC's format
  * @property {boolean} hidden
  */
 
-// Every pane there is; the columns start with a few, the rest are one
-// "Add pane…" away. A pane is open in at most one column.
+// Every pane there is; the columns start with a few (the clip finder is
+// not one of them), the rest are one "Add pane…" away. A pane is open in at most one column.
 export const PANE_IDS = [
     'finder', 'playlist',
     'map', 'players', 'stack', 'moments', 'feed',
@@ -32,7 +32,7 @@ export const PANE_IDS = [
 /** @type {PaneLayout} */
 const DEFAULT = {
     order: ['map', 'players', 'team-weapons'],
-    below: ['finder', 'playlist'],
+    below: ['playlist'],
     collapsed: {},
     heights: {},          // pane id → body height in px; unset = natural
     opts: {},
@@ -50,7 +50,7 @@ function sanitize(v) {
     /** @type {PaneLayout & { width?: unknown }} */
     const out = { ...DEFAULT, ...(v && typeof v === 'object' ? v : {}) };
     // A layout stored before the finder and the playlist were panes has no
-    // `below`: they open there.
+    // `below`: it gets the default one.
     const order = Array.isArray(out.order) ? out.order : DEFAULT.order;
     const below = Array.isArray(out.below) ? out.below : DEFAULT.below;
     const seen = new Set();

@@ -11,7 +11,9 @@
     // (and / or / not groups) matches, order them and keep the first N, cut clips from each row.
     // Every source, param and field is documented from the API spec
     // (api-docs.js). Load a preset, name and save your own, share it as a
-    // link, edit it all as code, add the clips to the playlist.
+    // link, edit it all as code, add the clips to the playlist. The clips it
+    // finds sit in a column beside the stages when the pane is wide enough,
+    // under them otherwise.
     import Plus from '@lucide/svelte/icons/plus';
     import X from '@lucide/svelte/icons/x';
     import ListPlus from '@lucide/svelte/icons/list-plus';
@@ -19,8 +21,8 @@
     import Share2 from '@lucide/svelte/icons/share-2';
     import Trash2 from '@lucide/svelte/icons/trash-2';
     import Info from '@lucide/svelte/icons/info';
-    import ArrowDown from '@lucide/svelte/icons/arrow-down';
     import ExprGroup from './ExprGroup.svelte';
+    import FinderFlow from './FinderFlow.svelte';
     import { demo, teams, colorOf } from '../state/index.js';
     import { formatDuration } from '../lib/result.js';
     import {
@@ -281,6 +283,8 @@
     </div>
     {#if about && JSON.stringify(query) === aboutKey}<div class="cf-about">{about}</div>{/if}
 
+    <div class="cf-body">
+    <div class="cf-build">
     <datalist id="cf-fields">
         {#each fields as f (f)}<option value={f} label={fieldTip(f)}></option>{/each}
     </datalist>
@@ -293,9 +297,14 @@
             <code>keep</code> a filter, <code>order field desc first 5</code>, a <code>clip from=field-3s to=field+2s watch=field label="…"</code>
             line per clip, <code>label "…"</code> for clips without their own. Indent to continue a line; <code>#</code> comments.
         </div>
-        <div class="cf-flow-line">
-            {#if run}{count(rows.length, 'row')} found → {count(run.kept.length, 'row')} kept → {count(run.ranked.length, 'row')} ordered → {count(clips.length, 'clip')}{/if}
-        </div>
+        {#if run}
+            <div class="cf-flow-line">
+                <FinderFlow n={rows.length} what="row" tone="rows" />
+                <FinderFlow n={run.kept.length} what="kept row" tone="kept" />
+                <FinderFlow n={run.ranked.length} what="ordered row" tone="ordered" />
+                <FinderFlow n={clips.length} what="clip" tone="clips" />
+            </div>
+        {/if}
     {:else}
         <!-- 1 · Find rows -->
         <section class="cf-stage">
@@ -330,9 +339,8 @@
                 </div>
             {/if}
         </section>
-        <div class="cf-flow"><ArrowDown size={13} />
-            {#if !$demo}load a demo{:else if error}<span class="cf-error">{error}</span>{:else if run}{count(rows.length, 'row')}{:else}…{/if}
-        </div>
+        <FinderFlow n={run ? rows.length : null} what="row" tone="rows" error={!!error}
+            note={!$demo ? 'load a demo' : error || (run ? '' : '…')} />
 
         <!-- 2 · Keep rows where -->
         <section class="cf-stage">
@@ -342,7 +350,7 @@
             </div>
             <ExprGroup bind:group={draft.where} fields="cf-fields" />
         </section>
-        <div class="cf-flow"><ArrowDown size={13} /> {#if run}{count(run.kept.length, 'row')} kept{/if}</div>
+        <FinderFlow n={run ? run.kept.length : null} what="row" tone="kept" />
 
         <!-- 3 · Order and keep the first N -->
         <section class="cf-stage">
@@ -364,7 +372,7 @@
                 </label>
             </div>
         </section>
-        <div class="cf-flow"><ArrowDown size={13} /> {#if run}{count(run.ranked.length, 'row')}{/if}</div>
+        <FinderFlow n={run ? run.ranked.length : null} what="row" tone="ordered" />
 
         <!-- 4 · Clips per row -->
         <section class="cf-stage">
@@ -408,15 +416,23 @@
                     <button class="pt-btn" title="Cut another clip from each row — e.g. a pack's pickup after its drop" onclick={addClipSpec}><Plus size={13} /> clip</button>
                 </div>
             {/if}
-            <label class="cf-label cf-grow" title={LABEL_HELP}>default label
-                <input class="cf-labeltpl" type="text" placeholder="for clips without their own, e.g. {'{'}player{'}'} · {'{'}detail.frags{'}'} frag{'{'}detail.frags|s{'}'}" bind:value={draft.label}>
-            </label>
+            <div class="cf-row">
+                <label class="cf-label cf-grow" title={LABEL_HELP}>default label
+                    <input class="cf-labeltpl" type="text" placeholder="for clips without their own, e.g. {'{'}player{'}'} · {'{'}detail.frags{'}'} frag{'{'}detail.frags|s{'}'}" bind:value={draft.label}>
+                </label>
+            </div>
             <div class="cf-help">{LABEL_HELP}</div>
         </section>
-        <div class="cf-flow"><ArrowDown size={13} /> {#if run}{count(clips.length, 'clip')}{/if}</div>
+        <FinderFlow n={run ? clips.length : null} what="clip" tone="clips" />
     {/if}
+    </div>
 
-    {#if clips.length}
+    <div class="cf-found">
+        <div class="cf-found-head">
+            <span class="cf-heading">Clips found</span>
+            {#if clips.length}<span class="muted cf-note">click: play · shift-click: add</span>{/if}
+        </div>
+        {#if clips.length}
         <ol class="pp-feed cf-results">
             {#each clips.slice(0, SHOWN) as c (c)}
                 <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
@@ -428,7 +444,11 @@
             {/each}
             {#if clips.length > SHOWN}<li class="muted">… and {clips.length - SHOWN} more</li>{/if}
         </ol>
-    {/if}
+        {:else}
+            <div class="muted cf-note">{run ? 'No clips — loosen the filter or the order' : 'Nothing yet'}</div>
+        {/if}
+    </div>
+    </div>
 
     {#if info}
         <div class="cf-info" role="dialog" aria-label="/{draft.source}">
@@ -469,6 +489,44 @@
         display: flex;
         flex-direction: column;
         gap: 6px;
+        container-type: inline-size;
+    }
+    .cf-body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+    }
+    .cf-build {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+    .cf-found {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+    .cf-found-head {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+    }
+    @container (min-width: 760px) {
+        .cf-body {
+            grid-template-columns: minmax(0, 3fr) minmax(220px, 2fr);
+        }
+        .cf-found {
+            position: sticky;
+            top: 0;
+            align-self: start;
+            border-left: 1px solid var(--bg-panel);
+            padding-left: 10px;
+        }
+        .cf-found .cf-results {
+            max-height: 70vh;
+        }
     }
     .cf-row {
         display: flex;
@@ -523,20 +581,10 @@
     .cf-note {
         font-size: 11px;
     }
-    .cf-flow {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        margin-left: 14px;
-        padding-left: 8px;
-        border-left: 2px solid var(--bg-panel);
-        font-size: 12px;
-        color: #aaa;
-        min-height: 18px;
-    }
     .cf-flow-line {
-        font-size: 12px;
-        color: #aaa;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 12px;
     }
     .cf-params {
         display: flex;

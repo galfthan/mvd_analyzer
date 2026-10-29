@@ -1087,10 +1087,11 @@ component inside a `Pane.svelte` frame and redraws at most once per
 animation frame on the page clock or the engine's status, only while the
 tab shows (`panes/tick.js`). The layout is a per-viewer convenience in
 `localStorage` (`mvd.playerPanes.v2`; the PoC's `v1` order is migrated;
-a layout stored before the finder and the playlist were panes gets them
-under the player): which panes are open in each column and in what order
-(default Map / Players / Team weapons beside the player, Clip finder /
-Playlist under it — the rest are one "Add pane…" away in either column),
+a layout stored before the finder and the playlist were panes gets the
+default under the player): which panes are open in each column and in
+what order (default Map / Players / Team weapons beside the player, the
+Playlist under it — the Clip finder and the rest are one "Add pane…" away
+in either column),
 each pane's height, collapsed state and options (`opts`: the map's
 overlays, a graph's window), the side column's
 share of the width (`split`, %, stored when a drag ends — a drag that
@@ -1177,8 +1178,13 @@ scripted playback, `Playlist.svelte` and `ClipBar.svelte` the UI. A clip is
   `mvd-api/openapi/openapi.yaml` is their reference. Plan:
   [`plan-clip-finder.md`](../plan-clip-finder.md).
 - **The clip finder pane** (`ClipFinder.svelte`, the filter editor
-  `ExprGroup.svelte`) runs a query in four boxed stages joined by the
-  count each passes on (`stages()`): **1 Find rows** — the source and its
+  `ExprGroup.svelte`; off by default — "Add pane…") runs a query in four
+  boxed stages joined by the count each passes on (`stages()`; the joint,
+  `FinderFlow.svelte`, is a rail of beads flowing down while rows pass on
+  and the count in a coloured pill, red at none, pulsing when it changes;
+  still under `prefers-reduced-motion`). The clips found sit in a column
+  beside the stages when the pane is at least 760 px wide (a container
+  query), under them otherwise: **1 Find rows** — the source and its
   params; **2 Keep rows where** — the filter as nested *all of* / *any
   of* groups with *not* (as text it is Code's `keep` line, e.g.
   `weapon = rl and (pickerRelation = enemy or not pickerHadWeapon)` —
