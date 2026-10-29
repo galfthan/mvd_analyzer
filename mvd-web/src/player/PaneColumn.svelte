@@ -14,7 +14,9 @@
     import StackPane from './panes/StackPane.svelte';
     import MomentsPane from './panes/MomentsPane.svelte';
     import FeedPane from './panes/FeedPane.svelte';
-    import PlayersPane from './panes/PlayersPane.svelte';
+    import LegendPane from './panes/LegendPane.svelte';
+    import ItemsPane from './panes/ItemsPane.svelte';
+    import RegionsPane from './panes/RegionsPane.svelte';
     import GraphPane from './panes/GraphPane.svelte';
     import { paneLayout, updateLayout, movePane, columnOf, PANE_IDS } from './layout.js';
     import { playlist } from './playlist-store.js';
@@ -28,7 +30,9 @@
         finder: { title: 'Clip finder', component: ClipFinder },
         playlist: { title: 'Playlist', component: Playlist },
         map: { title: 'Map', component: MapPane },
-        players: { title: 'Players', component: PlayersPane },
+        players: { title: 'Players', component: LegendPane },
+        items: { title: 'Items', component: ItemsPane },
+        'region-status': { title: 'Region status', component: RegionsPane },
         stack: { title: 'Health / armor strips', component: StackPane },
         moments: { title: 'Moments', component: MomentsPane },
         feed: { title: 'Frag feed', component: FeedPane },

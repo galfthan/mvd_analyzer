@@ -66,7 +66,7 @@ export function syncLegend(el, view, result, time) {
     const pd = frame ? frame.p : null;
     const frags = fragsAt(result, time);
     s.teams.forEach((/** @type {string} */ team, /** @type {number} */ ti) => {
-        const t = document.getElementById(`map-legend-team-title-${ti}`);
+        const t = el.querySelector(`#map-legend-team-title-${ti}`);
         if (t) t.textContent = `${team} — ${teamFragsAt(team, s.playerSymbols, frags)} frags`;
     });
     // Every legend cell carries data-player (legendRowHtml).

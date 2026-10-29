@@ -1148,11 +1148,20 @@ Player pane avoids that.)
   elsewhere closes it. Unmounting the
   pane (close, collapse, hiding the column) releases its WebGL context
   (`MvdMap.dispose`).
-- **Players**: the Map tab's legend at the playhead — per team (canonical
-  order and colour, with its running frags) each player's loc, health /
-  armor, RL LG GL SNG SSG, quad / pent / ring and frags; dead players dim,
-  the watched one is lit, click a name to watch them. A field of
-  individuals is one list.
+- **Players** (`panes/LegendPane.svelte`): the Map tab's legend as a
+  pane — one sortable table per team (canonical order and colour, the
+  team's running frags in its title), each player's symbol, loc, health +
+  armor, weapons and a play link at the playhead, built by
+  `src/tabs/map/sidebar.js` over the map model's data (cells refresh at
+  most every 150 ms). The watched player's row is lit; click a row to
+  watch them (`src/player/follow.js`: the engine's POV with the engine
+  up, else the map panes' follow target).
+- **Items** (`panes/ItemsPane.svelte`): every tracked armour, weapon,
+  mega and powerup with its loc — up, held, or the seconds to its
+  respawn at the playhead.
+- **Region status** (`panes/RegionsPane.svelte`): one row per control
+  region, its state and the players in it as their map symbols (only
+  with two sides).
 - **Graph panes** (`GraphPane.svelte`, off by default): *Score*, *Team
   weapons*, *Team health / armor*, *Weapons per player*, *Powerups* and
   *Region control* — the Timeline tab's series and renderers over a window
