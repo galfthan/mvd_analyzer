@@ -38,5 +38,10 @@ Each step: `make test`, build, headless checks, docs, push.
 
 Built and pushed: 1 engine only with a Player pane 2ccde0a · 2 the Map
 tab's panels as panes 7a291e4 · 3 the map pane does the Map tab's map
-c795347 · 4 presets replace the tabs (this commit). The tab is labelled
-**Watch**. Verified headless (Playwright + SwiftShader).
+c795347 · 4 presets replace the tabs ad714cd (one "Watch" tab with a
+Map | Player switch). Owner, the same evening: show them as two tabs
+again — familiar and easy to find — with the code shared, and no extra
+switch control; so the Map and Player sidebar tabs are the two views of
+one `#tab-player`, the tab shown picking the layout, *Reset* in each
+column's "+ Add pane…" menu. (The Timeline tab could become a third view
+of it the same way.) Verified headless (Playwright + SwiftShader).

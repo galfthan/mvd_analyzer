@@ -1,11 +1,11 @@
 // selection-clip.js — the selected segment as a clip: the playback bar's
 // "+ clip" and the keys i / o / c. A clip needs a POV, so it is offered
-// where one is: the Watch tab — the engine's (Auto counts) when it is up,
+// where one is: the Map and Player tabs — the engine's (Auto counts) when it is up,
 // else the player the map follows (follow.js). `selectionPov` is that POV,
 // null elsewhere.
 
 import { store } from '../state/store.js';
-import { activeTab, demo, segment, clock } from '../state/index.js';
+import { activeTab, demo, segment, clock, isWatchTab } from '../state/index.js';
 import { mapFollow } from './follow.js';
 import { formatDuration, nameOfUserId } from '../lib/result.js';
 import { markIn, markOut } from '../lib/playback-bar.js';
@@ -20,7 +20,7 @@ export const selectionPov = store(/** @type {Pov | null} */ (null));
 /** @returns {Pov | null} */
 function povNow() {
     const tab = activeTab.get();
-    if (tab !== 'player') return null;
+    if (!isWatchTab(tab)) return null;
     if (engine.drives()) {
         const track = engine.povTrack();
         return { track, who: track === 'auto' ? '' : nameOfUserId(demo.get()?.result, track) || '' };

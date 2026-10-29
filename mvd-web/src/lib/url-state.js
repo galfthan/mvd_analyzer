@@ -9,11 +9,8 @@ import { isTab } from '../state/ui.js';
 // is labelled "Locs & Regions" and the URL prefers the matching
 // "locs-regions" slug. Old "loc-graph" links still resolve; new URLs are
 // written as "locs-regions".
-// The Watch tab (internal id "player") is written as the preset view in
-// use, ?tab=map or ?tab=player — the two tabs it replaced, so their old
-// links open the matching view.
 /** @type {Record<string, string>} */
-const TAB_URL_TO_INTERNAL = { 'locs-regions': 'loc-graph', map: 'player' };
+const TAB_URL_TO_INTERNAL = { 'locs-regions': 'loc-graph' };
 /** @type {Record<string, string>} */
 const TAB_INTERNAL_TO_URL = { 'loc-graph': 'locs-regions' };
 
@@ -40,7 +37,6 @@ export function urlTab(name) {
  * @typedef {object} UrlDemoState
  * @property {number | string | null} [gameId]
  * @property {string} [activeTab]
- * @property {string} [preset]  the Watch tab's view (map / player)
  * @property {boolean} [learn]
  * @property {number} t
  * @property {{ start: number, end: number } | null} [seg]
@@ -56,8 +52,7 @@ export function urlQuery(demo, search, fields) {
     if (demo) {
         if (demo.gameId) params.set('gameId', String(demo.gameId));
         if (demo.activeTab && demo.activeTab !== 'summary') {
-            const name = demo.activeTab === 'player' ? demo.preset || 'player' : TAB_INTERNAL_TO_URL[demo.activeTab] || demo.activeTab;
-            params.set('tab', name);
+            params.set('tab', TAB_INTERNAL_TO_URL[demo.activeTab] || demo.activeTab);
         }
         if (demo.learn) params.set('learn', '1');
         if (demo.t > 0) params.set('t', String(Math.round(demo.t)));

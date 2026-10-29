@@ -4,16 +4,14 @@
 // it runs after the tabs' own subscribers — they wait a microtask for the
 // tab to be visible. Setting the same tab again notifies too, which is how
 // a tab re-runs its show path after late data.
-import { activeTab, selectTab } from '../state/ui.js';
+import { activeTab, selectTab, isWatchTab } from '../state/ui.js';
 import { resolveTabName } from '../lib/url-state.js';
 import { updateUrlState } from './url.js';
-import { setPreset, isPreset } from '../player/layout.js';
 
-// switchTab takes a URL tab name too (the locs-regions alias; map / player
-// open the Watch tab in that view); an unknown name changes nothing.
+// switchTab takes a URL tab name too (the locs-regions alias); an unknown
+// name changes nothing.
 /** @param {string} name */
 export function switchTab(name) {
-    if (isPreset(name)) setPreset(name);
     selectTab(resolveTabName(name));
 }
 
@@ -32,7 +30,8 @@ export function setupTabs() {
 /** @param {string} tabName */
 function onTabActivated(tabName) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    // Every tab in TABS renders its #tab-<id> (src/shell/App.svelte).
-    /** @type {HTMLElement} */ (document.getElementById(`tab-${tabName}`)).classList.add('active');
+    // Every tab in TABS renders its #tab-<id> (src/shell/App.svelte); the
+    // Map and Player tabs share #tab-player.
+    /** @type {HTMLElement} */ (document.getElementById(`tab-${isWatchTab(tabName) ? 'player' : tabName}`)).classList.add('active');
     updateUrlState();
 }

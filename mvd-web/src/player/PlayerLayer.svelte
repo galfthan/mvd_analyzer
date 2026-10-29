@@ -11,7 +11,7 @@
     // hands unused wheel events to the viewport, which does not scroll).
     import { onMount } from 'svelte';
     import PlayerFrame from './PlayerFrame.svelte';
-    import { activeTab } from '../state/index.js';
+    import { activeTab, isWatchTab } from '../state/index.js';
     import { engine } from './index.js';
     import { playerSlot, slotBox, clipAncestors } from './player-slot.js';
     import { paneLayout } from './layout.js';
@@ -75,7 +75,7 @@
             cancelAnimationFrame(raf);
             raf = 0;
             clipsOf = null;
-            if (tab === 'player') raf = requestAnimationFrame(frame);
+            if (isWatchTab(tab)) raf = requestAnimationFrame(frame);
         });
         const refresh = () => { clipsOf = null; };
         window.addEventListener('resize', refresh);

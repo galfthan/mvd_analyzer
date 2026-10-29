@@ -5,13 +5,14 @@
 // overlays, a graph's window), the side column's share of the tab's width
 // (a percentage, PaneForge's unit) and whether it is shown.
 //
-// The tab has preset views — `map` (mainly the map, no engine) and
-// `player` (mainly the demo player) — each its own layout: rearranging
-// edits the preset in use, resetPreset() restores it, setPreset() switches
-// (`paneLayout` is always the one in use). A fresh visit starts in `map`.
+// The Map and Player tabs are this one tab in two preset views — `map`
+// (mainly the map, no engine) and `player` (mainly the demo player) — each
+// its own layout: rearranging edits the view in use, resetPreset() restores
+// it; the tab shown picks the view (`paneLayout` is always the one in use).
 // A per-viewer convenience kept in localStorage.
 
 import { store } from '../state/store.js';
+import { activeTab } from '../state/ui.js';
 
 const KEY = 'mvd.playerPanes.v4';        // { preset, layouts: { map, player } }
 const V3_KEY = 'mvd.playerPanes.v3';     // one layout, before the presets
@@ -155,6 +156,9 @@ export function setPreset(id) {
     preset.set(id);
     paneLayout.set(all.layouts[id]);
 }
+
+// The tab shown picks the view (setPreset ignores the other tabs).
+activeTab.subscribe((tab) => setPreset(tab));
 
 // resetPreset puts the preset in use back to its default layout.
 export function resetPreset() {

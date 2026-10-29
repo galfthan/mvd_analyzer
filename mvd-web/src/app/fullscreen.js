@@ -12,6 +12,7 @@ import { activeTab } from '../state/ui.js';
 /** @type {Record<string, string>} tab id → the panel that goes fullscreen */
 export const FULLSCREEN_PANELS = {
     player: '#tab-player .player-panel',
+    map: '#tab-player .player-panel',
 };
 
 // The tab whose panel is fullscreen, or null.
@@ -22,7 +23,10 @@ let barHome = null;
 
 function onChange() {
     const el = document.fullscreenElement;
-    const tab = el ? Object.keys(FULLSCREEN_PANELS).find((id) => el.matches(FULLSCREEN_PANELS[id])) || null : null;
+    // Two tabs can share a panel (Map and Player): the active one is it.
+    const active = activeTab.get();
+    const tab = !el ? null : Object.hasOwn(FULLSCREEN_PANELS, active) && el.matches(FULLSCREEN_PANELS[active])
+        ? active : Object.keys(FULLSCREEN_PANELS).find((id) => el.matches(FULLSCREEN_PANELS[id])) || null;
     if (tab === fullscreenTab.get()) return;
     const bar = document.getElementById('unified-timeline');
     if (bar) {

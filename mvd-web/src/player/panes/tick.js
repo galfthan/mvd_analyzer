@@ -2,7 +2,7 @@
 // switch while paused), at most once per animation frame (the engine poll and
 // scrubbing can seek several times a frame), and not at all while the Player
 // tab is hidden.
-import { clock, activeTab } from '../../state/index.js';
+import { clock, activeTab, isWatchTab } from '../../state/index.js';
 import { engine } from '../index.js';
 
 /**
@@ -12,7 +12,7 @@ import { engine } from '../index.js';
 export function onFrame(draw) {
     let queued = false;
     const schedule = () => {
-        if (queued || activeTab.get() !== 'player') return;
+        if (queued || !isWatchTab(activeTab.get())) return;
         queued = true;
         requestAnimationFrame(() => {
             queued = false;

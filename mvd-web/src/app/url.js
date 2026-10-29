@@ -12,7 +12,6 @@ import { SEARCH_FIELDS } from '../data/hub.js';
 import { lastExecutedSearch } from '../tabs/search/search-model.js';
 import { urlQuery, parseSeg, parseTime } from '../lib/url-state.js';
 import { switchTab, activeTabName } from './tabs.js';
-import { preset } from '../player/layout.js';
 
 /** @type {ReturnType<typeof setTimeout> | null} */
 let urlStateTimer = null;
@@ -26,7 +25,6 @@ export function updateUrlState() {
         const qs = urlQuery(result && {
             gameId: result.hubInfo?.gameId,
             activeTab: activeTabName(),
-            preset: preset.get(),
             learn: learnMode.get(),
             t: clock.t,
             seg: segment.get(),

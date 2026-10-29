@@ -25,12 +25,14 @@ read **play** (Shift: **+add**, Ctrl / Cmd: **hub**), the clip finder
 starts closed and shows its clips beside the stages, and the map's depth
 fog is an option again — off by default — in the map's right-click menu.
 
-The **Map and Player tabs are now one, Watch**, with two preset views:
-*Map* (a large map, the players' table, items and region status — no demo
-player to load, so it opens instantly and scrubs freely) and *Player*
-(the game view and the playlist, the map beside). Each view remembers how
-you arranged it; old `?tab=map` / `?tab=player` links open the matching
-view, and playing any clip switches to the Player view. The map's
+The **Map and Player tabs are now two views of one tab**, sharing all of
+their panes: *Map* (a large map, the players' table, moments, items and
+region status — no demo player to load, so it opens instantly and scrubs
+freely) and *Player* (the game view and the playlist, the map beside).
+Each remembers how you arranged it, any pane can go in either, and
+playing any clip opens the Player tab. The graph panes and the health /
+armor strips show the selection (or the whole match) by default and grow
+with their pane. The map's
 toolbar controls moved into its right-click menu (follow, trails, learn
 the map), and the Map tab's player table replaced the Player tab's.
 

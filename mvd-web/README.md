@@ -1028,26 +1028,28 @@ loc the slowest?") with measured data before optimizing. It is what
 surfaced the two big costs — the parse event pass and the (now deferred)
 bucket build.
 
-## Watch tab (the Map and Player views)
+## Map and Player tabs (one tab, two views)
 
-One tab, **Watch** (internal id `player`), replaced the Map and Player
-tabs (plan: [`plan-map-player-merge.md`](../plan-map-player-merge.md)).
-Its head switches between two **preset views** (`src/player/layout.js`):
+The **Map** and **Player** tabs are one implementation (plan:
+[`plan-map-player-merge.md`](../plan-map-player-merge.md)): both show
+`#tab-player` (`PlayerTab.svelte`; `WATCH_TABS` / `isWatchTab` in
+`src/state/ui.js`), and the tab shown picks its **preset view** — its own
+pane layout (`src/player/layout.js`):
 
 - **Map** — mainly the map: a large Map pane in the main column, Players,
   Moments, Items and Region status beside it, and no Player pane, so the demo
   engine does not load (the page's own playback is the clock: instant
-  scrubbing, −1×). A fresh visit starts here.
+  scrubbing, −1×).
 - **Player** — mainly the demo player: the Player pane and the playlist,
   the Map, Players, Moments and Team weapons beside them.
 
 Each view is its own saved pane layout (`mvd.playerPanes.v4`:
 `{ preset, layouts: { map, player } }`; a pre-preset layout becomes the
-Player view): rearranging edits the view in use, the ↺ button puts it
-back to its default, and switching returns to a view as it was left.
-`?tab=map` and `?tab=player` open the tab in that view (the two old tabs'
-links keep working), and the URL writes the view in use. Playing a clip
-switches to the Player view when the view in use shows no Player pane.
+Player view): rearranging edits the tab in use, the foot menu's *↺ Reset
+this tab's panes* puts it back to its default, and switching tabs returns
+to a view as it was left. Any pane can open in either tab (a Player pane
+on the Map tab loads the engine there). Playing a clip opens the Player
+tab, and its Player pane if the viewer closed or collapsed it.
 
 `src/player/` (`PlayerTab.svelte` and its components, mounted by the
 shell) was the first tab ported to Svelte. It watches the loaded demo in the FTE
@@ -1193,16 +1195,22 @@ Player pane avoids that.)
   with two sides).
 - **Graph panes** (`GraphPane.svelte`, off by default): *Score*, *Team
   weapons*, *Team health / armor*, *Weapons per player*, *Powerups* and
-  *Region control* — the Timeline tab's series and renderers over a window
-  that rolls with the playhead (1, 3 or 10 min, three quarters behind it,
-  `rollingWindow`) or the whole match, per pane. A line marks the
+  *Region control* — the Timeline tab's series and renderers over the
+  pane's window (`PANE_WINDOWS`, `paneWindow` in `src/lib/timeline.js`):
+  by default the selected segment, or the whole match without one; else a
+  window that rolls with the playhead (1, 3 or 10 min, three quarters
+  behind it, `rollingWindow`) or the whole match. A line marks the
   playhead (an element over the canvas, so a paused graph is not redrawn
-  to move it); click seeks. The two-sided graphs say so in a field of
+  to move it); click seeks. Given a height (the pane's resize handle) a
+  graph grows to fill it — the diverging graphs' canvas, the span graphs'
+  rows — never below its natural size. The two-sided graphs say so in a field of
   individuals, where *Weapons per player* still works.
 - **Health / armor strips** (off by default): one row per player in canonical team order and
-  colour — a rolling strip (45 s back, 15 s ahead, `renderMiniStack`, fixed
-  0–300 scale) with the playhead, and the values at it. Click a name to
-  watch them.
+  colour — a strip over the pane's window, the graph panes' choices
+  (selection / match by default; 1 min rolls 45 s back, 15 s ahead;
+  `renderMiniStack`, fixed 0–300 scale), a line at the playhead, and the
+  values at it. Strips redraw when the window moves; given a height the
+  rows share it. Click a name to watch them.
 - **Moments**: two levels. The groups are the Key Moments and Pack Drops
   tabs' tables — quad / pent / ring runs, frag streaks, top damage windows,
   top RL and LG kills, demo markers, airgibs, discharges, quadbores,
@@ -1234,7 +1242,7 @@ from storage and share links, and the hub link, which has no such thing,
 drops it).
 
 - **Make**: the playback bar's selection is the clip. Where a POV is at
-  hand — the Watch tab: the engine's POV (Auto counts), or with no engine
+  hand — the Map / Player tab: the engine's POV (Auto counts), or with no engine
   the player the map follows — a *+ clip · who* pill beside the selection's in the
   playback bar adds it from that POV (`src/player/selection-clip.js`).
   Keys there: `i` / `o` set the selection's start / end at the playhead
@@ -1609,7 +1617,7 @@ own `MvdMap` each frame and draws at most once per animation frame while
 the tab shows. Learn mode is a store (`MvdMapTab.learnMode`) so the URL
 can keep it.
 
-The unified bar above the Timeline, Chat, Key Moments and Watch tabs
+The unified bar above the Timeline, Chat, Map, Key Moments and Player tabs
 is `src/ui/PlaybackBar.svelte` (arithmetic in `src/lib/playback-bar.js`),
 laid out like a video player's: a thin scrubber across the top — the
 played part, a round playhead, minute marks, the selected segment, and
@@ -1639,13 +1647,13 @@ clears it on stop unless the user picked another meanwhile), so the
 Timeline tab zooms to it too.
 
 **Fullscreen** is one feature for every tab that offers it
-(`src/app/fullscreen.js`; the Watch tab, naming its panel in
-`FULLSCREEN_PANELS`): the active tab's row in the tab bar carries the
+(`src/app/fullscreen.js`; the Map and Player tabs, naming their shared
+panel in `FULLSCREEN_PANELS` — the active tab is the one in fullscreen): the active tab's row in the tab bar carries the
 icon for it, and `f` toggles it (not while a field has the keys). The
 tab's panel fills the screen and the playback bar moves into it on top,
 ending with *Exit*, so the way out sits in the top-right corner (Esc
 works too); however fullscreen ends, the bar moves back. A tab reacts to
-the `fullscreenTab` store — the Watch tab's panel takes
+the `fullscreenTab` store — the Map / Player panel takes
 `player-panel--fullscreen`.
 
 ## Map item overlay

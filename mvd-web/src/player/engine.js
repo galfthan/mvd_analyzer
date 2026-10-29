@@ -15,6 +15,7 @@
 // throttled demo_jump.
 
 import { store } from '../state/store.js';
+import { WATCH_TABS } from '../state/ui.js';
 import { demoOffsetSec, mapFileKey, userIdOf, nameOfUserId } from '../lib/result.js';
 
 /**
@@ -103,9 +104,10 @@ export class PlayerEngine {
         });
     }
 
-    // On the Player tab, with something showing the engine.
+    // On the Map or Player tab (WATCH_TABS), with something showing the
+    // engine.
     active() {
-        return this.activeTab.get() === 'player' && this.wanted.get();
+        return WATCH_TABS.includes(this.activeTab.get()) && this.wanted.get();
     }
 
     // Unwanted, the engine is dropped (it loads again when wanted); off the

@@ -7,7 +7,6 @@ import { clock } from '../state/clock.js';
 import { segment } from '../state/timeline.js';
 import { hubInput } from '../state/shell.js';
 import { learnMode } from '../tabs/map/map-model.js';
-import { preset } from '../player/layout.js';
 import { SEARCH_FIELDS } from '../data/hub.js';
 import { filtersFromParams } from '../lib/search.js';
 import { setSearchForm, runSearch } from '../tabs/search/search-model.js';
@@ -26,7 +25,6 @@ export function boot() {
     clock.subscribe((tick) => { if (subscribed) onClockTick(tick); });
     segment.subscribe(() => { if (subscribed) updateUrlState(); });
     learnMode.subscribe(() => { if (subscribed) updateUrlState(); });
-    preset.subscribe(() => { if (subscribed) updateUrlState(); });
     subscribed = true;
     setupTabs();
     installFullscreen();

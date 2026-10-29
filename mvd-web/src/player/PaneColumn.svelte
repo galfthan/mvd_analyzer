@@ -19,7 +19,7 @@
     import RegionsPane from './panes/RegionsPane.svelte';
     import EntitiesPane from './panes/EntitiesPane.svelte';
     import GraphPane from './panes/GraphPane.svelte';
-    import { paneLayout, updateLayout, movePane, columnOf, PANE_IDS } from './layout.js';
+    import { paneLayout, updateLayout, movePane, columnOf, resetPreset, PANE_IDS } from './layout.js';
     import { playlist } from './playlist-store.js';
 
     /** @type {{ column: import('./layout.js').Column }} */
@@ -46,6 +46,9 @@
         regions: { title: 'Region control', component: GraphPane, props: { kind: 'regions' } },
     };
 
+    // The foot's menu also puts this tab's panes back as they were.
+    const RESET = '-reset';
+
     let ids = $derived($paneLayout[column]);
     let closed = $derived(PANE_IDS.filter((id) => !columnOf($paneLayout, id)));
     let dragOver = $state(false);
@@ -57,7 +60,8 @@
     function add(e) {
         const id = e.currentTarget.value;
         e.currentTarget.value = '';
-        if (id) updateLayout((l) => { l[column].push(id); });
+        if (id === RESET) resetPreset();
+        else if (id) updateLayout((l) => { l[column].push(id); });
     }
 
     // Dropped on the foot, a pane joins this column at the end.
@@ -88,14 +92,13 @@
         {/each}
         <div class="column-add" class:drag-over={dragOver} role="group" aria-label="Add a pane to this column"
             ondragover={dragOverFoot} ondragleave={() => (dragOver = false)} ondrop={drop}>
-            {#if closed.length}
-                <select class="pt-select" title="Add a pane to the end of this column" onchange={add}>
-                    <option value="">+ Add pane…</option>
-                    {#each closed as id (id)}
-                        <option value={id}>{PANES[id].title}</option>
-                    {/each}
-                </select>
-            {/if}
+            <select class="pt-select" title="Add a pane to the end of this column, or reset this tab's panes" onchange={add}>
+                <option value="">+ Add pane…</option>
+                {#each closed as id (id)}
+                    <option value={id}>{PANES[id].title}</option>
+                {/each}
+                <option value={RESET}>↺ Reset this tab's panes</option>
+            </select>
         </div>
     </div>
 {/if}
