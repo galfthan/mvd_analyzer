@@ -163,6 +163,24 @@ labels, without the analyzer (WASM + analysis take most of the load).
 3. Light player = a **separate `play.html`** linking out to the full
    analyzer; no background analysis.
 
+## Status (2026-10-29)
+
+All seven steps built and pushed on `web-svelte`: 1 hub links 6620bda ·
+2 finder 5025ecc · 3 bar 1016904, then laid out like a video player's
+(scrubber on top, pills under it — owner's feedback) 8d586d0 · 4 selection
+= clip 43f86ad · 5 slow motion 4f8a10e (+ docs 0cf8dd5) · 6 Player pane
+2daf987 · 7 light player aacd4ef. Verified headless (Playwright +
+SwiftShader); not yet on a real GPU browser.
+
+Deviations from the plan above:
+- Step 6: collapsing / closing the Player pane hides the layer but does
+  not suspend the engine — on that tab the engine is the clock the other
+  panes follow.
+- Step 4: the "+ clip" pill sits in the bar's pill row (after the owner's
+  layout feedback), not under the selection.
+- Step 7: the share link always opens `play.html`; the full page still
+  reads the old `?gameId=…&tab=player#playlist=` form.
+
 ## Order
 
 1 → 2 → 3 → 4 → 5 → 6 → 7. Step 3 precedes 4 (the pill hangs off the new
