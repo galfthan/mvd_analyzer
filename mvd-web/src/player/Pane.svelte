@@ -91,7 +91,7 @@
         <span class="acts">
             <button title="Move up" disabled={index === 0} onclick={() => movePane(id, column, index - 1)}><ArrowUp size={14} /></button>
             <button title="Move down" disabled={index === count - 1} onclick={() => movePane(id, column, index + 1)}><ArrowDown size={14} /></button>
-            <button title={column === 'order' ? 'Move under the player' : 'Move beside the player'} onclick={() => movePane(id, other, $paneLayout[other].length)}>
+            <button title={column === 'order' ? 'Move to the main column' : 'Move to the side column'} onclick={() => movePane(id, other, $paneLayout[other].length)}>
                 {#if column === 'order'}<PanelBottom size={14} />{:else}<PanelRight size={14} />{/if}
             </button>
             <button title="Close pane" onclick={close}><X size={14} /></button>

@@ -1,11 +1,13 @@
 <script>
-    // A column of panes: beside the player (`order`) or under it (`below`),
+    // A column of panes: the side column (`order`) or the main one (`below`
+    // — the name is from before the player was a pane),
     // in the user's order (drag a header onto another pane or onto this
     // column's "Add pane…" row at its foot, or ↑ ↓), each collapsible and
     // resizable. The side column's width and hiding (the POV bar's toggle)
     // are PlayerTab's split; hidden, it renders nothing, so its map stops
     // drawing.
     import Pane from './Pane.svelte';
+    import PlayerPane from './PlayerPane.svelte';
     import ClipFinder from './ClipFinder.svelte';
     import Playlist from './Playlist.svelte';
     import MapPane from './panes/MapPane.svelte';
@@ -22,6 +24,7 @@
 
     /** @type {Record<string, { title: string, component: import('svelte').Component<any>, props?: Record<string, unknown> }>} */
     const PANES = {
+        player: { title: 'Player', component: PlayerPane },
         finder: { title: 'Clip finder', component: ClipFinder },
         playlist: { title: 'Playlist', component: Playlist },
         map: { title: 'Map', component: MapPane },

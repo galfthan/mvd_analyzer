@@ -1062,14 +1062,28 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   Leaving the tab pauses the engine and suspends its frame loop
   (`FteController.suspend`; the hidden iframe otherwise keeps rendering at
   60 fps), resumed on the way back.
-- **POV bar** under the player: `Auto` (FTE's stats autotrack) and one
-  button per player in canonical team order and colour; the followed
-  player stays lit under autotrack too. A sound toggle sits at its right
-  end (the player starts muted, as hub's does), then the hide / show
-  toggle of the pane column beside the player.
+- **A pane, whose iframe never moves.** A moved or removed iframe
+  reloads (the demo restarts), and panes remount when they move or
+  collapse — so the engine is not in the Player pane. Its iframe (and the
+  clip card) lives in one fixed layer of the tab (`PlayerLayer.svelte`),
+  and the Player pane (`PlayerPane.svelte`) holds a 16:9 placeholder,
+  registered in `player-slot.js`. Once per frame while the tab shows, the
+  layer is put over the placeholder (a style write only when the box
+  changed) and clipped (`clip-path`) to what the placeholder's scrolling
+  ancestors show — up to the fullscreen element in fullscreen (`slotBox`,
+  `clipAncestors`). No placeholder — the pane closed or collapsed, its
+  column hidden, scrolled out of view — hides the layer; the engine runs
+  on, since it is the tab's clock. While the pointer is down elsewhere
+  (the split, a pane resize) or a pane is being dragged, the layer lets
+  events through so the iframe does not swallow them.
+- **POV bar** in the Player pane, under the picture: `Auto` (FTE's stats
+  autotrack) and one button per player in canonical team order and
+  colour; the followed player stays lit under autotrack too. A sound
+  toggle sits at its right end (the player starts muted, as hub's does),
+  then the hide / show toggle of the side pane column.
 - **Fullscreen** (see *Fullscreen* under the playback bar): the whole
-  player panel — the engine, its bars and both pane columns — fills the
-  screen, each column scrolling on its own. The tab's controls share one compact
+  player panel — both pane columns, the Player pane's picture included —
+  fills the screen, each column scrolling on its own. The tab's controls share one compact
   style (`.pt-btn`, `.pt-group` segments, `.pt-select` in `styles.css`).
 - **End of demo.** The demo runs a few seconds past the match end
   (scoreboard) and then FTE disconnects. The play button drops its ⏸, a
@@ -1078,21 +1092,22 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
 
 ### Panes
 
-Two columns of panes (`PaneColumn.svelte`, `column` = `order` or
-`below`): one beside the player, split from it by a PaneForge group in
-`PlayerTab.svelte` — drag the divider (or focus it and use the arrow keys)
-to resize, drag it shut to hide the column; below 1100 px it stacks under
-the player instead — and one under the player's bars. Every pane can open
-in either column (one at a time). Each pane is a Svelte
+Two columns of panes (`PaneColumn.svelte`, `column` = `below`, the main
+one — the name is from before the player was a pane — or `order`, the
+side one), split by a PaneForge group in `PlayerTab.svelte` — drag the
+divider (or focus it and use the arrow keys) to resize, drag it shut to
+hide the side column; below 1100 px it stacks under the main one. Every
+pane, the Player pane included, can open in either column (one at a
+time). Each pane is a Svelte
 component inside a `Pane.svelte` frame and redraws at most once per
 animation frame on the page clock or the engine's status, only while the
 tab shows (`panes/tick.js`). The layout is a per-viewer convenience in
-`localStorage` (`mvd.playerPanes.v2`; the PoC's `v1` order is migrated;
-a layout stored before the finder and the playlist were panes gets the
-default under the player): which panes are open in each column and in
-what order (default Map / Players / Team weapons beside the player, the
-Playlist under it — the Clip finder and the rest are one "Add pane…" away
-in either column),
+`localStorage` (`mvd.playerPanes.v3`; a `v2` layout, from before the
+player was a pane, gets it on top of the main column, and the PoC's `v1`
+order is migrated): which panes are open in each column and in what
+order (default Player / Playlist in the main column, Map / Players /
+Team weapons in the side one — the Clip finder and the rest are one
+"Add pane…" away in either column),
 each pane's height, collapsed state and options (`opts`: the map's
 overlays, a graph's window), the side column's
 share of the width (`split`, %, stored when a drag ends — a drag that
@@ -1104,7 +1119,8 @@ bottom edge resizes (double-click: natural height), the POV bar's toggle
 folds the side column away, and each column's foot, "+ Add pane…",
 reopens a closed pane at that column's end. (dockview was tried for this and
 dropped: ~390 KB, no stylesheet in its ESM build, and it reparents panels,
-which would reload the engine's iframe.)
+which would reload the engine's iframe — the fixed layer above is how the
+Player pane avoids that.)
 
 - **Clip finder** and **Playlist**: see *Clips and the playlist* below.
 - **Map** is its own `MvdMap` — its own canvas, camera and follow target —

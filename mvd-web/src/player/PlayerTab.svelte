@@ -1,13 +1,14 @@
 <script>
-    // The Player tab: the engine with its POV bar and a pane
-    // column under them (the clip finder and the playlist to start with) on
-    // the left, the side pane column on the right, split by PaneForge (drag
-    // the divider, or focus it and use the arrow keys; dragging the column
-    // shut hides it). src/app/tabs.js toggles the `active` class like on every
-    // other .tab-content.
+    // The Player tab: two columns of panes split by PaneForge — the main one
+    // (layout `below`: the Player pane and the playlist to start with) and
+    // the side one (`order`; drag the divider, or focus it and use the arrow
+    // keys; dragging the column shut hides it). The engine itself is not in
+    // a pane: PlayerLayer keeps its iframe in one fixed layer over the Player
+    // pane's placeholder, since a moved iframe reloads (player-slot.js).
+    // src/app/tabs.js toggles the `active` class like on every other
+    // .tab-content.
     import { PaneGroup, Pane, PaneResizer } from 'paneforge';
-    import PlayerFrame from './PlayerFrame.svelte';
-    import PovBar from './PovBar.svelte';
+    import PlayerLayer from './PlayerLayer.svelte';
     import PaneColumn from './PaneColumn.svelte';
     import { paneLayout, updateLayout, MIN_SPLIT, MAX_SPLIT } from './layout.js';
     import { fullscreenTab } from '../app/fullscreen.js';
@@ -67,11 +68,7 @@
     <div class="panel player-panel" class:player-panel--fullscreen={$fullscreenTab === 'player'}>
         <PaneGroup direction="horizontal" class="player-layout" onLayoutChange={layoutChange}>
             <Pane order={1} minSize={100 - MAX_SPLIT}>
-                <div class="player-main">
-                    <PlayerFrame />
-                    <PovBar />
-                    <PaneColumn column="below" />
-                </div>
+                <PaneColumn column="below" />
             </Pane>
             <PaneResizer class="player-split" onDraggingChange={draggingChange} title="Drag to resize the panes · drag shut to hide them" />
             <Pane order={2} bind:this={column} defaultSize={initial.hidden ? 0 : initial.split}
@@ -80,5 +77,6 @@
                 <PaneColumn column="order" />
             </Pane>
         </PaneGroup>
+        <PlayerLayer />
     </div>
 </div>

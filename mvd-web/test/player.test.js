@@ -18,8 +18,8 @@ const { syncMapData } = await import('../src/player/panes/map-sync.js');
 
 test('pane layout migrates the PoC order and sanitizes', () => {
     assert.deepEqual(paneLayout.get().order, ['feed', 'map'], 'v1 order kept, unknown and duplicate ids dropped');
-    assert.deepEqual(paneLayout.get().below, ['playlist'], 'a layout from before the panes under the player gets the default: the playlist (the finder is off)');
-    updateLayout((l) => { l.below.unshift('finder'); });
+    assert.deepEqual(paneLayout.get().below, ['player', 'playlist'], 'a layout from before the main column gets the default: the player and the playlist (the finder is off)');
+    updateLayout((l) => { l.below = ['finder', 'playlist']; });
     updateLayout((l) => { l.split = 99999; l.width = 420; l.order.push('stack', 'stack'); });
     assert.equal(paneLayout.get().split, MAX_SPLIT);
     assert.equal(paneLayout.get().width, undefined, 'the old px width is dropped');
@@ -28,7 +28,7 @@ test('pane layout migrates the PoC order and sanitizes', () => {
     assert.deepEqual(paneLayout.get().order, ['stack', 'feed', 'map']);
     movePane('stack', 'order', 2);
     assert.deepEqual(paneLayout.get().order, ['feed', 'map', 'stack'], 'the dragged pane takes the target slot, both ways');
-    assert.deepEqual(JSON.parse(mem.get('mvd.playerPanes.v2')).order, ['feed', 'map', 'stack']);
+    assert.deepEqual(JSON.parse(mem.get('mvd.playerPanes.v3')).order, ['feed', 'map', 'stack']);
     movePane('playlist', 'order', 1);
     assert.deepEqual([paneLayout.get().order, paneLayout.get().below], [['feed', 'playlist', 'map', 'stack'], ['finder']], 'across columns');
     movePane('playlist', 'below', 99);
@@ -51,7 +51,7 @@ test('pane options persist and read back typed', () => {
     assert.equal(paneOpt(l, 'score', 'window', 'x'), 'x', 'another type falls back');
     updateLayout((x) => { x.opts.bogus = { a: 1 }; x.opts.feed = 'nope'; });
     assert.deepEqual(Object.keys(paneLayout.get().opts).sort(), ['map', 'score'], 'unknown panes and non-objects dropped');
-    assert.equal(JSON.parse(mem.get('mvd.playerPanes.v2')).opts.score.window, 180);
+    assert.equal(JSON.parse(mem.get('mvd.playerPanes.v3')).opts.score.window, 180);
 });
 
 const demoA = { key: 'hub:1', gameId: 1, title: 'a', offset: 10 };
@@ -216,4 +216,20 @@ test('map data sync shares data, not view state', () => {
     dst._floorModel = 'built';
     assert.equal(syncMapData(src, dst), false, 'nothing changed');
     assert.equal(dst._floorModel, 'built', 'caches survive an unchanged sync');
+});
+
+test('a layout from before the player was a pane gets it on top of the main column', async () => {
+    mem.delete('mvd.playerPanes.v3');
+    mem.set('mvd.playerPanes.v2', JSON.stringify({ order: ['map'], below: ['finder', 'playlist'], split: 30 }));
+    const fresh = await import('../src/player/layout.js?v2-migration');
+    assert.deepEqual([fresh.paneLayout.get().order, fresh.paneLayout.get().below], [['map'], ['player', 'finder', 'playlist']]);
+});
+
+test('slotBox: the layer over the slot, clipped to its scrolling ancestors', async () => {
+    const { slotBox } = await import('../src/player/player-slot.js');
+    const r = slotBox({ left: 10, top: 50, width: 200, height: 100 }, [{ left: 0, top: 80, width: 180, height: 500 }]);
+    assert.deepEqual(r.box, { left: 10, top: 50, width: 200, height: 100 });
+    assert.deepEqual(r.inset, { top: 30, left: 0, bottom: 0, right: 30 });
+    assert.ok(r.visible);
+    assert.ok(!slotBox({ left: 10, top: 50, width: 200, height: 100 }, [{ left: 0, top: 200, width: 180, height: 50 }]).visible, 'scrolled out of view');
 });

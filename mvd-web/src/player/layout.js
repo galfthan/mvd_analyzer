@@ -1,5 +1,6 @@
-// layout.js — the Player tab's panes, in two columns: `order` beside the
-// player and `below` under it. Which panes are open in each, in what
+// layout.js — the Player tab's panes, in two columns: `below`, the main
+// one (the Player pane's by default; the name is from before the player
+// was a pane, when it sat under it), and `order`, the side one. Which panes are open in each, in what
 // order, each one's height, collapsed state and options (the map's
 // overlays, a graph's window), the side column's share of the tab's width
 // (a percentage, PaneForge's unit) and whether it is shown. A per-viewer
@@ -7,13 +8,14 @@
 
 import { store } from '../state/store.js';
 
-const KEY = 'mvd.playerPanes.v2';
+const KEY = 'mvd.playerPanes.v3';
+const V2_KEY = 'mvd.playerPanes.v2';    // before the player was a pane
 const OLD_KEY = 'mvd.playerPanes.v1';   // an order array, the PoC's format
 
 /**
  * @typedef {object} PaneLayout
  * @property {string[]} order                 the side column's pane ids, top to bottom
- * @property {string[]} below                 the panes under the player, top to bottom
+ * @property {string[]} below                 the main column's, top to bottom
  * @property {Record<string, boolean>} collapsed
  * @property {Record<string, number>} heights  pane id → body height in px
  * @property {Record<string, Record<string, unknown>>} opts  pane id → its options
@@ -24,7 +26,7 @@ const OLD_KEY = 'mvd.playerPanes.v1';   // an order array, the PoC's format
 // Every pane there is; the columns start with a few (the clip finder is
 // not one of them), the rest are one "Add pane…" away. A pane is open in at most one column.
 export const PANE_IDS = [
-    'finder', 'playlist',
+    'player', 'finder', 'playlist',
     'map', 'players', 'stack', 'moments', 'feed',
     'score', 'team-weapons', 'team-ha', 'weapons-pp', 'powerups', 'regions',
 ];
@@ -32,7 +34,7 @@ export const PANE_IDS = [
 /** @type {PaneLayout} */
 const DEFAULT = {
     order: ['map', 'players', 'team-weapons'],
-    below: ['playlist'],
+    below: ['player', 'playlist'],
     collapsed: {},
     heights: {},          // pane id → body height in px; unset = natural
     opts: {},
@@ -72,6 +74,14 @@ function load() {
     try {
         const v = JSON.parse(localStorage.getItem(KEY) || 'null');
         if (v) return sanitize(v);
+        // A layout from before the player was a pane gets it on top of the
+        // main column, where the player was.
+        const v2 = JSON.parse(localStorage.getItem(V2_KEY) || 'null');
+        if (v2) {
+            const l = sanitize(v2);
+            if (!columnOf(l, 'player')) l.below.unshift('player');
+            return l;
+        }
         const old = JSON.parse(localStorage.getItem(OLD_KEY) || 'null');
         if (Array.isArray(old)) return sanitize({ order: old });
     } catch { /* storage blocked or corrupt: defaults */ }
@@ -118,7 +128,7 @@ export function movePane(id, column, toIndex) {
     });
 }
 
-// showPane opens a pane, expanded, where it is or else under the player.
+// showPane opens a pane, expanded, where it is or else in the main column.
 /** @param {string} id */
 export function showPane(id) {
     updateLayout((l) => {

@@ -2,7 +2,7 @@
     // "Auto" (FTE's stats-based autotrack) plus one button per player,
     // grouped and coloured by the canonical team order. "Auto" lights while
     // autotrack is on; the followed player lights either way, so autotrack
-    // shows whom it picked. At the end: sound, and hiding / showing the panes beside the player.
+    // shows whom it picked. At the end: sound, and hiding / showing the side pane column.
     import Volume2 from '@lucide/svelte/icons/volume-2';
     import VolumeX from '@lucide/svelte/icons/volume-x';
     import PanelRightOpen from '@lucide/svelte/icons/panel-right-open';
@@ -35,7 +35,7 @@
                 onclick={() => engine.toggleMute()}>
                 {#if $status.ready && !$status.muted}<Volume2 size={16} />{:else}<VolumeX size={16} />{/if}
             </button>
-            <button class="pt-btn icon" title={$paneLayout.hidden ? 'Show the panes beside the player' : 'Hide the panes beside the player'}
+            <button class="pt-btn icon" title={$paneLayout.hidden ? 'Show the side pane column' : 'Hide the side pane column'}
                 onclick={() => updateLayout((l) => { l.hidden = !l.hidden; })}>
                 {#if $paneLayout.hidden}<PanelRightOpen size={16} />{:else}<PanelRightClose size={16} />{/if}
             </button>

@@ -3083,11 +3083,28 @@ th.sortable.sort-desc::after {
     gap: 8px;
 }
 
-.player-frame-host {
-    position: relative;
+/* The Player pane's placeholder; the engine's fixed layer
+ * (PlayerLayer.svelte) sits over it. */
+.player-slot {
     width: 100%;
     max-height: 75vh;
     aspect-ratio: 16 / 9;
+    background: #000;
+}
+
+.player-layer {
+    position: fixed;
+    z-index: 2;
+}
+
+.player-layer.pass-through {
+    pointer-events: none;
+}
+
+.player-frame-host {
+    position: relative;
+    width: 100%;
+    height: 100%;
     background: #000;
 }
 
@@ -3241,12 +3258,13 @@ th.sortable.sort-desc::after {
     overflow-y: auto;
 }
 
-.player-panel--fullscreen .player-frame-host {
-    max-height: calc(100vh - 210px);
+.player-panel--fullscreen .player-slot {
+    max-height: calc(100vh - 160px);
 }
 
-/* Player tab layout: player + POV/clip bars + playlist on the left, the
- * pane column on the right — a PaneForge group (flex row, sizes inline). */
+/* Player tab layout: the main pane column (the Player pane, the playlist)
+ * on the left, the side one on the right — a PaneForge group (flex row,
+ * sizes inline). */
 .player-layout {
     align-items: flex-start;
 }
@@ -3277,7 +3295,8 @@ th.sortable.sort-desc::after {
     background: var(--accent-cyan);
 }
 
-/* Narrow screens: the panes stack under the player, the split is off. */
+/* Narrow screens: the side column stacks under the main one, the split is
+ * off. */
 @media (max-width: 1100px) {
     .player-layout {
         flex-direction: column !important;
@@ -3290,13 +3309,6 @@ th.sortable.sort-desc::after {
     .player-split {
         display: none;
     }
-}
-
-.player-main {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
 }
 
 .player-playlist-head {
