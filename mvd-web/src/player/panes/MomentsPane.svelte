@@ -13,7 +13,7 @@
     import { demo, teams, colorOf } from '../../state/index.js';
     import { presetRuns } from '../preset-runs.js';
     import { formatDuration } from '../../lib/result.js';
-    import { PRESETS } from '../../lib/clip-query.js';
+    import { PRESETS, MOMENT_GROUPS } from '../../lib/clip-query.js';
     import { runner, engine } from '../index.js';
     import { addClips } from '../playlist-store.js';
     import { paneLayout, paneOpt, setPaneOpt } from '../layout.js';
@@ -22,11 +22,8 @@
 
     /** @typedef {import('../../lib/playlist.js').Clip} Clip */
 
-    const GROUPS = [
-        'quad-runs', 'pent-runs', 'ring-runs', 'frag-streaks',
-        'top-damage', 'top-rl-kills', 'top-lg-kills', 'demo-markers',
-        'airgibs', 'discharges', 'quadbores', 'telefrags', 'pack-drops',
-    ].map((id) => /** @type {(typeof PRESETS)[number]} */ (PRESETS.find((p) => p.id === id)));
+    // Every id names a preset (test/clip-query.test.js).
+    const GROUPS = MOMENT_GROUPS.map((id) => /** @type {(typeof PRESETS)[number]} */ (PRESETS.find((p) => p.id === id)));
 
     // Per group: its rows' count and clips (null while it runs).
     let found = $derived($presetRuns);
@@ -82,7 +79,11 @@
                         <span class="mg-title">{g.title}</span>
                         {#if !isOpen && f?.clips.some(isNow)}<span class="mg-now" title="The playhead is in one of these"></span>{/if}
                     </button>
-                    <span class="mg-count">{n ?? '…'}</span>
+                    {#if f?.error}
+                        <span class="mg-count error" title="Could not run: {f.error}">!</span>
+                    {:else}
+                        <span class="mg-count">{n ?? '…'}</span>
+                    {/if}
                     <button class="mg-add" disabled={!f?.clips.length} title="Add all {f?.clips.length ?? ''} clips to the playlist" onclick={() => addGroup(g)}><ListPlus size={13} /></button>
                 </div>
                 {#if isOpen && f}
@@ -159,6 +160,10 @@
         color: var(--accent-cyan);
         font-family: monospace;
         text-align: center;
+    }
+    .mg-count.error {
+        background: rgba(255, 107, 107, 0.15);
+        color: #ff8080;
     }
     .mg-add {
         display: inline-flex;

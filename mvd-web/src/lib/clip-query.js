@@ -429,6 +429,14 @@ export const PRESETS = [
     },
 ];
 
+// The Moments pane's groups, in its order: the Key Moments and Pack Drops
+// tabs' tables, each one of the presets above.
+export const MOMENT_GROUPS = [
+    'quad-runs', 'pent-runs', 'ring-runs', 'frag-streaks',
+    'top-damage', 'top-rl-kills', 'top-lg-kills', 'demo-markers',
+    'airgibs', 'discharges', 'quadbores', 'telefrags', 'pack-drops',
+];
+
 // fieldPaths lists the dotted paths a builder can offer for rows: every leaf
 // of the first rows, a list of objects by its first element
 // ('victims.0.name'), a list of values as itself.

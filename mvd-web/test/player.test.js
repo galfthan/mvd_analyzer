@@ -248,7 +248,7 @@ test('presets: each view keeps its own layout; reset restores the one in use', a
     assert.ok(p.paneLayout.get().order.includes('stack'), 'back to the Map view as it was left');
     p.resetPreset();
     assert.deepEqual(p.paneLayout.get().order, ['players', 'moments', 'items', 'region-status']);
-    assert.equal(JSON.parse(mem.get('mvd.playerPanes.v4')).preset, 'map');
+    assert.equal(JSON.parse(mem.get('mvd.playerPanes.v4')).preset, undefined, 'the view in use is not stored');
     p.setPreset('bogus');
     assert.equal(p.preset.get(), 'map', 'an unknown view changes nothing');
 });
@@ -260,4 +260,30 @@ test('slotBox: the layer over the slot, clipped to its scrolling ancestors', asy
     assert.deepEqual(r.inset, { top: 30, left: 0, bottom: 0, right: 30 });
     assert.ok(r.visible);
     assert.ok(!slotBox({ left: 10, top: 50, width: 200, height: 100 }, [{ left: 0, top: 200, width: 180, height: 50 }]).visible, 'scrolled out of view');
+});
+
+test('presets: a v3 layout becomes the Player view; corrupt storage falls back; the tab picks the view', async () => {
+    mem.delete('mvd.playerPanes.v4');
+    mem.delete('mvd.playerPanes.v2');
+    mem.delete('mvd.playerPanes.v1');
+    mem.set('mvd.playerPanes.v3', JSON.stringify({ order: ['feed'], below: ['player', 'finder'], split: 25 }));
+    const v3 = await import('../src/player/layout.js?v3');
+    const { activeTab } = await import('../src/state/ui.js');
+    activeTab.set('player');
+    assert.equal(v3.preset.get(), 'player', 'the Player tab shows the Player view');
+    assert.deepEqual([v3.paneLayout.get().order, v3.paneLayout.get().below], [['feed'], ['player', 'finder']]);
+    activeTab.set('map');
+    assert.equal(v3.preset.get(), 'map');
+    activeTab.set('summary');
+    assert.equal(v3.preset.get(), 'map', 'another tab leaves the view as it is');
+
+    mem.delete('mvd.playerPanes.v3');
+    mem.set('mvd.playerPanes.v4', '{not json');
+    const bad = await import('../src/player/layout.js?corrupt');
+    assert.deepEqual(bad.paneLayout.get().below, ['map'], 'corrupt storage: the defaults');
+
+    mem.delete('mvd.playerPanes.v4');
+    const fresh = await import('../src/player/layout.js?fresh');
+    fresh.setPreset('player');
+    assert.deepEqual(fresh.paneLayout.get().order, ['map', 'players', 'moments', 'team-weapons'], 'a fresh Player view, Moments on');
 });

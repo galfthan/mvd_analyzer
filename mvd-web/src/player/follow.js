@@ -3,9 +3,13 @@
 // `mapFollow` instead. A click on a player in a pane goes through watch().
 
 import { store } from '../state/store.js';
+import { demo } from '../state/index.js';
 import { engine } from './index.js';
 
 export const mapFollow = store(/** @type {string | null} */ (null));
+// A new demo follows nobody (its players are others, or the same names in
+// another game).
+demo.subscribe(() => { if (mapFollow.get() !== null) mapFollow.set(null); });
 
 /** @param {string} name */
 export function watch(name) {

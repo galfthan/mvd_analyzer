@@ -389,19 +389,3 @@ export function entityRowsHtml(rows) {
     ).join('');
 }
 
-// ─── Trails and follow ──────────────────────────────────────────────────────
-
-// trailButtons: All lit when every trail is on, None when none is, the
-// Players dropdown when a subset is.
-/**
- * @param {string[]} names
- * @param {Record<string, boolean>} enabled
- */
-export function trailButtons(names, enabled) {
-    let on = 0;
-    for (const n of names) if (enabled[n]) on++;
-    const total = names.length;
-    return { all: total > 0 && on === total, none: on === 0, some: on > 0 && on < total };
-}
-
-export const byName = (/** @type {string} */ a, /** @type {string} */ b) => a.localeCompare(b);

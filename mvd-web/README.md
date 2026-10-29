@@ -1762,8 +1762,8 @@ always means "someone is here". Team membership comes from the canonical
 
 `playerSymbols` is built by `assignPlayerSymbols()` (`src/lib/map.js`) from the KTX demoinfo
 roster where the demo has one and from `playerStats.players` otherwise —
-it is what the draw loop, the legend, the trail dropdown and the sidebar
-roster all key off, so a demo with no KTX block would otherwise render a
+it is what the draw loop, the Players pane's legend and the map menu's
+follow list all key off, so a demo with no KTX block would otherwise render a
 map with nobody on it. Team colours still come from the teams store's
 canonical order, never from either roster's own order. The legend
 lists each team's players **by name**, not in roster order; its column
@@ -1872,7 +1872,7 @@ Everything is drawn through one orbit-camera orthographic projection
 in the version-2 map JSON, so each floor renders at its real level, and
 player tracks, player symbols, items, death/drop markers, loc labels and
 the region-control / occupancy overlays all project through the same
-transform. At exact top-down (the **3D** toggle's other state) the
+transform. At exact top-down (the menu's **3D** item's other state) the
 projection degenerates to the old 2D transform. Depth is the GL depth
 buffer's: opaque floors and markers (players, items, entities) are
 depth-tested, and only the blended layers (liquids, the focus fade) keep
@@ -1893,24 +1893,23 @@ center `cx/cy/zMid`, `zoomK`, `panX/panY`); rotation goes through
 When the result contains a `mapEntities` field (the static per-map
 layout from the embedded corpus — see
 [`mvd-analytics/RESULT_SCHEMA.md`](../mvd-analytics/RESULT_SCHEMA.md#mapentitiesresult-mapentities)),
-the map controls show a **Learn map** toggle. It switches the canvas to
+the map's right-click menu has **Learn the map**. It switches the map to
 a static study view: players, trails and time-based overlays are
 hidden, the floor/loc base is kept, and the map's designed entities are
 drawn — item spawns, player spawnpoints, teleporters and buttons.
 
-A sidebar checklist toggles categories (Weapons, Armor, Health, Ammo,
-Powerups, Teleporters, Spawns, Buttons, Doors); spawns/buttons/doors
-start off to reduce clutter. Teleporters draw an arrow from each
+The **Map entities** pane's checklist toggles categories (Weapons, Armor,
+Health, Ammo, Powerups, Teleporters, Spawns, Buttons, Doors);
+spawns/buttons/doors start off to reduce clutter. Teleporters draw an arrow from each
 entrance to its exit (paired by `teleportSrc.target` ==
 `teleportDst.targetName`). Entities reuse the same projection (`project`,
 `MvdMap.toCanvas`) and item palette as playback, so they sit exactly where
 players do. The corpus is fetched in-browser by `fetchMapEntsSync`
 (`worker.js`) from `mapents/<map>.json` (deployed by `make build`); the
-toggle is hidden when no corpus exists for the map.
+pane says so when no corpus exists for the map.
 
-Below the canvas, a sortable table (standard `.stats-table` style,
-expanding with the tab — no inner scrollbar) lists every visible
-entity — Class (cleartext: Armor, Weapon, …), Type (kind: ra, h25, …),
+Under its checklist, a table (standard `.stats-table` style) lists every
+visible entity — Class (cleartext: Armor, Weapon, …), Type (kind: ra, h25, …),
 Name, Loc, and Destination. Teleporters collapse to one row per
 entrance→exit pair, with the entrance in **Loc** (where the trigger
 sits) and the exit it leads to in **Destination**. The table respects
@@ -1919,8 +1918,9 @@ the category filters and rebuilds via `entityRows` (`src/lib/map.js`).
 Learn mode is reflected in the URL as `?learn=1` (alongside `tab=map`),
 so a study view is directly link-shareable; `applyUrlState` restores it
 on load when the map has a corpus (`MvdMapTab.learnMode`, the store the
-tab follows). Code: `_glMapEntities` in `mvd-map-view/src/map.js`, the
-toggle and the table in `src/tabs/map/MapTab.svelte`.
+map panes follow). Code: `_glMapEntities` in `mvd-map-view/src/map.js`,
+the menu item in `src/player/panes/MapPane.svelte`, the checklist and the
+table in `src/player/panes/EntitiesPane.svelte`.
 
 ## Locs & Regions tab
 

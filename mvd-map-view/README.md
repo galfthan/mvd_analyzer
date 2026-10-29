@@ -82,7 +82,8 @@ Size arrives only through `resize(cssW, cssH, dpr)` — the host measures
 whatever it wants (container, fullscreen element, iframe) and pushes the
 result in.
 
-In the host (mvd-web's Map tab, `mvd-web/src/tabs/map/`): all measuring,
+In the host (mvd-web's map model `mvd-web/src/tabs/map/` and its map
+pane `mvd-web/src/player/panes/MapPane.svelte`): all measuring,
 all the DOM chrome, all loaders, and the DOM event glue that forwards
 pointer events into the component.
 
@@ -109,8 +110,9 @@ the same "2D context as texture baker" category as the label atlas.
 import { normalizeLocationName, moverPoseAt } from 'mvd-map-view';
 ```
 
-mvd-web bundles this package with Vite: its Map tab
-(`mvd-web/src/tabs/map/`), the Player tab's map pane and the Timeline
+mvd-web bundles this package with Vite: its map model
+(`mvd-web/src/tabs/map/`), the map pane of the Map and Player tabs and
+the Timeline
 import the modules under `src/` by relative path. No global is
 published.
 
@@ -149,7 +151,8 @@ broken inverse shows up there and nowhere else. One run has the geometry
 fetch blocked, covering the convex-hull fallback. Any `DIFF` is a real
 pixel change.
 
-`mvd-web/test/mapshot.py` drives one demo and takes `--demo`, `--out`,
+`mvd-web/test/mapshot.py` drives one demo on the Map tab (its map pane's
+canvas, the view states picked from the map's right-click menu) and takes `--demo`, `--out`,
 `--times` (match-relative **seconds** — the frontend clock is seconds, unlike
 the ms-native API), `--no-geometry` and `--no-webgl`.
 

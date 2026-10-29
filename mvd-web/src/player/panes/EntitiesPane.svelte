@@ -4,7 +4,7 @@
     // by category. The filters are the map model's (entityFilters), so the
     // map panes show the categories ticked here while learning the map (the
     // map menu's "Learn the map").
-    import { view, mapData, learnMode } from '../../tabs/map/map-model.js';
+    import { view, mapData, learnMode, touch } from '../../tabs/map/map-model.js';
     import { entityRows, entityRowsHtml } from '../../lib/map.js';
 
     const CATEGORIES = [
@@ -24,7 +24,7 @@
     function setFilter(cat, on) {
         s.entityFilters[cat] = on;
         filters = { ...s.entityFilters };
-        s.renderDirty = true;
+        touch();
     }
 </script>
 

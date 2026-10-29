@@ -32,7 +32,11 @@ freely) and *Player* (the game view and the playlist, the map beside).
 Each remembers how you arranged it, any pane can go in either, and
 playing any clip opens the Player tab. The graph panes and the health /
 armor strips show the selection (or the whole match) by default and grow
-with their pane. The map's
+with their pane. The playlist's Generate menu says how many of each
+preset the demo has (and leaves out the ones it lacks), there are new
+presets for pent and ring runs, the Key Moments tab's top damage windows
+and top RL / LG kills, and demo markers, and airgib clips (and the Key
+Moments airgib links) start 2.5 s before the hit. The map's
 toolbar controls moved into its right-click menu (follow, trails, learn
 the map), and the Map tab's player table replaced the Player tab's.
 

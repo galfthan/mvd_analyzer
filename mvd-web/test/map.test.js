@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import {
     mapTeams, assignPlayerSymbols, mapBounds, dropEventsOf, posStreamsOf,
     legendTeams, legendRowHtml, teamFragsAt, stackCell, weaponsText, regionStateLabel, regionStatusRows,
-    panelItems, itemStatusCell, entityRows, entityRowsHtml, trailButtons,
+    panelItems, itemStatusCell, entityRows, entityRowsHtml,
 } from '../src/lib/map.js';
 import {
     barAxisTicks, barPct, barTime, dragSpan, isDrag, nearKnob, overlayBox, segmentLabel, transport, SPEEDS,
@@ -121,12 +121,6 @@ test('entity table: shown categories, teleporters entrance → exit', () => {
     ]);
     assert.equal(entityRows(ents, { weapon: false, teleporter: false }, cat).length, 0);
     assert.equal(entityRowsHtml([{ cls: 'A', type: '<', name: '', loc: '', source: '' }]), '<tr><td>A</td><td>&lt;</td><td></td><td></td><td></td></tr>');
-});
-
-test('trail buttons', () => {
-    assert.deepEqual(trailButtons([], {}), { all: false, none: true, some: false });
-    assert.deepEqual(trailButtons(['a', 'b'], { a: true }), { all: false, none: false, some: true });
-    assert.deepEqual(trailButtons(['a', 'b'], { a: true, b: true }), { all: true, none: false, some: false });
 });
 
 test('playback bar: axis, cursor, pointer time, drag, overlay, buttons', () => {

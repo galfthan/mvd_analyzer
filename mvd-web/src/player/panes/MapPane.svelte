@@ -18,7 +18,7 @@
         MvdMap, DEFAULT_YAW, DEFAULT_PITCH, PITCH_MAX, is3D,
     } from '../../../../mvd-map-view/src/index.js';
     import { clock, demo, teams } from '../../state/index.js';
-    import { view as mapTabView, ensureLineOfSight, learnMode } from '../../tabs/map/map-model.js';
+    import { view as mapTabView, ensureLineOfSight, learnMode, changed } from '../../tabs/map/map-model.js';
     import { mapFollow } from '../follow.js';
     import { playback } from '../../state/index.js';
     import { engine } from '../index.js';
@@ -45,7 +45,7 @@
     let box;
     let empty = $state(false);
     let follow = $derived(paneOpt($paneLayout, 'map', 'follow', true));
-    // The overlays, as the Map tab names them in its toolbar.
+    // The overlays and trails, the pane's options.
     let opts = $derived({
         view: paneOpt($paneLayout, 'map', 'view', false),
         vel: paneOpt($paneLayout, 'map', 'vel', false),
@@ -125,7 +125,6 @@
         s.showViewArrows = opts.view;
         s.showVelArrows = opts.vel;
         s.occludeActors = opts.occl;
-        s.fog = opts.fog ? 1 : 0;
         s.showLos = opts.los;
         s.showPvs = opts.pvs;
         s.fog = opts.fog ? 1 : 0;
@@ -163,6 +162,8 @@
 
     $effect(() => {
         map = new MvdMap(canvas);
+        // The screenshot harness (test/mapshot.py) reaches the pane's map here.
+        /** @type {any} */ (canvas).mvdMap = map;
         // A click on a player (or off them) on the map: watch them.
         map.on('follow', (/** @type {string | null} */ name) => {
             if (setting) return;
@@ -196,7 +197,16 @@
         }
     });
 
-    // Line of sight / PVS on: the Map tab's lazy pass, run once per demo.
+    // What the map draws changes without the clock moving — learn mode
+    // (the menu, ?learn=1), the follow target, the model's data (geometry
+    // landing, regions, line of sight, entity filters: `changed`) — and a
+    // paused map gets no frame for it.
+    $effect(() => {
+        $learnMode; $mapFollow; $changed;
+        draw();
+    });
+
+    // Line of sight / PVS on: the map model's lazy pass, run once per demo.
     $effect(() => {
         if ((opts.los || opts.pvs) && $demo) ensureLineOfSight().then(() => draw());
     });

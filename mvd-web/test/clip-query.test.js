@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-    SOURCES, PRESETS, SLOW_DEFAULT, viewCall, matches, renderLabel, clipsOf, runQuery,
+    SOURCES, PRESETS, SLOW_DEFAULT, MOMENT_GROUPS, viewCall, matches, renderLabel, clipsOf, runQuery,
     fieldPaths, toEditTree, toExpr, validateQuery, encodeQuery, decodeQuery, toDraft, fromDraft,
 } from '../src/lib/clip-query.js';
 
@@ -188,4 +188,13 @@ test('a clip spec\'s slow motion: around the event by default, a stretch when as
     const fast = toDraft(/** @type {any} */ (q));
     fast.clips[0].slow.speed = '2';
     assert.equal(/** @type {any} */ (fromDraft(fast).clip)?.slow.speed, 1, 'an out-of-range speed is brought into range, not dropped');
+});
+
+test('the Moments groups are presets; airgibs start 2.5 s before the hit', () => {
+    for (const id of MOMENT_GROUPS) assert.ok(PRESETS.some((p) => p.id === id), `${id} is a preset`);
+    const result = /** @type {any} */ ({ streams: { global: { demoOffset: 10000 } }, timelineAnalysis: { playerUserIDs: { bps: 3 } } });
+    const demo = { key: 'hub:1', gameId: 1, title: 't', offset: 10 };
+    const air = /** @type {any} */ (PRESETS.find((p) => p.id === 'airgibs')).query;
+    const [c] = clipsOf(air, { airgibs: [{ time: 30000, actor: { name: 'bps' }, victims: [{ name: 'x' }] }] }, result, demo);
+    assert.equal(c.from, 37, '40 s demo time less 2.5 s, whole seconds');
 });

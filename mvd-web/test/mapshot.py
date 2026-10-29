@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Capture map-tab screenshots from the built web app.
+"""Capture map screenshots from the built web app.
 
 Drives dist/ in headless chromium: loads one demo through the file input,
-parks the clock at fixed times, and shoots the map canvas in a fixed set of
-view states. Used to pin the map renderer's output across the extraction of
+opens the Map tab, parks the clock at fixed times, and shoots its map
+pane's canvas in a fixed set of view states. Used to pin the map renderer's output across the extraction of
 the renderer into mvd-map-view — capture with --out baseline before the
 move, --out after once it builds, then compare.
 
@@ -25,33 +25,47 @@ from playwright.sync_api import sync_playwright
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 
-# Each state is (name, javascript[, wait]). The JS runs in page context with
-# the clock already parked; it mutates view state and returns once the map has
-# been redrawn. Buttons are clicked rather than state poked directly so the
-# capture exercises the same paths a user does. `wait` is an optional page
-# condition polled before the shot — the LOS/PVS toggles kick off a lazy,
-# multi-second worker raycast on first use, and shooting before it lands made
-# those shots depend on scheduler luck (the only nondeterminism ever seen in
-# this harness).
-# The Map tab's map view (src/tabs/map/map-model.js, window.MvdMapTab): draw
-# it now at the clock's time.
-REDRAW = ("MvdMapTab.view.state.renderDirty = true; "
-          "MvdMapTab.view.render(MvdMapTab.view.state.currentTime)")
+# The Map tab's map pane: its canvas, and its MvdMap on the canvas
+# (MapPane.svelte sets `mvdMap` for this harness).
+CANVAS = '[data-pane="map"] canvas'
+MAP = f"document.querySelector('{CANVAS}').mvdMap"
+# Draw it now at the clock's time.
+REDRAW = f"(() => {{ const m = {MAP}; m.state.renderDirty = true; m.render(MvdState.clock.t); }})()"
 
+# Each state is (name, action, undo[, wait]). An action is a label of the
+# map's right-click menu (src/ui/MapMenu.svelte: picked the way a user does)
+# or JavaScript run in the page; `undo` restores it (a menu label, JS, or
+# None). `wait` is an optional page condition polled before the shot — the
+# LOS/PVS toggles kick off a lazy, multi-second worker raycast on first
+# use, and shooting before it lands made those shots depend on scheduler
+# luck (the only nondeterminism ever seen in this harness).
 STATES = [
-    ("default3d", ""),
-    ("topdown", "document.getElementById('map-3d-toggle').click()"),
-    ("trails", "document.getElementById('map-trails-all').click()"),
-    ("viewarrows", "document.getElementById('map-view-arrows').click()"),
-    ("velarrows", "document.getElementById('map-vel-arrows').click()"),
-    ("los", "document.getElementById('map-los').click()",
-     "!MvdMapTab.view.state.losPending"),
-    ("pvs", "document.getElementById('map-pvs').click()",
-     "!MvdMapTab.view.state.losPending"),
-    ("learn", "document.getElementById('map-learn-toggle').click()"),
-    ("rotated", "MvdMapTab.view.setCamera(1.9, 0.6)"),
-    ("zoomed", "MvdMapTab.view.camera.zoomK = 2.5; " + REDRAW),
+    ("default3d", None, None),
+    ("topdown", "3D (right-drag rotates)", "3D (right-drag rotates)"),
+    ("trails", "Trails of everyone", "No trails"),
+    ("viewarrows", "View arrows", "View arrows"),
+    ("velarrows", "Velocity arrows", "Velocity arrows"),
+    ("los", "Line of sight", "Line of sight", "!MvdMapTab.view.state.losPending"),
+    ("pvs", "PVS", "PVS", "!MvdMapTab.view.state.losPending"),
+    ("learn", "Learn the map (items, teleporters)", "Learn the map (items, teleporters)"),
+    ("rotated", f"js:{MAP}.setCamera(1.9, 0.6)", f"js:{MAP}.resetView()"),
+    ("zoomed", f"js:{MAP}.camera.zoomK = 2.5", f"js:{MAP}.resetView()"),
 ]
+
+
+def run_action(page, action):
+    """A menu label (right-click the map, pick it, close the menu) or js:…"""
+    if not action:
+        return
+    if action.startswith("js:"):
+        page.evaluate(action[3:])
+        return
+    box = page.locator(CANVAS).bounding_box()
+    page.mouse.move(box["x"] + 20, box["y"] + 20)
+    page.mouse.down(button="right")
+    page.mouse.up(button="right")
+    page.locator('[data-pane="map"] .map-menu button', has_text=action).first.click()
+    page.keyboard.press("Escape")
 
 
 class _Quiet(http.server.SimpleHTTPRequestHandler):
@@ -78,12 +92,12 @@ def interact(page, out_dir, label, t):
     cumulative and end with Reset view, which restores the camera for
     whatever runs next.
     """
-    box = page.locator("#map-canvas").bounding_box()
+    box = page.locator(CANVAS).bounding_box()
     cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
 
     def shot(name):
         page.wait_for_timeout(80)
-        page.locator("#map-canvas").screenshot(path=str(out_dir / f"{label}-t{t}-{name}.png"))
+        page.locator(CANVAS).screenshot(path=str(out_dir / f"{label}-t{t}-{name}.png"))
 
     page.mouse.move(cx, cy)
     page.mouse.down()
@@ -105,7 +119,7 @@ def interact(page, out_dir, label, t):
     page.mouse.wheel(0, -600)
     shot("i-wheelzoom")
 
-    page.click("#map-reset-view")
+    page.dblclick(CANVAS)   # double-click: Reset view
     shot("i-resetview")
 
 
@@ -113,9 +127,9 @@ def capture(page, out_dir, label, times):
     for t in times:
         page.evaluate(f"MvdState.clock.seek({t})")
         interact(page, out_dir, label, t)
-        for name, js, *rest in STATES:
-            if js:
-                page.evaluate(js)
+        for name, action, undo, *rest in STATES:
+            if action:
+                run_action(page, action)
                 page.wait_for_timeout(120)
             if rest:
                 page.wait_for_function(rest[0], timeout=120_000)
@@ -123,9 +137,9 @@ def capture(page, out_dir, label, times):
             page.evaluate(REDRAW)
             page.wait_for_timeout(60)
             path = out_dir / f"{label}-t{t}-{name}.png"
-            page.locator("#map-canvas").screenshot(path=str(path))
-            if js:  # restore: every state above is a toggle
-                page.evaluate(js)
+            page.locator(CANVAS).screenshot(path=str(path))
+            if undo:
+                run_action(page, undo)
                 page.wait_for_timeout(60)
 
 
@@ -182,6 +196,9 @@ def main():
             if not args.no_geometry:
                 page.wait_for_function("MvdMapTab.view.state.mapGeometry", timeout=60_000)
             page.wait_for_function("MvdMapTab.view.state.frames", timeout=120_000)
+            # A file load shows its own tab; the map pane is the Map tab's.
+            page.evaluate("MvdState.selectTab('map')")
+            page.wait_for_function(f"!!{MAP}", timeout=30_000)
             page.wait_for_timeout(500)
             capture(page, out_dir, label, times)
             browser.close()

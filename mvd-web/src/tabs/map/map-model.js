@@ -1,6 +1,6 @@
 // map-model.js — the demo's map data, held in one headless MvdMap
 // (mvd-map-view) for the page: it is never drawn. Every map pane of the
-// Watch tab copies its DATA into its own MvdMap each frame
+// Map and Player tabs copies its DATA into its own MvdMap each frame
 // (src/player/panes/map-sync.js); the panes that list players, items,
 // regions and entities read it, and its lookups (frameAt, itemStatus,
 // resolvePlayerLoc, regionControlAt) answer for them. Learn mode and the
@@ -30,9 +30,10 @@ export const view = new MvdMap();
 export const mapData = store(/** @type {{ result: import('../../lib/result.js').Result } | null} */ (null));
 
 // "The map changed, draw it again" — geometry arrived, regions changed, line
-// of sight landed. A counter.
+// of sight landed, an entity filter changed (touch). A counter the map panes
+// redraw on.
 export const changed = store(0);
-const touch = () => {
+export const touch = () => {
     view.state.renderDirty = true;
     changed.set(changed.get() + 1);
 };

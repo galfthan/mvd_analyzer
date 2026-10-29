@@ -14,7 +14,7 @@
 import { store } from '../state/store.js';
 import { activeTab } from '../state/ui.js';
 
-const KEY = 'mvd.playerPanes.v4';        // { preset, layouts: { map, player } }
+const KEY = 'mvd.playerPanes.v4';        // { layouts: { map, player } }
 const V3_KEY = 'mvd.playerPanes.v3';     // one layout, before the presets
 const V2_KEY = 'mvd.playerPanes.v2';    // before the player was a pane
 const OLD_KEY = 'mvd.playerPanes.v1';   // an order array, the PoC's format
@@ -59,9 +59,9 @@ const MAP_DEFAULT = {
 /** @typedef {'map' | 'player'} Preset */
 /** @type {Record<Preset, PaneLayout>} */
 const PRESET_DEFAULTS = { map: MAP_DEFAULT, player: PLAYER_DEFAULT };
-export const PRESET_IDS = /** @type {Preset[]} */ (['map', 'player']);
+const PRESET_IDS = /** @type {Preset[]} */ (['map', 'player']);
 /** @param {unknown} id @returns {id is Preset} */
-export const isPreset = (id) => PRESET_IDS.includes(/** @type {Preset} */ (id));
+const isPreset = (id) => PRESET_IDS.includes(/** @type {Preset} */ (id));
 
 export const MIN_SPLIT = 18;
 export const MAX_SPLIT = 60;
@@ -111,13 +111,15 @@ function legacyLayout() {
     return null;
 }
 
+// The view in use is not stored: the tab shown picks it (until one shows,
+// the Map view's layout stands).
 /** @returns {{ preset: Preset, layouts: Record<Preset, PaneLayout> }} */
 function load() {
     try {
         const v = JSON.parse(localStorage.getItem(KEY) || 'null');
         if (v && typeof v === 'object') {
             return {
-                preset: isPreset(v.preset) ? v.preset : 'map',
+                preset: 'map',
                 layouts: { map: sanitize(v.layouts?.map, MAP_DEFAULT), player: sanitize(v.layouts?.player, PLAYER_DEFAULT) },
             };
         }
@@ -132,7 +134,7 @@ export const paneLayout = store(all.layouts[all.preset]);
 
 function save() {
     try {
-        localStorage.setItem(KEY, JSON.stringify(all));
+        localStorage.setItem(KEY, JSON.stringify({ layouts: all.layouts }));
     } catch { /* per-viewer convenience */ }
 }
 
@@ -152,7 +154,6 @@ export function updateLayout(fn) {
 export function setPreset(id) {
     if (!isPreset(id) || id === all.preset) return;
     all.preset = id;
-    save();
     preset.set(id);
     paneLayout.set(all.layouts[id]);
 }

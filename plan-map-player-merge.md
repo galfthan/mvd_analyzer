@@ -25,7 +25,9 @@ fresh visit starts in the Map preset.
    right-click menu (follow a player when there is no POV, trails per
    player and their length, clear, learn mode with an Entities pane, region
    focus), learn mode from `?learn=1`.
-4. **Presets replace the tabs.** One tab ("Watch"), a *Map | Player*
+4. **Presets replace the tabs** (as first built — superseded the same
+   evening, see Status: Map and Player are two tabs over the presets).
+   One tab ("Watch"), a *Map | Player*
    switch in its head; each preset is a saved pane layout (rearranging
    edits the preset in use; *Reset* restores it). `?tab=map` /
    `?tab=player` open the preset (old links keep working); the URL writes
