@@ -1145,9 +1145,20 @@ Player pane avoids that.)
   view and velocity arrows, line of sight and PVS (running the Map tab's
   `ensureLineOfSight` once per demo), occlusion, trails (none / the watched
   player / everyone, the last 10 s), 3D and reset view; Escape or a click
-  elsewhere closes it. Unmounting the
+  elsewhere closes it. With no engine (no Player pane — the Map preset)
+  the camera follows `mapFollow` (`src/player/follow.js`) instead of the
+  POV: the menu picks the player (or nobody), and so does a click on a
+  player on the map or in the Players pane; the crosshair button shows
+  only with the engine. The menu also has the Map tab's trail length and
+  *Clear trails*, and *Learn the map* (the `learnMode` store, `?learn=1`;
+  the Map entities pane filters what it shows). In the main column the
+  map may be as tall as 85 % of the window (beside it, 520 px). Escape
+  clears a region focus. Unmounting the
   pane (close, collapse, hiding the column) releases its WebGL context
   (`MvdMap.dispose`).
+- **Map entities** (`panes/EntitiesPane.svelte`): learn mode's category
+  filters (the map model's `entityFilters`) and the table of the map's
+  static entities, with a button into learn mode.
 - **Players** (`panes/LegendPane.svelte`): the Map tab's legend as a
   pane — one sortable table per team (canonical order and colour, the
   team's running frags in its title), each player's symbol, loc, health +

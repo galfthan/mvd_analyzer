@@ -17,6 +17,7 @@
     import LegendPane from './panes/LegendPane.svelte';
     import ItemsPane from './panes/ItemsPane.svelte';
     import RegionsPane from './panes/RegionsPane.svelte';
+    import EntitiesPane from './panes/EntitiesPane.svelte';
     import GraphPane from './panes/GraphPane.svelte';
     import { paneLayout, updateLayout, movePane, columnOf, PANE_IDS } from './layout.js';
     import { playlist } from './playlist-store.js';
@@ -33,6 +34,7 @@
         players: { title: 'Players', component: LegendPane },
         items: { title: 'Items', component: ItemsPane },
         'region-status': { title: 'Region status', component: RegionsPane },
+        entities: { title: 'Map entities', component: EntitiesPane },
         stack: { title: 'Health / armor strips', component: StackPane },
         moments: { title: 'Moments', component: MomentsPane },
         feed: { title: 'Frag feed', component: FeedPane },
@@ -81,7 +83,7 @@
         {#each ids as id, i (id)}
             {@const P = PANES[id].component}
             <Pane {id} {column} title={titleOf(id)} index={i} count={ids.length}>
-                <P {...PANES[id].props} />
+                <P {...PANES[id].props} {column} />
             </Pane>
         {/each}
         <div class="column-add" class:drag-over={dragOver} role="group" aria-label="Add a pane to this column"

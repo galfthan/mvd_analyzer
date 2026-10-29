@@ -1,5 +1,6 @@
 <script>
-    // The map, following the player you watch. A second MvdMap with its own
+    // The map, following the player you watch (the engine's POV, or with no
+    // engine — the Map preset — the follow target, follow.js). An MvdMap with its own
     // canvas, camera and follow target; the map DATA (geometry, locs,
     // frames, items, trails…) is the Map tab's (src/tabs/map/map-model.js),
     // read from it each frame (syncMapData). Click a player on the map
@@ -7,22 +8,36 @@
     // double-click resets the view. A right-click (or the sliders button)
     // opens the overlay menu (MapMenu, the Map tab's too) — view / velocity
     // arrows, trails, line of sight, PVS, occlusion, fog and 3D — kept in
-    // the pane's options (layout.js).
+    // the pane's options (layout.js); with no engine the menu also picks
+    // whom to follow, and it holds the Map tab's trail length, clear and
+    // learn-the-map. In the main column the map may be as tall as the
+    // window. Escape clears a region focus.
     import Crosshair from '@lucide/svelte/icons/crosshair';
     import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal';
     import {
         MvdMap, DEFAULT_YAW, DEFAULT_PITCH, PITCH_MAX, is3D,
     } from '../../../../mvd-map-view/src/index.js';
     import { clock, demo, teams } from '../../state/index.js';
-    import { view as mapTabView, ensureLineOfSight } from '../../tabs/map/map-model.js';
+    import { view as mapTabView, ensureLineOfSight, learnMode } from '../../tabs/map/map-model.js';
+    import { mapFollow } from '../follow.js';
+    import { playback } from '../../state/index.js';
     import { engine } from '../index.js';
     import { paneLayout, paneOpt, setPaneOpt } from '../layout.js';
     import { onFrame } from './tick.js';
     import { syncMapData } from './map-sync.js';
     import MapMenu from '../../ui/MapMenu.svelte';
 
+    const engineStatus = engine.status;
+
+    /** @type {{ column?: import('../layout.js').Column }} */
+    let { column = 'order' } = $props();
+
     const MIN_H = 200;
-    const MAX_H = 520;
+    // Beside the main column the map stays scannable; in it, it may fill
+    // the window.
+    const maxH = () => (column === 'below' ? Math.max(520, Math.round(window.innerHeight * 0.85)) : 520);
+    // The Map tab's trail lengths, seconds (0: the whole match so far).
+    const TRAIL_LENGTHS = [[5, '5 s'], [10, '10 s'], [30, '30 s'], [60, '1 min'], [300, '5 min'], [0, 'Whole match']];
 
     /** @type {HTMLCanvasElement} */
     let canvas;
@@ -39,6 +54,7 @@
         occl: paneOpt($paneLayout, 'map', 'occl', false),
         fog: paneOpt($paneLayout, 'map', 'fog', false),
         trails: paneOpt($paneLayout, 'map', 'trails', 'none'),
+        len: paneOpt($paneLayout, 'map', 'len', 10),
     });
     let tilted = $state(false);
     /** @type {{ x: number, y: number } | null} */
@@ -49,6 +65,8 @@
     let setting = false;
     /** @type {string | null} */
     let lastPov = null;       // the POV the camera last followed
+    /** @type {string | null | undefined} */
+    let lastFollow;           // the follow target, without an engine
     let needsFit = true;      // a new demo: reset the view once its data is in
 
     const sized = $derived($paneLayout.heights.map != null);
@@ -80,12 +98,22 @@
         applyOptions();
         map.state.currentTime = clock.t;
         map.state.renderDirty = true;
-        // Re-follow only when the POV changes: a pan, or a click that
-        // unfollows, holds until the next POV switch.
-        const pov = engine.povName();
-        if (follow && pov !== lastPov) {
-            lastPov = pov;
-            if (pov) setFollow(pov);
+        if (engine.drives()) {
+            lastFollow = undefined;
+            // Re-follow only when the POV changes: a pan, or a click that
+            // unfollows, holds until the next POV switch.
+            const pov = engine.povName();
+            if (follow && pov !== lastPov) {
+                lastPov = pov;
+                if (pov) setFollow(pov);
+            }
+        } else {
+            lastPov = null;
+            const target = mapFollow.get();
+            if (target !== lastFollow) {
+                lastFollow = target;
+                setFollow(target);
+            }
         }
         map.render(clock.t);
     }
@@ -100,7 +128,12 @@
         s.fog = opts.fog ? 1 : 0;
         s.showLos = opts.los;
         s.showPvs = opts.pvs;
-        const pov = engine.povName();
+        s.fog = opts.fog ? 1 : 0;
+        s.trailDuration = opts.len || Infinity;
+        s.learnMode = learnMode.get();
+        s.entityFilters = mapTabView.state.entityFilters;
+        s.isPlaying = engine.drives() ? engine.status.get().playing : playback.get().playing;
+        const pov = engine.drives() ? engine.povName() : mapFollow.get();
         /** @type {Record<string, boolean>} */
         const on = {};
         if (opts.trails === 'all') for (const name of Object.keys(s.fullTrails || {})) on[name] = true;
@@ -119,7 +152,7 @@
         const worldH = s.bounds.maxY - s.bounds.minY;
         const cssH = sized
             ? Math.max(MIN_H, Math.floor(box.clientHeight))
-            : worldW > 0 ? Math.round(Math.max(MIN_H, Math.min(MAX_H, cssW * (worldH / worldW)))) : cssW;
+            : worldW > 0 ? Math.round(Math.max(MIN_H, Math.min(maxH(), cssW * (worldH / worldW)))) : cssW;
         map.resize(cssW, cssH, window.devicePixelRatio || 1);
     }
 
@@ -130,9 +163,15 @@
 
     $effect(() => {
         map = new MvdMap(canvas);
+        // A click on a player (or off them) on the map: watch them.
         map.on('follow', (/** @type {string | null} */ name) => {
-            if (setting || !name) return;
-            engine.trackName(name);
+            if (setting) return;
+            if (engine.drives()) {
+                if (name) engine.trackName(name);
+            } else {
+                lastFollow = name;
+                mapFollow.set(name);
+            }
         });
         map.on('camera', () => { tilted = is3D(map.camera); });
         const ro = new ResizeObserver(() => resize());
@@ -231,9 +270,29 @@
         draw();
     }
 
+    // Whom the map follows: with the engine up, the POV (on or off); else a
+    // player of this demo, or nobody.
+    let players = $derived.by(() => { $demo; $mapFollow; return Object.keys(mapTabView.state.playerSymbols || {}).sort((x, y) => x.localeCompare(y)); });
+    /** @type {import('../../ui/map-menu.js').MenuItem[]} */
+    let followItems = $derived($engineStatus.ready
+        ? [{ kind: 'check', label: 'Follow the watched player', on: follow, run: toggleFollow }]
+        : [{ kind: 'radio', label: 'Follow nobody', on: !$mapFollow, run: () => mapFollow.set(null) },
+            ...players.map((name) => ({ kind: /** @type {const} */ ('radio'), label: `Follow ${name}`, on: $mapFollow === name, run: () => mapFollow.set(name) }))]);
+
+    function clearTrails() {
+        const s = map.state;
+        for (const name of Object.keys(s.fullTrails || {})) s.trailStartTimes[name] = clock.t;
+        draw();
+    }
+
+    /** @param {KeyboardEvent} e */
+    function key(e) {
+        if (e.key === 'Escape' && map?.state.focusGroupName) map.setFocusGroup(null);
+    }
+
     /** @type {import('../../ui/map-menu.js').MenuItem[]} */
     let menuItems = $derived([
-        { kind: 'check', label: 'Follow the watched player', on: follow, run: toggleFollow },
+        ...followItems,
         { kind: 'sep' },
         { kind: 'check', label: 'View arrows', title: 'Per-player arrows showing where each player is looking', on: opts.view, run: () => toggleOpt('view') },
         { kind: 'check', label: 'Velocity arrows', title: "Per-player arrows showing each player's velocity (length ∝ speed)", on: opts.vel, run: () => toggleOpt('vel') },
@@ -244,19 +303,27 @@
         { kind: 'sep' },
         ...[['none', 'No trails'], ['pov', 'Trail of the watched player'], ['all', 'Trails of everyone']]
             .map(([mode, label]) => ({ kind: /** @type {const} */ ('radio'), label, on: opts.trails === mode, run: () => setTrails(mode) })),
+        { kind: 'action', label: 'Clear trails', title: 'Start every trail again from now', run: clearTrails },
+        ...TRAIL_LENGTHS.map(([len, label]) => ({ kind: /** @type {const} */ ('radio'), label: `Trail length: ${label}`, on: opts.len === len, run: () => { setPaneOpt('map', 'len', len); draw(); } })),
+        { kind: 'sep' },
+        { kind: 'check', label: 'Learn the map (items, teleporters)', title: "The map's static layout: items, teleporters with their exits, spawns — the Entities pane filters them", on: $learnMode, run: () => learnMode.set(!learnMode.get()) },
         { kind: 'sep' },
         { kind: 'check', label: '3D (right-drag rotates)', on: tilted, run: toggle3D },
         { kind: 'action', label: 'Reset view', run: () => map?.resetView(), close: true },
     ]);
 </script>
 
+<svelte:window onkeydown={key} />
+
 <div class="map-pane" class:sized bind:this={box}>
     <span class="map-pane-btns">
         <button class="pt-btn icon menu-btn" class:active={!!menu} title="Map options (or right-click the map)"
             onclick={() => (menu = menu ? null : { x: Math.max(4, box.clientWidth - 198), y: 36 })}><SlidersHorizontal size={15} /></button>
-        <button class="pt-btn icon" class:active={follow} aria-pressed={follow}
-            title={follow ? 'Following the POV — click to stop' : 'Keep the map centred on the player you are watching'}
-            onclick={toggleFollow}><Crosshair size={15} /></button>
+        {#if $engineStatus.ready}
+            <button class="pt-btn icon" class:active={follow} aria-pressed={follow}
+                title={follow ? 'Following the POV — click to stop' : 'Keep the map centred on the player you are watching'}
+                onclick={toggleFollow}><Crosshair size={15} /></button>
+        {/if}
     </span>
     <MapMenu bind:at={menu} items={menuItems} keep=".menu-btn" />
     <canvas bind:this={canvas} onmousedown={down} onwheel={wheel} oncontextmenu={(e) => e.preventDefault()}

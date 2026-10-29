@@ -27,7 +27,7 @@ const OLD_KEY = 'mvd.playerPanes.v1';   // an order array, the PoC's format
 // not one of them), the rest are one "Add pane…" away. A pane is open in at most one column.
 export const PANE_IDS = [
     'player', 'finder', 'playlist',
-    'map', 'players', 'items', 'region-status', 'stack', 'moments', 'feed',
+    'map', 'players', 'items', 'region-status', 'entities', 'stack', 'moments', 'feed',
     'score', 'team-weapons', 'team-ha', 'weapons-pp', 'powerups', 'regions',
 ];
 /** @typedef {'order' | 'below'} Column */
