@@ -5,9 +5,9 @@
     // read from it each frame (syncMapData). Click a player on the map
     // to watch them; drag pans, right-drag orbits, the wheel zooms,
     // double-click resets the view. A right-click (or the sliders button)
-    // opens the overlay menu — the Map tab's view / velocity arrows,
-    // trails, line of sight, PVS, occlusion and 3D — kept in the pane's
-    // options (layout.js).
+    // opens the overlay menu (MapMenu, the Map tab's too) — view / velocity
+    // arrows, trails, line of sight, PVS, occlusion, fog and 3D — kept in
+    // the pane's options (layout.js).
     import Crosshair from '@lucide/svelte/icons/crosshair';
     import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal';
     import {
@@ -19,6 +19,7 @@
     import { paneLayout, paneOpt, setPaneOpt } from '../layout.js';
     import { onFrame } from './tick.js';
     import { syncMapData } from './map-sync.js';
+    import MapMenu from '../../ui/MapMenu.svelte';
 
     const MIN_H = 200;
     const MAX_H = 520;
@@ -36,6 +37,7 @@
         los: paneOpt($paneLayout, 'map', 'los', false),
         pvs: paneOpt($paneLayout, 'map', 'pvs', false),
         occl: paneOpt($paneLayout, 'map', 'occl', false),
+        fog: paneOpt($paneLayout, 'map', 'fog', false),
         trails: paneOpt($paneLayout, 'map', 'trails', 'none'),
     });
     let tilted = $state(false);
@@ -95,6 +97,7 @@
         s.showViewArrows = opts.view;
         s.showVelArrows = opts.vel;
         s.occludeActors = opts.occl;
+        s.fog = opts.fog ? 1 : 0;
         s.showLos = opts.los;
         s.showPvs = opts.pvs;
         const pov = engine.povName();
@@ -207,11 +210,7 @@
 
     /** @param {{ x: number, y: number }} at  canvas coordinates */
     function openMenu(at) {
-        // Kept inside the pane: the menu is about 190 x 260 px.
-        menu = {
-            x: Math.max(4, Math.min(at.x, box.clientWidth - 194)),
-            y: Math.max(4, Math.min(at.y, box.clientHeight - 264)),
-        };
+        menu = at;
     }
 
     /** @param {string} key */
@@ -232,19 +231,23 @@
         draw();
     }
 
-    // Outside clicks and Escape close the menu.
-    $effect(() => {
-        if (!menu) return;
-        const close = (/** @type {Event} */ e) => {
-            if (e instanceof KeyboardEvent ? e.key === 'Escape' : !(/** @type {Element} */ (e.target)).closest?.('.map-menu, .menu-btn')) menu = null;
-        };
-        window.addEventListener('pointerdown', close, true);
-        window.addEventListener('keydown', close);
-        return () => {
-            window.removeEventListener('pointerdown', close, true);
-            window.removeEventListener('keydown', close);
-        };
-    });
+    /** @type {import('../../ui/map-menu.js').MenuItem[]} */
+    let menuItems = $derived([
+        { kind: 'check', label: 'Follow the watched player', on: follow, run: toggleFollow },
+        { kind: 'sep' },
+        { kind: 'check', label: 'View arrows', title: 'Per-player arrows showing where each player is looking', on: opts.view, run: () => toggleOpt('view') },
+        { kind: 'check', label: 'Velocity arrows', title: "Per-player arrows showing each player's velocity (length ∝ speed)", on: opts.vel, run: () => toggleOpt('vel') },
+        { kind: 'check', label: 'Line of sight', title: 'Lines between players who can see each other (white = mutual, red/blue = one-way). BSP-backed maps only.', on: opts.los, run: () => toggleOpt('los') },
+        { kind: 'check', label: 'PVS', title: 'Thin lines between players the server sent to each other (potential visibility). BSP-backed maps only.', on: opts.pvs, run: () => toggleOpt('pvs') },
+        { kind: 'check', label: 'Occlusion', title: 'Floors hide players, items and lines behind them', on: opts.occl, run: () => toggleOpt('occl') },
+        { kind: 'check', label: 'Fog', title: 'Depth fog: the far side of the map fades', on: opts.fog, run: () => toggleOpt('fog') },
+        { kind: 'sep' },
+        ...[['none', 'No trails'], ['pov', 'Trail of the watched player'], ['all', 'Trails of everyone']]
+            .map(([mode, label]) => ({ kind: /** @type {const} */ ('radio'), label, on: opts.trails === mode, run: () => setTrails(mode) })),
+        { kind: 'sep' },
+        { kind: 'check', label: '3D (right-drag rotates)', on: tilted, run: toggle3D },
+        { kind: 'action', label: 'Reset view', run: () => map?.resetView(), close: true },
+    ]);
 </script>
 
 <div class="map-pane" class:sized bind:this={box}>
@@ -255,29 +258,7 @@
             title={follow ? 'Following the POV — click to stop' : 'Keep the map centred on the player you are watching'}
             onclick={toggleFollow}><Crosshair size={15} /></button>
     </span>
-    {#if menu}
-        <div class="map-menu" role="menu" style:left="{menu.x}px" style:top="{menu.y}px">
-            <button role="menuitemcheckbox" aria-checked={follow} onclick={toggleFollow}><span class="tick">{follow ? '✓' : ''}</span>Follow the watched player</button>
-            <hr>
-            <button role="menuitemcheckbox" aria-checked={opts.view} onclick={() => toggleOpt('view')}
-                title="Per-player arrows showing where each player is looking"><span class="tick">{opts.view ? '✓' : ''}</span>View arrows</button>
-            <button role="menuitemcheckbox" aria-checked={opts.vel} onclick={() => toggleOpt('vel')}
-                title="Per-player arrows showing each player's velocity (length ∝ speed)"><span class="tick">{opts.vel ? '✓' : ''}</span>Velocity arrows</button>
-            <button role="menuitemcheckbox" aria-checked={opts.los} onclick={() => toggleOpt('los')}
-                title="Lines between players who can see each other (white = mutual, red/blue = one-way). BSP-backed maps only."><span class="tick">{opts.los ? '✓' : ''}</span>Line of sight</button>
-            <button role="menuitemcheckbox" aria-checked={opts.pvs} onclick={() => toggleOpt('pvs')}
-                title="Thin lines between players the server sent to each other (potential visibility). BSP-backed maps only."><span class="tick">{opts.pvs ? '✓' : ''}</span>PVS</button>
-            <button role="menuitemcheckbox" aria-checked={opts.occl} onclick={() => toggleOpt('occl')}
-                title="Floors hide players, items and lines behind them"><span class="tick">{opts.occl ? '✓' : ''}</span>Occlusion</button>
-            <hr>
-            {#each [['none', 'No trails'], ['pov', 'Trail of the watched player'], ['all', 'Trails of everyone']] as [mode, label] (mode)}
-                <button role="menuitemradio" aria-checked={opts.trails === mode} onclick={() => setTrails(mode)}><span class="tick">{opts.trails === mode ? '•' : ''}</span>{label}</button>
-            {/each}
-            <hr>
-            <button role="menuitemcheckbox" aria-checked={tilted} onclick={toggle3D}><span class="tick">{tilted ? '✓' : ''}</span>3D (right-drag rotates)</button>
-            <button role="menuitem" onclick={() => { map?.resetView(); menu = null; }}><span class="tick"></span>Reset view</button>
-        </div>
-    {/if}
+    <MapMenu bind:at={menu} items={menuItems} keep=".menu-btn" />
     <canvas bind:this={canvas} onmousedown={down} onwheel={wheel} oncontextmenu={(e) => e.preventDefault()}
         ondblclick={() => map?.resetView()}></canvas>
     {#if empty}<div class="player-clip-hint">No map for this demo.</div>{/if}
@@ -304,43 +285,5 @@
     }
     .map-pane-btns .pt-btn {
         background: rgba(10, 14, 26, 0.7);
-    }
-    .map-menu {
-        position: absolute;
-        z-index: 2;
-        min-width: 190px;
-        display: flex;
-        flex-direction: column;
-        padding: 4px 0;
-        background: #10162a;
-        border: 1px solid var(--bg-panel);
-        border-radius: 4px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
-        font-size: 12px;
-    }
-    .map-menu button {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px 10px 4px 6px;
-        background: none;
-        border: 0;
-        color: var(--fg-default);
-        font: inherit;
-        text-align: left;
-        cursor: pointer;
-    }
-    .map-menu button:hover {
-        background: #34507a;
-    }
-    .map-menu .tick {
-        width: 14px;
-        color: var(--accent-cyan);
-    }
-    .map-menu hr {
-        width: 100%;
-        margin: 3px 0;
-        border: 0;
-        border-top: 1px solid var(--bg-panel);
     }
 </style>

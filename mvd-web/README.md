@@ -1808,10 +1808,15 @@ shallow edges and a pool seen from the side shows its body of water.
 Needs float render targets (`EXT_color_buffer_float`); without them, or
 for pre-v5 files, only the surfaces draw.
 
-Depth fog (`state.fog`) and directional floor shading
-(`state.worldLight`) are always on; they have no toolbar buttons. Fog
-starts a little in front of the map centre and thickens toward the far
-side.
+Directional floor shading (`state.worldLight`) is always on. Depth fog
+(`state.fog`) is an option, off by default (the toolbar's *Fog*, the
+right-click menu's, the map pane's): it starts a little in front of the
+map centre and thickens toward the far side.
+
+A right-click on the map that does not drag (a right-drag orbits) opens
+the overlay menu (`src/ui/MapMenu.svelte`, shared with the Player tab's
+map pane): view / velocity arrows, line of sight, PVS, occlusion, fog,
+trails, 3D and reset view; a click elsewhere or Escape closes it.
 
 Everything is drawn through one orbit-camera orthographic projection
 (`project` in `mvd-map-view/src/camera.js`): floor geometry uses the per-vertex heights

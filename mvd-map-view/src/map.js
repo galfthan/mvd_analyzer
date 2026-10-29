@@ -357,7 +357,7 @@ export function newState() {
         // world — realistic occlusion instead of the analyzer's
         // everyone-always-visible default. liquidHaze: opacity scale of the
         // liquid volume haze (0 off, 1 default; needs corpus v5 volumes).
-        fog: 1,
+        fog: 0,
         worldLight: 0.6,
         liquidHaze: 1,
         occludeActors: false,

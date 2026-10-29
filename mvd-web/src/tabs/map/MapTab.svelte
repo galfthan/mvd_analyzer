@@ -2,7 +2,9 @@
     // The Map tab: the map canvas (mvd-map-view's MvdMap, map-model.js), its
     // sidebar — the legend, the items list, the region status, the learn-mode
     // entity filters — and the controls under it (trails, follow, the
-    // overlays, 3D / occlusion, reset view; fullscreen is src/app/fullscreen.js).
+    // overlays, 3D / occlusion / fog, reset view; fullscreen is
+    // src/app/fullscreen.js). A right-click that does not drag opens the
+    // same overlays as a menu (src/ui/MapMenu.svelte, the map pane's too).
     // src/lib/map.js has the pure parts, sidebar.js
     // the hand-built legend and region status. src/app/tabs.js toggles the
     // `active` class like on every other .tab-content.
@@ -15,6 +17,7 @@
     // in Firefox). The sidebar follows a seek at once and playback every
     // 200 ms, and catches up when the tab shows. Nothing runs while it is
     // hidden.
+    import MapMenu from '../../ui/MapMenu.svelte';
     import { onMount, flushSync } from 'svelte';
     import {
         DEFAULT_YAW, DEFAULT_PITCH, PITCH_MAX, is3D, ITEM_MARKER_STYLES,
@@ -52,7 +55,12 @@
     let hasEntities = $state(false);
     let noData = $state(false);
     let tilted = $state(false);
-    let flags = $state({ view: false, vel: false, los: false, pvs: false, occl: false });
+    let flags = $state({ view: false, vel: false, los: false, pvs: false, occl: false, fog: false });
+    // The right-click menu (MapMenu): where it is open, in the canvas
+    // container's coordinates, and where the right button went down.
+    let menu = $state(/** @type {{ x: number, y: number } | null} */ (null));
+    /** @type {{ x: number, y: number } | null} */
+    let rightDown = null;
     /** @type {string | null} */
     let pendingBtn = $state(null);
     let trails = $state.raw({ all: false, none: true, some: false });
@@ -291,6 +299,28 @@
         view.setCamera(on ? 0 : DEFAULT_YAW, on ? PITCH_MAX : DEFAULT_PITCH);
     }
 
+    function toggleFog() {
+        toggle('fog', () => (s.fog = s.fog > 0 ? 0 : 1) > 0);
+    }
+
+    // The right-click menu: the toolbar's overlays, trails and view.
+    /** @type {import('../../ui/map-menu.js').MenuItem[]} */
+    let menuItems = $derived([
+        { kind: 'check', label: 'View arrows', title: 'Per-player arrows showing where each player is looking', on: flags.view, run: () => toggle('view', () => (s.showViewArrows = !s.showViewArrows)) },
+        { kind: 'check', label: 'Velocity arrows', title: "Per-player arrows showing each player's velocity (length ∝ speed)", on: flags.vel, run: () => toggle('vel', () => (s.showVelArrows = !s.showVelArrows)) },
+        { kind: 'check', label: 'Line of sight', title: 'Lines between players who can see each other (white = mutual, red/blue = one-way). BSP-backed maps only.', on: flags.los, run: () => toggleVis('los') },
+        { kind: 'check', label: 'PVS', title: 'Thin lines between players the server sent to each other (potential visibility). BSP-backed maps only.', on: flags.pvs, run: () => toggleVis('pvs') },
+        { kind: 'check', label: 'Occlusion', title: 'Floors hide players, items and lines behind them', on: flags.occl, run: () => toggle('occl', () => (s.occludeActors = !s.occludeActors)) },
+        { kind: 'check', label: 'Fog', title: 'Depth fog: the far side of the map fades', on: flags.fog, run: toggleFog },
+        { kind: 'sep' },
+        { kind: 'radio', label: 'No trails', on: trails.none, run: trailsNone },
+        { kind: 'radio', label: 'Trails of everyone', on: trails.all, run: trailsAll },
+        { kind: 'action', label: 'Clear trails', run: trailsClear },
+        { kind: 'sep' },
+        { kind: 'check', label: '3D (right-drag rotates)', on: tilted, run: toggle3D },
+        { kind: 'action', label: 'Reset view', run: () => view.resetView(), close: true },
+    ]);
+
     // ─── Learn mode ─────────────────────────────────────────────────────────
 
     /** @param {boolean} on */
@@ -356,6 +386,7 @@
     function down(ev) {
         if (!s.initialized || (ev.button !== 0 && ev.button !== 2)) return;
         const p = point(ev);
+        rightDown = ev.button === 2 ? p : null;
         view.pointerDown(p.x, p.y, (ev.button === 2 || ev.ctrlKey || ev.metaKey) ? 'orbit' : 'pan', ev.button);
         ev.preventDefault();
     }
@@ -372,6 +403,9 @@
         if (!s.initialized) return;
         const p = point(ev);
         view.pointerUp(p.x, p.y);
+        // A right-click that did not drag (an orbit) opens the menu.
+        if (rightDown && Math.hypot(p.x - rightDown.x, p.y - rightDown.y) < 4) menu = p;
+        rightDown = null;
     }
 
     /** @param {WheelEvent} ev */
@@ -428,6 +462,7 @@
             <div class="map-canvas-container">
                 <canvas id="map-canvas" width="850" height="850" bind:this={canvas}
                     onmousedown={down} oncontextmenu={(e) => e.preventDefault()} ondblclick={dblclick}></canvas>
+                <MapMenu bind:at={menu} items={menuItems} />
                 <div id="map-no-data" class="map-no-data" style:display={noData ? 'block' : 'none'}>
                     <p>No location data available for this map.</p>
                     <p>Player positions will still be shown.</p>
@@ -516,6 +551,7 @@
             <button id="map-pvs" class:active={flags.pvs} class:pending={pendingBtn === 'pvs'} title="Potential visibility (PVS): thin lines between players the server would have sent to each other on the wire (mvdsv per-client entity cull — fat PVS vs the opponent's box leaves). Superset of LOS; the gap (in PVS but not LOS) means same vis region without a direct sightline. BSP-backed maps only."
                 onclick={() => toggleVis('pvs')}>PVS</button>
             <button id="map-3d-toggle" class:active={tilted} title="Tilt the map into 3D — right-drag (or Ctrl+drag) to rotate freely" onclick={toggle3D}>3D</button>
+            <button id="map-fog" class:active={flags.fog} title="Depth fog: the far side of the map fades (off by default)" onclick={toggleFog}>Fog</button>
             <button id="map-occlude" class:active={flags.occl} title="Realistic occlusion — floors hide players, items and lines behind them (the default keeps everything visible)"
                 onclick={() => toggle('occl', () => (s.occludeActors = !s.occludeActors))}>Occl</button>
             <button id="map-reset-view" title="Reset pan / zoom / rotation" onclick={() => view.resetView()}>Reset view</button>

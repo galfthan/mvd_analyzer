@@ -5,6 +5,27 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (web-svelte) — a player-like timeline, clips from the selection, a light player
+
+No schema change; web UI only. The playback bar is laid out like a video
+player's: a thin scrubber on top (hover shows the time, a round playhead
+to drag, a press-and-drag selects) and under it play / pause, the speed
+(0.2–5×) and pills for the time and the selection. The selection now
+plays like a clip — a new one starts at its beginning and playback stops
+at its end — and on the Player and Map tabs a **+ clip** pill (or `c`;
+`i` / `o` set its ends) adds it to the playlist from the POV you watch,
+replacing the In / Out bar. Clips can carry slow motion around the event
+(the airgib, telefrag, quadbore and discharge presets have it on). The
+player itself is now a pane that can sit in either column or collapse
+without restarting the demo. The Moments pane lists the Key Moments and
+Pack Drops tables as groups with their counts. A playlist's share link
+opens a light player page that plays the clips without loading the
+analyzer, with a link on to the full Player tab. Hub links everywhere
+read **play** (Shift: **+add**, Ctrl / Cmd: **hub**), the clip finder
+starts closed and shows its clips beside the stages, and the map's depth
+fog is an option again — off by default — on the Map tab's toolbar and a
+new right-click menu.
+
 ## unreleased (web-svelte) — schema v77: backpack drops say who took them
 
 Every RL/LG backpack drop now carries its own pickup side, on every demo:
