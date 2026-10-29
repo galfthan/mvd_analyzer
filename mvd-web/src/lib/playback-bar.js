@@ -117,12 +117,10 @@ export function transport({ drives, engine, playing, speed }) {
     };
 }
 
-// A clock step longer than this (s) is a seek, not playback: it does not
-// "reach" a segment's end.
-const MAX_PLAY_STEP_S = 2;
-
 // crossedEnd: playback ran from inside the segment to its end or past it —
-// where it stops (a selection plays like a clip).
+// where it stops (a selection plays like a clip). Callers pass playback
+// steps only (a seek is not one): a long step — a frame hitch, a hidden
+// browser tab — still stops.
 /**
  * @param {Span | null | undefined} seg
  * @param {number | null} prev  the clock before this step
@@ -130,17 +128,19 @@ const MAX_PLAY_STEP_S = 2;
  */
 export function crossedEnd(seg, prev, t) {
     if (!seg || prev == null) return false;
-    return prev >= seg.start && prev < seg.end && t >= seg.end && t - prev <= MAX_PLAY_STEP_S;
+    return prev >= seg.start && prev < seg.end && t >= seg.end;
 }
 
-// replayFrom: play pressed while paused at (or past) the segment's end
-// starts over at its start; null plays on from where it is.
+// replayFrom: play pressed forward while paused at the segment's end (where
+// playback stopped) starts over at its start; null plays on from where it
+// is — anywhere else, or backwards.
 /**
  * @param {Span | null | undefined} seg
  * @param {number} t
+ * @param {number} speed
  */
-export function replayFrom(seg, t) {
-    return seg && t >= seg.end - 0.5 ? seg.start : null;
+export function replayFrom(seg, t, speed) {
+    return seg && speed > 0 && Math.abs(t - seg.end) <= 0.5 ? seg.start : null;
 }
 
 // The i / o keys: the selection's start or end at the playhead, keeping
@@ -149,10 +149,11 @@ const MARK_LEN_S = 10;
 /**
  * @param {Span | null | undefined} seg
  * @param {number} t
+ * @param {number} duration
  * @returns {Span}
  */
-export function markIn(seg, t) {
-    return { start: t, end: seg && seg.end > t ? seg.end : t + MARK_LEN_S };
+export function markIn(seg, t, duration) {
+    return { start: t, end: seg && seg.end > t ? seg.end : Math.min(duration, t + MARK_LEN_S) };
 }
 /**
  * @param {Span | null | undefined} seg

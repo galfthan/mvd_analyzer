@@ -426,7 +426,7 @@
                                 <input class="cf-field" type="text" list="cf-fields" placeholder={c.slow.at || c.from || src.clip.from} bind:value={c.slow.to}>
                             </label>
                             <label class="cf-label" title="Seconds after that time">+<input class="cf-num" type="text" placeholder={String(SLOW_DEFAULT.after / 1000)} bind:value={c.slow.after}>s</label>
-                            <label class="cf-label" title="The slow-motion speed, 0.05–1 (× normal)">at
+                            <label class="cf-label" title="The slow-motion speed, 0.05–1 (× normal; outside that it is brought into it)">at
                                 <input class="cf-num" type="text" placeholder={String(SLOW_DEFAULT.speed)} bind:value={c.slow.speed}>×
                             </label>
                         {/if}

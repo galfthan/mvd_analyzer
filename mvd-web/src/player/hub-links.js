@@ -52,10 +52,12 @@ export function installHubLinkRouting({ runner, demo, addClips, toast }) {
 
     // The pointer's own flags too: a key pressed or released while another
     // window had focus sends no key event here.
+    // On a Mac, Ctrl-click opens the context menu: there only Cmd opens hub.
+    const mac = /Mac|iP(hone|ad|od)/.test(navigator.platform);
     const root = document.documentElement.classList;
     /** @param {{ shiftKey: boolean, ctrlKey: boolean, metaKey: boolean }} e */
     const mods = (e) => {
-        const hub = e.ctrlKey || e.metaKey;
+        const hub = e.metaKey || (e.ctrlKey && !mac);
         root.toggle('mod-hub', hub);
         root.toggle('mod-add', e.shiftKey && !hub);
     };

@@ -528,8 +528,10 @@ export function fromDraft(d) {
                 const sec = Number.parseFloat(c.slow[k]);
                 if (Number.isFinite(sec)) sl[k] = Math.round(sec * 1000);
             }
+            // Out of range is brought into it (2 → 1), not dropped for the
+            // default: the builder plays what was asked as near as it can.
             const speed = Number.parseFloat(c.slow.speed);
-            if (speed >= SLOW_MIN && speed <= SLOW_MAX) sl.speed = speed;
+            if (Number.isFinite(speed)) sl.speed = Math.min(SLOW_MAX, Math.max(SLOW_MIN, speed));
             spec.slow = sl;
         }
         return spec;

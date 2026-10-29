@@ -1261,7 +1261,10 @@ drops it).
 - **Slow motion**: a run plays a clip's `slow` window at its speed (the
   runner, `slowAt`, through `engine.slowTo`) and at the viewer's speed
   again after it; a pause drops it and play inside the window slows
-  again. The bar's speed stays the viewer's. A playlist row with one
+  again. The bar's speed stays the viewer's; one picked inside the window
+  takes effect at its end (the engine holds it while `slow` is set). However
+  a run ends — stopped, or its clip removed or the list cleared under it —
+  the engine leaves slow motion. A playlist row with one
   shows a snail.
 - **Edit**: label inline, drag or ↑ ↓ to reorder, × to remove. The list
   persists in `localStorage` (`mvd.playlist.v1`).
@@ -1310,7 +1313,8 @@ capture-phase click handler (`src/player/hub-links.js`) reroutes them for
 the **loaded** demo: plain click plays that clip in the Player tab (a
 one-clip run that stops at `to`), shift-click adds it to the playlist,
 ctrl/cmd-click and middle-click keep the browser's "open hub in a new
-tab". While Shift or Ctrl/Cmd is held the links say so — they read
+tab". While Shift or Ctrl/Cmd (Cmd only on a Mac, where Ctrl-click is
+the context menu) is held the links say so — they read
 **+add** or **hub** (`mod-add` / `mod-hub` on `<html>`, set from key and
 pointer events, cleared on blur). Links exist only for hub demos (they
 need a gameId) — a locally loaded file has none.
@@ -1569,8 +1573,12 @@ rate, since FTE's speed reads 0 while paused).
 
 A selection plays like a clip: a new one seeks to its start, playback
 that runs into its end stops there (the page's loop, and the engine
-outside a playlist run — `crossedEnd`; a step over 2 s is a seek and does
-not count), and play pressed at the end starts it over. A playlist clip
+outside a playlist run — `crossedEnd`, on playback steps only, however
+long: a frame hitch or a hidden browser tab still stops), and play
+pressed forward at the end starts it over (anywhere else, or backwards,
+it plays on — `replayFrom`). `i` near the match end clamps the 10 s to
+the match; held keys (Space, `i` / `o` / `c`) do not repeat. On the
+Player tab play waits for the engine to be up. A playlist clip
 that plays is the selection (the runner sets it, in match time, and
 clears it on stop unless the user picked another meanwhile), so the
 Timeline tab zooms to it too.

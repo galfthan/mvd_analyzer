@@ -98,11 +98,12 @@ One component, rewritten with pointer events + `setPointerCapture`:
 ## 5. Slow motion in clips
 
 - Clip gains an optional `slow: { from, to, speed }` (demo seconds,
-  inside the clip). The runner sets `engine.setSpeed(speed)` on crossing
-  `slow.from` and back to 1× at `slow.to` (seeks re-evaluate which side
-  they land on). Persisted in `mvd.playlist.v1` and the `#playlist=`
-  encoding (back-compatible: an absent field = none). Hub `clip=` has no
-  slow motion — the hub link drops it.
+  inside the clip). The runner plays that window through `engine.slowTo`
+  and returns to the viewer's rate (the bar's speed) after it; the engine
+  holds a bar speed change made inside the window until its end.
+  Persisted in `mvd.playlist.v1` and the `#playlist=` encoding
+  (back-compatible: an absent field = none). Hub `clip=` has no slow
+  motion — the hub link drops it.
 - Finder stage 4, per clip spec: *slow-mo* off / on; at = a row field
   (point events: `time`) or from / to fields (ranges: top-kills, top-windows,
   quad runs), ± seconds, speed (default 0.3×). Code line:

@@ -59,6 +59,10 @@ export class PlayerEngine {
         // The speed play runs at (percent): kept here, since FTE's own speed
         // reads 0 while paused.
         this.rate = 100;
+        // A clip's slow-motion speed (percent) while the runner has one on:
+        // it, not the rate, is what plays then.
+        /** @type {number | null} */
+        this.slow = null;
         /** @type {DemoHandle | null} */
         this.handle = null;
         /** @type {HTMLElement | null} */
@@ -175,6 +179,7 @@ export class PlayerEngine {
         Object.assign(this, {
             blobUrl: null, iframe: null, fte: null, seekTimer: null,
             pendingSeek: null, seekTarget: null, onReady: null,
+            rate: 100, slow: null,
         });
         this.status.set({ ...IDLE });
     }
@@ -295,17 +300,20 @@ export class PlayerEngine {
     setRate(speed) {
         if (!(speed > 0)) return;
         this.rate = Math.round(speed * 100);
-        if (this.fte?.isPlaying()) this.fte.setDemoSpeed(this.rate);
+        // Inside a slow-motion window the new rate waits for its end.
+        if (this.fte?.isPlaying() && this.slow == null) this.fte.setDemoSpeed(this.rate);
         this.publish();
     }
 
-    // A clip's slow motion (× 1), or null for the rate again: only while
-    // playing, and the rate (the bar's speed) stays what it was.
+    // A clip's slow motion (× 1), or null for the rate again; it changes
+    // what plays only while playing, and the rate (the bar's speed) stays
+    // what it was.
     /** @param {number | null} speed */
     slowTo(speed) {
+        this.slow = speed == null ? null : Math.round(speed * 100);
         const fte = this.fte;
         if (!fte?.isPlaying()) return;
-        fte.setDemoSpeed(speed == null ? this.rate : Math.round(speed * 100));
+        fte.setDemoSpeed(this.slow ?? this.rate);
         this.publish();
     }
 

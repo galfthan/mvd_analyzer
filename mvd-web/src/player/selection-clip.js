@@ -55,9 +55,9 @@ export function addSelectionClip() {
 
 /** @param {KeyboardEvent} e */
 function onKey(e) {
-    if (!selectionPov.get() || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!selectionPov.get() || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
     if (/** @type {Element} */ (e.target).closest?.('input, textarea, select, [contenteditable]')) return;
-    if (e.key === 'i') segment.set(markIn(segment.get(), clock.t));
+    if (e.key === 'i') segment.set(markIn(segment.get(), clock.t, clock.duration));
     else if (e.key === 'o') segment.set(markOut(segment.get(), clock.t));
     else if (e.key === 'c') addSelectionClip();
     else return;

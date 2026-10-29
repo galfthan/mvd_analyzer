@@ -185,4 +185,7 @@ test('a clip spec\'s slow motion: around the event by default, a stretch when as
     const off = toDraft(/** @type {any} */ (q));
     off.clips[0].slow.on = false;
     assert.equal(/** @type {any} */ (fromDraft(off).clip)?.slow, undefined, 'unticked: gone');
+    const fast = toDraft(/** @type {any} */ (q));
+    fast.clips[0].slow.speed = '2';
+    assert.equal(/** @type {any} */ (fromDraft(fast).clip)?.slow.speed, 1, 'an out-of-range speed is brought into range, not dropped');
 });

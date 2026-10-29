@@ -71,11 +71,18 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
     }
 
     function stop() {
-        slowTo(null);
         setRun(null);
+    }
+
+    // However a run ends — stop(), or the playlist removing the clip that
+    // plays or clearing the list under it — the engine leaves slow motion
+    // and the run's segment goes.
+    playlist.subscribe((s) => {
+        if (s.run || (slowing == null && !shownSpan)) return;
+        slowTo(null);
         if (shownSpan && segment.get() === shownSpan) segment.set(null);
         shownSpan = null;
-    }
+    });
 
     /**
      * @param {number} index

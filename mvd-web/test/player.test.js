@@ -152,6 +152,11 @@ test('runner plays a clip\'s slow-motion window at its speed, then at the viewer
     assert.deepEqual(engine.log.filter((e) => e[0] === 'slow').slice(2), [['slow', 0.3], ['slow', null], ['slow', 0.3]], 'a pause drops it, play inside the window slows again');
     runner.stop();
     assert.deepEqual(engine.log.at(-1), ['slow', null], 'stopping restores the rate');
+    runner.start([clip(100, 110, { slow: { from: 104, to: 106, speed: 0.3 } })], 0);
+    engine.tick(104.5);
+    assert.deepEqual(engine.log.at(-1), ['slow', 0.3]);
+    setRun(null);
+    assert.deepEqual(engine.log.at(-1), ['slow', null], 'a run the playlist ends (its clip removed, the list cleared) restores it too');
 });
 
 test('runner loads another hub demo and carries on there', async () => {

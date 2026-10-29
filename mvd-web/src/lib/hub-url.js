@@ -36,7 +36,7 @@ export function hubReplayUrl({ gameId, from, to, track }) {
     return url;
 }
 
-export const HUB_LINK_TITLE = 'Play in the Player tab · Shift: add to the playlist · Ctrl: open on hub';
+export const HUB_LINK_TITLE = 'Play in the Player tab · Shift: add to the playlist · Ctrl / Cmd: open on hub';
 
 // hubLinkHtml: the anchor every tab shows for a replay URL. It reads
 // "play"; holding Shift or Ctrl relabels it "+add" / "hub" (the classes

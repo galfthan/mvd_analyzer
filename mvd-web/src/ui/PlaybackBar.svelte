@@ -85,8 +85,11 @@
     }
 
     function togglePlay() {
+        // The Player tab plays the engine; until it is up there is nothing
+        // to play (the page's own loop would fight it once it is).
+        if (tab === 'player' && !engine.drives()) return;
         if (!tp.playing) {
-            const from = replayFrom(segment.get(), clock.t);
+            const from = replayFrom(segment.get(), clock.t, tp.speed);
             if (from != null) clock.seek(from);
         }
         if (engine.drives()) engine.togglePlay();
@@ -166,7 +169,7 @@
 
     /** @param {KeyboardEvent} e */
     function key(e) {
-        if (!shown || e.key !== ' ' || e.ctrlKey || e.metaKey || e.altKey) return;
+        if (!shown || e.key !== ' ' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
         if (/** @type {Element} */ (e.target).closest?.('input, textarea, select, button, a, [contenteditable]')) return;
         e.preventDefault();
         togglePlay();

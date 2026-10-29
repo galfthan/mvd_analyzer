@@ -34,7 +34,8 @@ function importPlaylistFromHash() {
     if (!decoded || !decoded.length) return;
     // Opening your own link again must not double the list.
     /** @type {(a: import('../lib/playlist.js').Clip, b: import('../lib/playlist.js').Clip) => boolean} */
-    const same = (a, b) => a.demo.key === b.demo.key && a.from === b.from && a.to === b.to && a.track === b.track;
+    const same = (a, b) => a.demo.key === b.demo.key && a.from === b.from && a.to === b.to && a.track === b.track
+        && JSON.stringify(a.slow ?? null) === JSON.stringify(b.slow ?? null);
     const have = playlist.get().clips;
     const clips = decoded.filter((c) => !have.some((o) => same(o, c)));
     addClips(clips);
