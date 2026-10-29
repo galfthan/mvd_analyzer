@@ -299,6 +299,16 @@ export class PlayerEngine {
         this.publish();
     }
 
+    // A clip's slow motion (× 1), or null for the rate again: only while
+    // playing, and the rate (the bar's speed) stays what it was.
+    /** @param {number | null} speed */
+    slowTo(speed) {
+        const fte = this.fte;
+        if (!fte?.isPlaying()) return;
+        fte.setDemoSpeed(speed == null ? this.rate : Math.round(speed * 100));
+        this.publish();
+    }
+
     play() {
         if (this.fte && !this.fte.isPlaying()) this.fte.setDemoSpeed(this.rate);
         this.publish();

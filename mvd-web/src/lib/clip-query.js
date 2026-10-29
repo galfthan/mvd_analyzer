@@ -22,7 +22,11 @@
 //            tracking the player named by field `pov`; unset fields take the
 //            source's. A list of them makes one clip per entry for each row
 //            (a pack's drop and its pickup), skipping an entry whose `from`
-//            field the row lacks.
+//            field the row lacks. `slow` { at, before, to, after, speed }
+//            plays row field `at` minus `before` ms to field `to` plus
+//            `after` ms at `speed` — slow motion at the event; `at` defaults
+//            to the clip's `from` field, `to` to `at`, the pads to 1 s, the
+//            speed to 0.3 (clamped into the clip).
 //   label    a template: {field} is the row's value, {field|s} a plural 's'
 //            unless the value is 1, {field|sec} ms as whole seconds,
 //            {field|upper} upper case; a clip entry's own label wins
@@ -30,7 +34,7 @@
 // Rows, fields and params are the endpoint's own — mvd-api/openapi/openapi.yaml
 // is their reference. The finder adds no detection of its own.
 
-import { makeClip, base64UrlEncode, base64UrlDecode } from './playlist.js';
+import { makeClip, base64UrlEncode, base64UrlDecode, SLOW_MIN, SLOW_MAX } from './playlist.js';
 
 /**
  * @typedef {import('./result.js').Result} Result
@@ -39,7 +43,8 @@ import { makeClip, base64UrlEncode, base64UrlDecode } from './playlist.js';
  * @typedef {string | number | boolean} Scalar
  * @typedef {{ field: string, op: '=' | '!=' | '<' | '<=' | '>' | '>=' | '~' | 'in', value: Scalar | Scalar[] }} Condition
  * @typedef {Condition | { and: Expr[] } | { or: Expr[] } | { not: Expr }} Expr
- * @typedef {{ from?: string, before?: number, to?: string, after?: number, pov?: string, label?: string }} ClipSpec
+ * @typedef {{ at?: string, before?: number, to?: string, after?: number, speed?: number }} SlowSpec
+ * @typedef {{ from?: string, before?: number, to?: string, after?: number, pov?: string, label?: string, slow?: SlowSpec }} ClipSpec
  * @typedef {object} ClipQuery
  * @property {string} source
  * @property {Record<string, string | number>} [params]
@@ -47,11 +52,12 @@ import { makeClip, base64UrlEncode, base64UrlDecode } from './playlist.js';
  * @property {{ by?: string, desc?: boolean, limit?: number }} [rank]
  * @property {ClipSpec | ClipSpec[]} [clip]
  * @property {string} [label]
- * @typedef {{ fn: string, params: string[], opts: (p: Record<string, string | number>) => object, rows: (body: any) => any[], clip: Required<Omit<ClipSpec, 'label'>> }} Source
+ * @typedef {{ fn: string, params: string[], opts: (p: Record<string, string | number>) => object, rows: (body: any) => any[], clip: Required<Omit<ClipSpec, 'label' | 'slow'>> }} Source
  * @typedef {(fn: string, opts: object) => Promise<any>} ViewFn
  * @typedef {{ kind: 'cond', field: string, op: Condition['op'], value: string }} EditCond
  * @typedef {{ kind: 'group', op: 'and' | 'or', not: boolean, items: Array<EditGroup | EditCond> }} EditGroup
- * @typedef {{ from: string, before: string, to: string, after: string, pov: string, label: string }} DraftClip
+ * @typedef {{ on: boolean, at: string, before: string, to: string, after: string, speed: string }} DraftSlow
+ * @typedef {{ from: string, before: string, to: string, after: string, pov: string, label: string, slow: DraftSlow }} DraftClip
  * @typedef {object} Draft  the builder's form: every field as typed text, times in seconds
  * @property {string} source
  * @property {Record<string, string>} params
@@ -60,6 +66,10 @@ import { makeClip, base64UrlEncode, base64UrlDecode } from './playlist.js';
  * @property {DraftClip[]} clips
  * @property {string} label
  */
+
+// A slow-motion window's defaults: a second either side of the event, at
+// 0.3×.
+export const SLOW_DEFAULT = { before: 1000, after: 1000, speed: 0.3 };
 
 /** @param {string | number | undefined} v */
 const csv = (v) => (v == null || v === '' ? undefined : String(v).split(',').map((s) => s.trim()).filter(Boolean));
@@ -251,9 +261,28 @@ export function stages(query, body, result, demo) {
         const who = String(fieldOf(r, spec.pov) ?? '');
         const fromMs = Number(from) - spec.before;
         const toMs = (Number(fieldOf(r, spec.to)) || Number(from)) + spec.after;
-        return [makeClip(result, demo, fromMs, toMs, ids[who], who, renderLabel(spec.label ?? query.label ?? '', r))];
+        return [makeClip(result, demo, fromMs, toMs, ids[who], who, renderLabel(spec.label ?? query.label ?? '', r), slowOf(spec, r))];
     }));
     return { rows, kept, ranked, clips };
+}
+
+// slowOf: a clip spec's slow-motion window on one row, in match ms; none
+// without `slow` or when the row lacks its field.
+/**
+ * @param {Required<Omit<ClipSpec, 'label' | 'slow'>> & { slow?: SlowSpec }} spec
+ * @param {any} row
+ */
+function slowOf(spec, row) {
+    const sl = spec.slow;
+    if (!sl) return undefined;
+    const at = Number(fieldOf(row, sl.at || spec.from));
+    if (!Number.isFinite(at)) return undefined;
+    const to = Number(fieldOf(row, sl.to || sl.at || spec.from));
+    return {
+        fromMs: at - (sl.before ?? SLOW_DEFAULT.before),
+        toMs: (Number.isFinite(to) ? to : at) + (sl.after ?? SLOW_DEFAULT.after),
+        speed: sl.speed ?? SLOW_DEFAULT.speed,
+    };
 }
 
 // clipsOf turns an endpoint's body into clips: filter, rank, window.
@@ -340,19 +369,19 @@ export const PRESETS = [
     },
     {
         id: 'quadbores', title: 'Quadbores', about: 'Players killing themselves with their own rocket or grenade while holding quad.',
-        query: { source: 'highlights', params: { kinds: 'quadbore' }, label: 'Quadbore · {actor.name} · quad held {quadHeldMs|sec} s' },
+        query: { source: 'highlights', params: { kinds: 'quadbore' }, clip: { slow: {} }, label: 'Quadbore · {actor.name} · quad held {quadHeldMs|sec} s' },
     },
     {
         id: 'airgibs', title: 'Airgibs', about: 'Direct rocket hits on enemies in mid-air.',
-        query: { source: 'highlights', params: { kinds: 'airgib' }, label: 'Airgib · {actor.name} → {victims.0.name}' },
+        query: { source: 'highlights', params: { kinds: 'airgib' }, clip: { slow: {} }, label: 'Airgib · {actor.name} → {victims.0.name}' },
     },
     {
         id: 'telefrags', title: 'Telefrags', about: 'Kills by teleporting onto someone.',
-        query: { source: 'highlights', params: { kinds: 'telefrag' }, label: 'Telefrag · {actor.name} → {victims.0.name}' },
+        query: { source: 'highlights', params: { kinds: 'telefrag' }, clip: { slow: {} }, label: 'Telefrag · {actor.name} → {victims.0.name}' },
     },
     {
         id: 'discharges', title: 'Discharges', about: 'Lightning-gun discharges in water.',
-        query: { source: 'highlights', params: { kinds: 'discharge' }, label: 'Discharge · {actor.name} · {enemyKills} kill{enemyKills|s}' },
+        query: { source: 'highlights', params: { kinds: 'discharge' }, clip: { slow: {} }, label: 'Discharge · {actor.name} · {enemyKills} kill{enemyKills|s}' },
     },
 ];
 
@@ -460,6 +489,10 @@ export function toDraft(q) {
         rank: { by: q.rank?.by || '', desc: q.rank?.desc ?? true, limit: q.rank?.limit ? String(q.rank.limit) : '' },
         clips: specs.map((c) => ({
             from: c.from || '', before: secText(c.before), to: c.to || '', after: secText(c.after), pov: c.pov || '', label: c.label || '',
+            slow: {
+                on: !!c.slow, at: c.slow?.at || '', before: secText(c.slow?.before), to: c.slow?.to || '', after: secText(c.slow?.after),
+                speed: c.slow?.speed == null ? '' : String(c.slow.speed),
+            },
         })),
         label: q.label || '',
     };
@@ -486,6 +519,18 @@ export function fromDraft(d) {
         for (const k of /** @type {const} */ (['before', 'after'])) {
             const sec = Number.parseFloat(c[k]);
             if (Number.isFinite(sec)) spec[k] = Math.round(sec * 1000);
+        }
+        if (c.slow.on) {
+            /** @type {SlowSpec} */
+            const sl = {};
+            for (const k of /** @type {const} */ (['at', 'to'])) if (c.slow[k].trim()) sl[k] = c.slow[k].trim();
+            for (const k of /** @type {const} */ (['before', 'after'])) {
+                const sec = Number.parseFloat(c.slow[k]);
+                if (Number.isFinite(sec)) sl[k] = Math.round(sec * 1000);
+            }
+            const speed = Number.parseFloat(c.slow.speed);
+            if (speed >= SLOW_MIN && speed <= SLOW_MAX) sl.speed = speed;
+            spec.slow = sl;
         }
         return spec;
     });
@@ -546,8 +591,43 @@ function cleanSpec(c) {
     }
     for (const k of /** @type {const} */ (['before', 'after'])) {
         if (o[k] == null) continue;
-        if (typeof o[k] !== 'number' || !Number.isFinite(o[k]) || Math.abs(o[k]) > 600000) return null;
+        if (!ms(o[k])) return null;
         out[k] = o[k];
+    }
+    if (o.slow != null) {
+        const sl = cleanSlowSpec(o.slow);
+        if (!sl) return null;
+        out.slow = sl;
+    }
+    return out;
+}
+
+/** @param {unknown} v  an offset in ms, at most 10 minutes */
+const ms = (v) => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) <= 600000;
+
+/**
+ * @param {unknown} c
+ * @returns {SlowSpec | null}
+ */
+function cleanSlowSpec(c) {
+    if (!c || typeof c !== 'object') return null;
+    const o = /** @type {Record<string, any>} */ (c);
+    /** @type {SlowSpec} */
+    const out = {};
+    for (const k of /** @type {const} */ (['at', 'to'])) {
+        if (o[k] == null) continue;
+        const t = text(o[k]);
+        if (t == null) return null;
+        out[k] = t;
+    }
+    for (const k of /** @type {const} */ (['before', 'after'])) {
+        if (o[k] == null) continue;
+        if (!ms(o[k])) return null;
+        out[k] = o[k];
+    }
+    if (o.speed != null) {
+        if (!(typeof o.speed === 'number' && o.speed >= SLOW_MIN && o.speed <= SLOW_MAX)) return null;
+        out.speed = o.speed;
     }
     return out;
 }

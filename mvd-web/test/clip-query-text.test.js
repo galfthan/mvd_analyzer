@@ -26,7 +26,7 @@ test('a query with every line round-trips', { skip }, () => {
         params: { metric: 'frags', windowMs: '30000', players: 'a b, c' },
         where: { and: [{ field: 'score', op: '>=', value: 3 }, { not: { field: 'player', op: '~', value: 'x' } }] },
         rank: { by: 'score', desc: false, limit: 4 },
-        clip: [{ from: 'start', before: 2500, to: 'end', after: 0, pov: 'player', label: 'a "q" {player}' }, { before: -1000 }, {}],
+        clip: [{ from: 'start', before: 2500, to: 'end', after: 0, pov: 'player', label: 'a "q" {player}', slow: { at: 'start', before: 1500, to: 'detail.end', after: -500, speed: 0.25 } }, { before: -1000, slow: {} }, {}],
         label: '{player} · {score}',
     };
     const text = queryToText(query, 'Mine');
@@ -66,4 +66,13 @@ test('what it cannot read is an error naming the line', { skip }, () => {
         const r = parseQueryText(bad);
         assert.match(r.error || '', /** @type {RegExp} */ (want), bad);
     }
+});
+
+test('slow= reads its short forms', { skip }, () => {
+    const clip = (t) => parseQueryText(`source highlights\nclip ${t}`).query?.clip;
+    assert.deepEqual(clip('slow=on'), { slow: {} });
+    assert.deepEqual(clip('slow=@0.5'), { slow: { speed: 0.5 } });
+    assert.deepEqual(clip('slow=-2s..+1s'), { slow: { before: 2000, after: 1000 } });
+    assert.match(parseQueryText('source highlights\nclip slow=a@b@c').error, /line 2: slow=/);
+    assert.match(parseQueryText('source highlights\nclip slow=@4').error, /0\.05–1/);
 });

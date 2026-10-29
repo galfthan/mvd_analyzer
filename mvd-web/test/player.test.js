@@ -96,6 +96,7 @@ function fakeEngine(activeTab) {
         track: (u) => log.push(['track', u]),
         play: () => { fte.playing = true; },
         pause: () => { fte.playing = false; log.push(['pause']); },
+        slowTo: (sp) => log.push(['slow', sp]),
         onTick: (fn) => { ticks.add(fn); },
         tick: (t) => { fte.t = t; for (const fn of ticks) fn(t); },
     };
@@ -130,6 +131,27 @@ test('runner plays clips in order and steps on crossing `to`', () => {
     runner.start([clip(100, 110)], 0, true);
     demo.set({ ref: { key: 'hub:2', gameId: 2 }, result: {} });
     assert.equal(playlist.get().run, null, 'loading another demo by hand ends a run');
+});
+
+test('runner plays a clip\'s slow-motion window at its speed, then at the viewer\'s', () => {
+    const activeTab = store('player');
+    const engine = fakeEngine(activeTab);
+    const demo = store({ ref: { key: 'hub:1', gameId: 1 }, result: { streams: { global: { demoOffset: 10000 } } } });
+    const runner = createRunner({ engine, demo, teams: store({ order: [] }), selectTab: () => {}, loadDemo: async () => {}, demoRefOf, segment: store(null) });
+    runner.start([clip(100, 110, { slow: { from: 104, to: 106, speed: 0.3 } })], 0);
+    engine.tick(103);
+    engine.tick(104.2);
+    engine.tick(105);
+    engine.tick(106.1);
+    assert.deepEqual(engine.log.filter((e) => e[0] === 'slow'), [['slow', 0.3], ['slow', null]], 'once in, once out');
+    engine.tick(104.5);
+    engine.fte.playing = false;
+    engine.tick(104.6);
+    engine.fte.playing = true;
+    engine.tick(104.7);
+    assert.deepEqual(engine.log.filter((e) => e[0] === 'slow').slice(2), [['slow', 0.3], ['slow', null], ['slow', 0.3]], 'a pause drops it, play inside the window slows again');
+    runner.stop();
+    assert.deepEqual(engine.log.at(-1), ['slow', null], 'stopping restores the rate');
 });
 
 test('runner loads another hub demo and carries on there', async () => {

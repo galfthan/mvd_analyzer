@@ -4,9 +4,11 @@
 // demo loads that demo and carries on there; a clip of another local file
 // is skipped with a note. The clip playing is the selected segment (the
 // playback bar shows it, the Timeline tab zooms to it); stopping clears it
-// unless the user selected another meanwhile.
+// unless the user selected another meanwhile. Inside a clip's slow-motion
+// window (clip.slow) the engine plays at its speed, then at the viewer's
+// again.
 
-import { playlistStep } from '../lib/playlist.js';
+import { playlistStep, slowAt } from '../lib/playlist.js';
 import { playlist, setRun } from './playlist-store.js';
 import { toast } from './toast.js';
 
@@ -59,7 +61,17 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
         segment.set(shownSpan);
     }
 
+    /** @type {number | null} */
+    let slowing = null;   // the slow-motion speed the engine is at, if any
+    /** @param {number | null} speed */
+    function slowTo(speed) {
+        if (speed === slowing) return;
+        slowing = speed;
+        engine.slowTo(speed);
+    }
+
     function stop() {
+        slowTo(null);
         setRun(null);
         if (shownSpan && segment.get() === shownSpan) segment.set(null);
         shownSpan = null;
@@ -74,6 +86,7 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
         if (!run) return;
         const c = run.clips[index];
         if (!c) return stop();
+        slowTo(null);
         setRun({ ...run, index, prev: null });
 
         if (!isCurrent(c)) {
@@ -167,6 +180,9 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             ? { type: 'end' }
             : playlistStep(local.map((i) => run.clips[i]), li, run.prev, demoT, fte.isPlaying());
         run.prev = demoT;
+        // Paused, nothing is slowed: play resumes at the rate and the next
+        // tick slows it again inside the window.
+        if (step.type === 'none') slowTo(fte.isPlaying() ? slowAt(run.clips[run.index], demoT) : null);
         if (step.type === 'follow') {
             // A seek into another clip: it is the active one, with its POV.
             const next = run.clips[local[step.index]];

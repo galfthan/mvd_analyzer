@@ -21,12 +21,13 @@
     import Share2 from '@lucide/svelte/icons/share-2';
     import Trash2 from '@lucide/svelte/icons/trash-2';
     import Info from '@lucide/svelte/icons/info';
+    import Snail from '@lucide/svelte/icons/snail';
     import ExprGroup from './ExprGroup.svelte';
     import FinderFlow from './FinderFlow.svelte';
     import { demo, teams, colorOf } from '../state/index.js';
     import { formatDuration } from '../lib/result.js';
     import {
-        SOURCES, PRESETS, viewCall, stages, fieldPaths, fieldOf, toDraft, fromDraft, encodeQuery,
+        SOURCES, PRESETS, SLOW_DEFAULT, viewCall, stages, fieldPaths, fieldOf, toDraft, fromDraft, encodeQuery,
     } from '../lib/clip-query.js';
     import { parseQueryText, queryToText } from '../lib/clip-query-text.js';
     import { miniMarkdown } from '../lib/mini-md.js';
@@ -238,7 +239,10 @@
     }
 
     function addClipSpec() {
-        draft.clips.push({ from: '', before: '', to: '', after: '', pov: '', label: '' });
+        draft.clips.push({
+            from: '', before: '', to: '', after: '', pov: '', label: '',
+            slow: { on: false, at: '', before: '', to: '', after: '', speed: '' },
+        });
     }
 
     /** @param {KeyboardEvent} e */
@@ -295,7 +299,7 @@
         <div class="cf-help">
             One line per stage: <code>name "…"</code>, <code>source endpoint param=value …</code>,
             <code>keep</code> a filter, <code>order field desc first 5</code>, a <code>clip from=field-3s to=field+2s watch=field label="…"</code>
-            line per clip, <code>label "…"</code> for clips without their own. Indent to continue a line; <code>#</code> comments.
+            line per clip (add <code>slow=time-1s..time+1s@0.3</code> for slow motion), <code>label "…"</code> for clips without their own. Indent to continue a line; <code>#</code> comments.
         </div>
         {#if run}
             <div class="cf-flow-line">
@@ -409,6 +413,24 @@
                             <button class="pt-btn icon" title="Remove this clip" onclick={() => draft.clips.splice(i, 1)}><X size={13} /></button>
                         {/if}
                     </div>
+                    <div class="cf-row">
+                        <label class="cf-label" title="Play part of the clip in slow motion — around the event: a moment (an airgib) or a stretch (a top-kills window)">
+                            <input type="checkbox" bind:checked={c.slow.on}><Snail size={13} /> slow-mo
+                        </label>
+                        {#if c.slow.on}
+                            <label class="cf-label" title="From this row field (a time), minus the seconds after it — default: the clip's from field">at
+                                <input class="cf-field" type="text" list="cf-fields" placeholder={c.from || src.clip.from} bind:value={c.slow.at}>
+                            </label>
+                            <label class="cf-label" title="Seconds before that time">−<input class="cf-num" type="text" placeholder={String(SLOW_DEFAULT.before / 1000)} bind:value={c.slow.before}>s</label>
+                            <label class="cf-label" title="To this row field (a time), plus the seconds after it — default: the same field as at">to
+                                <input class="cf-field" type="text" list="cf-fields" placeholder={c.slow.at || c.from || src.clip.from} bind:value={c.slow.to}>
+                            </label>
+                            <label class="cf-label" title="Seconds after that time">+<input class="cf-num" type="text" placeholder={String(SLOW_DEFAULT.after / 1000)} bind:value={c.slow.after}>s</label>
+                            <label class="cf-label" title="The slow-motion speed, 0.05–1 (× normal)">at
+                                <input class="cf-num" type="text" placeholder={String(SLOW_DEFAULT.speed)} bind:value={c.slow.speed}>×
+                            </label>
+                        {/if}
+                    </div>
                 </div>
             {/each}
             {#if draft.clips.length < 4}
@@ -440,6 +462,7 @@
                     onclick={(e) => clickClip(e, c)} onkeydown={(e) => e.key === 'Enter' && clickClip(e, c)}>
                     <span class="t">{formatDuration(Math.max(0, c.from - c.demo.offset))}</span>
                     <span style:color={c.who ? colorOf($teams, c.who, $teams.perPlayer) : '#ccc'}>{c.label || c.who || 'clip'}</span>
+                    {#if c.slow}<span class="cf-slow" title="Slow motion at {c.slow.speed}×"><Snail size={11} /></span>{/if}
                 </li>
             {/each}
             {#if clips.length > SHOWN}<li class="muted">… and {clips.length - SHOWN} more</li>{/if}
@@ -660,6 +683,9 @@
         font-size: 13px;
         padding: 4px 6px;
         resize: vertical;
+    }
+    .cf-slow {
+        color: #e070f0;
     }
     .cf-error {
         color: #ff8080;

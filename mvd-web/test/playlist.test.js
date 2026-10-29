@@ -4,7 +4,7 @@ import { readFileSync, existsSync } from 'node:fs';
 
 import {
     parseHubReplayUrl, hubClipsUrl, singleHubGame, encodePlaylist, decodePlaylist,
-    playlistStep, playerFragClips, MAX_HUB_CLIPS,
+    playlistStep, playerFragClips, MAX_HUB_CLIPS, cleanSlow, slowAt,
 } from '../src/lib/playlist.js';
 
 const demo = { key: 'hub:212260', gameId: 212260, title: 'dm3', offset: 10.3 };
@@ -84,4 +84,21 @@ test('playerFragClips merges kills that overlap', { skip: !golden && 'golden cor
     assert.ok(clips.length > 0 && clips.length <= kills.length);
     for (let i = 1; i < clips.length; i++) assert.ok(clips[i].from >= clips[i - 1].to - 1, 'no overlap left');
     assert.ok(clips.every((c) => c.track === golden.timelineAnalysis.playerUserIDs[name]));
+});
+
+test('slow motion: clamped into the clip, carried by the share link, read per time', () => {
+    const demo = { key: 'hub:5', gameId: 5, title: 't', offset: 10 };
+    assert.deepEqual(cleanSlow({ from: 20, to: 30 }, 18, 22.04, 0.3), { from: 20, to: 22, speed: 0.3 }, 'clamped, 0.1 s steps');
+    assert.equal(cleanSlow({ from: 20, to: 30 }, 31, 33, 0.3), null, 'outside the clip');
+    assert.equal(cleanSlow({ from: 20, to: 30 }, 21, 22, 2), null, 'not slow');
+    assert.equal(cleanSlow({ from: 20, to: 30 }, '21', 22, 0.3), null, 'untrusted types');
+    const clips = [
+        { from: 20, to: 30, track: 3, who: 'a', label: 'x', demo, slow: { from: 24, to: 26, speed: 0.25 } },
+        { from: 40, to: 50, track: 'auto', who: '', label: 'y', demo },
+    ];
+    const back = decodePlaylist(encodePlaylist(/** @type {any} */ (clips)));
+    assert.deepEqual(back, clips);
+    assert.equal(slowAt(clips[0], 24), 0.25);
+    assert.equal(slowAt(clips[0], 26), null, 'the window is half-open');
+    assert.equal(slowAt(clips[1], 45), null);
 });

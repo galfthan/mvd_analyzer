@@ -5,13 +5,16 @@
 //   keep   detail.powerup = quad and detail.frags > 0
 //   order  detail.frags desc first 5
 //   clip   from=time-3s to=detail.endTime+2s watch=player label="{player}"
+//          slow=time-1s..time+1s@0.3
 //   label  "Quad run · {player} · {detail.frags} frag{detail.frags|s}"
 //
 // `source` names the endpoint and its params (key=value, API names and
 // values as-is); `keep` is the filter (src/lib/clip-expr-text.js);
 // `order` a field, asc or desc and `first N`, each optional; each `clip`
 // line one clip per row — from / to a row field with an offset in seconds,
-// watch the field naming the player to follow, label its own; `label` the
+// watch the field naming the player to follow, label its own, slow a
+// slow-motion window (`at±Ns..to±Ns@speed`, every part optional; `slow=on`
+// takes all the defaults); `label` the
 // default label. Lines but `source` are optional; an indented line
 // continues the one above; `#` starts a comment line. Values with spaces
 // are "quoted" (JSON string escapes).
@@ -68,6 +71,41 @@ function edge(v, key) {
     if (!m) throw new Error(`${key}=${v}: write a field, an offset in seconds or both, e.g. ${key}=time${key === 'from' ? '-3s' : '+2s'}`);
     const ms = m[3] == null ? undefined : Math.round(Number(m[3]) * 1000) * (m[2] === '-' ? -1 : 1);
     return { field: m[1], ms };
+}
+
+// slow reads a clip's slow=… value.
+/** @param {string} v */
+function slowSpec(v) {
+    /** @type {import('./clip-query.js').SlowSpec} */
+    const sl = {};
+    if (v === 'on') return sl;
+    const bad = () => new Error(`slow=${v}: write at..to@speed, e.g. slow=time-1s..time+1s@0.3 (or slow=on)`);
+    const [range, speed, ...more] = v.split('@');
+    const [a, b, ...rest] = range.split('..');
+    if (more.length || rest.length) throw bad();
+    if (a) {
+        const e = edge(a, 'slow');
+        if (e.field) sl.at = e.field;
+        if (e.ms != null) sl.before = 0 - e.ms || 0;
+    }
+    if (b) {
+        const e = edge(b, 'slow');
+        if (e.field) sl.to = e.field;
+        if (e.ms != null) sl.after = e.ms;
+    }
+    if (speed != null) {
+        if (!/^\d+(?:\.\d+)?$/.test(speed)) throw bad();
+        sl.speed = Number(speed);
+    }
+    return sl;
+}
+
+/** @param {import('./clip-query.js').SlowSpec} sl */
+function slowText(sl) {
+    const a = `${sl.at || ''}${sl.before != null ? (sl.before > 0 ? `-${sec(sl.before)}` : `+${sec(-sl.before)}`) : ''}`;
+    const b = `${sl.to || ''}${sl.after != null ? (sl.after >= 0 ? `+${sec(sl.after)}` : `-${sec(-sl.after)}`) : ''}`;
+    const v = `${a}${b ? `..${b}` : ''}${sl.speed != null ? `@${sl.speed}` : ''}`;
+    return v || 'on';
 }
 
 // parseQueryText reads the text into a query and its name; any line it
@@ -136,7 +174,8 @@ export function parseQueryText(text) {
                         if (e.ms != null) spec[t.key === 'from' ? 'before' : 'after'] = t.key === 'from' ? 0 - e.ms || 0 : e.ms;
                     } else if (t.key === 'watch') spec.pov = t.value;
                     else if (t.key === 'label') spec.label = t.value;
-                    else throw new Error(`cannot read "${t.key ? `${t.key}=` : ''}${t.value}" — clip takes from=, to=, watch= and label=`);
+                    else if (t.key === 'slow') spec.slow = slowSpec(t.value);
+                    else throw new Error(`cannot read "${t.key ? `${t.key}=` : ''}${t.value}" — clip takes from=, to=, watch=, label= and slow=`);
                 }
                 clips.push(spec);
             } else if (kw === 'label') {
@@ -152,7 +191,7 @@ export function parseQueryText(text) {
     if (clips.length > 1) q.clip = clips;
     else if (clips.length && Object.keys(clips[0]).length) q.clip = clips[0];
     const query = validateQuery(q);
-    if (!query) return { error: 'the query is out of bounds (too many clip lines, an offset over 10 minutes, or text too long)' };
+    if (!query) return { error: 'the query is out of bounds (too many clip lines, an offset over 10 minutes, a slow-motion speed outside 0.05–1, or text too long)' };
     return { query, title };
 }
 
@@ -176,6 +215,7 @@ export function queryToText(query, title = '') {
         if (c.to != null || c.after != null) parts.push(`to=${c.to || ''}${c.after != null ? (c.after >= 0 ? `+${sec(c.after)}` : `-${sec(-c.after)}`) : ''}`);
         if (c.pov) parts.push(`watch=${quote(c.pov)}`);
         if (c.label) parts.push(`label=${JSON.stringify(c.label)}`);
+        if (c.slow) parts.push(`slow=${slowText(c.slow)}`);
         out.push(`clip   ${parts.join(' ')}`.trimEnd());
     }
     if (query.label) out.push(`label  ${JSON.stringify(query.label)}`);

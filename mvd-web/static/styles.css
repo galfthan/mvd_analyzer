@@ -3494,6 +3494,12 @@ th.sortable.sort-desc::after {
     font-family: monospace;
 }
 
+.playlist-item .slow {
+    margin-left: 4px;
+    color: #e070f0;
+    vertical-align: -2px;
+}
+
 .playlist-item input {
     background: transparent;
     border: 1px solid transparent;

@@ -1,7 +1,7 @@
 // playlist.js — the Player tab's clip model, kept free of DOM and page state
 // so it runs under `node --test`.
 //
-// A clip is { from, to, track, who, label, demo }:
+// A clip is { from, to, track, who, label, demo, slow? }:
 //   from / to  demo-relative whole seconds — the clock FTE's demo_jump and
 //              hub's from/to/clip params use (match time + demoOffset)
 //   track      a userid (number) or 'auto' (FTE's stats autotrack)
@@ -10,6 +10,9 @@
 //   demo       { key, gameId, title, offset } — which demo the clip belongs
 //              to; key is 'hub:<gameId>' or 'file:<name>', offset its
 //              demoOffset in seconds (for showing match time)
+//   slow       optional { from, to, speed }: play [from, to) (demo seconds,
+//              inside the clip) at `speed` (× 1) — slow motion at the event;
+//              hub links have no such thing and drop it
 //
 // Times stay demo-relative in storage because both consumers (the engine
 // and hub links) speak it; the page converts to match time for display.
@@ -18,7 +21,8 @@
  * @typedef {import('./result.js').Result} Result
  * @typedef {number | 'auto'} Track
  * @typedef {{ key: string, gameId: number | null, title: string, offset: number }} ClipDemo
- * @typedef {{ from: number, to: number, track: Track, who: string, label: string, demo: ClipDemo }} Clip
+ * @typedef {{ from: number, to: number, speed: number }} Slow
+ * @typedef {{ from: number, to: number, track: Track, who: string, label: string, demo: ClipDemo, slow?: Slow }} Clip
  * @typedef {{ type: 'follow' | 'next', index: number } | { type: 'none' | 'end', index?: undefined }} PlaylistStep
  */
 
@@ -87,8 +91,9 @@ export function singleHubGame(clips) {
 // ── Share encoding ──────────────────────────────────────────────────────────
 //
 // `#playlist=<base64url(JSON)>`. Compact rows keep the URL short:
-// [from, to, track, who, label, demoIndex] plus a demo table. Local-file
-// demos travel by title only — the receiver has to load the file.
+// [from, to, track, who, label, demoIndex, slow?] plus a demo table (slow
+// as [from, to, speed]). Local-file demos travel by title only — the
+// receiver has to load the file.
 
 /** @param {Clip[]} clips */
 export function encodePlaylist(clips) {
@@ -102,7 +107,10 @@ export function encodePlaylist(clips) {
             index.set(key, demos.length);
             demos.push([key, c.demo?.gameId || 0, c.demo?.title || '', c.demo?.offset || 0]);
         }
-        return [c.from, c.to, c.track, c.who || '', c.label || '', index.get(key)];
+        /** @type {unknown[]} */
+        const row = [c.from, c.to, c.track, c.who || '', c.label || '', index.get(key)];
+        if (c.slow) row.push([c.slow.from, c.slow.to, c.slow.speed]);
+        return row;
     });
     return base64UrlEncode(JSON.stringify({ v: PLAYLIST_VERSION, d: demos, c: rows }));
 }
@@ -144,18 +152,55 @@ function decodeRows(doc) {
     const clips = [];
     for (const row of doc.c) {
         if (!Array.isArray(row)) continue;
-        const [from, to, track, who, label, di] = row;
+        const [from, to, track, who, label, di, slow] = row;
         if (!Number.isFinite(from) || !Number.isFinite(to) || to <= from) continue;
         const demo = demos[di];
         if (!demo) continue;
-        clips.push({
+        /** @type {Clip} */
+        const c = {
             from, to,
             track: Number.isInteger(track) && track > 0 ? track : 'auto',
             who: String(who || ''), label: String(label || ''),
             demo: { ...demo },
-        });
+        };
+        const sl = Array.isArray(slow) ? cleanSlow(c, slow[0], slow[1], slow[2]) : null;
+        if (sl) c.slow = sl;
+        clips.push(c);
     }
     return clips;
+}
+
+// Slow-motion speeds a clip may carry (× 1).
+export const SLOW_MIN = 0.05;
+export const SLOW_MAX = 1;
+
+// cleanSlow clamps a slow-motion window into its clip (0.1 s steps); null
+// when nothing of it is left or the speed is out of range — untrusted
+// input (share links, storage) goes through it.
+/**
+ * @param {Pick<Clip, 'from' | 'to'>} clip
+ * @param {unknown} from
+ * @param {unknown} to
+ * @param {unknown} speed
+ * @returns {Slow | null}
+ */
+export function cleanSlow(clip, from, to, speed) {
+    if (typeof from !== 'number' || typeof to !== 'number' || typeof speed !== 'number') return null;
+    if (!(speed >= SLOW_MIN && speed <= SLOW_MAX)) return null;
+    const a = Math.round(Math.max(clip.from, from) * 10) / 10;
+    const b = Math.round(Math.min(clip.to, to) * 10) / 10;
+    return a < b ? { from: a, to: b, speed } : null;
+}
+
+// slowAt: the speed a clip plays at demo time `t` — its slow-motion speed
+// inside that window, else null (the viewer's own speed).
+/**
+ * @param {Pick<Clip, 'slow'> | null | undefined} clip
+ * @param {number} t
+ */
+export function slowAt(clip, t) {
+    const s = clip?.slow;
+    return s && t >= s.from && t < s.to ? s.speed : null;
 }
 
 /** @param {string} text */
@@ -231,10 +276,12 @@ function demoSec(result, ms) {
  * @param {number | null | undefined} track  a userid; none follows FTE's autotrack
  * @param {string} who
  * @param {string} label
+ * @param {{ fromMs: number, toMs: number, speed: number }} [slow]  match ms
  * @returns {Clip}
  */
-export function makeClip(result, demo, fromMs, toMs, track, who, label) {
-    return {
+export function makeClip(result, demo, fromMs, toMs, track, who, label, slow) {
+    /** @type {Clip} */
+    const c = {
         from: Math.max(0, Math.floor(demoSec(result, fromMs))),
         to: Math.ceil(demoSec(result, toMs)),
         track: track || 'auto',
@@ -242,6 +289,9 @@ export function makeClip(result, demo, fromMs, toMs, track, who, label) {
         label,
         demo: { ...demo },
     };
+    const sl = slow && cleanSlow(c, demoSec(result, slow.fromMs), demoSec(result, slow.toMs), slow.speed);
+    if (sl) c.slow = sl;
+    return c;
 }
 
 /** @param {number} ms */

@@ -6,6 +6,7 @@
 // hub link or a moment.
 
 import { store } from '../state/store.js';
+import { cleanSlow } from '../lib/playlist.js';
 
 /**
  * @typedef {import('../lib/playlist.js').Clip} Clip
@@ -19,7 +20,12 @@ const KEY = 'mvd.playlist.v1';
 function load() {
     try {
         const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
-        if (Array.isArray(saved)) return saved.filter((/** @type {any} */ c) => c && c.to > c.from && c.demo?.key);
+        if (!Array.isArray(saved)) return [];
+        return saved.filter((/** @type {any} */ c) => c && c.to > c.from && c.demo?.key).map((/** @type {any} */ c) => {
+            const { slow, ...clip } = c;
+            const sl = slow && cleanSlow(clip, slow.from, slow.to, slow.speed);
+            return sl ? { ...clip, slow: sl } : clip;
+        });
     } catch { /* storage blocked or corrupt: start empty */ }
     return [];
 }

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-    SOURCES, PRESETS, viewCall, matches, renderLabel, clipsOf, runQuery,
+    SOURCES, PRESETS, SLOW_DEFAULT, viewCall, matches, renderLabel, clipsOf, runQuery,
     fieldPaths, toEditTree, toExpr, validateQuery, encodeQuery, decodeQuery, toDraft, fromDraft,
 } from '../src/lib/clip-query.js';
 
@@ -163,4 +163,26 @@ test('the builder draft round-trips every preset', () => {
     d.clips[0].before = '1.5';
     d.rank = { by: 'damageGiven', desc: true, limit: '3' };
     assert.deepEqual(fromDraft(d), { source: 'lives', params: { minMs: '60000' }, rank: { by: 'damageGiven', desc: true, limit: 3 }, clip: { before: 1500 } });
+});
+
+test('a clip spec\'s slow motion: around the event by default, a stretch when asked', () => {
+    const result = /** @type {any} */ ({ streams: { global: { demoOffset: 10000 } }, timelineAnalysis: { playerUserIDs: { bps: 3 } } });
+    const demo = { key: 'hub:1', gameId: 1, title: 't', offset: 10 };
+    const air = { airgibs: [{ time: 30000, actor: { name: 'bps' } }] };
+    const [c] = clipsOf({ source: 'highlights', clip: { slow: {} } }, air, result, demo);
+    assert.deepEqual(c.slow, { from: 39, to: 41, speed: SLOW_DEFAULT.speed }, 'a second either side, demo time');
+    const win = { windows: [{ start: 20000, end: 28000, player: 'bps' }] };
+    const [w] = clipsOf({ source: 'top-windows', clip: { slow: { to: 'end', before: 0, after: 0, speed: 0.5 } } }, win, result, demo);
+    assert.deepEqual(w.slow, { from: 30, to: 38, speed: 0.5 }, 'from the window start to its end');
+    assert.equal(clipsOf({ source: 'highlights' }, air, result, demo)[0].slow, undefined, 'none unless asked');
+    for (const id of ['quadbores', 'airgibs', 'telefrags', 'discharges']) {
+        assert.ok(/** @type {any} */ (PRESETS.find((p) => p.id === id)?.query.clip)?.slow, `${id} slows at the event`);
+    }
+    const q = { source: 'highlights', clip: { slow: { at: 'time', before: 500, speed: 0.2 } } };
+    assert.deepEqual(validateQuery(q), q);
+    assert.equal(validateQuery({ source: 'highlights', clip: { slow: { speed: 3 } } }), null, 'a speed over 1 is not slow');
+    assert.deepEqual(fromDraft(toDraft(/** @type {any} */ (q))), q, 'the builder keeps it');
+    const off = toDraft(/** @type {any} */ (q));
+    off.clips[0].slow.on = false;
+    assert.equal(/** @type {any} */ (fromDraft(off).clip)?.slow, undefined, 'unticked: gone');
 });

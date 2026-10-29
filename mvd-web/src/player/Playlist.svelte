@@ -7,6 +7,7 @@
     import ArrowUp from '@lucide/svelte/icons/arrow-up';
     import ArrowDown from '@lucide/svelte/icons/arrow-down';
     import X from '@lucide/svelte/icons/x';
+    import Snail from '@lucide/svelte/icons/snail';
     import { demo, teams, colorOf, teamIndexOf } from '../state/index.js';
     import { formatDuration } from '../lib/result.js';
     import {
@@ -195,7 +196,7 @@
                 ondragleave={() => (dragOver = -1)} ondrop={(e) => drop(e, i)}>
                 <button class="play" title="Play from this clip on" onclick={() => runner.start(clips, i)}><Play size={13} /></button>
                 <span class="idx" title="Drag to reorder">{i + 1}</span>
-                <span class="when">{when(c)}</span>
+                <span class="when">{when(c)}{#if c.slow}<span class="slow" title="Slow motion at {c.slow.speed}× for {Math.round((c.slow.to - c.slow.from) * 10) / 10} s"><Snail size={12} /></span>{/if}</span>
                 <span class="who">{c.who || 'Auto'}</span>
                 <input class="label" type="text" value={c.label || ''} placeholder="name this clip"
                     oninput={(e) => setLabel(c, e.currentTarget.value)}>
