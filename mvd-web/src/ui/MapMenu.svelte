@@ -1,5 +1,7 @@
 <script>
-    // The map's right-click menu (the map panes of the Map and Player tabs): a list of items (checks, radios, actions, separators) at a
+    // The map's right-click menu (the map panes of the Map and Player tabs),
+    // and the player's (its keys and switches): a list of items (checks,
+    // radios, actions, shortcuts, separators) at a
     // point of its container, kept inside it. A click on an item runs it
     // and leaves the menu open (so several overlays can be toggled in a
     // row) unless the item closes it; a click elsewhere or Escape closes.
@@ -50,11 +52,13 @@
         {#each items as it, i (i)}
             {#if it.kind === 'sep'}
                 <hr>
+            {:else if it.kind === 'info'}
+                <div class="info" title={it.title}><span class="tick"></span>{it.label}<kbd>{it.keys}</kbd></div>
             {:else if it.kind === 'action'}
-                <button role="menuitem" title={it.title} onclick={() => { it.run(); if (it.close) at = null; }}><span class="tick"></span>{it.label}</button>
+                <button role="menuitem" title={it.title} onclick={() => { it.run(); if (it.close) at = null; }}><span class="tick"></span>{it.label}{#if it.keys}<kbd>{it.keys}</kbd>{/if}</button>
             {:else}
                 <button role={it.kind === 'check' ? 'menuitemcheckbox' : 'menuitemradio'} aria-checked={it.on} title={it.title}
-                    onclick={() => it.run()}><span class="tick">{it.on ? (it.kind === 'check' ? '✓' : '•') : ''}</span>{it.label}</button>
+                    onclick={() => it.run()}><span class="tick">{it.on ? (it.kind === 'check' ? '✓' : '•') : ''}</span>{it.label}{#if it.keys}<kbd>{it.keys}</kbd>{/if}</button>
             {/if}
         {/each}
     </div>
@@ -92,6 +96,20 @@
     .tick {
         width: 14px;
         color: var(--accent-cyan);
+    }
+    .info {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px 4px 6px;
+        color: #aab;
+    }
+    kbd {
+        margin-left: auto;
+        padding-left: 16px;
+        font-family: monospace;
+        font-size: 11px;
+        color: #8a9;
     }
     hr {
         width: 100%;

@@ -27,6 +27,9 @@
     import { formatDuration } from '../lib/result.js';
     import { loadLightDemo } from './light-demo.js';
     import { createPlayerKeys, nextName } from '../player/player-keys.js';
+    import { playerMenuItems } from '../player/player-menu.js';
+    import MapMenu from '../ui/MapMenu.svelte';
+    import Keyboard from '@lucide/svelte/icons/keyboard';
 
     /** @type {{ clips: import('../lib/playlist.js').Clip[], code: string }} */
     let { clips, code } = $props();
@@ -105,25 +108,35 @@
         if (index < 0) return playFrom(0);
         engine.togglePlay();
     }
-    // A click on the game view plays / pauses; the keys are hub's
+    // A click on the game view plays / pauses; the keys are the analyzer's
     // (src/player/player-keys.js), typed on the page or in the game view.
     engine.screenToggle = togglePlay;
-    const keys = createPlayerKeys({
-        toggle: togglePlay,
-        next: () => {
-            const ids = (engine.fte?.getPlayers() || []).map((/** @type {{ userid: number }} */ p) => String(p.userid));
-            const id = nextName(ids, String(engine.status.get().track));
-            if (id) engine.track(Number(id));
-        },
-        seek: (by) => clock.seek(Math.max(0, clock.t + by)),
-    });
-    engine.screenPointer = keys.cancel;
+    /** @param {1 | -1} dir */
+    function step(dir) {
+        const ids = (engine.fte?.getPlayers() || []).map((/** @type {{ userid: number }} */ p) => String(p.userid));
+        const id = nextName(ids, String(engine.status.get().track), dir);
+        if (id) engine.track(Number(id));
+    }
+    /** @param {number} by */
+    const seek = (by) => clock.seek(Math.max(0, clock.t + by));
+    const key = createPlayerKeys({ toggle: togglePlay, step, seek });
+
+    // The player menu (src/player/player-menu.js), as the Player pane's:
+    // the keyboard button or a right-click on the game view.
+    let menu = $state(/** @type {{ x: number, y: number } | null} */ (null));
+    let menuItems = $derived(playerMenuItems({ engine, status: $status, toggle: togglePlay, step, seek }));
+    engine.screenMenu = (x, y) => { menu = { x, y }; };
+    engine.screenDismiss = () => {
+        if (!menu) return false;
+        menu = null;
+        return true;
+    };
 
     /** @param {import('../lib/playlist.js').Clip} c */
     const len = (c) => formatDuration(c.to - c.from);
 </script>
 
-<svelte:window onkeydown={keys.down} onkeyup={keys.up} onpointerdowncapture={keys.cancel} />
+<svelte:window onkeydown={key} />
 
 <div class="clips-page">
     <header class="clips-head">
@@ -158,7 +171,13 @@
                 <button class="clips-btn" title={$status.ready && !$status.muted ? 'Sound on — click to mute' : 'Sound off — click to unmute'} onclick={() => engine.toggleMute()}>
                     {#if $status.ready && !$status.muted}<Volume2 size={16} />{:else}<VolumeX size={16} />{/if}
                 </button>
+                <button class="clips-btn clips-menu-btn" title="Keys and player options (or right-click the game view)"
+                    onclick={(e) => {
+                        const stage = /** @type {HTMLElement} */ (e.currentTarget.closest('.clips-stage'));
+                        menu = menu ? null : { x: stage.clientWidth - 230, y: stage.clientHeight - 330 };
+                    }}><Keyboard size={16} /></button>
             </div>
+            <MapMenu bind:at={menu} items={menuItems} keep=".clips-menu-btn" />
         </div>
         <ol class="clips-list">
             {#each playable as c, i (i)}
@@ -221,6 +240,9 @@
     .clips-full:hover {
         background: var(--accent-cyan);
         color: var(--bg-deep);
+    }
+    .clips-stage {
+        position: relative;
     }
     .clips-screen {
         width: 100%;

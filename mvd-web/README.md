@@ -1697,14 +1697,17 @@ pressed forward at the end starts it over (anywhere else, or backwards,
 it plays on — `replayFrom`). `i` near the match end clamps the 10 s to
 the match; held keys (Space, `i` / `o` / `c`) do not repeat.
 
-**Keys** are hub's demo player's (`src/player/player-keys.js`, after hub's
-`config_v10.cfg`): Space tracks the next player (on the Map tab, follows
-the next one on the map — `watchNext`, in the POV bar's order; on a tab
-with nobody to watch, Space plays / pauses), Ctrl on its own plays /
-pauses (on release, with no other key or click meanwhile, so Ctrl+C does
-not), ← / → step a second, Shift ← / → ten. Tab (scoreboard) and ` / ~
-(console) are binds in the engine's `config.cfg`. A click on the game
-view plays / pauses. The engine's frame keeps the focus after a click in
+**Keys** (`src/player/player-keys.js`): Space plays / pauses, ↑ / ↓ watch
+the previous / next player on the Map and Player tabs (`watchNext`, in the
+POV bar's order; on the Map tab the map follows them; elsewhere ↑ / ↓
+scroll), ← / → step a second, Shift ← / → ten. Tab (scoreboard) and ` / ~
+(console) are hub's binds in the engine's `config.cfg`. A click on the
+game view plays / pauses. The **player menu** (`player-menu.js`, drawn by
+the map's `MapMenu.svelte`) lists them all as items to click, then
+autotrack and sound: the POV bar's keyboard button or a right-click on
+the game view (`engine.screenMenu`) opens it, and a click on the game
+view while it is open only closes it (`engine.screenDismiss`). The light
+player has the same keys and menu. The engine's frame keeps the focus after a click in
 it, so `hookScreen` (`engine.js`) sends the keys typed there on to the
 page as if typed there — these, `i` / `o` / `c`, `f` — but for Tab and
 the console's (and everything while the console is open); the click is

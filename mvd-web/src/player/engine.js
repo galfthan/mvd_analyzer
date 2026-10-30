@@ -67,12 +67,15 @@ export class PlayerEngine {
         // it, not the rate, is what plays then.
         /** @type {number | null} */
         this.slow = null;
-        // Play / pause from a click on the game view, and a pointer press
-        // there (Ctrl+click is no Ctrl alone) — hookScreen.
+        // Play / pause from a click on the game view, the menu from a
+        // right-click (hookScreen; game-view pixels) — none by default.
         /** @type {() => void} */
         this.screenToggle = () => this.togglePlay();
-        /** @type {() => void} */
-        this.screenPointer = () => {};
+        /** @type {((x: number, y: number) => void) | null} */
+        this.screenMenu = null;
+        // A click that closes an open menu instead (true: taken).
+        /** @type {() => boolean} */
+        this.screenDismiss = () => false;
         /** @type {DemoHandle | null} */
         this.handle = null;
         /** @type {HTMLElement | null} */
@@ -194,7 +197,8 @@ export class PlayerEngine {
 
     // The game view's input. A click plays / pauses (`screenToggle`, the
     // host's play / pause: the full page's playback bar, the light page's
-    // play button; the engine's own by default); a press is `screenPointer`. Keys typed with the game
+    // play button; the engine's own by default); a right-click opens the
+    // host's player menu (`screenMenu`, src/player/player-menu.js). Keys typed with the game
     // in focus — its frame keeps the focus after any click there — go to
     // the page as if typed there (src/player/player-keys.js, the bar's i /
     // o / c, f for fullscreen), but for the engine's own binds: Tab (the
@@ -204,7 +208,12 @@ export class PlayerEngine {
     /** @param {Window} win */
     hookScreen(win) {
         win.addEventListener('click', (e) => {
-            if (e.button === 0) this.screenToggle();
+            if (e.button === 0 && !this.screenDismiss()) this.screenToggle();
+        }, true);
+        win.addEventListener('contextmenu', (e) => {
+            if (!this.screenMenu) return;
+            e.preventDefault();
+            this.screenMenu(e.clientX, e.clientY);
         }, true);
         let consoleOpen = false;
         /** @param {KeyboardEvent} e */
@@ -223,9 +232,7 @@ export class PlayerEngine {
         };
         win.addEventListener('keydown', forward, true);
         win.addEventListener('keyup', forward, true);
-        // Not forwarded as an event: a page pointerdown is the layer's
-        // cue to let a drag pass through it (PlayerLayer.svelte).
-        win.addEventListener('pointerdown', () => this.screenPointer(), true);
+
     }
 
     // teardown drops the engine; removing the iframe frees it.

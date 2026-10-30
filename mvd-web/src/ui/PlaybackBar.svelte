@@ -171,23 +171,23 @@
         shownSeg = segment.get();
     }
 
-    // Hub's player keys (src/player/player-keys.js): Space the next player
-    // on the Map and Player tabs (elsewhere, with nobody to watch, Space
-    // plays / pauses), Ctrl on its own plays / pauses, arrows step.
-    const keys = createPlayerKeys({
+    // The player keys (src/player/player-keys.js): Space plays / pauses,
+    // ← / → step, ↑ / ↓ the previous / next player on the Map and Player
+    // tabs (elsewhere they scroll).
+    const key = createPlayerKeys({
         enabled: () => shown,
         toggle: togglePlay,
-        next: () => (isWatchTab(activeTab.get()) ? watchNext() : togglePlay()),
+        get step() {
+            return isWatchTab(activeTab.get()) ? watchNext : null;
+        },
         seek: (by) => clock.seek(Math.max(0, clock.t + by)),
     });
 
     // A click or Space on the game view is this play / pause too.
     onMount(() => {
         engine.screenToggle = togglePlay;
-        engine.screenPointer = keys.cancel;
         return () => {
             engine.screenToggle = () => engine.togglePlay();
-            engine.screenPointer = () => {};
         };
     });
 
@@ -213,7 +213,7 @@
     });
 </script>
 
-<svelte:window onkeydown={keys.down} onkeyup={keys.up} onpointerdowncapture={keys.cancel} />
+<svelte:window onkeydown={key} />
 
 <div id="unified-timeline" class="panel pb" style:display={shown ? null : 'none'}>
     <!-- svelte-ignore a11y_no_static_element_interactions: a pointer scrubber; play / pause and the speed are the controls -->

@@ -37,10 +37,11 @@ export function watchOrder(handle, t) {
     return Object.keys(ids).sort((a, b) => (idx(a) - idx(b)) || a.localeCompare(b));
 }
 
-// watchNext: watch the player after the one watched now, in that order
-// (Space, src/player/player-keys.js).
-export function watchNext() {
-    const name = nextName(watchOrder(demo.get(), teams.get()), watched());
+// watchNext: watch the player after (dir 1) or before (-1) the one
+// watched now, in that order (↓ / ↑, src/player/player-keys.js).
+/** @param {1 | -1} dir */
+export function watchNext(dir) {
+    const name = nextName(watchOrder(demo.get(), teams.get()), watched(), dir);
     if (!name) return;
     if (engine.drives()) engine.trackName(name);
     else mapFollow.set(name);

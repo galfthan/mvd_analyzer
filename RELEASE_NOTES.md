@@ -47,11 +47,13 @@ marker the analysis used before schema v33. The playback bar shows times
 to a tenth of a second (the hover readout, the current time, the
 selection), and its hover readout is no longer cut off in fullscreen or
 at the bar's ends. Resizing the Player pane's height now resizes the game
-view too (any aspect, not only 16:9). The player's keys are hub's: Space
-tracks the next player (on the Map tab, follows the next one), Ctrl
-plays / pauses, ← / → step a second and Shift ← / → ten seconds, Tab
+view too (any aspect, not only 16:9). The player has keys — Space plays /
+pauses, ↑ / ↓ switch to the previous / next player (on the Map tab the
+map follows them), ← / → step a second and Shift ← / → ten seconds, Tab
 shows the scoreboard and ` the console — with the focus in the game view
-or not, in the analyzer and the light player. The players' table has no play column — click a name to follow. The graph panes and the health /
+or not, in the analyzer and the light player; a keyboard button (or a
+right-click on the game view) opens a menu listing them, with autotrack
+and sound. The players' table has no play column — click a name to follow. The graph panes and the health /
 armor strips show the selection (or the whole match) by default and grow
 with their pane. The playlist's Generate menu says how many of each
 preset the demo has (and leaves out the ones it lacks), there are new

@@ -7,6 +7,8 @@
     import VolumeX from '@lucide/svelte/icons/volume-x';
     import PanelRightOpen from '@lucide/svelte/icons/panel-right-open';
     import PanelRightClose from '@lucide/svelte/icons/panel-right-close';
+    import Keyboard from '@lucide/svelte/icons/keyboard';
+    import { playerMenu } from './player-menu.js';
     import { demo, teams, colorOf } from '../state/index.js';
     import { watchOrder } from './follow.js';
     import { engine } from './index.js';
@@ -29,6 +31,11 @@
                 style:--pov-color={p.color} onclick={() => engine.track(p.userid)}>{p.name}</button>
         {/each}
         <span class="pov-end">
+            <button class="pt-btn icon player-menu-btn" class:active={!!$playerMenu} title="Keys and player options (or right-click the game view)"
+                onclick={(e) => {
+                    const body = e.currentTarget.closest('.player-pane-body');
+                    playerMenu.set($playerMenu ? null : { x: (body?.clientWidth || 400) - 230, y: (body?.clientHeight || 300) - 330 });
+                }}><Keyboard size={16} /></button>
             <button class="pt-btn icon" title={$status.ready && !$status.muted ? 'Sound on — click to mute' : 'Sound off — click to unmute'}
                 onclick={() => engine.toggleMute()}>
                 {#if $status.ready && !$status.muted}<Volume2 size={16} />{:else}<VolumeX size={16} />{/if}

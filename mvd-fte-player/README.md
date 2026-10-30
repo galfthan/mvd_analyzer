@@ -23,7 +23,7 @@ the whole point — mvd-web calls the controller through
 | `src/loader.js` | `startFte()` — builds the Emscripten `Module` config (canvas, manifest, virtual-FS file map), injects `ftewebgl.js`, resolves when `Module.getClientState` exists. |
 | `src/fte-controller.js` | `FteController` — console commands (`FTEC.cbufadd`), demo clock, `demoJump` (re-applies track + speed after a rewind; restarts the demo after it ended), speed / pause, autotrack / `track`, volume, and `suspend` / `resume` of the engine's own frame loop (`FTEC.step`, gated by wrapping it — emscripten's `pauseMainLoop` does not drive FTE) for a host that hides the page. |
 | `src/assets.js` | The engine's asset manifest: 450 paths under `a.quake.world/fte/`, the map BSP from `assets.quake.world/maps/`, our `config.cfg`, and the demo. |
-| `config.cfg` | Hub's `config_v5.cfg`: HUD, rendering, and the closing `playdemo match` — plus hub's `config_v10.cfg` binds the engine serves itself (Tab scoreboard, `` ` `` / `~` console); the host page handles hub's other keys. |
+| `config.cfg` | Hub's `config_v5.cfg`: HUD, rendering, and the closing `playdemo match` — plus hub's `config_v10.cfg` binds the engine serves itself (Tab scoreboard, `` ` `` / `~` console); the host page handles the other keys. |
 | `test/` | Node tests (`make test`) against a fake engine window. |
 
 `src/fte-controller.js`, `src/assets.js`, `src/loader.js` and `config.cfg`
