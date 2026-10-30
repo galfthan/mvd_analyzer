@@ -2768,6 +2768,22 @@ th.sortable.sort-desc::after {
     background: #000;
 }
 
+/* A Player pane resized by its handle: the game view fills the height
+ * given, at whatever aspect that makes (FTE renders to its canvas's size),
+ * the POV bar under it. Unsized, it stays 16:9 by the width. */
+[data-pane="player"] .player-pane-body.sized {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+[data-pane="player"] .player-pane-body.sized .player-slot {
+    flex: 1 1 0;
+    min-height: 80px;
+    aspect-ratio: auto;
+    max-height: none;
+}
+
 .player-layer {
     position: fixed;
     z-index: 2;

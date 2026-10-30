@@ -1100,8 +1100,11 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   reloads (the demo restarts), and panes remount when they move or
   collapse — so the engine is not in the Player pane. Its iframe (and the
   clip card) lives in one fixed layer of the tab (`PlayerLayer.svelte`),
-  and the Player pane (`PlayerPane.svelte`) holds a 16:9 placeholder,
-  registered in `player-slot.js`. Once per frame while the tab shows, the
+  and the Player pane (`PlayerPane.svelte`) holds a placeholder — 16:9 by
+  its width, or, once the pane's handle has given it a height, filling
+  that height at whatever aspect results (FTE renders to its canvas's
+  size, keeping its horizontal field of view) — registered in
+  `player-slot.js`. Once per frame while the tab shows, the
   layer is put over the placeholder (a style write only when the box
   changed) and clipped (`clip-path`) to what the placeholder's scrolling
   ancestors show — up to the fullscreen element in fullscreen (`slotBox`,
