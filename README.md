@@ -221,6 +221,7 @@ servable artifact by name:
 | **Generic DAG artifacts** | |
 | `listArtifacts()` | `mvd-api` `GET /v1/artifacts` (the DAG manifest) |
 | `getArtifact(demoId, name)` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` (any servable artifact by name) |
+| `createPlaylistLink(items, name)` | `mvd-api` `POST /v1/playlist-links` (a light-player link playing clips from many games, title cards and text) |
 
 **Full schemas live in three places:**
 

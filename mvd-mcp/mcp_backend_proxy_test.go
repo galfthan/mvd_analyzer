@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -699,5 +700,37 @@ func TestProxy_LocTrailsDwellDefault(t *testing.T) {
 	}
 	if seenQuery.Get("minDwellMs") != "1000" {
 		t.Errorf("explicit minDwellMs = %q, want 1000", seenQuery.Get("minDwellMs"))
+	}
+}
+
+func TestProxy_CreatePlaylistLink_PostsJSON(t *testing.T) {
+	var got map[string]any
+	var ctype string
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /v1/playlist-links", func(w http.ResponseWriter, r *http.Request) {
+		ctype = r.Header.Get("Content-Type")
+		_ = json.NewDecoder(r.Body).Decode(&got)
+		w.Write([]byte(`{"url":"https://mvdanalyzer.com/play.html#playlist=zx","clips":1}`))
+	})
+	srv := httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
+	b := newProxyBackend(srv.URL, "", 5*time.Second)
+	op := 0.7
+	out, err := b.CreatePlaylistLink(context.Background(), CreatePlaylistLinkInput{Items: []PlaylistItem{
+		{Card: &PlaylistCard{Ms: 3000, Opacity: &op, Text: []PlaylistText{{Text: "Reel"}}}},
+		{Clip: &PlaylistClip{GameID: 7, From: 1000, To: 5000, Watch: "bps"}},
+	}})
+	if err != nil {
+		t.Fatalf("CreatePlaylistLink: %v", err)
+	}
+	if ctype != "application/json" {
+		t.Errorf("Content-Type %q", ctype)
+	}
+	b2, _ := json.Marshal(got)
+	if want := `{"items":[{"card":{"ms":3000,"opacity":0.7,"text":[{"text":"Reel"}]}},{"clip":{"from":1000,"gameId":7,"to":5000,"watch":"bps"}}]}`; string(b2) != want {
+		t.Errorf("body\n got %s\nwant %s", b2, want)
+	}
+	if m, _ := out.(map[string]any); m["url"] == nil {
+		t.Errorf("out %v", out)
 	}
 }

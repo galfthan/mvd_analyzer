@@ -22,6 +22,14 @@ stays up until the next clip actually plays, covering its demo loading.
 A playlist over several demos plays straight through in the light
 player, the next demo downloading while the current item plays.
 
+**`createPlaylistLink` (MCP) / `POST /v1/playlist-links` (mvd-api)**
+make such links: an agent hands in clips (hub game, match-ms window,
+the player to watch, label, slow motion, captions) from up to 20 games,
+title cards and text, and gets back the light-player URL and a named
+Markdown link for Discord — the whole reel in the link, nothing stored.
+mvd-api's new `-play-url` (default `https://mvdanalyzer.com/play.html`)
+says which deployment the links open.
+
 The playback bar is laid out like a video
 player's: a thin scrubber on top (hover shows the time, a round playhead
 to drag, a press-and-drag selects) and under it play / pause, the speed

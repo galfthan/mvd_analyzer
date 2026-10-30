@@ -96,6 +96,7 @@ description says so.
 | `getHighlights` | `mvd-api` `GET /v1/demos/{id}/highlights` |
 | `listArtifacts` | `mvd-api` `GET /v1/artifacts` |
 | `getArtifact` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` |
+| `createPlaylistLink` | `mvd-api` `POST /v1/playlist-links` |
 
 `demoId` is the string returned by `loadDemo` (`sha:HEX`) or any
 `gameId:NNNN` reference.
@@ -1029,6 +1030,28 @@ claim from "we could not tell". The envelope's `measured.liveness`
 carries the same fact on the responses that do get served, so it is only
 ever `false` on `getTopWindows`. A demo with no damage stream still
 yields lives.
+
+#### `createPlaylistLink({items, name?})`
+
+`POST /v1/playlist-links` — a link that **plays** a scripted reel in the
+web app's light player (`play.html`): clips from any number of hub games,
+title cards between them, text over either. Made for agents: find games
+with `searchGames`, moments with `getHighlights` / `getTopKills` /
+`getTopWindows` / `getEvents` / `getLives`, and hand their match-ms
+times and player names straight in. Nothing is stored — the whole reel
+rides in the link's fragment (deflate-compressed; a 20-clip reel is
+typically 500–1000 characters, Discord allows 2000).
+
+| Item | Fields |
+|---|---|
+| `clip` | `gameId`, `from` / `to` (int ms since match start), `watch` (a player name in that game; omit = autotrack; unknown → 400 listing the players), `label` (`Kind · details` — the link's name counts kinds), `slow?` `{from, to, speed}` (same ms; speed 0.05–1), `text?` |
+| `card` | `ms` (300–30000; a minimum — it stays up until the next clip plays, covering its demo loading), `bg` (`#rrggbb`), `opacity` (0–1; below 1 the paused game shows through), `fadeIn` / `fadeOut`, `label`, `text?` |
+| `text[]` | `text` (≤ 200 chars), `size` (% of view height, 1–30, default 6), `color`, `font` (`title` / `body` / `mono`), `at` (`center`, `top`, `bottom`, `left`, `right`, corners), `from` / `to` (ms within its item), `fadeIn` / `fadeOut` |
+
+Output: `{url, markdown, name, length, clips, cards, demos[{gameId,
+title}]}` — `markdown` is `[name](url)` to paste into Discord. Each game
+is loaded through the cache on first use. 1–100 items, ≤ 20 games, at
+least one clip; `400 invalid_param` names the item and field.
 
 #### `getHighlights({demoId, kinds?, players?, preMs?})`
 

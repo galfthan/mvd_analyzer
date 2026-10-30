@@ -40,11 +40,13 @@ func runServe(args []string) error {
 		burstService  = fs.Int("burst-service", 200, "per-key burst (bucket size) for service keys")
 		enablePortal  = fs.Bool("portal", false, "enable the Discord key portal at /portal (requires -auth-dir and the DISCORD_CLIENT_ID/DISCORD_CLIENT_SECRET/PORTAL_COOKIE_SECRET env vars); off = no /portal routes")
 		portalBaseURL = fs.String("portal-base-url", "", "public origin for the portal, e.g. https://qw.example.com; used to build the OAuth redirect_uri and links (required with -portal)")
+		playURL       = fs.String("play-url", playPageURL, "the web app's light player that POST /v1/playlist-links links to (a branch deploy's play.html, say)")
 	)
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 
+	playPageURL = *playURL
 	logger := newLogger(*logFormat)
 	// One hub client backs both the on-demand demo fetch (via the cache) and
 	// GET /v1/games/search, so a single set of hub env vars configures both.

@@ -36,6 +36,7 @@ type MCPBackend interface {
 	GetHighlights(ctx context.Context, in GetHighlightsInput) (any, error)
 	ListArtifacts(ctx context.Context, in ListArtifactsInput) (any, error)
 	GetArtifact(ctx context.Context, in GetArtifactInput) (any, error)
+	CreatePlaylistLink(ctx context.Context, in CreatePlaylistLinkInput) (any, error)
 }
 
 // --- Tool input/output structs ---
@@ -197,6 +198,57 @@ type GetHighlightsInput struct {
 	Kinds   []string `json:"kinds,omitempty" jsonschema:"restrict to these highlight kinds: discharge, quadbore, telefrag, airgib (default all four). The unrequested lists still come back, empty; kinds on the envelope echoes what applied. An unknown kind is rejected 400 invalid_param"`
 	Players []string `json:"players,omitempty" jsonschema:"keep only events whose ACTOR or one of whose VICTIMS is one of these names (case-sensitive display names)"`
 	PreMs   *int     `json:"preMs,omitempty" jsonschema:"airgib pre-hit look-back in integer MILLISECONDS (0..1000; omit for the default 100, 0 = the pre-hit airborne gate off). Only the airgibs list is recomputed; the other three are stored. The knob the airgib detector has always taken"`
+}
+
+// CreatePlaylistLinkInput mirrors the POST /v1/playlist-links body; the
+// proxy forwards it as JSON (same field names), unset pointers left out so
+// the API's defaults apply.
+type CreatePlaylistLinkInput struct {
+	Items []PlaylistItem `json:"items" jsonschema:"the reel, played in order (1-100 items over at most 20 demos, at least one clip). Each item sets exactly one of clip or card"`
+	Name  string         `json:"name,omitempty" jsonschema:"the Markdown link's text; default generated: 'mvda · <demo title, or N demos> · <clip kinds with counts>' (a label's kind is its text before ' · ')"`
+}
+
+type PlaylistItem struct {
+	Clip *PlaylistClip `json:"clip,omitempty" jsonschema:"a window of a hub demo, watched from one player's view"`
+	Card *PlaylistCard `json:"card,omitempty" jsonschema:"a title card: a colour over the game view (the game paused behind it), with text — a title or intermission screen"`
+}
+
+type PlaylistClip struct {
+	GameID int            `json:"gameId" jsonschema:"hub.quakeworld.nu game id (searchGames); clips may come from any number of games"`
+	From   int32          `json:"from" jsonschema:"clip start, integer MILLISECONDS since match start (the same clock as every tool's times — e.g. a getHighlights row's time minus 3000)"`
+	To     int32          `json:"to" jsonschema:"clip end, integer MILLISECONDS since match start, after from (e.g. the event time plus 2000)"`
+	Watch  string         `json:"watch,omitempty" jsonschema:"whose view to watch: a player name exactly as that game's tools spell it; 'auto' or omitted = the engine's autotrack. An unknown name is a 400 listing the game's players"`
+	Label  string         `json:"label,omitempty" jsonschema:"the clip's name in the list, shown briefly as it starts; write it 'Kind · details' (e.g. 'Airgib · bps → milton') so the link's name counts kinds"`
+	Slow   *PlaylistSlow  `json:"slow,omitempty" jsonschema:"play part of the clip in slow motion"`
+	Text   []PlaylistText `json:"text,omitempty" jsonschema:"captions over the clip (at most 8), timed from the clip's start"`
+}
+
+type PlaylistSlow struct {
+	From  int32   `json:"from" jsonschema:"slow-motion start, integer ms since match start (inside the clip)"`
+	To    int32   `json:"to" jsonschema:"slow-motion end, integer ms since match start"`
+	Speed float64 `json:"speed" jsonschema:"× real time, 0.05 to 1 (0.3 is a good default)"`
+}
+
+type PlaylistCard struct {
+	Ms      int            `json:"ms" jsonschema:"how long it shows, ms, 300-30000 — a minimum: it stays up until the next clip plays, covering its demo loading"`
+	Bg      string         `json:"bg,omitempty" jsonschema:"background #rrggbb (default #000000)"`
+	Opacity *float64       `json:"opacity,omitempty" jsonschema:"0-1 (default 1); below 1 the paused game shows through, e.g. 0.7 for a dimmed intermission"`
+	FadeIn  *int           `json:"fadeIn,omitempty" jsonschema:"ms (default 400)"`
+	FadeOut *int           `json:"fadeOut,omitempty" jsonschema:"ms (default 400)"`
+	Label   string         `json:"label,omitempty" jsonschema:"the card's name in the list (default its first text)"`
+	Text    []PlaylistText `json:"text,omitempty" jsonschema:"text on the card (at most 8), timed from the card's start"`
+}
+
+type PlaylistText struct {
+	Text    string   `json:"text" jsonschema:"the words, at most 200 characters; a newline breaks the line"`
+	Size    *float64 `json:"size,omitempty" jsonschema:"% of the game view's height, 1-30 (default 6; ~12 for a title, ~4 for a caption)"`
+	Color   string   `json:"color,omitempty" jsonschema:"#rrggbb (default #ffffff)"`
+	Font    string   `json:"font,omitempty" jsonschema:"title (default, a bold display face), body or mono"`
+	At      string   `json:"at,omitempty" jsonschema:"placement: center (default), top, bottom, left, right, top-left, top-right, bottom-left, bottom-right"`
+	From    *int     `json:"from,omitempty" jsonschema:"ms from the item's start it appears (default 0)"`
+	To      *int     `json:"to,omitempty" jsonschema:"ms from the item's start it goes (default the item's end)"`
+	FadeIn  *int     `json:"fadeIn,omitempty" jsonschema:"ms (default 300)"`
+	FadeOut *int     `json:"fadeOut,omitempty" jsonschema:"ms (default 300)"`
 }
 
 // GetLivesInput mirrors /v1/demos/{id}/lives query params. Every INTEGER here
