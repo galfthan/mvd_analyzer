@@ -42,7 +42,7 @@
     import { formatDuration } from '../lib/result.js';
     import { matchDurationSec } from '../lib/timeline.js';
     import {
-        barAxisTicks, barPct, barTime, dragSpan, isDrag, nearKnob, overlayBox, segmentLabel, transport, replayFrom,
+        barAxisTicks, barPct, barTime, dragSpan, isDrag, nearKnob, overlayBox, segmentLabel, formatTenths, transport, replayFrom,
     } from '../lib/playback-bar.js';
 
     /** @type {HTMLDivElement} */
@@ -58,7 +58,8 @@
     // The segment as shown: the store's, or a drag's preview.
     let shownSeg = $state.raw(/** @type {{ start: number, end: number } | null} */ (null));
     // The pointer over the scrubber: its x (px into the bar) and time.
-    let hover = $state.raw(/** @type {{ x: number, t: number } | null} */ (null));
+    let hover = $state.raw(/** @type {{ x: number, t: number, at: number } | null} */ (null));
+    const READOUT_HALF = 30;   // half the hover readout's width, px
     let overKnob = $state(false);
 
     /** @type {null | { mode: 'knob' | 'press' | 'select', x0: number, t0: number }} */
@@ -76,7 +77,7 @@
     function follow(t) {
         const p = barPct(t, duration);
         if (p !== null) pct = p;
-        time = formatDuration(Math.max(0, t));
+        time = formatTenths(t);
     }
 
     function refresh() {
@@ -111,7 +112,8 @@
     function track(e) {
         const r = bar.getBoundingClientRect();
         const t = barTime(e.clientX, r, duration);
-        hover = t === null ? null : { x: e.clientX - r.left, t };
+        // The readout stays whole within the bar near its ends.
+        hover = t === null ? null : { x: e.clientX - r.left, t, at: Math.min(Math.max(e.clientX - r.left, READOUT_HALF), r.width - READOUT_HALF) };
         overKnob = nearKnob(e.clientX, r, clock.t, duration);
     }
 
@@ -219,7 +221,7 @@
         <div class="pb-knob" style:left="{pct}%"></div>
         {#if hover}
             <div class="pb-hover-line" style:left="{hover.x}px"></div>
-            <div class="pb-readout" style:left="{hover.x}px" transition:fade={{ duration: 100 }}>{formatDuration(hover.t)}</div>
+            <div class="pb-readout" style:left="{hover.at}px" transition:fade={{ duration: 100 }}>{formatTenths(hover.t)}</div>
         {/if}
     </div>
     <div class="pb-row">

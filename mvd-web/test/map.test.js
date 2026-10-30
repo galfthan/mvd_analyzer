@@ -8,7 +8,7 @@ import {
     panelItems, itemStatusCell, entityRows, entityRowsHtml,
 } from '../src/lib/map.js';
 import {
-    barAxisTicks, barPct, barTime, dragSpan, isDrag, nearKnob, overlayBox, segmentLabel, transport, SPEEDS,
+    barAxisTicks, barPct, barTime, dragSpan, isDrag, nearKnob, overlayBox, segmentLabel, formatTenths, transport, SPEEDS,
     crossedEnd, replayFrom, markIn, markOut,
 } from '../src/lib/playback-bar.js';
 import { ITEM_MARKER_STYLES } from '../../mvd-map-view/src/map.js';
@@ -145,7 +145,10 @@ test('playback bar: axis, cursor, pointer time, drag, overlay, buttons', () => {
     assert.ok(!nearKnob(150, rect, 150, 0), 'no duration, no playhead');
     assert.deepEqual(overlayBox({ start: 30, end: 90 }, 600), { left: '5%', width: '10%' });
     assert.equal(overlayBox({ start: 30, end: 90 }, 0), null);
-    assert.equal(segmentLabel({ start: 65, end: 130 }), '1:05 – 2:10');
+    assert.equal(segmentLabel({ start: 65, end: 130 }), '1:05.0 – 2:10.0');
+    assert.equal(segmentLabel({ start: 65.47, end: 130.99 }), '1:05.4 – 2:10.9', 'tenths, cut');
+    assert.equal(formatTenths(59.96), '0:59.9', 'never 0:60.0');
+    assert.equal(formatTenths(0.3), '0:00.3', 'float noise does not drop a tenth');
     assert.equal(segmentLabel(null), '');
     const own = transport({ drives: false, engine: { playing: false, rate: 100 }, playing: true, speed: 5 });
     assert.deepEqual([own.playing, own.speed], [true, 5]);

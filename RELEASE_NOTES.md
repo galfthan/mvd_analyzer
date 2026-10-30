@@ -43,7 +43,10 @@ player. The light player's *Open in the full analyzer* opens its
 playlist there as the playlist, to edit, at the clip it was playing.
 The map no longer draws a sky-high height stem for a player with no floor
 beneath them (dm3's paused start): it still looked for the "no floor"
-marker the analysis used before schema v33. The players' table has no play column — click a name to follow. The graph panes and the health /
+marker the analysis used before schema v33. The playback bar shows times
+to a tenth of a second (the hover readout, the current time, the
+selection), and its hover readout is no longer cut off in fullscreen or
+at the bar's ends. The players' table has no play column — click a name to follow. The graph panes and the health /
 armor strips show the selection (or the whole match) by default and grow
 with their pane. The playlist's Generate menu says how many of each
 preset the demo has (and leaves out the ones it lacks), there are new

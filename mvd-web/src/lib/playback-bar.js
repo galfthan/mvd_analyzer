@@ -98,7 +98,15 @@ export function overlayBox(seg, duration) {
 
 /** @param {Span | null | undefined} seg */
 export function segmentLabel(seg) {
-    return seg ? `${formatDuration(seg.start)} – ${formatDuration(seg.end)}` : '';
+    return seg ? `${formatTenths(seg.start)} – ${formatTenths(seg.end)}` : '';
+}
+
+// formatTenths: m:ss.d — the bar's times to a tenth of a second (cut, not
+// rounded: 59.96 is still 0:59.9, never 0:60.0).
+/** @param {number} seconds */
+export function formatTenths(seconds) {
+    const tenths = Math.floor(Math.max(0, seconds) * 10 + 1e-6);
+    return `${formatDuration(Math.floor(tenths / 10))}.${tenths % 10}`;
 }
 
 // transport: whether it plays, the speed it runs (or will run) at, and the

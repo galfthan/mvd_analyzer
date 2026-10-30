@@ -2919,7 +2919,9 @@ th.sortable.sort-desc::after {
 
 .player-panel--fullscreen #unified-timeline {
     margin: 0;
-    padding: 6px 10px;
+    /* At the top of the screen: room above the scrubber for its hover
+     * time readout. */
+    padding: 22px 10px 6px;
     flex: 0 0 auto;
 }
 
