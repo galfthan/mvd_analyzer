@@ -35,6 +35,7 @@
     });
 
     const when = (/** @type {import('../lib/playlist.js').Clip} */ c) => {
+        if (c.card) return `card · ${Math.round(c.card.ms / 100) / 10} s`;
         const off = c.demo?.offset || 0;
         return `${formatDuration(Math.max(0, c.from - off))}–${formatDuration(Math.max(0, c.to - off))}`;
     };
@@ -202,18 +203,18 @@
     <ol class="playlist-items">
         {#each clips as c, i (c)}
             {@const current = !!ref && c.demo?.key === ref.key}
-            <li class="playlist-item" class:other-demo={!current} class:active={activeIndex === i}
+            <li class="playlist-item" class:other-demo={!current && !c.card} class:card={!!c.card} class:active={activeIndex === i}
                 class:drag-over={dragOver === i}
                 style:--pov-color={current && c.who ? colorOf($teams, c.who, $teams.perPlayer) : null}
                 draggable="true" ondragstart={(e) => dragStart(e, i)} ondragover={(e) => dragOverRow(e, i)}
                 ondragleave={() => (dragOver = -1)} ondrop={(e) => drop(e, i)}>
-                <button class="play" title="Play from this clip on" onclick={() => runner.start(clips, i)}><Play size={13} /></button>
+                <button class="play" title={c.card ? 'Play from this title card on' : 'Play from this clip on'} onclick={() => runner.start(clips, i)}><Play size={13} /></button>
                 <span class="idx" title="Drag to reorder">{i + 1}</span>
                 <span class="when">{when(c)}{#if c.slow}<span class="slow" title="Slow motion at {c.slow.speed}× for {Math.round((c.slow.to - c.slow.from) * 10) / 10} s"><Snail size={12} /></span>{/if}</span>
-                <span class="who">{c.who || 'Auto'}</span>
+                <span class="who">{c.card ? '' : c.who || 'Auto'}</span>
                 <input class="label" type="text" value={c.label || ''} placeholder="name this clip"
                     oninput={(e) => setLabel(c, e.currentTarget.value)}>
-                <span class="demo-tag">{current ? '' : (c.demo?.title || c.demo?.key || '')}</span>
+                <span class="demo-tag">{c.card ? 'title card' : current ? '' : (c.demo?.title || c.demo?.key || '')}</span>
                 <span class="ops">
                     <button class="up" title="Move up" onclick={() => moveClip(i, i - 1)}><ArrowUp size={13} /></button>
                     <button class="down" title="Move down" onclick={() => moveClip(i, i + 1)}><ArrowDown size={13} /></button>

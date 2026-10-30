@@ -9,9 +9,12 @@
 // playback bar shows it, the Timeline tab zooms to it); stopping clears it
 // unless the user selected another meanwhile. Inside a clip's slow-motion
 // window (clip.slow) the engine plays at its speed, then at the viewer's
-// again.
+// again. A title card (isCard) pauses the game for its time, the overlay
+// (PlaylistOverlay.svelte) drawing it, and the run moves on; meanwhile the
+// next clip's demo is fetched (deps.prefetch, the light page's) when it is
+// another one.
 
-import { playlistStep, slowAt } from '../lib/playlist.js';
+import { playlistStep, slowAt, isCard } from '../lib/playlist.js';
 import { playlist, setRun } from './playlist-store.js';
 import { toast } from './toast.js';
 
@@ -33,10 +36,11 @@ import { toast } from './toast.js';
  * @property {typeof import('../app/load.js').loadDemo} loadDemo
  * @property {typeof import('./demo-ref.js').demoRefOf} demoRefOf
  * @property {import('../state/store.js').Store<{ start: number, end: number } | null>} segment
+ * @property {(c: Clip) => void} [prefetch]  start fetching a clip's demo ahead of it
  */
 
 /** @param {RunnerDeps} deps */
-export function createRunner({ engine, page, driverFor = () => engine, demo, teams, selectTab, loadDemo, demoRefOf, segment }) {
+export function createRunner({ engine, page, driverFor = () => engine, demo, teams, selectTab, loadDemo, demoRefOf, segment, prefetch }) {
     /** @type {Driver} */
     let drv = engine;         // what the run plays in
     /** @type {Clip | null} */
@@ -87,6 +91,7 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
     }
 
     function stop() {
+        clearTimeout(cardTimer);
         setRun(null);
     }
 
@@ -111,6 +116,9 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
         if (!c) return stop();
         slowTo(null);
         setRun({ ...run, index, prev: null });
+        clearTimeout(cardTimer);
+        warmNext(index);
+        if (isCard(c)) return showCard(c);
 
         if (!isCurrent(c)) {
             if (c.demo?.gameId) return loadForRun(c);
@@ -155,6 +163,37 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
         drv.jumpToDemoTime(c.from);
         drv.track(c.track);
         drv.play();
+    }
+
+    /** @type {ReturnType<typeof setTimeout> | undefined} */
+    let cardTimer;
+    // A title card: the game pauses behind it; after its time the run goes
+    // on (or ends, the card being the last item).
+    /** @param {Clip} c */
+    function showCard(c) {
+        // Drawn over the game view: shown, as a clip's would be.
+        if (drv === engine && !engine.active()) selectTab('player');
+        if (drv.ready() && drv.isPlaying()) drv.pause();
+        cardTimer = setTimeout(() => {
+            const r = playlist.get().run;
+            if (!r || r.clips[r.index] !== c) return;
+            if (r.index + 1 < r.clips.length) {
+                playClip(r.index + 1);
+            } else {
+                if (!r.transient) toast('Playlist finished');
+                stop();
+            }
+        }, /** @type {import('../lib/playlist.js').Card} */ (c.card).ms);
+    }
+
+    // The next clip after `index`, when its demo is another hub demo: fetch
+    // it while this item plays.
+    /** @param {number} index */
+    function warmNext(index) {
+        if (!prefetch) return;
+        const run = playlist.get().run;
+        const next = run?.clips.slice(index + 1).find((x) => !isCard(x));
+        if (next?.demo?.gameId && !isCurrent(next)) prefetch(next);
     }
 
     /** @param {Clip} c  a hub clip: demo.gameId is set */

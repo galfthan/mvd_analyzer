@@ -1431,6 +1431,28 @@ drops it).
   the link's list replaces the viewer's — asked first when the viewer has
   a different list of their own, which Cancel keeps (the link's clips
   added to it) — and the Player tab opens with its playlist pane.
+- **Title cards and text** (playlist v2; v1 links still read). Besides
+  clips, a playlist holds **cards**: a colour over the game view (the
+  game paused behind it; `opacity` below 1 lets it show through) for
+  `ms`, fading in and out — a title or intermission screen. Any item, clip
+  or card, can carry **text**: words, a size in % of the game view's
+  height (so fullscreen looks the same), a colour, a font style (`title`
+  Rajdhani, `body` Inter, `mono`), a place (`center`, `top`, `bottom`,
+  `left`, `right` and the four corners), the ms inside the item it shows
+  from / to, and its fades — a card with text is a title screen, a clip
+  with text a caption. `PlaylistOverlay.svelte` draws both, in the
+  analyzer's Player tab and the light player alike; a card's time is a
+  minimum: it stays up, with its texts, until the next clip plays (its
+  demo downloading or the engine booting underneath). In the model a card
+  is a clip of no demo (`CARD_DEMO`, `isCard`) so the list stays one
+  array; hub links, the playlist's name and the per-demo steps skip it,
+  and loading another demo keeps it. In the link a clip row gains the
+  texts as an eighth element; a card is an object row,
+  `{ k: [ms, bg, opacity, fadeIn, fadeOut], l: label, x: texts }`, texts
+  in short keys (`t s c f a b e i o`, defaults left out); everything is
+  clamped on the way in (`cleanText`, `makeCard`). The playlist lists
+  cards as rows ("title card"); there is no UI to make them yet — they
+  come in a link.
 
 ### The light player (`play.html`)
 
@@ -1448,7 +1470,10 @@ the clips). The page lists the clips (label, who, length, slow motion,
 demo), starts the run at once (muted, as the tab does), and has play /
 pause, previous / next, sound, the keys menu and fullscreen (the game
 view and these controls; `f`); a click on a clip plays from it. The team
-info shows from the start. A click on the game view plays / pauses, and
+info shows from the start. A list over several hub demos plays straight
+through: while an item plays, the next clip's demo downloads when it is
+another one (the runner's `prefetch`; the page keeps the downloads by
+gameId, and a pick shares one in flight). A click on the game view plays / pauses, and
 the keys are the full page's (*Keys*), on this page and the full one
 alike. Clips
 of a local file are listed as skipped. A click while a demo downloads

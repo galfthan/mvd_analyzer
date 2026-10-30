@@ -6,7 +6,7 @@
 // hub link or a moment.
 
 import { store } from '../state/store.js';
-import { cleanSlow } from '../lib/playlist.js';
+import { cleanSlow, cleanText, makeCard, isCard } from '../lib/playlist.js';
 
 /**
  * @typedef {import('../lib/playlist.js').Clip} Clip
@@ -21,10 +21,14 @@ function load() {
     try {
         const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
         if (!Array.isArray(saved)) return [];
-        return saved.filter((/** @type {any} */ c) => c && c.to > c.from && c.demo?.key).map((/** @type {any} */ c) => {
-            const { slow, ...clip } = c;
+        return saved.filter((/** @type {any} */ c) => c && (c.card || (c.to > c.from && c.demo?.key))).map((/** @type {any} */ c) => {
+            if (c.card) return makeCard({ ...c.card, label: c.label, text: c.text });
+            const { slow, text, ...clip } = c;
             const sl = slow && cleanSlow(clip, slow.from, slow.to, slow.speed);
-            return sl ? { ...clip, slow: sl } : clip;
+            if (sl) clip.slow = sl;
+            const tx = cleanText(text);
+            if (tx.length) clip.text = tx;
+            return clip;
         });
     } catch { /* storage blocked or corrupt: start empty */ }
     return [];
@@ -110,11 +114,11 @@ export function setClips(clips) {
 }
 
 // keepDemos drops the clips of every demo but `keys` (a run over the list
-// ends with them).
+// ends with them); title cards stay.
 /** @param {string[]} keys */
 export function keepDemos(keys) {
     const s = playlist.get();
-    const kept = s.clips.filter((c) => keys.includes(c.demo?.key));
+    const kept = s.clips.filter((c) => isCard(c) || keys.includes(c.demo?.key));
     if (kept.length === s.clips.length) return;
     update((n) => {
         n.clips = kept;

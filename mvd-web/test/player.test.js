@@ -249,6 +249,28 @@ test('a demo the user picks while the run loads its own wins and ends the run', 
     assert.ok(!engine.log.some(([k]) => k === 'jump'), 'nothing played on the user\'s demo');
 });
 
+test('a title card pauses the game for its time, fetching the next demo meanwhile', async () => {
+    const activeTab = store('player');
+    const engine = fakeEngine(activeTab);
+    const demo = store({ ref: { key: 'hub:1', gameId: 1 }, result: { streams: { global: { demoOffset: 10000 } } } });
+    /** @type {any[]} */
+    const fetched = [];
+    const runner = createRunner({ engine, page: fakeEngine(store('map')), driverFor: () => engine, demo, teams: store({ order: [] }),
+        selectTab: () => {}, loadDemo: async () => {}, demoRefOf, segment: store(null), prefetch: (c) => fetched.push(c.demo.gameId) });
+    const { makeCard } = await import('../src/lib/playlist.js');
+    engine.fte.playing = true;
+    const other = clip(50, 60, { demo: { key: 'hub:2', gameId: 2, title: 'b', offset: 0 } });
+    runner.start([makeCard({ ms: 400, text: [{ t: 'hi' }] }), clip(100, 110), other], 0);
+    assert.deepEqual(engine.log, [['pause']], 'the game pauses behind the card; nothing jumps yet');
+    await new Promise((r) => setTimeout(r, 200));
+    assert.equal(playlist.get().run.index, 0, 'the card holds for its time');
+    await new Promise((r) => setTimeout(r, 300));
+    assert.equal(playlist.get().run.index, 1, 'then the next item plays');
+    assert.deepEqual(engine.log.slice(1, 3), [['jump', 100], ['track', 'auto']]);
+    assert.deepEqual(fetched, [2], 'the clip after it is another demo: fetched while this one plays');
+    runner.stop();
+});
+
 test('demoRefOf names the demo for the playlist', () => {
     const handle = { ref: { key: 'hub:5', gameId: 5 }, result: { demoInfo: { map: 'maps/dm3.bsp' }, streams: { global: { demoOffset: 2500 } } } };
     assert.deepEqual(demoRefOf(handle, ['a', 'b', 'c', 'd']), { key: 'hub:5', gameId: 5, title: 'dm3 · a vs b vs c', offset: 2.5 });

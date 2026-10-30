@@ -28,7 +28,8 @@
         if (clip === shown) return;
         shown = clip;
         clearTimeout(cardTimer);
-        if (!run || !clip) {
+        // A title card is its own picture (PlaylistOverlay.svelte).
+        if (!run || !clip || clip.card) {
             card = null;
             veil = false;
             return;

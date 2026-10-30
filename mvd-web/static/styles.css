@@ -3188,6 +3188,10 @@ th.sortable.sort-desc::after {
     outline: 1px solid var(--accent-cyan);
 }
 
+.playlist-item.card .when {
+    color: #c9a0ff;
+}
+
 .playlist-item.other-demo {
     opacity: 0.75;
 }

@@ -11,7 +11,18 @@ Schema v78 (additive): a weapon pickup's run has an end on every row —
 `weaponPickups[].endTime`, the picker's next death or else the match end
 (they were still on the run when it ended), and `backpacks[].pickerEndTime`
 on `ktx` rows; see [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).
-Otherwise web UI only. The playback bar is laid out like a video
+Otherwise web UI only.
+
+**Playlists can hold title cards and text** (share-link format v2; older
+links still open). A card is a colour over the game view for a few
+seconds, fading in and out, with text on it — a title or intermission
+screen; text can also run over a clip, as a caption. Size, colour, font
+style, place and timing are per text. Both players draw them, and a card
+stays up until the next clip actually plays, covering its demo loading.
+A playlist over several demos plays straight through in the light
+player, the next demo downloading while the current item plays.
+
+The playback bar is laid out like a video
 player's: a thin scrubber on top (hover shows the time, a round playhead
 to drag, a press-and-drag selects) and under it play / pause, the speed
 (0.2–5×) and pills for the time and the selection. The selection now

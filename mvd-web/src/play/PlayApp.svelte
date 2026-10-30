@@ -40,8 +40,22 @@
     // Player tab".
     const clock = createClock();
     let picks = 0;
-    /** @type {{ gameId: number, handle: Promise<import('./light-demo.js').LightHandle> } | null} */
-    let pending = null;
+    // The demos downloading or downloaded and not yet shown, by gameId: a
+    // pick shares a download in flight, and the runner starts the next
+    // clip's demo ahead of it (prefetch).
+    /** @type {Map<number, Promise<import('./light-demo.js').LightHandle>>} */
+    const downloads = new Map();
+    /** @param {number} gameId */
+    function download(gameId) {
+        let d = downloads.get(gameId);
+        if (!d) {
+            const offset = clips.find((c) => c.demo?.gameId === gameId)?.demo.offset || 0;
+            d = loadLightDemo(gameId, offset);
+            downloads.set(gameId, d);
+            d.catch(() => downloads.delete(gameId));
+        }
+        return d;
+    }
     const demo = store(/** @type {any} */ (null));
     const engine = new PlayerEngine({ clock, demo, activeTab: store('player') });
     // A shared clip is watched for the fight: both teams' health, armor and
@@ -58,15 +72,13 @@
         loadDemo: async (/** @type {any} */ { gameId }, /** @type {any} */ { stillWanted } = {}) => {
             const pick = ++picks;
             if (demo.get()?.ref.gameId === gameId) return true;
-            // A second pick of the demo still downloading shares its download.
-            const offset = clips.find((c) => c.demo?.gameId === gameId)?.demo.offset || 0;
-            const mine = pending && pending.gameId === gameId ? pending : { gameId, handle: loadLightDemo(gameId, offset) };
-            pending = mine;
-            const handle = await mine.handle.finally(() => { if (pending === mine) pending = null; });
+            const handle = await download(gameId);
             if (pick !== picks || (stillWanted && !stillWanted())) return false;
+            downloads.delete(gameId);
             demo.set(handle);
             return true;
         },
+        prefetch: (c) => { if (c.demo.gameId) download(c.demo.gameId).catch(() => {}); },
     });
     const status = engine.status;
 
@@ -77,9 +89,11 @@
         return () => { off(); runner.stop(); engine.teardown(); };
     });
 
-    // Only hub clips can play here: a local file's clip needs its file.
-    const playable = $derived(clips.filter((c) => c.demo?.gameId));
+    // Only hub clips (and title cards) play here: a local file's clip needs
+    // its file.
+    const playable = $derived(clips.filter((c) => c.card || c.demo?.gameId));
     const skipped = $derived(clips.length - playable.length);
+    const nClips = $derived(clips.filter((c) => !c.card).length);
 
     let run = $derived($playlist.run);
     let index = $derived(run && run.clips === playable ? run.index : -1);
@@ -90,7 +104,8 @@
     // clip playing, that clip selected (?seg=, match seconds) and the
     // playhead at its start — where the viewer is, to edit from.
     const fullUrl = $derived.by(() => {
-        const at = current || playable[0];
+        // The clip playing, or the next one after a title card.
+        const at = [...playable.slice(Math.max(0, index)), ...playable].find((c) => !c.card);
         const params = new URLSearchParams();
         if (at?.demo.gameId) params.set('gameId', String(at.demo.gameId));
         params.set('tab', 'player');
@@ -146,7 +161,7 @@
     };
 
     /** @param {import('../lib/playlist.js').Clip} c */
-    const len = (c) => formatDuration(c.to - c.from);
+    const len = (c) => formatDuration(c.card ? c.card.ms / 1000 : c.to - c.from);
 </script>
 
 <svelte:window onkeydown={key} />
@@ -155,7 +170,7 @@
 <div class="clips-page">
     <header class="clips-head">
         <span class="clips-brand">MVD Analyzer</span>
-        <span class="clips-title">{clips.length} clip{clips.length === 1 ? '' : 's'}</span>
+        <span class="clips-title">{nClips} clip{nClips === 1 ? '' : 's'}</span>
         <a class="clips-full" href={fullUrl} title="Open this playlist in the full analyzer's Player tab to edit it, at the clip playing — with its map, graphs and tables (it analyses the demo first)">
             <ExternalLink size={14} /> Open in the full analyzer
         </a>
@@ -174,7 +189,7 @@
                 <span class="clips-now">
                     {#if current}
                         <span class="n">{index + 1} / {playable.length}</span>
-                        <span class="t">{formatDuration(Math.max(0, Math.min(now, current.to) - current.from))} / {len(current)}</span>
+                        {#if !current.card}<span class="t">{formatDuration(Math.max(0, Math.min(now, current.to) - current.from))} / {len(current)}</span>{/if}
                         <span class="l">{current.label || current.who || 'Clip'}</span>
                     {:else if $status.ready}
                         <span class="l muted">Pick a clip</span>
@@ -203,10 +218,10 @@
                     <button onclick={() => playFrom(i)} title="Play from this clip on">
                         <span class="i">{i + 1}</span>
                         <span class="l">{c.label || 'Clip'}</span>
-                        <span class="w">{c.who || 'Auto'}</span>
+                        <span class="w">{c.card ? 'title card' : c.who || 'Auto'}</span>
                         {#if c.slow}<span class="s" title="Slow motion at {c.slow.speed}×"><Snail size={12} /></span>{/if}
                         <span class="d">{len(c)}</span>
-                        <span class="g">{c.demo.title}</span>
+                        <span class="g">{c.card ? '' : c.demo.title}</span>
                     </button>
                 </li>
             {/each}

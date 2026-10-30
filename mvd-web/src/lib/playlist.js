@@ -13,6 +13,14 @@
 //   slow       optional { from, to, speed }: play [from, to) (demo seconds,
 //              inside the clip) at `speed` (× 1) — slow motion at the event;
 //              hub links have no such thing and drop it
+//   text       optional text over it (Text: what, size, colour, font,
+//              placement, when inside the item, fades)
+//
+// A playlist also holds title CARDS between the clips: { card, label,
+// text? } — a colour over the game view (paused behind it) for `card.ms`,
+// fading in and out. A card travels as a clip of no demo (CARD_DEMO,
+// from = to = 0) so the list stays one array; isCard() tells them apart,
+// and everything that plays or links a demo skips it.
 //
 // Times stay demo-relative in storage because both consumers (the engine
 // and hub links) speak it; the page converts to match time for display.
@@ -22,14 +30,136 @@
  * @typedef {number | 'auto'} Track
  * @typedef {{ key: string, gameId: number | null, title: string, offset: number }} ClipDemo
  * @typedef {{ from: number, to: number, speed: number }} Slow
- * @typedef {{ from: number, to: number, track: Track, who: string, label: string, demo: ClipDemo, slow?: Slow }} Clip
+ * @typedef {'title' | 'body' | 'mono'} TextFont
+ * @typedef {'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'} TextAt
+ * @typedef {object} Text  text over a clip or a card
+ * @property {string} t        the text
+ * @property {number} size     % of the game view's height
+ * @property {string} color    #rrggbb
+ * @property {TextFont} font
+ * @property {TextAt} at
+ * @property {number} from     ms from the item's start it shows from
+ * @property {number | null} to  ms from the item's start it goes at; null: the item's end
+ * @property {number} fadeIn   ms
+ * @property {number} fadeOut  ms
+ * @typedef {object} Card  a title card: a colour over the game view
+ * @property {number} ms       how long it shows, fades included
+ * @property {string} bg       #rrggbb
+ * @property {number} opacity  0–1 (below 1 the paused game shows through)
+ * @property {number} fadeIn   ms
+ * @property {number} fadeOut  ms
+ * @typedef {{ from: number, to: number, track: Track, who: string, label: string, demo: ClipDemo, slow?: Slow, text?: Text[], card?: Card }} Clip
  * @typedef {{ type: 'follow' | 'next', index: number } | { type: 'none' | 'end', index?: undefined }} PlaylistStep
  */
 
 const HUB_GAMES_URL = 'https://hub.quakeworld.nu/games/';
 // hub.quakeworld.nu src/utils/game-url.ts MAX_CLIPS @ 5c96205c19c7
 export const MAX_HUB_CLIPS = 20;
-const PLAYLIST_VERSION = 1;
+// v2 adds title cards and text; v1 links still decode.
+const PLAYLIST_VERSION = 2;
+
+// A card's stand-in demo (see the header).
+/** @type {ClipDemo} */
+export const CARD_DEMO = Object.freeze({ key: 'card:', gameId: null, title: '', offset: 0 });
+
+/** @param {Pick<Clip, 'card'> | null | undefined} c */
+export const isCard = (c) => !!c?.card;
+
+export const TEXT_FONTS = /** @type {TextFont[]} */ (['title', 'body', 'mono']);
+export const TEXT_AT = /** @type {TextAt[]} */ (['center', 'top', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right']);
+const MAX_TEXTS = 8;
+const MAX_TEXT_LEN = 200;
+const FADE_MAX = 5000;
+export const CARD_MS_MIN = 300;
+export const CARD_MS_MAX = 30000;
+
+/**
+ * @param {unknown} v
+ * @param {number} lo
+ * @param {number} hi
+ * @param {number} dflt
+ */
+const num = (v, lo, hi, dflt) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dflt);
+/** @param {unknown} v @param {string} dflt */
+const hex = (v, dflt) => (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : dflt);
+
+// cleanText: a list of texts from untrusted input (share links, storage,
+// the generator), each field defaulted and clamped; texts without words
+// go. Accepts the compact keys of the link (t s c f a b e i o) and the
+// long ones of the model alike.
+/**
+ * @param {unknown} list
+ * @returns {Text[]}
+ */
+export function cleanText(list) {
+    if (!Array.isArray(list)) return [];
+    /** @type {Text[]} */
+    const out = [];
+    for (const x of list.slice(0, MAX_TEXTS)) {
+        if (!x || typeof x !== 'object') continue;
+        const o = /** @type {Record<string, unknown>} */ (x);
+        const t = String(o.t ?? '').slice(0, MAX_TEXT_LEN).trim();
+        if (!t) continue;
+        const font = /** @type {TextFont} */ (o.font ?? o.f);
+        const at = /** @type {TextAt} */ (o.at ?? o.a);
+        const from = num(o.from ?? o.b, 0, CARD_MS_MAX * 20, 0);
+        const toRaw = o.to ?? o.e;
+        out.push({
+            t,
+            size: num(o.size ?? o.s, 1, 30, 6),
+            color: hex(o.color ?? o.c, '#ffffff'),
+            font: TEXT_FONTS.includes(font) ? font : 'title',
+            at: TEXT_AT.includes(at) ? at : 'center',
+            from,
+            to: typeof toRaw === 'number' && toRaw > from ? toRaw : null,
+            fadeIn: num(o.fadeIn ?? o.i, 0, FADE_MAX, 300),
+            fadeOut: num(o.fadeOut ?? o.o, 0, FADE_MAX, 300),
+        });
+    }
+    return out;
+}
+
+// makeCard: a title card item from (untrusted) options, clamped.
+/**
+ * @param {{ ms?: unknown, bg?: unknown, opacity?: unknown, fadeIn?: unknown, fadeOut?: unknown, label?: unknown, text?: unknown }} o
+ * @returns {Clip}
+ */
+export function makeCard(o) {
+    /** @type {Clip} */
+    const c = {
+        from: 0, to: 0, track: 'auto', who: '', label: String(o.label ?? '').slice(0, MAX_TEXT_LEN),
+        demo: { ...CARD_DEMO },
+        card: {
+            ms: num(o.ms, CARD_MS_MIN, CARD_MS_MAX, 3000),
+            bg: hex(o.bg, '#000000'),
+            opacity: num(o.opacity, 0, 1, 1),
+            fadeIn: num(o.fadeIn, 0, FADE_MAX, 400),
+            fadeOut: num(o.fadeOut, 0, FADE_MAX, 400),
+        },
+    };
+    const text = cleanText(o.text);
+    if (text.length) c.text = text;
+    if (!c.label) c.label = text[0]?.t || 'Title card';
+    return c;
+}
+
+// The texts in the link's compact form (defaults left out).
+/** @param {Text[]} list */
+function packText(list) {
+    return list.map((x) => {
+        /** @type {Record<string, unknown>} */
+        const o = { t: x.t };
+        if (x.size !== 6) o.s = x.size;
+        if (x.color !== '#ffffff') o.c = x.color;
+        if (x.font !== 'title') o.f = x.font;
+        if (x.at !== 'center') o.a = x.at;
+        if (x.from) o.b = x.from;
+        if (x.to != null) o.e = x.to;
+        if (x.fadeIn !== 300) o.i = x.fadeIn;
+        if (x.fadeOut !== 300) o.o = x.fadeOut;
+        return o;
+    });
+}
 
 // parseHubReplayUrl reads a link built by hubReplayUrl() (src/lib/hub-url.js) — the only
 // shape the page emits: /games/?gameId=N&from=F[&to=T]&track=U.
@@ -61,9 +191,10 @@ export function parseHubReplayUrl(href) {
 // `clips.length` against the cap to tell the user.
 /**
  * @param {number} gameId
- * @param {Array<Pick<Clip, 'from' | 'to' | 'track'>>} clips
+ * @param {Array<Pick<Clip, 'from' | 'to' | 'track' | 'card'>>} clips
  */
 export function hubClipsUrl(gameId, clips) {
+    clips = clips.filter((c) => !isCard(c));
     const params = new URLSearchParams({ gameId: String(gameId) });
     for (const c of clips.slice(0, MAX_HUB_CLIPS)) {
         const from = Math.max(0, Math.floor(c.from));
@@ -82,6 +213,7 @@ export function hubClipsUrl(gameId, clips) {
  * @returns {number | null}
  */
 export function singleHubGame(clips) {
+    clips = clips.filter((c) => !isCard(c));
     if (!clips.length) return null;
     const id = clips[0].demo?.gameId;
     if (!id) return null;
@@ -100,6 +232,7 @@ export function singleHubGame(clips) {
  * @param {{ key: string, date: string } | null} [loaded]  the loaded demo's key and date
  */
 export function playlistName(clips, loaded) {
+    clips = clips.filter((c) => !isCard(c));
     const parts = ['mvda'];
     const keys = new Set(clips.map((c) => c.demo?.key));
     if (keys.size === 1) {
@@ -152,6 +285,13 @@ export async function encodePlaylist(clips) {
     /** @type {Map<string, number>} */
     const index = new Map();
     const rows = clips.map((c) => {
+        if (c.card) {
+            const k = c.card;
+            /** @type {Record<string, unknown>} */
+            const row = { k: [k.ms, k.bg, k.opacity, k.fadeIn, k.fadeOut], l: c.label || '' };
+            if (c.text?.length) row.x = packText(c.text);
+            return row;
+        }
         const key = c.demo?.key || '';
         if (!index.has(key)) {
             index.set(key, demos.length);
@@ -159,7 +299,8 @@ export async function encodePlaylist(clips) {
         }
         /** @type {unknown[]} */
         const row = [c.from, c.to, c.track, c.who || '', c.label || '', index.get(key)];
-        if (c.slow) row.push([c.slow.from, c.slow.to, c.slow.speed]);
+        if (c.slow || c.text?.length) row.push(c.slow ? [c.slow.from, c.slow.to, c.slow.speed] : 0);
+        if (c.text?.length) row.push(packText(c.text));
         return row;
     });
     const json = JSON.stringify({ v: PLAYLIST_VERSION, d: demos, c: rows });
@@ -198,7 +339,7 @@ async function pipeBytes(bytes, through) {
  * @returns {Clip[] | null}
  */
 function decodeRows(doc) {
-    if (!doc || doc.v !== PLAYLIST_VERSION || !Array.isArray(doc.c) || !Array.isArray(doc.d)) return null;
+    if (!doc || (doc.v !== 1 && doc.v !== PLAYLIST_VERSION) || !Array.isArray(doc.c) || !Array.isArray(doc.d)) return null;
     /** @type {Array<ClipDemo | null>} */
     const demos = doc.d.map((/** @type {unknown} */ row) => {
         if (!Array.isArray(row)) return null;
@@ -214,8 +355,13 @@ function decodeRows(doc) {
     /** @type {Clip[]} */
     const clips = [];
     for (const row of doc.c) {
+        if (row && typeof row === 'object' && !Array.isArray(row) && Array.isArray(row.k)) {
+            const [ms, bg, opacity, fadeIn, fadeOut] = row.k;
+            clips.push(makeCard({ ms, bg, opacity, fadeIn, fadeOut, label: row.l, text: row.x }));
+            continue;
+        }
         if (!Array.isArray(row)) continue;
-        const [from, to, track, who, label, di, slow] = row;
+        const [from, to, track, who, label, di, slow, text] = row;
         if (!Number.isFinite(from) || !Number.isFinite(to) || to <= from) continue;
         const demo = demos[di];
         if (!demo) continue;
@@ -228,6 +374,8 @@ function decodeRows(doc) {
         };
         const sl = Array.isArray(slow) ? cleanSlow(c, slow[0], slow[1], slow[2]) : null;
         if (sl) c.slow = sl;
+        const tx = cleanText(text);
+        if (tx.length) c.text = tx;
         clips.push(c);
     }
     return clips;

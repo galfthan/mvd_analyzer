@@ -102,7 +102,7 @@ async function importPlaylistFromHash() {
     // Opening your own link again must not double the list.
     /** @type {(a: import('../lib/playlist.js').Clip, b: import('../lib/playlist.js').Clip) => boolean} */
     const same = (a, b) => a.demo.key === b.demo.key && a.from === b.from && a.to === b.to && a.track === b.track
-        && JSON.stringify(a.slow ?? null) === JSON.stringify(b.slow ?? null);
+        && JSON.stringify([a.slow, a.card, a.text]) === JSON.stringify([b.slow, b.card, b.text]);
     const have = playlist.get().clips;
     // The light player's "Open in the full analyzer" (&open): this list is
     // the playlist now, to edit — not clips added to whatever was there.

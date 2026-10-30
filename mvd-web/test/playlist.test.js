@@ -5,6 +5,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import {
     parseHubReplayUrl, hubClipsUrl, singleHubGame, encodePlaylist, decodePlaylist,
     playlistStep, playerFragClips, MAX_HUB_CLIPS, cleanSlow, slowAt, playlistName, markdownLink,
+    makeCard, cleanText, isCard,
 } from '../src/lib/playlist.js';
 import { matchDay } from '../src/lib/wall-clock.js';
 
@@ -66,7 +67,7 @@ test('decodePlaylist rejects malformed and inconsistent links', async () => {
     assert.equal((await decodePlaylist(enc({ v: 1, d: [0], c: [[1, 2, 3, '', '', 0]] }))).length, 0, 'non-array demo row');
     assert.equal((await decodePlaylist(enc({ v: 1, d: [['hub:5', 6, 't', 0]], c: [[1, 2, 3, '', '', 0]] }))).length, 0, 'key/gameId disagree');
     assert.equal((await decodePlaylist(enc({ v: 1, d: [['hub:5', '5 or 1=1', 't', 0]], c: [[1, 2, 3, '', '', 0]] }))).length, 0, 'gameId not a number');
-    assert.equal(await decodePlaylist(enc({ v: 2, d: [], c: [] })), null, 'unknown version');
+    assert.equal(await decodePlaylist(enc({ v: 3, d: [], c: [] })), null, 'unknown version');
     const ok = await decodePlaylist(enc({ v: 1, d: [['hub:5', 5, 't', 1.5]], c: [[1, 2, 'x', '', '', 0]] }));
     assert.deepEqual(ok, [{ from: 1, to: 2, track: 'auto', who: '', label: '', demo: { key: 'hub:5', gameId: 5, title: 't', offset: 1.5 } }]);
 });
@@ -131,4 +132,27 @@ test('matchDay: the demoinfo date, else the hedged wall clock', () => {
     assert.equal(matchDay({ demoInfo: { date: '2026-03-08 21:16:56 +0000' } }), '2026-03-08');
     assert.equal(matchDay({ streams: { global: { matchStartUnixMs: Date.UTC(2002, 7, 4, 11), matchStartConfidence: 'unverified' } } }), '~2002-08-04');
     assert.equal(matchDay({}), '');
+});
+
+test('v2: title cards and text travel in the link, clamped; v1 links still read', async () => {
+    const card = makeCard({ ms: 2500, bg: '#102030', opacity: 0.8, text: [{ t: 'Airgibs', size: 12, color: '#00d9ff', at: 'center' }, { t: 'week 3', font: 'body', at: 'bottom', from: 500 }] });
+    assert.equal(card.label, 'Airgibs', 'a card is named by its first text');
+    assert.ok(isCard(card) && card.from === 0 && card.to === 0 && card.demo.key === 'card:');
+    const clips = [
+        card,
+        { from: 10, to: 20, track: 3, who: 'milton', label: 'a', demo, text: cleanText([{ t: 'dm3 · 4:12', at: 'bottom-left', size: 4, to: 3000 }]) },
+        { from: 30, to: 40, track: 'auto', who: '', label: 'b', demo: { key: 'hub:9', gameId: 9, title: 'e1m2', offset: 3 }, slow: { from: 31, to: 33, speed: 0.3 } },
+    ];
+    const back = await decodePlaylist(await encodePlaylist(clips));
+    assert.deepEqual(back, clips, 'cards, texts, slow motion and two demos round-trip');
+
+    const t = cleanText([{ t: '  x  ', size: 99, color: 'red', font: 'comic', at: 'middle', from: -5, to: -1, i: 1e9 }, { t: '' }, 'no']);
+    assert.deepEqual(t, [{ t: 'x', size: 30, color: '#ffffff', font: 'title', at: 'center', from: 0, to: null, fadeIn: 5000, fadeOut: 300 }], 'clamped, defaulted, empty ones dropped');
+    assert.equal(cleanText(Array.from({ length: 20 }, () => ({ t: 'a' }))).length, 8, 'at most eight per item');
+    const k = makeCard({ ms: 1e9, bg: 'url(x)', opacity: 3 }).card;
+    assert.deepEqual([k.ms, k.bg, k.opacity], [30000, '#000000', 1], 'a card is clamped too');
+
+    assert.equal(singleHubGame([card, ...clips.slice(1, 2)]), 212260, 'cards do not make a list multi-demo');
+    assert.doesNotMatch(hubClipsUrl(212260, [card, clips[1]]), /clip=0-/, 'nor go to hub');
+    assert.equal(playlistName([card, clips[1]]), 'mvda · dm3 · a', 'nor count as clips in the name');
 });
