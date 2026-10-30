@@ -57,8 +57,22 @@ See PLAN-hosting.md → **"Operator prerequisites"**. In short:
 
 ## 1. Build
 
-On a build host with the Go toolchain and node (`make build` runs
-`npm ci && vite build` in mvd-web/):
+On a build host with the Go toolchain and **Node.js 22 LTS** (≥ 22.12, or
+20.19+; Vite 8 needs it — `make build` runs `npm ci && vite build` in
+mvd-web/). Ubuntu's own `nodejs` package is too old (Node 18 on 24.04);
+install from NodeSource instead:
+
+```sh
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs   # brings npm
+node -v                          # v22.x
+```
+
+The first `make build` downloads the pinned packages (`package-lock.json`)
+from the npm registry into `mvd-web/node_modules`, so the build host needs
+network access then. Node is a build-time tool only: the server serves
+the built `dist/` and runs nothing of it.
+
 
 ```sh
 make bsps           # fetch BSPs into bsps/ (sha-pinned; web locvis filter)
