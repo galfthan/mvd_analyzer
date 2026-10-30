@@ -77,7 +77,7 @@ func (cs Coords) MarshalJSON() ([]byte, error) {
 //  5. shiftAndFilterPosition (match-relative trim) — analyzer/timeshift.go
 //  6. this MarshalJSON shadow struct — result/coord.go
 //  7. the view-layer kind/slice/columnar plumbing — mvd-analytics/view
-//  8. the tier-2 cache codec (GobEncode/GobDecode) — result/postrack_gob.go
+//  8. the tier-2 cache codec (append/readPositionTrack) — result/postrack_cache.go
 func (p PositionTrack) MarshalJSON() ([]byte, error) {
 	type shadow struct {
 		T   []int32 `json:"t"`

@@ -69,8 +69,8 @@ func mvdPath(root, sha string) string {
 // tree (`results/v<N>f3/…`) and they are re-parsed on next touch. Unlike
 // the f1→f2 bump this one DOES change served bodies, which is the point.
 //
-// Format 4 gives PositionTrack its own raw-column gob codec
-// (result/postrack_gob.go): the same Result, ~8x cheaper to write and read.
+// Format 4 writes the PositionTrack columns raw, outside gob
+// (result/postrack_cache.go): the same Result, ~8x cheaper to write and read.
 // A format-3 file's Streams would not decode under it, so the tree moves
 // (`results/v<N>f4/…`); served bodies are unchanged.
 //

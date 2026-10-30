@@ -9,7 +9,7 @@ import (
 // TestPositionTrackCodecCoversEveryColumn fills every PositionTrack column
 // with distinct values (including -0 and NaN bit patterns) and requires
 // the codec to bring each back bit-identical — a column added to the
-// struct but not to GobEncode/GobDecode fails here.
+// struct but not to append/readPositionTrack fails here.
 func TestPositionTrackCodecCoversEveryColumn(t *testing.T) {
 	var p PositionTrack
 	v := reflect.ValueOf(&p).Elem()

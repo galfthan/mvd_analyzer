@@ -102,8 +102,9 @@ func EncodeCache(r *Result) ([]byte, error) {
 		return nil, fmt.Errorf("encode cache: nil result")
 	}
 
-	// Shallow copy so the caller's Result is never mutated — this runs on
-	// the live Result the LRU is still handing to concurrent requests.
+	// Shallow copies, never writes: the caller's Result is left exactly as
+	// it was (democache encodes before publishing it to the LRU, but a
+	// cache codec has no business mutating what it serializes).
 	rest := *r
 	rest.Streams = nil
 	restJSON, err := json.Marshal(&rest)
