@@ -1295,7 +1295,9 @@ drops it).
   endpoint (`events`, `highlights`, `backpacks`, `top-kills`, `top-windows`, `lives`,
   `frags` — the kill log, teamkills and suicides included, watched from
   the killer — and `weapon-pickups` — every slot-weapon pickup with the
-  kills before the picker's next death, from the pickup to that death)
+  kills before the picker's next death, from the pickup to that death —
+  15 s past the pickup when the picker never died again: a row without
+  its clip's end field runs that long, as the Pack Drops tab's Run link)
   with its query params under their API names, a `where` over the rows it
   returns (an and / or / not tree of conditions — `= != < <= > >=`,
   `~` contains on text and membership on a list, `in` any of — fields as

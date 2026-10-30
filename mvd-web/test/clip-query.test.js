@@ -64,8 +64,8 @@ test('the kill log and weapon pickups as sources: killer POV, pickup to next dea
         { time: 30000, player: 'valla', weapon: 'rl', kills: 0, nextDeathTime: 40000 },
         { time: 60000, player: 'valla', weapon: 'rl', kills: 1 },
     ] }, result, demo);
-    assert.deepEqual(runs.map((c) => [c.from, c.to, c.who]), [[28, 61, 'bps'], [68, 71, 'valla']],
-        '2 s before the pickup to 1 s after the death; a picker who never died again gets the after only');
+    assert.deepEqual(runs.map((c) => [c.from, c.to, c.who]), [[28, 61, 'bps'], [68, 85, 'valla']],
+        '2 s before the pickup to 1 s after the death; a picker who never died again: 15 s past the pickup');
 });
 
 test('viewCall maps API params onto view options', async () => {
