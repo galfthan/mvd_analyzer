@@ -290,6 +290,17 @@ test('streamPosAt carries the last sample forward and reports no track as null',
     assert.equal(map.streamPosAt('nlk', 99999).x, 20);
 });
 
+test('streamPosAt reads either NoFloor sentinel as no floor, never as a height', () => {
+    const map = new MvdMap();
+    map.state.posStreams = {
+        a: { t: [0, 1000, 2000, 3000], x: [0, 0, 0, 0], y: [0, 0, 0, 0], z: [0, 0, 0, 0], h: [-1e9, -2147483600, 12, 0] },
+    };
+    assert.equal(map.streamPosAt('a', 0).h, null, 'the current sentinel');
+    assert.equal(map.streamPosAt('a', 1000).h, null, 'the pre-v33 one, as JSON carries it');
+    assert.equal(map.streamPosAt('a', 2000).h, 12);
+    assert.equal(map.streamPosAt('a', 3000).h, 0);
+});
+
 test('the team palette defaults to the canonical order and can be overridden', () => {
     assert.equal(new MvdMap().teamColors[0], '#ff5050');
     const custom = new MvdMap(null, { teamColors: ['#111', '#222'] });

@@ -40,7 +40,10 @@ tab. Loading another demo clears the previous demo's clips from the
 playlist (a share link over several demos keeps them). A click on the
 game view, or Space, plays and pauses — in the analyzer and the light
 player. The light player's *Open in the full analyzer* opens its
-playlist there as the playlist, to edit, at the clip it was playing. The players' table has no play column — click a name to follow. The graph panes and the health /
+playlist there as the playlist, to edit, at the clip it was playing.
+The map no longer draws a sky-high height stem for a player with no floor
+beneath them (dm3's paused start): it still looked for the "no floor"
+marker the analysis used before schema v33. The players' table has no play column — click a name to follow. The graph panes and the health /
 armor strips show the selection (or the whole match) by default and grow
 with their pane. The playlist's Generate menu says how many of each
 preset the demo has (and leaves out the ones it lacks), there are new

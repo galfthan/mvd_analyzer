@@ -169,8 +169,12 @@ export const LEARN_ITEM_STYLES = Object.assign({}, ITEM_MARKER_STYLES, {
     suit:    { fill: '#000', outline: '#00e676',          label: 'ES' },
 });
 
-// result.NoFloor sentinel in PositionTrack.H — no floor to measure from.
-const MAP_NO_FLOOR = -2147483648;
+// PositionTrack.H's NoFloor sentinel — no floor to measure from: -1e9
+// since schema v33, -2147483648 (serialized as -2147483600) before it.
+// Anything below this bound is one of them; no real height comes near
+// (a Quake map spans ±32768 a side). Read as a height, the sentinel drew a
+// stem a billion units long — dm3's players at the paused match start.
+const MAP_NO_FLOOR_BELOW = -1e8;
 
 // perfNow: monotonic ms for the frame-stat samples. `performance` exists in
 // browsers, workers and node alike; the Date fallback only matters in exotic
@@ -1733,7 +1737,7 @@ export class MvdMap {
         let idx = lowerBoundIndex(t, tMs, (a, i) => a[i]);
         if (idx < 0) idx = 0;
         let h = null;
-        if (pos.h && pos.h.length === n && pos.h[idx] !== MAP_NO_FLOOR) h = pos.h[idx];
+        if (pos.h && pos.h.length === n && pos.h[idx] > MAP_NO_FLOOR_BELOW) h = pos.h[idx];
         const out = { x: pos.x[idx], y: pos.y[idx], z: pos.z[idx], h };
         // View direction (raw angle16) and velocity (u/s) ride the same stream
         // when present (schema v31–v32); the map's optional arrows read them.
