@@ -161,8 +161,21 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
             return;
         }
         drv.jumpToDemoTime(c.from);
-        drv.track(c.track);
+        clipPov(drv, c);
         drv.play();
+    }
+
+    // A clip plays from its own POV (none in it: autotrack — the format's
+    // 'auto'), whatever the viewer switched to during the clip before. On a
+    // fresh engine this runs after carrySettings (whenReady), so the clip's
+    // POV wins over the one carried from a hand pick.
+    /**
+     * @param {Driver} d
+     * @param {Clip} c
+     */
+    function clipPov(d, c) {
+        if (d === engine) engine.track(c.track, { pick: false });
+        else d.track(c.track);
     }
 
     /** @type {ReturnType<typeof setTimeout> | undefined} */
@@ -279,7 +292,7 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
             const next = run.clips[local[step.index]];
             setRun({ ...run, index: local[step.index] });
             showSpan(next);
-            if (next.track !== run.clips[run.index].track) d.track(next.track);
+            clipPov(d, next);
         } else if (step.type === 'next' || step.type === 'end') {
             if (run.index + 1 < run.clips.length) {
                 playClip(run.index + 1);

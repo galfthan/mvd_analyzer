@@ -1138,8 +1138,13 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   the user picked carries over (`engine.carrySettings`): sound, team
   info, the speed (`engine.rate`, applied on play), and the player
   followed by hand — by name, followed on the new engine only when its
-  demo has that player, else autotrack. A clip's POV counts as followed
-  by hand. Per engine, and not carried: the position (it opens paused at
+  demo has that player, else autotrack. In a playlist the playlist says
+  whom to watch: every clip — reached by playing on, a seek into it, or
+  in another demo's engine (its POV is set after the carried one) —
+  starts from its own POV, autotrack when it names none, so a player
+  picked by hand during one clip does not carry into the next. A clip's
+  POV is not a hand pick and is not carried to a demo loaded by hand
+  later. Per engine, and not carried: the position (it opens paused at
   the cursor), a clip's slow motion, the console. Fullscreen, the pane
   layout and the playlist belong to the page and are untouched.
 - **Fullscreen** (see *Fullscreen* under the playback bar): the whole

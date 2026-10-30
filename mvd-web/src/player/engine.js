@@ -198,24 +198,31 @@ export class PlayerEngine {
             /** @type {any} */ (iframe.contentWindow).mvdFte.start({ demoUrl, demoPath, mapName: mapFileKey(handle.result) })
                 .then((/** @type {FteController} */ fte) => waitForDemoClock(fte, () => this.iframe === iframe).then(() => fte))
                 .then((/** @type {FteController} */ fte) => {
-                    if (this.iframe !== iframe) return;
-                    this.fte = fte;
-                    this.carrySettings(fte);
-                    // Open where the cursor already is, paused — the same
-                    // entry hub's ?from= gives.
-                    if (this.clock.t > 0) this.jump(this.clock.t);
-                    fte.pause();
-                    if (this.active()) this.startSync();
-                    else fte.suspend();
-                    this.publish();
-                    const onReady = this.onReady;
-                    this.onReady = null;
-                    if (onReady) onReady();
+                    if (this.iframe === iframe) this.adopt(fte);
                 }, (/** @type {unknown} */ err) => console.error('player:', err));
         }, { once: true });
         this.blobUrl = demoUrl;
         this.iframe = iframe;
         this.host.appendChild(iframe);
+    }
+
+    // adopt takes a fresh engine once its demo runs: the settings carried
+    // from the engines before, then whatever waited for it (whenReady — a
+    // playlist clip, which so sets its POV after the carried one).
+    /** @param {FteController} fte */
+    adopt(fte) {
+        this.fte = fte;
+        this.carrySettings(fte);
+        // Open where the cursor already is, paused — the same entry hub's
+        // ?from= gives.
+        if (this.clock.t > 0) this.jump(this.clock.t);
+        fte.pause();
+        if (this.active()) this.startSync();
+        else fte.suspend();
+        this.publish();
+        const onReady = this.onReady;
+        this.onReady = null;
+        if (onReady) onReady();
     }
 
     // carrySettings sets a fresh engine to the settings the user picked on
@@ -462,13 +469,18 @@ export class PlayerEngine {
         this.publish();
     }
 
-    // track(userid | 'auto')
-    /** @param {Track} userid */
-    track(userid) {
+    // track(userid | 'auto'). `pick`: the user's own choice, carried to the
+    // next engines (carrySettings); a playlist clip's POV is not — the
+    // playlist set it, and a demo loaded by hand later should not inherit it.
+    /**
+     * @param {Track} userid
+     * @param {{ pick?: boolean }} [opts]
+     */
+    track(userid, { pick = true } = {}) {
         if (!this.fte) return;
         if (userid === 'auto') this.fte.enableAutotrack();
         else this.fte.track(userid);
-        this.trackedName = userid === 'auto' ? null : nameIn(this.fte, userid);
+        if (pick) this.trackedName = userid === 'auto' ? null : nameIn(this.fte, userid);
         this.publish();
     }
 
