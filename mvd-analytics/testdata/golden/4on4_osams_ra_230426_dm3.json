@@ -36383,6 +36383,7 @@
         48
       ],
       "picker": "lakso",
+      "pickerEndTime": 122941,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 122941,
@@ -36405,6 +36406,7 @@
         -48
       ],
       "picker": "doberman",
+      "pickerEndTime": 168275,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 168275,
@@ -36427,6 +36429,7 @@
         19.625
       ],
       "picker": "apa",
+      "pickerEndTime": 282269,
       "pickerHadWeapon": false,
       "pickerKills": 3,
       "pickerNextDeathTime": 282269,
@@ -36449,6 +36452,7 @@
         23.25
       ],
       "picker": "apa",
+      "pickerEndTime": 282269,
       "pickerHadWeapon": false,
       "pickerKills": 1,
       "pickerNextDeathTime": 282269,
@@ -36471,6 +36475,7 @@
         -57.25
       ],
       "picker": "sCorp",
+      "pickerEndTime": 271792,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 271792,
@@ -36493,6 +36498,7 @@
         -48
       ],
       "picker": "clox",
+      "pickerEndTime": 302866,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 302866,
@@ -36515,6 +36521,7 @@
         32
       ],
       "picker": "apa",
+      "pickerEndTime": 282269,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 282269,
@@ -36537,6 +36544,7 @@
         -334.375
       ],
       "picker": "clox",
+      "pickerEndTime": 302866,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 302866,
@@ -36559,6 +36567,7 @@
         -317.125
       ],
       "picker": "nlk",
+      "pickerEndTime": 348808,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 348808,
@@ -36581,6 +36590,7 @@
         32
       ],
       "picker": "clox",
+      "pickerEndTime": 345823,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 345823,
@@ -36603,6 +36613,7 @@
         -86.875
       ],
       "picker": "sCorp",
+      "pickerEndTime": 360043,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 360043,
@@ -36625,6 +36636,7 @@
         -393.125
       ],
       "picker": "lakso",
+      "pickerEndTime": 363412,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 363412,
@@ -36647,6 +36659,7 @@
         -76.75
       ],
       "picker": "marksuzu",
+      "pickerEndTime": 399029,
       "pickerHadWeapon": false,
       "pickerKills": 1,
       "pickerNextDeathTime": 399029,
@@ -36669,6 +36682,7 @@
         -208
       ],
       "picker": "lakso",
+      "pickerEndTime": 479120,
       "pickerHadWeapon": false,
       "pickerKills": 2,
       "pickerNextDeathTime": 479120,
@@ -36691,6 +36705,7 @@
         -118
       ],
       "picker": "doberman",
+      "pickerEndTime": 471865,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 471865,
@@ -36713,6 +36728,7 @@
         32
       ],
       "picker": "doberman",
+      "pickerEndTime": 479078,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 479078,
@@ -36735,6 +36751,7 @@
         -40
       ],
       "picker": "[cmd] witka",
+      "pickerEndTime": 480555,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 480555,
@@ -36757,6 +36774,7 @@
         -190.625
       ],
       "picker": "apa",
+      "pickerEndTime": 513192,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 513192,
@@ -36779,6 +36797,7 @@
         -112
       ],
       "picker": "doberman",
+      "pickerEndTime": 736815,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 736815,
@@ -36801,6 +36820,7 @@
         46.625
       ],
       "picker": "doberman",
+      "pickerEndTime": 930751,
       "pickerHadWeapon": false,
       "pickerKills": 10,
       "pickerNextDeathTime": 930751,
@@ -36823,6 +36843,7 @@
         32
       ],
       "picker": "nlk",
+      "pickerEndTime": 899278,
       "pickerHadWeapon": false,
       "pickerKills": 7,
       "pickerNextDeathTime": 899278,
@@ -36845,6 +36866,7 @@
         -193.25
       ],
       "picker": "[cmd] witka",
+      "pickerEndTime": 823473,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 823473,
@@ -36867,6 +36889,7 @@
         -112
       ],
       "picker": "apa",
+      "pickerEndTime": 829180,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 829180,
@@ -36889,6 +36912,7 @@
         -291.375
       ],
       "picker": "apa",
+      "pickerEndTime": 900881,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 900881,
@@ -36911,6 +36935,7 @@
         32
       ],
       "picker": "nlk",
+      "pickerEndTime": 937570,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 937570,
@@ -36933,6 +36958,7 @@
         24
       ],
       "picker": "marksuzu",
+      "pickerEndTime": 971319,
       "pickerHadWeapon": false,
       "pickerKills": 3,
       "pickerNextDeathTime": 971319,
@@ -36955,6 +36981,7 @@
         69
       ],
       "picker": "apa",
+      "pickerEndTime": 1200059,
       "pickerHadWeapon": false,
       "pickerKills": 13,
       "pickerRelation": "team",
@@ -36976,6 +37003,7 @@
         32
       ],
       "picker": "sCorp",
+      "pickerEndTime": 974906,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 974906,
@@ -36998,6 +37026,7 @@
         -95
       ],
       "picker": "clox",
+      "pickerEndTime": 1004636,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 1004636,
@@ -37020,6 +37049,7 @@
         -339.75
       ],
       "picker": "nlk",
+      "pickerEndTime": 1077280,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 1077280,
@@ -37042,6 +37072,7 @@
         13.875
       ],
       "picker": "lakso",
+      "pickerEndTime": 1200059,
       "pickerHadWeapon": false,
       "pickerKills": 6,
       "pickerRelation": "enemy",
@@ -37063,6 +37094,7 @@
         -192
       ],
       "picker": "marksuzu",
+      "pickerEndTime": 1200059,
       "pickerHadWeapon": false,
       "pickerKills": 2,
       "pickerRelation": "enemy",
@@ -37084,6 +37116,7 @@
         41.75
       ],
       "picker": "clox",
+      "pickerEndTime": 1155791,
       "pickerHadWeapon": false,
       "pickerKills": 5,
       "pickerNextDeathTime": 1155791,
@@ -37106,6 +37139,7 @@
         -169.875
       ],
       "picker": "doberman",
+      "pickerEndTime": 1148732,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 1148732,
@@ -37128,6 +37162,7 @@
         32
       ],
       "picker": "lakso",
+      "pickerEndTime": 1200059,
       "pickerHadWeapon": false,
       "pickerKills": 4,
       "pickerRelation": "enemy",
@@ -37149,6 +37184,7 @@
         36
       ],
       "picker": "apa",
+      "pickerEndTime": 1200059,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerRelation": "enemy",
@@ -37170,6 +37206,7 @@
         -4.5
       ],
       "picker": "nlk",
+      "pickerEndTime": 1182990,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 1182990,
@@ -37192,6 +37229,7 @@
         -48
       ],
       "picker": "marksuzu",
+      "pickerEndTime": 1200059,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerRelation": "enemy",
@@ -37213,6 +37251,7 @@
         -308.375
       ],
       "picker": "lakso",
+      "pickerEndTime": 1200059,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerRelation": "enemy",
@@ -93771,7 +93810,7 @@
       }
     ]
   },
-  "schemaVersion": 77,
+  "schemaVersion": 78,
   "shots": {
     "byPlayer": [
       {
@@ -268670,6 +268709,7 @@
   },
   "weaponPickups": [
     {
+      "endTime": 7627,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 7627,
@@ -268680,6 +268720,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 23164,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 23164,
@@ -268690,6 +268731,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 14860,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 14860,
@@ -268700,6 +268742,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 135721,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 135721,
@@ -268710,6 +268753,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 79259,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 79259,
@@ -268720,6 +268764,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 135721,
       "hadBefore": false,
       "kills": 10,
       "nextDeathTime": 135721,
@@ -268730,6 +268775,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 79259,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 79259,
@@ -268740,6 +268786,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 71618,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 71618,
@@ -268750,6 +268797,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 68550,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 68550,
@@ -268760,6 +268808,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 135721,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 135721,
@@ -268770,6 +268819,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 79259,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 79259,
@@ -268780,6 +268830,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 248414,
       "hadBefore": false,
       "kills": 12,
       "nextDeathTime": 248414,
@@ -268790,6 +268841,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 135721,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 135721,
@@ -268800,6 +268852,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 88511,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 88511,
@@ -268810,6 +268863,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 115543,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 115543,
@@ -268820,6 +268874,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 134065,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 134065,
@@ -268830,6 +268885,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 115543,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 115543,
@@ -268840,6 +268896,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 134065,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 134065,
@@ -268850,6 +268907,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 248414,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 248414,
@@ -268860,6 +268918,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 192059,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 192059,
@@ -268874,6 +268933,7 @@
       "dropTime": 115543,
       "dropper": "lakso",
       "dropperTeam": "oSaMs",
+      "endTime": 122941,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 122941,
@@ -268884,6 +268944,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 168275,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 168275,
@@ -268894,6 +268955,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 159582,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 159582,
@@ -268904,6 +268966,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 162971,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 162971,
@@ -268914,6 +268977,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 159129,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 159129,
@@ -268924,6 +268988,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 168275,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 168275,
@@ -268934,6 +268999,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 163842,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 163842,
@@ -268944,6 +269010,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 192059,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 192059,
@@ -268958,6 +269025,7 @@
       "dropTime": 163842,
       "dropper": "lakso",
       "dropperTeam": "oSaMs",
+      "endTime": 168275,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 168275,
@@ -268968,6 +269036,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 247011,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 247011,
@@ -268978,6 +269047,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 247011,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 247011,
@@ -268988,6 +269058,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 248414,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 248414,
@@ -268998,6 +269069,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 220258,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 220258,
@@ -269008,6 +269080,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 217454,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 217454,
@@ -269018,6 +269091,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 348808,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 348808,
@@ -269028,6 +269102,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 348808,
       "hadBefore": false,
       "kills": 7,
       "nextDeathTime": 348808,
@@ -269038,6 +269113,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 247872,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 247872,
@@ -269052,6 +269128,7 @@
       "dropTime": 247011,
       "dropper": "marksuzu",
       "dropperTeam": "oSaMs",
+      "endTime": 282269,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 282269,
@@ -269062,6 +269139,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 262657,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 262657,
@@ -269076,6 +269154,7 @@
       "dropTime": 248414,
       "dropper": "sCorp",
       "dropperTeam": ".ra.",
+      "endTime": 282269,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 282269,
@@ -269086,6 +269165,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 273051,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 273051,
@@ -269096,6 +269176,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 348808,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 348808,
@@ -269106,6 +269187,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 271792,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 271792,
@@ -269120,6 +269202,7 @@
       "dropTime": 262657,
       "dropper": "lakso",
       "dropperTeam": "oSaMs",
+      "endTime": 271792,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 271792,
@@ -269130,6 +269213,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 271895,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 271895,
@@ -269144,6 +269228,7 @@
       "dropTime": 271792,
       "dropper": "sCorp",
       "dropperTeam": ".ra.",
+      "endTime": 302866,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 302866,
@@ -269158,6 +269243,7 @@
       "dropTime": 273051,
       "dropper": "[cmd] witka",
       "dropperTeam": ".ra.",
+      "endTime": 282269,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 282269,
@@ -269168,6 +269254,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 291125,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 291125,
@@ -269178,6 +269265,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 295456,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 295456,
@@ -269188,6 +269276,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 301918,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 301918,
@@ -269202,6 +269291,7 @@
       "dropTime": 301918,
       "dropper": "doberman",
       "dropperTeam": ".ra.",
+      "endTime": 302866,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 302866,
@@ -269216,6 +269306,7 @@
       "dropTime": 302866,
       "dropper": "clox",
       "dropperTeam": "oSaMs",
+      "endTime": 348808,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 348808,
@@ -269226,6 +269317,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 470184,
       "hadBefore": false,
       "kills": 8,
       "nextDeathTime": 470184,
@@ -269236,6 +269328,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 317788,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 317788,
@@ -269246,6 +269339,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 336583,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 336583,
@@ -269256,6 +269350,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 336583,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 336583,
@@ -269266,6 +269361,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 345823,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 345823,
@@ -269276,6 +269372,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 342034,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 342034,
@@ -269290,6 +269387,7 @@
       "dropTime": 336583,
       "dropper": "sCorp",
       "dropperTeam": ".ra.",
+      "endTime": 345823,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 345823,
@@ -269300,6 +269398,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 356693,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 356693,
@@ -269310,6 +269409,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 362863,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 362863,
@@ -269320,6 +269420,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 347977,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 347977,
@@ -269334,6 +269435,7 @@
       "dropTime": 347977,
       "dropper": "sCorp",
       "dropperTeam": ".ra.",
+      "endTime": 360043,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 360043,
@@ -269344,6 +269446,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 360043,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 360043,
@@ -269358,6 +269461,7 @@
       "dropTime": 360043,
       "dropper": "sCorp",
       "dropperTeam": ".ra.",
+      "endTime": 363412,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 363412,
@@ -269368,6 +269472,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 607257,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 607257,
@@ -269378,6 +269483,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 384751,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 384751,
@@ -269388,6 +269494,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 390557,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 390557,
@@ -269398,6 +269505,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 394653,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 394653,
@@ -269408,6 +269516,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 607257,
       "hadBefore": false,
       "kills": 17,
       "nextDeathTime": 607257,
@@ -269422,6 +269531,7 @@
       "dropTime": 384751,
       "dropper": "nlk",
       "dropperTeam": ".ra.",
+      "endTime": 399029,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 399029,
@@ -269432,6 +269542,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 438859,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 438859,
@@ -269442,6 +269553,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 408014,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 408014,
@@ -269452,6 +269564,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 413810,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 413810,
@@ -269466,6 +269579,7 @@
       "dropTime": 413810,
       "dropper": "doberman",
       "dropperTeam": ".ra.",
+      "endTime": 479120,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 479120,
@@ -269476,6 +269590,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 457565,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 457565,
@@ -269486,6 +269601,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 438859,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 438859,
@@ -269496,6 +269612,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 470184,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 470184,
@@ -269506,6 +269623,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 479120,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 479120,
@@ -269516,6 +269634,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 441788,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 441788,
@@ -269526,6 +269645,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 466903,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 466903,
@@ -269536,6 +269656,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 467236,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 467236,
@@ -269546,6 +269667,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 471865,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 471865,
@@ -269556,6 +269678,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 470184,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 470184,
@@ -269570,6 +269693,7 @@
       "dropTime": 467236,
       "dropper": "nlk",
       "dropperTeam": ".ra.",
+      "endTime": 471865,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 471865,
@@ -269580,6 +269704,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 607257,
       "hadBefore": false,
       "kills": 6,
       "nextDeathTime": 607257,
@@ -269594,6 +269719,7 @@
       "dropTime": 470184,
       "dropper": "[cmd] witka",
       "dropperTeam": ".ra.",
+      "endTime": 479078,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 479078,
@@ -269608,6 +269734,7 @@
       "dropTime": 479120,
       "dropper": "lakso",
       "dropperTeam": "oSaMs",
+      "endTime": 480555,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 480555,
@@ -269618,6 +269745,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 506374,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 506374,
@@ -269628,6 +269756,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 506768,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 506768,
@@ -269638,6 +269767,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 607257,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 607257,
@@ -269648,6 +269778,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 506374,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 506374,
@@ -269658,6 +269789,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 517757,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 517757,
@@ -269672,6 +269804,7 @@
       "dropTime": 506374,
       "dropper": "nlk",
       "dropperTeam": ".ra.",
+      "endTime": 513192,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 513192,
@@ -269682,6 +269815,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 539136,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 539136,
@@ -269692,6 +269826,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 532374,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 532374,
@@ -269702,6 +269837,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 543980,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 543980,
@@ -269712,6 +269848,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 538110,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 538110,
@@ -269722,6 +269859,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 563714,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 563714,
@@ -269732,6 +269870,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 582154,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 582154,
@@ -269742,6 +269881,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 607257,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 607257,
@@ -269752,6 +269892,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 587412,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 587412,
@@ -269762,6 +269903,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 565884,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 565884,
@@ -269772,6 +269914,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 666534,
       "hadBefore": false,
       "kills": 5,
       "nextDeathTime": 666534,
@@ -269782,6 +269925,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 603667,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 603667,
@@ -269792,6 +269936,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 607546,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 607546,
@@ -269802,6 +269947,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 607257,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 607257,
@@ -269812,6 +269958,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 687164,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 687164,
@@ -269822,6 +269969,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 666534,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 666534,
@@ -269832,6 +269980,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 787732,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 787732,
@@ -269842,6 +269991,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 787732,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 787732,
@@ -269852,6 +270002,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 667132,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 667132,
@@ -269862,6 +270013,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 650297,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 650297,
@@ -269872,6 +270024,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 703320,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 703320,
@@ -269882,6 +270035,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 665458,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 665458,
@@ -269892,6 +270046,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 680768,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 680768,
@@ -269902,6 +270057,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 774058,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 774058,
@@ -269912,6 +270068,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 774058,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 774058,
@@ -269922,6 +270079,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 707394,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 707394,
@@ -269932,6 +270090,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 726057,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 726057,
@@ -269942,6 +270101,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 721030,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 721030,
@@ -269952,6 +270112,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 726057,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 726057,
@@ -269966,6 +270127,7 @@
       "dropTime": 726057,
       "dropper": "[cmd] witka",
       "dropperTeam": ".ra.",
+      "endTime": 736815,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 736815,
@@ -269976,6 +270138,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 741114,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 741114,
@@ -269990,6 +270153,7 @@
       "dropTime": 736815,
       "dropper": "doberman",
       "dropperTeam": ".ra.",
+      "endTime": 930751,
       "hadBefore": false,
       "kills": 10,
       "nextDeathTime": 930751,
@@ -270000,6 +270164,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 754023,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 754023,
@@ -270010,6 +270175,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 752681,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 752681,
@@ -270020,6 +270186,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 754023,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 754023,
@@ -270030,6 +270197,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 778953,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 778953,
@@ -270040,6 +270208,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 819620,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 819620,
@@ -270050,6 +270219,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 899278,
       "hadBefore": false,
       "kills": 5,
       "nextDeathTime": 899278,
@@ -270060,6 +270230,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 782098,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 782098,
@@ -270070,6 +270241,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 971443,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 971443,
@@ -270084,6 +270256,7 @@
       "dropTime": 787732,
       "dropper": "lakso",
       "dropperTeam": "oSaMs",
+      "endTime": 899278,
       "hadBefore": false,
       "kills": 7,
       "nextDeathTime": 899278,
@@ -270094,6 +270267,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 811424,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 811424,
@@ -270104,6 +270278,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 819620,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 819620,
@@ -270114,6 +270289,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 819620,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 819620,
@@ -270124,6 +270300,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 829959,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 829959,
@@ -270134,6 +270311,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 823473,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 823473,
@@ -270144,6 +270322,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 971443,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 971443,
@@ -270158,6 +270337,7 @@
       "dropTime": 819620,
       "dropper": "apa",
       "dropperTeam": "oSaMs",
+      "endTime": 823473,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 823473,
@@ -270172,6 +270352,7 @@
       "dropTime": 823473,
       "dropper": "[cmd] witka",
       "dropperTeam": ".ra.",
+      "endTime": 829180,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 829180,
@@ -270182,6 +270363,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 933532,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 933532,
@@ -270192,6 +270374,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 881513,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 881513,
@@ -270202,6 +270385,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 899278,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 899278,
@@ -270212,6 +270396,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 933532,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 933532,
@@ -270222,6 +270407,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 872244,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 872244,
@@ -270232,6 +270418,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 900881,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 900881,
@@ -270242,6 +270429,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 971443,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 971443,
@@ -270252,6 +270440,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 881513,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 881513,
@@ -270262,6 +270451,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 896838,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 896838,
@@ -270272,6 +270462,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 902400,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 902400,
@@ -270282,6 +270473,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 971443,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 971443,
@@ -270296,6 +270488,7 @@
       "dropTime": 899278,
       "dropper": "nlk",
       "dropperTeam": ".ra.",
+      "endTime": 900881,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 900881,
@@ -270306,6 +270499,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 937570,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 937570,
@@ -270316,6 +270510,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 916946,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 916946,
@@ -270326,6 +270521,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 937570,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 937570,
@@ -270336,6 +270532,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1004636,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 1004636,
@@ -270346,6 +270543,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 940922,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 940922,
@@ -270360,6 +270558,7 @@
       "dropTime": 933532,
       "dropper": "marksuzu",
       "dropperTeam": "oSaMs",
+      "endTime": 937570,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 937570,
@@ -270374,6 +270573,7 @@
       "dropTime": 937570,
       "dropper": "nlk",
       "dropperTeam": ".ra.",
+      "endTime": 971319,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 971319,
@@ -270384,6 +270584,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1004636,
       "hadBefore": false,
       "kills": 7,
       "nextDeathTime": 1004636,
@@ -270394,6 +270595,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 949675,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 949675,
@@ -270404,6 +270606,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1004636,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1004636,
@@ -270414,6 +270617,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 971443,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 971443,
@@ -270428,6 +270632,7 @@
       "dropTime": 971443,
       "dropper": "sCorp",
       "dropperTeam": ".ra.",
+      "endTime": 974906,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 974906,
@@ -270442,6 +270647,7 @@
       "dropTime": 971319,
       "dropper": "marksuzu",
       "dropperTeam": "oSaMs",
+      "endTime": 1200059,
       "hadBefore": false,
       "kills": 13,
       "player": "apa",
@@ -270451,6 +270657,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 979618,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 979618,
@@ -270461,6 +270668,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 1004636,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1004636,
@@ -270471,6 +270679,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 984033,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 984033,
@@ -270481,6 +270690,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1017671,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1017671,
@@ -270491,6 +270701,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 994155,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 994155,
@@ -270501,6 +270712,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1004016,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1004016,
@@ -270515,6 +270727,7 @@
       "dropTime": 994155,
       "dropper": "nlk",
       "dropperTeam": ".ra.",
+      "endTime": 1004636,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 1004636,
@@ -270525,6 +270738,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1029442,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1029442,
@@ -270535,6 +270749,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1049702,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 1049702,
@@ -270545,6 +270760,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1049053,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1049053,
@@ -270555,6 +270771,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1049053,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1049053,
@@ -270565,6 +270782,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1200059,
       "hadBefore": false,
       "kills": 0,
       "player": "lakso",
@@ -270574,6 +270792,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 1095803,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 1095803,
@@ -270588,6 +270807,7 @@
       "dropTime": 1049702,
       "dropper": "nlk",
       "dropperTeam": ".ra.",
+      "endTime": 1200059,
       "hadBefore": false,
       "kills": 6,
       "player": "lakso",
@@ -270601,6 +270821,7 @@
       "dropTime": 1049053,
       "dropper": "clox",
       "dropperTeam": "oSaMs",
+      "endTime": 1077280,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1077280,
@@ -270611,6 +270832,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1077280,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1077280,
@@ -270621,6 +270843,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 1076343,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1076343,
@@ -270631,6 +270854,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1088061,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1088061,
@@ -270641,6 +270865,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1092322,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1092322,
@@ -270651,6 +270876,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 1200059,
       "hadBefore": false,
       "kills": 4,
       "player": "marksuzu",
@@ -270664,6 +270890,7 @@
       "dropTime": 1088061,
       "dropper": "sCorp",
       "dropperTeam": ".ra.",
+      "endTime": 1200059,
       "hadBefore": false,
       "kills": 2,
       "player": "marksuzu",
@@ -270677,6 +270904,7 @@
       "dropTime": 1095803,
       "dropper": "doberman",
       "dropperTeam": ".ra.",
+      "endTime": 1155791,
       "hadBefore": false,
       "kills": 5,
       "nextDeathTime": 1155791,
@@ -270687,6 +270915,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1146743,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1146743,
@@ -270697,6 +270926,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 1155791,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1155791,
@@ -270707,6 +270937,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1200059,
       "hadBefore": false,
       "kills": 0,
       "player": "lakso",
@@ -270716,6 +270947,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 1116321,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1116321,
@@ -270726,6 +270958,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1152637,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1152637,
@@ -270740,6 +270973,7 @@
       "dropTime": 1116321,
       "dropper": "doberman",
       "dropperTeam": ".ra.",
+      "endTime": 1148732,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1148732,
@@ -270750,6 +270984,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1146743,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1146743,
@@ -270760,6 +270995,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 1200059,
       "hadBefore": false,
       "kills": 0,
       "player": "apa",
@@ -270769,6 +271005,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1182990,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1182990,
@@ -270783,6 +271020,7 @@
       "dropTime": 1148732,
       "dropper": "doberman",
       "dropperTeam": ".ra.",
+      "endTime": 1200059,
       "hadBefore": false,
       "kills": 4,
       "player": "lakso",
@@ -270792,6 +271030,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1200059,
       "hadBefore": false,
       "kills": 0,
       "player": "marksuzu",
@@ -270801,6 +271040,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 1172965,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1172965,
@@ -270815,6 +271055,7 @@
       "dropTime": 1152637,
       "dropper": "sCorp",
       "dropperTeam": ".ra.",
+      "endTime": 1200059,
       "hadBefore": true,
       "kills": 0,
       "player": "apa",
@@ -270828,6 +271069,7 @@
       "dropTime": 1155791,
       "dropper": "clox",
       "dropperTeam": "oSaMs",
+      "endTime": 1182990,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 1182990,
@@ -270838,6 +271080,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1173570,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1173570,
@@ -270852,6 +271095,7 @@
       "dropTime": 1172965,
       "dropper": "[cmd] witka",
       "dropperTeam": ".ra.",
+      "endTime": 1200059,
       "hadBefore": true,
       "kills": 0,
       "player": "marksuzu",
@@ -270861,6 +271105,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1194207,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1194207,
@@ -270871,6 +271116,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1200059,
       "hadBefore": false,
       "kills": 2,
       "player": "sCorp",
@@ -270884,6 +271130,7 @@
       "dropTime": 1182990,
       "dropper": "nlk",
       "dropperTeam": ".ra.",
+      "endTime": 1200059,
       "hadBefore": true,
       "kills": 0,
       "player": "lakso",
@@ -270893,6 +271140,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1200059,
       "hadBefore": false,
       "kills": 0,
       "player": "apa",

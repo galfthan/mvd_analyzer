@@ -498,6 +498,11 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 			continue
 		}
 		nextDeath := findNextAfter(deathsBySlot[p.pickerSlot], p.time)
+		// The run ends at the next death, or with the match.
+		end := nextDeath
+		if end == 0 && a.core != nil && a.core.Clock != nil {
+			end = a.core.Clock.MatchEndMs
+		}
 
 		pickerID := a.identityAt(p.pickerSlot, p.time)
 		// Born-correct team labels: the roster rewrites a duel participant's
@@ -513,6 +518,7 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 			Inferred:      p.inferred,
 			Kills:         kills[i],
 			NextDeathTime: nextDeath,
+			EndTime:       end,
 		}
 		if p.source == "backpack" {
 			entry.BackpackEnt = p.backpackEnt
@@ -532,13 +538,16 @@ func (a *WeaponPickupsAnalyzer) Finalize(result *Result) error {
 	// Born-correct timestamps: rebase pickup times to the match clock. Kill
 	// attribution and the next-death windows above ran against the demo-time
 	// FragEntries / pickup times, so this shifts only the emitted fields.
-	// NextDeathTime/DropTime are omitempty when 0 (never dies / not a
-	// backpack), so they shift only when set.
+	// NextDeathTime/EndTime/DropTime are omitempty when 0 (never dies /
+	// no match end / not a backpack), so they shift only when set.
 	if ms := a.core.MatchStartMs(); ms > 0 {
 		for i := range out {
 			out[i].Time -= ms
 			if out[i].NextDeathTime > 0 {
 				out[i].NextDeathTime -= ms
+			}
+			if out[i].EndTime > 0 {
+				out[i].EndTime -= ms
 			}
 			if out[i].DropTime > 0 {
 				out[i].DropTime -= ms

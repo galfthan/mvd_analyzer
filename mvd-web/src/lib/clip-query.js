@@ -132,14 +132,14 @@ export const SOURCES = {
         clip: { from: 'time', before: 5000, to: 'time', after: 2000, pov: 'killer' },
     },
     // Every slot-weapon pickup, with the kills before the picker's next
-    // death: from the pickup to that death (to the match end for a picker
-    // who never died again: no nextDeathTime).
+    // death: from the pickup to the run's end (endTime: that death, else
+    // the match end).
     'weapon-pickups': {
         fn: 'getWeaponPickups',
         params: ['players', 'weapons', 'source', 'from', 'to'],
         opts: (p) => ({ Players: csv(p.players), Weapons: csv(p.weapons), Source: p.source, From: int(p.from), To: int(p.to) }),
         rows: (b) => b?.pickups || [],
-        clip: { from: 'time', before: 2000, to: 'nextDeathTime', after: 1000, pov: 'player' },
+        clip: { from: 'time', before: 2000, to: 'endTime', after: 1000, pov: 'player' },
     },
     lives: {
         fn: 'getLives',
@@ -304,10 +304,7 @@ export function stages(query, body, result, demo) {
         if (from == null) return [];
         const who = String(fieldOf(r, spec.pov) ?? '');
         const fromMs = Number(from) - spec.before;
-        // A row without its end — a weapon run whose picker never died
-        // again — lasted until the match ended.
-        const to = fieldOf(r, spec.to);
-        const toMs = to == null ? (result?.match?.duration || Number(from) + spec.after) : (Number(to) || Number(from)) + spec.after;
+        const toMs = (Number(fieldOf(r, spec.to)) || Number(from)) + spec.after;
         return [makeClip(result, demo, fromMs, toMs, ids[who], who, renderLabel(spec.label ?? query.label ?? '', r), slowOf(spec, r))];
     }));
     return { rows, kept, ranked, clips };

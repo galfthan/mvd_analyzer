@@ -93,6 +93,10 @@ type BackpackDrop struct {
 	PickerHadWeapon     *bool `json:"pickerHadWeapon,omitempty"`
 	PickerKills         *int  `json:"pickerKills,omitempty"`
 	PickerNextDeathTime int32 `json:"pickerNextDeathTime,omitempty"`
+	// PickerEndTime is the matched weaponPickups row's EndTime (v78): where
+	// the picker's run with the pack ends — their next death, else the
+	// match end. `ktx` rows only, like the three above.
+	PickerEndTime int32 `json:"pickerEndTime,omitempty"`
 }
 
 // BackpackDrop.Source vocabulary.

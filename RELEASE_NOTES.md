@@ -7,7 +7,11 @@ detail.
 
 ## unreleased (web-svelte) — a player-like timeline, clips from the selection, a light player
 
-No schema change; web UI only. The playback bar is laid out like a video
+Schema v78 (additive): a weapon pickup's run has an end on every row —
+`weaponPickups[].endTime`, the picker's next death or else the match end
+(they were still on the run when it ended), and `backpacks[].pickerEndTime`
+on `ktx` rows; see [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).
+Otherwise web UI only. The playback bar is laid out like a video
 player's: a thin scrubber on top (hover shows the time, a round playhead
 to drag, a press-and-drag selects) and under it play / pause, the speed
 (0.2–5×) and pills for the time and the selection. The selection now
@@ -57,8 +61,9 @@ The clip finder reads two more sources: the **kill log** (every kill,
 teamkills and suicides included, from the killer's view — a *Teamkills*
 preset) and **weapon pickups** (every pickup with the kills before the
 picker's next death — *RL runs*, *LG runs* and the five best of each,
-from the pickup to that death, or to the match end when the picker
-never died again — as the Pack Drops tab's *Run* link now does too; RL / LG runs are Moments groups too). The
+from the pickup to the run's end — the next death, or the match end
+when the picker never died again (`endTime`), as the Pack Drops tab's
+*Run* link now does too; RL / LG runs are Moments groups too). The
 Summary tab has an **Opening** panel (after Basic Stats): where each player spawned and who
 was first to take each armor, mega, powerup and RL / LG. Switching
 between the Map and Player tabs keeps the map (no new WebGL context or

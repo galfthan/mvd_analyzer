@@ -12,7 +12,7 @@ const drop = (o) => ({ entNum: 7, time: 61000, player: 'a', team: 'red', weapon:
 test('packDropRows reads each drop\'s own pickup side, converting ms to s', () => {
     const result = {
         backpacks: [
-            drop({ source: 'ktx', fate: 'picked', picker: 'b', pickerTeam: 'red', pickupTime: 63500, pickerNextDeathTime: 80000, pickerKills: 2, pickerHadWeapon: false }),
+            drop({ source: 'ktx', fate: 'picked', picker: 'b', pickerTeam: 'red', pickupTime: 63500, pickerNextDeathTime: 80000, pickerEndTime: 80000, pickerKills: 2, pickerHadWeapon: false }),
             drop({ source: 'ktx', entNum: 8, time: 90000, weapon: 'lg', fate: 'expired' }),
             drop({ source: 'ktx', entNum: 9, time: 95000, fate: 'unobserved' }),
         ],
@@ -20,7 +20,7 @@ test('packDropRows reads each drop\'s own pickup side, converting ms to s', () =
     const rows = packDropRows(result);
     assert.equal(rows.length, 3);
     assert.equal(rows[0].drop.time, 61);
-    assert.deepEqual(rows[0].pickup, { player: 'b', team: 'red', time: 63.5, nextDeathTime: 80, kills: 2, hadBefore: false });
+    assert.deepEqual(rows[0].pickup, { player: 'b', team: 'red', time: 63.5, endTime: 80, kills: 2, hadBefore: false });
     assert.deepEqual(rows[0].status, { label: 'xfer', cls: 'status-xfer' });
     assert.equal(rows[1].pickup, null);
     assert.equal(rows[1].status.label, 'expired', 'KTX said so');
@@ -42,7 +42,7 @@ test('packDropStatusFor: xfer / enemy, with the weapon when the picker already h
 
 test('reconstructed drops carry their own fate; kills stay unknown', () => {
     const r = drop({ source: 'reconstructed', fate: 'picked', picker: 'b', pickerTeam: 'blue', pickupTime: 64000 });
-    assert.deepEqual(packDropPickup(r), { player: 'b', team: 'blue', time: 64, nextDeathTime: 0, kills: null, hadBefore: undefined });
+    assert.deepEqual(packDropPickup(r), { player: 'b', team: 'blue', time: 64, endTime: 0, kills: null, hadBefore: undefined });
     assert.equal(packDropStatusFor(r, packDropPickup(r)).label, 'picked');
     assert.equal(packDropPickup({ ...r, fate: 'expired' }), null);
     assert.equal(packDropStatusFor({ ...r, fate: 'expired' }, null).label, 'expired');
@@ -78,19 +78,19 @@ test('hubAnchor: demo-relative whole seconds, a play link, "-" without a hub gam
     assert.equal(hubAnchor(ctx, 1, 2, 'nobody'), '-');
 });
 
-test('rowHtml: time cell, escaped names, run link to the next death or the match end', () => {
-    const ctx = { gameId: 5, userIDs: { '<a>': 1, b: 2 }, demoOffset: 0, matchEnd: 1200 };
+test('rowHtml: time cell, escaped names, run link to the run\'s end, or 15 s without one', () => {
+    const ctx = { gameId: 5, userIDs: { '<a>': 1, b: 2 }, demoOffset: 0 };
     const row = {
         drop: { time: 75, player: '<a>', team: 'red', weapon: 'rl' },
-        pickup: { player: 'b', team: 'red', time: 80, nextDeathTime: 0, kills: 3, hadBefore: true },
+        pickup: { player: 'b', team: 'red', time: 80, endTime: 1200, kills: 3, hadBefore: true },
         status: { label: 'xfer RL', cls: 'status-xfer-had' },
     };
     const h = rowHtml(row, ctx);
     assert.match(h, /<td class="time-cell time-link">1:15<\/td>/);
     assert.match(h, /<td>&lt;a&gt;<\/td>/);
     assert.match(h, /from=71&to=77&track=1/);
-    assert.match(h, /from=77&to=1200&track=2/, 'the picker never died again: to the match end');
-    assert.match(rowHtml(row, { ...ctx, matchEnd: undefined }), /from=77&to=95&track=2/, 'no match length: 15 s');
+    assert.match(h, /from=77&to=1200&track=2/, 'to the run\'s end (endTime)');
+    assert.match(rowHtml({ ...row, pickup: { ...row.pickup, endTime: 0 } }, ctx), /from=77&to=95&track=2/, 'a reconstructed pickup has no run: 15 s');
     assert.match(h, /<span class="kills-redundant">3<\/span>/);
     assert.match(h, /<td class="weapon-cell weapon-rl">RL<\/td>/);
     assert.match(h, /<span class="pack-status status-xfer-had">xfer RL<\/span>/);

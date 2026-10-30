@@ -39,4 +39,4 @@ Every node in the analytics DAG, as declared in [`analyzer/dag.go`](analyzer/dag
 | `backpack-pickups` | light | no | — | `backpacks:final`, `weapon-pickups`, `backpack-linkage` | `backpack-pickups` | Pickup side of each `ktx` backpack drop, stamped on the drop row: the `//ktx bp` weaponPickups row joined on (entNum, drop time) gives `fate: picked` with `picker`/`pickerTeam`/`pickupTime` and the pickup's `pickerHadWeapon`/`pickerKills`/`pickerNextDeathTime`; an unjoined row keeps `expired` from `//ktx expire` or becomes `unobserved`. Every row naming a picker also gets `pickerRelation` (self/team/enemy). Runs after backpack-linkage, the other writer of backpacks[].fate. |
 | `los` | heavy | yes | — | `timeline`, `demoinfo`, `metadata` | `los` | Per-player line-of-sight and potential-visibility interval sets — the heaviest position-derived pass, materialised on demand. |
 
-Generated at schema version 77.
+Generated at schema version 78.

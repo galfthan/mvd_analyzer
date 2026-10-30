@@ -6406,6 +6406,7 @@
         290.25
       ],
       "picker": "mj",
+      "pickerEndTime": 41740,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 41740,
@@ -6428,6 +6429,7 @@
         272
       ],
       "picker": "mj",
+      "pickerEndTime": 41740,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 41740,
@@ -6450,6 +6452,7 @@
         128
       ],
       "picker": "speedball",
+      "pickerEndTime": 261292,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 261292,
@@ -6472,6 +6475,7 @@
         128
       ],
       "picker": "mj",
+      "pickerEndTime": 50572,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 50572,
@@ -6494,6 +6498,7 @@
         219
       ],
       "picker": "speedball",
+      "pickerEndTime": 261292,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 261292,
@@ -6516,6 +6521,7 @@
         164.875
       ],
       "picker": "speedball",
+      "pickerEndTime": 261292,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 261292,
@@ -6538,6 +6544,7 @@
         0
       ],
       "picker": "mj",
+      "pickerEndTime": 165730,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 165730,
@@ -6560,6 +6567,7 @@
         243.625
       ],
       "picker": "speedball",
+      "pickerEndTime": 261292,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 261292,
@@ -6582,6 +6590,7 @@
         272
       ],
       "picker": "speedball",
+      "pickerEndTime": 261292,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 261292,
@@ -6604,6 +6613,7 @@
         272
       ],
       "picker": "mj",
+      "pickerEndTime": 165730,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 165730,
@@ -6626,6 +6636,7 @@
         0
       ],
       "picker": "mj",
+      "pickerEndTime": 113885,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 113885,
@@ -6648,6 +6659,7 @@
         144
       ],
       "picker": "speedball",
+      "pickerEndTime": 261292,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 261292,
@@ -6670,6 +6682,7 @@
         0
       ],
       "picker": "speedball",
+      "pickerEndTime": 261292,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 261292,
@@ -6692,6 +6705,7 @@
         80
       ],
       "picker": "speedball",
+      "pickerEndTime": 261292,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 261292,
@@ -6714,6 +6728,7 @@
         145
       ],
       "picker": "speedball",
+      "pickerEndTime": 261292,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 261292,
@@ -6736,6 +6751,7 @@
         0
       ],
       "picker": "mj",
+      "pickerEndTime": 220979,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 220979,
@@ -6758,6 +6774,7 @@
         80
       ],
       "picker": "mj",
+      "pickerEndTime": 231557,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 231557,
@@ -6780,6 +6797,7 @@
         108.375
       ],
       "picker": "mj",
+      "pickerEndTime": 231557,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 231557,
@@ -6802,6 +6820,7 @@
         -5.75
       ],
       "picker": "speedball",
+      "pickerEndTime": 261292,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 261292,
@@ -6824,6 +6843,7 @@
         80
       ],
       "picker": "mj",
+      "pickerEndTime": 279980,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 279980,
@@ -6846,6 +6866,7 @@
         0
       ],
       "picker": "speedball",
+      "pickerEndTime": 461920,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 461920,
@@ -6868,6 +6889,7 @@
         272
       ],
       "picker": "mj",
+      "pickerEndTime": 349203,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 349203,
@@ -6890,6 +6912,7 @@
         185.875
       ],
       "picker": "speedball",
+      "pickerEndTime": 461920,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 461920,
@@ -6912,6 +6935,7 @@
         192
       ],
       "picker": "speedball",
+      "pickerEndTime": 461920,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 461920,
@@ -6934,6 +6958,7 @@
         144
       ],
       "picker": "mj",
+      "pickerEndTime": 329665,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 329665,
@@ -6956,6 +6981,7 @@
         272
       ],
       "picker": "mj",
+      "pickerEndTime": 349203,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 349203,
@@ -6978,6 +7004,7 @@
         235.5
       ],
       "picker": "mj",
+      "pickerEndTime": 396710,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 396710,
@@ -7000,6 +7027,7 @@
         187.25
       ],
       "picker": "speedball",
+      "pickerEndTime": 461920,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 461920,
@@ -7022,6 +7050,7 @@
         23.25
       ],
       "picker": "speedball",
+      "pickerEndTime": 461920,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 461920,
@@ -7044,6 +7073,7 @@
         213.375
       ],
       "picker": "speedball",
+      "pickerEndTime": 461920,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 461920,
@@ -7066,6 +7096,7 @@
         3.375
       ],
       "picker": "speedball",
+      "pickerEndTime": 461920,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 461920,
@@ -7088,6 +7119,7 @@
         308.625
       ],
       "picker": "speedball",
+      "pickerEndTime": 461920,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 461920,
@@ -7110,6 +7142,7 @@
         144
       ],
       "picker": "mj",
+      "pickerEndTime": 443799,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 443799,
@@ -7132,6 +7165,7 @@
         158.5
       ],
       "picker": "mj",
+      "pickerEndTime": 454270,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 454270,
@@ -7154,6 +7188,7 @@
         41
       ],
       "picker": "speedball",
+      "pickerEndTime": 476527,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 476527,
@@ -7176,6 +7211,7 @@
         295.875
       ],
       "picker": "speedball",
+      "pickerEndTime": 461920,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 461920,
@@ -7198,6 +7234,7 @@
         235.375
       ],
       "picker": "speedball",
+      "pickerEndTime": 476527,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 476527,
@@ -7220,6 +7257,7 @@
         128
       ],
       "picker": "speedball",
+      "pickerEndTime": 574235,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 574235,
@@ -7242,6 +7280,7 @@
         272
       ],
       "picker": "speedball",
+      "pickerEndTime": 574235,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 574235,
@@ -7264,6 +7303,7 @@
         144
       ],
       "picker": "speedball",
+      "pickerEndTime": 574235,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 574235,
@@ -7286,6 +7326,7 @@
         80
       ],
       "picker": "mj",
+      "pickerEndTime": 558088,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 558088,
@@ -7308,6 +7349,7 @@
         53.875
       ],
       "picker": "speedball",
+      "pickerEndTime": 574235,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 574235,
@@ -7330,6 +7372,7 @@
         144
       ],
       "picker": "speedball",
+      "pickerEndTime": 574235,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 574235,
@@ -7352,6 +7395,7 @@
         0
       ],
       "picker": "mj",
+      "pickerEndTime": 592958,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 592958,
@@ -7374,6 +7418,7 @@
         36
       ],
       "picker": "mj",
+      "pickerEndTime": 592958,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 592958,
@@ -7396,6 +7441,7 @@
         199.75
       ],
       "picker": "speedball",
+      "pickerEndTime": 600001,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerRelation": "enemy",
@@ -18885,7 +18931,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 77,
+  "schemaVersion": 78,
   "shots": {
     "byPlayer": [
       {
@@ -39406,6 +39452,7 @@
   },
   "weaponPickups": [
     {
+      "endTime": 7641,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39417,6 +39464,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 41740,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -39432,6 +39480,7 @@
       "dropTime": 7641,
       "dropper": "speedball",
       "dropperTeam": "speedball",
+      "endTime": 41740,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 41740,
@@ -39442,6 +39491,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 35533,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39453,6 +39503,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 41740,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -39464,6 +39515,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 41740,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39475,6 +39527,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 35533,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39486,6 +39539,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 35533,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39497,6 +39551,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 41740,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39512,6 +39567,7 @@
       "dropTime": 35533,
       "dropper": "speedball",
       "dropperTeam": "speedball",
+      "endTime": 41740,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 41740,
@@ -39522,6 +39578,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 45494,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -39533,6 +39590,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 45494,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39544,6 +39602,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 50572,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39555,6 +39614,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 50572,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -39566,6 +39626,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 50572,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39577,6 +39638,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 261292,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39592,6 +39654,7 @@
       "dropTime": 45494,
       "dropper": "speedball",
       "dropperTeam": "speedball",
+      "endTime": 50572,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 50572,
@@ -39602,6 +39665,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 261292,
       "hadBefore": false,
       "inferred": true,
       "kills": 13,
@@ -39613,6 +39677,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 261292,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39624,6 +39689,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 65500,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39635,6 +39701,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 65500,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39650,6 +39717,7 @@
       "dropTime": 50572,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 261292,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 261292,
@@ -39660,6 +39728,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 65500,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39671,6 +39740,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 261292,
       "hadBefore": false,
       "inferred": true,
       "kills": 8,
@@ -39686,6 +39756,7 @@
       "dropTime": 65500,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 261292,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 261292,
@@ -39696,6 +39767,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 68131,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39711,6 +39783,7 @@
       "dropTime": 41740,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 261292,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 261292,
@@ -39721,6 +39794,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 78027,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39732,6 +39806,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 81690,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39743,6 +39818,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 87742,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39758,6 +39834,7 @@
       "dropTime": 87742,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 261292,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 261292,
@@ -39768,6 +39845,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 99131,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39783,6 +39861,7 @@
       "dropTime": 81690,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 261292,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 261292,
@@ -39793,6 +39872,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 105002,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39804,6 +39884,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 113885,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39819,6 +39900,7 @@
       "dropTime": 105002,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 113885,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 113885,
@@ -39829,6 +39911,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 165730,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39844,6 +39927,7 @@
       "dropTime": 78027,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 165730,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 165730,
@@ -39854,6 +39938,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 165730,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39865,6 +39950,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 261292,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39880,6 +39966,7 @@
       "dropTime": 113885,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 261292,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 261292,
@@ -39890,6 +39977,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 165730,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39905,6 +39993,7 @@
       "dropTime": 99131,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 165730,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 165730,
@@ -39915,6 +40004,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 165730,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39926,6 +40016,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 165730,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39941,6 +40032,7 @@
       "dropTime": 165730,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 261292,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 261292,
@@ -39951,6 +40043,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 178912,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39962,6 +40055,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 178912,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39973,6 +40067,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 261292,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39988,6 +40083,7 @@
       "dropTime": 178912,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 261292,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 261292,
@@ -39998,6 +40094,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 195043,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40009,6 +40106,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 195043,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40020,6 +40118,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 195043,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40035,6 +40134,7 @@
       "dropTime": 195043,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 261292,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 261292,
@@ -40045,6 +40145,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 203407,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40056,6 +40157,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 203407,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40067,6 +40169,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 211875,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40078,6 +40181,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 211875,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40089,6 +40193,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 220979,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40104,6 +40209,7 @@
       "dropTime": 203407,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 220979,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 220979,
@@ -40114,6 +40220,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 220979,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40129,6 +40236,7 @@
       "dropTime": 220979,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 231557,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 231557,
@@ -40143,6 +40251,7 @@
       "dropTime": 211875,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 231557,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 231557,
@@ -40153,6 +40262,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 231557,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40164,6 +40274,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 231557,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40175,6 +40286,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 245785,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40186,6 +40298,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 245785,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40197,6 +40310,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 279980,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -40212,6 +40326,7 @@
       "dropTime": 245785,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 261292,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 261292,
@@ -40226,6 +40341,7 @@
       "dropTime": 261292,
       "dropper": "speedball",
       "dropperTeam": "speedball",
+      "endTime": 279980,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 279980,
@@ -40236,6 +40352,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 461920,
       "hadBefore": false,
       "inferred": true,
       "kills": 14,
@@ -40247,6 +40364,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 461920,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40258,6 +40376,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 279980,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40269,6 +40388,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 461920,
       "hadBefore": false,
       "inferred": true,
       "kills": 9,
@@ -40280,6 +40400,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 279980,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40291,6 +40412,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 291521,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40306,6 +40428,7 @@
       "dropTime": 279980,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 461920,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 461920,
@@ -40316,6 +40439,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 291521,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40327,6 +40451,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 461920,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40338,6 +40463,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 297819,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40353,6 +40479,7 @@
       "dropTime": 297819,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 461920,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 461920,
@@ -40363,6 +40490,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 303838,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40374,6 +40502,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 461920,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40385,6 +40514,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 307864,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40400,6 +40530,7 @@
       "dropTime": 307864,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 329665,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 329665,
@@ -40414,6 +40545,7 @@
       "dropTime": 303838,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 461920,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 461920,
@@ -40424,6 +40556,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 329665,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40439,6 +40572,7 @@
       "dropTime": 291521,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 349203,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 349203,
@@ -40449,6 +40583,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 349203,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40464,6 +40599,7 @@
       "dropTime": 329665,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 349203,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 349203,
@@ -40474,6 +40610,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 349203,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40485,6 +40622,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 461920,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40496,6 +40634,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 355385,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40507,6 +40646,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 355385,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40518,6 +40658,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 361411,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40533,6 +40674,7 @@
       "dropTime": 361411,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 461920,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 461920,
@@ -40543,6 +40685,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 370458,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40554,6 +40697,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 370458,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40565,6 +40709,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 372938,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40576,6 +40721,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 382944,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40591,6 +40737,7 @@
       "dropTime": 382944,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 461920,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 461920,
@@ -40601,6 +40748,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 396710,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40616,6 +40764,7 @@
       "dropTime": 355385,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 396710,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 396710,
@@ -40630,6 +40779,7 @@
       "dropTime": 396710,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 461920,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 461920,
@@ -40640,6 +40790,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 400048,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40655,6 +40806,7 @@
       "dropTime": 372938,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 461920,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 461920,
@@ -40665,6 +40817,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 407797,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40676,6 +40829,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 416918,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40687,6 +40841,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 416918,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40698,6 +40853,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 416918,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40713,6 +40869,7 @@
       "dropTime": 400048,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 461920,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 461920,
@@ -40723,6 +40880,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 437958,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40738,6 +40896,7 @@
       "dropTime": 416918,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 443799,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 443799,
@@ -40748,6 +40907,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 443799,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40759,6 +40919,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 445123,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40770,6 +40931,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 447881,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40785,6 +40947,7 @@
       "dropTime": 437958,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 454270,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 454270,
@@ -40799,6 +40962,7 @@
       "dropTime": 454270,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 461920,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 461920,
@@ -40809,6 +40973,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 490154,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -40820,6 +40985,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 476527,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40831,6 +40997,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 476527,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40846,6 +41013,7 @@
       "dropTime": 461920,
       "dropper": "speedball",
       "dropperTeam": "speedball",
+      "endTime": 476527,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 476527,
@@ -40860,6 +41028,7 @@
       "dropTime": 443799,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 476527,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 476527,
@@ -40870,6 +41039,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 490154,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40881,6 +41051,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 476527,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40892,6 +41063,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 574235,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -40903,6 +41075,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 490154,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40914,6 +41087,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 574235,
       "hadBefore": false,
       "inferred": true,
       "kills": 8,
@@ -40925,6 +41099,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 490154,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40940,6 +41115,7 @@
       "dropTime": 490154,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 574235,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 574235,
@@ -40950,6 +41126,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 494128,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40961,6 +41138,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 574235,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40972,6 +41150,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 574235,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40983,6 +41162,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 497566,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40994,6 +41174,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 509311,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41005,6 +41186,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 574235,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41016,6 +41198,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 509311,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41027,6 +41210,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 524480,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41042,6 +41226,7 @@
       "dropTime": 524480,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 574235,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 574235,
@@ -41052,6 +41237,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 533714,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41067,6 +41253,7 @@
       "dropTime": 533714,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 574235,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 574235,
@@ -41077,6 +41264,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 546169,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41088,6 +41276,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 574235,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41099,6 +41288,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 558088,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41114,6 +41304,7 @@
       "dropTime": 546169,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 558088,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 558088,
@@ -41128,6 +41319,7 @@
       "dropTime": 558088,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 574235,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 574235,
@@ -41138,6 +41330,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 565455,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41149,6 +41342,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 565455,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41164,6 +41358,7 @@
       "dropTime": 565455,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 574235,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 574235,
@@ -41174,6 +41369,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 574205,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41185,6 +41381,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600001,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -41195,6 +41392,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 585322,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41206,6 +41404,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600001,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -41216,6 +41415,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600001,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41230,6 +41430,7 @@
       "dropTime": 574205,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 592958,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 592958,
@@ -41244,6 +41445,7 @@
       "dropTime": 574235,
       "dropper": "speedball",
       "dropperTeam": "speedball",
+      "endTime": 592958,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 592958,
@@ -41254,6 +41456,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 592958,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -41269,6 +41472,7 @@
       "dropTime": 592958,
       "dropper": "mj",
       "dropperTeam": "mj",
+      "endTime": 600001,
       "hadBefore": true,
       "kills": 0,
       "player": "speedball",
@@ -41278,6 +41482,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600001,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,

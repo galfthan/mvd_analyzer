@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "77"
+  version: "78"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -5843,6 +5843,14 @@ components:
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
+        pickerEndTime:
+          description: >
+            Where the picker's run with the pack ends, int32 ms since match
+            start — the joined /weapon-pickups row's `endTime`: their next
+            death, else the match end (schema v78). `ktx` rows only.
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         pickerTeam:
           description: >
             Team of `picker`. Omitted when the picker has no team — an FFA
@@ -5929,6 +5937,14 @@ components:
           type: integer
         nextDeathTime:
           description: "Picker's next death, int32 ms (0 = never died before match end)."
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        endTime:
+          description: >
+            Where the pickup's run ends, int32 ms: `nextDeathTime`, else the
+            match end — the picker was still on the run when the match ended
+            (schema v78). The window `kills` counts over.
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer

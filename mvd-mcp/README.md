@@ -692,7 +692,8 @@ Timeline output (`summary: false`): `result.ItemsResult` —
 
 Output: `{ pickups: []result.WeaponPickup }` — each entry has `time`,
 `player`, `team`, `weapon`, `source`, `hadBefore`, `kills` (before
-picker's next death), `nextDeathTime`, plus for backpack pickups
+picker's next death), `nextDeathTime`, `endTime` (where the run ends:
+the next death, else the match end), plus for backpack pickups
 `backpackEnt`, `dropper`, `dropperTeam`, `dropTime`. Joins to
 `getBackpacks` via `backpackEnt` == `backpacks[].entNum`. (REST returns a
 `{timeUnit, pickups}` envelope; the MCP tool passes it through.)

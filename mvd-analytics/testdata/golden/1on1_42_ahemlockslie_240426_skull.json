@@ -4322,6 +4322,7 @@
         -256
       ],
       "picker": "42",
+      "pickerEndTime": 68589,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 68589,
@@ -4344,6 +4345,7 @@
         -196.375
       ],
       "picker": "42",
+      "pickerEndTime": 68589,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 68589,
@@ -4366,6 +4368,7 @@
         -198.375
       ],
       "picker": "AHemlocksLie",
+      "pickerEndTime": 130700,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 130700,
@@ -4388,6 +4391,7 @@
         -192
       ],
       "picker": "AHemlocksLie",
+      "pickerEndTime": 130700,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 130700,
@@ -4410,6 +4414,7 @@
         -387.75
       ],
       "picker": "AHemlocksLie",
+      "pickerEndTime": 130700,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 130700,
@@ -4432,6 +4437,7 @@
         -192
       ],
       "picker": "AHemlocksLie",
+      "pickerEndTime": 130700,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 130700,
@@ -4454,6 +4460,7 @@
         76.25
       ],
       "picker": "42",
+      "pickerEndTime": 175868,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 175868,
@@ -4476,6 +4483,7 @@
         74.5
       ],
       "picker": "42",
+      "pickerEndTime": 175868,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 175868,
@@ -4498,6 +4506,7 @@
         -320
       ],
       "picker": "AHemlocksLie",
+      "pickerEndTime": 206208,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 206208,
@@ -4520,6 +4529,7 @@
         -232.125
       ],
       "picker": "42",
+      "pickerEndTime": 220026,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 220026,
@@ -4542,6 +4552,7 @@
         -23
       ],
       "picker": "AHemlocksLie",
+      "pickerEndTime": 245675,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 245675,
@@ -4564,6 +4575,7 @@
         6.25
       ],
       "picker": "42",
+      "pickerEndTime": 367242,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 367242,
@@ -4586,6 +4598,7 @@
         -183.875
       ],
       "picker": "42",
+      "pickerEndTime": 367242,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 367242,
@@ -4608,6 +4621,7 @@
         -229
       ],
       "picker": "42",
+      "pickerEndTime": 367242,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 367242,
@@ -4630,6 +4644,7 @@
         -320
       ],
       "picker": "42",
+      "pickerEndTime": 405683,
       "pickerHadWeapon": false,
       "pickerKills": 1,
       "pickerNextDeathTime": 405683,
@@ -4652,6 +4667,7 @@
         -272
       ],
       "picker": "AHemlocksLie",
+      "pickerEndTime": 396293,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 396293,
@@ -4674,6 +4690,7 @@
         106.75
       ],
       "picker": "AHemlocksLie",
+      "pickerEndTime": 427618,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 427618,
@@ -4696,6 +4713,7 @@
         -192
       ],
       "picker": "AHemlocksLie",
+      "pickerEndTime": 446579,
       "pickerHadWeapon": false,
       "pickerKills": 0,
       "pickerNextDeathTime": 446579,
@@ -4718,6 +4736,7 @@
         -385.5
       ],
       "picker": "42",
+      "pickerEndTime": 544528,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 544528,
@@ -4740,6 +4759,7 @@
         -256
       ],
       "picker": "42",
+      "pickerEndTime": 544528,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 544528,
@@ -4762,6 +4782,7 @@
         77
       ],
       "picker": "42",
+      "pickerEndTime": 544528,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 544528,
@@ -4784,6 +4805,7 @@
         10.125
       ],
       "picker": "42",
+      "pickerEndTime": 544528,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 544528,
@@ -4806,6 +4828,7 @@
         -44.5
       ],
       "picker": "42",
+      "pickerEndTime": 544528,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 544528,
@@ -4828,6 +4851,7 @@
         56.375
       ],
       "picker": "AHemlocksLie",
+      "pickerEndTime": 584008,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 584008,
@@ -4850,6 +4874,7 @@
         23.5
       ],
       "picker": "AHemlocksLie",
+      "pickerEndTime": 584008,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerNextDeathTime": 584008,
@@ -4872,6 +4897,7 @@
         -273.125
       ],
       "picker": "42",
+      "pickerEndTime": 599993,
       "pickerHadWeapon": true,
       "pickerKills": 0,
       "pickerRelation": "enemy",
@@ -14420,7 +14446,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 77,
+  "schemaVersion": 78,
   "shots": {
     "byPlayer": [
       {
@@ -38965,6 +38991,7 @@
   },
   "weaponPickups": [
     {
+      "endTime": 40467,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -38976,6 +39003,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 40574,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -38987,6 +39015,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 40467,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -38998,6 +39027,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 40574,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39009,6 +39039,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 40467,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39020,6 +39051,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 40574,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39031,6 +39063,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 68589,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39042,6 +39075,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 68589,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39053,6 +39087,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 68589,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -39064,6 +39099,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 68589,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39075,6 +39111,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 68589,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39086,6 +39123,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 68589,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39101,6 +39139,7 @@
       "dropTime": 40574,
       "dropper": "42",
       "dropperTeam": "42",
+      "endTime": 68589,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 68589,
@@ -39115,6 +39154,7 @@
       "dropTime": 40467,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 68589,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 68589,
@@ -39125,6 +39165,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 77823,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39136,6 +39177,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 77823,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39147,6 +39189,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 77823,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39158,6 +39201,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 130700,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -39173,6 +39217,7 @@
       "dropTime": 77823,
       "dropper": "42",
       "dropperTeam": "42",
+      "endTime": 130700,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 130700,
@@ -39183,6 +39228,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 97115,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39194,6 +39240,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 130700,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39205,6 +39252,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 97115,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39220,6 +39268,7 @@
       "dropTime": 68589,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 130700,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 130700,
@@ -39234,6 +39283,7 @@
       "dropTime": 97115,
       "dropper": "42",
       "dropperTeam": "42",
+      "endTime": 130700,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 130700,
@@ -39248,6 +39298,7 @@
       "dropTime": 68589,
       "dropper": "42",
       "dropperTeam": "42",
+      "endTime": 130700,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 130700,
@@ -39258,6 +39309,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 175868,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39269,6 +39321,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 175868,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -39280,6 +39333,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 149946,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39291,6 +39345,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 149946,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39302,6 +39357,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 175868,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39317,6 +39373,7 @@
       "dropTime": 130700,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 175868,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 175868,
@@ -39331,6 +39388,7 @@
       "dropTime": 149946,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 175868,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 175868,
@@ -39341,6 +39399,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 206208,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39352,6 +39411,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 206208,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -39363,6 +39423,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 206208,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39374,6 +39435,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 175868,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39389,6 +39451,7 @@
       "dropTime": 175868,
       "dropper": "42",
       "dropperTeam": "42",
+      "endTime": 206208,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 206208,
@@ -39399,6 +39462,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 188881,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39410,6 +39474,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 188881,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39421,6 +39486,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 206208,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39432,6 +39498,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 220026,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39443,6 +39510,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 220026,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -39454,6 +39522,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 220026,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39469,6 +39538,7 @@
       "dropTime": 188881,
       "dropper": "42",
       "dropperTeam": "42",
+      "endTime": 220026,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 220026,
@@ -39479,6 +39549,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 220026,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39490,6 +39561,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 245675,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -39505,6 +39577,7 @@
       "dropTime": 220026,
       "dropper": "42",
       "dropperTeam": "42",
+      "endTime": 245675,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 245675,
@@ -39515,6 +39588,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 245675,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39526,6 +39600,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 245675,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39537,6 +39612,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 367242,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -39548,6 +39624,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 367242,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -39559,6 +39636,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 245675,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39570,6 +39648,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 272490,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39581,6 +39660,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 367242,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39596,6 +39676,7 @@
       "dropTime": 245675,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 367242,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 367242,
@@ -39606,6 +39687,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 272490,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39617,6 +39699,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 272490,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39628,6 +39711,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 272490,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39643,6 +39727,7 @@
       "dropTime": 272490,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 367242,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 367242,
@@ -39653,6 +39738,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 309048,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39664,6 +39750,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 309048,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39675,6 +39762,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 309048,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39686,6 +39774,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 309048,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39697,6 +39786,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 367242,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39708,6 +39798,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 311505,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39723,6 +39814,7 @@
       "dropTime": 311505,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 367242,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 367242,
@@ -39733,6 +39825,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 315350,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39744,6 +39837,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 328269,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39755,6 +39849,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 396293,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -39766,6 +39861,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 396293,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39777,6 +39873,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 396293,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -39788,6 +39885,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 372359,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39799,6 +39897,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 396293,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39810,6 +39909,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 372359,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39825,6 +39925,7 @@
       "dropTime": 372359,
       "dropper": "42",
       "dropperTeam": "42",
+      "endTime": 396293,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 396293,
@@ -39839,6 +39940,7 @@
       "dropTime": 367242,
       "dropper": "42",
       "dropperTeam": "42",
+      "endTime": 405683,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 405683,
@@ -39849,6 +39951,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 405683,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39860,6 +39963,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 405683,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39871,6 +39975,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 427618,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -39886,6 +39991,7 @@
       "dropTime": 396293,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 427618,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 427618,
@@ -39896,6 +40002,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 427618,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39907,6 +40014,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 544528,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -39918,6 +40026,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 427618,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39929,6 +40038,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 544528,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -39940,6 +40050,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 446579,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39955,6 +40066,7 @@
       "dropTime": 427618,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 544528,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 544528,
@@ -39969,6 +40081,7 @@
       "dropTime": 405683,
       "dropper": "42",
       "dropperTeam": "42",
+      "endTime": 446579,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 446579,
@@ -39979,6 +40092,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 544528,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -39990,6 +40104,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 446579,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40001,6 +40116,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 453865,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40012,6 +40128,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 544528,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40023,6 +40140,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 487023,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40034,6 +40152,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 487023,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40045,6 +40164,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 487023,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40060,6 +40180,7 @@
       "dropTime": 453865,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 544528,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 544528,
@@ -40070,6 +40191,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 498228,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40081,6 +40203,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 498228,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40096,6 +40219,7 @@
       "dropTime": 498228,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 544528,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 544528,
@@ -40106,6 +40230,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 512954,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40117,6 +40242,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 512954,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40132,6 +40258,7 @@
       "dropTime": 512954,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 544528,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 544528,
@@ -40142,6 +40269,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 526812,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40157,6 +40285,7 @@
       "dropTime": 526812,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 544528,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 544528,
@@ -40167,6 +40296,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 544450,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40178,6 +40308,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 544450,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40189,6 +40320,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 584008,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40200,6 +40332,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 599993,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -40214,6 +40347,7 @@
       "dropTime": 544528,
       "dropper": "42",
       "dropperTeam": "42",
+      "endTime": 584008,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 584008,
@@ -40228,6 +40362,7 @@
       "dropTime": 544450,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 584008,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 584008,
@@ -40238,6 +40373,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 599993,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40248,6 +40384,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 584008,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40259,6 +40396,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 584008,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40270,6 +40408,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 584008,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40285,6 +40424,7 @@
       "dropTime": 584008,
       "dropper": "AHemlocksLie",
       "dropperTeam": "AHemlocksLie",
+      "endTime": 599993,
       "hadBefore": true,
       "kills": 0,
       "player": "42",
@@ -40294,6 +40434,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 590655,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40305,6 +40446,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 590655,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40316,6 +40458,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 599993,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40326,6 +40469,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 599993,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -40336,6 +40480,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 599993,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,

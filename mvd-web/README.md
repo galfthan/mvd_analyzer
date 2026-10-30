@@ -1295,9 +1295,9 @@ drops it).
   endpoint (`events`, `highlights`, `backpacks`, `top-kills`, `top-windows`, `lives`,
   `frags` — the kill log, teamkills and suicides included, watched from
   the killer — and `weapon-pickups` — every slot-weapon pickup with the
-  kills before the picker's next death, from the pickup to that death —
-  to the match end when the picker never died again: a row without its
-  clip's end field runs until the match ended)
+  kills before the picker's next death, from the pickup to the run's
+  `endTime` — that death, or the match end when the picker never died
+  again)
   with its query params under their API names, a `where` over the rows it
   returns (an and / or / not tree of conditions — `= != < <= > >=`,
   `~` contains on text and membership on a list, `in` any of — fields as
@@ -1683,8 +1683,9 @@ show through the status chip (`enemy RL`, `xfer RL`).
 The `Drop` and `Run` columns are play links (a click plays in the
 Player tab, Ctrl / Cmd-click opens hub). `Drop` runs from 4 s before the
 drop to 2 s after, tracking the dropper;
-`Run` spans 3 s before pickup to the picker's next death (or the match end
-if they survived to match end), tracking the picker.
+`Run` spans 3 s before pickup to the run's end (`pickerEndTime`: the
+picker's next death, or the match end if they survived it; 15 s on a
+reconstructed row, whose pickup carries no run), tracking the picker.
 
 ## The map model and the playback bar
 

@@ -38,6 +38,11 @@ type WeaponPickup struct {
 	Inferred      bool   `json:"inferred,omitempty"` // synthesized from a STAT_ITEMS flip (weapon-stay recovery), not a KTX hint
 	Kills         int    `json:"kills"`
 	NextDeathTime int32  `json:"nextDeathTime,omitempty"` // ms; 0 if picker never died before match end
+	// EndTime is where the pickup's run ends (schema v78): NextDeathTime,
+	// else the match end — a picker who never died again was still on it
+	// when the match ended. The window Kills counts over. Match ms; 0 only
+	// when the demo has no match end either.
+	EndTime int32 `json:"endTime,omitempty"`
 
 	// Backpack-source fields. Only set when Source == "backpack".
 	// BackpackEnt pairs with BackpackDrop.EntNum so the frontend can

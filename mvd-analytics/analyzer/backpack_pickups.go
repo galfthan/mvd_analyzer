@@ -37,7 +37,7 @@ func backpackPickupsPost(res *Result, _ *CoreOutputs) {
 				had, kills := p.HadBefore, p.Kills
 				d.Fate = result.BackpackFatePicked
 				d.Picker, d.PickerTeam, d.PickupTime = p.Player, p.Team, p.Time
-				d.PickerHadWeapon, d.PickerKills, d.PickerNextDeathTime = &had, &kills, p.NextDeathTime
+				d.PickerHadWeapon, d.PickerKills, d.PickerNextDeathTime, d.PickerEndTime = &had, &kills, p.NextDeathTime, p.EndTime
 			} else if d.Fate == "" {
 				d.Fate = result.BackpackFateUnobserved
 			}

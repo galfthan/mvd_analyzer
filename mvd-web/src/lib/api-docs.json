@@ -54,6 +54,10 @@
         "description": "Who took the pack (schema v72). Set only with `fate: picked`, and only when the evidence named exactly ONE player — two players on one pack with nothing to separate them leave this empty rather than guess. On a `ktx` row, the `//ktx bp` pickup's player (schema v77; reconstructed rows since v72).",
         "type": "string"
       },
+      "pickerEndTime": {
+        "description": "Where the picker's run with the pack ends, int32 ms since match start — the joined /weapon-pickups row's `endTime`: their next death, else the match end (schema v78). `ktx` rows only.",
+        "type": "integer"
+      },
       "pickerHadWeapon": {
         "description": "Whether the picker already held the pack's weapon — the joined /weapon-pickups row's `hadBefore` (schema v77). `ktx` rows only: the entity track a reconstructed pickup is read from cannot say.",
         "type": "boolean"
@@ -1251,6 +1255,10 @@
       "dropperTeam": {
         "description": "Backpack dropper team.",
         "type": "string"
+      },
+      "endTime": {
+        "description": "Where the pickup's run ends, int32 ms: `nextDeathTime`, else the match end — the picker was still on the run when the match ended (schema v78). The window `kills` counts over.",
+        "type": "integer"
       },
       "hadBefore": {
         "description": "Picker already held this weapon (redundant grab, zero kills credited).",

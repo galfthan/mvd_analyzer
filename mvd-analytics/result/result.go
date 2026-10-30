@@ -1339,8 +1339,15 @@ package result
 //     `expired` and left the rest to the consumer's join; the join's answer
 //     is unchanged, and weaponPickups itself is untouched.
 //
+// v78 — a weapon pickup's run has an end on every row.
+//   - ADDED on `weaponPickups[]`: `endTime` — `nextDeathTime`, else the
+//     match end (the picker was still on the run when it ended), the
+//     window `kills` counts over; and on `ktx` rows of `backpacks[]` the
+//     same value as `pickerEndTime`. `nextDeathTime` is unchanged (absent
+//     when the picker never died again).
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 77
+const CurrentSchemaVersion = 78
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

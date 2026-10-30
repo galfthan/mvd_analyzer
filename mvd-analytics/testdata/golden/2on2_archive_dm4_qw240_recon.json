@@ -46035,7 +46035,7 @@
       }
     ]
   },
-  "schemaVersion": 77,
+  "schemaVersion": 78,
   "shots": {
     "byPlayer": [
       {
@@ -126019,6 +126019,7 @@
   },
   "weaponPickups": [
     {
+      "endTime": 4005,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126030,6 +126031,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 15690,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126041,6 +126043,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 12951,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126052,6 +126055,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 4005,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126063,6 +126067,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 38754,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -126074,6 +126079,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 10005,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126085,6 +126091,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 12951,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126096,6 +126103,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 16112,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126107,6 +126115,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 15690,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126118,6 +126127,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 16112,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126129,6 +126139,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 18588,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126140,6 +126151,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 38754,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -126151,6 +126163,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 18588,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126162,6 +126175,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 18588,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126173,6 +126187,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 30128,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126184,6 +126199,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 38754,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126195,6 +126211,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 23895,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126206,6 +126223,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 26111,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126217,6 +126235,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 30128,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126228,6 +126247,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 30128,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126239,6 +126259,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 35970,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126250,6 +126271,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 35970,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126261,6 +126283,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 31654,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126272,6 +126295,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 35970,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126283,6 +126307,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 72761,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126294,6 +126319,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 108508,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126305,6 +126331,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 108508,
       "hadBefore": false,
       "inferred": true,
       "kills": 7,
@@ -126316,6 +126343,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 41707,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126327,6 +126355,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 72761,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -126338,6 +126367,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 44494,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126349,6 +126379,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 108508,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -126360,6 +126391,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 50547,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126371,6 +126403,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 53116,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126382,6 +126415,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 50547,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126393,6 +126427,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 53116,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126404,6 +126439,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 108508,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126415,6 +126451,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 60743,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126426,6 +126463,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 60743,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126437,6 +126475,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 58793,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126448,6 +126487,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 63127,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126459,6 +126499,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 63127,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126470,6 +126511,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 72761,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126481,6 +126523,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 68970,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126492,6 +126535,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 81973,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126503,6 +126547,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 81973,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126514,6 +126559,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 76182,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126525,6 +126571,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 81973,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126536,6 +126583,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 83236,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126547,6 +126595,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 81973,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126558,6 +126607,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 83236,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126569,6 +126619,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 86547,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126580,6 +126631,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 115567,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -126591,6 +126643,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 115567,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126602,6 +126655,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 90548,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126613,6 +126667,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 108508,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126624,6 +126679,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 100707,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126635,6 +126691,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 100707,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126646,6 +126703,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 115567,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126657,6 +126715,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 116410,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -126668,6 +126727,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 169937,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -126679,6 +126739,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 113035,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126690,6 +126751,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 116410,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126701,6 +126763,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 116410,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126712,6 +126775,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 122620,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126723,6 +126787,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 122726,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126734,6 +126799,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 122620,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126745,6 +126811,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 129409,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126756,6 +126823,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 129409,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126767,6 +126835,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 129409,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126778,6 +126847,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 129253,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126789,6 +126859,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 129253,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126800,6 +126871,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 169937,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -126811,6 +126883,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 145775,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126822,6 +126895,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 137094,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126833,6 +126907,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 137094,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126844,6 +126919,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 136620,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126855,6 +126931,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 145775,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126866,6 +126943,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 181672,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -126877,6 +126955,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 142462,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126888,6 +126967,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 169937,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126899,6 +126979,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 150623,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126910,6 +126991,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 181672,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126921,6 +127003,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 150623,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126932,6 +127015,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 157831,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126943,6 +127027,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 157831,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126954,6 +127039,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 153149,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126965,6 +127051,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 158728,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -126976,6 +127063,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 158728,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126987,6 +127075,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 170514,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -126998,6 +127087,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 167832,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127009,6 +127099,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 167832,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127020,6 +127111,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 181672,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127031,6 +127123,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 173570,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127042,6 +127135,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 186941,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127053,6 +127147,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 181672,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127064,6 +127159,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 216222,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -127075,6 +127171,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 177203,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127086,6 +127183,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 193044,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -127097,6 +127195,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 186941,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127108,6 +127207,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 186359,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127119,6 +127219,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 193044,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127130,6 +127231,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 190619,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127141,6 +127243,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 192621,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127152,6 +127255,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 193044,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127163,6 +127267,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 216222,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -127174,6 +127279,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 199308,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127185,6 +127291,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 199308,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -127196,6 +127303,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 216222,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127207,6 +127315,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 201365,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127218,6 +127327,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 201365,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127229,6 +127339,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 202312,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127240,6 +127351,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 208372,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127251,6 +127363,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 208372,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127262,6 +127375,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 249382,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127273,6 +127387,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 249382,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127284,6 +127399,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 216222,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127295,6 +127411,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 249382,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -127306,6 +127423,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 220851,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -127317,6 +127435,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 215327,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127328,6 +127447,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 220851,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127339,6 +127459,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 219748,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127350,6 +127471,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 219748,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127361,6 +127483,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 252801,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127372,6 +127495,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 252801,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127383,6 +127507,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 239432,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127394,6 +127519,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 231380,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127405,6 +127531,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 239432,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127416,6 +127543,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 252801,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127427,6 +127555,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 231380,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127438,6 +127567,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 252801,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127449,6 +127579,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 239432,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127460,6 +127591,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 242013,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127471,6 +127603,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 252801,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127482,6 +127615,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 242013,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127493,6 +127627,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 251750,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127504,6 +127639,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 252801,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127515,6 +127651,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 272435,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127526,6 +127663,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 272435,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127537,6 +127675,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 264909,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127548,6 +127687,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 264909,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127559,6 +127699,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 281976,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127570,6 +127711,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 265696,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127581,6 +127723,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 264909,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127592,6 +127735,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 271595,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127603,6 +127747,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 281976,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127614,6 +127759,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 277436,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127625,6 +127771,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 271595,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127636,6 +127783,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 274010,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127647,6 +127795,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 281976,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -127658,6 +127807,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 275698,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127669,6 +127819,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 275698,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127680,6 +127831,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 280822,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127691,6 +127843,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 280822,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127702,6 +127855,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 279927,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127713,6 +127867,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 280822,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127724,6 +127879,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 292782,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127735,6 +127891,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 293362,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127746,6 +127903,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 295363,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127757,6 +127915,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 293362,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127768,6 +127927,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 292782,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127779,6 +127939,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 303412,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -127790,6 +127951,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 303412,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127801,6 +127963,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 295363,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127812,6 +127975,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 293362,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127823,6 +127987,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 293362,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127834,6 +127999,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 303412,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127845,6 +128011,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 295363,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127856,6 +128023,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 307456,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -127867,6 +128035,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 298940,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127878,6 +128047,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 301729,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127889,6 +128059,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 305926,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127900,6 +128071,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 310020,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127911,6 +128083,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 315653,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127922,6 +128095,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 310020,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127933,6 +128107,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 305926,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127944,6 +128119,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 315653,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -127955,6 +128131,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 315653,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -127966,6 +128143,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 318496,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -127977,6 +128155,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 311963,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127988,6 +128167,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 313915,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -127999,6 +128179,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 315653,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128010,6 +128191,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 318496,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128021,6 +128203,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 322019,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128032,6 +128215,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 322019,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128043,6 +128227,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 323549,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128054,6 +128239,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 323549,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128065,6 +128251,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 327335,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128076,6 +128263,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 327335,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128087,6 +128275,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 325333,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128098,6 +128287,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 327335,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128109,6 +128299,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 330389,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128120,6 +128311,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 330389,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128131,6 +128323,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 330389,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -128142,6 +128335,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 339864,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128153,6 +128347,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 335336,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128164,6 +128359,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 335336,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128175,6 +128371,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 344181,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128186,6 +128383,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 344181,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128197,6 +128395,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 338126,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128208,6 +128407,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 338126,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128219,6 +128419,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 345129,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128230,6 +128431,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 345129,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128241,6 +128443,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 366656,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128252,6 +128455,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 345129,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128263,6 +128467,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 355142,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128274,6 +128479,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 355142,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128285,6 +128491,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 366656,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -128296,6 +128503,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 371078,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128307,6 +128515,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 371078,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128318,6 +128527,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 353561,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128329,6 +128539,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 353561,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128340,6 +128551,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 355142,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128351,6 +128563,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 371078,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128362,6 +128575,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 360826,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128373,6 +128587,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 371078,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128384,6 +128599,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 366656,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128395,6 +128611,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 369447,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128406,6 +128623,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 373973,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128417,6 +128635,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 373973,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128428,6 +128647,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 427132,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -128439,6 +128659,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 377601,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128450,6 +128671,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 377601,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128461,6 +128683,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 373973,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128472,6 +128695,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 405007,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -128483,6 +128707,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 378971,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128494,6 +128719,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 427132,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128505,6 +128731,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 405007,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -128516,6 +128743,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 427132,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -128527,6 +128755,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 387553,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128538,6 +128767,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 391371,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128549,6 +128779,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 391371,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128560,6 +128791,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 395417,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128571,6 +128803,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 400549,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128582,6 +128815,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 405007,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128593,6 +128827,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 415341,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128604,6 +128839,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 415341,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128615,6 +128851,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 415341,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128626,6 +128863,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 410961,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128637,6 +128875,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 424133,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128648,6 +128887,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 418816,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128659,6 +128899,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 424133,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128670,6 +128911,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 424133,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128681,6 +128923,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 427239,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128692,6 +128935,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 432762,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128703,6 +128947,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 427239,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128714,6 +128959,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 439239,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -128725,6 +128971,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 439239,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128736,6 +128983,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 431921,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128747,6 +128995,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 441971,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128758,6 +129007,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 432762,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128769,6 +129019,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 441971,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -128780,6 +129031,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 435712,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128791,6 +129043,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 441658,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128802,6 +129055,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 439239,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128813,6 +129067,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 440446,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128824,6 +129079,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 445451,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128835,6 +129091,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 445451,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128846,6 +129103,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 445451,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128857,6 +129115,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 446135,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -128868,6 +129127,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 446135,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -128879,6 +129139,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 446135,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128890,6 +129151,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 451136,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -128901,6 +129163,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 462083,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128912,6 +129175,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 449610,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128923,6 +129187,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 449610,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128934,6 +129199,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 465295,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -128945,6 +129211,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 465295,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128956,6 +129223,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 451136,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128967,6 +129235,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 451136,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128978,6 +129247,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 460712,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -128989,6 +129259,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 460712,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129000,6 +129271,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 465295,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129011,6 +129283,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 465347,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -129022,6 +129295,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 462083,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129033,6 +129307,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 465347,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129044,6 +129319,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 477346,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -129055,6 +129331,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 470241,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129066,6 +129343,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 470241,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129077,6 +129355,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 471347,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129088,6 +129367,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 478242,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129099,6 +129379,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 477346,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129110,6 +129391,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 478242,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129121,6 +129403,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 477346,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129132,6 +129415,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 503451,
       "hadBefore": false,
       "inferred": true,
       "kills": 5,
@@ -129143,6 +129427,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 481605,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129154,6 +129439,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 483658,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129165,6 +129451,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 481605,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -129176,6 +129463,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 481605,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129187,6 +129475,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 483658,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129198,6 +129487,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 487085,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129209,6 +129499,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 489033,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129220,6 +129511,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 489033,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129231,6 +129523,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 489136,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -129242,6 +129535,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 503451,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129253,6 +129547,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 495241,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129264,6 +129559,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 502028,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129275,6 +129571,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 495241,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129286,6 +129583,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 495452,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129297,6 +129595,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 505823,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -129308,6 +129607,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 501765,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129319,6 +129619,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 502028,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129330,6 +129631,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 514559,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -129341,6 +129643,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 508823,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129352,6 +129655,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 531347,
       "hadBefore": false,
       "inferred": true,
       "kills": 6,
@@ -129363,6 +129667,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 531347,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129374,6 +129679,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 542400,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -129385,6 +129691,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 514559,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129396,6 +129703,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 512402,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129407,6 +129715,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 512402,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129418,6 +129727,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 531347,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129429,6 +129739,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 542400,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129440,6 +129751,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 519087,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129451,6 +129763,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 519087,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129462,6 +129775,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 522295,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129473,6 +129787,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 522295,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129484,6 +129799,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 528088,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129495,6 +129811,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 532927,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -129506,6 +129823,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 594524,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -129517,6 +129835,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 594524,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129528,6 +129847,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 594524,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -129539,6 +129859,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 547773,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129550,6 +129871,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 564409,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -129561,6 +129883,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 564409,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129572,6 +129895,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 547773,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129583,6 +129907,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 542400,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129594,6 +129919,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 564409,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129605,6 +129931,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 554944,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129616,6 +129943,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 564409,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -129627,6 +129955,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 556049,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -129638,6 +129967,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 554944,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129649,6 +129979,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 594524,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129660,6 +129991,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 564465,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129671,6 +130003,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 598472,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -129682,6 +130015,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 594524,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129693,6 +130027,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 598472,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -129704,6 +130039,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 567994,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129715,6 +130051,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 589996,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129726,6 +130063,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 588257,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129737,6 +130075,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 588257,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129748,6 +130087,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 598472,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129759,6 +130099,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 589996,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129770,6 +130111,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 593682,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129781,6 +130123,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 600053,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129791,6 +130134,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600053,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129801,6 +130145,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600053,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -129811,6 +130156,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 600053,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,

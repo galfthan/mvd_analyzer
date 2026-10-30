@@ -14,7 +14,6 @@
     import { onMount } from 'svelte';
     import { clock, demo, activeTab } from '../../state/index.js';
     import { demoOffsetSec } from '../../lib/result.js';
-    import { matchDurationSec } from '../../lib/timeline.js';
     import { FILTER_KEYS, packDropRows, filterOptions, filterRows, countText, rowHtml } from '../../lib/packdrops.js';
     import { makeSortable } from '../../ui/sortable.js';
 
@@ -69,7 +68,6 @@
             gameId: result?.hubInfo?.gameId,
             userIDs: result?.timelineAnalysis?.playerUserIDs || {},
             demoOffset: demoOffsetSec(result),
-            matchEnd: result ? matchDurationSec(result) : undefined,
         };
         empty = !!result && rows.length === 0;
         const opts = filterOptions(rows);
