@@ -76,9 +76,22 @@
     let index = $derived(run && run.clips === playable ? run.index : -1);
     let current = $derived(index >= 0 ? playable[index] : null);
 
+    // The full analyzer opens this playlist as its own (`&open`: it
+    // replaces the list there rather than adding to it) on the demo of the
+    // clip playing, that clip selected (?seg=, match seconds) and the
+    // playhead at its start — where the viewer is, to edit from.
     const fullUrl = $derived.by(() => {
-        const firstHub = playable[0]?.demo.gameId;
-        return `./?${firstHub ? `gameId=${firstHub}&` : ''}tab=player#playlist=${code}`;
+        const at = current || playable[0];
+        const params = new URLSearchParams();
+        if (at?.demo.gameId) params.set('gameId', String(at.demo.gameId));
+        params.set('tab', 'player');
+        if (at) {
+            const off = at.demo.offset || 0;
+            const start = Math.max(0, at.from - off);
+            params.set('seg', `${start}-${Math.max(start, at.to - off)}`);
+            params.set('t', String(start));
+        }
+        return `./?${params}#playlist=${code}&open`;
     });
 
     /** @param {number} i */
@@ -91,16 +104,28 @@
         if (index < 0) return playFrom(0);
         engine.togglePlay();
     }
+    // A click or Space on the game view, and Space anywhere on the page
+    // but a control (Space on a button presses it), play / pause.
+    engine.screenToggle = togglePlay;
+    /** @param {KeyboardEvent} e */
+    function key(e) {
+        if (e.key !== ' ' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+        if (/** @type {Element} */ (e.target).closest?.('input, textarea, select, button, a')) return;
+        e.preventDefault();
+        togglePlay();
+    }
 
     /** @param {import('../lib/playlist.js').Clip} c */
     const len = (c) => formatDuration(c.to - c.from);
 </script>
 
+<svelte:window onkeydown={key} />
+
 <div class="clips-page">
     <header class="clips-head">
         <span class="clips-brand">MVD Analyzer</span>
         <span class="clips-title">{clips.length} clip{clips.length === 1 ? '' : 's'}</span>
-        <a class="clips-full" href={fullUrl} title="Open these clips in the full analyzer's Player tab, with its map, graphs and tables (it analyses the demo first)">
+        <a class="clips-full" href={fullUrl} title="Open this playlist in the full analyzer's Player tab to edit it, at the clip playing — with its map, graphs and tables (it analyses the demo first)">
             <ExternalLink size={14} /> Open in the full analyzer
         </a>
     </header>

@@ -175,6 +175,12 @@
         togglePlay();
     }
 
+    // A click or Space on the game view is this play / pause too.
+    onMount(() => {
+        engine.screenToggle = togglePlay;
+        return () => { engine.screenToggle = () => engine.togglePlay(); };
+    });
+
     onMount(() => {
         const offs = [
             demo.subscribe((h) => {

@@ -67,6 +67,9 @@ export class PlayerEngine {
         // it, not the rate, is what plays then.
         /** @type {number | null} */
         this.slow = null;
+        // Play / pause from a click or Space on the game view (hookScreen).
+        /** @type {() => void} */
+        this.screenToggle = () => this.togglePlay();
         /** @type {DemoHandle | null} */
         this.handle = null;
         /** @type {HTMLElement | null} */
@@ -163,6 +166,7 @@ export class PlayerEngine {
         iframe.addEventListener('load', () => {
             if (this.iframe !== iframe) return;
             // player.html's window.mvdFte (mvd-fte-player/README.md).
+            this.hookScreen(/** @type {Window} */ (iframe.contentWindow));
             /** @type {any} */ (iframe.contentWindow).mvdFte.start({ demoUrl, demoPath, mapName: mapFileKey(handle.result) })
                 .then((/** @type {FteController} */ fte) => waitForDemoClock(fte, () => this.iframe === iframe).then(() => fte))
                 .then((/** @type {FteController} */ fte) => {
@@ -183,6 +187,25 @@ export class PlayerEngine {
         this.blobUrl = demoUrl;
         this.iframe = iframe;
         this.host.appendChild(iframe);
+    }
+
+    // A click on the game view and Space inside it play / pause: the
+    // engine's frame takes the focus, so the page's own Space never sees
+    // the key there. FTE's config unbinds every key and button
+    // (mvd-fte-player/config.cfg), so nothing of the engine's is lost.
+    // `screenToggle` is the host's play / pause — the full page's playback
+    // bar, the light page's play button; the engine's own by default.
+    /** @param {Window} win */
+    hookScreen(win) {
+        win.addEventListener('click', (e) => {
+            if (e.button === 0) this.screenToggle();
+        }, true);
+        win.addEventListener('keydown', (e) => {
+            if (e.key !== ' ' || e.ctrlKey || e.metaKey || e.altKey) return;
+            e.preventDefault();
+            e.stopPropagation();
+            if (!e.repeat) this.screenToggle();
+        }, true);
     }
 
     // teardown drops the engine; removing the iframe frees it.

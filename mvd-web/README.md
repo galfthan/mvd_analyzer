@@ -1396,9 +1396,11 @@ drops it).
   kinds with counts ("Quad run ×5, Airgib ×2"), else "N clips".
   Shift-click copies the bare URL; Ctrl / Cmd-click hub's own multi-clip
   link (`hub.quakeworld.nu/games/?gameId=…&clip=F-T:U…`) when every clip
-  is from one hub demo — hub reads the first 20. This page still reads
-  `?gameId=…&tab=player#playlist=…` — the light player's *Open in the full
-  analyzer* link — and appends the clips not already in the viewer's list.
+  is from one hub demo — hub reads the first 20. This page reads a
+  `#playlist=…` link by adding the clips not already in the viewer's list;
+  with `&open` after it (the light player's *Open in the full analyzer*)
+  the link's list replaces the viewer's, and the Player tab opens with its
+  playlist pane.
 
 ### The light player (`play.html`)
 
@@ -1414,11 +1416,17 @@ demo's bytes (`fetchGame` + `downloadDemo`) and a minimal handle whose
 result carries just the map (hub's game row) and the demo offset (from
 the clips). The page lists the clips (label, who, length, slow motion,
 demo), starts the run at once (muted, as the tab does), and has play /
-pause, previous / next and sound; a click on a clip plays from it. Clips
+pause, previous / next and sound; a click on a clip plays from it. A
+click on the game view or Space plays / pauses (on the full page too:
+`hookScreen` in `engine.js` catches them inside the engine's frame, which
+holds the focus there, and calls the host's play / pause —
+`engine.screenToggle`, set by the playback bar and by this page). Clips
 of a local file are listed as skipped. A click while a demo downloads
 wins over the run that asked first (and shares its download when it is
 the same demo). *Open in the full analyzer* (head
-and foot) goes to this page's Player tab with the same playlist.
+and foot) goes to the Player tab with this playlist as its own, to edit
+(`#playlist=…&open`), on the demo of the clip playing, that clip
+selected and the playhead at its start (`?seg=` / `?t=`).
 
 ### Hub links on the other tabs
 

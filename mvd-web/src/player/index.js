@@ -15,7 +15,7 @@ import { PlayerEngine } from './engine.js';
 import { createRunner } from './runner.js';
 import { createPageDriver } from './page-driver.js';
 import { demoRefOf } from './demo-ref.js';
-import { playlist, addClips, keepDemos } from './playlist-store.js';
+import { playlist, addClips, setClips, keepDemos } from './playlist-store.js';
 import { installHubLinkRouting } from './hub-links.js';
 import { toast } from './toast.js';
 
@@ -93,11 +93,28 @@ export function currentRef() {
 // playlist simply becomes it) and drop the fragment so a reload does not
 // import twice.
 async function importPlaylistFromHash() {
-    const m = location.hash.match(/^#playlist=([A-Za-z0-9_-]+)$/);
+    const m = location.hash.match(/^#playlist=([A-Za-z0-9_-]+)(&open)?$/);
     if (!m) return;
     history.replaceState(null, '', location.pathname + location.search);
     const decoded = await decodePlaylist(m[1]);
     if (!decoded || !decoded.length) return;
+    linkDemos = decoded.map((c) => c.demo.key);
+    // The light player's "Open in the full analyzer" (&open): this list is
+    // the playlist now, to edit — not clips added to whatever was there.
+    if (m[2]) {
+        setClips(decoded);
+        // On the Player tab (the link's ?tab=, applied once its demo is
+        // in), with its playlist pane open.
+        const off = activeTab.subscribe((t) => {
+            if (t !== 'player') return;
+            queueMicrotask(() => {
+                off();
+                showPane('playlist');
+            });
+        });
+        toast(`Opened the playlist: ${decoded.length} clip${decoded.length === 1 ? '' : 's'}`);
+        return;
+    }
     // Opening your own link again must not double the list.
     /** @type {(a: import('../lib/playlist.js').Clip, b: import('../lib/playlist.js').Clip) => boolean} */
     const same = (a, b) => a.demo.key === b.demo.key && a.from === b.from && a.to === b.to && a.track === b.track
@@ -105,7 +122,6 @@ async function importPlaylistFromHash() {
     const have = playlist.get().clips;
     const clips = decoded.filter((c) => !have.some((o) => same(o, c)));
     addClips(clips);
-    linkDemos = decoded.map((c) => c.demo.key);
     toast(clips.length
         ? `Imported ${clips.length} clip${clips.length === 1 ? '' : 's'} into the playlist`
         : 'Those clips are already in your playlist');

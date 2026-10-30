@@ -103,6 +103,12 @@ export function clearClips() {
     update((s) => { s.clips = []; s.run = null; });
 }
 
+// setClips replaces the list (a run over it ends).
+/** @param {Clip[]} clips */
+export function setClips(clips) {
+    update((s) => { s.clips = [...clips]; s.run = null; });
+}
+
 // keepDemos drops the clips of every demo but `keys` (a run over the list
 // ends with them).
 /** @param {string[]} keys */
