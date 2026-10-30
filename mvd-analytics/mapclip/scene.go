@@ -20,7 +20,7 @@ const sceneAABBSlack = 1.0
 // and the start must not be below the inflated solid's bottom (solid
 // extends playerBoxTop below raw geometry in hull 1; a start under
 // that can only miss, and a start inside it reports no floor anyway).
-func (m PosedHull) columnMayHit(cx, cy, z float32) bool {
+func (m *PosedHull) columnMayHit(cx, cy, z float32) bool {
 	h := m.H
 	if h == nil || len(h.nodes) == 0 {
 		return false
@@ -30,6 +30,25 @@ func (m PosedHull) columnMayHit(cx, cy, z float32) bool {
 		return false
 	}
 	if cy < h.mins[1]+m.Origin[1]-pad || cy > h.maxs[1]+m.Origin[1]+pad {
+		return false
+	}
+	return z >= h.mins[2]+m.Origin[2]-playerBoxTop
+}
+
+// footprintMayHit is columnMayHit widened to the whole 3×3 footprint
+// around (x, y): true for every sample one of whose columns columnMayHit
+// accepts (plus a unit of slack, so float rounding of x±footprintMargin
+// can never make it stricter than the column test).
+func (m *PosedHull) footprintMayHit(x, y, z float32) bool {
+	h := m.H
+	if h == nil || len(h.nodes) == 0 {
+		return false
+	}
+	const pad = playerBoxHalf + sceneAABBSlack + footprintMargin + 1
+	if x < h.mins[0]+m.Origin[0]-pad || x > h.maxs[0]+m.Origin[0]+pad {
+		return false
+	}
+	if y < h.mins[1]+m.Origin[1]-pad || y > h.maxs[1]+m.Origin[1]+pad {
 		return false
 	}
 	return z >= h.mins[2]+m.Origin[2]-playerBoxTop
@@ -54,6 +73,19 @@ func HeightAboveFloorBoxScene(world *Hull, movers []PosedHull, x, y, z float32) 
 		}
 		return world.HeightAboveFloorBox(x, y, z)
 	}
+	// The movers any of the nine columns can reach, found once per sample
+	// rather than per column (a map has dozens of doors, plats and
+	// buttons; a sample is near a handful at most). footprintMayHit is a
+	// superset of every column's columnMayHit, and the candidates keep
+	// the movers' order, so the result is the one the per-column scan
+	// gave.
+	var candBuf [16]int32
+	cands := candBuf[:0]
+	for i := range movers {
+		if movers[i].footprintMayHit(x, y, z) {
+			cands = append(cands, int32(i))
+		}
+	}
 	best := float32(0)
 	any := false
 	for _, dx := range footprintOffsets {
@@ -64,7 +96,8 @@ func HeightAboveFloorBoxScene(world *Hull, movers []PosedHull, x, y, z float32) 
 					best, any = floorZ, true
 				}
 			}
-			for _, m := range movers {
+			for _, i := range cands {
+				m := &movers[i]
 				if !m.columnMayHit(cx, cy, z) {
 					continue
 				}
