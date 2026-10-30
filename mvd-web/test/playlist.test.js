@@ -39,24 +39,35 @@ test('singleHubGame only answers for one hub demo', () => {
     assert.equal(singleHubGame([]), null);
 });
 
-test('encode/decode round-trips clips across demos', () => {
+test('encode/decode round-trips clips across demos', async () => {
     const clips = [
         { from: 10, to: 20, track: 3, who: 'milton', label: 'quad run · ä', demo },
         { from: 30, to: 40, track: 'auto', who: '', label: '', demo: { key: 'file:a.mvd', gameId: null, title: 'a', offset: 0 } },
         { from: 50, to: 60, track: 4, who: 'bps', label: 'x', demo },
     ];
-    const back = decodePlaylist(encodePlaylist(clips));
-    assert.deepEqual(back, clips);
-    assert.equal(decodePlaylist('garbage!!'), null);
+    const code = await encodePlaylist(clips);
+    assert.match(code, /^z[A-Za-z0-9_-]+$/, 'compressed, URL-safe');
+    assert.deepEqual(await decodePlaylist(code), clips);
+    assert.equal(await decodePlaylist('garbage!!'), null);
+    assert.equal(await decodePlaylist('zgarbage'), null);
+    const legacy = Buffer.from(JSON.stringify({ v: 1, d: [['hub:1', 1, 't', 0]], c: [[1, 2, 'auto', '', 'old', 0]] })).toString('base64url');
+    assert.equal((await decodePlaylist(legacy))[0].label, 'old', 'a link from before the compression still decodes');
+
+    const many = Array.from({ length: 20 }, (_, i) => ({ from: i * 60, to: i * 60 + 25, track: 3 + (i % 4), who: ['gore', 'nexus', 'blaze', 'vegeta'][i % 4],
+        label: `Quad run · ${['gore', 'nexus', 'blaze', 'vegeta'][i % 4]} · ${i % 6} frags`, demo }));
+    const z = await encodePlaylist(many);
+    const raw = (await import('../src/lib/playlist.js')).base64UrlEncode(JSON.stringify({ v: 1, d: [[demo.key, demo.gameId, demo.title, demo.offset]],
+        c: many.map((c) => [c.from, c.to, c.track, c.who, c.label, 0]) }));
+    assert.ok(z.length < raw.length * 0.6, `about half: ${z.length} vs ${raw.length}`);
 });
 
-test('decodePlaylist rejects malformed and inconsistent links', () => {
+test('decodePlaylist rejects malformed and inconsistent links', async () => {
     const enc = (doc) => Buffer.from(JSON.stringify(doc)).toString('base64url');
-    assert.equal(decodePlaylist(enc({ v: 1, d: [0], c: [[1, 2, 3, '', '', 0]] })).length, 0, 'non-array demo row');
-    assert.equal(decodePlaylist(enc({ v: 1, d: [['hub:5', 6, 't', 0]], c: [[1, 2, 3, '', '', 0]] })).length, 0, 'key/gameId disagree');
-    assert.equal(decodePlaylist(enc({ v: 1, d: [['hub:5', '5 or 1=1', 't', 0]], c: [[1, 2, 3, '', '', 0]] })).length, 0, 'gameId not a number');
-    assert.equal(decodePlaylist(enc({ v: 2, d: [], c: [] })), null, 'unknown version');
-    const ok = decodePlaylist(enc({ v: 1, d: [['hub:5', 5, 't', 1.5]], c: [[1, 2, 'x', '', '', 0]] }));
+    assert.equal((await decodePlaylist(enc({ v: 1, d: [0], c: [[1, 2, 3, '', '', 0]] }))).length, 0, 'non-array demo row');
+    assert.equal((await decodePlaylist(enc({ v: 1, d: [['hub:5', 6, 't', 0]], c: [[1, 2, 3, '', '', 0]] }))).length, 0, 'key/gameId disagree');
+    assert.equal((await decodePlaylist(enc({ v: 1, d: [['hub:5', '5 or 1=1', 't', 0]], c: [[1, 2, 3, '', '', 0]] }))).length, 0, 'gameId not a number');
+    assert.equal(await decodePlaylist(enc({ v: 2, d: [], c: [] })), null, 'unknown version');
+    const ok = await decodePlaylist(enc({ v: 1, d: [['hub:5', 5, 't', 1.5]], c: [[1, 2, 'x', '', '', 0]] }));
     assert.deepEqual(ok, [{ from: 1, to: 2, track: 'auto', who: '', label: '', demo: { key: 'hub:5', gameId: 5, title: 't', offset: 1.5 } }]);
 });
 
@@ -87,7 +98,7 @@ test('playerFragClips merges kills that overlap', { skip: !golden && 'golden cor
     assert.ok(clips.every((c) => c.track === golden.timelineAnalysis.playerUserIDs[name]));
 });
 
-test('slow motion: clamped into the clip, carried by the share link, read per time', () => {
+test('slow motion: clamped into the clip, carried by the share link, read per time', async () => {
     const demo = { key: 'hub:5', gameId: 5, title: 't', offset: 10 };
     assert.deepEqual(cleanSlow({ from: 20, to: 30 }, 18, 22.04, 0.3), { from: 20, to: 22, speed: 0.3 }, 'clamped, 0.1 s steps');
     assert.equal(cleanSlow({ from: 20, to: 30 }, 31, 33, 0.3), null, 'outside the clip');
@@ -97,7 +108,7 @@ test('slow motion: clamped into the clip, carried by the share link, read per ti
         { from: 20, to: 30, track: 3, who: 'a', label: 'x', demo, slow: { from: 24, to: 26, speed: 0.25 } },
         { from: 40, to: 50, track: 'auto', who: '', label: 'y', demo },
     ];
-    const back = decodePlaylist(encodePlaylist(/** @type {any} */ (clips)));
+    const back = await decodePlaylist(await encodePlaylist(/** @type {any} */ (clips)));
     assert.deepEqual(back, clips);
     assert.equal(slowAt(clips[0], 24), 0.25);
     assert.equal(slowAt(clips[0], 26), null, 'the window is half-open');

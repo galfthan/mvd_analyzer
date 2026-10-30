@@ -133,13 +133,20 @@ export function markdownLink(text, url) {
 
 // ── Share encoding ──────────────────────────────────────────────────────────
 //
-// `#playlist=<base64url(JSON)>`. Compact rows keep the URL short:
-// [from, to, track, who, label, demoIndex, slow?] plus a demo table (slow
-// as [from, to, speed]). Local-file demos travel by title only — the
-// receiver has to load the file.
+// `#playlist=z<base64url(deflate-raw(JSON))>`. Compact rows keep the URL
+// short: [from, to, track, who, label, demoIndex, slow?] plus a demo table
+// (slow as [from, to, speed]); deflate then takes the labels' repeats (a
+// generated list's labels share their kind and players) — about half the
+// length. Links from before the compression, `#playlist=<base64url(JSON)>`,
+// still decode: their base64 opens with "eyJ" ('{"'), never with the "z".
+// Local-file demos travel by title only — the receiver has to load the
+// file.
 
-/** @param {Clip[]} clips */
-export function encodePlaylist(clips) {
+/**
+ * @param {Clip[]} clips
+ * @returns {Promise<string>}
+ */
+export async function encodePlaylist(clips) {
     /** @type {Array<[string, number, string, number]>} */
     const demos = [];
     /** @type {Map<string, number>} */
@@ -155,19 +162,32 @@ export function encodePlaylist(clips) {
         if (c.slow) row.push([c.slow.from, c.slow.to, c.slow.speed]);
         return row;
     });
-    return base64UrlEncode(JSON.stringify({ v: PLAYLIST_VERSION, d: demos, c: rows }));
+    const json = JSON.stringify({ v: PLAYLIST_VERSION, d: demos, c: rows });
+    return `z${bytesToBase64Url(await pipeBytes(new TextEncoder().encode(json), new CompressionStream('deflate-raw')))}`;
 }
 
 /**
  * @param {string} str
- * @returns {Clip[] | null}
+ * @returns {Promise<Clip[] | null>}
  */
-export function decodePlaylist(str) {
+export async function decodePlaylist(str) {
     try {
-        return decodeRows(JSON.parse(base64UrlDecode(str)));
+        const json = str.startsWith('z')
+            ? new TextDecoder().decode(await pipeBytes(base64UrlToBytes(str.slice(1)), new DecompressionStream('deflate-raw')))
+            : base64UrlDecode(str);
+        return decodeRows(JSON.parse(json));
     } catch {
         return null;
     }
+}
+
+/**
+ * @param {Uint8Array<ArrayBuffer>} bytes
+ * @param {CompressionStream | DecompressionStream} through
+ */
+async function pipeBytes(bytes, through) {
+    const out = new Blob([bytes]).stream().pipeThrough(through);
+    return new Uint8Array(await new Response(out).arrayBuffer());
 }
 
 // A share link is untrusted input: anything malformed drops the row (or the
@@ -248,17 +268,26 @@ export function slowAt(clip, t) {
 
 /** @param {string} text */
 export function base64UrlEncode(text) {
-    const bytes = new TextEncoder().encode(text);
+    return bytesToBase64Url(new TextEncoder().encode(text));
+}
+
+/** @param {string} str */
+export function base64UrlDecode(str) {
+    return new TextDecoder().decode(base64UrlToBytes(str));
+}
+
+/** @param {Uint8Array} bytes */
+function bytesToBase64Url(bytes) {
     let bin = '';
     for (const b of bytes) bin += String.fromCharCode(b);
     return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 /** @param {string} str */
-export function base64UrlDecode(str) {
+function base64UrlToBytes(str) {
     const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
     const bin = atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4));
-    return new TextDecoder().decode(Uint8Array.from(bin, (ch) => ch.charCodeAt(0)));
+    return Uint8Array.from(bin, (ch) => ch.charCodeAt(0));
 }
 
 // ── Scripted playback ───────────────────────────────────────────────────────

@@ -1360,8 +1360,11 @@ drops it).
   run, label and watched player for a couple of seconds. A clip of another hub demo loads that demo
   (`loadDemo`) and carries on; a clip of another local file is
   skipped with a note.
-- **Copy link**, one button: the light player, `play.html#playlist=<base64url
-  JSON>` (below). A click copies it as Markdown, `[name](url)`, which
+- **Copy link**, one button: the light player,
+  `play.html#playlist=z<base64url(deflate-raw(JSON))>` (below; the
+  browser's `CompressionStream` — a 20-clip list is about 480 characters
+  where the plain base64 JSON was 1 600; the older uncompressed links,
+  base64 JSON opening "eyJ", still decode). A click copies it as Markdown, `[name](url)`, which
   Discord shows as a named link; the name is `playlistName`
   (`src/lib/playlist.js`): "mvda", the demo's date (the loaded demo's, by
   the topbar's precedence — `matchDay`, `src/lib/wall-clock.js`), map and

@@ -76,11 +76,11 @@ export function currentRef() {
 // A share link's #playlist= on page load: append its clips (an empty
 // playlist simply becomes it) and drop the fragment so a reload does not
 // import twice.
-function importPlaylistFromHash() {
+async function importPlaylistFromHash() {
     const m = location.hash.match(/^#playlist=([A-Za-z0-9_-]+)$/);
     if (!m) return;
     history.replaceState(null, '', location.pathname + location.search);
-    const decoded = decodePlaylist(m[1]);
+    const decoded = await decodePlaylist(m[1]);
     if (!decoded || !decoded.length) return;
     // Opening your own link again must not double the list.
     /** @type {(a: import('../lib/playlist.js').Clip, b: import('../lib/playlist.js').Clip) => boolean} */

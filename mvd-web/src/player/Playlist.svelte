@@ -72,16 +72,24 @@
         toast(`Added ${out.length} clip${out.length === 1 ? '' : 's'}: ${what}`);
     }
 
+    // The text may still be on its way (a link compresses asynchronously):
+    // a ClipboardItem takes the promise inside the click, which Safari asks
+    // for — writeText after an await is no longer in the gesture there.
     /**
-     * @param {string} text
+     * @param {string | Promise<string>} text
      * @param {string} what
      */
     async function copyText(text, what) {
         try {
-            await navigator.clipboard.writeText(text);
+            if (typeof ClipboardItem !== 'undefined' && navigator.clipboard.write) {
+                const blob = Promise.resolve(text).then((t) => new Blob([t], { type: 'text/plain' }));
+                await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })]);
+            } else {
+                await navigator.clipboard.writeText(await text);
+            }
             toast(`${what} copied`);
         } catch {
-            window.prompt(`Copy the ${what.toLowerCase()}:`, text);
+            window.prompt(`Copy the ${what.toLowerCase()}:`, await text);
         }
     }
 
@@ -108,10 +116,10 @@
             return;
         }
         const dir = location.pathname.replace(/[^/]*$/, '');
-        const url = `${location.origin}${dir}play.html#playlist=${encodePlaylist(clips)}`;
+        const url = encodePlaylist(clips).then((code) => `${location.origin}${dir}play.html#playlist=${code}`);
         if (e.shiftKey) return copyText(url, 'Link');
-        const loaded = ref ? { key: ref.key, date: matchDay($demo?.result) } : null;
-        copyText(markdownLink(playlistName(clips, loaded), url), 'Markdown link');
+        const name = playlistName(clips, ref ? { key: ref.key, date: matchDay($demo?.result) } : null);
+        copyText(url.then((u) => markdownLink(name, u)), 'Markdown link');
     }
 
     function clear() {
