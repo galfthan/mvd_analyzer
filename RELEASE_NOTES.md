@@ -37,8 +37,12 @@ armor strips show the selection (or the whole match) by default and grow
 with their pane. The playlist's Generate menu says how many of each
 preset the demo has (and leaves out the ones it lacks), there are new
 presets for pent and ring runs, the Key Moments tab's top damage windows
-and top RL / LG kills, and demo markers, and airgib clips (and the Key
-Moments airgib links) start 2.5 s before the hit. The map's
+and top RL / LG kills, and demo markers, and the clips are tighter so a
+playlist keeps moving: a pack drop shows the 4 s before it (was 12 s),
+airgibs start 2.5 s before the hit, other highlights 3 s, powerup runs
+2 s before the pickup, demo markers 8 s before to 2 s after (was 5 s
+before to 15 s after) — the Key Moments and Pack Drops tabs' play links
+alike. The map's
 toolbar controls moved into its right-click menu (follow, trails, learn
 the map), and the Map tab's player table replaced the Player tab's.
 

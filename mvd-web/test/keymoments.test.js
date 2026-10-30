@@ -35,10 +35,10 @@ test('powerup runs convert ms to s and filter on the rounded duration AND frags'
     assert.deepEqual(powerupRuns({}), []);
 });
 
-test('powerup run row: hub clip -10/+5 s on demo time, only with a userid', () => {
+test('powerup run row: hub clip -2/+1 s on demo time, only with a userid', () => {
     const ev = { time: 61, endTime: 70, duration: 9, frags: 4, powerupType: 'quad', playerName: '<b>', team: 'red', playerUserID: 7 };
     const html = powerupRunRowHtml(ev, hub);
-    assert.equal(href(html), 'https://hub.quakeworld.nu/games/?gameId=42&from=61&to=85&track=7');
+    assert.equal(href(html), 'https://hub.quakeworld.nu/games/?gameId=42&from=69&to=81&track=7');
     assert.match(html, /<td class="powerup-cell quad">Quad<\/td>/);
     assert.match(html, /&lt;b&gt;/);
     assert.match(html, /<td>9s<\/td>/);
@@ -49,7 +49,7 @@ test('powerup run row: hub clip -10/+5 s on demo time, only with a userid', () =
 test('streak and marker rows', () => {
     const [s] = fragStreaks({ timelineAnalysis: { fragStreaks: [{ time: 5000, endTime: 20000, duration: 15000, frags: 6, ewep: 'rl', playerName: 'a' }] } });
     const sh = streakRowHtml(s, hub);
-    assert.equal(href(sh), 'https://hub.quakeworld.nu/games/?gameId=42&from=15&to=33&track=0');
+    assert.equal(href(sh), 'https://hub.quakeworld.nu/games/?gameId=42&from=15&to=32&track=0');
     assert.match(sh, /<td>RL<\/td>/);
     assert.match(sh, /<td>15s<\/td>/);
 
@@ -58,7 +58,7 @@ test('streak and marker rows', () => {
     const mh = markerRowHtml(ms[0], hub);
     assert.match(mh, /-0:30/);
     assert.match(mh, /<td>spec<\/td>/);
-    assert.equal(href(mh), 'https://hub.quakeworld.nu/games/?gameId=42&from=0&to=20&track=0');
+    assert.equal(href(mh), 'https://hub.quakeworld.nu/games/?gameId=42&from=0&to=10&track=0');
     assert.equal(formatMarkerTime(75), '1:15');
     assert.equal(formatMarkerTime(-30.5), '-0:30');
 });
@@ -111,7 +111,7 @@ test('highlight tables: default orders and sort columns', () => {
     assert.deepEqual(air.map(a => a.time), [1000, 2000]);
     const ah = tbl.airgibs.rowHtml(air[0], hub);
     assert.match(ah, /airgib-lethal/);
-    assert.equal(href(ah), 'https://hub.quakeworld.nu/games/?gameId=42&from=8&to=14&track=7', 'an airgib: 2.5 s before the hit');
+    assert.equal(href(ah), 'https://hub.quakeworld.nu/games/?gameId=42&from=8&to=13&track=7', 'an airgib: 2.5 s before the hit');
 
     const armedQuad = { killed: true, relation: 'enemy', weapons: ['rl'], powerups: ['quad'] };
     assert.equal(dischargeValue({ victims: [armedQuad, { ...armedQuad, relation: 'team' }, { ...armedQuad, killed: false }] }), 2);

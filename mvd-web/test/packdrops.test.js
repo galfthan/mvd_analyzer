@@ -88,7 +88,7 @@ test('rowHtml: time cell, escaped names, run link to the next death or +15 s', (
     const h = rowHtml(row, ctx);
     assert.match(h, /<td class="time-cell time-link">1:15<\/td>/);
     assert.match(h, /<td>&lt;a&gt;<\/td>/);
-    assert.match(h, /from=65&to=77&track=1/);
+    assert.match(h, /from=71&to=77&track=1/);
     assert.match(h, /from=77&to=95&track=2/);
     assert.match(h, /<span class="kills-redundant">3<\/span>/);
     assert.match(h, /<td class="weapon-cell weapon-rl">RL<\/td>/);

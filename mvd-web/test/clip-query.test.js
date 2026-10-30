@@ -52,7 +52,7 @@ test('clipsOf windows rows in demo seconds and tracks the pov by name', () => {
     assert.deepEqual(ranked.map((c) => c.label), ['nobody', 'bps'], 'rank, ties by time, then limit');
 
     const hl = clipsOf({ source: 'highlights' }, { airgibs: [{ time: 30000, actor: { name: 'bps' } }] }, result, demo);
-    assert.deepEqual(hl.map((c) => [c.from, c.to, c.track]), [[34, 43, 3]], 'source defaults: 6 s before, 3 s after');
+    assert.deepEqual(hl.map((c) => [c.from, c.to, c.track]), [[37, 42, 3]], 'source defaults: 3 s before, 2 s after');
 });
 
 test('viewCall maps API params onto view options', async () => {
@@ -103,14 +103,14 @@ test('a list of clip entries makes one clip per entry and row', () => {
     const all = PRESETS.find((p) => p.id === 'pack-drops');
     const clips = clipsOf(all.query, body, result, demo);
     assert.deepEqual(clips.map((c) => [c.from, c.to, c.who, c.label]), [
-        [28, 42, 'bps', 'RL pack · bps drops it'],
-        [47, 52, 'valla', 'RL pack · valla takes it (enemy)'],
-        [48, 62, 'valla', 'LG pack · valla drops it'],
-        [59, 64, 'bps', 'LG pack · bps takes it (enemy)'],
-        [58, 72, 'bps', 'LG pack · bps drops it'],
+        [36, 42, 'bps', 'RL pack · bps drops it'],
+        [48, 52, 'valla', 'RL pack · valla takes it (enemy)'],
+        [56, 62, 'valla', 'LG pack · valla drops it'],
+        [60, 64, 'bps', 'LG pack · bps takes it (enemy)'],
+        [66, 72, 'bps', 'LG pack · bps drops it'],
     ], 'the drop\'s lead-up, then the pickup; an untaken pack gets one clip');
     const worst = PRESETS.find((p) => p.id === 'packs-enemy-new');
-    assert.deepEqual(clipsOf(worst.query, body, result, demo).map((c) => c.from), [28, 47]);
+    assert.deepEqual(clipsOf(worst.query, body, result, demo).map((c) => c.from), [36, 48]);
 });
 
 test('fieldPaths lists leaf paths, lists of objects by their first element', () => {

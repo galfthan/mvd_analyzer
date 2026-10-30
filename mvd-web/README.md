@@ -1263,9 +1263,14 @@ drops it).
   quad, pent and ring runs, frag streaks, top damage windows, top RL / LG
   kills (the Key Moments tab's queries), demo markers, RL/LG pack drops (all, the enemy took, a teammate took, the
   enemy took without having the weapon — each pack as the dropper's last
-  12 s, then a 5 s look at the pickup from the picker's view), quadbores,
+  4 s, then a 4 s look at the pickup from the picker's view), quadbores,
   airgibs, telefrags, discharges — presets of the clip finder below — and
-  one player's frags (merged when 5 s apart or less).
+  one player's frags (merged when 5 s apart or less). The windows are kept
+  tight so a playlist keeps moving: powerup runs from 2 s before the
+  pickup to 1 s after it ends, streaks to 2 s after the last frag,
+  highlights 3 s before to 2 s after (airgibs 2.5 s before), demo markers
+  8 s before to 2 s after; the Key Moments and Pack Drops tabs' play links
+  use the same windows.
 - **Clip finder** (`src/lib/clip-query.js`): a query is one mvd-api
   endpoint (`events`, `highlights`, `backpacks`, `top-kills`, `top-windows`, `lives`)
   with its query params under their API names, a `where` over the rows it

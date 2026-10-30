@@ -94,14 +94,14 @@ export const SOURCES = {
         params: ['kinds', 'players'],
         opts: (p) => ({ Kinds: csv(p.kinds), Players: csv(p.players) }),
         rows: (b) => [...(b?.discharges || []), ...(b?.quadbores || []), ...(b?.telefrags || []), ...(b?.airgibs || [])],
-        clip: { from: 'time', before: 6000, to: 'time', after: 3000, pov: 'actor.name' },
+        clip: { from: 'time', before: 3000, to: 'time', after: 2000, pov: 'actor.name' },
     },
     backpacks: {
         fn: 'getBackpacks',
         params: ['weapons', 'players', 'from', 'to'],
         opts: (p) => ({ Players: csv(p.players), Weapons: csv(p.weapons), From: int(p.from), To: int(p.to) }),
         rows: (b) => b?.backpacks || [],
-        clip: { from: 'time', before: 8000, to: 'time', after: 2000, pov: 'player' },
+        clip: { from: 'time', before: 4000, to: 'time', after: 2000, pov: 'player' },
     },
     'top-kills': {
         fn: 'getTopKills',
@@ -312,9 +312,9 @@ export async function runQuery(query, view, result, demo) {
 // they died with it — then a short look at the pickup from the picker's (a
 // pack nobody took has no pickupTime and gets only the first).
 /** @type {ClipSpec} */
-const PACK_DROP = { before: 12000, after: 2000, label: '{weapon|upper} pack · {player} drops it' };
+const PACK_DROP = { before: 4000, after: 2000, label: '{weapon|upper} pack · {player} drops it' };
 /** @type {ClipSpec} */
-const PACK_PICKUP = { from: 'pickupTime', before: 3000, to: 'pickupTime', after: 2000, pov: 'picker', label: '{weapon|upper} pack · {picker} takes it ({pickerRelation})' };
+const PACK_PICKUP = { from: 'pickupTime', before: 2000, to: 'pickupTime', after: 2000, pov: 'picker', label: '{weapon|upper} pack · {picker} takes it ({pickerRelation})' };
 
 // The built-in presets, for the finder's Load menu and the playlist's
 // Generate menu; `about` says in a line what each finds.
@@ -325,7 +325,7 @@ export const PRESETS = [
         query: {
             source: 'events', params: { types: 'powerup' },
             where: { field: 'detail.powerup', op: '=', value: 'quad' },
-            clip: { before: 3000, to: 'detail.endTime', after: 2000 },
+            clip: { before: 2000, to: 'detail.endTime', after: 1000 },
             label: 'Quad run · {player} · {detail.frags} frag{detail.frags|s}',
         },
     },
@@ -335,7 +335,7 @@ export const PRESETS = [
             source: 'events', params: { types: 'powerup' },
             where: { and: [{ field: 'detail.powerup', op: '=', value: 'quad' }, { field: 'detail.frags', op: '>', value: 0 }] },
             rank: { by: 'detail.frags', desc: true, limit: 5 },
-            clip: { before: 3000, to: 'detail.endTime', after: 2000 },
+            clip: { before: 2000, to: 'detail.endTime', after: 1000 },
             label: 'Quad run · {player} · {detail.frags} frag{detail.frags|s}',
         },
     },
@@ -344,7 +344,7 @@ export const PRESETS = [
         query: {
             source: 'events', params: { types: 'powerup' },
             where: { field: 'detail.powerup', op: '=', value: 'pent' },
-            clip: { before: 3000, to: 'detail.endTime', after: 2000 },
+            clip: { before: 2000, to: 'detail.endTime', after: 1000 },
             label: 'Pent run · {player} · {detail.frags} frag{detail.frags|s}',
         },
     },
@@ -353,15 +353,15 @@ export const PRESETS = [
         query: {
             source: 'events', params: { types: 'powerup' },
             where: { field: 'detail.powerup', op: '=', value: 'ring' },
-            clip: { before: 3000, to: 'detail.endTime', after: 2000 },
+            clip: { before: 2000, to: 'detail.endTime', after: 1000 },
             label: 'Ring run · {player} · {detail.frags} frag{detail.frags|s}',
         },
     },
     {
-        id: 'frag-streaks', title: 'Frag streaks', about: 'Every frag streak, from its first frag to three seconds after its last.',
+        id: 'frag-streaks', title: 'Frag streaks', about: 'Every frag streak, from its first frag to two seconds after its last.',
         query: {
             source: 'events', params: { types: 'streak' },
-            clip: { before: 0, to: 'detail.endTime', after: 3000 },
+            clip: { before: 0, to: 'detail.endTime', after: 2000 },
             label: 'Streak · {player} · {detail.length} frags',
         },
     },
@@ -389,10 +389,10 @@ export const PRESETS = [
     },
     {
         id: 'demo-markers', title: 'Demo markers', about: 'The /demomark bookmarks players dropped during the game.',
-        query: { source: 'events', params: { types: 'demomark' }, clip: { before: 5000, after: 15000 }, label: 'Demo marker · {player}' },
+        query: { source: 'events', params: { types: 'demomark' }, clip: { before: 8000, after: 2000 }, label: 'Demo marker · {player}' },
     },
     {
-        id: 'pack-drops', title: 'Pack drops (RL/LG)', about: 'Every RL / LG pack dropped: the 12 s before the death that dropped it, then a short look at whoever took it.',
+        id: 'pack-drops', title: 'Pack drops (RL/LG)', about: 'Every RL / LG pack dropped: the 4 s before the death that dropped it, then a short look at whoever took it.',
         query: { source: 'backpacks', clip: [PACK_DROP, PACK_PICKUP] },
     },
     {

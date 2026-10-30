@@ -165,7 +165,7 @@ export function hubAnchor(ctx, from, to, trackName) {
     return hubLinkHtml(url);
 }
 
-// The cells of one row (a <tr>'s innerHTML). The drop link starts 10 s
+// The cells of one row (a <tr>'s innerHTML). The drop link starts 4 s
 // before the drop; the run link from 3 s before the pickup to the picker's
 // next death (15 s when there is none).
 /**
@@ -174,7 +174,7 @@ export function hubAnchor(ctx, from, to, trackName) {
  */
 export function rowHtml(r, ctx) {
     const { drop, pickup } = r;
-    const dropHub = hubAnchor(ctx, drop.time - 10, drop.time + 2, drop.player);
+    const dropHub = hubAnchor(ctx, drop.time - 4, drop.time + 2, drop.player);
 
     let runHub = '-';
     let pickerLabel = '-';

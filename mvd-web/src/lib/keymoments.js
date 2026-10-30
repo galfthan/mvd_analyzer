@@ -141,8 +141,8 @@ export function powerupRunRowHtml(event, ctx) {
     // the pack-drop anchors).
     let watchCell = '-';
     if (ctx.gameId && event.playerUserID) {
-        const fromTime = Math.max(0, Math.floor(event.time + ctx.demoOffset) - 10);
-        const toTime = Math.floor(event.endTime + ctx.demoOffset) + 5;
+        const fromTime = Math.max(0, Math.floor(event.time + ctx.demoOffset) - 2);
+        const toTime = Math.floor(event.endTime + ctx.demoOffset) + 1;
         watchCell = hubLinkHtml(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: toTime, track: event.playerUserID }));
     }
     return `
@@ -164,7 +164,7 @@ export function streakRowHtml(streak, ctx) {
     let watchCell = '-';
     if (ctx.gameId) {
         const fromTime = Math.max(0, Math.floor(streak.time + ctx.demoOffset));
-        const toTime = Math.floor(streak.endTime + ctx.demoOffset) + 3;
+        const toTime = Math.floor(streak.endTime + ctx.demoOffset) + 2;
         watchCell = hubLinkHtml(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: toTime, track: streak.playerUserID || 0 }));
     }
     const mainWep = streak.ewep ? streak.ewep.toUpperCase() : '-';
@@ -186,8 +186,8 @@ export function streakRowHtml(streak, ctx) {
 export function markerRowHtml(marker, ctx) {
     let watchCell = '-';
     if (ctx.gameId) {
-        const fromTime = Math.max(0, Math.floor(marker.time + ctx.demoOffset) - 10);
-        watchCell = hubLinkHtml(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: fromTime + 20, track: marker.playerUserID || 0 }));
+        const fromTime = Math.max(0, Math.floor(marker.time + ctx.demoOffset) - 8);
+        watchCell = hubLinkHtml(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: fromTime + 10, track: marker.playerUserID || 0 }));
     }
     // A spectator's mark has no meaningful team (and its userID is not a
     // useful Hub track target, but the link still frames the right time
@@ -349,18 +349,18 @@ function topKillRowHtml(k, ctx) {
 const AIRGIB_LEAD_S = 2.5;
 
 // The Hub replay link from the actor's userid (the JSON key is `userId` on
-// HighlightPlayer): `lead` seconds before the moment (5 s; an airgib, owner's
-// call, 2.5 s — the shot itself is the point) to 3 s after.
+// HighlightPlayer): `lead` seconds before the moment (3 s; an airgib, owner's
+// call, 2.5 s — the shot itself is the point) to 2 s after.
 /**
  * @param {RowCtx} ctx
  * @param {number} timeSec
  * @param {number | undefined} trackId
  * @param {number} [lead]
  */
-function highlightWatchCell(ctx, timeSec, trackId, lead = 5) {
+function highlightWatchCell(ctx, timeSec, trackId, lead = 3) {
     if (!ctx.gameId) return '-';
     const fromTime = Math.max(0, Math.floor(timeSec + ctx.demoOffset - lead));
-    const toTime = Math.floor(timeSec + ctx.demoOffset) + 3;
+    const toTime = Math.floor(timeSec + ctx.demoOffset) + 2;
     return hubLinkHtml(hubReplayUrl({ gameId: ctx.gameId, from: fromTime, to: toTime, track: trackId || 0 }));
 }
 
