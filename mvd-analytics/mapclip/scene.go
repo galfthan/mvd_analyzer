@@ -56,14 +56,14 @@ func (m *PosedHull) footprintMayHit(x, y, z float32) bool {
 	return z >= h.mins[2]+m.Origin[2]-playerBoxTop
 }
 
-// FootprintReach bounds the sample origins whose footprint can reach
+// SweptFootprintBox bounds the sample origins whose footprint can reach
 // this hull at any pose with origin in [minOrg, maxOrg]: footprintMayHit
 // is false outside [lo, hi] for every such pose (hi[2] is unbounded — a
 // start any height above a mover may still land on it). Float addition
 // rounds monotonically, so the swept box contains every pose's box
 // exactly as footprintMayHit computes it. ok is false for a hull no
 // sample can reach.
-func (h *Hull) FootprintReach(minOrg, maxOrg [3]float32) (lo, hi [3]float32, ok bool) {
+func (h *Hull) SweptFootprintBox(minOrg, maxOrg [3]float32) (lo, hi [3]float32, ok bool) {
 	if h == nil || len(h.nodes) == 0 {
 		return lo, hi, false
 	}

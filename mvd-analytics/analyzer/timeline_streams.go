@@ -982,7 +982,7 @@ type posableMover struct {
 	track *moverTrack
 	hull  *mapclip.Hull
 	// lo, hi bound the sample origins the hull can reach over the whole
-	// track (mapclip.FootprintReach); a sample outside them leaves the
+	// track (Hull.SweptFootprintBox); a sample outside them leaves the
 	// mover out of its scene without posing it.
 	lo, hi [3]float32
 	reach  bool
@@ -1049,7 +1049,7 @@ func (a *TimelineAnalyzer) resolveFloorHeights() {
 					maxOrg[k] = max(maxOrg[k], o[k])
 				}
 			}
-			p.lo, p.hi, p.reach = p.hull.FootprintReach(minOrg, maxOrg)
+			p.lo, p.hi, p.reach = p.hull.SweptFootprintBox(minOrg, maxOrg)
 		}
 		posable[i] = p
 	}
