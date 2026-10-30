@@ -138,7 +138,7 @@
         "type": "integer"
       },
       "types": {
-        "description": "CSV of event types: frag, powerup, streak, spawn, death, weapon, item, chat, pickup (the default set), plus the opt-in high-frequency / dedicated lenses damage, health, armor, loc, telefrag, stomp, discharge, quadbore. Omit for the default set. An unknown type value 400s (invalid_param) rather than silently matching nothing.",
+        "description": "CSV of event types: frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, discharge, quadbore, pause (the default set), plus the opt-in high-frequency / dedicated lenses damage, health, armor, loc, telefrag, stomp. Omit for the default set. An unknown type value 400s (invalid_param) rather than silently matching nothing.",
         "type": "array",
         "enum": [
           "frag",

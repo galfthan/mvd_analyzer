@@ -55,7 +55,7 @@
         // it is the one loaded, or a later pick superseded this one (the
         // last pick wins, as loadDemo's does on the full page).
         // (The runner only ever asks for a hub clip's demo by gameId.)
-        loadDemo: async (/** @type {any} */ { gameId }) => {
+        loadDemo: async (/** @type {any} */ { gameId }, /** @type {any} */ { stillWanted } = {}) => {
             const pick = ++picks;
             if (demo.get()?.ref.gameId === gameId) return true;
             // A second pick of the demo still downloading shares its download.
@@ -63,7 +63,7 @@
             const mine = pending && pending.gameId === gameId ? pending : { gameId, handle: loadLightDemo(gameId, offset) };
             pending = mine;
             const handle = await mine.handle.finally(() => { if (pending === mine) pending = null; });
-            if (pick !== picks) return false;
+            if (pick !== picks || (stillWanted && !stillWanted())) return false;
             demo.set(handle);
             return true;
         },

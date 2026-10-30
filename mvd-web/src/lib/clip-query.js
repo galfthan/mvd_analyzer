@@ -148,11 +148,24 @@ export async function viewCall(view, source, params = {}) {
     if (!src) throw new Error(`unknown clip source: ${source}`);
     const opts = src.opts(params);
     if (!BOUNDED_DEFAULT.has(source) || params.dmg) return view(src.fn, opts);
+    return boundedOrRaw(view, src.fn, opts);
+}
+
+// boundedOrRaw runs a damage-ranked view on the bounded family, or — on a
+// demo whose mode skips its reconstruction (CA, wipeout, midair, …) — on
+// the raw one, as mvd-api does for an unset dmg. The envelope's `dmg`
+// says which.
+/**
+ * @param {ViewFn} view
+ * @param {string} fn
+ * @param {object} opts
+ */
+export async function boundedOrRaw(view, fn, opts) {
     try {
-        return await view(src.fn, { ...opts, Dmg: 'bounded' });
+        return await view(fn, { ...opts, Dmg: 'bounded' });
     } catch (err) {
         if (!/bounded damage family unavailable/.test(String(/** @type {Error} */ (err)?.message))) throw err;
-        return view(src.fn, { ...opts, Dmg: 'raw' });
+        return view(fn, { ...opts, Dmg: 'raw' });
     }
 }
 
@@ -370,7 +383,7 @@ export const PRESETS = [
         },
     },
     {
-        id: 'frag-streaks', title: 'Frag streaks', about: 'Every frag streak, from its first frag to two seconds after its last.',
+        id: 'frag-streaks', title: 'Frag streaks', about: 'The ten lives with the most frags, from the spawn to two seconds after the death.',
         query: {
             source: 'events', params: { types: 'streak' },
             clip: { before: 0, to: 'detail.endTime', after: 2000 },
@@ -380,7 +393,7 @@ export const PRESETS = [
     {
         id: 'top-damage', title: 'Top damage windows (10 s)', about: 'The Key Moments tab\'s ten 10-second stretches with the most enemy damage dealt.',
         query: {
-            source: 'top-windows', params: { metric: 'damageGiven', windowMs: '10000', limit: '10', dmg: 'bounded' },
+            source: 'top-windows', params: { metric: 'damageGiven', windowMs: '10000', limit: '10' },
             clip: { before: 1000, after: 0 },
             label: 'Damage window · {player} · {damageGiven} dmg',
         },
@@ -388,14 +401,14 @@ export const PRESETS = [
     {
         id: 'top-rl-kills', title: 'Top RL kills', about: 'The Key Moments tab\'s hardest rocket kill bursts: the run of RL hits on the victim up to the kill.',
         query: {
-            source: 'top-kills', params: { weapons: 'rl', gapMs: '2300', limit: '10', dmg: 'bounded' },
+            source: 'top-kills', params: { weapons: 'rl', gapMs: '2300', limit: '10' },
             label: 'RL kill · {killer} → {victim} · {damage} dmg',
         },
     },
     {
         id: 'top-lg-kills', title: 'Top LG kills', about: 'The Key Moments tab\'s hardest lightning kill bursts.',
         query: {
-            source: 'top-kills', params: { weapons: 'lg', gapMs: '1200', limit: '5', dmg: 'bounded' },
+            source: 'top-kills', params: { weapons: 'lg', gapMs: '1200', limit: '5' },
             label: 'LG kill · {killer} → {victim} · {damage} dmg',
         },
     },
@@ -432,8 +445,8 @@ export const PRESETS = [
         query: { source: 'highlights', params: { kinds: 'airgib' }, clip: { before: 2500, slow: {} }, label: 'Airgib · {actor.name} → {victims.0.name}' },
     },
     {
-        id: 'telefrags', title: 'Telefrags', about: 'Kills by teleporting onto someone.',
-        query: { source: 'highlights', params: { kinds: 'telefrag' }, clip: { slow: {} }, label: 'Telefrag · {actor.name} → {victims.0.name}' },
+        id: 'telefrags', title: 'Telefrags', about: 'Teleporting onto someone: a telefrag kills them; a deflect (onto a pentagram holder) kills the teleporter; a spawnicide is KTX\'s spawn telefrag. The label says which.',
+        query: { source: 'highlights', params: { kinds: 'telefrag' }, clip: { slow: {} }, label: '{teleKind} · {actor.name} → {victims.0.name}' },
     },
     {
         id: 'discharges', title: 'Discharges', about: 'Lightning-gun discharges in water.',

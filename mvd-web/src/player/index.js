@@ -99,10 +99,16 @@ async function importPlaylistFromHash() {
     const decoded = await decodePlaylist(m[1]);
     if (!decoded || !decoded.length) return;
     linkDemos = decoded.map((c) => c.demo.key);
+    // Opening your own link again must not double the list.
+    /** @type {(a: import('../lib/playlist.js').Clip, b: import('../lib/playlist.js').Clip) => boolean} */
+    const same = (a, b) => a.demo.key === b.demo.key && a.from === b.from && a.to === b.to && a.track === b.track
+        && JSON.stringify(a.slow ?? null) === JSON.stringify(b.slow ?? null);
+    const have = playlist.get().clips;
     // The light player's "Open in the full analyzer" (&open): this list is
     // the playlist now, to edit — not clips added to whatever was there.
+    // A list of the viewer's own it would replace is theirs to keep: asked
+    // first, and kept (the link's clips added to it) on Cancel.
     if (m[2]) {
-        setClips(decoded);
         // On the Player tab (the link's ?tab=, applied once its demo is
         // in), with its playlist pane open.
         const off = activeTab.subscribe((t) => {
@@ -112,14 +118,13 @@ async function importPlaylistFromHash() {
                 showPane('playlist');
             });
         });
-        toast(`Opened the playlist: ${decoded.length} clip${decoded.length === 1 ? '' : 's'}`);
-        return;
+        const unchanged = have.length === decoded.length && have.every((c, i) => same(c, decoded[i]));
+        if (!have.length || unchanged || confirm(`Replace your playlist (${have.length} clip${have.length === 1 ? '' : 's'}) with this one (${decoded.length})?\n\nCancel adds its clips to yours instead.`)) {
+            setClips(decoded);
+            toast(`Opened the playlist: ${decoded.length} clip${decoded.length === 1 ? '' : 's'}`);
+            return;
+        }
     }
-    // Opening your own link again must not double the list.
-    /** @type {(a: import('../lib/playlist.js').Clip, b: import('../lib/playlist.js').Clip) => boolean} */
-    const same = (a, b) => a.demo.key === b.demo.key && a.from === b.from && a.to === b.to && a.track === b.track
-        && JSON.stringify(a.slow ?? null) === JSON.stringify(b.slow ?? null);
-    const have = playlist.get().clips;
     const clips = decoded.filter((c) => !have.some((o) => same(o, c)));
     addClips(clips);
     toast(clips.length

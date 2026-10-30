@@ -239,9 +239,9 @@ const TOP_RUN_WINDOW_MS = 10000;
 // headline highlight in team games.
 /** @type {Array<[TopKey, string, object]>} */
 export const TOP_QUERIES = [
-    ['topdmg', 'getTopWindows', { metric: 'damageGiven', windowMs: TOP_RUN_WINDOW_MS, limit: 10, dmg: 'bounded' }],
-    ['toprl', 'getTopKills', { weapons: ['rl'], gapMs: 2300, limit: 10, dmg: 'bounded' }],
-    ['toplg', 'getTopKills', { weapons: ['lg'], gapMs: 1200, limit: 5, dmg: 'bounded' }],
+    ['topdmg', 'getTopWindows', { metric: 'damageGiven', windowMs: TOP_RUN_WINDOW_MS, limit: 10 }],
+    ['toprl', 'getTopKills', { weapons: ['rl'], gapMs: 2300, limit: 10 }],
+    ['toplg', 'getTopKills', { weapons: ['lg'], gapMs: 1200, limit: 5 }],
 ];
 
 // A windowed Hub clip link for a view row. Same rule as the powerup /

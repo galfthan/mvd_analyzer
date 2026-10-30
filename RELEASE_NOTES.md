@@ -39,7 +39,19 @@ state; coming back to the Player tab after picking a time on another
 tab plays from that time instead of jumping back; a frag feed click
 follows the killer on the Map tab too; Space after clicking a button
 (a player, a playlist row) plays / pauses instead of pressing it again;
-the arrows on a focused pane divider only resize.
+the arrows on a focused pane divider only resize. The Key Moments top
+damage / RL / LG tables (and their clip-finder presets) now fill on
+modes without bounded damage — CA, wipeout, midair, instagib — ranked
+by raw damage and marked so; they were empty. *Open in the full
+analyzer* asks before replacing a playlist of your own (Cancel adds the
+clips to it). A playlist over several demos: *Play all* on the Map tab
+stays on the map when it loads the next demo, editing the list while a
+demo loads no longer stalls the run, and a download the run no longer
+needs no longer replaces the demo you are watching. The map's follow
+menu no longer offers the game view's follow for a while after the
+Player pane closes, and lists players in the POV bar's order. Frag
+streak and telefrag presets say what they hold (the ten best lives;
+deflects and spawnicides by name).
 
 The **Map and Player tabs are now two views of one tab**, sharing all of
 their panes: *Map* (a large map, the players' table, moments, items and

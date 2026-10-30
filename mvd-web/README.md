@@ -318,11 +318,11 @@ beside the damage; **Top RL Kills** (10) and **Top LG
 Kills** (5) are the hardest kill bursts per weapon — the run of killing-weapon hits leading up to
 the kill — at the per-weapon gaps `gapMs=2300` (RL) and `1200` (LG),
 with the burst's damage, hits, span, the victim's weapon class and the
-damage the victim dealt back. Every query names `dmg=bounded`
-explicitly (the *view* default is raw, unlike mvd-api's), so a demo
-whose bounded family was never reconstructed (`BoundedMode` `skipped:*`)
-shows that table's empty state rather than ranking a different family
-under the same heading. Each table settles independently: a query the
+damage the victim dealt back. Every query asks for the bounded family
+(the *view* default is raw, unlike mvd-api's) and, on a demo whose mode
+skips its reconstruction (`BoundedMode` `skipped:*`: CA, wipeout,
+midair, …), falls back to raw as mvd-api does (`boundedOrRaw`,
+`src/lib/clip-query.js`); the table's heading then says *raw damage*. Each table settles independently: a query the
 demo cannot answer (no damage log, no measurable liveness) leaves only
 its own empty state up. Hub links follow the tab's usual rule — a slot
 number is not a userid, so a name `timelineAnalysis.playerUserIDs` does
@@ -1391,8 +1391,12 @@ drops it).
   POV). Each clip change shows `ClipCard.svelte` over the player: a dip to
   black that lifts once the jump has landed, and the clip's place in the
   run, label and watched player for a couple of seconds. A clip of another hub demo loads that demo
-  (`loadDemo`) and carries on; a clip of another local file is
-  skipped with a note.
+  (`loadDemo`, `keepTab`: on the tab the run plays from, so a Map tab run
+  stays on the map) and carries on — also when the list was edited
+  meanwhile, as long as the run is still at that clip; a download the run
+  no longer wants (it moved on to a clip of the demo shown, or stopped) is
+  dropped rather than shown (`stillWanted`). A clip of another local file
+  is skipped with a note.
 - **Copy link**, one button: the light player,
   `play.html#playlist=z<base64url(deflate-raw(JSON))>` (below; the
   browser's `CompressionStream` — a 20-clip list is about 480 characters
@@ -1409,8 +1413,9 @@ drops it).
   is from one hub demo — hub reads the first 20. This page reads a
   `#playlist=…` link by adding the clips not already in the viewer's list;
   with `&open` after it (the light player's *Open in the full analyzer*)
-  the link's list replaces the viewer's, and the Player tab opens with its
-  playlist pane.
+  the link's list replaces the viewer's — asked first when the viewer has
+  a different list of their own, which Cancel keeps (the link's clips
+  added to it) — and the Player tab opens with its playlist pane.
 
 ### The light player (`play.html`)
 

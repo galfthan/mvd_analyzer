@@ -63,11 +63,11 @@ test('streak and marker rows', () => {
     assert.equal(formatMarkerTime(-30.5), '-0:30');
 });
 
-test('view queries name dmg=bounded and the per-weapon gaps', () => {
+test('view queries leave the damage family to boundedOrRaw, and name the per-weapon gaps', () => {
     assert.deepEqual(TOP_QUERIES.map(([k, fn, o]) => [k, fn, o.dmg, o.gapMs ?? o.windowMs, o.limit]), [
-        ['topdmg', 'getTopWindows', 'bounded', 10000, 10],
-        ['toprl', 'getTopKills', 'bounded', 2300, 10],
-        ['toplg', 'getTopKills', 'bounded', 1200, 5],
+        ['topdmg', 'getTopWindows', undefined, 10000, 10],
+        ['toprl', 'getTopKills', undefined, 2300, 10],
+        ['toplg', 'getTopKills', undefined, 1200, 5],
     ]);
 });
 

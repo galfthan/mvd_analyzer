@@ -80,10 +80,13 @@ function setAnalysisStatus(result) {
 // learn mode; every other load starts on Summary at 0:00.
 /**
  * @param {import('../data/wasm-source.js').LoadInput} input
- * @param {{ deepLink?: boolean }} [opts]
+ * @param {{ deepLink?: boolean, keepTab?: boolean, stillWanted?: () => boolean }} [opts]
+ *   keepTab: stay on the tab (a playlist run loading its next clip's
+ *   demo); stillWanted: asked once the demo is in — false drops it (the
+ *   run moved on to a clip of the demo already shown)
  * @returns {Promise<boolean>}
  */
-export async function loadDemo(input, { deepLink = false } = {}) {
+export async function loadDemo(input, { deepLink = false, keepTab = false, stillWanted } = {}) {
     setStatus(loadStatus.get().text, 'status loading');
     const ids = /** @type {{ game?: import('../data/hub.js').HubGame, gameId?: number | string }} */ (input);
     const hubId = ids.game?.id ?? ids.gameId;
@@ -100,6 +103,10 @@ export async function loadDemo(input, { deepLink = false } = {}) {
     } catch (err) {
         if (/** @type {{ superseded?: boolean }} */ (err).superseded) return false;
         throw err;
+    }
+    if (stillWanted && !stillWanted()) {
+        if (currentDemo) setAnalysisStatus(currentDemo.result);
+        return false;
     }
     // load() sets the timings before it resolves.
     recordLoadTimings(/** @type {import('../data/wasm-source.js').LoadTimings} */ (handle.timings));
@@ -119,7 +126,7 @@ export async function loadDemo(input, { deepLink = false } = {}) {
         (info) => { if (handle === currentDemo) onBucketsReady(info); },
         (err) => console.warn('deferred buckets failed:', err.message));
 
-    displayResults(result, deepLink);
+    displayResults(result, deepLink, keepTab);
     return true;
 }
 
@@ -204,8 +211,9 @@ function onBucketsReady(data) {
 /**
  * @param {Result} result
  * @param {boolean} deepLink
+ * @param {boolean} [keepTab]
  */
-function displayResults(result, deepLink) {
+function displayResults(result, deepLink, keepTab = false) {
     // Wipe every store and JS-side state object that could carry data from
     // a previous demo. Critical when swapping between demos with different
     // shapes (e.g. 4on4 → FFA where teams/regions/etc. are absent and would
@@ -218,8 +226,11 @@ function displayResults(result, deepLink) {
     // the deep link and it names a tab (?tab=map should win —
     // applyUrlState() is called later and switches to it). Any other load
     // ignores the URL: it still describes the previous demo.
-    if (!(deepLink && urlTab(new URLSearchParams(location.search).get('tab')))) {
+    // A playlist run's load stays where the run plays (keepTab).
+    if (!keepTab && !(deepLink && urlTab(new URLSearchParams(location.search).get('tab')))) {
         switchTab('summary');
+    } else if (keepTab) {
+        switchTab(activeTabName());
     }
 
     // Before anything that reads `streams`: the marker decides whether the

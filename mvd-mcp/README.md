@@ -723,7 +723,7 @@ Output: `view.ColumnarBuckets` (default) or `view.BucketsView` (`layout=row`)
 | `startTime` | `integer` | match start | Match-relative milliseconds |
 | `endTime`   | `integer` | match end | Match-relative milliseconds |
 | `players`   | `string[]` | all | — |
-| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, discharge, quadbore, pause` (default), opt-in: `loc, health, armor, damage, telefrag, stomp, discharge, quadbore` (the last two are the highlight-catalogue lenses — `getHighlights` has the full rows) |
+| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, discharge, quadbore, pause` (default), opt-in: `loc, health, armor, damage, telefrag, stomp` (`discharge` / `quadbore` are the highlight-catalogue lenses — `getHighlights` has the full rows) |
 
 Output: `view.EventsView` —
 `{ events: [{ time, type, player, detail }, …] }`. Per-type `detail`

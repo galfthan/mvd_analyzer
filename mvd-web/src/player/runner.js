@@ -39,8 +39,8 @@ import { toast } from './toast.js';
 export function createRunner({ engine, page, driverFor = () => engine, demo, teams, selectTab, loadDemo, demoRefOf, segment }) {
     /** @type {Driver} */
     let drv = engine;         // what the run plays in
-    /** @type {Run | null} */
-    let loadingRun = null;   // the run whose next clip's demo is being loaded
+    /** @type {Clip | null} */
+    let loadingClip = null;  // the clip whose demo a run is loading
     let awaitingFrames = false;   // a clip waits for the shown engine to repaint
     let showTries = 0;            // two-frame waits for the engine to become active
     const MAX_SHOW_TRIES = 30;
@@ -159,23 +159,30 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
 
     /** @param {Clip} c  a hub clip: demo.gameId is set */
     async function loadForRun(c) {
-        // A run is what plays the clip.
-        const run = /** @type {Run} */ (playlist.get().run);
         toast(`Loading ${c.demo.title || `game ${c.demo.gameId}`}…`);
-        loadingRun = run;
+        loadingClip = c;
         let shown;
         try {
-            shown = await loadDemo({ gameId: /** @type {number} */ (c.demo.gameId) });
+            // On the tab it plays from (the Map tab's run stays on the
+            // map); dropped when the run moved on meanwhile to a clip of
+            // the demo already shown.
+            shown = await loadDemo({ gameId: /** @type {number} */ (c.demo.gameId) }, {
+                keepTab: true,
+                stillWanted: () => playingClip() === c,
+            });
         } catch (err) {
             toast(`Could not load game ${c.demo.gameId}: ${/** @type {Error} */ (err).message}`);
-            if (playlist.get().run === run) stop();
+            if (playingClip() === c) stop();
             return;
         } finally {
-            // A newer run may be loading its own demo by now; it is still
+            // A newer pick may be loading its own demo by now; it is still
             // the one carried on.
-            if (loadingRun === run) loadingRun = null;
+            if (loadingClip === c) loadingClip = null;
         }
-        if (playlist.get().run !== run) return;
+        // The run may be another object by now (the list was edited while
+        // the demo loaded); it carries on while it is still at this clip.
+        const now = playlist.get().run;
+        if (!now || now.clips[now.index] !== c) return;
         // The user loaded another demo meanwhile, and the last pick wins
         // (loadDemo dropped this one): the run ends, as it does on any demo
         // the user loads.
@@ -189,7 +196,13 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
             stop();
             return;
         }
-        playClip(run.index);
+        playClip(now.index);
+    }
+
+    // The clip the run is at, if one runs.
+    function playingClip() {
+        const r = playlist.get().run;
+        return r ? r.clips[r.index] : null;
     }
 
     // One tick of the run, after every poll of the driver it plays in.
@@ -248,9 +261,9 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
         if (handle === lastHandle) return;
         lastHandle = handle;
         const run = playlist.get().run;
-        if (run && loadingRun !== run) stop();
+        if (run && (!loadingClip || run.clips[run.index] !== loadingClip)) stop();
     });
 
     // loadsForRun: the demo being loaded is the run's own (loadForRun).
-    return { start, stop, isCurrent, currentRef, driver: () => drv, loadsForRun: () => loadingRun !== null };
+    return { start, stop, isCurrent, currentRef, driver: () => drv, loadsForRun: () => loadingClip !== null };
 }

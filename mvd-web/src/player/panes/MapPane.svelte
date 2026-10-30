@@ -19,7 +19,7 @@
     } from '../../../../mvd-map-view/src/index.js';
     import { clock, demo, teams } from '../../state/index.js';
     import { view as mapTabView, ensureLineOfSight, learnMode, changed } from '../../tabs/map/map-model.js';
-    import { mapFollow } from '../follow.js';
+    import { mapFollow, watchOrder } from '../follow.js';
     import { playback } from '../../state/index.js';
     import { engine } from '../index.js';
     import { paneLayout, paneOpt, setPaneOpt } from '../layout.js';
@@ -28,6 +28,12 @@
     import MapMenu from '../../ui/MapMenu.svelte';
 
     const engineStatus = engine.status;
+    const engineWanted = engine.wanted;
+    const engineTab = engine.activeTab;
+    // The map follows the engine's POV while the engine drives the tab — not
+    // merely while it is up (it lingers suspended for a while after the
+    // Player pane goes: src/player/index.js).
+    let engineDrives = $derived.by(() => { $engineStatus; $engineWanted; $engineTab; return engine.drives(); });
 
     /** @type {{ column?: import('../layout.js').Column }} */
     let { column = 'order' } = $props();
@@ -282,9 +288,10 @@
 
     // Whom the map follows: with the engine up, the POV (on or off); else a
     // player of this demo, or nobody.
-    let players = $derived.by(() => { $demo; $mapFollow; return Object.keys(mapTabView.state.playerSymbols || {}).sort((x, y) => x.localeCompare(y)); });
+    // In the POV bar's order (and ↑ / ↓'s).
+    let players = $derived(watchOrder($demo, $teams));
     /** @type {import('../../ui/map-menu.js').MenuItem[]} */
-    let followItems = $derived($engineStatus.ready
+    let followItems = $derived(engineDrives
         ? [{ kind: 'check', label: 'Follow the watched player', on: follow, run: toggleFollow }]
         : [{ kind: 'radio', label: 'Follow nobody', on: !$mapFollow, run: () => mapFollow.set(null) },
             ...players.map((name) => ({ kind: /** @type {const} */ ('radio'), label: `Follow ${name}`, on: $mapFollow === name, run: () => mapFollow.set(name) }))]);
@@ -329,7 +336,7 @@
     <span class="map-pane-btns">
         <button class="pt-btn icon menu-btn" class:active={!!menu} title="Map options (or right-click the map)"
             onclick={() => (menu = menu ? null : { x: Math.max(4, box.clientWidth - 198), y: 36 })}><SlidersHorizontal size={15} /></button>
-        {#if $engineStatus.ready}
+        {#if engineDrives}
             <button class="pt-btn icon" class:active={follow} aria-pressed={follow}
                 title={follow ? 'Following the POV — click to stop' : 'Keep the map centred on the player you are watching'}
                 onclick={toggleFollow}><Crosshair size={15} /></button>

@@ -27,6 +27,7 @@
         powerupRunRowHtml, streakRowHtml, markerRowHtml, TOP_QUERIES, topRows, topRowHtml, HIGHLIGHT_TABLES,
     } from '../../lib/keymoments.js';
     import { makeSortable } from '../../ui/sortable.js';
+    import { boundedOrRaw } from '../../lib/clip-query.js';
 
     // Which empty message shows, by the id prefix of its table.
     const EMPTY_IDS = ['keymoments', 'keymoments-filtered', 'fragstreaks', 'demomarkers', 'topdmg', 'toprl', 'toplg',
@@ -41,6 +42,8 @@
     const noEmpties = () => Object.fromEntries(EMPTY_IDS.map((id) => [id, false]));
 
     let empty = $state(noEmpties());
+    // The top tables ranked by raw damage (no bounded family in this demo).
+    let raw = $state(/** @type {Record<string, boolean>} */ ({}));
     // The damage-evidence banner over the three damage-ranked tables (the
     // same renderer as the Summary and Aim tabs' banners). Powerup runs and
     // frag streaks are frag-log-only and carry none.
@@ -136,9 +139,15 @@
 
         for (const spec of HIGHLIGHT_TABLES) renderHighlights(spec, result);
 
+        raw = {};
+        const h = /** @type {import('../../state/demo.js').DemoHandle} */ (handle);
         for (const [key, fn, opts] of TOP_QUERIES) {
-            /** @type {import('../../state/demo.js').DemoHandle} */ (handle).view(fn, opts)
-                .then((v) => { if (my === token) renderTop(key, v); })
+            boundedOrRaw((f, o) => h.view(f, o), fn, opts)
+                .then((v) => {
+                    if (my !== token) return;
+                    raw[key] = v?.dmg === 'raw';
+                    renderTop(key, v);
+                })
                 .catch((err) => {
                     if (my !== token) return;
                     console.warn(`[keymoments] ${fn} unavailable:`, err.message || err);
@@ -219,6 +228,10 @@
     <div id="{id}-provenance" class={provenanceClass(note)} style:display={note ? null : 'none'}>{@html note?.html ?? ''}</div>
 {/snippet}
 
+{#snippet rawNote(/** @type {string} */ id)}
+    {#if raw[id]}<span class="muted raw-note" title="This demo's mode skips the bounded damage reconstruction (CA, wipeout, midair, …), so this table ranks raw damage">&nbsp;· raw damage</span>{/if}
+{/snippet}
+
 {#snippet emptyMsg(/** @type {string} */ id, /** @type {string} */ text)}
     <div id="{id}-empty" class="empty-message" style:display={empty[id] ? 'block' : 'none'}>{text}</div>
 {/snippet}
@@ -284,7 +297,7 @@
         {@render emptyMsg('fragstreaks', 'No frag streaks detected in this demo.')}
     </div>
     <div data-panel="top-damage" class="panel">
-        <h3 title="The ten 10-second stretches with the most bounded enemy damage dealt; ties break on frags">Top Damage Windows (10 s)</h3>
+        <h3 title="The ten 10-second stretches with the most bounded enemy damage dealt; ties break on frags">Top Damage Windows (10 s){@render rawNote('topdmg')}</h3>
         {@render provenance('topdmg')}
         <table class="stats-table" id="topdmg-table">
             <thead>
@@ -302,7 +315,7 @@
         {@render emptyMsg('topdmg', 'No damage windows in this demo (needs a damage stream).')}
     </div>
     <div data-panel="top-rl" class="panel">
-        <h3 title="Hardest rocket kill bursts: the run of RL hits on that victim leading up to the kill (gap 2.3 s)">Top RL Kills</h3>
+        <h3 title="Hardest rocket kill bursts: the run of RL hits on that victim leading up to the kill (gap 2.3 s)">Top RL Kills{@render rawNote('toprl')}</h3>
         {@render provenance('toprl')}
         <table class="stats-table" id="toprl-table">
             {@render killHead()}
@@ -327,7 +340,7 @@
         {@render emptyMsg('demomarkers', 'No demo markers in this demo.')}
     </div>
     <div data-panel="top-lg" class="panel">
-        <h3 title="Hardest lightning kill bursts: the run of LG hits on that victim leading up to the kill (gap 1.2 s)">Top LG Kills</h3>
+        <h3 title="Hardest lightning kill bursts: the run of LG hits on that victim leading up to the kill (gap 1.2 s)">Top LG Kills{@render rawNote('toplg')}</h3>
         {@render provenance('toplg')}
         <table class="stats-table" id="toplg-table">
             {@render killHead()}
