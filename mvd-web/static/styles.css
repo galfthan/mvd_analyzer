@@ -3122,6 +3122,13 @@ th.sortable.sort-desc::after {
     min-width: 0;
 }
 
+/* Block, not inline: an inline canvas sits on the text baseline with the
+ * descender gap under it, a few px per row that the pane's row-height
+ * share (StackPane rowHeight) does not count — a sized pane scrolled. */
+.pp-stack-wrap canvas {
+    display: block;
+}
+
 /* Frag feed pane. */
 .pp-feed {
     list-style: none;

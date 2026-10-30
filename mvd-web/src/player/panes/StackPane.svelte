@@ -57,11 +57,16 @@
     /** @type {HTMLDivElement} */
     let list;
 
-    // The row height when the viewer sized the pane, never below ROW_H.
+    // The row height when the viewer sized the pane, never below ROW_H:
+    // the body's inner height less the head (with its margin) shared by the
+    // rows, each a strip plus its 2 px of padding.
     function rowHeight() {
         const body = list?.closest('.player-pane-body');
         if (!body || !body.classList.contains('sized') || !rows.length) return ROW_H;
-        return Math.max(ROW_H, Math.floor((body.clientHeight - head.offsetHeight - 6) / rows.length) - 2);
+        const bs = getComputedStyle(body);
+        const inner = body.clientHeight - parseFloat(bs.paddingTop) - parseFloat(bs.paddingBottom);
+        const headH = head.offsetHeight + parseFloat(getComputedStyle(head).marginBottom);
+        return Math.max(ROW_H, Math.floor((inner - headH) / rows.length) - 2);
     }
 
     let lastKey = '';
