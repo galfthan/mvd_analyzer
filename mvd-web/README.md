@@ -1131,10 +1131,17 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   autotrack) and one button per player in canonical team order and
   colour; the followed player stays lit under autotrack too. At its
   right end: the keys menu button (see *Keys*), the sound toggle (the
-  player starts muted, as hub's does; sound turned on stays on for the
-  next demo's engine, so a playlist over several demos keeps it:
-  `engine.carrySettings`) and the hide / show toggle of the side pane
-  column.
+  player starts muted, as hub's does) and the hide / show toggle of the
+  side pane column.
+- **Settings across engines.** Each demo gets a fresh engine (and one
+  dropped after 20 s unshown comes back fresh), at FTE's defaults. What
+  the user picked carries over (`engine.carrySettings`): sound, team
+  info, the speed (`engine.rate`, applied on play), and the player
+  followed by hand — by name, followed on the new engine only when its
+  demo has that player, else autotrack. A clip's POV counts as followed
+  by hand. Per engine, and not carried: the position (it opens paused at
+  the cursor), a clip's slow motion, the console. Fullscreen, the pane
+  layout and the playlist belong to the page and are untouched.
 - **Fullscreen** (see *Fullscreen* under the playback bar): the whole
   player panel — both pane columns, the Player pane's picture included —
   fills the screen, each column scrolling on its own. The tab's controls share one compact

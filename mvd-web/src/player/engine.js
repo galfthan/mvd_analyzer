@@ -63,7 +63,8 @@ export class PlayerEngine {
         // What the POV bar, the playback bar and the panes show.
         this.status = store({ ...IDLE });
         // The speed play runs at (percent): kept here, since FTE's own speed
-        // reads 0 while paused.
+        // reads 0 while paused — and across engines, the bar's speed being
+        // the user's, not the demo's (play() applies it).
         this.rate = 100;
         // A clip's slow-motion speed (percent) while the runner has one on:
         // it, not the rate, is what plays then.
@@ -87,6 +88,11 @@ export class PlayerEngine {
         // muted, so a run moving on to another demo's clip would mute again.
         this.teamInfo = false;
         this.sound = false;
+        // The player last followed by hand, by name — userids differ from
+        // demo to demo: followed on the next engine when it has them, else
+        // the engine's autotrack. null: autotrack.
+        /** @type {string | null} */
+        this.trackedName = null;
         /** @type {DemoHandle | null} */
         this.handle = null;
         /** @type {HTMLElement | null} */
@@ -213,11 +219,14 @@ export class PlayerEngine {
     }
 
     // carrySettings sets a fresh engine to the settings the user picked on
-    // the ones before it (team info, sound).
+    // the ones before it (team info, sound, the followed player; the rate
+    // applies on play).
     /** @param {FteController} fte */
     carrySettings(fte) {
         if (this.teamInfo) fte.command('hud_teaminfo_show 1');
         if (this.sound) fte.unmute();
+        const id = this.trackedName == null ? null : userIdIn(fte, this.trackedName);
+        if (id != null) fte.track(id);
     }
 
     // The game view's input. A click plays / pauses (`screenToggle`, the
@@ -272,9 +281,9 @@ export class PlayerEngine {
         Object.assign(this, {
             blobUrl: null, iframe: null, fte: null, seekTimer: null,
             pendingSeek: null, seekTarget: null, onReady: null,
-            rate: 100, slow: null, consoleOpen: false,
+            slow: null, consoleOpen: false,
         });
-        this.status.set({ ...IDLE });
+        this.status.set({ ...IDLE, rate: this.rate });
     }
 
     startSync() {
@@ -459,6 +468,7 @@ export class PlayerEngine {
         if (!this.fte) return;
         if (userid === 'auto') this.fte.enableAutotrack();
         else this.fte.track(userid);
+        this.trackedName = userid === 'auto' ? null : nameIn(this.fte, userid);
         this.publish();
     }
 
@@ -511,6 +521,28 @@ export class PlayerEngine {
             if (this.active()) this.ensure();
         }
     }
+}
+
+// The engine's own player list, not the Result's: the light player's
+// stand-in Result has no userids (src/play/light-demo.js).
+/**
+ * @param {FteController} fte
+ * @param {string} name
+ * @returns {number | null}
+ */
+function userIdIn(fte, name) {
+    const p = fte.getPlayers().find((/** @type {any} */ x) => x.getNamePlain() === name);
+    return p ? p.userid : null;
+}
+
+/**
+ * @param {FteController} fte
+ * @param {number} userid
+ * @returns {string | null}
+ */
+function nameIn(fte, userid) {
+    const p = fte.getPlayers().find((/** @type {any} */ x) => x.userid === Number(userid));
+    return p ? p.getNamePlain() : null;
 }
 
 // waitForDemoClock resolves once the engine's demo clock moves (or after

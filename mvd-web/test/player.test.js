@@ -357,51 +357,78 @@ test('presets: a v3 layout becomes the Player view; corrupt storage falls back; 
     assert.deepEqual(fresh.paneLayout.get().order, ['map', 'players', 'moments', 'team-weapons'], 'a fresh Player view, Moments on');
 });
 
-// Each demo gets a fresh engine (FteController), and each starts muted: the
-// sound the user turned on must come back on the next one, as team info does.
-test('engine keeps sound on across engines', async () => {
+// Each demo gets a fresh engine (FteController), at FTE's defaults — muted,
+// autotrack, normal speed: what the user picked carries to the next one.
+test('engine carries sound, speed, team info and the followed player across engines', async () => {
     const { PlayerEngine } = await import('../src/player/engine.js');
     const { createClock } = await import('../src/state/clock.js');
     const { FteController } = await import('../../mvd-fte-player/src/fte-controller.js');
-    const fakeWin = () => {
+    // A window FTE publishes into, playing a demo with these players.
+    /** @param {Record<string, number>} players  name → userid */
+    const fresh = (players) => {
+        const list = Object.entries(players).map(([name, userid]) => ({ userid, spectator: 0, getNamePlain: () => name }));
         const win = {
-            commands: [],
-            FTEC: { cbufadd: (/** @type {string} */ cmd) => win.commands.push(cmd), step: () => {} },
+            commands: /** @type {string[]} */ ([]),
+            FTEC: { cbufadd: (/** @type {string} */ cmd) => win.commands.push(cmd.trim()), step: () => {} },
             Module: {
                 getDemoTime: () => 0,
-                getClientState: () => ({ getPlayerView: () => ({ getTrackedPlayer: () => ({ userid: 1 }) }) }),
+                getClientState: () => ({
+                    allocated_client_slots: list.length,
+                    getPlayer: (/** @type {number} */ i) => list[i],
+                    getPlayerView: () => ({ getTrackedPlayer: () => null }),
+                }),
             },
         };
-        return win;
-    };
-    const fresh = () => {
         let resumed = 0;
-        const fte = new FteController(fakeWin(), { resumeAudio: () => resumed++ });
+        const fte = new FteController(win, { resumeAudio: () => resumed++ });
         fte.mute();   // as the loader hands it over
-        return { fte, resumed: () => resumed };
+        return { fte, win, resumed: () => resumed };
     };
     const engine = new PlayerEngine({ clock: createClock(), demo: store(null), activeTab: store('summary') });
+    /** @param {ReturnType<typeof fresh>} e */
+    const adopt = (e) => {
+        engine.teardown();
+        engine.fte = e.fte;
+        engine.carrySettings(e.fte);
+        e.win.commands.length = 0;
+    };
 
-    const first = fresh();
-    engine.fte = first.fte;
-    engine.carrySettings(first.fte);
+    const first = fresh({ alpha: 3, bravo: 4 });
+    adopt(first);
     assert.ok(first.fte.isMuted(), 'starts muted');
     engine.toggleMute();
+    engine.toggleTeamInfo();
+    engine.setRate(2);
+    engine.track(4);
     assert.equal(engine.status.get().muted, false);
     assert.equal(first.resumed(), 1, 'unmute resumes the audio');
 
+    // Another demo: bravo is in it under another userid.
+    const second = fresh({ bravo: 9, charlie: 2 });
     engine.teardown();
-    const second = fresh();
+    assert.equal(engine.status.get().rate, 200, 'the bar keeps the speed while the next engine loads');
     engine.fte = second.fte;
     engine.carrySettings(second.fte);
-    assert.ok(!second.fte.isMuted(), 'the next engine comes up with sound');
+    assert.ok(!second.fte.isMuted(), 'comes up with sound');
     assert.equal(second.resumed(), 1);
+    assert.ok(second.win.commands.includes('hud_teaminfo_show 1'));
+    assert.ok(second.win.commands.includes('track 9'), 'follows bravo by name');
+    second.fte.pause();   // the engine opens paused
+    engine.play();
+    assert.equal(second.fte.getDemoSpeed(), 200, 'plays at the speed picked before');
 
+    // One without bravo: the engine's autotrack.
+    const third = fresh({ charlie: 2 });
+    adopt(third);
+    assert.ok(third.fte.isUsingAutotrack());
+    assert.equal(engine.trackedName, 'bravo', 'still wanted for a later demo');
+
+    // Autotrack and mute picked: carried as such.
+    engine.track('auto');
     engine.toggleMute();
-    engine.teardown();
-    const third = fresh();
-    engine.fte = third.fte;
-    engine.carrySettings(third.fte);
-    assert.ok(third.fte.isMuted(), 'muted again stays muted');
+    const fourth = fresh({ bravo: 1 });
+    adopt(fourth);
+    assert.ok(fourth.fte.isMuted());
+    assert.ok(fourth.fte.isUsingAutotrack());
     engine.teardown();
 });
