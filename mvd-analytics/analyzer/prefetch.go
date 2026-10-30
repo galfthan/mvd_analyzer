@@ -1,6 +1,8 @@
 package analyzer
 
 import (
+	"io"
+
 	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
@@ -28,6 +30,7 @@ const prefetchBatchSize = 512
 type prefetchSource struct {
 	ch   chan prefetchBatch
 	stop chan struct{}
+	done chan struct{}
 	cur  []events.Event
 	head int
 	err  error
@@ -37,8 +40,10 @@ func newPrefetchSource(src events.Source) *prefetchSource {
 	p := &prefetchSource{
 		ch:   make(chan prefetchBatch, 4),
 		stop: make(chan struct{}),
+		done: make(chan struct{}),
 	}
 	go func() {
+		defer close(p.done)
 		defer close(p.ch)
 		for {
 			b := prefetchBatch{events: make([]events.Event, 0, prefetchBatchSize)}
@@ -80,7 +85,97 @@ func (p *prefetchSource) Next() (events.Event, error) {
 }
 
 // halt stops the producer when the consumer abandons the stream early (an
-// analyzer error). After a drained stream it is a no-op.
+// analyzer error) and waits for it to leave the Source, so the caller may
+// close it. After a drained stream it only waits out the goroutine's exit.
 func (p *prefetchSource) halt() {
 	close(p.stop)
+	<-p.done
+}
+
+// readAheadChunk is how much inflated demo the decompressor hands over at
+// a time.
+const readAheadChunk = 256 << 10
+
+type readAheadChunkMsg struct {
+	buf []byte
+	err error
+}
+
+// readAhead runs a reader (the demo's gunzip) on its own goroutine, a
+// chunk ahead of the consumer — the first stage of Parallel's pipeline,
+// in front of prefetchSource. Bytes and the terminating error (io.EOF, a
+// truncated gzip, ErrDecompressedTooLarge, a cancelled ctx) reach the
+// consumer in order. Buffers cycle through free, so the whole demo is
+// never resident twice.
+type readAhead struct {
+	ch   chan readAheadChunkMsg
+	free chan []byte
+	stop chan struct{}
+	done chan struct{}
+	cur  []byte
+	buf  []byte
+	err  error
+}
+
+func newReadAhead(r io.Reader) *readAhead {
+	a := &readAhead{
+		ch:   make(chan readAheadChunkMsg, 2),
+		free: make(chan []byte, 3),
+		stop: make(chan struct{}),
+		done: make(chan struct{}),
+	}
+	go func() {
+		defer close(a.done)
+		defer close(a.ch)
+		for {
+			var buf []byte
+			select {
+			case buf = <-a.free:
+			default:
+				buf = make([]byte, readAheadChunk)
+			}
+			n := 0
+			var err error
+			for n < len(buf) && err == nil {
+				var m int
+				m, err = r.Read(buf[n:])
+				n += m
+			}
+			select {
+			case a.ch <- readAheadChunkMsg{buf: buf[:n], err: err}:
+			case <-a.stop:
+				return
+			}
+			if err != nil {
+				return
+			}
+		}
+	}()
+	return a
+}
+
+func (a *readAhead) Read(p []byte) (int, error) {
+	for len(a.cur) == 0 {
+		if a.err != nil {
+			return 0, a.err
+		}
+		if a.buf != nil {
+			select {
+			case a.free <- a.buf[:cap(a.buf)]:
+			default:
+			}
+		}
+		m := <-a.ch
+		a.buf, a.cur, a.err = m.buf, m.buf, m.err
+	}
+	n := copy(p, a.cur)
+	a.cur = a.cur[n:]
+	return n, nil
+}
+
+// halt stops the decompressor goroutine and waits until it is out of the
+// underlying reader, which the caller closes next.
+func (a *readAhead) halt() {
+	close(a.stop)
+	<-a.done
 }

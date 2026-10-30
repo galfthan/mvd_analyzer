@@ -17,8 +17,10 @@ analytics can consume without caring about the on-the-wire format.
 - `mvdfile/` — gzip-aware file reader. Detects `.mvd.gz` by magic bytes and
   wraps the stream.
 - `source/mvd/` — the reference **Source implementation** backed by an MVD
-  file or in-memory byte stream. Exposes `Open(path)` and
-  `NewFromReader(io.Reader)`; both return a value that satisfies
+  file or in-memory byte stream. Exposes `Open(path)`,
+  `NewFromReader(io.Reader)` (gzip sniffed) and `NewFromRaw(io.Reader)`
+  (an already-inflated stream — mvd-analytics inflates on its own
+  goroutine under `Registry.Parallel`); all return a value that satisfies
   `events.Source`.
 
 ## Using mvd-reader

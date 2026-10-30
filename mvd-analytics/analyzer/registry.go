@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"io"
+	"os"
 	"reflect"
 	"runtime"
 	"sort"
@@ -11,6 +12,7 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/config"
 	resultpkg "github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
+	"github.com/mvd-analyzer/mvd-reader/mvdfile"
 	mvdsource "github.com/mvd-analyzer/mvd-reader/source/mvd"
 )
 
@@ -155,24 +157,34 @@ func (r *Registry) RegisterPostProcessor(p ResultPostProcessor) {
 // Analyze runs all registered analyzers on an MVD file at the given path.
 // Gzip is auto-detected.
 func (r *Registry) Analyze(filePath string) (*Result, error) {
-	src, err := mvdsource.Open(filePath)
+	f, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
-	defer src.Close()
-	src.Parser().SetDecodeNails(r.BuildNails)
-	return r.analyzeSource(src, filePath)
+	defer f.Close()
+	return r.AnalyzeReader(f, filePath)
 }
 
 // AnalyzeReader runs all registered analyzers on an MVD byte stream.
 // Provided as a convenience for callers that already have bytes in hand
 // (notably the WASM entry, which receives a JS Uint8Array).
+//
+// With Parallel the demo is inflated on its own goroutine (readAhead)
+// and parsed on another (prefetchSource), so gunzip, parse and the
+// analyzers' OnEvent run as a three-stage pipeline.
 func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, error) {
-	src, err := mvdsource.NewFromReader(reader)
+	rc, err := mvdfile.NewReader(reader)
 	if err != nil {
 		return nil, err
 	}
-	defer src.Close()
+	defer rc.Close()
+	var raw io.Reader = rc
+	if r.Parallel {
+		ahead := newReadAhead(rc)
+		defer ahead.halt()
+		raw = ahead
+	}
+	src := mvdsource.NewFromRaw(raw)
 	src.Parser().SetDecodeNails(r.BuildNails)
 	return r.analyzeSource(src, filename)
 }
