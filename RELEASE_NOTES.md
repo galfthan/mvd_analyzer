@@ -100,7 +100,9 @@ one); from any other tab it opens the Player tab. Loading another demo clears th
 playlist (a share link over several demos keeps them). A click on the
 game view, or Space, plays and pauses — in the analyzer and the light
 player. The light player's *Open in the full analyzer* opens its
-playlist there as the playlist, to edit, at the clip it was playing.
+playlist there as the playlist, to edit, at the clip it was playing; a
+playlist over several games (the analyzer holds one at a time) asks
+which game, and takes that game's clips only.
 The map no longer draws a sky-high height stem for a player with no floor
 beneath them (dm3's paused start): it still looked for the "no floor"
 marker the analysis used before schema v33. The playback bar shows times

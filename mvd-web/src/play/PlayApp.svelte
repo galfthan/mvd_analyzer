@@ -4,7 +4,9 @@
     // so it opens in the time the engine and the demo take to download. The
     // runner, the engine and the clip card are the Player tab's; the demo
     // handle is light-demo.js's. "Open in the full analyzer" carries the
-    // same playlist to the Player tab.
+    // same playlist to the Player tab — for a list over several games, the
+    // clips of the one the viewer picks (the analyzer is one game at a
+    // time).
     import { onMount } from 'svelte';
     import Play from '@lucide/svelte/icons/play';
     import Pause from '@lucide/svelte/icons/pause';
@@ -25,6 +27,7 @@
     import { store } from '../state/store.js';
     import { teams } from '../state/teams.js';
     import { formatDuration } from '../lib/result.js';
+    import { encodePlaylist } from '../lib/playlist.js';
     import { loadLightDemo } from './light-demo.js';
     import { createPlayerKeys, nextName } from '../player/player-keys.js';
     import { playerMenuItems } from '../player/player-menu.js';
@@ -102,21 +105,53 @@
     // The full analyzer opens this playlist as its own (`&open`: it
     // replaces the list there rather than adding to it) on the demo of the
     // clip playing, that clip selected (?seg=, match seconds) and the
-    // playhead at its start — where the viewer is, to edit from.
-    const fullUrl = $derived.by(() => {
-        // The clip playing, or the next one after a title card.
-        const at = [...playable.slice(Math.max(0, index)), ...playable].find((c) => !c.card);
+    // playhead at its start — where the viewer is, to edit from. The
+    // analyzer holds one game at a time, so a list over several opens the
+    // game the viewer picks with that game's clips only — the others and
+    // the title cards (the reel's structure) stay in this page's link.
+    /** @typedef {{ key: string, gameId: number, title: string, n: number }} Game */
+    // The clip playing, or the next one after a title card.
+    let at = $derived([...playable.slice(Math.max(0, index)), ...playable].find((c) => !c.card));
+    /** @type {Game[]} */
+    let games = $derived.by(() => {
+        /** @type {Map<string, Game>} */
+        const m = new Map();
+        for (const c of playable) {
+            if (c.card || !c.demo.gameId) continue;
+            const g = m.get(c.demo.key) || { key: c.demo.key, gameId: c.demo.gameId, title: c.demo.title, n: 0 };
+            g.n++;
+            m.set(c.demo.key, g);
+        }
+        // The game playing first.
+        return [...m.values()].sort((a, b) => (b.key === at?.demo.key ? 1 : 0) - (a.key === at?.demo.key ? 1 : 0));
+    });
+    let multi = $derived(games.length > 1);
+    // Each game's clips as their own link code (multi only).
+    let codes = $state(/** @type {Record<string, string>} */ ({}));
+    $effect(() => {
+        if (!multi) return;
+        for (const g of games) {
+            if (codes[g.key]) continue;
+            encodePlaylist(playable.filter((c) => !c.card && c.demo.key === g.key)).then((z) => { codes[g.key] = z; });
+        }
+    });
+    /** @param {Game | null} g  null: the whole (one-game) list */
+    function fullUrl(g) {
+        const key = g?.key ?? at?.demo.key;
+        const clip = at && at.demo.key === key ? at : playable.find((c) => !c.card && c.demo.key === key);
         const params = new URLSearchParams();
-        if (at?.demo.gameId) params.set('gameId', String(at.demo.gameId));
+        if (clip?.demo.gameId) params.set('gameId', String(clip.demo.gameId));
         params.set('tab', 'player');
-        if (at) {
-            const off = at.demo.offset || 0;
-            const start = Math.max(0, at.from - off);
-            params.set('seg', `${start}-${Math.max(start, at.to - off)}`);
+        if (clip) {
+            const off = clip.demo.offset || 0;
+            const start = Math.max(0, clip.from - off);
+            params.set('seg', `${start}-${Math.max(start, clip.to - off)}`);
             params.set('t', String(start));
         }
-        return `./?${params}#playlist=${code}&open`;
-    });
+        const list = g ? codes[g.key] : code;
+        return list ? `./?${params}#playlist=${list}&open` : `./?${params}`;
+    }
+    let pickGame = $state(false);
 
     /** @param {number} i */
     function playFrom(i) {
@@ -164,16 +199,32 @@
     const len = (c) => formatDuration(c.card ? c.card.ms / 1000 : c.to - c.from);
 </script>
 
-<svelte:window onkeydown={key} />
+<svelte:window onkeydown={key} onclick={(e) => { if (pickGame && !/** @type {Element} */ (e.target)?.closest?.('.clips-full-wrap')) pickGame = false; }} />
 <svelte:document onfullscreenchange={() => { fullscreen = !!document.fullscreenElement; }} />
 
 <div class="clips-page">
     <header class="clips-head">
         <span class="clips-brand">MVD Analyzer</span>
         <span class="clips-title">{nClips} clip{nClips === 1 ? '' : 's'}</span>
-        <a class="clips-full" href={fullUrl} title="Open this playlist in the full analyzer's Player tab to edit it, at the clip playing — with its map, graphs and tables (it analyses the demo first)">
-            <ExternalLink size={14} /> Open in the full analyzer
-        </a>
+        {#if multi}
+            <span class="clips-full-wrap">
+                <button class="clips-full" title="The full analyzer holds one game at a time: pick the game to open there, with its clips from this list to edit (the others and the title cards stay in this link)"
+                    onclick={() => (pickGame = !pickGame)}>
+                    <ExternalLink size={14} /> Open a game in the full analyzer
+                </button>
+                {#if pickGame}
+                    <span class="clips-games" role="menu">
+                        {#each games as g (g.key)}
+                            <a role="menuitem" href={fullUrl(g)}>{g.title || `game ${g.gameId}`} <span class="muted">· {g.n} clip{g.n === 1 ? '' : 's'}{g.key === at?.demo.key ? ' · playing' : ''}</span></a>
+                        {/each}
+                    </span>
+                {/if}
+            </span>
+        {:else}
+            <a class="clips-full" href={fullUrl(null)} title="Open this playlist in the full analyzer's Player tab to edit it, at the clip playing — with its map, graphs and tables (it analyses the demo first)">
+                <ExternalLink size={14} /> Open in the full analyzer
+            </a>
+        {/if}
     </header>
     {#if !playable.length}
         <p class="clips-empty">{clips.length ? 'These clips are from local files — open them in the full analyzer and load the files there.' : 'No clips in this link.'}</p>
@@ -229,7 +280,12 @@
         {#if skipped}<p class="clips-empty">{skipped} clip{skipped === 1 ? ' is' : 's are'} from a local file and not shown — open the full analyzer to play {skipped === 1 ? 'it' : 'them'}.</p>{/if}
     {/if}
     <footer class="clips-foot">
-        <a href={fullUrl}>Full analyzer — map, timeline, stats and the clip finder for these demos</a>
+        {#if multi}
+            Full analyzer — map, timeline, stats and the clip finder, one game at a time:
+            {#each games as g, i (g.key)}{i ? ' · ' : ' '}<a href={fullUrl(g)}>{g.title || `game ${g.gameId}`}</a>{/each}
+        {:else}
+            <a href={fullUrl(null)}>Full analyzer — map, timeline, stats and the clip finder for this demo</a>
+        {/if}
     </footer>
 </div>
 <Toast />
@@ -273,6 +329,39 @@
     .clips-full:hover {
         background: var(--accent-cyan);
         color: var(--bg-deep);
+    }
+    button.clips-full {
+        background: none;
+        font: inherit;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+    .clips-full-wrap {
+        position: relative;
+        margin-left: auto;
+    }
+    .clips-games {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 4px);
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        min-width: 260px;
+        padding: 4px 0;
+        background: var(--bg-panel, #16213e);
+        border: 1px solid rgba(0, 217, 255, 0.3);
+        border-radius: 5px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+    }
+    .clips-games a {
+        padding: 6px 12px;
+        color: #dde;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+    .clips-games a:hover {
+        background: rgba(0, 217, 255, 0.12);
     }
     .clips-stage {
         position: relative;

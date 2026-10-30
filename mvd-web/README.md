@@ -1481,7 +1481,12 @@ wins over the run that asked first (and shares its download when it is
 the same demo). *Open in the full analyzer* (head
 and foot) goes to the Player tab with this playlist as its own, to edit
 (`#playlist=…&open`), on the demo of the clip playing, that clip
-selected and the playhead at its start (`?seg=` / `?t=`).
+selected and the playhead at its start (`?seg=` / `?t=`). The analyzer
+holds one game at a time — it has no notion of several yet — so for a
+list over several games the button asks which game (the one playing
+first) and opens that game with its clips only; the other games' clips
+and the title cards stay in the light player's link. The foot lists the
+games the same way.
 
 ### Hub links on the other tabs
 
