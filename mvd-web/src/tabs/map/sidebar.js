@@ -84,29 +84,36 @@ export function syncLegend(el, view, result, time) {
     }
 }
 
-// syncRegionStatus rebuilds the region rows at `time`. `icons` caches the
-// composited player icons per (name, letter, colour, badges) for the demo:
-// a player is in one region per frame, so a cached node is appended once.
+// syncRegionStatus rebuilds the region rows at `time`. `iconCache` caches
+// the composited player icons per (name, letter, colour, badges) for the
+// demo: a player is in one region per frame, so a cached node is appended
+// once.
 /**
  * @param {HTMLElement | null | undefined} el
  * @param {MvdMap} view
  * @param {number} time
  * @param {string[]} colors
- * @param {Map<string, HTMLCanvasElement>} icons
+ * @param {Map<string, HTMLCanvasElement>} iconCache
  */
-export function syncRegionStatus(el, view, time, colors, icons) {
+export function syncRegionStatus(el, view, time, colors, iconCache) {
     const s = view.state;
     if (!el || !s.controlRegions || s.controlRegions.length === 0) return;
-    el.innerHTML = '';
     const states = view.regionControlAt(time);
-    if (!states) return;
-    const frame = view.frameAt(time);
-    const rows = regionStatusRows({
+    const frame = states ? view.frameAt(time) : null;
+    const rows = !states ? [] : regionStatusRows({
         regions: s.controlRegions, states, playerData: frame ? frame.p : null,
         locOf: (/** @type {PlayerFrame} */ d) => view.resolvePlayerLoc(d), locToRegion: s.locToRegion,
         symbols: s.playerSymbols, teams: s.teams || [], colors, sides: s.controlSides,
     });
-    for (const r of rows) {
+    // It runs every frame: rebuild only when a row changed (the icons are
+    // cached per look, so the same canvas means the same badge set).
+    const icons = rows.map((r) => r.players.map((p) => playerIcon(view, p, colors, iconCache)));
+    const sig = rows.flatMap((r, i) => [r.name, r.label, r.color, icons[i].length, ...icons[i]]);
+    const last = shownRows.get(el);
+    if (last && last.length === sig.length && last.every((v, i) => v === sig[i])) return;
+    shownRows.set(el, sig);
+    el.innerHTML = '';
+    rows.forEach((r, ri) => {
         const row = document.createElement('div');
         row.className = 'region-status-row';
         const name = document.createElement('span');
@@ -121,15 +128,19 @@ export function syncRegionStatus(el, view, time, colors, icons) {
         const players = document.createElement('span');
         players.className = 'region-status-players';
         if (r.players.length === 0) players.textContent = '-';
-        for (const p of r.players) {
-            const icon = playerIcon(view, p, colors, icons);
+        r.players.forEach((p, pi) => {
+            const icon = icons[ri][pi];
             icon.title = p.name;
             players.appendChild(icon);
-        }
+        });
         row.appendChild(players);
         el.appendChild(row);
-    }
+    });
 }
+
+// What each status element shows now (syncRegionStatus's signature).
+/** @type {WeakMap<HTMLElement, unknown[]>} */
+const shownRows = new WeakMap();
 
 // A player's symbol with their RL / LG / powerup badges around it.
 /**

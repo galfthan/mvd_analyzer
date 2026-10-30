@@ -65,14 +65,27 @@
     }
 
     let lastKey = '';
+    // The strips' width and row height, read on resize only: reading them
+    // per frame forces a layout after the frame's DOM writes.
+    let boxW = 0;
+    let rowH = ROW_H;
+    function measure() {
+        boxW = list?.clientWidth || 0;
+        rowH = rowHeight();
+        lastKey = '';
+    }
+
+    // The strips redraw when the window moved by a pixel at least (a
+    // rolling window would otherwise redraw them every frame).
     /** @param {number} t */
     function draw(t) {
         const v = view;
         if (!v || !v.count) return;
         const [start, end] = paneWindow(t, width, matchDurationSec($demo?.result), segment.get());
         cursor = indicatorPct(t, start, end);
-        const h = rowHeight();
-        const key = `${start}|${end}|${h}|${list?.clientWidth}`;
+        const h = rowH;
+        const px = (end - start) / Math.max(1, boxW);
+        const key = `${Math.floor(start / px)}|${Math.floor(end / px)}|${h}|${boxW}`;
         if (key !== lastKey) {
             lastKey = key;
             for (const { name, cid } of rows) {
@@ -98,13 +111,13 @@
     // New rows, data, window or selection redraw the strips.
     $effect(() => {
         rows; view; width; $segment;
-        lastKey = '';
+        measure();
         return onFrame(draw);
     });
 
     $effect(() => {
         // A resize with the clock still: no frame comes, so draw now.
-        const ro = new ResizeObserver(() => { lastKey = ''; draw(clock.t); });
+        const ro = new ResizeObserver(() => { measure(); draw(clock.t); });
         ro.observe(list);
         const body = list.closest('.player-pane-body');
         if (body) ro.observe(body);

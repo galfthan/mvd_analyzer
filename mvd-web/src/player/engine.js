@@ -138,7 +138,7 @@ export class PlayerEngine {
             const back = !!this.fte && !this.syncFrame;
             this.fte?.resume();
             this.ensure();
-            if (back && this.fte && Math.abs(this.fte.getDemoElapsedTime() - this.offset() - this.clock.t) > 0.5) this.requestSeek(this.clock.t);
+            if (back && this.fte && Math.abs(this.matchTime(this.fte.getDemoElapsedTime()) - this.clock.t) > 0.5) this.requestSeek(this.clock.t);
             this.startSync();
         } else if (this.fte) {
             this.stopSync();
@@ -307,6 +307,14 @@ export class PlayerEngine {
         return this.pendingSeek != null || this.seekTarget != null;
     }
 
+    // matchTime: a demo time as the page clock holds it — clamped as the
+    // clock clamps, so the countdown (before the match) reads 0, not a
+    // difference that would re-seek the clock every frame.
+    /** @param {number} demoT */
+    matchTime(demoT) {
+        return Math.min(Math.max(0, demoT - this.offset()), this.clock.duration);
+    }
+
     tick() {
         const fte = this.fte;
         if (!fte) return;
@@ -322,7 +330,7 @@ export class PlayerEngine {
             if (arrived || performance.now() - this.seekIssuedAt > SEEK_SETTLE_MS) this.seekTarget = null;
         }
         if (!this.seeking()) {
-            const t = demoT - this.offset();
+            const t = this.matchTime(demoT);
             if (Math.abs(t - this.clock.t) > 0.01) this.clock.seek(t, 'engine');
         }
         this.publish();

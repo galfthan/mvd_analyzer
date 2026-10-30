@@ -59,9 +59,21 @@
     let hint = $state('');
     let legend = $state.raw(/** @type {Array<{ text: string, color: string }>} */ ([]));
     let lastKey = '';
+    // The canvas width and the sized height, read on resize only: reading
+    // them per frame forces a layout after the frame's DOM writes.
+    let boxW = 0;
+    /** @type {number | null} */
+    let avail = null;
+    function measure() {
+        boxW = canvas?.parentElement?.clientWidth || 0;
+        avail = availH();
+        lastKey = '';
+    }
 
-    // draw renders when the window or the data moved; the playhead line is
-    // an element over the canvas, so a paused whole-match graph only moves it.
+    // draw renders when the window or the data moved — by a canvas pixel
+    // at least, so a rolling window does not redraw every frame; the
+    // playhead line is an element over the canvas, so a paused whole-match
+    // graph only moves it.
     /** @param {number} t */
     function draw(t) {
         const result = $demo?.result;
@@ -69,8 +81,8 @@
         const [start, end] = paneWindow(t, width, matchDurationSec(result), segment.get());
         range = [start, end];
         cursor = indicatorPct(t, start, end);
-        const avail = availH();
-        const key = `${start}|${end}|${canvas?.parentElement?.clientWidth}|${avail}`;
+        const px = (end - start) / Math.max(1, boxW);
+        const key = `${Math.floor(start / px)}|${Math.floor(end / px)}|${boxW}|${avail}`;
         if (key === lastKey) return;
         lastKey = key;
         hint = '';
@@ -143,13 +155,13 @@
     // the span stayed put.
     $effect(() => {
         $demo; $teams; $regionControl; view; width; $segment;
-        lastKey = '';
+        measure();
         draw(clock.t);
     });
 
     $effect(() => {
         const off = onFrame((t) => draw(t));
-        const ro = new ResizeObserver(() => { lastKey = ''; draw(clock.t); });
+        const ro = new ResizeObserver(() => { measure(); draw(clock.t); });
         ro.observe(/** @type {HTMLElement} */ (canvas.parentElement));
         const body = canvas.closest('.player-pane-body');
         if (body) ro.observe(body);
