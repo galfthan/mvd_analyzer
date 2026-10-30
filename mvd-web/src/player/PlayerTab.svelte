@@ -35,12 +35,16 @@
         }
     });
 
-    // Another preset (or a reset) brings its own split.
+    // Another preset (or a reset) brings its own split. Only a change of
+    // the stored split (or the preset) moves the divider — any other layout
+    // write (a pane's option, its height) re-ran this and snapped a drag in
+    // progress back to the stored width — and never during a drag.
+    let storedSplit = $derived($paneLayout.split);
     $effect(() => {
         $preset;
-        $paneLayout;
-        if (!column || $paneLayout.hidden || column.isCollapsed()) return;
-        if (Math.abs(column.getSize() - $paneLayout.split) > 0.5) column.resize($paneLayout.split);
+        const split = storedSplit;
+        if (!column || dragging || paneLayout.get().hidden || column.isCollapsed()) return;
+        if (Math.abs(column.getSize() - split) > 0.5) column.resize(split);
     });
 
     /** @param {boolean} hidden */

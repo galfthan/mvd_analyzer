@@ -63,8 +63,11 @@ const PRESET_IDS = /** @type {Preset[]} */ (['map', 'player']);
 /** @param {unknown} id @returns {id is Preset} */
 const isPreset = (id) => PRESET_IDS.includes(/** @type {Preset} */ (id));
 
+// The side column's share of the width. It may take most of it — down to
+// a fifth left for the main column — a wide finder or players' table
+// beside a small map is a layout people ask for.
 export const MIN_SPLIT = 18;
-export const MAX_SPLIT = 60;
+export const MAX_SPLIT = 80;
 
 /**
  * @param {unknown} v  a stored layout, untrusted
