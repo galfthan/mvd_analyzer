@@ -183,9 +183,10 @@ summary, the high-level Result-section pass-throughs (KTX demoinfo,
 metadata, player-stats, frags, damage, aim, loc-graph, chat, backpacks,
 items, map entities, weapon-pickups, loc-table), eight for the view
 query layer,
-and two generic
+two generic
 DAG-artifact tools (`listArtifacts` + `getArtifact`) that reach any
-servable artifact by name:
+servable artifact by name, and `createPlaylistLink`, which turns clips
+from any number of games into a link that plays them:
 
 | Tool | Backing |
 |---|---|
