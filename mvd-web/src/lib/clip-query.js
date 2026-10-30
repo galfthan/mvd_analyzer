@@ -69,9 +69,6 @@ import { formatDuration } from './result.js';
  * @property {string} label
  */
 
-// How long a clip runs whose row lacks its end field.
-const OPEN_END_MS = 15000;
-
 // A slow-motion window's defaults: a second either side of the event, at
 // 0.3×.
 export const SLOW_DEFAULT = { before: 1000, after: 1000, speed: 0.3 };
@@ -135,8 +132,8 @@ export const SOURCES = {
         clip: { from: 'time', before: 5000, to: 'time', after: 2000, pov: 'killer' },
     },
     // Every slot-weapon pickup, with the kills before the picker's next
-    // death: from the pickup to that death (15 s past the pickup for a
-    // picker who never died again: no nextDeathTime).
+    // death: from the pickup to that death (to the match end for a picker
+    // who never died again: no nextDeathTime).
     'weapon-pickups': {
         fn: 'getWeaponPickups',
         params: ['players', 'weapons', 'source', 'from', 'to'],
@@ -308,10 +305,9 @@ export function stages(query, body, result, demo) {
         const who = String(fieldOf(r, spec.pov) ?? '');
         const fromMs = Number(from) - spec.before;
         // A row without its end — a weapon run whose picker never died
-        // again — runs OPEN_END_MS past its start (playback stops at the
-        // match end), as the Pack Drops tab's Run link does.
+        // again — lasted until the match ended.
         const to = fieldOf(r, spec.to);
-        const toMs = to == null ? Number(from) + OPEN_END_MS : (Number(to) || Number(from)) + spec.after;
+        const toMs = to == null ? (result?.match?.duration || Number(from) + spec.after) : (Number(to) || Number(from)) + spec.after;
         return [makeClip(result, demo, fromMs, toMs, ids[who], who, renderLabel(spec.label ?? query.label ?? '', r), slowOf(spec, r))];
     }));
     return { rows, kept, ranked, clips };

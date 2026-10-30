@@ -59,13 +59,14 @@ test('the kill log and weapon pickups as sources: killer POV, pickup to next dea
     const kills = clipsOf({ source: 'frags', where: { field: 'isTeamKill', op: '=', value: true } },
         { frags: [{ time: 30000, killer: 'bps', victim: 'x' }, { time: 60000, killer: 'valla', victim: 'y', isTeamKill: true }] }, result, demo);
     assert.deepEqual(kills.map((c) => [c.from, c.to, c.who]), [[65, 72, 'valla']], 'teamkills only; 5 s before, 2 s after (demo seconds)');
+    const ended = { ...result, match: { duration: 1200000 } };
     const runs = clipsOf({ source: 'weapon-pickups', where: { field: 'kills', op: '>', value: 0 } }, { pickups: [
         { time: 20000, player: 'bps', weapon: 'rl', kills: 2, nextDeathTime: 50000 },
         { time: 30000, player: 'valla', weapon: 'rl', kills: 0, nextDeathTime: 40000 },
         { time: 60000, player: 'valla', weapon: 'rl', kills: 1 },
-    ] }, result, demo);
-    assert.deepEqual(runs.map((c) => [c.from, c.to, c.who]), [[28, 61, 'bps'], [68, 85, 'valla']],
-        '2 s before the pickup to 1 s after the death; a picker who never died again: 15 s past the pickup');
+    ] }, ended, demo);
+    assert.deepEqual(runs.map((c) => [c.from, c.to, c.who]), [[28, 61, 'bps'], [68, 1210, 'valla']],
+        '2 s before the pickup to 1 s after the death; a picker who never died again: to the match end');
 });
 
 test('viewCall maps API params onto view options', async () => {
