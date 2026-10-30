@@ -249,10 +249,19 @@ func (a *ShotsAnalyzer) onNails(e *events.NailsFrameEvent) {
 			a.openNail[n.ID] = &rawProjectile{kind: "nail", spawnTMs: e.TimeMs, spawnOrigin: n.Origin}
 		}
 	}
-	for id, fl := range a.openNail {
-		if present[id] {
-			continue
+	// Close vanished flights in id order: several nails can vanish in one
+	// frame, and map order would shuffle them run to run — nailFlights
+	// order feeds the nail stream and, through linkProjectiles, which
+	// flight a damage event links to.
+	var gone []int
+	for id := range a.openNail {
+		if !present[id] {
+			gone = append(gone, id)
 		}
+	}
+	sort.Ints(gone)
+	for _, id := range gone {
+		fl := a.openNail[id]
 		fl.despawnTMs = e.TimeMs
 		fl.despawnOrigin = a.nailLastPos[id]
 		a.nailFlights = append(a.nailFlights, *fl)
