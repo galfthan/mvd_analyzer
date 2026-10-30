@@ -1086,6 +1086,12 @@ table tbody tr:hover {
     text-align: right;
 }
 
+/* The Summary's Opening: names and places, not numbers. */
+#opening-table td,
+#opening-table th {
+    text-align: left;
+}
+
 /* In a two-row header the Player <th> spans both rows via rowspan, so the
    second row's :first-child is a data column and must right-align like the
    cells under it. */

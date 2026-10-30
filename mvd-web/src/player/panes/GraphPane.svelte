@@ -1,3 +1,27 @@
+<script module>
+    // The team series over the whole bucket view (~0.1 s on a 20-minute
+    // demo), kept per view and window: a pane remounted by a tab switch, or
+    // a window that comes back, does not redo them.
+    /** @type {WeakMap<object, Map<string, any>>} */
+    const series = new WeakMap();
+    /**
+     * @template T
+     * @param {object} view
+     * @param {string} key
+     * @param {() => T} make
+     * @returns {T}
+     */
+    function seriesOf(view, key, make) {
+        let m = series.get(view);
+        if (!m) series.set(view, m = new Map());
+        if (!m.has(key)) {
+            if (m.size >= 12) m.delete(/** @type {string} */ (m.keys().next().value));
+            m.set(key, make());
+        }
+        return m.get(key);
+    }
+</script>
+
 <script>
     // One of the Timeline tab's graphs as a pane, over the selected segment
     // (the whole match without one — the default), a window that rolls
@@ -96,7 +120,9 @@
         } else if (kind === 'team-weapons' || kind === 'team-ha') {
             if (!twoSided) { hint = 'A field of players has no two sides — try Weapons per player.'; return; }
             if (!view) { hint = 'Loading…'; lastKey = ''; return; }
-            const { points, max } = kind === 'team-weapons' ? prepWeaponsData(view, start, end, order) : prepHealthArmorData(view, start, end, order);
+            const v = view;
+            const { points, max } = seriesOf(v, `${kind}|${start}|${end}|${order.join('\u0000')}`,
+                () => (kind === 'team-weapons' ? prepWeaponsData(v, start, end, order) : prepHealthArmorData(v, start, end, order)));
             const dropMarks = kind === 'team-weapons' ? computeBackpackDrops(ev.backpacks, start, end, order) : undefined;
             legend = [{ text: `${order[0]} ↑`, color: colors[0] }, { text: `${order[1]} ↓`, color: colors[1] }, { text: `max ${max}`, color: '#888' }];
             renderDivergingGraph(canvas, { startTime: start, endTime: end, dataPoints: points, maxValue: max, dropMarks, height: grown(avail) });

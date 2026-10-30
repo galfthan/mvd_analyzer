@@ -5,7 +5,7 @@ import {
     matchInfo, matchSettings, serverInfoRows, teamsSummary, teamsPanelHidden, noMatchView,
     effPct, enemyWeaponKillCell, enemyKillCell, basicStatsPlayerRows, basicStatsTeamRows,
     weaponStatsPlayerRows, weaponStatsTeamRows, accConventionNote, itemsPlayerRows, formatXfer,
-    weaponKillBars, getWeaponName,
+    weaponKillBars, getWeaponName, openingRows,
 } from '../src/lib/summary.js';
 import {
     ktxHitsConvention, formatAccuracyCell, accOffKtxScale, anyAccOffKtxScale, ACC_OFF_SCALE_FOOTNOTE,
@@ -151,4 +151,21 @@ test('no match view: title, reading, evidence, errors only on demoUnreadable', (
     assert.equal(v.errors, '');
     assert.equal(noMatchView({ noMatch: { reason: 'demoUnreadable' }, errors: ['a', 'b'] }).errors, 'Reader: a · b');
     assert.equal(noMatchView({ noMatch: { reason: 'other' } }).title, 'This recording holds no analyzable match');
+});
+
+test('openingRows: a row per player in canonical team order, spawn and first takes', () => {
+    assert.deepEqual(openingRows(/** @type {any} */ ({}), ['a', 'b']), [], 'no opening, no rows');
+    const rows = openingRows(/** @type {any} */ ({
+        opening: {
+            players: [{ name: 'x', team: 'a', loc: 'RL' }, { name: 'y', team: 'b', loc: 'YA' }, { name: 'w', team: 'b' }],
+            firstTakes: [
+                { item: 'ya', kind: 'ya', time: 1372, takenBy: 'y', team: 'b', loc: 'YA' },
+                { item: 'quad', kind: 'quad', time: 2177, takenBy: 'y', team: 'b' },
+                { item: 'rl', kind: 'rl', time: 3039, takenBy: 'late', team: 'a' },
+            ],
+        },
+    }), ['b', 'a']);
+    assert.deepEqual(rows.map((r) => [r.html.match(/<td>([^<]*)<\/td>/)[1], r.colorIdx]), [['w', 0], ['y', 0], ['late', 1], ['x', 1]]);
+    assert.match(rows[1].html, /<td>YA<\/td>.*YA <span class="muted">0:01<\/span>.* · .*Quad <span class="muted">0:02/);
+    assert.match(rows[2].html, /<td>-<\/td>.*RL/, 'a first take by someone not at the start still gets a row');
 });

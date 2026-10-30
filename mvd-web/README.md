@@ -308,7 +308,7 @@ computed on demand from the demo the WASM module still holds, so they
 fill in a moment after the rest of the tab has painted. The Go exports
 (`getTopWindows`, `getTopKills`) live on the worker's global like every
 other one, so the main page reaches them — and `getEvents`, `getLives`,
-`getHighlights`, `getBackpacks`, the worker's other whitelisted view exports — through a `viewQuery` worker
+`getHighlights`, `getBackpacks`, `getFrags`, `getWeaponPickups`, the worker's other whitelisted view exports — through a `viewQuery` worker
 message (`DemoHandle.view`, `src/data/wasm-source.js`) — the same round-trip as region recompute
 and line of sight. **Top Damage Windows (10 s)** is the top 10 windows by bounded enemy
 damage (`metric=damageGiven`, `windowMs=10000`, `dmg=bounded` — the same
@@ -496,6 +496,11 @@ Every table on the Summary tab — Basic Stats, Weapon Stats, Item Pickups
 `match.players`, `frags.byPlayer`, `frags.frags` and `demoInfo` that
 lived in `app.js` and that the REST and MCP consumers never got; the
 merge now happens once, in Go.
+
+The one exception is the **Opening** panel: `result.opening` (where each
+player spawned at match start, and who was first to take each armor,
+mega, powerup and RL / LG pad, with the time), one row per player
+(`openingRows`).
 
 The tab is Svelte (`src/tabs/summary/SummaryTab.svelte`). Its DOM-free
 parts are `src/lib/summary.js` (Match Info / Settings / Server Info, the
@@ -1161,7 +1166,8 @@ shuts the column passes its minimum on the way) and whether it is shown.
 Headers drag by the grip to reorder, or onto the other column's panes or
 its foot; ↑ ↓, the move-across button and ×
 (dim until hovered) move and close, the chevron or title collapses, the
-bottom edge resizes (double-click: natural height), the POV bar's toggle
+bottom edge resizes (double-click: natural height; a drag writes the
+layout once a frame and stores it on release), the POV bar's toggle
 folds the side column away, and each column's foot, "+ Add pane…",
 reopens a closed pane at that column's end. (dockview was tried for this and
 dropped: ~390 KB, no stylesheet in its ESM build, and it reparents panels,
@@ -1170,7 +1176,11 @@ Player pane avoids that.)
 
 - **Clip finder** and **Playlist**: see *Clips and the playlist* below.
 - **Map** is its own `MvdMap` — its own canvas, camera and follow target —
-  reading the map model's data each frame (`panes/map-sync.js`: data
+  that outlives the pane by 30 s: the two views place the map in
+  different columns, so a tab switch remounts it, and the kept map is
+  attached to the new canvas with its camera instead of a new WebGL
+  context, geometry upload and first frame (the graph panes likewise keep
+  their team series per window). It reads the map model's data each frame (`panes/map-sync.js`: data
   fields by reference, never view state; the line-of-sight pairs once the
   model's lazy pass ran). The crosshair toggle (*follow POV*) puts the camera on
   the watched player whenever the POV changes — a pan holds until the next
@@ -1231,7 +1241,7 @@ Player pane avoids that.)
   values at it. Strips redraw when the window moves; given a height the
   rows share it. Click a name to watch them.
 - **Moments**: two levels. The groups are the Key Moments and Pack Drops
-  tabs' tables — quad / pent / ring runs, frag streaks, top damage windows,
+  tabs' tables — quad / pent / ring runs, RL / LG runs, frag streaks, top damage windows,
   top RL and LG kills, demo markers, airgibs, discharges, quadbores,
   telefrags, pack drops — each a clip finder preset, with the number of
   rows it found (dim at none). An opened group lists its clips in time
@@ -1282,7 +1292,10 @@ drops it).
   8 s before to 2 s after; the Key Moments and Pack Drops tabs' play links
   use the same windows.
 - **Clip finder** (`src/lib/clip-query.js`): a query is one mvd-api
-  endpoint (`events`, `highlights`, `backpacks`, `top-kills`, `top-windows`, `lives`)
+  endpoint (`events`, `highlights`, `backpacks`, `top-kills`, `top-windows`, `lives`,
+  `frags` — the kill log, teamkills and suicides included, watched from
+  the killer — and `weapon-pickups` — every slot-weapon pickup with the
+  kills before the picker's next death, from the pickup to that death)
   with its query params under their API names, a `where` over the rows it
   returns (an and / or / not tree of conditions — `= != < <= > >=`,
   `~` contains on text and membership on a list, `in` any of — fields as

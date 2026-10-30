@@ -141,16 +141,24 @@ function save() {
     } catch { /* per-viewer convenience */ }
 }
 
-/** @param {(layout: PaneLayout) => void} fn */
-export function updateLayout(fn) {
+// updateLayout edits the layout in use and stores it; `persist: false`
+// leaves the storing to saveLayout (a drag: once on release, not per
+// pointer move).
+/**
+ * @param {(layout: PaneLayout) => void} fn
+ * @param {{ persist?: boolean }} [opts]
+ */
+export function updateLayout(fn, { persist = true } = {}) {
     const base = PRESET_DEFAULTS[all.preset];
     const next = sanitize(structuredClone(paneLayout.get()), base);
     fn(next);
     const clean = sanitize(next, base);
     all.layouts[all.preset] = clean;
-    save();
+    if (persist) save();
     paneLayout.set(clean);
 }
+
+export const saveLayout = save;
 
 // setPreset shows a preset's layout (as the viewer left it).
 /** @param {string} id */

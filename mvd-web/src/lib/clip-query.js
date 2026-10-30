@@ -122,6 +122,25 @@ export const SOURCES = {
         rows: (b) => b?.windows || [],
         clip: { from: 'start', before: 2000, to: 'end', after: 2000, pov: 'player' },
     },
+    // The kill log: one row per kill (teamkills and suicides too), watched
+    // from the killer.
+    frags: {
+        fn: 'getFrags',
+        params: ['players', 'weapons', 'from', 'to'],
+        opts: (p) => ({ Players: csv(p.players), Weapons: csv(p.weapons), From: int(p.from), To: int(p.to) }),
+        rows: (b) => b?.frags || [],
+        clip: { from: 'time', before: 5000, to: 'time', after: 2000, pov: 'killer' },
+    },
+    // Every slot-weapon pickup, with the kills before the picker's next
+    // death: from the pickup to that death (a picker who never died again
+    // has no nextDeathTime, and gets the after only).
+    'weapon-pickups': {
+        fn: 'getWeaponPickups',
+        params: ['players', 'weapons', 'source', 'from', 'to'],
+        opts: (p) => ({ Players: csv(p.players), Weapons: csv(p.weapons), Source: p.source, From: int(p.from), To: int(p.to) }),
+        rows: (b) => b?.pickups || [],
+        clip: { from: 'time', before: 2000, to: 'nextDeathTime', after: 1000, pov: 'player' },
+    },
     lives: {
         fn: 'getLives',
         params: ['players', 'from', 'to', 'minMs', 'dmg'],
@@ -383,6 +402,40 @@ export const PRESETS = [
         },
     },
     {
+        id: 'rl-runs', title: 'RL runs', about: 'Every rocket launcher pickup that got a kill before the picker died: from the pickup to that death.',
+        query: {
+            source: 'weapon-pickups', params: { weapons: 'rl' }, where: { field: 'kills', op: '>', value: 0 },
+            label: 'RL run · {player} · {kills} kill{kills|s}',
+        },
+    },
+    {
+        id: 'lg-runs', title: 'LG runs', about: 'Every lightning gun pickup that got a kill before the picker died: from the pickup to that death.',
+        query: {
+            source: 'weapon-pickups', params: { weapons: 'lg' }, where: { field: 'kills', op: '>', value: 0 },
+            label: 'LG run · {player} · {kills} kill{kills|s}',
+        },
+    },
+    {
+        id: 'best-rl-runs', title: 'Best RL runs (most kills)', about: 'The five rocket launcher pickups with the most kills before the picker died.',
+        query: {
+            source: 'weapon-pickups', params: { weapons: 'rl' }, where: { field: 'kills', op: '>', value: 0 },
+            rank: { by: 'kills', desc: true, limit: 5 },
+            label: 'RL run · {player} · {kills} kill{kills|s}',
+        },
+    },
+    {
+        id: 'best-lg-runs', title: 'Best LG runs (most kills)', about: 'The five lightning gun pickups with the most kills before the picker died.',
+        query: {
+            source: 'weapon-pickups', params: { weapons: 'lg' }, where: { field: 'kills', op: '>', value: 0 },
+            rank: { by: 'kills', desc: true, limit: 5 },
+            label: 'LG run · {player} · {kills} kill{kills|s}',
+        },
+    },
+    {
+        id: 'teamkills', title: 'Teamkills', about: 'Every kill of a teammate, from the killer\'s view.',
+        query: { source: 'frags', where: { field: 'isTeamKill', op: '=', value: true }, label: 'Teamkill · {killer} → {victim} · {weapon}' },
+    },
+    {
         id: 'frag-streaks', title: 'Frag streaks', about: 'The ten lives with the most frags, from the spawn to two seconds after the death.',
         query: {
             source: 'events', params: { types: 'streak' },
@@ -457,7 +510,7 @@ export const PRESETS = [
 // The Moments pane's groups, in its order: the Key Moments and Pack Drops
 // tabs' tables, each one of the presets above.
 export const MOMENT_GROUPS = [
-    'quad-runs', 'pent-runs', 'ring-runs', 'frag-streaks',
+    'quad-runs', 'pent-runs', 'ring-runs', 'rl-runs', 'lg-runs', 'frag-streaks',
     'top-damage', 'top-rl-kills', 'top-lg-kills', 'demo-markers',
     'airgibs', 'discharges', 'quadbores', 'telefrags', 'pack-drops',
 ];

@@ -1,3 +1,15 @@
+<script module>
+    // The pane's MvdMap outlives the pane for a while: the Map and Player
+    // tabs place it in different columns, so a tab switch remounts it, and
+    // a new map is a new WebGL context, geometry upload and first frame
+    // (~0.2 s). A remount within KEEP_MS takes the kept one onto its new
+    // canvas, with its camera; the map's events reach whichever pane holds
+    // it (`on`).
+    const KEEP_MS = 30000;
+    /** @type {{ map: import('../../../../mvd-map-view/src/index.js').MvdMap, demo: unknown, on: Record<string, (arg: any) => void>, timer?: ReturnType<typeof setTimeout> } | null} */
+    let kept = null;
+</script>
+
 <script>
     // The map, following the player you watch (the engine's POV, or with no
     // engine — the Map preset — the follow target, follow.js). An MvdMap with its own
@@ -12,6 +24,7 @@
     // whom to follow, and it holds the Map tab's trail length, clear and
     // learn-the-map. In the main column the map may be as tall as the
     // window. Escape clears a region focus.
+    import { untrack } from 'svelte';
     import Crosshair from '@lucide/svelte/icons/crosshair';
     import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal';
     import {
@@ -73,7 +86,7 @@
     let lastPov = null;       // the POV the camera last followed
     /** @type {string | null | undefined} */
     let lastFollow;           // the follow target, without an engine
-    let needsFit = true;      // a new demo: reset the view once its data is in
+    let needsFit = false;     // a new demo: reset the view once its data is in
 
     const sized = $derived($paneLayout.heights.map != null);
 
@@ -167,40 +180,59 @@
     }
 
     $effect(() => {
-        map = new MvdMap(canvas);
+        if (kept) {
+            clearTimeout(kept.timer);
+            kept.map.attach(canvas);
+        } else {
+            const k = { map: new MvdMap(canvas), demo: undefined, on: /** @type {Record<string, (arg: any) => void>} */ ({}) };
+            k.map.on('follow', (/** @type {string | null} */ name) => k.on.follow?.(name));
+            k.map.on('camera', () => k.on.camera?.(undefined));
+            kept = k;
+        }
+        const k = kept;
+        map = k.map;
+        tilted = is3D(map.camera);
         // The screenshot harness (test/mapshot.py) reaches the pane's map here.
         /** @type {any} */ (canvas).mvdMap = map;
-        // A click on a player (or off them) on the map: watch them.
-        map.on('follow', (/** @type {string | null} */ name) => {
-            if (setting) return;
-            if (engine.drives()) {
-                if (name) engine.trackName(name);
-            } else {
-                lastFollow = name;
-                mapFollow.set(name);
-            }
-        });
-        map.on('camera', () => { tilted = is3D(map.camera); });
+        k.on = {
+            // A click on a player (or off them) on the map: watch them.
+            follow: (/** @type {string | null} */ name) => {
+                if (setting) return;
+                if (engine.drives()) {
+                    if (name) engine.trackName(name);
+                } else {
+                    lastFollow = name;
+                    mapFollow.set(name);
+                }
+            },
+            camera: () => { tilted = is3D(map.camera); },
+        };
         const ro = new ResizeObserver(() => resize());
         ro.observe(box);
         const offFrame = onFrame(() => draw());
         return () => {
             offFrame();
             ro.disconnect();
-            map.dispose();
+            k.on = {};
+            k.timer = setTimeout(() => {
+                if (kept !== k) return;
+                k.map.dispose();
+                kept = null;
+            }, KEEP_MS);
             map = /** @type {any} */ (null);
         };
     });
 
     // A new demo: drop the old follow target and trail starts; the view
-    // resets on its data.
+    // resets on its data. A remount on the demo the kept map shows keeps
+    // its view.
     $effect(() => {
-        $demo;
+        const d = $demo;
+        if (!kept || kept.demo === d) return;
+        kept.demo = d;
         needsFit = true;
-        if (map) {
-            setFollow(null);
-            map.state.trailStartTimes = {};
-        }
+        setFollow(null);
+        map.state.trailStartTimes = {};
     });
 
     // What the map draws changes without the clock moving — learn mode
@@ -209,7 +241,7 @@
     // paused map gets no frame for it.
     $effect(() => {
         $learnMode; $mapFollow; $changed;
-        draw();
+        untrack(draw);
     });
 
     // Line of sight / PVS on: the map model's lazy pass, run once per demo.
@@ -217,9 +249,12 @@
         if ((opts.los || opts.pvs) && $demo) ensureLineOfSight().then(() => draw());
     });
 
+    // Only `sized`: draw reads the pane's options, and tracking them here
+    // would refit and redraw the map on every layout write (another pane's
+    // height mid-drag, a collapsed group).
     $effect(() => {
         sized;
-        resize();
+        untrack(resize);
     });
 
     /** @param {MouseEvent} ev */

@@ -1,6 +1,6 @@
 <script>
     // The Summary tab: Match Info, Match Settings, Server Info, the Teams
-    // box, Basic Stats / Weapon Stats / Item Pickups & Drops (per team and
+    // box, the Opening (spawns and first takes, result.opening), Basic Stats / Weapon Stats / Item Pickups & Drops (per team and
     // per player, all from result.playerStats), Kills by Weapon, and — on a
     // recording that holds no match — the no-match panel at the top
     // (src/lib/summary.js has the rules and the row markup). src/app/tabs.js
@@ -24,7 +24,7 @@
     import {
         matchInfo, matchSettings, serverInfoRows, teamsSummary, teamsPanelHidden, noMatchView,
         basicStatsTeamRows, basicStatsPlayerRows, weaponStatsTeamRows, weaponStatsPlayerRows,
-        itemsTeamRows, itemsPlayerRows, accConventionNote, weaponKillBars,
+        itemsTeamRows, itemsPlayerRows, accConventionNote, weaponKillBars, openingRows,
     } from '../../lib/summary.js';
     import { makeSortable } from '../../ui/sortable.js';
 
@@ -44,7 +44,7 @@
      * @property {string} convNote
      * @property {boolean} showHandicap
      * @property {import('../../lib/summary.js').WeaponKillBar[] | null} bars
-     * @property {Record<'basicTeam' | 'basicPlayer' | 'weapTeam' | 'weapPlayer' | 'itemTeam' | 'itemPlayer', SummaryRow[]>} tables
+     * @property {Record<'basicTeam' | 'basicPlayer' | 'weapTeam' | 'weapPlayer' | 'itemTeam' | 'itemPlayer' | 'opening', SummaryRow[]>} tables
      * @property {string[]} colors
      */
 
@@ -70,6 +70,7 @@
             basicTeam: NO_ROWS, basicPlayer: NO_ROWS,
             weapTeam: NO_ROWS, weapPlayer: NO_ROWS,
             itemTeam: NO_ROWS, itemPlayer: NO_ROWS,
+            opening: NO_ROWS,
         },
         colors: [],
     });
@@ -137,6 +138,7 @@
                 weapPlayer: weaponStatsPlayerRows(rows, canonical),
                 itemTeam: itemsTeamRows(teamRows, canonical),
                 itemPlayer: itemsPlayerRows(rows, canonical),
+                opening: openingRows(result, canonical),
             },
             colors: t.colors,
         };
@@ -327,6 +329,15 @@
                 </div>
             {/each}
         </div>
+    </div>
+
+    <div data-panel="opening" id="opening-panel" class="panel" style:display={v.tables.opening.length ? null : 'none'}>
+        <h3>Opening</h3>
+        <p class="panel-note">Where each player spawned at match start, and the armors, mega, powerups and RL / LG pads they were first to take — with the match time.</p>
+        <table id="opening-table" class="stats-table">
+            <thead><tr><th>Player</th><th>Spawn</th><th>First to take</th></tr></thead>
+            <tbody id="opening-body" use:rows={{ rows: v.tables.opening, colors: v.colors }}></tbody>
+        </table>
     </div>
 
     <div data-panel="basic-stats" id="players-panel" class="panel">

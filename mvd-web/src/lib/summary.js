@@ -554,6 +554,49 @@ export function itemsTeamRows(teamRows, canonical) {
     return teamRowsInColourOrder(teamRows, canonical).map((t, idx) => ({ html: `<td>${escapeHtml(t.name)}</td>${itemCells(t)}`, colorIdx: idx }));
 }
 
+// ─── Opening ───────────────────────────────────────────────────────────────
+
+// The opening's spawner kinds, as the Items table names them.
+/** @type {Record<string, string>} */
+const OPENING_ITEM_NAMES = {
+    ra: 'RA', ya: 'YA', ga: 'GA', mh: 'Mega', quad: 'Quad', pent: 'Pent', ring: 'Ring', rl: 'RL', lg: 'LG',
+};
+
+// openingRows: result.opening as one row per player — where they spawned
+// at match start, and each spawner they were first to take (with the
+// match time), in canonical team order. A first take by someone not
+// alive at the start (a late spawn) still gets its row. Empty without an
+// opening block (no match start detected).
+/**
+ * @param {Result} result
+ * @param {string[] | null | undefined} canonical
+ * @returns {SummaryRow[]}
+ */
+export function openingRows(result, canonical) {
+    const op = result.opening;
+    if (!op) return [];
+    /** @type {Map<string, { name: string, team: string, loc: string, takes: string[] }>} */
+    const byName = new Map();
+    const row = (/** @type {string} */ name, /** @type {string | undefined} */ team) => {
+        let r = byName.get(name);
+        if (!r) byName.set(name, r = { name, team: team || '', loc: '', takes: [] });
+        return r;
+    };
+    for (const p of op.players || []) row(p.name, p.team).loc = p.loc || '';
+    for (const t of op.firstTakes || []) {
+        const label = OPENING_ITEM_NAMES[t.kind] || t.kind.toUpperCase();
+        row(t.takenBy, t.team).takes.push(`<span title="${escapeHtml(t.item)}${t.loc ? ` at ${escapeHtml(t.loc)}` : ''}">${escapeHtml(label)} <span class="muted">${formatDuration(t.time / 1000)}</span></span>`);
+    }
+    const list = [...byName.values()];
+    const order = teamOrder(canonical, list);
+    const idx = (/** @type {{ name: string, team: string }} */ r) => order.indexOf(r.team || r.name);
+    list.sort((a, b) => (idx(a) - idx(b)) || a.name.localeCompare(b.name));
+    return list.map((r) => ({
+        html: `<td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.loc || '-')}</td><td class="opening-takes">${r.takes.join(' · ') || '<span class="muted">-</span>'}</td>`,
+        colorIdx: idx(r),
+    }));
+}
+
 // ─── Kills by Weapon ───────────────────────────────────────────────────────
 
 /** @type {Record<string, string>} */

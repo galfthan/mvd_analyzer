@@ -37,6 +37,8 @@ var webDocSources = []struct {
 	{"top-kills", []string{"kills"}},
 	{"top-windows", []string{"windows"}},
 	{"lives", []string{"lives"}},
+	{"frags", []string{"frags"}},
+	{"weapon-pickups", []string{"pickups"}},
 }
 
 type webDocParam struct {

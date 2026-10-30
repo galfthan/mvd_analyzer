@@ -53,6 +53,17 @@ Player pane closes, and lists players in the POV bar's order. Frag
 streak and telefrag presets say what they hold (the ten best lives;
 deflects and spawnicides by name).
 
+The clip finder reads two more sources: the **kill log** (every kill,
+teamkills and suicides included, from the killer's view — a *Teamkills*
+preset) and **weapon pickups** (every pickup with the kills before the
+picker's next death — *RL runs*, *LG runs* and the five best of each,
+from the pickup to that death; RL / LG runs are Moments groups too). The
+Summary tab has an **Opening** panel: where each player spawned and who
+was first to take each armor, mega, powerup and RL / LG. Switching
+between the Map and Player tabs keeps the map (no new WebGL context or
+first frame, about twice as fast), and dragging a pane's height no
+longer stores the layout and redraws the map on every pointer move.
+
 The **Map and Player tabs are now two views of one tab**, sharing all of
 their panes: *Map* (a large map, the players' table, moments, items and
 region status — no demo player to load, so it opens instantly and scrubs

@@ -10,7 +10,7 @@
     import X from '@lucide/svelte/icons/x';
     import PanelRight from '@lucide/svelte/icons/panel-right';
     import PanelBottom from '@lucide/svelte/icons/panel-bottom';
-    import { paneLayout, updateLayout, movePane } from './layout.js';
+    import { paneLayout, updateLayout, saveLayout, movePane } from './layout.js';
 
     /** @type {{ id: string, title: string, column: import('./layout.js').Column, index: number, count: number, children: import('svelte').Snippet }} */
     let { id, title, column, index, count, children } = $props();
@@ -62,14 +62,27 @@
         const startY = e.clientY;
         // The handle renders with the body it resizes.
         const startH = /** @type {HTMLElement} */ (body).getBoundingClientRect().height;
+        // One layout write per frame however fast the pointer reports, and
+        // stored once, on release.
+        let h = startH;
+        let frame = 0;
         /** @param {PointerEvent} ev */
         const move = (ev) => {
-            const h = Math.max(60, Math.round(startH + ev.clientY - startY));
-            updateLayout((l) => { l.heights[id] = h; });
+            h = Math.max(60, Math.round(startH + ev.clientY - startY));
+            frame ||= requestAnimationFrame(() => {
+                frame = 0;
+                updateLayout((l) => { l.heights[id] = h; }, { persist: false });
+            });
         };
         const up = () => {
             window.removeEventListener('pointermove', move);
             window.removeEventListener('pointerup', up);
+            if (frame) {
+                cancelAnimationFrame(frame);
+                frame = 0;
+                updateLayout((l) => { l.heights[id] = h; }, { persist: false });
+            }
+            saveLayout();
         };
         window.addEventListener('pointermove', move);
         window.addEventListener('pointerup', up);

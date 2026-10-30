@@ -360,6 +360,79 @@
       }
     }
   },
+  "frags": {
+    "summary": "Frag aggregates + kill log",
+    "description": "Top-level frag aggregates plus the full kill log.\n\n**Filters.** When any scoping filter (players / weapon / from / to) is\nactive, ALL aggregates are recomputed from the filtered log so they\nstay consistent with the entries shown.\n\n**Measuredness.** `killsMeasured` (always present) is the demo-global\nverdict on whether kill ATTRIBUTION was observable at all. When it is\n`false` the log is empty on a demo where players demonstrably died —\nevery obituary went unmatched — so `kills`, `teamkills` and `byWeapon`\nare zeros that are NOT measurements, while `deaths` still is. It is\nnot recomputed per filter: a filter that matches nothing does not make\na demo unmeasurable. `/top-windows` and `/lives` publish the same\nverdict as `measured.frags`.\n\n**Errors.** 422 `frags_unavailable` when the demo has no frag log.",
+    "params": {
+      "from": {
+        "description": "Window start, match-relative integer MILLISECONDS. 0 / omitted = no lower bound. Endpoints treat the window as inclusive on both ends. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "label": {
+        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "type": "string"
+      },
+      "players": {
+        "description": "CSV of player display names. Case-SENSITIVE (QW names are case-significant). Omit for all players. Filter semantics are per-endpoint (e.g. killer-or-victim on /frags, speaker on /chat).",
+        "type": "array"
+      },
+      "summary": {
+        "description": "`1`/`true` drops the big per-event log / sample arrays / phase timeline and returns only the aggregates.",
+        "type": "boolean"
+      },
+      "to": {
+        "description": "Window end, match-relative integer MILLISECONDS. 0 / omitted = no upper bound. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "weapon": {
+        "description": "Deprecated legacy alias of `weapons` (the pre-16.2 singular spelling). Ignored when `weapons` is present.",
+        "type": "array"
+      },
+      "weapons": {
+        "description": "CSV of weapon codes (case-insensitive). Core codes: rl, lg, gl, ssg,\nsng, ng, sg, axe; on /damage the pseudo-codes tele/stomp select the\npositional instant kills (which carry no real weapon).\n\nEach endpoint validates against its OWN closed vocabulary and returns\n400 `invalid_param` (listing the valid set) for an unknown token — no\nmore silent empty result:\n\n- **/frags** additionally accepts the obituary environmental / cause\n  codes (hook, rail, squish, explobox, fall, lava, slime, water,\n  world, tele, stomp, unknown, suicide, teamkill);\n\n`water` and `drown` are the SAME cause under the two logs' different\nspellings and are accepted interchangeably wherever either is valid,\nso you need not know which log backs the endpoint you are calling.\n\nOn `/frags`, `teamkill` selects only the teamkills whose obituary\nphrasing has no cause in it (\"X checks his glasses\" and its siblings,\nwhich KTX picks at random). KTX's team branch tests three deathtypes\nby name before that random pick, and those keep their real code —\nfilter `tele` (teammate telefrag), `stomp` (teammate jump/crush) or\n`squish` (teammate mover crush) for them, and `isTeamKill` to\nseparate any of these from the enemy-facing rows carrying the same\ncode.\n\nThe pre-16.2 singular spelling `weapon` is an accepted legacy alias;\n`weapons` wins when both are present.",
+        "type": "array"
+      }
+    },
+    "fields": {
+      "cause": {
+        "description": "Sub-cause beneath weapon for the deathtypes KTX prints distinctly but books under an ordinary weapon: discharge (LG water discharge, weapon stays lg), deflect (pentagram telefrag deflection, weapon tele, a suicide), spawnicide (weapon tele, a suicide). Absent on every other row.",
+        "type": "string",
+        "enum": [
+          "discharge",
+          "deflect",
+          "spawnicide"
+        ]
+      },
+      "deflector": {
+        "description": "On a deflect row whose print names them: the surviving pentagram holder the teleporter died on (KTX dtTELE3). Absent on the dtTELE2 print, which names nobody.",
+        "type": "string"
+      },
+      "isSuicide": {
+        "description": "Suicide frag.",
+        "type": "boolean"
+      },
+      "isTeamKill": {
+        "description": "Team-kill frag.",
+        "type": "boolean"
+      },
+      "killer": {
+        "description": "Killer (attacker) name.",
+        "type": "string"
+      },
+      "time": {
+        "description": "Event/sample time, int32 ms since match start.",
+        "type": "integer"
+      },
+      "victim": {
+        "description": "Victim (killed player) name.",
+        "type": "string"
+      },
+      "weapon": {
+        "description": "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg).",
+        "type": "string"
+      }
+    }
+  },
   "highlights": {
     "summary": "Highlight catalogue (discharges, quadbores, telefrags, airgibs)",
     "description": "The stored highlight catalogue (`highlights`): every LG water discharge, every quadbore (self-kill by own rocket/grenade while holding quad), every telefrag (incl. the pentagram deflections and spawnicides) and every airgib, as four lists of one row shape. Each row carries an `actor`, its `victims`, enemy/team kill counters, the damage-log figure and the evidence `sources`; every participant carries their relation to the actor and their state read one millisecond before the event — health, armor (+ type), stack, weapons, wielded weapon, powerups, loc — so toplists are a client-side sort (discharges by `enemyKills`/`damage`/`cells`, quadbores by `quadHeldMs` ascending against KTX's 30 s quad, telefrags by `victims[0].stack`, airgibs by `heightAboveAttacker`).\n\nAll four lists are always present — `[]` when the match had none or `kinds` excluded them; `kinds` echoes the filter. `players` keeps rows whose actor or a victim is named. `preMs` re-runs only the airgib detection. 422 `highlights_unavailable` when the demo has no match streams or no frag log to build the catalogue from.",
@@ -1121,6 +1194,99 @@
       "victims": {
         "description": "Kills per victim. Sums to `kills`.",
         "type": "object"
+      }
+    }
+  },
+  "weapon-pickups": {
+    "summary": "Slot-weapon acquisitions + effectiveness",
+    "description": "Every slot-weapon acquisition (world spawners + RL/LG backpacks) with kills-before-next-death effectiveness. Backpack pickups carry the dropper and the ent number joining to /backpacks. Always 200 — empty when none.",
+    "params": {
+      "from": {
+        "description": "Window start, match-relative integer MILLISECONDS. 0 / omitted = no lower bound. Endpoints treat the window as inclusive on both ends. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "label": {
+        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "type": "string"
+      },
+      "players": {
+        "description": "CSV of player display names. Case-SENSITIVE (QW names are case-significant). Omit for all players. Filter semantics are per-endpoint (e.g. killer-or-victim on /frags, speaker on /chat).",
+        "type": "array"
+      },
+      "source": {
+        "description": "Restrict weapon pickups by provenance.",
+        "type": "string",
+        "enum": [
+          "world",
+          "backpack",
+          "unknown"
+        ]
+      },
+      "to": {
+        "description": "Window end, match-relative integer MILLISECONDS. 0 / omitted = no upper bound. A non-integer value 400s with code `invalid_param` and an `(integer milliseconds)` hint.",
+        "type": "integer"
+      },
+      "weapon": {
+        "description": "Deprecated legacy alias of `weapons` (the pre-16.2 singular spelling). Ignored when `weapons` is present.",
+        "type": "array"
+      },
+      "weapons": {
+        "description": "CSV of weapon codes (case-insensitive). Core codes: rl, lg, gl, ssg,\nsng, ng, sg, axe; on /damage the pseudo-codes tele/stomp select the\npositional instant kills (which carry no real weapon).\n\nEach endpoint validates against its OWN closed vocabulary and returns\n400 `invalid_param` (listing the valid set) for an unknown token — no\nmore silent empty result:\n\n- **/weapon-pickups** ssg,ng,sng,gl,rl,lg;\n\n`water` and `drown` are the SAME cause under the two logs' different\nspellings and are accepted interchangeably wherever either is valid,\nso you need not know which log backs the endpoint you are calling.\n\nThe pre-16.2 singular spelling `weapon` is an accepted legacy alias;\n`weapons` wins when both are present.",
+        "type": "array"
+      }
+    },
+    "fields": {
+      "backpackEnt": {
+        "description": "Originating BackpackDrop entNum (backpack source only).",
+        "type": "integer"
+      },
+      "dropTime": {
+        "description": "Drop time of the source backpack, int32 ms.",
+        "type": "integer"
+      },
+      "dropper": {
+        "description": "Backpack dropper name.",
+        "type": "string"
+      },
+      "dropperTeam": {
+        "description": "Backpack dropper team.",
+        "type": "string"
+      },
+      "hadBefore": {
+        "description": "Picker already held this weapon (redundant grab, zero kills credited).",
+        "type": "boolean"
+      },
+      "inferred": {
+        "description": "Synthesized from a STAT_ITEMS flip (weapon-stay recovery), not a KTX hint.",
+        "type": "boolean"
+      },
+      "kills": {
+        "description": "Kills credited to the weapon this pickup granted.",
+        "type": "integer"
+      },
+      "nextDeathTime": {
+        "description": "Picker's next death, int32 ms (0 = never died before match end).",
+        "type": "integer"
+      },
+      "player": {
+        "description": "Player display name.",
+        "type": "string"
+      },
+      "source": {
+        "description": "Pickup source (\"world\"/\"backpack\"/\"unknown\").",
+        "type": "string"
+      },
+      "team": {
+        "description": "Team name.",
+        "type": "string"
+      },
+      "time": {
+        "description": "Event/sample time, int32 ms since match start.",
+        "type": "integer"
+      },
+      "weapon": {
+        "description": "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg).",
+        "type": "string"
       }
     }
   }

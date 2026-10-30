@@ -10,6 +10,7 @@ export const PANEL_TABS = {
         ['match-settings', 'Match settings'],
         ['server-info', 'Server info'],
         ['teams', 'Teams'],
+        ['opening', 'Opening'],
         ['basic-stats', 'Basic stats'],
         ['weapon-stats', 'Weapon stats'],
         ['items', 'Item pickups & drops'],
