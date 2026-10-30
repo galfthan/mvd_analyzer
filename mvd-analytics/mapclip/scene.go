@@ -1,5 +1,7 @@
 package mapclip
 
+import "math"
+
 // PosedHull is a collision hull positioned at an entity origin — one
 // mover (lift, door, train) at a moment in time. The pose changes per
 // sample, so callers build these transiently from their mover-origin
@@ -52,6 +54,27 @@ func (m *PosedHull) footprintMayHit(x, y, z float32) bool {
 		return false
 	}
 	return z >= h.mins[2]+m.Origin[2]-playerBoxTop
+}
+
+// FootprintReach bounds the sample origins whose footprint can reach
+// this hull at any pose with origin in [minOrg, maxOrg]: footprintMayHit
+// is false outside [lo, hi] for every such pose (hi[2] is unbounded — a
+// start any height above a mover may still land on it). Float addition
+// rounds monotonically, so the swept box contains every pose's box
+// exactly as footprintMayHit computes it. ok is false for a hull no
+// sample can reach.
+func (h *Hull) FootprintReach(minOrg, maxOrg [3]float32) (lo, hi [3]float32, ok bool) {
+	if h == nil || len(h.nodes) == 0 {
+		return lo, hi, false
+	}
+	const pad = playerBoxHalf + sceneAABBSlack + footprintMargin + 1
+	for k := 0; k < 2; k++ {
+		lo[k] = h.mins[k] + minOrg[k] - pad
+		hi[k] = h.maxs[k] + maxOrg[k] + pad
+	}
+	lo[2] = h.mins[2] + minOrg[2] - playerBoxTop
+	hi[2] = float32(math.Inf(1))
+	return lo, hi, true
 }
 
 // HeightAboveFloorBoxScene is HeightAboveFloorBox over the union of the
