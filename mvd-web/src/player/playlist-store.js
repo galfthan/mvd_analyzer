@@ -103,6 +103,19 @@ export function clearClips() {
     update((s) => { s.clips = []; s.run = null; });
 }
 
+// keepDemos drops the clips of every demo but `keys` (a run over the list
+// ends with them).
+/** @param {string[]} keys */
+export function keepDemos(keys) {
+    const s = playlist.get();
+    const kept = s.clips.filter((c) => keys.includes(c.demo?.key));
+    if (kept.length === s.clips.length) return;
+    update((n) => {
+        n.clips = kept;
+        if (n.run && !n.run.transient) n.run = null;
+    });
+}
+
 /** @param {Run | null} run */
 export function setRun(run) {
     update((s) => { s.run = run; });

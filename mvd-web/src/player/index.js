@@ -15,7 +15,7 @@ import { PlayerEngine } from './engine.js';
 import { createRunner } from './runner.js';
 import { createPageDriver } from './page-driver.js';
 import { demoRefOf } from './demo-ref.js';
-import { playlist, addClips } from './playlist-store.js';
+import { playlist, addClips, keepDemos } from './playlist-store.js';
 import { installHubLinkRouting } from './hub-links.js';
 import { toast } from './toast.js';
 
@@ -69,6 +69,22 @@ const keepDriver = () => {
 activeTab.subscribe(keepDriver);
 paneLayout.subscribe(keepDriver);
 
+// A demo the user loads starts the playlist over: the clips of other
+// demos go (its own stay — a reload, or a link to its clips). Not when a
+// run loads its next clip's demo; and the first load after a share link
+// was imported keeps the link's demos too (a list over several opens on
+// the first of them).
+/** @type {string[]} */
+let linkDemos = [];
+let lastDemo = demo.get();
+demo.subscribe((handle) => {
+    if (handle === lastDemo || !handle) return;
+    lastDemo = handle;
+    const keep = [handle.ref.key, ...linkDemos];
+    linkDemos = [];
+    if (!runner.loadsForRun()) keepDemos(keep);
+});
+
 export function currentRef() {
     return runner.currentRef();
 }
@@ -89,6 +105,7 @@ async function importPlaylistFromHash() {
     const have = playlist.get().clips;
     const clips = decoded.filter((c) => !have.some((o) => same(o, c)));
     addClips(clips);
+    linkDemos = decoded.map((c) => c.demo.key);
     toast(clips.length
         ? `Imported ${clips.length} clip${clips.length === 1 ? '' : 's'} into the playlist`
         : 'Those clips are already in your playlist');

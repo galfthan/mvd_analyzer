@@ -1367,7 +1367,12 @@ drops it).
   the engine leaves slow motion. A playlist row with one
   shows a snail.
 - **Edit**: label inline, drag or ↑ ↓ to reorder, × to remove. The list
-  persists in `localStorage` (`mvd.playlist.v1`).
+  persists in `localStorage` (`mvd.playlist.v1`). A demo the user loads
+  starts it over: the clips of other demos go, its own stay (a reload, a
+  link to its clips) — `keepDemos`, from `src/player/index.js`. A run
+  loading its next clip's demo keeps the list, and so does the first load
+  after a share link was imported, for the link's demos (a playlist over
+  several matches comes from a share link).
 - **Play all / ▶ on a row**: a scripted run — seek, POV, play; advance when
   playback crosses the clip's `to` (not on a seek past it), follow a manual
   seek into another clip, taking its POV (hub's `useClipListPlayback`

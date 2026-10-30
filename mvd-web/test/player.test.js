@@ -11,7 +11,7 @@ mem.set('mvd.playerPanes.v1', JSON.stringify(['feed', 'map', 'bogus', 'map']));
 
 const { store } = await import('../src/state/store.js');
 const { paneLayout, updateLayout, movePane, showPane, MAX_SPLIT, paneOpt, setPaneOpt, preset, setPreset } = await import('../src/player/layout.js');
-const { playlist, addClips, moveClip, removeClip, setRun, setLabel } = await import('../src/player/playlist-store.js');
+const { playlist, addClips, moveClip, removeClip, setRun, setLabel, keepDemos, clearClips } = await import('../src/player/playlist-store.js');
 const { createRunner } = await import('../src/player/runner.js');
 const { demoRefOf } = await import('../src/player/demo-ref.js');
 const { syncMapData } = await import('../src/player/panes/map-sync.js');
@@ -82,6 +82,20 @@ test('playlist edits keep a running list on the same clip', () => {
     setLabel(before.clips[0], 'renamed');
     assert.equal(playlist.get(), before, 'a label edit does not notify');
     assert.equal(JSON.parse(mem.get('mvd.playlist.v1'))[0].label, 'renamed');
+});
+
+test('keepDemos drops the other demos\' clips and a run over the list', () => {
+    clearClips();
+    const other = { ...demoA, key: 'hub:2', gameId: 2 };
+    addClips([clip(10, 20), clip(30, 40, { demo: other }), clip(50, 60)]);
+    setRun({ clips: playlist.get().clips, index: 1, prev: null, transient: false });
+    keepDemos(['hub:1']);
+    assert.deepEqual(playlist.get().clips.map((c) => c.from), [10, 50]);
+    assert.equal(playlist.get().run, null);
+    const before = playlist.get();
+    keepDemos(['hub:1']);
+    assert.equal(playlist.get(), before, 'nothing to drop: no change');
+    clearClips();
 });
 
 // A stand-in engine with a controllable FTE clock.

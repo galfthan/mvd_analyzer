@@ -36,7 +36,8 @@ freely) and *Player* (the game view and the playlist, the map beside).
 Each remembers how you arranged it, and any pane can go in either. A
 moment or the playlist played on the Map tab plays right there, on the
 map, following the clip's player; from any other tab it opens the Player
-tab. The players' table has no play column — click a name to follow. The graph panes and the health /
+tab. Loading another demo clears the previous demo's clips from the
+playlist (a share link over several demos keeps them). The players' table has no play column — click a name to follow. The graph panes and the health /
 armor strips show the selection (or the whole match) by default and grow
 with their pane. The playlist's Generate menu says how many of each
 preset the demo has (and leaves out the ones it lacks), there are new

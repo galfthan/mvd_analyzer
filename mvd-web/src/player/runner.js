@@ -251,5 +251,6 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
         if (run && loadingRun !== run) stop();
     });
 
-    return { start, stop, isCurrent, currentRef, driver: () => drv };
+    // loadsForRun: the demo being loaded is the run's own (loadForRun).
+    return { start, stop, isCurrent, currentRef, driver: () => drv, loadsForRun: () => loadingRun !== null };
 }
