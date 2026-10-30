@@ -5,6 +5,330 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (web-svelte) — a player-like timeline, clips from the selection, a light player
+
+Schema v78 (additive): a weapon pickup's run has an end on every row —
+`weaponPickups[].endTime`, the picker's next death or else the match end
+(they were still on the run when it ended), and `backpacks[].pickerEndTime`
+on `ktx` rows; see [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).
+Otherwise the web UI, plus a new mvd-api endpoint and MCP tool for
+playlist links (below).
+
+**Playlists can hold title cards and text** (share-link format v2; older
+links still open). A card is a colour over the game view for a few
+seconds, fading in and out, with text on it — a title or intermission
+screen; text can also run over a clip, as a caption. Size, colour, font
+style, place and timing are per text. Both players draw them, and a card
+stays up until the next clip actually plays, covering its demo loading.
+A playlist over several demos plays straight through in the light
+player, the next demo downloading while the current item plays.
+
+**`createPlaylistLink` (MCP) / `POST /v1/playlist-links` (mvd-api)**
+make such links: an agent hands in clips (hub game, match-ms window,
+the player to watch, label, slow motion, captions) from up to 20 games,
+title cards and text, and gets back the light-player URL and a named
+Markdown link for Discord — the whole reel in the link, nothing stored.
+mvd-api's new `-play-url` (default `https://mvdanalyzer.com/play.html`)
+says which deployment the links open.
+
+The playback bar is laid out like a video
+player's: a thin scrubber on top (hover shows the time, a round playhead
+to drag, a press-and-drag selects) and under it play / pause, the speed
+(0.2–5×) and pills for the time and the selection. The selection now
+plays like a clip — a new one starts at its beginning and playback stops
+at its end — and on the Player and Map tabs a **+ clip** pill (or `c`;
+`i` / `o` set its ends) adds it to the playlist from the POV you watch,
+replacing the In / Out bar. Clips can carry slow motion around the event
+(the airgib, telefrag, quadbore and discharge presets have it on). The
+player itself is now a pane that can sit in either column or collapse
+without restarting the demo. The Moments pane lists the Key Moments and
+Pack Drops tables as groups with their counts. A playlist's link opens
+a light player page that plays the clips without loading the analyzer,
+with a link on to the full Player tab; the playlist's one **Copy link**
+button copies it as a named Markdown link for Discord ("mvda · date ·
+map · teams · Quad run ×5"), Shift the bare URL, Ctrl / Cmd a hub link.
+The link is compressed — 20 clips fit in about 480 characters, well
+inside a Discord message — and links copied before still open. Hub links everywhere
+read **play** (Shift: **+add**, Ctrl / Cmd: **hub**), the clip finder
+starts closed and shows its clips beside the stages, and the map's depth
+fog is an option again — off by default — in the map's right-click menu.
+The fullscreen button moved from the tab list to the right end of the
+playback bar, where it stays as the way out in fullscreen. The light
+player goes fullscreen too (a button, or `f`) and shows the engine's
+team info — both teams' players with their loc, health / armor and
+weapon — from the start; `t` shows / hides it in either player, and the
+keys menu lists it, `f` and the selection keys. Fixes: opening the
+console from the menu no longer leaves the game view's keys in the wrong
+state; coming back to the Player tab after picking a time on another
+tab plays from that time instead of jumping back; a frag feed click
+follows the killer on the Map tab too; Space after clicking a button
+(a player, a playlist row) plays / pauses instead of pressing it again;
+the arrows on a focused pane divider only resize. The Key Moments top
+damage / RL / LG tables (and their clip-finder presets) now fill on
+modes without bounded damage — CA, wipeout, midair, instagib — ranked
+by raw damage and marked so; they were empty. *Open in the full
+analyzer* asks before replacing a playlist of your own (Cancel adds the
+clips to it). A playlist over several demos: *Play all* on the Map tab
+stays on the map when it loads the next demo, editing the list while a
+demo loads no longer stalls the run, and a download the run no longer
+needs no longer replaces the demo you are watching. The map's follow
+menu no longer offers the game view's follow for a while after the
+Player pane closes, and lists players in the POV bar's order. Frag
+streak and telefrag presets say what they hold (the ten best lives;
+deflects and spawnicides by name).
+
+The clip finder reads two more sources: the **kill log** (every kill,
+teamkills and suicides included, from the killer's view — a *Teamkills*
+preset) and **weapon pickups** (every pickup with the kills before the
+picker's next death — *RL runs*, *LG runs* and the five best of each,
+from the pickup to the run's end — the next death, or the match end
+when the picker never died again (`endTime`), as the Pack Drops tab's
+*Run* link now does too; RL / LG runs are Moments groups too). The
+Summary tab has an **Opening** panel (after Basic Stats): where each player spawned and who
+was first to take each armor, mega, powerup and RL / LG. Switching
+between the Map and Player tabs keeps the map (no new WebGL context or
+first frame, about twice as fast), and dragging a pane's height no
+longer stores the layout and redraws the map on every pointer move.
+
+The **Map and Player tabs are now two views of one tab**, sharing all of
+their panes: *Map* (a large map, the players' table, moments, items and
+region status — no demo player to load, so it opens instantly and scrubs
+freely) and *Player* (the game view and the playlist, the map beside).
+Each remembers how you arranged it, and any pane can go in either. A
+moment or the playlist played on the Map tab plays right there, on the
+map, following the clip's player (in the Player pane if the tab has
+one); from any other tab it opens the Player tab. Loading another demo clears the previous demo's clips from the
+playlist (a share link over several demos keeps them). A click on the
+game view, or Space, plays and pauses — in the analyzer and the light
+player. The light player's *Open in the full analyzer* opens its
+playlist there as the playlist, to edit, at the clip it was playing; a
+playlist over several games (the analyzer holds one at a time) asks
+which game, and takes that game's clips only.
+The map no longer draws a sky-high height stem for a player with no floor
+beneath them (dm3's paused start): it still looked for the "no floor"
+marker the analysis used before schema v33. The playback bar shows times
+to a tenth of a second (the hover readout, the current time, the
+selection), and its hover readout is no longer cut off in fullscreen or
+at the bar's ends. Resizing the Player pane's height now resizes the game
+view too (any aspect, not only 16:9). The player has keys — Space plays /
+pauses, ↑ / ↓ switch to the previous / next player (on the Map tab the
+map follows them), ← / → step a second and Shift ← / → ten seconds —
+with the focus in the game view or not — and in the game view Tab shows
+the scoreboard and ` the console, in the analyzer and the light player; a keyboard button (or a
+right-click on the game view) opens a menu listing them, with autotrack
+and sound. The players' table has no play column — click a name to follow. The graph panes and the health /
+armor strips show the selection (or the whole match) by default and grow
+with their pane. The playlist's Generate menu says how many of each
+preset the demo has (and leaves out the ones it lacks), there are new
+presets for pent and ring runs, the Key Moments tab's top damage windows
+and top RL / LG kills, and demo markers, and the clips are tighter so a
+playlist keeps moving: a pack drop shows the 4 s before it (was 12 s),
+airgibs start 2.5 s before the hit, other highlights 3 s, powerup runs
+2 s before the pickup, demo markers 8 s before to 2 s after (was 5 s
+before to 15 s after) — the Key Moments and Pack Drops tabs' play links
+alike. The map's
+toolbar controls moved into its right-click menu (follow, trails, learn
+the map), and the Map tab's player table replaced the Player tab's.
+
+The clip finder says what its rows hold: **Fields and values** (a button
+on the filter, order and clip steps; ⓘ stays the source and its params)
+lists every field by its full path
+(`detail.powerup`, not "powerup"), what it means, its unit, the values it
+allows and the ones this demo has with counts, and shows a real row;
+events and highlights narrow to one kind of row, so a powerup's fields
+show apart from a frag's. Click a value to filter on it; click a field
+to order by it or put it in the label, from those steps. A condition's
+value box suggests values too, every field box says what its field means,
+and `players` suggests this demo's names. A row without a field no
+longer passes `<` / `>` tests on it (only `!=`), ordering by a text field
+sorts it, labels gain `{field|mmss}`, top damage windows take `weapons`,
+and the API reference fixes descriptions that were cut off at a comma and
+lists the allowed powerup and victim-weapon values.
+
+## unreleased (web-svelte) — schema v77: backpack drops say who took them
+
+Every RL/LG backpack drop now carries its own pickup side, on every demo:
+`fate` (`picked` / `expired` / `unobserved`), who picked it up and when,
+and `pickerRelation` — whether the picker was the dropper themselves (back
+from a respawn), a teammate or an enemy. On demos with KTX's backpack hints the drop also says whether the
+picker already had the weapon (`pickerHadWeapon`), the kills they made with
+it (`pickerKills`) and when they next died. Before, that half lived only in
+`/weapon-pickups` and every consumer had to join the two lists itself;
+`/backpacks` (and the MCP `getBackpacks` tool) now answers "packs the enemy
+took" or "RL packs the enemy took without having an RL" directly. The Pack
+Drops tab reads the same rows.
+
+## unreleased (player-tab) — watch the demo in a Player tab
+
+No schema change; web UI only. A new **Player** tab plays the loaded demo
+in the FTE engine right on the page, in step with the rest of the UI: the
+unified timeline's cursor follows the playback, scrubbing it or clicking any
+time link seeks the player, the speed buttons set the demo speed, and a POV
+bar switches whose view you watch (or hands it back to autotrack). The
+player is a port of hub.quakeworld.nu's (MIT) served from our own origin —
+hub's own embed accepts no commands from the page around it — and it plays
+the bytes already loaded for analysis, so local files work and nothing is
+downloaded twice. The engine itself loads on the first visit to the tab.
+A sound toggle unmutes it, and seeking or pressing play after the demo has
+run out restarts it instead of leaving the player stuck (hub's player has
+the same dead end).
+
+Beside the player, a column of panes follows its clock and POV — the map
+(following whoever you watch; click a player to switch to them; right-click
+for view / velocity arrows, trails, line of sight, PVS, occlusion and 3D),
+everyone's loc, health/armor, weapons, powerups and frags, a list of the
+demo's moments (quad runs, streaks, highlights — click to play), and a frag
+feed (click a frag to watch it from the killer's view). More can be added:
+the Timeline tab's score, team weapons, team health/armor, weapons per
+player, powerups and region control graphs over a window rolling with the
+playhead (click to seek), and a rolling health/armor strip per player.
+Panes are added, closed, reordered, collapsed and resized at will; the
+column itself can be widened, by dragging or with the arrow keys, or
+dragged shut to hide it. The whole tab goes fullscreen, playback bar
+included — like the Map tab, from the icon on the tab's row in the tab
+bar or the `f` key, with *Exit* at the playback bar's right end (the Map
+tab's own Fullscreen button is gone).
+
+The panels of the other tabs (Summary, Timeline, Locs & Regions, Key
+Moments, Pickups, Aim Stats) can be arranged the same way: reordered,
+collapsed to their heading or closed, with *Show all* and a reset to bring
+everything back. The arrangement is remembered in the browser. Under it, a
+**playlist** of clips: mark In/Out and add from the current POV, or
+generate quad runs, frag streaks, quadbores, airgibs, telefrags, discharges
+or one player's frags; play the list right there as a script (across hub
+demos too), or export it as one hub link (hub's multi-clip format) or a
+share link to this page. Every hub link on the other tabs now plays its
+clip in the Player tab; shift-click adds it to the playlist, ctrl-click
+still opens hub. Moving from clip to clip, the player dips to black over
+the jump and shows the next clip's title (its place in the list, its label
+and whose view it is); a clip that overlaps the end of the one before it
+(a pack's pickup, seconds after its drop) now switches to its own POV
+instead of carrying on with the previous one.
+
+The **clip finder** builds those lists from any of six API endpoints
+(events, highlights, backpacks, top kills, top windows, lives) in four
+visible stages, each saying how many rows it passes on: find rows (the
+endpoint and its params), keep the rows that match a filter (built from
+and / or / not groups), order them and keep
+the first N, and cut one or more clips from each row (from / to a row's
+time with padding, watching a player the row names, with a label
+template). Every source, param and row field is explained from the API
+reference itself (tooltips, value lists and an ⓘ page per source). Load
+a preset, name and save your own, share it as a link, or edit the whole
+query as a few lines of code. The finder and the playlist are panes like
+the ones beside the player: they start under it, and any pane can sit in
+either column.
+
+Under the hood the page is now built with Vite, and the shell and every
+tab are Svelte, with demo loading behind one data layer
+(`plan-frontend-restructure.md`); the tabs look and behave as before. One Chat fix came with its port: lines that crowd together no longer
+overlap when the demo was loaded while another tab was showing (they were
+stacked at a minimum height, not their real one). Two Timeline fixes came
+with its: a click on the timeline bar that clears a selected range now
+redraws the graphs over the whole match (they stayed zoomed while the bar
+showed no range), and the name column of the per-player weapons, powerup and
+region rows widens to its names after a demo switch instead of cutting a
+long name short. One Map fix came with its port: the legend (frags, locs, stacks)
+and region status show the current time as soon as the full timeline has
+loaded and after a region edit, instead of blank or old values until the
+clock next moved.
+
+Loading a second demo no longer inherits the first one's URL state: a
+search click, upload, hub-box load or playlist run now always starts on
+Summary at 0:00 with no range selected (before, the previous demo's tab,
+time, range and learn mode were applied to it — a range past the new
+demo's end left the Timeline empty, and a load started from Search stayed
+on Search). Only a shared link's own demo takes the link's tab, time and
+range. A link whose `tab=` names no tab now opens on Summary instead of
+Search.
+
+Region control now names and colours each side correctly when the team
+listed first in the demo lost (the Map's region status named the other
+team, and the Map overlay, the Timeline's control rows and the Locs &
+Regions matrix used the other team's colour — a bug the old page had
+too). Picking a second demo while the first is still loading now always
+ends on the second; the previous map's floors and region tints no longer
+carry over onto a map without geometry; and the Player engine stops
+rendering in the background while another tab is showing.
+
+## unreleased (gl-map) — the map renders entirely through WebGL2
+
+No schema change; web UI only. Supersedes the hybrid described in the entry
+below: the canvas-2D scene painter is gone, and the whole map — floors
+(depth-buffered, no painter sort), liquids, movers, region tints/outlines,
+trails and sightlines (with shader-drawn teleport dashes), player symbols,
+badges, item markers, death/drop markers, the learn-mode entity view, and
+every label (atlas-baked billboards) — draws in one WebGL2 pass. Rotating,
+tilting, zooming and panning cost uniform updates instead of
+re-rasterising the world; liquids are now correctly occluded by floors
+above them, and movers read as solid depth-tested boxes instead of faint
+translucent silhouettes. The depth buffer this leaves behind is the
+foundation for the planned effects (fog, lighting, occlusion view mode, 3D
+player models, first-person camera). A machine without WebGL2 sees a
+"WebGL2 required" notice on the map tab; software rasterisers
+(SwiftShader/llvmpipe) still work, just slower. `?gl=0`/`?gl=1` are gone.
+
+**Map effects.** Depth fog and directional floor shading are always on
+(their toolbar buttons are gone); fog is anchored to the map centre, so
+it no longer shifts with where the view was panned before tilting.
+Liquids render as volumes: mapgen exports each pool's real 3D shape (the
+BSP's closed liquid cells, geometry version 5) and the map measures how
+far every view ray travels through water, slime or lava before it hits a
+floor, so pools read as bodies of liquid from any angle — deep water
+denser than shallow, with visible sides — under the existing surfaces
+(opacity adjustable via `state.liquidHaze`). The 29 maps with deployed
+BSPs carry the volumes; the rest of the corpus keeps surfaces only until
+regenerated. The map geometry also keeps pool
+bottoms: usage pruning never drops a floor under a liquid surface (no
+player ever stood there, so every pool used to be bottomless), and the
+pruned corpus was regenerated against newer and more demos
+(`scripts/prune-demos.tsv`; phantombase is now pruned too). The FPS and Bench toolbar buttons
+described below were removed again; the measurement hooks stay in
+`mvd-map-view` (`MvdMap.lastFrameStats`, `perfCapture`, `bench.js`).
+
+**Render-performance instrumentation.** The map toolbar gains two buttons.
+**FPS** shows a live overlay: presented map-frames per second, the frame
+split (CPU command build / GL submit / canvas blit / GPU time where the
+`EXT_disjoint_timer_query_webgl2` extension exists), and per-frame draw
+stats (draw calls, world triangles, points, line segments, sprites,
+streamed bytes). **Bench** plays the demo from a fixed timestamp while the
+camera runs a deterministic 18 s spin / tilt / zoom script, then reports
+average fps, frame-time percentiles (p50/p95/max), hitch count and the
+frame split; each run is logged to the console as one JSON line and kept
+in localStorage, so re-running on the same demo at the same canvas size
+shows the fps delta against the previous run — before/after comparisons
+for renderer changes on real hardware.
+
+## unreleased (map-view-extract) — reusable map component + WebGL world
+
+No schema change; web UI only, in two parts.
+
+**The map renderer is now a standalone component** —
+[`mvd-map-view/`](mvd-map-view/README.md), a dependency-free ESM package
+holding the camera, the world/actor/overlay draw layers, the frame feed, hit
+testing and the pointer gesture semantics behind an `MvdMap` class. mvd-web
+mounts it through a small module bootstrap; behaviour is pixel-identical by
+construction (every extraction step was gated on a byte-exact screenshot
+corpus). This is groundwork for embedding the same map outside mvd-web (an
+MCP Apps viewer), where it must run behind a strict CSP — hence the package's
+loader invariant: it never fetches, never touches ambient globals, and takes
+data and size only through its API.
+
+**The static world now renders on the GPU.** Floors and liquid volumes draw
+through a WebGL2 backend: rotating, tilting or zooming the map no longer
+re-rasterises the whole floor model per frame (the old path re-baked ~2–25k
+triangles to an offscreen canvas on every camera-motion frame), and the
+hairline seam-sealing stroke the 2D painter needed between adjacent
+triangles is gone — GL rasterisation has no such seams, so the floor reads
+cleaner at every angle. Painter order and colours are unchanged, so the look
+is the same apart from the crisper edges. Canvas-2D remains as an automatic
+fallback wherever WebGL2 is unavailable (or lost mid-session) — including on
+machines with no usable GPU, where the browser hands out a software
+rasteriser (SwiftShader/llvmpipe) that is slower than the 2D painter; the
+map detects those and stays on 2D. `?gl=0` forces 2D and `?gl=1` forces GL
+even on a software renderer; the 2D path stays byte-identical to the
+previous release and remains the parity harness's anchor.
+
 ## unreleased (add-new-highlights) — schema v76: highlight catalogue (discharges, quadbores, telefrags, airgibs) with what everyone had
 
 **Toplists of the classic moments — the biggest discharge, the most quad

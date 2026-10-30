@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Damage reconstruction for pre-instrumentation QW demos — workflow &amp; guide</title>
+<style>
+  :root{
+    --ink:#1f2328; --mut:#59636e; --faint:#818b96; --acc:#0969da; --bd:#d7dde3;
+    --bg:#eef1f4; --card:#ffffff; --good:#1a7f37; --goodbg:#e7f4ea; --bad:#cf222e; --badbg:#fdeaea;
+    --mid:#9a6700; --midbg:#fbf3d6; --chip:#f2f5f8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8ecef; --mut:#9aa4ad; --faint:#727b83; --acc:#4c9bf5; --bd:#2b3138;
+      --bg:#14171a; --card:#1b1f23; --good:#4bbf6b; --goodbg:#16301f; --bad:#f2645f; --badbg:#331b1c;
+      --mid:#d4a72c; --midbg:#2e2716; --chip:#22272c; }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:940px;margin:0 auto;padding:40px 22px 64px}
+  h1{font-size:28px;line-height:1.15;letter-spacing:-.02em;margin:0 0 6px}
+  h2{font-size:21px;letter-spacing:-.01em;margin:38px 0 4px}
+  h3{font-size:16.5px;margin:22px 0 6px}
+  .sub{color:var(--mut);font-size:14.5px;margin:0 0 4px}
+  p{margin:10px 0}
+  code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86em;
+    background:var(--chip);padding:.08em .34em;border-radius:5px}
+  pre{background:var(--chip);border:1px solid var(--bd);border-radius:10px;
+    padding:12px 14px;overflow-x:auto;font-size:13px;line-height:1.5}
+  pre code{background:none;padding:0;font-size:inherit}
+  a{color:var(--acc);text-decoration:none} a:hover{text-decoration:underline}
+  .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;
+    padding:16px 18px;box-shadow:0 1px 2px #0000000a;margin:14px 0}
+  .gate{background:var(--midbg);border:1px solid var(--mid);border-radius:12px;
+    padding:12px 16px;margin:16px 0;font-size:14.5px}
+  .gate b{color:var(--mid)}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:10px 0}
+  th{text-align:left;color:var(--mut);font-size:12px;text-transform:uppercase;
+    letter-spacing:.04em;border-bottom:2px solid var(--bd);padding:6px 10px 6px 0}
+  td{border-bottom:1px solid var(--bd);padding:6px 10px 6px 0;vertical-align:top}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .tscroll{overflow-x:auto}
+  .good{color:var(--good);font-weight:700}
+  .bad{color:var(--bad);font-weight:700}
+  .muted{color:var(--mut)}
+  .small{font-size:13px;color:var(--mut)}
+  /* pipeline */
+  .pipe{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin:16px 0}
+  .pstep{flex:1;min-width:150px;background:var(--card);border:1px solid var(--bd);
+    border-radius:11px;padding:10px 12px;font-size:12.5px;position:relative}
+  .pstep b{display:block;font-size:13.5px;margin-bottom:3px}
+  .pstep .pn{position:absolute;top:-9px;left:10px;background:var(--acc);color:#fff;
+    font-size:10.5px;font-weight:800;border-radius:20px;padding:1px 8px}
+  .pstep.gated{background:var(--midbg);border-color:var(--mid)}
+  /* funnel */
+  .funnel{display:flex;gap:6px;align-items:stretch;margin:16px 0 6px;font-size:12px}
+  .fbar{text-align:center;padding:9px 6px;border-radius:8px;background:var(--chip);color:var(--mut)}
+  .fbar b{display:block;font-size:18px;color:var(--ink);letter-spacing:-.02em;line-height:1.15;font-variant-numeric:tabular-nums}
+  .fbar.f1{flex:5} .fbar.f2{flex:4.2} .fbar.f3{flex:4}
+  .fbar.f4{flex:3.8;background:var(--goodbg)} .fbar.f4 b{color:var(--good)}
+  .toc{columns:2;column-gap:28px;font-size:14px;margin:8px 0 0}
+  .toc a{display:block;padding:2px 0}
+  @media (max-width:640px){.toc{columns:1}}
+  .chiprow{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .chip{font-size:11.5px;background:var(--chip);border:1px solid var(--bd);
+    border-radius:20px;padding:2px 10px;color:var(--mut);font-family:ui-monospace,Menlo,monospace}
+  .tier{font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+    border-radius:20px;padding:2px 8px;white-space:nowrap}
+  .tier.hi{background:var(--goodbg);color:var(--good)}
+  .tier.lo{background:var(--midbg);color:var(--mid)}
+  .tier.no{background:var(--badbg);color:var(--bad)}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>Reconstructing damage from pre-instrumentation QW demos</h1>
+<p class="sub">Workflow, evidence, and a hands-on guide &nbsp;·&nbsp; 2026-08-11 &nbsp;·&nbsp;
+engine <code>research/fuzzyolddemoextract/recon.py</code> &nbsp;·&nbsp; status: <b>preliminary</b></p>
+
+<div class="gate"><b>Gate:</b> the engine passed a GO evaluation and a first full processing run,
+but is under adversarial substance review. Reconstructed rows live in their own index tier
+(<code>out-recon/</code>, every kill stamped <code>dmgSource:&nbsp;"reconstructed"</code>) and are
+<b>not merged into the production index</b> until the review clears.</div>
+
+<div class="toc">
+<a href="#problem">1 · The problem</a>
+<a href="#why">2 · Why it works</a>
+<a href="#algo">3 · The algorithm</a>
+<a href="#valid">4 · Validation</a>
+<a href="#run">5 · The first production run</a>
+<a href="#trust">6 · Trust model</a>
+<a href="#guide">7 · Use guide: requirements</a>
+<a href="#files">8 · File map</a>
+<a href="#quick">9 · Quick start (one demo)</a>
+<a href="#corpus">10 · Corpus run</a>
+<a href="#validate">11 · Validate on your own demos</a>
+<a href="#params">12 · Parameter reference</a>
+<a href="#contract">13 · Input contract &amp; gotchas</a>
+<a href="#schema">14 · Output schema</a>
+<a href="#limits">15 · Known limits</a>
+</div>
+
+<h2 id="problem">1 · The problem</h2>
+<p>Modern KTX servers broadcast every hit into the demo
+(<code>mvdhidden_dmgdone</code>), which is what per-kill burst analysis
+(<code>topKills</code>) is built on. Roughly <b>45% of the demo archive predates that
+instrumentation</b> — for those demos the damage stream is simply absent, and every
+burst-quality query is blind to them.</p>
+<p>But old demos are not information-poor. They carry, per player and at server frame rate:
+health and armor over time (<code>h</code>/<code>a</code>), positions/view/velocity
+(<code>pos</code>), weapon-fire sounds (<code>shots</code>), LG beam segments, tracked
+rocket/grenade entity flights, item timelines, and the frag log. The engine reconstructs
+per-hit damage from health/armor <i>decrements</i>, attributes each hit from the
+spectator-visible evidence, and assembles the same burst rows the modern pipeline uses.</p>
+
+<h2 id="why">2 · Why it works — three structural facts</h2>
+<div class="card">
+<p><b>1. The h/a streams are per-hit, not sampled.</b> <code>svc_playerinfo</code> is
+change-driven at server frame rate: 100% of ground-truth damage events have an
+exact-same-timestamp health or armor change, and frag times align with the killing
+h-drop (measured 129/129 on the calibration demo; frag-anchor rate across 85 old demos:
+p50&nbsp;=&nbsp;100%, p10&nbsp;=&nbsp;99.2%).</p>
+<p><b>2. The observed delta IS the bounded damage.</b> KTX-scoreboard "bounded" damage =
+armor absorbed + health share capped at remaining health — definitionally what the streams
+record. No damage model is needed for <i>magnitude</i>. And since bounded == raw for every
+surviving hit, magnitudes also discriminate weapons sharply: an LG cell is exactly 30,
+a rocket 100–120&nbsp;−&nbsp;0.5·dist.</p>
+<p><b>3. Attribution has rich spectator-visible evidence.</b> TE_LIGHTNING2 beam segments
+(exact frame; the victim lies on the segment), rocket/grenade entity flights (spawn + end,
+position + time), <code>svc_sound</code> weapon fire, full position/view/velocity tracks,
+and the frag log anchoring every kill. All verified present in the <code>no_damage</code>
+demos, and the damage <i>physics</i> of the old era are measured identical (LG&nbsp;=&nbsp;30
+with modern armor splits, splash D−0.5·dist, mega-rot present, no
+<code>svc_playerinfo</code> dropouts).</p>
+</div>
+
+<h2 id="algo">3 · The algorithm</h2>
+<div class="pipe">
+  <div class="pstep"><span class="pn">1</span><b>Delta extraction</b>
+    Per player, merge h+a change streams; drops = damage. Filter mega-rot, spawn resets,
+    pickups. Health share capped at remaining health; corpse hits → 0.</div>
+  <div class="pstep"><span class="pn">2</span><b>Attribution</b>
+    Score candidates per delta: geometry + damage-model consistency + knockback direction
+    + enemy-prior. Best explanation wins; no candidate → environmental, excluded.</div>
+  <div class="pstep"><span class="pn">3</span><b>Burst assembly</b>
+    <code>killBurstFor</code> parity: backward walk over killing-weapon hits, 3000&nbsp;ms
+    capture gap, life-start clip, anchor at the frag instant, returnDamage over 4000&nbsp;ms.</div>
+</div>
+
+<h3>Attribution evidence, per candidate kind</h3>
+<div class="tscroll"><table>
+<tr><th>kind</th><th>weapon</th><th>evidence</th><th>gate (measured basis)</th></tr>
+<tr><td><code>frag-anchor</code></td><td>any</td><td>frag at the same instant → killer/weapon authoritative</td>
+  <td>positional kills (tele/stomp/squish) excluded per topKills vocabulary</td></tr>
+<tr><td><code>beam</code></td><td>lg</td><td>same-frame beam whose segment passes near the victim; attacker = player at beam start</td>
+  <td>seg ≤ 90u (p99 measured 60u, max 79); source ≤ 160u</td></tr>
+<tr><td><code>proj</code></td><td>rl/gl</td><td>tracked flight ending near the victim in the same frame; shooter by spawn proximity + aim-vs-flight direction + fire-sound match</td>
+  <td>end ≤ 380u (p95 199); spawn ≤ 220u of shooter (p50 81, p90 152); ±130&nbsp;ms (p5 −81, p99 261)</td></tr>
+<tr><td><code>rl-sound</code></td><td>rl</td><td>point-blank rockets explode before the entity is broadcast: fire sound + flight-time consistency (1000&nbsp;ups) + aim gate; only for shots with no tracked flight</td>
+  <td>flight-time error ≤ 180&nbsp;ms; aim ≤ 60°</td></tr>
+<tr><td><code>hitscan</code></td><td>sg/ssg/axe</td><td>same-frame fire sound + aim cone (sg/ssg); proximity (axe ≤ 110u)</td>
+  <td>real sg hits p95 &lt; 24°; gate at 50°</td></tr>
+<tr><td><code>nail</code></td><td>ng/sng</td><td>fire sound + flight-time consistency (1000&nbsp;ups)</td>
+  <td>|Δt − flight| ≤ 150&nbsp;ms</td></tr>
+</table></div>
+
+<p>Two discriminators sit on top of the geometry:</p>
+<p><b>The damage-model score</b> checks each candidate's expected magnitude against the
+observed delta — LG 30/cell (down to armor-only 9/18/24 for health-nullified server modes),
+splash D−0.5·dist for enemies / D−0.25·dist for self, pellet ranges, ×4 under quad (from
+<code>q</code> intervals). This is what disambiguates close-quarters rocket fights
+(<i>whose explosion was it</i>). <b>Knockback</b> adds a direction check: the victim's
+velocity change should point away from the candidate explosion.</p>
+<p><b>The enemy-attribution prior</b> (<code>SELF_PEN</code>): in the ambiguous close-range
+mutual-rocket frame, preferring the enemy explanation converts silent juicy-burst recall
+losses into rare slight inflations (duel juicy-RL recall 93.5%→98.7% for a 98.6%→96.2%
+precision trade, confirmed on a never-touched sample). Mode-aware default: 0.6 in duels,
+0.1 in team games.</p>
+<p><b>Burst-walk parity is proven by oracle</b>: fed the real damage log, the Python walk
+reproduces <code>-view top-kills</code> <b>4398/4398 rows with zero mismatches</b> on
+damage, hits, spanMs, maxGapMs and returnDamage.</p>
+
+<h2 id="valid">4 · Validation</h2>
+<p>Blind reconstruction scored against real <code>damage.events</code> ground truth on
+modern demos (which carry <i>both</i> the broadcast and the h/a/pos streams), plus a
+cadence-degradation test and a 97-demo old-corpus coverage study. Three independent
+adversarial review passes (code/leakage, statistics, domain transfer).</p>
+<div class="tscroll"><table>
+<tr><th>set</th><th class="num">rows</th><th class="num">dmg exact</th><th class="num">within-5%</th><th class="num">Spearman</th></tr>
+<tr><td>in-sample (43 demos)</td><td class="num">4,395</td><td class="num">88.8%</td><td class="num">93.8%</td><td class="num">0.972</td></tr>
+<tr><td><b>held-out (56 demos)</b></td><td class="num">7,878</td><td class="num"><b>90.2%</b></td><td class="num"><b>95.0%</b></td><td class="num"><b>0.975</b></td></tr>
+<tr><td>cadence-degraded to 51&nbsp;ms frames</td><td class="num">4,374</td><td class="num">86.9%</td><td class="num">92.6%</td><td class="num">0.977</td></tr>
+<tr><td><b>fresh gate check before the production run</b> (seed 20260811, 60 demos)</td>
+  <td class="num">7,438</td><td class="num">90.3%</td><td class="num">94.6%</td><td class="num">0.980</td></tr>
+</table></div>
+<p class="small">within-5% = |Δdamage| ≤ max(5, 0.05·GT), on matched rows (unmatched exclusions 0.1–0.5%).
+Held-out ≥ in-sample on every metric — no tuning-on-test.</p>
+
+<h3>What actually matters: selection quality</h3>
+<p>The index's job is <i>finding</i> the right kills, not pricing them to the point.
+Archetype selection precision/recall on the fresh gate sample:</p>
+<div class="tscroll"><table>
+<tr><th>archetype filter</th><th class="num">precision</th><th class="num">recall</th></tr>
+<tr><td>juicy-RL &nbsp;<span class="chip">rl · dmg≥180 · returnDmg≥50</span></td><td class="num">97.5%</td><td class="num">97.8%</td></tr>
+<tr><td>shaft &nbsp;<span class="chip">lg · dmg≥200</span></td><td class="num">98.9%</td><td class="num">99.4%</td></tr>
+<tr><td>shaft &nbsp;<span class="chip">lg · dmg≥150</span></td><td class="num">95.5%</td><td class="num">99.6%</td></tr>
+</table></div>
+<p class="small">Stable under threshold sweeps (150–250 dmg / 0–100 rd → precision 94–97%, recall 90–95%).
+Cross-demo "best of month": GT top-100 RL bursts overlap 95/100.</p>
+
+<h3>Segments</h3>
+<div class="tscroll"><table>
+<tr><th>segment (arena excluded)</th><th class="num">rows</th><th class="num">within-5%</th><th class="num">Spearman</th><th class="num">juicy-RL P / R</th></tr>
+<tr><td>core duel+team</td><td class="num">10,083</td><td class="num">95.0%</td><td class="num">0.973</td><td class="num">97.7% / 91.6%</td></tr>
+<tr><td>— core 1on1</td><td class="num">1,551</td><td class="num">93.9%</td><td class="num">0.968</td><td class="num">98.9% / 89.1%</td></tr>
+<tr><td>— core 2on2/4on4</td><td class="num">8,532</td><td class="num">95.2%</td><td class="num">0.974</td><td class="num">97.0% / 93.1%</td></tr>
+</table></div>
+<p class="small">Team modes are the strongest slice — duels concentrate the one hard case
+(close-range mutual rocket fights; 68% of attribution flips occur at &lt;300u separation,
+and duels carry 2.4× the self-damage share of team games). Arena-family maps run ~83%
+within-5% and are excluded from the corpus entirely.</p>
+
+<h2 id="run">5 · The first production run (2026-08-11)</h2>
+<div class="funnel">
+  <div class="fbar f1"><b>41,766</b>megademocache demos</div>
+  <div class="fbar f2"><b>27,267</b>non-arena, no damage stream</div>
+  <div class="fbar f3"><b>26,242</b>reconstructed (96.2%)</div>
+  <div class="fbar f4"><b>24,694</b>games in out-recon · <b>2,449,226</b> kills</div>
+</div>
+<p>Wall-clock ≈ 21&nbsp;min on 7 workers (~0.25&nbsp;s heavy parse + ~0.03–1&nbsp;s recon per demo).
+Exclusions, all logged per-sha: 1,025 demos with frags but no player streams (kill-level
+only — a known class, out of this tier), and 1,548 <code>end</code>-map games removed after
+the run on the ruling that <b>end is arena</b>. 2,577 games reconstructed to zero kills —
+spot-checked as genuinely fragless recordings (prewar/aborted).</p>
+
+<h3>Three input bugs found and fixed by the run</h3>
+<div class="card">
+<p><b>Non-finite coordinates crash the analyzer's JSON encoder</b> (~1.1% of old demos —
+<code>json: unsupported value: NaN</code>). Root-caused by section-wise marshal probing to
+non-finite wire origins reaching four sinks: projectile flights, mover tracks (doors/plats
+— which also poisoned the derived floor-height column), item entities, and player position
+samples (→ derived velocities). Fixed with ingestion-side finite guards (4 files in
+mvd-analytics, +54/−10, currently uncommitted), built as a separate
+<code>qw-analyze-viewall-nanfix</code> binary; byte-identical output on unaffected demos.</p>
+<p><b>The empty-wire-team duel bug</b> (~4,000 duels — 15% of the old corpus — would have
+silently produced zero kills). Old duels often record an <i>empty team string for both
+players</i>; the analyzer's frag classifier then marks every frag
+<code>isTeamKill</code>, and the reconstructor skips teamkill frags. The streams block
+masks it (its <code>team</code> falls back to the player name). Fixed as input
+canonicalization in the driver: with exactly two players, a killer≠victim frag cannot be a
+teamkill. Recovered ~64,500 kills.</p>
+<p><b>Null <code>shots</code> lists</b> in three demos — normalized to empty so the engine
+sees "no evidence" instead of crashing.</p>
+</div>
+
+<h3>Sanity vs the modern index (arena excluded on both sides)</h3>
+<div class="tscroll"><table>
+<tr><th></th><th class="num">RL p50/p90/p99</th><th class="num">LG p50/p90</th><th class="num">shaft≥150 per 1000</th></tr>
+<tr><td>modern (broadcast damage)</td><td class="num">100 / 193 / 402</td><td class="num">100 / 197</td><td class="num">22.5</td></tr>
+<tr><td>reconstructed</td><td class="num">100 / 207 / 435</td><td class="num">100 / 174</td><td class="num">24.8</td></tr>
+</table></div>
+<p class="small">The residual LG tail difference is corpus composition (the old half is duel-heavier),
+documented in the domain-transfer review — not attribution loss.</p>
+
+<h2 id="trust">6 · Trust model</h2>
+<p>Reconstructed damage is an <b>estimate</b> and must stay isolatable, never silently mixed
+with real damage:</p>
+<div class="tscroll"><table>
+<tr><th>marker</th><th>where</th><th>values</th></tr>
+<tr><td><code>dmgSource</code></td><td>every kill row</td>
+  <td><code>"reconstructed"</code> here; real broadcast damage is <code>"broadcast"</code></td></tr>
+<tr><td><code>reconTier</code></td><td>every game row</td><td>
+  <span class="tier hi">high</span> 24,146 — Duel/Team, non-arena (the validated class) &nbsp;·&nbsp;
+  <span class="tier lo">unknown-mode</span> 429 — no mode in metadata &nbsp;·&nbsp;
+  <span class="tier lo">other-mode</span> 119 — FFA/Extinction/Wipeout/RACE, never validated &nbsp;·&nbsp;
+  <span class="tier no">excluded</span> arena-family maps incl. <code>end</code>, CTF, no-streams demos</td></tr>
+</table></div>
+<p>Rule of thumb from the evidence: <b>selection survives better than per-burst value
+accuracy</b>. Filters ("find contested RL bursts ≥ 180") transfer at 95–99% fidelity even
+where individual damage numbers wobble; treat single damage values as ±5% and rankings as
+solid.</p>
+
+<h2 id="guide">7 · Use guide — requirements</h2>
+<div class="card">
+<table>
+<tr><th>piece</th><th>detail</th></tr>
+<tr><td>Python ≥ 3.9</td><td>stdlib only — no pip installs anywhere in the toolchain</td></tr>
+<tr><td><code>qw-analyze</code> CLI</td><td>from the mvd_analyzer project (Go). <b>Build it with the
+  NaN ingestion guards</b> (see §13 — without them ~1% of old demos abort the parse).
+  Building needs Go ≥ 1.25; a user-space tarball install works fine.</td></tr>
+<tr><td>BSP directory</td><td>the CLI's <code>bsps/</code> map pack — exported as
+  <code>MVDA_BSP_DIR</code>. Needed for floor/liquid classification; the reconstruction
+  itself degrades gracefully without a map's BSP.</td></tr>
+<tr><td>Demos</td><td><code>.mvd</code> files (gz also accepted by the CLI). The old
+  no-damage ones are the point, but modern ones are what you validate on.</td></tr>
+</table>
+</div>
+
+<h2 id="files">8 · File map</h2>
+<h3><code>research/fuzzyolddemoextract/</code> — the engine and its evidence</h3>
+<div class="tscroll"><table>
+<tr><th>file</th><th>what it is</th></tr>
+<tr><td><code>recon.py</code></td><td><b>The reconstructor</b> (~600 lines, self-contained).
+  Library: <code>load()</code>, <code>build_recon_events(d, params)</code>,
+  <code>assemble_topkills(d, events, gap_ms, contested_ms)</code>. CLI:
+  <code>python3 recon.py full.json</code> prints event count + top-5 kills.</td></tr>
+<tr><td><code>REPORT.md</code></td><td>The full evidence document: method, all validation
+  numbers, adversarial-review outcomes, known limits, next-level accuracy leads. Read this
+  before trusting anything.</td></tr>
+<tr><td><code>holdout_eval.py</code></td><td>Scores a directory of reconstructions against
+  ground truth: <code>python3 holdout_eval.py &lt;dir&gt;</code> where <code>&lt;dir&gt;/full/*.json</code>
+  are full-stream extractions and <code>&lt;dir&gt;/tk/&lt;sha8&gt;.json</code> the matching
+  <code>-view top-kills</code> output. Prints exact/within-5%/Spearman, per-mode splits,
+  archetype precision/recall sweeps, worst demos.</td></tr>
+<tr><td><code>freshval_prep.py</code></td><td>Builds such a directory from a fresh random
+  sample of modern demos: <code>python3 freshval_prep.py &lt;outdir&gt; [seed] [N]</code>.
+  Pick an unused seed — the point is a never-touched sample.</td></tr>
+<tr><td><code>compare.py</code></td><td>Row-matching + Spearman helpers used by the eval scripts.</td></tr>
+<tr><td><code>fresh_confirm.py</code></td><td>The SELF_PEN (enemy-prior) confirmation harness.</td></tr>
+<tr><td><code>seg_eval.py</code></td><td>Per-segment cut (1on1 / 2on2+4on4 / arena) of the pooled validation.</td></tr>
+<tr><td><code>degrade.py</code></td><td>Cadence-degradation test (quantizes modern demos to 51&nbsp;ms frames).</td></tr>
+<tr><td><code>coverage.py</code>, <code>classify.py</code></td><td>Old-corpus coverage study (what fraction reconstructs, and why not).</td></tr>
+<tr><td><code>distshift.py</code></td><td>Old-vs-modern physics/distribution checks (LG=30, armor splits, splash law).</td></tr>
+<tr><td><code>bias_sweep.py</code></td><td>SELF_PEN parameter sweep.</td></tr>
+<tr><td><code>miss_anatomy.py</code>, <code>situation_profile.py</code>, <code>selfshare.py</code></td>
+  <td>Error anatomy: where the residual attribution flips live.</td></tr>
+<tr><td><code>rl110.py</code>, <code>old110.py</code></td><td>Rocket-damage-constant detection study (modern RL directs are fixed 110; the old archive is mixed).</td></tr>
+<tr><td><code>runval.py</code>, <code>diagnose.py</code>, <code>archetypes.py</code></td><td>Earlier validation harness pieces.</td></tr>
+<tr><td><code>demo_out/</code></td><td>End-to-end reconstructions of five handoff-named no-damage demos, as examples of output.</td></tr>
+</table></div>
+
+<h3><code>index-build/</code> — the corpus pipeline</h3>
+<div class="tscroll"><table>
+<tr><th>file</th><th>what it is</th></tr>
+<tr><td><code>recon_run.py</code></td><td><b>The corpus driver.</b> Enumerates targets
+  (0-kill, non-arena) from the reduced index, runs extract→recon per demo on 7 workers,
+  writes <code>recon-src/&lt;sha&gt;.json</code> + an error log. Idempotent — re-running
+  skips existing outputs and retries errors.</td></tr>
+<tr><td><code>reduce.py</code></td><td>The <b>unchanged</b> modern-index reducer — consumes
+  <code>recon-src/</code> exactly like the staged <code>-view all</code> captures and emits
+  <code>games.jsonl</code> + <code>kills.jsonl</code> with the derived fields
+  (killerDeathDeltaMs, quad flags, victim shot counts).</td></tr>
+<tr><td><code>stamp_recon.py</code></td><td>Post-pass: stamps <code>dmgSource</code> on every
+  kill and <code>reconTier</code> on every game. Idempotent, rewrites in place.</td></tr>
+<tr><td><code>merge.py</code></td><td>Combines per-source indexes into the production index.
+  <b>The recon source is deliberately not in its <code>SRCS</code> yet</b> (review gate);
+  adding <code>('recon','out-recon')</code> after hub/mega is the entire merge step —
+  order matters, real damage must win sha collisions.</td></tr>
+<tr><td><code>recon-src/</code>, <code>out-recon/</code>, <code>recon-src-log.jsonl</code></td>
+  <td>Run artifacts: per-demo provenance (~5&nbsp;GB), the reduced+stamped index
+  (~790&nbsp;MB), and the per-sha error log.</td></tr>
+</table></div>
+
+<h2 id="quick">9 · Quick start — one demo, end to end</h2>
+<pre><code># 1. Heavy parse: full streams + spatial evidence (~0.25 s, ~3–12 MB JSON)
+MVDA_BSP_DIR=&lt;dist&gt;/bsps qw-analyze-viewall \
+  -view full -include positions,view,velocity,projectiles,beams \
+  demo.mvd &gt; full.json
+
+# 2. Reconstruct (prints event count + top-5 burst rows)
+python3 recon.py full.json</code></pre>
+<p>As a library:</p>
+<pre><code>import recon
+d      = recon.load("full.json")
+events = recon.build_recon_events(d)            # per-hit damage events
+rows   = recon.assemble_topkills(d, events)     # topKills-compatible burst rows
+# rows[0] → {"killer": ..., "victim": ..., "time": ..., "weapon": "rl",
+#            "damage": 300, "hits": 5, "spanMs": 2936, "maxGapMs": 843,
+#            "victimWep": "rl", "returnDamage": 78}</code></pre>
+<p class="small">Sanity check for a first run: on a typical duel you should see roughly one burst row
+per enemy frag, and <code>nevents</code> a few× the frag count. A duel yielding <i>zero</i>
+rows almost always means the empty-wire-team gotcha (§13).</p>
+
+<h2 id="corpus">10 · Corpus run</h2>
+<pre><code>cd index-build
+python3 recon_run.py --limit 100     # pilot first — read the error log
+python3 recon_run.py                 # full corpus (idempotent, ~21 min / 27k demos on 8 cores)
+python3 reduce.py --in $PWD/recon-src --sets &lt;catalog-dir&gt; --out $PWD/out-recon
+python3 stamp_recon.py               # dmgSource + reconTier stamps</code></pre>
+<div class="tscroll"><table>
+<tr><th>knob</th><th>where</th><th>meaning</th></tr>
+<tr><td><code>--limit N</code></td><td>recon_run.py argv</td><td>process only the first N pending targets (pilot runs)</td></tr>
+<tr><td><code>CLI / BSP / CACHE / ALLMEGA / GAMES</code></td><td>constants at the top of recon_run.py</td>
+  <td>paths to the analyzer binary, BSP dir, the .mvd corpus, the staged <code>-view all</code>
+  captures, and the reduced index used for target enumeration. <b>Edit these for your machine</b> —
+  they are hardcoded home paths.</td></tr>
+<tr><td><code>max_workers=7</code></td><td>recon_run.py</td><td>process pool size; each worker is one
+  CLI subprocess + one recon pass. Size to cores−1.</td></tr>
+<tr><td><code>recon-src-log.jsonl</code></td><td>output</td><td>one row per failed sha with an error
+  class: <code>no-mvd</code> / <code>nan-bug</code> / <code>extract-err</code> /
+  <code>recon-err</code> / <code>allmega-err</code>. A re-run retries everything logged.</td></tr>
+</table></div>
+<p class="small">Budget: the heavy parse inflates to ~3–12&nbsp;MB JSON per demo (held in memory per
+worker, deleted after use); <code>recon-src/</code> lands at ~200&nbsp;KB per demo
+(~5&nbsp;GB / 26k demos); the reduced index is ~300&nbsp;B per kill.</p>
+
+<h2 id="validate">11 · Validate on your own demos before trusting anything</h2>
+<p>The engine's leverage is that modern demos carry <b>both</b> the real damage broadcast
+and the h/a/pos streams — so you can reconstruct blind and score against truth on any
+corpus you care about:</p>
+<pre><code>python3 freshval_prep.py myval 4242 60    # 60 modern demos, YOUR unused seed
+python3 holdout_eval.py myval</code></pre>
+<p>Expect ≈ 90% exact / ≈ 95% within-5% / Spearman ≈ 0.97+ on non-arena duel/team. The bar
+that matters is <b>rank preservation for your archetypes</b> (the precision/recall block),
+not absolute damage error. If your corpus skews to arena-family maps or CTF, expect the
+documented degradation and tier accordingly.</p>
+
+<h2 id="params">12 · Parameter reference</h2>
+<p>All tolerances live in <code>recon.DEFAULTS</code> and were <b>measured</b>, not chosen —
+each carries its calibration in the source comments. Override any subset via
+<code>build_recon_events(d, params={...})</code>.</p>
+<div class="tscroll"><table>
+<tr><th>param</th><th class="num">default</th><th>meaning (measured basis)</th></tr>
+<tr><td><code>TOL_BEAM</code></td><td class="num">30 ms</td><td>beam-flash → damage-frame window (measured: 0)</td></tr>
+<tr><td><code>TOL_PROJ</code></td><td class="num">130 ms</td><td>projectile-end → damage-frame (p5 −81, p99 261)</td></tr>
+<tr><td><code>TOL_SHOT</code></td><td class="num">60 ms</td><td>hitscan sound → damage-frame</td></tr>
+<tr><td><code>R_BEAM_SEG</code></td><td class="num">90 u</td><td>victim → beam segment (p99 60, max 79)</td></tr>
+<tr><td><code>R_BEAM_SRC</code></td><td class="num">160 u</td><td>beam start → attacker eye</td></tr>
+<tr><td><code>R_PROJ_SRC</code></td><td class="num">220 u</td><td>projectile spawn → shooter (p50 81, p90 152)</td></tr>
+<tr><td><code>R_SPLASH</code></td><td class="num">380 u</td><td>projectile end → victim (p95 199)</td></tr>
+<tr><td><code>NAIL_SPEED</code> / <code>ROCKET_SPEED</code></td><td class="num">1000 ups</td><td>flight-time consistency for sound-based attribution</td></tr>
+<tr><td><code>TOL_FLIGHT</code></td><td class="num">180 ms</td><td>flight-time error for the trackless-rocket fallback</td></tr>
+<tr><td><code>R_AXE</code></td><td class="num">110 u</td><td>axe reach</td></tr>
+<tr><td><code>R_HITSCAN</code></td><td class="num">3000 u</td><td>sg/ssg max range (aim cone is the real gate)</td></tr>
+<tr><td><code>SELF_PEN</code></td><td class="num">auto</td><td>enemy-attribution prior: additive score penalty on
+  self-splash candidates. <code>None</code> → 0.6 in duels (2 players), 0.1 in team games.
+  Effect saturates at 0.6. See §3.</td></tr>
+</table></div>
+<p>Burst assembly (<code>assemble_topkills</code>): <code>gap_ms=3000</code> (capture gap —
+matches the API's generous capture; narrow client-side with <code>maxGapMs</code>),
+<code>contested_ms=4000</code> (returnDamage window — matches the API's
+<code>contestedMs</code>). Keep both at defaults for parity with modern
+<code>topKills</code>.</p>
+
+<h2 id="contract">13 · Input contract &amp; gotchas</h2>
+<p><code>recon.py</code> reads one JSON per demo with:
+<code>streams.players[]</code> (per player: <code>h</code>/<code>a</code> change streams,
+<code>pos</code> track, <code>sp</code> spawn times, <code>alive</code> intervals, weapon-held
+intervals <code>rl/lg/gl/ssg/sng/ng</code>, quad intervals <code>q</code>, <code>team</code>),
+<code>streams.beams</code>, <code>streams.projectiles</code>, <code>frags.frags</code>,
+<code>shots.shots</code>, and optional <code>demoInfo.mode</code>. The extraction command in
+§9 produces exactly this.</p>
+<div class="card">
+<p><b>Gotchas, in the order they will bite you:</b></p>
+<p><b>1 · Empty-wire-team duels (~15% of old duels).</b> Both players record an empty team
+string → every frag is flagged <code>isTeamKill</code> → recon skips them all → zero rows,
+silently. Canonicalize before calling the engine (this is what <code>recon_run.py</code>
+does): in a 2-player demo, a killer≠victim frag is not a teamkill.</p>
+<p><b>2 · The analyzer NaN crash (~1% of old demos).</b> Non-finite wire origins abort the
+JSON encode (<code>json: unsupported value: NaN</code>). The fix is four small ingestion
+guards in mvd-analytics (drop non-finite samples in <code>flightsToStream</code>, mover-track
+append, <code>recordPosition</code>; zero non-finite item origins) — currently an uncommitted
+working-tree patch built as <code>qw-analyze-viewall-nanfix</code>. Without it, catch the
+nonzero exit and count the demo out.</p>
+<p><b>3 · No player streams (~4% of old demos).</b> Frag log exists, h/a/pos don't — the
+extraction has no <code>streams</code> block and reconstruction is impossible. Kill-level
+data only; exclude from this tier.</p>
+<p><b>4 · <code>demoInfo.mode</code> is usually absent in old demos.</b> The engine falls
+back to player count for the SELF_PEN mode split (2 players → duel). Fine in practice; be
+aware if you feed it exotic formats.</p>
+<p><b>5 · Null <code>shots</code>/<code>frags</code> inner lists</b> occur in a handful of
+demos — normalize to <code>[]</code>.</p>
+</div>
+
+<h2 id="schema">14 · Output schema</h2>
+<h3>Engine output — one row per enemy frag (topKills-compatible)</h3>
+<div class="tscroll"><table>
+<tr><th>field</th><th>meaning</th></tr>
+<tr><td><code>killer, victim, time, weapon</code></td><td>from the frag anchor; time is match-relative ms</td></tr>
+<tr><td><code>damage</code></td><td>bounded burst damage (armor absorbed + health share capped at remaining)</td></tr>
+<tr><td><code>hits, spanMs, maxGapMs</code></td><td>burst texture: hit count, first→kill span, widest gap</td></tr>
+<tr><td><code>victimWep</code></td><td>what the victim held at the kill: <code>rl/lg/both/mid/sg</code></td></tr>
+<tr><td><code>returnDamage</code></td><td>victim→killer damage in the closed 4000&nbsp;ms window (= "contested")</td></tr>
+</table></div>
+<h3>Reduced index rows (<code>out-recon/kills.jsonl</code>) add</h3>
+<div class="tscroll"><table>
+<tr><th>field</th><th>meaning</th></tr>
+<tr><td><code>g</code></td><td>interned int FK → <code>games.jsonl</code> row (sha lives there once)</td></tr>
+<tr><td><code>killerDeathDeltaMs</code></td><td>ms until the killer's own death; <code>null</code> = survived (trade/survived filters)</td></tr>
+<tr><td><code>killerQuad, victimQuad</code></td><td>quad active at the kill (from powerup events)</td></tr>
+<tr><td><code>vShotsRL, vShotsLG</code></td><td>victim's rl/lg fires in the burst window (activity texture)</td></tr>
+<tr><td><code>dmgSource</code></td><td><b><code>"reconstructed"</code></b> — the isolation stamp; never absent</td></tr>
+</table></div>
+<p class="small">Game rows carry <code>sha</code>, map, mode/format, team sizes, demo offset, uid map,
+<code>nkills</code>, and <code>reconTier</code>.</p>
+
+<h2 id="limits">15 · Known limits (all measured, none hidden)</h2>
+<div class="card">
+<p>· Same-frame multi-hit merges cannot be split — ~1–2% of rows off-by-a-hit; damage unaffected.</p>
+<p>· Close-quarters rocket self/enemy ambiguity is the dominant residual error class; knockback +
+aim + consumed-shot logic + the enemy prior already reclaim most of it.</p>
+<p>· <code>returnDamage</code> within-5%: 92.8% — it inherits attribution symmetrically.</p>
+<p>· RAW-family (overkill) damage is only recoverable to the −99 corpse clamp; this pipeline uses
+bounded, so it does not matter here.</p>
+<p>· Arena-family maps (povdmm4/dmm4*/anarena/<code>end</code>/…) run ~83% within-5% — excluded
+from the corpus. CTF is unmodeled (hook/rail) — excluded. <code>boundedMode:skipped</code> modes
+(midair, instagib): ground truth itself refuses these; skip reconstruction too.</p>
+<p>· The cadence test quantizes times but keeps modern-precision projectile end positions, so its
+92.6% is mildly optimistic on that one axis; the old-corpus internal evidence (98% of damage
+attributed, matching physics distributions) covers the real condition.</p>
+</div>
+
+<p class="small" style="margin-top:34px">Sources: <code>research/fuzzyolddemoextract/REPORT.md</code>
+(method + validation), <code>docs/reconstruction-processing-handoff.md</code> §9 (the production run),
+<code>docs/damage-reconstruction-handoff.md</code> (original feasibility study). Preliminary — the
+adversarial substance review is ongoing and may tighten which subsets are index-worthy.</p>
+
+</div></body>
+</html>

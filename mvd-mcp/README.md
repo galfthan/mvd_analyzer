@@ -45,7 +45,7 @@ mvd-mcp version
 
 ## Tool surface
 
-Twenty-six tools. Inputs are typed Go structs with JSON-Schema inference
+Thirty tools. Inputs are typed Go structs with JSON-Schema inference
 (this file); outputs are passed through as opaque JSON — see
 [`../mvd-api/README.md`](../mvd-api/README.md) for the response shape
 of each per-demo endpoint, and
@@ -96,6 +96,7 @@ description says so.
 | `getHighlights` | `mvd-api` `GET /v1/demos/{id}/highlights` |
 | `listArtifacts` | `mvd-api` `GET /v1/artifacts` |
 | `getArtifact` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` |
+| `createPlaylistLink` | `mvd-api` `POST /v1/playlist-links` |
 
 `demoId` is the string returned by `loadDemo` (`sha:HEX`) or any
 `gameId:NNNN` reference.
@@ -617,9 +618,8 @@ ezQuake markup), `messageClean` (markup stripped). Cleaner shape than
 
 Output: `{ backpacks: []result.BackpackDrop }` — each entry has `time`,
 `player` (dropper), `team`, `weapon` (`rl`/`lg`), `origin` (XYZ), `loc`
-(resolved name), `entNum` (server edict) and `source` (schema v72); a
-`reconstructed` row additionally carries `fate` and its companions below,
-and a `ktx` row carries `fate: "expired"` when KTX announced the timeout.
+(resolved name), `entNum` (server edict) and `source` (schema v72), and
+its pickup side: `fate` and its companions below (every row since v77).
 (REST returns a `{timeUnit, backpacks}` envelope; the MCP tool passes it
 through.)
 
@@ -630,14 +630,18 @@ pipeline replays KTX's own `DropBackpack` rule instead — validated at
 the pickup side differently**:
 
 - A `ktx` row's `entNum` is the hinted edict and joins to
-  `weapon-pickups[].backpackEnt`, which is where its pickup lives.
-  `picker` / `pickerTeam` / `pickupTime` are absent. `fate` appears only
-  as `expired`, and only when KTX announced the 120 s removal in its third
-  backpack directive `//ktx expire` — the one statement the pickup join
-  cannot make. An ABSENT `fate` on a `ktx` row means "ask
-  `getWeaponPickups`", never "nobody took it": across the archive only
+  `weapon-pickups[].backpackEnt`; since v77 that join is stamped on the
+  row: `fate: "picked"` with `picker` / `pickerTeam` / `pickupTime` and the
+  pickup's `pickerHadWeapon` / `pickerKills` / `pickerNextDeathTime` /
+  `pickerEndTime` (v78: the next death, else the match end).
+  `fate: "expired"` is KTX's third backpack directive `//ktx expire` (a pack
+  removed untaken at the 120 s timeout), and `unobserved` means neither
+  hint named the pack — never "nobody took it": across the archive only
   half the drops with no pickup row carry the expiry hint, the rest being
   packs the recording ended on top of.
+- Every row naming a `picker` carries `pickerRelation` (`self` when the
+  dropper took their own pack back, else `team` / `enemy`; every other
+  picker in a duel or FFA is an enemy).
 - A `reconstructed` row has no pickup hint to join to, so the pickup side
   is on the row itself (schema v72): `fate` (`picked` / `expired` /
   `unobserved`), plus `pickupTime` and `picker` / `pickerTeam` when the
@@ -690,7 +694,8 @@ Timeline output (`summary: false`): `result.ItemsResult` —
 
 Output: `{ pickups: []result.WeaponPickup }` — each entry has `time`,
 `player`, `team`, `weapon`, `source`, `hadBefore`, `kills` (before
-picker's next death), `nextDeathTime`, plus for backpack pickups
+picker's next death), `nextDeathTime`, `endTime` (where the run ends:
+the next death, else the match end), plus for backpack pickups
 `backpackEnt`, `dropper`, `dropperTeam`, `dropTime`. Joins to
 `getBackpacks` via `backpackEnt` == `backpacks[].entNum`. (REST returns a
 `{timeUnit, pickups}` envelope; the MCP tool passes it through.)
@@ -721,7 +726,7 @@ Output: `view.ColumnarBuckets` (default) or `view.BucketsView` (`layout=row`)
 | `startTime` | `integer` | match start | Match-relative milliseconds |
 | `endTime`   | `integer` | match end | Match-relative milliseconds |
 | `players`   | `string[]` | all | — |
-| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, discharge, quadbore, pause` (default), opt-in: `loc, health, armor, damage, telefrag, stomp, discharge, quadbore` (the last two are the highlight-catalogue lenses — `getHighlights` has the full rows) |
+| `types`     | `string[]` | discrete-event default set | `frag, powerup, streak, spawn, death, weapon, item, chat, pickup, demomark, airgib, discharge, quadbore, pause` (default), opt-in: `loc, health, armor, damage, telefrag, stomp` (`discharge` / `quadbore` are the highlight-catalogue lenses — `getHighlights` has the full rows) |
 
 Output: `view.EventsView` —
 `{ events: [{ time, type, player, detail }, …] }`. Per-type `detail`
@@ -1026,6 +1031,28 @@ claim from "we could not tell". The envelope's `measured.liveness`
 carries the same fact on the responses that do get served, so it is only
 ever `false` on `getTopWindows`. A demo with no damage stream still
 yields lives.
+
+#### `createPlaylistLink({items, name?})`
+
+`POST /v1/playlist-links` — a link that **plays** a scripted reel in the
+web app's light player (`play.html`): clips from any number of hub games,
+title cards between them, text over either. Made for agents: find games
+with `searchGames`, moments with `getHighlights` / `getTopKills` /
+`getTopWindows` / `getEvents` / `getLives`, and hand their match-ms
+times and player names straight in. Nothing is stored — the whole reel
+rides in the link's fragment (deflate-compressed; a 20-clip reel is
+typically 500–1000 characters, Discord allows 2000).
+
+| Item | Fields |
+|---|---|
+| `clip` | `gameId`, `from` / `to` (int ms since match start), `watch` (a player name in that game; omit = autotrack; unknown → 400 listing the players), `label` (`Kind · details` — the link's name counts kinds), `slow?` `{from, to, speed}` (same ms; speed 0.05–1), `text?` |
+| `card` | `ms` (300–30000; a minimum — it stays up until the next clip plays, covering its demo loading), `bg` (`#rrggbb`), `opacity` (0–1; below 1 the paused game shows through), `fadeIn` / `fadeOut`, `label`, `text?` |
+| `text[]` | `text` (≤ 200 chars), `size` (% of view height, 1–30, default 6), `color`, `font` (`title` / `body` / `mono`), `at` (`center`, `top`, `bottom`, `left`, `right`, corners), `from` / `to` (ms within its item), `fadeIn` / `fadeOut` |
+
+Output: `{url, markdown, name, length, clips, cards, demos[{gameId,
+title}]}` — `markdown` is `[name](url)` to paste into Discord. Each game
+is loaded through the cache on first use. 1–100 items, ≤ 20 games, at
+least one clip; `400 invalid_param` names the item and field.
 
 #### `getHighlights({demoId, kinds?, players?, preMs?})`
 

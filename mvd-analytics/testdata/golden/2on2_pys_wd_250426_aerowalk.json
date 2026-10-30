@@ -13292,12 +13292,21 @@
   "backpacks": [
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "air.ledge",
       "origin": [
         -505.875,
         -21,
         367.75
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 13248,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 13248,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 7556,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -13306,12 +13315,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -576,
         -268.75,
         291.25
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 13248,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 13248,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 11103,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13320,12 +13338,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -687.875,
         340.875,
         219
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 19492,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 19492,
+      "pickerRelation": "self",
+      "pickerTeam": "wd",
+      "pickupTime": 14794,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -13334,12 +13361,21 @@
     },
     {
       "entNum": 158,
+      "fate": "picked",
       "loc": "air.ledge",
       "origin": [
         -8.25,
         56.625,
         224
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 31348,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 31348,
+      "pickerRelation": "self",
+      "pickerTeam": "wd",
+      "pickupTime": 23712,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -13348,12 +13384,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "Quad.GA",
       "origin": [
         -306,
         -531.875,
         240.75
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 28177,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 28177,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 26323,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13362,12 +13407,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad.ledge",
       "origin": [
         0,
         -263.625,
         240
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 31348,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 31348,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 29157,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13376,12 +13430,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -494.375,
         -261.5,
         160.875
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 42585,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 42585,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 38840,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -13390,12 +13453,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -597.75,
         -32.75,
         128
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 42585,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 42585,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 39363,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13404,12 +13476,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -504.875,
         -779.875,
         417.5
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 57748,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 57748,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 55609,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -13418,12 +13499,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         165.5,
         463.5,
         416
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 56632,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 56632,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 47702,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -13432,12 +13522,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         76.25,
         416.25,
         384
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 46929,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 46929,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 46586,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -13446,12 +13545,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -586.125,
         438,
         224
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 44663,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 44663,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 43164,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -13460,12 +13568,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -674.5,
         491.75,
         224
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 55973,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 55973,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 46616,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -13474,12 +13591,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -736,
         216.875,
         267.75
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 55973,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 55973,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 47284,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -13488,12 +13614,21 @@
     },
     {
       "entNum": 152,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         120.5,
         348.625,
         403.25
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 57748,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 57748,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 50321,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13502,12 +13637,21 @@
     },
     {
       "entNum": 157,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -489.375,
         444.75,
         224
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 57748,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 57748,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 52988,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -13516,12 +13660,21 @@
     },
     {
       "entNum": 159,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -481.875,
         479.125,
         224.75
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 56632,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 56632,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 56391,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -13530,12 +13683,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "Quad.tele",
       "origin": [
         -652.75,
         7.625,
         431.5
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 74092,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 74092,
+      "pickerRelation": "self",
+      "pickerTeam": "wd",
+      "pickupTime": 66531,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -13544,12 +13706,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -589.75,
         -656,
         404.25
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 57778,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 57778,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 57763,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13558,12 +13729,21 @@
     },
     {
       "entNum": 160,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -611.625,
         -687.375,
         430.5
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 74092,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 74092,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 70005,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -13572,12 +13752,21 @@
     },
     {
       "entNum": 157,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -653.125,
         -133,
         128.5
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 74092,
+      "pickerHadWeapon": false,
+      "pickerKills": 4,
+      "pickerNextDeathTime": 74092,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 63243,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -13586,12 +13775,21 @@
     },
     {
       "entNum": 159,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -697,
         25.125,
         119.75
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 74092,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 74092,
+      "pickerRelation": "self",
+      "pickerTeam": "wd",
+      "pickupTime": 63817,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -13600,12 +13798,21 @@
     },
     {
       "entNum": 154,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -282.375,
         -601.25,
         419
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 125842,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 125842,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 74374,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -13614,12 +13821,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "RA.stairs",
       "origin": [
         -23,
         419.5,
         395.75
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 81547,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 81547,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 81161,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13628,12 +13844,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "RA.stairs",
       "origin": [
         -88.5,
         532.5,
         304
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 82247,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 82247,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 81547,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -13642,12 +13867,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         286.25,
         243.375,
         401.25
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 125842,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 125842,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 89325,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -13656,12 +13890,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "RA.stairs",
       "origin": [
         -60.375,
         544,
         315.5
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 124882,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 124882,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 95715,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13670,12 +13913,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         161.625,
         411.875,
         416
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 124882,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 124882,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 101627,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -13684,12 +13936,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "RA.stairs",
       "origin": [
         -40.75,
         425.875,
         336
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 111337,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 111337,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 105311,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13698,12 +13959,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         80,
         56.75,
         440.375
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 142598,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 142598,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 130006,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13712,12 +13982,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -717.75,
         -145.75,
         128
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 125842,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 125842,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 112050,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -13726,12 +14005,21 @@
     },
     {
       "entNum": 152,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -217.875,
         -362.5,
         416
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 123531,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 123531,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 121493,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -13740,12 +14028,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -446.75,
         -808.75,
         425.75
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 125842,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 125842,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 124572,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13754,12 +14051,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         -926.625,
         -767.125,
         344.875
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 190855,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 190855,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 181164,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -13768,12 +14074,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -912.125,
         -912,
         238.625
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 129674,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 129674,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 127231,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -13782,12 +14097,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -537,
         -906.25,
         251.5
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 142598,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 142598,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 137011,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13796,12 +14120,21 @@
     },
     {
       "entNum": 152,
+      "fate": "picked",
       "loc": "Quad.GA",
       "origin": [
         -208.875,
         -832.75,
         211.75
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 142598,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 142598,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 132698,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -13810,12 +14143,21 @@
     },
     {
       "entNum": 152,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         200.875,
         404.125,
         416
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 153494,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 153494,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 139169,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13824,12 +14166,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         -282,
         -247.125,
         -4.125
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 144857,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 144857,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 143714,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -13853,12 +14204,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "air.ledge",
       "origin": [
         -56.5,
         123.375,
         224
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 153494,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 153494,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 149713,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -13867,12 +14227,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         176,
         -78.375,
         409.125
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 169556,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 169556,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 168882,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -13881,12 +14250,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         155.5,
         -155.375,
         441.125
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 185840,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 185840,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 175509,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13895,12 +14273,21 @@
     },
     {
       "entNum": 153,
+      "fate": "picked",
       "loc": "RA.stairs",
       "origin": [
         -97.875,
         423.125,
         308.75
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 203046,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 203046,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 194338,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13909,12 +14296,21 @@
     },
     {
       "entNum": 159,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         356,
         -60.5,
         416
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 203046,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 203046,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 198882,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -13923,12 +14319,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -227.125,
         -417.875,
         416
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 187688,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 187688,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 181645,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -13937,12 +14342,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -890.625,
         -790.25,
         228
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 187688,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 187688,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 187511,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -13951,12 +14365,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -877.125,
         -827.625,
         224
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 190855,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 190855,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 187896,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13965,12 +14388,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -506,
         -858.875,
         447
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 211883,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 211883,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 192077,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -13979,12 +14411,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "Quad.ledge",
       "origin": [
         -247,
         -398.25,
         224
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 193369,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 193369,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 192338,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -13993,12 +14434,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "Quad.GA",
       "origin": [
         -214.25,
         -729.75,
         223
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 193369,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 193369,
+      "pickerRelation": "self",
+      "pickerTeam": "wd",
+      "pickupTime": 191258,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14007,12 +14457,21 @@
     },
     {
       "entNum": 157,
+      "fate": "picked",
       "loc": "air.ledge",
       "origin": [
         -431.25,
         -24.875,
         207.75
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 249913,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 249913,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 218156,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14021,12 +14480,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -652.5,
         -270.625,
         128
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 211883,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 211883,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 194517,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14035,12 +14503,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -671.875,
         -341.625,
         416
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 218461,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 218461,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 210112,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14049,12 +14526,21 @@
     },
     {
       "entNum": 152,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         145.625,
         544,
         399.375
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 236026,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 236026,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 205797,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14063,12 +14549,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -126.25,
         -333.25,
         420.125
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 211883,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 211883,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 204676,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14077,12 +14572,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         228.75,
         299.875,
         464.875
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 236026,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 236026,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 213043,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -14091,12 +14595,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -212.625,
         -422.625,
         426.375
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 218461,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 218461,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 217154,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -14105,12 +14618,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         275,
         -183.5,
         459.5
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 236026,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 236026,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 219357,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14119,12 +14641,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -656.125,
         -277.75,
         128
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 249913,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 249913,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 225582,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14133,12 +14664,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -542,
         -212,
         119
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 236026,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 236026,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 232557,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14147,12 +14687,21 @@
     },
     {
       "entNum": 152,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         80,
         123.25,
         388
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 240247,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 240247,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 236309,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14161,12 +14710,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -506.875,
         -174.375,
         144.75
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 243281,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 243281,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 239350,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14175,12 +14733,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "Quad.GA",
       "origin": [
         -370.125,
         -624.5,
         224
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 243295,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 243295,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 242049,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14189,12 +14756,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "Quad.GA",
       "origin": [
         -328.625,
         -822.125,
         224
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 243281,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 243281,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 242466,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14203,12 +14779,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "Quad.GA",
       "origin": [
         -240.625,
         -858.875,
         267.25
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 257887,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 257887,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 243295,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14217,12 +14802,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "Quad.GA",
       "origin": [
         -208,
         -841,
         224
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 275324,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 275324,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 261701,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14231,12 +14825,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad.GA",
       "origin": [
         -402.875,
         -666.875,
         262.625
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 253126,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 253126,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 250362,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -14260,12 +14863,21 @@
     },
     {
       "entNum": 153,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -653.5,
         511.75,
         255.75
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 275324,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 275324,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 267649,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14274,12 +14886,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "RA.stairs",
       "origin": [
         -39.75,
         496.625,
         329.625
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 262892,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 262892,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 258442,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14288,12 +14909,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         250.75,
         100,
         459.875
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 267324,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 267324,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 263594,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14302,12 +14932,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         235.375,
         364,
         416
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 267324,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 267324,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 264754,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14316,12 +14955,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         367.5,
         201.5,
         402.875
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 271996,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 271996,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 269685,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14330,12 +14978,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         154.875,
         321,
         403.875
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 277389,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 277389,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 272711,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14344,12 +15001,21 @@
     },
     {
       "entNum": 155,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -679.25,
         279.625,
         267.375
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 275324,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 275324,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 273870,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14358,12 +15024,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -592.25,
         426.375,
         224
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 288297,
+      "pickerHadWeapon": false,
+      "pickerKills": 4,
+      "pickerNextDeathTime": 288297,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 275366,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -14372,12 +15047,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         204.875,
         500.875,
         416
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 285209,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 285209,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 278893,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14386,12 +15070,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -723.875,
         507.5,
         224
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 288297,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 288297,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 284361,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14400,12 +15093,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "Quad.ledge",
       "origin": [
         -266.125,
         -269.375,
         365.5
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 293178,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 293178,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 289415,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14414,12 +15116,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "Quad.ledge",
       "origin": [
         -260.875,
         -193.875,
         190
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 288297,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 288297,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 288269,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -14428,12 +15139,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         -288.375,
         -205.5,
         0
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 293178,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 293178,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 289115,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14442,12 +15162,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad.tele",
       "origin": [
         -625.25,
         -216.625,
         395.75
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 312794,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 312794,
+      "pickerRelation": "self",
+      "pickerTeam": "wd",
+      "pickupTime": 309389,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14456,12 +15185,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -870.625,
         -898,
         224
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 311581,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 311581,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 310482,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -14470,12 +15208,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -738,
         -864,
         235.625
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 323635,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 323635,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 315892,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14484,12 +15231,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -901.5,
         -829.625,
         224
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 317866,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 317866,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 313675,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14498,12 +15254,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         -358.625,
         69.875,
         1.25
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 323698,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 323698,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 319326,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14512,12 +15277,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         90.25,
         -288,
         459.375
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 336609,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 336609,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 335207,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14526,12 +15300,21 @@
     },
     {
       "entNum": 155,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         306.5,
         -317.5,
         409.375
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 338855,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 338855,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 336523,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -14540,12 +15323,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -176,
         -454,
         503.375
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 371293,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 371293,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 355674,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14554,12 +15346,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         -376.375,
         -171,
         82.25
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 343103,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 343103,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 333575,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14568,12 +15369,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         113.125,
         -240.25,
         416
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 338855,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 338855,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 338793,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14582,12 +15392,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         119,
         -264.375,
         398.125
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 349939,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 349939,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 349119,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14596,12 +15415,21 @@
     },
     {
       "entNum": 158,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         -372.875,
         -6.625,
         -21.625
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 351215,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 351215,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 347871,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14610,12 +15438,21 @@
     },
     {
       "entNum": 159,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -735.125,
         49.5,
         128
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 346511,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 346511,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 346223,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14624,12 +15461,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -705.875,
         156.625,
         162.375
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 367297,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 367297,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 361939,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14638,12 +15484,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -205.625,
         -368.625,
         434.25
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 371293,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 371293,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 353347,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14667,12 +15522,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -482.625,
         437.5,
         224
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 364303,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 364303,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 354012,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14681,12 +15545,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -236.125,
         -536.875,
         428.75
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 354826,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 354826,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 354325,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14695,12 +15568,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -282.75,
         -466.75,
         429.375
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 371293,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 371293,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 355181,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14709,12 +15591,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -309.75,
         456.625,
         224
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 396713,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 396713,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 377747,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14723,12 +15614,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -381.5,
         -691.625,
         416
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 382615,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 382615,
+      "pickerRelation": "self",
+      "pickerTeam": "wd",
+      "pickupTime": 375328,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14737,12 +15637,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -754.875,
         -784,
         267.25
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 427791,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 427791,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 425719,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14751,12 +15660,21 @@
     },
     {
       "entNum": 154,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -507.375,
         -912,
         223.75
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 377776,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 377776,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 372645,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14765,12 +15683,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -513.125,
         -878,
         496.625
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 377776,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 377776,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 371982,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -14779,12 +15706,21 @@
     },
     {
       "entNum": 152,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -483.375,
         520.375,
         224
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 396713,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 396713,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 378335,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14793,12 +15729,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         174.5,
         189.125,
         431.5
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 396713,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 396713,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 383659,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14807,12 +15752,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         170.125,
         275.75,
         422.625
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 407987,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 407987,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 389535,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14821,12 +15775,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         275.375,
         -32.125,
         467.25
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 407987,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 407987,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 392377,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14835,12 +15798,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -725.75,
         421,
         248
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 396713,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 396713,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 396622,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14849,12 +15821,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -696.625,
         394.625,
         224
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 404459,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 404459,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 400661,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -14863,12 +15844,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -341.125,
         -463.25,
         504.375
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 407987,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 407987,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 402753,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14877,12 +15867,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -732.5,
         -207.625,
         128.875
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 407987,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 407987,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 406181,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14891,12 +15890,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -677.75,
         -28.125,
         128
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 431220,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 431220,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 409065,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14905,12 +15913,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -643.75,
         -132.75,
         115
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 427791,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 427791,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 416945,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -14919,12 +15936,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -781.625,
         -907.25,
         224
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 431493,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 431493,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 431324,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14933,12 +15959,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         -865.625,
         -472.75,
         440.125
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 436031,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 436031,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 431951,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -14947,12 +15982,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -634.625,
         -149.375,
         166.375
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 445023,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 445023,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 437759,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -14961,12 +16005,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -320.625,
         241.75,
         224
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 464894,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 464894,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 460507,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -14975,12 +16028,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -423.25,
         426.25,
         224
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 464894,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 464894,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 459985,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -14989,12 +16051,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         146.5,
         -287.25,
         450.75
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 457489,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 457489,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 449141,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15003,12 +16074,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "Quad.tele",
       "origin": [
         -571.5,
         -73.5,
         400
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 455587,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 455587,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 453868,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -15017,12 +16097,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -590.75,
         40.625,
         128
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 455587,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 455587,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 454875,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15031,12 +16120,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         297.625,
         288.25,
         430.5
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 468187,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 468187,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 455795,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15045,12 +16143,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -580.5,
         27.5,
         138.75
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 457489,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 457489,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 456350,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -15059,12 +16166,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -704.25,
         -226.125,
         118.75
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 465986,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 465986,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 457743,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -15073,12 +16189,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         -187.5,
         -77.25,
         -15.625
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 479477,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 479477,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 472376,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -15087,12 +16212,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -479.375,
         -242.625,
         108.625
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 484175,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 484175,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 471808,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -15101,12 +16235,21 @@
     },
     {
       "entNum": 162,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -682.25,
         283.875,
         219.5
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 543154,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 543154,
+      "pickerRelation": "self",
+      "pickerTeam": "wd",
+      "pickupTime": 479622,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -15115,12 +16258,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -722.375,
         -330.25,
         432.5
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 484175,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 484175,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 477279,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -15129,12 +16281,21 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -900.5,
         -801.125,
         219.75
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 548842,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 548842,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 544465,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15143,12 +16304,21 @@
     },
     {
       "entNum": 153,
+      "fate": "picked",
       "loc": "Quad.ledge",
       "origin": [
         -161.125,
         -265.875,
         224
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 543154,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 543154,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 485315,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -15157,12 +16327,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -915.625,
         -897,
         224
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 509492,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 509492,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 485645,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15171,12 +16350,21 @@
     },
     {
       "entNum": 153,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -608.875,
         -777.375,
         471.25
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 543154,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 543154,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 537764,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15185,12 +16373,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -301,
         -710.625,
         469.375
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 543154,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 543154,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 492123,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15199,12 +16396,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         -249.75,
         -161.25,
         163.625
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 509492,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 509492,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 497233,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -15213,12 +16419,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         -560,
         -81.25,
         0
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 509492,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 509492,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 501349,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -15227,12 +16442,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -649.875,
         490.625,
         215.625
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 510388,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 510388,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 507464,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -15241,12 +16465,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -253.625,
         -490.125,
         407.125
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 519076,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 519076,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 512399,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -15255,12 +16488,21 @@
     },
     {
       "entNum": 159,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -163.625,
         -355.375,
         417.375
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 519076,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 519076,
+      "pickerRelation": "self",
+      "pickerTeam": "wd",
+      "pickupTime": 513083,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -15269,12 +16511,21 @@
     },
     {
       "entNum": 143,
+      "fate": "picked",
       "loc": "Quad.tele",
       "origin": [
         -644.625,
         -284.25,
         416
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 521717,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 521717,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 515343,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15283,12 +16534,21 @@
     },
     {
       "entNum": 157,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         136.625,
         413.375,
         417.25
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 519076,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 519076,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 515401,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15297,12 +16557,21 @@
     },
     {
       "entNum": 159,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         338.125,
         90.5,
         416
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 543154,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 543154,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 520647,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -15311,12 +16580,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         347.375,
         25.25,
         444.75
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 543154,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 543154,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 520647,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15325,12 +16603,21 @@
     },
     {
       "entNum": 155,
+      "fate": "picked",
       "loc": "air.ledge",
       "origin": [
         -177.625,
         24.875,
         248.875
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 548842,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 548842,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 535529,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -15339,12 +16626,21 @@
     },
     {
       "entNum": 151,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         220.875,
         114.125,
         419.375
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 545603,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 545603,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 529747,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15353,12 +16649,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -664.25,
         -8.875,
         120.125
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 543154,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 543154,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 532361,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -15367,12 +16672,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "Quad.GA",
       "origin": [
         -405.875,
         -813.375,
         224
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 543154,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 543154,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 537204,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15381,12 +16695,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -760.375,
         -573.375,
         416
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 545603,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 545603,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 545164,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -15395,12 +16718,21 @@
     },
     {
       "entNum": 146,
+      "fate": "picked",
       "loc": "Quad.up",
       "origin": [
         -763.625,
         -719.625,
         446.875
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 552276,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 552276,
+      "pickerRelation": "team",
+      "pickerTeam": "wd",
+      "pickupTime": 547011,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -15409,12 +16741,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -778.625,
         -871.375,
         242.625
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 552276,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 552276,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 549419,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15423,12 +16764,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -900.625,
         -912,
         287.5
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 553790,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 553790,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 553119,
       "player": "wd.char",
       "source": "ktx",
       "team": "wd",
@@ -15437,12 +16787,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -744.625,
         -912,
         221.5
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 555939,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 555939,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 555036,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -15451,12 +16810,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -928,
         -881.625,
         224
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 555939,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 555939,
+      "pickerRelation": "team",
+      "pickerTeam": "pys",
+      "pickupTime": 554023,
       "player": "psy*overon",
       "source": "ktx",
       "team": "pys",
@@ -15465,12 +16833,20 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "Quad.GA",
       "origin": [
         -367.625,
         -825.75,
         267.5
       ],
+      "picker": "wd.char",
+      "pickerEndTime": 600040,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 557984,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15479,12 +16855,20 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         -601.375,
         -150.5,
         166
       ],
+      "picker": "psy*overon",
+      "pickerEndTime": 600040,
+      "pickerHadWeapon": false,
+      "pickerKills": 4,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 564543,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -15493,12 +16877,21 @@
     },
     {
       "entNum": 153,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -679.5,
         487.5,
         224
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 564374,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 564374,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 564319,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15507,12 +16900,21 @@
     },
     {
       "entNum": 150,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         100.75,
         -301,
         414.25
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 572024,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 572024,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 569811,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15521,12 +16923,21 @@
     },
     {
       "entNum": 149,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         -461.5,
         550.5,
         224
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 584915,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 584915,
+      "pickerRelation": "enemy",
+      "pickerTeam": "wd",
+      "pickupTime": 577309,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15535,12 +16946,21 @@
     },
     {
       "entNum": 155,
+      "fate": "picked",
       "loc": "air.ledge",
       "origin": [
         -316.625,
         197.25,
         224
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 580608,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 580608,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 577800,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -15549,12 +16969,20 @@
     },
     {
       "entNum": 144,
+      "fate": "picked",
       "loc": "high.RL",
       "origin": [
         -132,
         -357.625,
         406.375
       ],
+      "picker": "wd.cao",
+      "pickerEndTime": 600040,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerRelation": "self",
+      "pickerTeam": "wd",
+      "pickupTime": 598907,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -15563,12 +16991,21 @@
     },
     {
       "entNum": 157,
+      "fate": "picked",
       "loc": "RA.LG",
       "origin": [
         228,
         32,
         416
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 593793,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 593793,
+      "pickerRelation": "self",
+      "pickerTeam": "pys",
+      "pickupTime": 584634,
       "player": "wd.dilbert",
       "source": "ktx",
       "team": "pys",
@@ -15577,12 +17014,21 @@
     },
     {
       "entNum": 142,
+      "fate": "picked",
       "loc": "Quad.GA",
       "origin": [
         -227.125,
         -752.75,
         224
       ],
+      "picker": "wd.dilbert",
+      "pickerEndTime": 593793,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 593793,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pys",
+      "pickupTime": 591955,
       "player": "wd.cao",
       "source": "ktx",
       "team": "wd",
@@ -15591,6 +17037,7 @@
     },
     {
       "entNum": 149,
+      "fate": "unobserved",
       "loc": "Quad.ledge",
       "origin": [
         -352,
@@ -39933,7 +41380,7 @@
       }
     ]
   },
-  "schemaVersion": 76,
+  "schemaVersion": 78,
   "shots": {
     "byPlayer": [
       {
@@ -89712,6 +91159,7 @@
   },
   "weaponPickups": [
     {
+      "endTime": 19870,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -89723,6 +91171,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 13248,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -89734,6 +91183,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 7508,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89745,6 +91195,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 13248,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89756,6 +91207,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 7508,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89767,6 +91219,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 19870,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89782,6 +91235,7 @@
       "dropTime": 7508,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 13248,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 13248,
@@ -89792,6 +91246,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 9672,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89807,6 +91262,7 @@
       "dropTime": 9672,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 13248,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 13248,
@@ -89817,6 +91273,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 19870,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89832,6 +91289,7 @@
       "dropTime": 13248,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 19492,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 19492,
@@ -89842,6 +91300,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 16216,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89853,6 +91312,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 42585,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -89864,6 +91324,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 24780,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -89875,6 +91336,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 19492,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89886,6 +91348,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 19870,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89897,6 +91360,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 31348,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -89908,6 +91372,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 39333,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89923,6 +91388,7 @@
       "dropTime": 19870,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 31348,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 31348,
@@ -89933,6 +91399,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 39333,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89948,6 +91415,7 @@
       "dropTime": 24780,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 28177,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 28177,
@@ -89958,6 +91426,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 42585,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89969,6 +91438,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 31348,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -89984,6 +91454,7 @@
       "dropTime": 28177,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 31348,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 31348,
@@ -89994,6 +91465,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 33285,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90005,6 +91477,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 35708,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -90016,6 +91489,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 46929,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -90027,6 +91501,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 46929,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90042,6 +91517,7 @@
       "dropTime": 31348,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 42585,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 42585,
@@ -90052,6 +91528,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 41468,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90067,6 +91544,7 @@
       "dropTime": 33285,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 42585,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 42585,
@@ -90081,6 +91559,7 @@
       "dropTime": 42585,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 44663,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 44663,
@@ -90091,6 +91570,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 44593,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90102,6 +91582,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 56632,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -90117,6 +91598,7 @@
       "dropTime": 41468,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 46929,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 46929,
@@ -90131,6 +91613,7 @@
       "dropTime": 44593,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 55973,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 55973,
@@ -90145,6 +91628,7 @@
       "dropTime": 44663,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 55973,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 55973,
@@ -90159,6 +91643,7 @@
       "dropTime": 39333,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 56632,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 56632,
@@ -90169,6 +91654,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 50274,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90180,6 +91666,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 57748,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -90195,6 +91682,7 @@
       "dropTime": 46929,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 57748,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 57748,
@@ -90205,6 +91693,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 55973,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90216,6 +91705,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 52904,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90227,6 +91717,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 56632,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90242,6 +91733,7 @@
       "dropTime": 52904,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 57748,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 57748,
@@ -90252,6 +91744,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 57748,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90263,6 +91756,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 55973,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90274,6 +91768,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 57778,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -90289,6 +91784,7 @@
       "dropTime": 35708,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 57748,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 57748,
@@ -90303,6 +91799,7 @@
       "dropTime": 55973,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 56632,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 56632,
@@ -90317,6 +91814,7 @@
       "dropTime": 57748,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 57778,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 57778,
@@ -90327,6 +91825,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 61845,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -90338,6 +91837,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 61830,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90349,6 +91849,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 68131,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90360,6 +91861,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 65154,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90375,6 +91877,7 @@
       "dropTime": 61830,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 74092,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 74092,
@@ -90389,6 +91892,7 @@
       "dropTime": 61845,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 74092,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 74092,
@@ -90403,6 +91907,7 @@
       "dropTime": 56632,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 74092,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 74092,
@@ -90413,6 +91918,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 74092,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90424,6 +91930,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 81547,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -90439,6 +91946,7 @@
       "dropTime": 57778,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 74092,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 74092,
@@ -90449,6 +91957,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 125842,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -90460,6 +91969,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 71669,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90475,6 +91985,7 @@
       "dropTime": 74092,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 125842,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 125842,
@@ -90485,6 +91996,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 84155,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -90496,6 +92008,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 79530,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90511,6 +92024,7 @@
       "dropTime": 79530,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 81547,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 81547,
@@ -90525,6 +92039,7 @@
       "dropTime": 81547,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 82247,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 82247,
@@ -90535,6 +92050,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 95115,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -90546,6 +92062,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 125842,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90557,6 +92074,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 124882,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -90568,6 +92086,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 89142,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90579,6 +92098,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 89142,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90590,6 +92110,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 125842,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -90605,6 +92126,7 @@
       "dropTime": 89142,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 125842,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 125842,
@@ -90615,6 +92137,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 90505,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90626,6 +92149,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 97745,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90637,6 +92161,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 95115,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90652,6 +92177,7 @@
       "dropTime": 95115,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 124882,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 124882,
@@ -90662,6 +92188,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 97745,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90673,6 +92200,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 99301,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -90684,6 +92212,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 111337,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90699,6 +92228,7 @@
       "dropTime": 97745,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 124882,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 124882,
@@ -90709,6 +92239,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 111561,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90720,6 +92251,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 111337,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90731,6 +92263,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 124882,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90746,6 +92279,7 @@
       "dropTime": 99301,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 111337,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 111337,
@@ -90756,6 +92290,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 111561,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90767,6 +92302,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 111561,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90782,6 +92318,7 @@
       "dropTime": 111561,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 125842,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 125842,
@@ -90792,6 +92329,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 120273,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90803,6 +92341,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 123531,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -90818,6 +92357,7 @@
       "dropTime": 120273,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 123531,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 123531,
@@ -90828,6 +92368,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 129674,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -90839,6 +92380,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 129674,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90854,6 +92396,7 @@
       "dropTime": 123531,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 125842,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 125842,
@@ -90864,6 +92407,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 129479,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -90879,6 +92423,7 @@
       "dropTime": 125842,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 129674,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 129674,
@@ -90889,6 +92434,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 129674,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90900,6 +92446,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 153494,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -90911,6 +92458,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 129479,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90926,6 +92474,7 @@
       "dropTime": 111337,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 142598,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 142598,
@@ -90936,6 +92485,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 153494,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -90947,6 +92497,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 138232,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90962,6 +92513,7 @@
       "dropTime": 129674,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 142598,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 142598,
@@ -90972,6 +92524,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 190855,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -90983,6 +92536,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 138232,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -90998,6 +92552,7 @@
       "dropTime": 129479,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 142598,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 142598,
@@ -91012,6 +92567,7 @@
       "dropTime": 138232,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 153494,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 153494,
@@ -91022,6 +92578,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 190855,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -91033,6 +92590,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 169556,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91048,6 +92606,7 @@
       "dropTime": 142598,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 144857,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 144857,
@@ -91058,6 +92617,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 149649,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91073,6 +92633,7 @@
       "dropTime": 149649,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 153494,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 153494,
@@ -91083,6 +92644,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 185840,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -91094,6 +92656,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 169556,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91105,6 +92668,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 185840,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91116,6 +92680,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 169556,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91127,6 +92692,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 190855,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91138,6 +92704,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 178066,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91149,6 +92716,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 178066,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91160,6 +92728,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 185840,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91171,6 +92740,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 178066,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -91182,6 +92752,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 178066,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91197,6 +92768,7 @@
       "dropTime": 153494,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 169556,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 169556,
@@ -91207,6 +92779,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 185840,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91218,6 +92791,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 177806,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91233,6 +92807,7 @@
       "dropTime": 169556,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 185840,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 185840,
@@ -91247,6 +92822,7 @@
       "dropTime": 124882,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 190855,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 190855,
@@ -91261,6 +92837,7 @@
       "dropTime": 181806,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 187688,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 187688,
@@ -91271,6 +92848,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 181806,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91282,6 +92860,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 190855,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91293,6 +92872,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 211883,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -91304,6 +92884,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 188986,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91315,6 +92896,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 187688,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91330,6 +92912,7 @@
       "dropTime": 185840,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 187688,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 187688,
@@ -91344,6 +92927,7 @@
       "dropTime": 187688,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 190855,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 190855,
@@ -91354,6 +92938,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 211883,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91365,6 +92950,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 190689,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91376,6 +92962,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 193883,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -91391,6 +92978,7 @@
       "dropTime": 190855,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 193369,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 193369,
@@ -91405,6 +92993,7 @@
       "dropTime": 188986,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 211883,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 211883,
@@ -91419,6 +93008,7 @@
       "dropTime": 190689,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 193369,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 193369,
@@ -91429,6 +93019,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 203046,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91444,6 +93035,7 @@
       "dropTime": 177806,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 203046,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 203046,
@@ -91458,6 +93050,7 @@
       "dropTime": 193883,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 211883,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 211883,
@@ -91468,6 +93061,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 218461,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -91479,6 +93073,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 198282,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91490,6 +93085,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 218461,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91501,6 +93097,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 203046,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91516,6 +93113,7 @@
       "dropTime": 178066,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 203046,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 203046,
@@ -91526,6 +93124,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 236026,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -91537,6 +93136,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 204565,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91552,6 +93152,7 @@
       "dropTime": 204565,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 211883,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 211883,
@@ -91566,6 +93167,7 @@
       "dropTime": 203046,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 236026,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 236026,
@@ -91576,6 +93178,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 211883,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -91591,6 +93194,7 @@
       "dropTime": 198282,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 218461,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 218461,
@@ -91601,6 +93205,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 225993,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91616,6 +93221,7 @@
       "dropTime": 211883,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 236026,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 236026,
@@ -91626,6 +93232,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 225993,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91637,6 +93244,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 216154,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91652,6 +93260,7 @@
       "dropTime": 216154,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 218461,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 218461,
@@ -91666,6 +93275,7 @@
       "dropTime": 193369,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 249913,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 249913,
@@ -91680,6 +93290,7 @@
       "dropTime": 218461,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 236026,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 236026,
@@ -91690,6 +93301,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 224907,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91701,6 +93313,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 225993,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91716,6 +93329,7 @@
       "dropTime": 224907,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 249913,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 249913,
@@ -91726,6 +93340,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 240545,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -91737,6 +93352,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 233439,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91748,6 +93364,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 240545,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91763,6 +93380,7 @@
       "dropTime": 225993,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 236026,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 236026,
@@ -91773,6 +93391,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 249913,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -91788,6 +93407,7 @@
       "dropTime": 233439,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 240247,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 240247,
@@ -91798,6 +93418,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 243281,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91813,6 +93434,7 @@
       "dropTime": 236026,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 243281,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 243281,
@@ -91823,6 +93445,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 249913,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91838,6 +93461,7 @@
       "dropTime": 240247,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 243295,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 243295,
@@ -91852,6 +93476,7 @@
       "dropTime": 240545,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 243281,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 243281,
@@ -91866,6 +93491,7 @@
       "dropTime": 243281,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 257887,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 257887,
@@ -91876,6 +93502,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 244282,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91887,6 +93514,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 257887,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91898,6 +93526,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 263649,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91909,6 +93538,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 253126,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -91920,6 +93550,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 263649,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -91935,6 +93566,7 @@
       "dropTime": 249913,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 253126,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 253126,
@@ -91945,6 +93577,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 258830,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91956,6 +93589,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 257887,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91967,6 +93601,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 255303,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91978,6 +93613,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 258830,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -91993,6 +93629,7 @@
       "dropTime": 257887,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 262892,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 262892,
@@ -92003,6 +93640,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 263649,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92014,6 +93652,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 267324,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -92025,6 +93664,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 262892,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92040,6 +93680,7 @@
       "dropTime": 243295,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 275324,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 275324,
@@ -92054,6 +93695,7 @@
       "dropTime": 262892,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 267324,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 267324,
@@ -92064,6 +93706,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 273870,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92079,6 +93722,7 @@
       "dropTime": 263649,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 267324,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 267324,
@@ -92089,6 +93733,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 271996,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -92104,6 +93749,7 @@
       "dropTime": 255303,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 275324,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 275324,
@@ -92114,6 +93760,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 273870,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92125,6 +93772,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 275324,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92136,6 +93784,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 277389,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -92151,6 +93800,7 @@
       "dropTime": 267324,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 271996,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 271996,
@@ -92161,6 +93811,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 273870,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92176,6 +93827,7 @@
       "dropTime": 271996,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 277389,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 277389,
@@ -92186,6 +93838,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 277389,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92201,6 +93854,7 @@
       "dropTime": 273870,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 275324,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 275324,
@@ -92215,6 +93869,7 @@
       "dropTime": 275324,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 288297,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 288297,
@@ -92225,6 +93880,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 285209,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92236,6 +93892,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 288297,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92247,6 +93904,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 285209,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92258,6 +93916,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 287207,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -92273,6 +93932,7 @@
       "dropTime": 277389,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 285209,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 285209,
@@ -92283,6 +93943,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 284347,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92294,6 +93955,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 285209,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92309,6 +93971,7 @@
       "dropTime": 284347,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 288297,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 288297,
@@ -92319,6 +93982,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 298009,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92330,6 +93994,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 309534,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -92345,6 +94010,7 @@
       "dropTime": 287207,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 288297,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 288297,
@@ -92359,6 +94025,7 @@
       "dropTime": 288297,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 293178,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 293178,
@@ -92373,6 +94040,7 @@
       "dropTime": 285209,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 293178,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 293178,
@@ -92383,6 +94051,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 317866,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -92394,6 +94063,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 293178,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92405,6 +94075,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 298009,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92416,6 +94087,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 317866,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -92427,6 +94099,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 309534,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92438,6 +94111,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 306294,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92449,6 +94123,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 302055,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92460,6 +94135,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 309534,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92471,6 +94147,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 311581,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92482,6 +94159,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 317866,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92493,6 +94171,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 312794,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -92504,6 +94183,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 312794,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92519,6 +94199,7 @@
       "dropTime": 293178,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 312794,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 312794,
@@ -92533,6 +94214,7 @@
       "dropTime": 309534,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 311581,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 311581,
@@ -92543,6 +94225,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 311581,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92558,6 +94241,7 @@
       "dropTime": 312794,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 317866,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 317866,
@@ -92568,6 +94252,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 323635,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92583,6 +94268,7 @@
       "dropTime": 311581,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 323635,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 323635,
@@ -92593,6 +94279,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 323698,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -92604,6 +94291,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 320960,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92619,6 +94307,7 @@
       "dropTime": 317866,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 323698,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 323698,
@@ -92629,6 +94318,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 332933,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -92640,6 +94330,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 338855,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92651,6 +94342,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 332933,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92662,6 +94354,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 343103,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -92673,6 +94366,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 328441,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92684,6 +94378,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 343103,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92695,6 +94390,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 338855,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -92710,6 +94406,7 @@
       "dropTime": 332933,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 343103,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 343103,
@@ -92720,6 +94417,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 344793,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -92735,6 +94433,7 @@
       "dropTime": 323635,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 336609,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 336609,
@@ -92745,6 +94444,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 344793,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92760,6 +94460,7 @@
       "dropTime": 323698,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 338855,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 338855,
@@ -92770,6 +94471,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 340675,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -92785,6 +94487,7 @@
       "dropTime": 336609,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 338855,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 338855,
@@ -92795,6 +94498,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 344793,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92806,6 +94510,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 351215,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92817,6 +94522,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 346511,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92828,6 +94534,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 371293,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -92839,6 +94546,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 371293,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92854,6 +94562,7 @@
       "dropTime": 344793,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 346511,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 346511,
@@ -92868,6 +94577,7 @@
       "dropTime": 340675,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 351215,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 351215,
@@ -92882,6 +94592,7 @@
       "dropTime": 338855,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 349939,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 349939,
@@ -92892,6 +94603,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 354311,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -92903,6 +94615,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 371293,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -92914,6 +94627,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 352891,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -92925,6 +94639,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 364303,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -92940,6 +94655,7 @@
       "dropTime": 349939,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 371293,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 371293,
@@ -92954,6 +94670,7 @@
       "dropTime": 352891,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 364303,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 364303,
@@ -92968,6 +94685,7 @@
       "dropTime": 354311,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 354826,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 354826,
@@ -92982,6 +94700,7 @@
       "dropTime": 354826,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 371293,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 371293,
@@ -92996,6 +94715,7 @@
       "dropTime": 328441,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 371293,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 371293,
@@ -93006,6 +94726,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 357341,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93017,6 +94738,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 364303,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93028,6 +94750,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 367297,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93043,6 +94766,7 @@
       "dropTime": 346511,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 367297,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 367297,
@@ -93053,6 +94777,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 370599,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93064,6 +94789,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 367297,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93075,6 +94801,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 370599,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93086,6 +94813,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 383525,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -93097,6 +94825,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 383525,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93112,6 +94841,7 @@
       "dropTime": 371293,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 377776,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 377776,
@@ -93126,6 +94856,7 @@
       "dropTime": 370599,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 377776,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 377776,
@@ -93136,6 +94867,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 396713,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -93151,6 +94883,7 @@
       "dropTime": 364303,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 382615,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 382615,
@@ -93161,6 +94894,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 382615,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93172,6 +94906,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 377776,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93187,6 +94922,7 @@
       "dropTime": 357341,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 396713,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 396713,
@@ -93201,6 +94937,7 @@
       "dropTime": 377776,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 396713,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 396713,
@@ -93211,6 +94948,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 396713,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93222,6 +94960,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 385168,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93233,6 +94972,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 383525,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -93248,6 +94988,7 @@
       "dropTime": 383525,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 396713,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 396713,
@@ -93258,6 +94999,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 385168,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93269,6 +95011,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 407987,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -93280,6 +95023,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 407987,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -93295,6 +95039,7 @@
       "dropTime": 385168,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 407987,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 407987,
@@ -93305,6 +95050,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 391362,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93320,6 +95066,7 @@
       "dropTime": 391362,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 407987,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 407987,
@@ -93330,6 +95077,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 396713,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93341,6 +95089,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 396183,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93356,6 +95105,7 @@
       "dropTime": 396183,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 396713,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 396713,
@@ -93366,6 +95116,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 404459,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93377,6 +95128,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 436031,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -93388,6 +95140,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 401531,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93403,6 +95156,7 @@
       "dropTime": 396713,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 404459,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 404459,
@@ -93413,6 +95167,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 436031,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93428,6 +95183,7 @@
       "dropTime": 401531,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 407987,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 407987,
@@ -93438,6 +95194,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 427791,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93449,6 +95206,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 431220,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -93464,6 +95222,7 @@
       "dropTime": 404459,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 407987,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 407987,
@@ -93474,6 +95233,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 436031,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -93489,6 +95249,7 @@
       "dropTime": 407987,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 431220,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 431220,
@@ -93499,6 +95260,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 413792,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93514,6 +95276,7 @@
       "dropTime": 413792,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 427791,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 427791,
@@ -93524,6 +95287,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 417208,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93535,6 +95299,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 427791,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93550,6 +95315,7 @@
       "dropTime": 367297,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 427791,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 427791,
@@ -93560,6 +95326,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 431493,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93571,6 +95338,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 431220,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93582,6 +95350,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 445023,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93597,6 +95366,7 @@
       "dropTime": 427791,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 431493,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 431493,
@@ -93611,6 +95381,7 @@
       "dropTime": 431220,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 436031,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 436031,
@@ -93621,6 +95392,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 445023,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -93632,6 +95404,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 455587,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -93643,6 +95416,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 457489,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93658,6 +95432,7 @@
       "dropTime": 436031,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 445023,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 445023,
@@ -93668,6 +95443,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 457489,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -93679,6 +95455,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 445567,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -93690,6 +95467,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 445023,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93701,6 +95479,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 445567,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93712,6 +95491,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 455587,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93723,6 +95503,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 448492,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93734,6 +95515,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 455587,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93745,6 +95527,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 450725,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93760,6 +95543,7 @@
       "dropTime": 448492,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 457489,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 457489,
@@ -93770,6 +95554,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 450725,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93781,6 +95566,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 451636,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93792,6 +95578,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 468187,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -93807,6 +95594,7 @@
       "dropTime": 450725,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 455587,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 455587,
@@ -93817,6 +95605,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 457489,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93828,6 +95617,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 455187,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93843,6 +95633,7 @@
       "dropTime": 451636,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 455587,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 455587,
@@ -93857,6 +95648,7 @@
       "dropTime": 455187,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 468187,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 468187,
@@ -93871,6 +95663,7 @@
       "dropTime": 455587,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 457489,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 457489,
@@ -93881,6 +95674,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 465986,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -93896,6 +95690,7 @@
       "dropTime": 457489,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 465986,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 465986,
@@ -93906,6 +95701,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 464894,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -93917,6 +95713,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 461847,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93932,6 +95729,7 @@
       "dropTime": 445567,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 464894,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 464894,
@@ -93946,6 +95744,7 @@
       "dropTime": 445023,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 464894,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 464894,
@@ -93956,6 +95755,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 464894,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93967,6 +95767,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 464894,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -93978,6 +95779,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 509492,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -93989,6 +95791,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 484175,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -94000,6 +95803,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 479477,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94011,6 +95815,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 484175,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94022,6 +95827,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 509492,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -94033,6 +95839,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 477279,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94048,6 +95855,7 @@
       "dropTime": 465986,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 484175,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 484175,
@@ -94062,6 +95870,7 @@
       "dropTime": 464894,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 479477,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 479477,
@@ -94072,6 +95881,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 479477,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94083,6 +95893,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 477279,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94094,6 +95905,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 484175,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94109,6 +95921,7 @@
       "dropTime": 477279,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 484175,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 484175,
@@ -94119,6 +95932,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 543154,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -94134,6 +95948,7 @@
       "dropTime": 468187,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 543154,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 543154,
@@ -94144,6 +95959,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 484175,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94155,6 +95971,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 484453,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94170,6 +95987,7 @@
       "dropTime": 484175,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 543154,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 543154,
@@ -94184,6 +96002,7 @@
       "dropTime": 484453,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 509492,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 509492,
@@ -94194,6 +96013,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 487324,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94205,6 +96025,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 489139,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94216,6 +96037,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 490239,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94227,6 +96049,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 509492,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94238,6 +96061,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 510388,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94253,6 +96077,7 @@
       "dropTime": 490239,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 543154,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 543154,
@@ -94263,6 +96088,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 496175,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94274,6 +96100,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 510388,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94289,6 +96116,7 @@
       "dropTime": 496175,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 509492,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 509492,
@@ -94299,6 +96127,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 499071,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94310,6 +96139,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 510388,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94321,6 +96151,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 543154,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94336,6 +96167,7 @@
       "dropTime": 499071,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 509492,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 509492,
@@ -94346,6 +96178,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 507315,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94357,6 +96190,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 507315,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94372,6 +96206,7 @@
       "dropTime": 507315,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 510388,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 510388,
@@ -94382,6 +96217,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 509477,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94393,6 +96229,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 521717,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94404,6 +96241,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 521717,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94419,6 +96257,7 @@
       "dropTime": 509477,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 519076,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 519076,
@@ -94433,6 +96272,7 @@
       "dropTime": 509492,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 519076,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 519076,
@@ -94443,6 +96283,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 514440,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94458,6 +96299,7 @@
       "dropTime": 510388,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 521717,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 521717,
@@ -94472,6 +96314,7 @@
       "dropTime": 514440,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 519076,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 519076,
@@ -94482,6 +96325,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 519076,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -94497,6 +96341,7 @@
       "dropTime": 519076,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 543154,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 543154,
@@ -94511,6 +96356,7 @@
       "dropTime": 519076,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 543154,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 543154,
@@ -94521,6 +96367,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 528841,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94532,6 +96379,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 528841,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94543,6 +96391,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 545603,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -94554,6 +96403,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 528841,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94565,6 +96415,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 531959,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94580,6 +96431,7 @@
       "dropTime": 528841,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 545603,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 545603,
@@ -94590,6 +96442,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 531959,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94601,6 +96454,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 545603,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94612,6 +96466,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 534621,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94627,6 +96482,7 @@
       "dropTime": 531959,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 543154,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 543154,
@@ -94641,6 +96497,7 @@
       "dropTime": 521717,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 548842,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 548842,
@@ -94651,6 +96508,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 553790,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94666,6 +96524,7 @@
       "dropTime": 534621,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 543154,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 543154,
@@ -94676,6 +96535,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 543154,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94691,6 +96551,7 @@
       "dropTime": 487324,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 543154,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 543154,
@@ -94701,6 +96562,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 548842,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94712,6 +96574,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 548842,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94723,6 +96586,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 545603,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94738,6 +96602,7 @@
       "dropTime": 479477,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 548842,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 548842,
@@ -94748,6 +96613,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 552276,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -94763,6 +96629,7 @@
       "dropTime": 543154,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 545603,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 545603,
@@ -94777,6 +96644,7 @@
       "dropTime": 545603,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 552276,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 552276,
@@ -94787,6 +96655,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 553591,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94798,6 +96667,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 553790,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -94813,6 +96683,7 @@
       "dropTime": 548842,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 552276,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 552276,
@@ -94823,6 +96694,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 555939,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94834,6 +96706,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 553790,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94849,6 +96722,7 @@
       "dropTime": 552276,
       "dropper": "wd.char",
       "dropperTeam": "wd",
+      "endTime": 553790,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 553790,
@@ -94863,6 +96737,7 @@
       "dropTime": 553790,
       "dropper": "psy*overon",
       "dropperTeam": "pys",
+      "endTime": 555939,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 555939,
@@ -94873,6 +96748,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 555939,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94888,6 +96764,7 @@
       "dropTime": 553591,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 555939,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 555939,
@@ -94898,6 +96775,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600040,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -94908,6 +96786,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 560459,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94919,6 +96798,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600040,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -94933,6 +96813,7 @@
       "dropTime": 555939,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 600040,
       "hadBefore": true,
       "kills": 0,
       "player": "wd.char",
@@ -94942,6 +96823,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 562423,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94953,6 +96835,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 562423,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94964,6 +96847,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600040,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -94978,6 +96862,7 @@
       "dropTime": 562423,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 564374,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 564374,
@@ -94992,6 +96877,7 @@
       "dropTime": 560459,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 600040,
       "hadBefore": false,
       "kills": 4,
       "player": "psy*overon",
@@ -95001,6 +96887,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 572024,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95012,6 +96899,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 567111,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95023,6 +96911,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600040,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -95033,6 +96922,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 572024,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95048,6 +96938,7 @@
       "dropTime": 567111,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 572024,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 572024,
@@ -95058,6 +96949,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600040,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95068,6 +96960,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 571799,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95079,6 +96972,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 576790,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95090,6 +96984,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 580608,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -95105,6 +97000,7 @@
       "dropTime": 571799,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 584915,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 584915,
@@ -95119,6 +97015,7 @@
       "dropTime": 572024,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 580608,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 580608,
@@ -95129,6 +97026,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 600040,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95139,6 +97037,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 593793,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95154,6 +97053,7 @@
       "dropTime": 580608,
       "dropper": "wd.dilbert",
       "dropperTeam": "pys",
+      "endTime": 593793,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 593793,
@@ -95164,6 +97064,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 593793,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95175,6 +97076,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 587147,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95186,6 +97088,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 593793,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95201,6 +97104,7 @@
       "dropTime": 584915,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 593793,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 593793,
@@ -95211,6 +97115,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600040,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -95225,6 +97130,7 @@
       "dropTime": 576790,
       "dropper": "wd.cao",
       "dropperTeam": "wd",
+      "endTime": 600040,
       "hadBefore": false,
       "kills": 0,
       "player": "wd.cao",

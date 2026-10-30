@@ -110,10 +110,12 @@ make build                                  # output in dist/
 the competitive QW map set defined in
 [`scripts/fetch-bsps.sh`](scripts/fetch-bsps.sh) (id-stock from
 [id-maps-gpl](https://github.com/quakeworld/id-maps-gpl), community
-maps from [maps.quakeworld.nu/core](https://maps.quakeworld.nu/core/),
-sha256-pinned). `make build` then copies them into `dist/bsps/` for
-the WASM worker to lazy-fetch per map. The script hard-fails on any
-download or sha mismatch so a flaky mirror produces a red build
+maps from [maps.quakeworld.nu/core](https://maps.quakeworld.nu/core/)
+with fallbacks to [vikpe/qw-assets](https://github.com/vikpe/qw-assets)
+and this repo's `bsp-mirror-1` release, every source held to the same
+sha256 pin). `make build` then copies them into `dist/bsps/` for
+the WASM worker to lazy-fetch per map. The script hard-fails when no
+mirror yields a map matching its pin, so an outage produces a red build
 rather than a silent V1-everywhere deploy.
 
 For local dev the step is skippable — maps without a BSP fall back to
@@ -176,14 +178,15 @@ make build-all-platforms                    # cross-compile both mvd-api and mvd
 
 #### Tool surface
 
-Twenty-six tools — one for discovery, two for cache control + curated
+Thirty tools — one for discovery, two for cache control + curated
 summary, the high-level Result-section pass-throughs (KTX demoinfo,
 metadata, player-stats, frags, damage, aim, loc-graph, chat, backpacks,
 items, map entities, weapon-pickups, loc-table), eight for the view
 query layer,
-and two generic
+two generic
 DAG-artifact tools (`listArtifacts` + `getArtifact`) that reach any
-servable artifact by name:
+servable artifact by name, and `createPlaylistLink`, which turns clips
+from any number of games into a link that plays them:
 
 | Tool | Backing |
 |---|---|
@@ -211,14 +214,17 @@ servable artifact by name:
 | `getEvents(demoId, types, …)` | `mvd-api` `/events` |
 | `getStreamSlice(demoId, from, to, fields, …)` | `mvd-api` `/stream-slice` |
 | `getStateAt(demoId, time, fields, …)` | `mvd-api` `/state-at` |
+| `getPointEffects(demoId, from, to, …)` | `mvd-api` `/streams/point-effects` |
 | `getLocTrails(demoId, minDwellMs, …)` | `mvd-api` `/loc-trails` |
 | `getRegionControl(demoId, windowMs, regions, …)` | `mvd-api` `/region-control` |
 | `getTopWindows(demoId, metric, mode, windowMs, gapMs, limit, perPlayer, …)` | `mvd-api` `/top-windows` (each player's best stretches, ranked — fixed-length windows or gap-delimited runs) |
 | `getTopKills(demoId, gapMs, weapons, minDamage, …)` | `mvd-api` `/top-kills` (the hardest kill bursts, ranked) |
 | `getLives(demoId, players, minMs, …)` | `mvd-api` `/lives` (one row per spawn-to-death life) |
+| `getHighlights(demoId, kinds, players, preMs)` | `mvd-api` `/highlights` (discharges, quadbores, telefrags, airgibs with what everyone had) |
 | **Generic DAG artifacts** | |
 | `listArtifacts()` | `mvd-api` `GET /v1/artifacts` (the DAG manifest) |
 | `getArtifact(demoId, name)` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` (any servable artifact by name) |
+| `createPlaylistLink(items, name)` | `mvd-api` `POST /v1/playlist-links` (a light-player link playing clips from many games, title cards and text) |
 
 **Full schemas live in three places:**
 
@@ -508,12 +514,14 @@ backpacks (RL/LG drops attributed to the dropping player, each row
 stamped `source`: `ktx` from the `//ktx drop` hint, or `reconstructed`
 where the mod predates that hint — a replay of KTX's own `DropBackpack`
 rule from the death instant, the wielded-weapon stat and the death
-position, validated at 99.97% precision/recall against the hints; a
-reconstructed row also carries the pack's `fate` — `picked` with the
-`picker` named, `expired` at KTX's 120 s removal timeout, or
-`unobserved` — read off the wire's backpack-entity track, 100% precision
-and 96.1% recall against the `//ktx bp` hints and 100%/100% on `expired`
-against `//ktx expire`, which a `ktx` row carries as its own `fate`),
+position, validated at 99.97% precision/recall against the hints; every
+row carries the pack's `fate` — `picked` with the `picker` named and
+`pickerRelation` self/team/enemy, `expired` at KTX's 120 s removal
+timeout, or `unobserved` — on a `ktx` row (v77) copied from the `//ktx bp`
+pickup with its `pickerHadWeapon` / `pickerKills`, on a reconstructed row
+read off the wire's backpack-entity track, 100% precision and 96.1% recall
+against the `//ktx bp` hints and 100%/100% on `expired` against
+`//ktx expire`),
 weaponPickups (every slot-weapon acquisition —
 world spawners and RL/LG backpacks — with a kills-before-next-death
 effectiveness metric; joins to backpacks via `backpackEnt` ==
@@ -856,8 +864,13 @@ mvd-analyzer/
     No mvd-analytics import — outputs are opaque JSON pass-through
 
   mvd-web/                 Module: browser UX + WASM glue (Layer 3, frontend)
-    static/                index.html, app.js, worker.js, styles.css, maps/
+    index.html, src/       Vite + Svelte: app/ (load, URL, tabs), shell/, tabs/, player/ (Map and Player tabs), play/ (play.html, the light player), data/, state/, lib/, ui/ (shared widgets: playback bar, panels)
+    static/                worker.js, styles.css, vendor/, maps/ (copied as-is)
+    test/                  node --test unit tests for the DOM-free modules
     cmd/wasm/              WASM entry (exports analyzeMVD to JS)
+
+  mvd-map-view/            ESM: the embeddable WebGL2 map renderer (MvdMap) the Map and Player tabs' map panes draw with
+  mvd-fte-player/          ESM: FTE demo player page for the Player tab (port of hub's, MIT)
 
   demos/                   Corpus for regression + manual testing (untracked)
 ```
@@ -875,6 +888,8 @@ mvd-analyzer/
 - [mvd-mcp/README.md](mvd-mcp/README.md) — stdio MCP shim, distribution
 - [mvd-mcp/CLAUDE_DESKTOP.md](mvd-mcp/CLAUDE_DESKTOP.md) — Claude Desktop / Claude Code config snippets
 - [mvd-web/README.md](mvd-web/README.md) — browser UI, build and deploy
+- [mvd-map-view/README.md](mvd-map-view/README.md) — the map renderer package (MvdMap): API, data it takes, embedding
+- [mvd-fte-player/README.md](mvd-fte-player/README.md) — the embedded FTE demo player behind the Player tab
 
 ## Testing
 
@@ -946,6 +961,12 @@ git add mvd-analytics/testdata/golden/    # commit alongside the analyzer change
 (The `-update-golden` flag is registered only in the analyzer test
 package; wider scopes like `./mvd-analytics/...` fail in `mapgen` with
 "flag provided but not defined".)
+
+The frontend's node tests (`mvd-web/test/`, run by `make test` when node
+is on `PATH`) read the same `mvd-analytics/testdata/golden/*.json` and pin
+values out of them, so rerun `make test` after a regen and update a JS
+expectation that the intended change moved — see
+[mvd-web/README.md § Tests](mvd-web/README.md#tests).
 
 The pipeline also has a CLI for ad-hoc bulk diffs:
 

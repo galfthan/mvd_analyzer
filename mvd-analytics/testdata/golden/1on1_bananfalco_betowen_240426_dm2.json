@@ -605,12 +605,21 @@
   "backpacks": [
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1815.75,
         -1183.125,
         33.125
       ],
+      "picker": "banan falco",
+      "pickerEndTime": 54766,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 54766,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 40532,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -619,12 +628,21 @@
     },
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         2539.25,
         -1607.75,
         35.125
       ],
+      "picker": "betowen",
+      "pickerEndTime": 65636,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 65636,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 56168,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -633,12 +651,21 @@
     },
     {
       "entNum": 128,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         2565.125,
         -1903.75,
         41
       ],
+      "picker": "betowen",
+      "pickerEndTime": 65636,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 65636,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 61520,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -647,12 +674,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         2585.75,
         -1590.125,
         58.375
       ],
+      "picker": "banan falco",
+      "pickerEndTime": 202895,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 202895,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 66220,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -661,12 +697,21 @@
     },
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1843.125,
         -1195.25,
         33.75
       ],
+      "picker": "betowen",
+      "pickerEndTime": 286113,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 286113,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 246334,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -675,12 +720,21 @@
     },
     {
       "entNum": 130,
+      "fate": "picked",
       "loc": "platforms",
       "origin": [
         2201.625,
         -1668.125,
         5.875
       ],
+      "picker": "betowen",
+      "pickerEndTime": 352411,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 352411,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 339282,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -689,12 +743,21 @@
     },
     {
       "entNum": 129,
+      "fate": "picked",
       "loc": "low.lift",
       "origin": [
         2544,
         -1039.75,
         1.5
       ],
+      "picker": "banan falco",
+      "pickerEndTime": 387632,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 387632,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 354671,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -703,12 +766,21 @@
     },
     {
       "entNum": 135,
+      "fate": "picked",
       "loc": "path.lift",
       "origin": [
         2514,
         -913.25,
         82
       ],
+      "picker": "banan falco",
+      "pickerEndTime": 387632,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 387632,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 381119,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -717,12 +789,21 @@
     },
     {
       "entNum": 133,
+      "fate": "picked",
       "loc": "RA.MH",
       "origin": [
         2678.625,
         -2163.125,
         148
       ],
+      "picker": "betowen",
+      "pickerEndTime": 417281,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 417281,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 390164,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -731,12 +812,21 @@
     },
     {
       "entNum": 131,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1689.625,
         -895,
         -4
       ],
+      "picker": "betowen",
+      "pickerEndTime": 417281,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 417281,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 412788,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -745,12 +835,21 @@
     },
     {
       "entNum": 135,
+      "fate": "picked",
       "loc": "platforms",
       "origin": [
         2071.625,
         -1695,
         37.25
       ],
+      "picker": "banan falco",
+      "pickerEndTime": 429762,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 429762,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 418684,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -759,12 +858,21 @@
     },
     {
       "entNum": 134,
+      "fate": "picked",
       "loc": "Quad.button",
       "origin": [
         1648,
         -716.875,
         0
       ],
+      "picker": "betowen",
+      "pickerEndTime": 472371,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 472371,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 430878,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -773,12 +881,21 @@
     },
     {
       "entNum": 130,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1880.5,
         -887.25,
         38.5
       ],
+      "picker": "betowen",
+      "pickerEndTime": 494515,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 494515,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 479527,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -787,12 +904,21 @@
     },
     {
       "entNum": 131,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1677.5,
         -1137.125,
         0.5
       ],
+      "picker": "betowen",
+      "pickerEndTime": 494515,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 494515,
+      "pickerRelation": "self",
+      "pickerTeam": "betowen",
+      "pickupTime": 480339,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -801,12 +927,21 @@
     },
     {
       "entNum": 128,
+      "fate": "picked",
       "loc": "Quad.low",
       "origin": [
         2064,
         -400.125,
         87.25
       ],
+      "picker": "betowen",
+      "pickerEndTime": 514306,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 514306,
+      "pickerRelation": "self",
+      "pickerTeam": "betowen",
+      "pickupTime": 497618,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -815,12 +950,21 @@
     },
     {
       "entNum": 134,
+      "fate": "picked",
       "loc": "Quad.low",
       "origin": [
         1984.25,
         -422.375,
         91.5
       ],
+      "picker": "betowen",
+      "pickerEndTime": 514306,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 514306,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 497773,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -829,12 +973,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "tele",
       "origin": [
         2354.625,
         -79.25,
         -96.625
       ],
+      "picker": "betowen",
+      "pickerEndTime": 546604,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 546604,
+      "pickerRelation": "self",
+      "pickerTeam": "betowen",
+      "pickupTime": 531662,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -843,12 +996,21 @@
     },
     {
       "entNum": 131,
+      "fate": "picked",
       "loc": "low.button",
       "origin": [
         2159.25,
         -2078.5,
         65.75
       ],
+      "picker": "banan falco",
+      "pickerEndTime": 543383,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 543383,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 521202,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -857,12 +1019,21 @@
     },
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "low.RL",
       "origin": [
         2468,
         -1362.125,
         74.75
       ],
+      "picker": "banan falco",
+      "pickerEndTime": 543383,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 543383,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 530968,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -871,12 +1042,21 @@
     },
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "big.stairs",
       "origin": [
         1957.375,
         -1365,
         96
       ],
+      "picker": "betowen",
+      "pickerEndTime": 546604,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 546604,
+      "pickerRelation": "enemy",
+      "pickerTeam": "betowen",
+      "pickupTime": 544357,
       "player": "banan falco",
       "source": "ktx",
       "team": "banan falco",
@@ -885,12 +1065,20 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "big.button",
       "origin": [
         1670.625,
         -1548.375,
         0
       ],
+      "picker": "banan falco",
+      "pickerEndTime": 599980,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 547766,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -899,12 +1087,20 @@
     },
     {
       "entNum": 127,
+      "fate": "picked",
       "loc": "Quad.button",
       "origin": [
         1675.25,
         -838.625,
         -4
       ],
+      "picker": "banan falco",
+      "pickerEndTime": 599980,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "enemy",
+      "pickerTeam": "banan falco",
+      "pickupTime": 596136,
       "player": "betowen",
       "source": "ktx",
       "team": "betowen",
@@ -11351,7 +11547,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 76,
+  "schemaVersion": 78,
   "shots": {
     "byPlayer": [
       {
@@ -288203,6 +288399,7 @@
   },
   "weaponPickups": [
     {
+      "endTime": 25844,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288214,6 +288411,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 39091,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -288225,6 +288423,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 25844,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288236,6 +288435,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 25844,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288247,6 +288447,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 54766,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -288262,6 +288463,7 @@
       "dropTime": 39091,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 54766,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 54766,
@@ -288272,6 +288474,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 65636,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -288287,6 +288490,7 @@
       "dropTime": 54766,
       "dropper": "banan falco",
       "dropperTeam": "banan falco",
+      "endTime": 65636,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 65636,
@@ -288297,6 +288501,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 59896,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288312,6 +288517,7 @@
       "dropTime": 59896,
       "dropper": "banan falco",
       "dropperTeam": "banan falco",
+      "endTime": 65636,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 65636,
@@ -288322,6 +288528,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 202895,
       "hadBefore": false,
       "inferred": true,
       "kills": 6,
@@ -288337,6 +288544,7 @@
       "dropTime": 65636,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 202895,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 202895,
@@ -288347,6 +288555,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 202895,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288358,6 +288567,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 100506,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288369,6 +288579,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 122778,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288380,6 +288591,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 286113,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288391,6 +288603,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 286113,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -288402,6 +288615,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 202895,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288413,6 +288627,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 286113,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288424,6 +288639,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 245400,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288435,6 +288651,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 245400,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288446,6 +288663,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 245400,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288461,6 +288679,7 @@
       "dropTime": 245400,
       "dropper": "banan falco",
       "dropperTeam": "banan falco",
+      "endTime": 286113,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 286113,
@@ -288471,6 +288690,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 338348,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288482,6 +288702,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 338348,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288493,6 +288714,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 352411,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -288504,6 +288726,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 338348,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288515,6 +288738,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 352411,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288526,6 +288750,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 338348,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288541,6 +288766,7 @@
       "dropTime": 338348,
       "dropper": "banan falco",
       "dropperTeam": "banan falco",
+      "endTime": 352411,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 352411,
@@ -288551,6 +288777,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 352411,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288562,6 +288789,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 387632,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -288577,6 +288805,7 @@
       "dropTime": 352411,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 387632,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 387632,
@@ -288587,6 +288816,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 379917,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288602,6 +288832,7 @@
       "dropTime": 379917,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 387632,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 387632,
@@ -288612,6 +288843,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 417281,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -288627,6 +288859,7 @@
       "dropTime": 387632,
       "dropper": "banan falco",
       "dropperTeam": "banan falco",
+      "endTime": 417281,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 417281,
@@ -288637,6 +288870,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 417281,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288648,6 +288882,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 411819,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288663,6 +288898,7 @@
       "dropTime": 411819,
       "dropper": "banan falco",
       "dropperTeam": "banan falco",
+      "endTime": 417281,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 417281,
@@ -288673,6 +288909,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 429762,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -288688,6 +288925,7 @@
       "dropTime": 417281,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 429762,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 429762,
@@ -288698,6 +288936,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 429762,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288709,6 +288948,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 472371,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -288724,6 +288964,7 @@
       "dropTime": 429762,
       "dropper": "banan falco",
       "dropperTeam": "banan falco",
+      "endTime": 472371,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 472371,
@@ -288734,6 +288975,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 472293,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288745,6 +288987,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 472293,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288756,6 +288999,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 494515,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288767,6 +289011,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 494515,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288778,6 +289023,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 494515,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -288793,6 +289039,7 @@
       "dropTime": 472293,
       "dropper": "banan falco",
       "dropperTeam": "banan falco",
+      "endTime": 494515,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 494515,
@@ -288807,6 +289054,7 @@
       "dropTime": 472371,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 494515,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 494515,
@@ -288817,6 +289065,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 494515,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288828,6 +289077,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 543383,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -288843,6 +289093,7 @@
       "dropTime": 494515,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 514306,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 514306,
@@ -288857,6 +289108,7 @@
       "dropTime": 494515,
       "dropper": "banan falco",
       "dropperTeam": "banan falco",
+      "endTime": 514306,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 514306,
@@ -288867,6 +289119,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 543383,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -288878,6 +289131,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 519878,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288893,6 +289147,7 @@
       "dropTime": 519878,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 543383,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 543383,
@@ -288903,6 +289158,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 530189,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288918,6 +289174,7 @@
       "dropTime": 530189,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 543383,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 543383,
@@ -288932,6 +289189,7 @@
       "dropTime": 514306,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 546604,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 546604,
@@ -288942,6 +289200,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 546604,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288957,6 +289216,7 @@
       "dropTime": 543383,
       "dropper": "banan falco",
       "dropperTeam": "banan falco",
+      "endTime": 546604,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 546604,
@@ -288971,6 +289231,7 @@
       "dropTime": 546604,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 599980,
       "hadBefore": false,
       "kills": 1,
       "player": "banan falco",
@@ -288980,6 +289241,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 595558,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -288991,6 +289253,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 599980,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -289001,6 +289264,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 595558,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -289016,6 +289280,7 @@
       "dropTime": 595558,
       "dropper": "betowen",
       "dropperTeam": "betowen",
+      "endTime": 599980,
       "hadBefore": true,
       "kills": 0,
       "player": "banan falco",
@@ -289025,6 +289290,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 599980,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,

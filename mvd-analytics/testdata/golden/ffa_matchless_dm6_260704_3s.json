@@ -1315,7 +1315,7 @@
       "score": "derived"
     }
   },
-  "schemaVersion": 76,
+  "schemaVersion": 78,
   "streams": {
     "global": {
       "dateMarkers": [
@@ -1800,6 +1800,7 @@
   },
   "weaponPickups": [
     {
+      "endTime": 3167,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,

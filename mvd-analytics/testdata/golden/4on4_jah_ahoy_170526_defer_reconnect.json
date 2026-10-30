@@ -41494,12 +41494,21 @@
   "backpacks": [
     {
       "entNum": 416,
+      "fate": "picked",
       "loc": "RL",
       "origin": [
         2668,
         -9.125,
         -272
       ],
+      "picker": "sailorman",
+      "pickerEndTime": 134958,
+      "pickerHadWeapon": false,
+      "pickerKills": 6,
+      "pickerNextDeathTime": 134958,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 31282,
       "player": "gandi",
       "source": "ktx",
       "team": "jah",
@@ -41508,12 +41517,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "Ring.high",
       "origin": [
         1770.625,
         1000.625,
         17.875
       ],
+      "picker": "biggz",
+      "pickerEndTime": 138798,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 138798,
+      "pickerRelation": "self",
+      "pickerTeam": "jah",
+      "pickupTime": 123924,
       "player": "biggz",
       "source": "ktx",
       "team": "jah",
@@ -41522,12 +41540,21 @@
     },
     {
       "entNum": 432,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         1155.625,
         1772.25,
         35.375
       ],
+      "picker": "paniagua",
+      "pickerEndTime": 122228,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 122228,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 121193,
       "player": "nexus",
       "source": "ktx",
       "team": "ahoy",
@@ -41536,12 +41563,21 @@
     },
     {
       "entNum": 430,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         1096.5,
         1854,
         0
       ],
+      "picker": "[nW].Veggie",
+      "pickerEndTime": 131854,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 131854,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 124578,
       "player": "paniagua",
       "source": "ktx",
       "team": "jah",
@@ -41550,12 +41586,21 @@
     },
     {
       "entNum": 420,
+      "fate": "picked",
       "loc": "Quad.entry",
       "origin": [
         1763.25,
         1526.5,
         16
       ],
+      "picker": "gandi",
+      "pickerEndTime": 138249,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 138249,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 133439,
       "player": "[nW].Veggie",
       "source": "ktx",
       "team": "ahoy",
@@ -41564,12 +41609,21 @@
     },
     {
       "entNum": 420,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         -208,
         325.375,
         1.875
       ],
+      "picker": "biggz",
+      "pickerEndTime": 138798,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 138798,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 137347,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -41578,12 +41632,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         -202.875,
         483.25,
         -64
       ],
+      "picker": "sailorman",
+      "pickerEndTime": 138798,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 138798,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 138524,
       "player": "paniagua",
       "source": "ktx",
       "team": "jah",
@@ -41592,12 +41655,21 @@
     },
     {
       "entNum": 424,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         -155.25,
         474.125,
         -64.5
       ],
+      "picker": "nexus",
+      "pickerEndTime": 226166,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 226166,
+      "pickerRelation": "team",
+      "pickerTeam": "ahoy",
+      "pickupTime": 144786,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -41606,12 +41678,21 @@
     },
     {
       "entNum": 433,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         -248.125,
         437.125,
         -64
       ],
+      "picker": "nexus",
+      "pickerEndTime": 226166,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 226166,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 144615,
       "player": "biggz",
       "source": "ktx",
       "team": "jah",
@@ -41620,12 +41701,21 @@
     },
     {
       "entNum": 430,
+      "fate": "picked",
       "loc": "RL",
       "origin": [
         2395.25,
         -500.75,
         -270.5
       ],
+      "picker": "gandi",
+      "pickerEndTime": 214786,
+      "pickerHadWeapon": false,
+      "pickerKills": 4,
+      "pickerNextDeathTime": 214786,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 161063,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -41634,12 +41724,21 @@
     },
     {
       "entNum": 430,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         -231,
         -143.625,
         -32
       ],
+      "picker": "paniagua",
+      "pickerEndTime": 416826,
+      "pickerHadWeapon": false,
+      "pickerKills": 10,
+      "pickerNextDeathTime": 416826,
+      "pickerRelation": "team",
+      "pickerTeam": "jah",
+      "pickupTime": 215790,
       "player": "gandi",
       "source": "ktx",
       "team": "jah",
@@ -41648,12 +41747,21 @@
     },
     {
       "entNum": 420,
+      "fate": "picked",
       "loc": "Quad.low",
       "origin": [
         1113.75,
         1269.75,
         -208
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 276589,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 276589,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 263161,
       "player": "rusti",
       "source": "ktx",
       "team": "jah",
@@ -41662,12 +41770,21 @@
     },
     {
       "entNum": 428,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         516,
         372.625,
         -175.25
       ],
+      "picker": "biggz",
+      "pickerEndTime": 345770,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 345770,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 277697,
       "player": "ocoini",
       "source": "ktx",
       "team": "ahoy",
@@ -41676,12 +41793,21 @@
     },
     {
       "entNum": 427,
+      "fate": "picked",
       "loc": "Pent.MH",
       "origin": [
         970.5,
         -834.375,
         -208
       ],
+      "picker": "paniagua",
+      "pickerEndTime": 416826,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 416826,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 294185,
       "player": "ocoini",
       "source": "ktx",
       "team": "ahoy",
@@ -41690,12 +41816,21 @@
     },
     {
       "entNum": 420,
+      "fate": "picked",
       "loc": "RL.tele",
       "origin": [
         2012.375,
         -83.5,
         -216.125
       ],
+      "picker": "gandi",
+      "pickerEndTime": 397980,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 397980,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 302475,
       "player": "[nW].Veggie",
       "source": "ktx",
       "team": "ahoy",
@@ -41704,12 +41839,21 @@
     },
     {
       "entNum": 425,
+      "fate": "picked",
       "loc": "RL",
       "origin": [
         2669.375,
         -309.125,
         -178.875
       ],
+      "picker": "nexus",
+      "pickerEndTime": 359123,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 359123,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 346638,
       "player": "biggz",
       "source": "ktx",
       "team": "jah",
@@ -41718,12 +41862,21 @@
     },
     {
       "entNum": 430,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         234.875,
         224,
         -130.25
       ],
+      "picker": "sailorman",
+      "pickerEndTime": 400112,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 400112,
+      "pickerRelation": "team",
+      "pickerTeam": "ahoy",
+      "pickupTime": 399168,
       "player": "nexus",
       "source": "ktx",
       "team": "ahoy",
@@ -41732,12 +41885,21 @@
     },
     {
       "entNum": 431,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         -3.5,
         572.625,
         -32
       ],
+      "picker": "gandi",
+      "pickerEndTime": 409586,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 409586,
+      "pickerRelation": "self",
+      "pickerTeam": "jah",
+      "pickupTime": 407160,
       "player": "gandi",
       "source": "ktx",
       "team": "jah",
@@ -41746,12 +41908,21 @@
     },
     {
       "entNum": 416,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         142.375,
         245.375,
         -128
       ],
+      "picker": "gandi",
+      "pickerEndTime": 409586,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 409586,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 404654,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -41760,12 +41931,21 @@
     },
     {
       "entNum": 424,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         98.375,
         23.875,
         -31.625
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 411242,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 411242,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 411208,
       "player": "gandi",
       "source": "ktx",
       "team": "jah",
@@ -41774,12 +41954,21 @@
     },
     {
       "entNum": 434,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         59.125,
         77.875,
         -0.5
       ],
+      "picker": "nexus",
+      "pickerEndTime": 423091,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 423091,
+      "pickerRelation": "team",
+      "pickerTeam": "ahoy",
+      "pickupTime": 418624,
       "player": "ocoini",
       "source": "ktx",
       "team": "ahoy",
@@ -41788,12 +41977,21 @@
     },
     {
       "entNum": 424,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         54.125,
         117.5,
         -3.625
       ],
+      "picker": "rusti",
+      "pickerEndTime": 481998,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 481998,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 424653,
       "player": "nexus",
       "source": "ktx",
       "team": "ahoy",
@@ -41802,12 +42000,21 @@
     },
     {
       "entNum": 425,
+      "fate": "picked",
       "loc": "RL.tele",
       "origin": [
         2020.625,
         -140.375,
         -240
       ],
+      "picker": "paniagua",
+      "pickerEndTime": 486083,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 486083,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 451602,
       "player": "[nW].Veggie",
       "source": "ktx",
       "team": "ahoy",
@@ -41816,12 +42023,21 @@
     },
     {
       "entNum": 428,
+      "fate": "picked",
       "loc": "LG",
       "origin": [
         1241.75,
         858.375,
         -176
       ],
+      "picker": "sailorman",
+      "pickerEndTime": 510748,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 510748,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 470359,
       "player": "gandi",
       "source": "ktx",
       "team": "jah",
@@ -41830,12 +42046,21 @@
     },
     {
       "entNum": 416,
+      "fate": "picked",
       "loc": "LG",
       "origin": [
         1340,
         582.375,
         -64.75
       ],
+      "picker": "sailorman",
+      "pickerEndTime": 621085,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 621085,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 541116,
       "player": "paniagua",
       "source": "ktx",
       "team": "jah",
@@ -41844,12 +42069,21 @@
     },
     {
       "entNum": 416,
+      "fate": "picked",
       "loc": "RA.door",
       "origin": [
         367.375,
         375.375,
         17
       ],
+      "picker": "paniagua",
+      "pickerEndTime": 671651,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 671651,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 623066,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -41858,12 +42092,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "Pent.SSG",
       "origin": [
         1680.375,
         -454.125,
         -179
       ],
+      "picker": "rusti",
+      "pickerEndTime": 730773,
+      "pickerHadWeapon": false,
+      "pickerKills": 5,
+      "pickerNextDeathTime": 730773,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 648070,
       "player": "[nW].Veggie",
       "source": "ktx",
       "team": "ahoy",
@@ -41872,12 +42115,21 @@
     },
     {
       "entNum": 416,
+      "fate": "picked",
       "loc": "RL",
       "origin": [
         2573,
         -138.125,
         -272
       ],
+      "picker": "sailorman",
+      "pickerEndTime": 807198,
+      "pickerHadWeapon": false,
+      "pickerKills": 19,
+      "pickerNextDeathTime": 807198,
+      "pickerRelation": "self",
+      "pickerTeam": "ahoy",
+      "pickupTime": 652030,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -41886,12 +42138,21 @@
     },
     {
       "entNum": 419,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         1048.125,
         1474.75,
         54.625
       ],
+      "picker": "nexus",
+      "pickerEndTime": 735058,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 735058,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 731841,
       "player": "rusti",
       "source": "ktx",
       "team": "jah",
@@ -41900,12 +42161,21 @@
     },
     {
       "entNum": 425,
+      "fate": "picked",
       "loc": "Pent.water",
       "origin": [
         1217.5,
         -920.875,
         -329.375
       ],
+      "picker": "rusti",
+      "pickerEndTime": 757415,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 757415,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 744545,
       "player": "[nW].Veggie",
       "source": "ktx",
       "team": "ahoy",
@@ -41914,12 +42184,21 @@
     },
     {
       "entNum": 425,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         568.25,
         -213.375,
         86.375
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 811781,
+      "pickerHadWeapon": false,
+      "pickerKills": 5,
+      "pickerNextDeathTime": 811781,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 758657,
       "player": "rusti",
       "source": "ktx",
       "team": "jah",
@@ -41928,12 +42207,21 @@
     },
     {
       "entNum": 439,
+      "fate": "picked",
       "loc": "Ring.high",
       "origin": [
         2114.875,
         734.625,
         16
       ],
+      "picker": "biggz",
+      "pickerEndTime": 786459,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 786459,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 782784,
       "player": "nexus",
       "source": "ktx",
       "team": "ahoy",
@@ -41942,12 +42230,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "RL",
       "origin": [
         2590.625,
         58.5,
         -240
       ],
+      "picker": "[nW].Veggie",
+      "pickerEndTime": 793705,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 793705,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 788957,
       "player": "rusti",
       "source": "ktx",
       "team": "jah",
@@ -41956,12 +42253,21 @@
     },
     {
       "entNum": 437,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         448.25,
         274,
         -58.125
       ],
+      "picker": "rusti",
+      "pickerEndTime": 809630,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 809630,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 808867,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -41970,12 +42276,21 @@
     },
     {
       "entNum": 438,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         273,
         309.25,
         -163.25
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 811781,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 811781,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 810358,
       "player": "paniagua",
       "source": "ktx",
       "team": "jah",
@@ -41984,12 +42299,21 @@
     },
     {
       "entNum": 425,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         456.25,
         270,
         -176
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 811781,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 811781,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 811190,
       "player": "rusti",
       "source": "ktx",
       "team": "jah",
@@ -41998,12 +42322,21 @@
     },
     {
       "entNum": 425,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         550.375,
         290,
         -176
       ],
+      "picker": "sailorman",
+      "pickerEndTime": 909714,
+      "pickerHadWeapon": false,
+      "pickerKills": 11,
+      "pickerNextDeathTime": 909714,
+      "pickerRelation": "team",
+      "pickerTeam": "ahoy",
+      "pickupTime": 811816,
       "player": "ocoini",
       "source": "ktx",
       "team": "ahoy",
@@ -42012,12 +42345,21 @@
     },
     {
       "entNum": 428,
+      "fate": "picked",
       "loc": "LG.high",
       "origin": [
         1494.625,
         987.875,
         60
       ],
+      "picker": "gandi",
+      "pickerEndTime": 854218,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 854218,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 852073,
       "player": "nexus",
       "source": "ktx",
       "team": "ahoy",
@@ -42026,12 +42368,21 @@
     },
     {
       "entNum": 428,
+      "fate": "picked",
       "loc": "Quad.entry",
       "origin": [
         1908.5,
         1234.625,
         16
       ],
+      "picker": "sailorman",
+      "pickerEndTime": 909714,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 909714,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 854253,
       "player": "gandi",
       "source": "ktx",
       "team": "jah",
@@ -42040,12 +42391,21 @@
     },
     {
       "entNum": 416,
+      "fate": "picked",
       "loc": "Ring.high",
       "origin": [
         1700.5,
         953.875,
         17
       ],
+      "picker": "nexus",
+      "pickerEndTime": 897817,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 897817,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 856925,
       "player": "biggz",
       "source": "ktx",
       "team": "jah",
@@ -42054,12 +42414,21 @@
     },
     {
       "entNum": 419,
+      "fate": "picked",
       "loc": "RL",
       "origin": [
         2638.5,
         -419.75,
         -275
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 927614,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 927614,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 882810,
       "player": "paniagua",
       "source": "ktx",
       "team": "jah",
@@ -42068,12 +42437,21 @@
     },
     {
       "entNum": 438,
+      "fate": "picked",
       "loc": "Ring.tele",
       "origin": [
         2537.5,
         637.375,
         17.375
       ],
+      "picker": "gandi",
+      "pickerEndTime": 935297,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 935297,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 927858,
       "player": "[nW].Veggie",
       "source": "ktx",
       "team": "ahoy",
@@ -42082,12 +42460,21 @@
     },
     {
       "entNum": 424,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         344.875,
         46.5,
         82.125
       ],
+      "picker": "rusti",
+      "pickerEndTime": 1196841,
+      "pickerHadWeapon": false,
+      "pickerKills": 10,
+      "pickerNextDeathTime": 1196841,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 1097694,
       "player": "[nW].Veggie",
       "source": "ktx",
       "team": "ahoy",
@@ -42096,12 +42483,21 @@
     },
     {
       "entNum": 419,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         333,
         116.625,
         139.75
       ],
+      "picker": "gandi",
+      "pickerEndTime": 1185018,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 1185018,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 1126406,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -42110,12 +42506,21 @@
     },
     {
       "entNum": 434,
+      "fate": "picked",
       "loc": "RL",
       "origin": [
         2659.375,
         -524.625,
         -272
       ],
+      "picker": "sailorman",
+      "pickerEndTime": 1149526,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 1149526,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 1147761,
       "player": "biggz",
       "source": "ktx",
       "team": "jah",
@@ -42124,12 +42529,20 @@
     },
     {
       "entNum": 437,
+      "fate": "picked",
       "loc": "RL",
       "origin": [
         2699.375,
         -229.125,
         -272
       ],
+      "picker": "biggz",
+      "pickerEndTime": 1200101,
+      "pickerHadWeapon": false,
+      "pickerKills": 4,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 1151573,
       "player": "sailorman",
       "source": "ktx",
       "team": "ahoy",
@@ -42138,12 +42551,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "RL",
       "origin": [
         2322.125,
         -398.875,
         -275.375
       ],
+      "picker": "rusti",
+      "pickerEndTime": 1196841,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 1196841,
+      "pickerRelation": "enemy",
+      "pickerTeam": "jah",
+      "pickupTime": 1180712,
       "player": "ocoini",
       "source": "ktx",
       "team": "ahoy",
@@ -42152,12 +42574,21 @@
     },
     {
       "entNum": 439,
+      "fate": "picked",
       "loc": "Ring.lift",
       "origin": [
         1679.375,
         634.25,
         -142.625
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 1187049,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 1187049,
+      "pickerRelation": "enemy",
+      "pickerTeam": "ahoy",
+      "pickupTime": 1185720,
       "player": "gandi",
       "source": "ktx",
       "team": "jah",
@@ -42166,6 +42597,7 @@
     },
     {
       "entNum": 37,
+      "fate": "unobserved",
       "loc": "Ring.high",
       "origin": [
         1710.375,
@@ -96966,7 +97398,7 @@
       }
     ]
   },
-  "schemaVersion": 76,
+  "schemaVersion": 78,
   "shots": {
     "byPlayer": [
       {
@@ -280626,6 +281058,7 @@
   },
   "weaponPickups": [
     {
+      "endTime": 50701,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 50701,
@@ -280636,6 +281069,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 29514,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 29514,
@@ -280646,6 +281080,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 24008,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 24008,
@@ -280656,6 +281091,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 134958,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 134958,
@@ -280666,6 +281102,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 39202,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 39202,
@@ -280676,6 +281113,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 29514,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 29514,
@@ -280690,6 +281128,7 @@
       "dropTime": 29514,
       "dropper": "gandi",
       "dropperTeam": "jah",
+      "endTime": 134958,
       "hadBefore": false,
       "kills": 6,
       "nextDeathTime": 134958,
@@ -280700,6 +281139,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 50701,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 50701,
@@ -280710,6 +281150,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 41729,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 41729,
@@ -280720,6 +281161,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 121019,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 121019,
@@ -280730,6 +281172,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 134958,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 134958,
@@ -280740,6 +281183,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 99845,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 99845,
@@ -280750,6 +281194,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 77907,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 77907,
@@ -280760,6 +281205,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 99845,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 99845,
@@ -280770,6 +281216,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 87496,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 87496,
@@ -280780,6 +281227,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 77907,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 77907,
@@ -280790,6 +281238,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 84772,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 84772,
@@ -280800,6 +281249,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 109462,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 109462,
@@ -280810,6 +281260,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 122228,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 122228,
@@ -280820,6 +281271,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 119979,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 119979,
@@ -280830,6 +281282,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 121019,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 121019,
@@ -280840,6 +281293,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 122228,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 122228,
@@ -280850,6 +281304,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 121019,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 121019,
@@ -280864,6 +281319,7 @@
       "dropTime": 121019,
       "dropper": "nexus",
       "dropperTeam": "ahoy",
+      "endTime": 122228,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 122228,
@@ -280878,6 +281334,7 @@
       "dropTime": 119979,
       "dropper": "biggz",
       "dropperTeam": "jah",
+      "endTime": 138798,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 138798,
@@ -280892,6 +281349,7 @@
       "dropTime": 122228,
       "dropper": "paniagua",
       "dropperTeam": "jah",
+      "endTime": 131854,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 131854,
@@ -280902,6 +281360,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 174293,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 174293,
@@ -280912,6 +281371,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 137381,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 137381,
@@ -280926,6 +281386,7 @@
       "dropTime": 131854,
       "dropper": "[nW].Veggie",
       "dropperTeam": "ahoy",
+      "endTime": 138249,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 138249,
@@ -280940,6 +281401,7 @@
       "dropTime": 134958,
       "dropper": "sailorman",
       "dropperTeam": "ahoy",
+      "endTime": 138798,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 138798,
@@ -280950,6 +281412,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 147752,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 147752,
@@ -280964,6 +281427,7 @@
       "dropTime": 137381,
       "dropper": "paniagua",
       "dropperTeam": "jah",
+      "endTime": 138798,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 138798,
@@ -280974,6 +281438,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 153515,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 153515,
@@ -280988,6 +281453,7 @@
       "dropTime": 138798,
       "dropper": "biggz",
       "dropperTeam": "jah",
+      "endTime": 226166,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 226166,
@@ -281002,6 +281468,7 @@
       "dropTime": 138798,
       "dropper": "sailorman",
       "dropperTeam": "ahoy",
+      "endTime": 226166,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 226166,
@@ -281012,6 +281479,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 157990,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 157990,
@@ -281022,6 +281490,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 153515,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 153515,
@@ -281032,6 +281501,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 159816,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 159816,
@@ -281042,6 +281512,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 163310,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 163310,
@@ -281056,6 +281527,7 @@
       "dropTime": 159816,
       "dropper": "sailorman",
       "dropperTeam": "ahoy",
+      "endTime": 214786,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 214786,
@@ -281066,6 +281538,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 191075,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 191075,
@@ -281076,6 +281549,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 188684,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 188684,
@@ -281086,6 +281560,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 226166,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 226166,
@@ -281096,6 +281571,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 211192,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 211192,
@@ -281106,6 +281582,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 191075,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 191075,
@@ -281116,6 +281593,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 214786,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 214786,
@@ -281126,6 +281604,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 216378,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 216378,
@@ -281140,6 +281619,7 @@
       "dropTime": 214786,
       "dropper": "gandi",
       "dropperTeam": "jah",
+      "endTime": 416826,
       "hadBefore": false,
       "kills": 10,
       "nextDeathTime": 416826,
@@ -281150,6 +281630,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 232165,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 232165,
@@ -281160,6 +281641,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 276589,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 276589,
@@ -281170,6 +281652,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 345770,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 345770,
@@ -281180,6 +281663,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 244440,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 244440,
@@ -281190,6 +281674,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 416826,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 416826,
@@ -281200,6 +281685,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 256168,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 256168,
@@ -281210,6 +281696,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 301711,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 301711,
@@ -281220,6 +281707,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 299113,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 299113,
@@ -281230,6 +281718,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 261511,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 261511,
@@ -281244,6 +281733,7 @@
       "dropTime": 261511,
       "dropper": "rusti",
       "dropperTeam": "jah",
+      "endTime": 276589,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 276589,
@@ -281254,6 +281744,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 276589,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 276589,
@@ -281264,6 +281755,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 288311,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 288311,
@@ -281278,6 +281770,7 @@
       "dropTime": 276589,
       "dropper": "ocoini",
       "dropperTeam": "ahoy",
+      "endTime": 345770,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 345770,
@@ -281288,6 +281781,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 299113,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 299113,
@@ -281298,6 +281792,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 294185,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 294185,
@@ -281308,6 +281803,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 301711,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 301711,
@@ -281318,6 +281814,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 294185,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 294185,
@@ -281332,6 +281829,7 @@
       "dropTime": 294185,
       "dropper": "ocoini",
       "dropperTeam": "ahoy",
+      "endTime": 416826,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 416826,
@@ -281346,6 +281844,7 @@
       "dropTime": 301711,
       "dropper": "[nW].Veggie",
       "dropperTeam": "ahoy",
+      "endTime": 397980,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 397980,
@@ -281356,6 +281855,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 359123,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 359123,
@@ -281366,6 +281866,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 397980,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 397980,
@@ -281376,6 +281877,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 397980,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 397980,
@@ -281386,6 +281888,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 359123,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 359123,
@@ -281396,6 +281899,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 345770,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 345770,
@@ -281406,6 +281910,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 322719,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 322719,
@@ -281416,6 +281921,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 359123,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 359123,
@@ -281426,6 +281932,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 358048,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 358048,
@@ -281440,6 +281947,7 @@
       "dropTime": 345770,
       "dropper": "biggz",
       "dropperTeam": "jah",
+      "endTime": 359123,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 359123,
@@ -281450,6 +281958,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 481998,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 481998,
@@ -281460,6 +281969,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 481998,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 481998,
@@ -281470,6 +281980,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 365751,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 365751,
@@ -281480,6 +281991,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 372050,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 372050,
@@ -281490,6 +282002,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 397599,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 397599,
@@ -281500,6 +282013,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 390007,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 390007,
@@ -281510,6 +282024,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 393097,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 393097,
@@ -281520,6 +282035,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 397599,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 397599,
@@ -281530,6 +282046,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 402399,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 402399,
@@ -281544,6 +282061,7 @@
       "dropTime": 397599,
       "dropper": "nexus",
       "dropperTeam": "ahoy",
+      "endTime": 400112,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 400112,
@@ -281554,6 +282072,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 411242,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 411242,
@@ -281568,6 +282087,7 @@
       "dropTime": 400112,
       "dropper": "sailorman",
       "dropperTeam": "ahoy",
+      "endTime": 409586,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 409586,
@@ -281582,6 +282102,7 @@
       "dropTime": 397980,
       "dropper": "gandi",
       "dropperTeam": "jah",
+      "endTime": 409586,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 409586,
@@ -281596,6 +282117,7 @@
       "dropTime": 409586,
       "dropper": "gandi",
       "dropperTeam": "jah",
+      "endTime": 411242,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 411242,
@@ -281606,6 +282128,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 419006,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 419006,
@@ -281620,6 +282143,7 @@
       "dropTime": 411242,
       "dropper": "ocoini",
       "dropperTeam": "ahoy",
+      "endTime": 423091,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 423091,
@@ -281630,6 +282154,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 470359,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 470359,
@@ -281644,6 +282169,7 @@
       "dropTime": 423091,
       "dropper": "nexus",
       "dropperTeam": "ahoy",
+      "endTime": 481998,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 481998,
@@ -281654,6 +282180,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 470359,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 470359,
@@ -281664,6 +282191,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 450074,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 450074,
@@ -281674,6 +282202,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 437402,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 437402,
@@ -281684,6 +282213,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 486083,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 486083,
@@ -281694,6 +282224,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 470359,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 470359,
@@ -281704,6 +282235,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 457455,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 457455,
@@ -281718,6 +282250,7 @@
       "dropTime": 450074,
       "dropper": "[nW].Veggie",
       "dropperTeam": "ahoy",
+      "endTime": 486083,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 486083,
@@ -281728,6 +282261,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 480303,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 480303,
@@ -281738,6 +282272,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 487296,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 487296,
@@ -281748,6 +282283,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 486083,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 486083,
@@ -281758,6 +282294,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 470359,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 470359,
@@ -281772,6 +282309,7 @@
       "dropTime": 470359,
       "dropper": "gandi",
       "dropperTeam": "jah",
+      "endTime": 510748,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 510748,
@@ -281782,6 +282320,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 497841,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 497841,
@@ -281792,6 +282331,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 560871,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 560871,
@@ -281802,6 +282342,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 595992,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 595992,
@@ -281812,6 +282353,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 496970,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 496970,
@@ -281822,6 +282364,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 514215,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 514215,
@@ -281832,6 +282375,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 583928,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 583928,
@@ -281842,6 +282386,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 537142,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 537142,
@@ -281852,6 +282397,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 560871,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 560871,
@@ -281862,6 +282408,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 535337,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 535337,
@@ -281872,6 +282419,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 595992,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 595992,
@@ -281882,6 +282430,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 540147,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 540147,
@@ -281896,6 +282445,7 @@
       "dropTime": 540147,
       "dropper": "paniagua",
       "dropperTeam": "jah",
+      "endTime": 621085,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 621085,
@@ -281906,6 +282456,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 569598,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 569598,
@@ -281916,6 +282467,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 645782,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 645782,
@@ -281926,6 +282478,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 621085,
       "hadBefore": false,
       "kills": 5,
       "nextDeathTime": 621085,
@@ -281936,6 +282489,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 595992,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 595992,
@@ -281946,6 +282500,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 569598,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 569598,
@@ -281956,6 +282511,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 614817,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 614817,
@@ -281966,6 +282522,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 588317,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 588317,
@@ -281976,6 +282533,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 645782,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 645782,
@@ -281986,6 +282544,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 671651,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 671651,
@@ -281996,6 +282555,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 645782,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 645782,
@@ -282006,6 +282566,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 619011,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 619011,
@@ -282016,6 +282577,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 655900,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 655900,
@@ -282030,6 +282592,7 @@
       "dropTime": 621085,
       "dropper": "sailorman",
       "dropperTeam": "ahoy",
+      "endTime": 671651,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 671651,
@@ -282040,6 +282603,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 661172,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 661172,
@@ -282050,6 +282614,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 643941,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 643941,
@@ -282060,6 +282625,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 648244,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 648244,
@@ -282074,6 +282640,7 @@
       "dropTime": 645782,
       "dropper": "[nW].Veggie",
       "dropperTeam": "ahoy",
+      "endTime": 730773,
       "hadBefore": false,
       "kills": 5,
       "nextDeathTime": 730773,
@@ -282088,6 +282655,7 @@
       "dropTime": 648244,
       "dropper": "sailorman",
       "dropperTeam": "ahoy",
+      "endTime": 807198,
       "hadBefore": false,
       "kills": 19,
       "nextDeathTime": 807198,
@@ -282098,6 +282666,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 671651,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 671651,
@@ -282108,6 +282677,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 672865,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 672865,
@@ -282118,6 +282688,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 665035,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 665035,
@@ -282128,6 +282699,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 686282,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 686282,
@@ -282138,6 +282710,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 686282,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 686282,
@@ -282148,6 +282721,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 730355,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 730355,
@@ -282158,6 +282732,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 697549,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 697549,
@@ -282168,6 +282743,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 706581,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 706581,
@@ -282178,6 +282754,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 713496,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 713496,
@@ -282188,6 +282765,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 706821,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 706821,
@@ -282198,6 +282776,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 807198,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 807198,
@@ -282208,6 +282787,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 743646,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 743646,
@@ -282218,6 +282798,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 735058,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 735058,
@@ -282232,6 +282813,7 @@
       "dropTime": 730773,
       "dropper": "rusti",
       "dropperTeam": "jah",
+      "endTime": 735058,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 735058,
@@ -282242,6 +282824,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 743646,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 743646,
@@ -282252,6 +282835,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 741988,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 741988,
@@ -282262,6 +282846,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 807198,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 807198,
@@ -282276,6 +282861,7 @@
       "dropTime": 743646,
       "dropper": "[nW].Veggie",
       "dropperTeam": "ahoy",
+      "endTime": 757415,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 757415,
@@ -282286,6 +282872,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 770993,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 770993,
@@ -282296,6 +282883,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 757415,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 757415,
@@ -282310,6 +282898,7 @@
       "dropTime": 757415,
       "dropper": "rusti",
       "dropperTeam": "jah",
+      "endTime": 811781,
       "hadBefore": false,
       "kills": 5,
       "nextDeathTime": 811781,
@@ -282320,6 +282909,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 767865,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 767865,
@@ -282330,6 +282920,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 784688,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 784688,
@@ -282340,6 +282931,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 793705,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 793705,
@@ -282354,6 +282946,7 @@
       "dropTime": 770993,
       "dropper": "nexus",
       "dropperTeam": "ahoy",
+      "endTime": 786459,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 786459,
@@ -282364,6 +282957,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 788088,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 788088,
@@ -282378,6 +282972,7 @@
       "dropTime": 788088,
       "dropper": "rusti",
       "dropperTeam": "jah",
+      "endTime": 793705,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 793705,
@@ -282388,6 +282983,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 811085,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 811085,
@@ -282398,6 +282994,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 800943,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 800943,
@@ -282408,6 +283005,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 808062,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 808062,
@@ -282422,6 +283020,7 @@
       "dropTime": 807198,
       "dropper": "sailorman",
       "dropperTeam": "ahoy",
+      "endTime": 809630,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 809630,
@@ -282436,6 +283035,7 @@
       "dropTime": 808062,
       "dropper": "paniagua",
       "dropperTeam": "jah",
+      "endTime": 811781,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 811781,
@@ -282450,6 +283050,7 @@
       "dropTime": 809630,
       "dropper": "rusti",
       "dropperTeam": "jah",
+      "endTime": 811781,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 811781,
@@ -282464,6 +283065,7 @@
       "dropTime": 811781,
       "dropper": "ocoini",
       "dropperTeam": "ahoy",
+      "endTime": 909714,
       "hadBefore": false,
       "kills": 11,
       "nextDeathTime": 909714,
@@ -282474,6 +283076,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 822911,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 822911,
@@ -282484,6 +283087,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 851829,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 851829,
@@ -282494,6 +283098,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 831798,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 831798,
@@ -282504,6 +283109,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 856406,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 856406,
@@ -282514,6 +283120,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 909714,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 909714,
@@ -282524,6 +283131,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 854218,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 854218,
@@ -282534,6 +283142,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 848847,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 848847,
@@ -282548,6 +283157,7 @@
       "dropTime": 851829,
       "dropper": "nexus",
       "dropperTeam": "ahoy",
+      "endTime": 854218,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 854218,
@@ -282562,6 +283172,7 @@
       "dropTime": 854218,
       "dropper": "gandi",
       "dropperTeam": "jah",
+      "endTime": 909714,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 909714,
@@ -282576,6 +283187,7 @@
       "dropTime": 856406,
       "dropper": "biggz",
       "dropperTeam": "jah",
+      "endTime": 897817,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 897817,
@@ -282586,6 +283198,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 876585,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 876585,
@@ -282596,6 +283209,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 863654,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 863654,
@@ -282606,6 +283220,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 878876,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 878876,
@@ -282616,6 +283231,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 876585,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 876585,
@@ -282626,6 +283242,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 900479,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 900479,
@@ -282636,6 +283253,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 901690,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 901690,
@@ -282650,6 +283268,7 @@
       "dropTime": 876585,
       "dropper": "paniagua",
       "dropperTeam": "jah",
+      "endTime": 927614,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 927614,
@@ -282660,6 +283279,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 897817,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 897817,
@@ -282670,6 +283290,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 927614,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 927614,
@@ -282680,6 +283301,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 901690,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 901690,
@@ -282690,6 +283312,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 927719,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 927719,
@@ -282700,6 +283323,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 935297,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 935297,
@@ -282710,6 +283334,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 927022,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 927022,
@@ -282720,6 +283345,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 963650,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 963650,
@@ -282730,6 +283356,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 959295,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 959295,
@@ -282744,6 +283371,7 @@
       "dropTime": 927719,
       "dropper": "[nW].Veggie",
       "dropperTeam": "ahoy",
+      "endTime": 935297,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 935297,
@@ -282754,6 +283382,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 960606,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 960606,
@@ -282764,6 +283393,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 960606,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 960606,
@@ -282774,6 +283404,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 959295,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 959295,
@@ -282784,6 +283415,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 986061,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 986061,
@@ -282794,6 +283426,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 963650,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 963650,
@@ -282804,6 +283437,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 984575,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 984575,
@@ -282814,6 +283448,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 1093051,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 1093051,
@@ -282824,6 +283459,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 990873,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 990873,
@@ -282834,6 +283470,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1068197,
       "hadBefore": false,
       "kills": 8,
       "nextDeathTime": 1068197,
@@ -282844,6 +283481,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1014569,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1014569,
@@ -282854,6 +283492,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 1032516,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1032516,
@@ -282864,6 +283503,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1019449,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1019449,
@@ -282874,6 +283514,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1051154,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1051154,
@@ -282884,6 +283525,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 1078137,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1078137,
@@ -282894,6 +283536,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1032968,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1032968,
@@ -282904,6 +283547,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1093051,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 1093051,
@@ -282914,6 +283558,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1078137,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1078137,
@@ -282924,6 +283569,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1093051,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1093051,
@@ -282934,6 +283580,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 1095302,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 1095302,
@@ -282944,6 +283591,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1068197,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 1068197,
@@ -282954,6 +283602,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1077787,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1077787,
@@ -282964,6 +283613,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 1196841,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 1196841,
@@ -282974,6 +283624,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1115526,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 1115526,
@@ -282984,6 +283635,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1118256,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1118256,
@@ -282994,6 +283646,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1115526,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 1115526,
@@ -283004,6 +283657,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1093051,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 1093051,
@@ -283018,6 +283672,7 @@
       "dropTime": 1095302,
       "dropper": "[nW].Veggie",
       "dropperTeam": "ahoy",
+      "endTime": 1196841,
       "hadBefore": false,
       "kills": 10,
       "nextDeathTime": 1196841,
@@ -283028,6 +283683,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1106268,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1106268,
@@ -283038,6 +283694,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1116456,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1116456,
@@ -283048,6 +283705,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 1130435,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1130435,
@@ -283058,6 +283716,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1147210,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1147210,
@@ -283068,6 +283727,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1125288,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1125288,
@@ -283082,6 +283742,7 @@
       "dropTime": 1118256,
       "dropper": "sailorman",
       "dropperTeam": "ahoy",
+      "endTime": 1185018,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 1185018,
@@ -283092,6 +283753,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1147244,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1147244,
@@ -283102,6 +283764,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1185018,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1185018,
@@ -283112,6 +283775,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 1147244,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1147244,
@@ -283126,6 +283790,7 @@
       "dropTime": 1147244,
       "dropper": "biggz",
       "dropperTeam": "jah",
+      "endTime": 1149526,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1149526,
@@ -283140,6 +283805,7 @@
       "dropTime": 1149526,
       "dropper": "sailorman",
       "dropperTeam": "ahoy",
+      "endTime": 1200101,
       "hadBefore": false,
       "kills": 4,
       "player": "biggz",
@@ -283149,6 +283815,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1179363,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1179363,
@@ -283159,6 +283826,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1200101,
       "hadBefore": false,
       "kills": 0,
       "player": "biggz",
@@ -283168,6 +283836,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1185018,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1185018,
@@ -283178,6 +283847,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1179363,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1179363,
@@ -283188,6 +283858,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1200101,
       "hadBefore": false,
       "kills": 0,
       "player": "paniagua",
@@ -283201,6 +283872,7 @@
       "dropTime": 1179363,
       "dropper": "ocoini",
       "dropperTeam": "ahoy",
+      "endTime": 1196841,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 1196841,
@@ -283215,6 +283887,7 @@
       "dropTime": 1185018,
       "dropper": "gandi",
       "dropperTeam": "jah",
+      "endTime": 1187049,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1187049,
@@ -283225,6 +283898,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 1196841,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1196841,
@@ -283235,6 +283909,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1200101,
       "hadBefore": false,
       "kills": 0,
       "player": "gandi",
@@ -283244,6 +283919,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1200101,
       "hadBefore": false,
       "kills": 1,
       "player": "paniagua",

@@ -36,7 +36,8 @@ import (
 // second" limit. A transition whose per-axis displacement exceeds
 // bucketDuration * teleportBaseThreshold in the single sample where
 // the loc changed is classified as a teleport. Mirrors the frontend
-// constant at app.js (MAX_MOVE_PER_BUCKET = 2500 * bucketDuration).
+// constant in mvd-map-view/src/map.js (MAX_MOVE_PER_BUCKET = 2500 *
+// bucketDuration, the map trails' teleport break).
 const teleportBaseThreshold = 2500.0
 
 // locgraphTeleportMaxGapMs bounds the sample gap across which a loc change is

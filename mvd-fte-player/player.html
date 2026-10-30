@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FTE demo player</title>
+<style>
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+    #fteCanvas { display: block; width: 100%; height: 100%; }
+    #status {
+        position: absolute; inset: 0; display: flex; align-items: center;
+        justify-content: center; color: #aaa; font: 14px system-ui, sans-serif;
+        pointer-events: none;
+    }
+</style>
+</head>
+<body>
+<canvas id="fteCanvas"></canvas>
+<div id="status"></div>
+<!-- The host page (same origin) embeds this file as an iframe and calls
+     contentWindow.mvdFte.start(...) after the iframe's load event; module
+     scripts run before that event fires. One demo per page load. -->
+<script type="module">
+    import { startFte } from './src/loader.js';
+
+    const status = document.getElementById('status');
+    window.mvdFte = {
+        start(opts) {
+            status.textContent = 'Loading player…';
+            return startFte({
+                win: window,
+                canvas: document.getElementById('fteCanvas'),
+                configUrl: new URL('config.cfg', location.href).href,
+                onProgress: (n, total) => { status.textContent = `Loading player… ${n}/${total}`; },
+                ...opts,
+            }).then((fte) => {
+                status.textContent = '';
+                return fte;
+            }, (err) => {
+                status.textContent = `Player failed to load: ${err.message}`;
+                throw err;
+            });
+        },
+    };
+</script>
+</body>
+</html>

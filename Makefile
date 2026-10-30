@@ -16,7 +16,9 @@ MCP_MAIN   := ./mvd-mcp
 QW_ANALYZE_MAIN := ./mvd-analytics/cmd/qw-analyze
 MAPGEN_MAIN     := ./mvd-analytics/cmd/mapgen
 DIST_DIR   := dist
+WEB_DIR    := mvd-web
 STATIC_DIR := mvd-web/static
+FTEPLAYER_DIR := mvd-fte-player
 LOC_DATA   := mvd-analytics/loc/data
 MAPENTS_DATA := mvd-analytics/mapents/data
 BSP_DIR    := bsps
@@ -34,19 +36,21 @@ LDFLAGS    := -ldflags "-s -w -X main.GitHash=$(GIT_HASH) -X main.GitTag=$(GIT_T
 # Build the deployable web bundle into dist/.
 build:
 	@rm -rf $(DIST_DIR)
+	@echo "Building the page (Vite: index.html + src/, static/ copied as-is)..."
+	@cd $(WEB_DIR) && npm ci --no-fund --no-audit && npm run build
 	@echo "Building WASM module..."
-	@mkdir -p $(DIST_DIR)
 	GOOS=js GOARCH=wasm go build $(LDFLAGS) -o $(DIST_DIR)/analyzer.wasm $(WASM_MAIN)
+	@# The JS glue must match the toolchain that built analyzer.wasm. Go 1.24
+	@# moved it from misc/wasm/ to lib/wasm/; the committed copy in static/
+	@# (which Vite has already put in dist/) is the last resort.
 	@echo "Copying wasm_exec.js..."
-	@cp "$$(go env GOROOT)/misc/wasm/wasm_exec.js" $(DIST_DIR)/ 2>/dev/null || cp $(STATIC_DIR)/wasm_exec.js $(DIST_DIR)/
-	@echo "Copying static files..."
-	@cp $(STATIC_DIR)/index.html $(DIST_DIR)/
+	@goroot="$$(go env GOROOT)"; \
+	if [ -f "$$goroot/lib/wasm/wasm_exec.js" ]; then cp "$$goroot/lib/wasm/wasm_exec.js" $(DIST_DIR)/; \
+	elif [ -f "$$goroot/misc/wasm/wasm_exec.js" ]; then cp "$$goroot/misc/wasm/wasm_exec.js" $(DIST_DIR)/; \
+	else echo "  toolchain wasm_exec.js not found; using $(STATIC_DIR)/wasm_exec.js"; cp $(STATIC_DIR)/wasm_exec.js $(DIST_DIR)/; fi
 	@sed -i 's/<meta name="build" content="dev">/<meta name="build" content="$(GIT_HASH)">/' $(DIST_DIR)/index.html
-	@cp $(STATIC_DIR)/styles.css $(DIST_DIR)/
-	@cp $(STATIC_DIR)/app.js $(DIST_DIR)/
-	@cp $(STATIC_DIR)/worker.js $(DIST_DIR)/
-	@cp -r $(STATIC_DIR)/vendor $(DIST_DIR)/
-	@cp -r $(STATIC_DIR)/maps $(DIST_DIR)/
+	@echo "Copying mvd-fte-player..."
+	@mkdir -p $(DIST_DIR)/fte-player/src && cp $(FTEPLAYER_DIR)/player.html $(FTEPLAYER_DIR)/config.cfg $(DIST_DIR)/fte-player/ && cp $(FTEPLAYER_DIR)/src/*.js $(DIST_DIR)/fte-player/src/
 	@echo "Copying loc corpus from $(LOC_DATA)..."
 	@mkdir -p $(DIST_DIR)/locs && cp $(LOC_DATA)/*.loc $(DIST_DIR)/locs/
 	@echo "Copying map-entity corpus from $(MAPENTS_DATA)..."
@@ -158,6 +162,19 @@ test:
 # without demos. -count=1 is the only reliable fix; it costs nothing when
 # the directory really is absent.
 	go test -count=1 -timeout 1800s ./mvd-analytics/corpus/
+# The JS modules are tested with node's built-in runner, and svelte-check
+# type-checks mvd-web/src (JSDoc types, checkJs in jsconfig.json; it exits
+# non-zero on any error, which fails this target). It needs `npm ci` in
+# mvd-web, which `make build` does. Skipped (loudly) where node is absent rather than failing
+# a Go-only checkout. Explicit glob, not a directory arg: `node --test
+# <dir>` is rejected by some node 22 releases.
+	@if command -v node >/dev/null 2>&1; then \
+		node --test mvd-map-view/test/*.test.js mvd-fte-player/test/*.test.js mvd-web/test/*.test.js && \
+		if [ -d $(WEB_DIR)/node_modules ]; then (cd $(WEB_DIR) && npm run --silent check); \
+		else echo "SKIP svelte-check (run npm ci in $(WEB_DIR))"; fi; \
+	else \
+		echo "SKIP mvd-map-view / mvd-fte-player / mvd-web tests (no node on PATH)"; \
+	fi
 
 # Remove dist/.
 clean:
@@ -182,7 +199,7 @@ help:
 	@echo ""
 	@echo "Usage: make [target]"
 	@echo ""
-	@echo "  build               Build WASM + copy static assets + loc corpus into dist/"
+	@echo "  build               Build the page (Vite, needs node) + WASM + corpora into dist/"
 	@echo "  build-api           Build mvd-api binary for the host platform"
 	@echo "  build-mcp           Build mvd-mcp binary for the host platform"
 	@echo "  build-bin           build-api + build-mcp"

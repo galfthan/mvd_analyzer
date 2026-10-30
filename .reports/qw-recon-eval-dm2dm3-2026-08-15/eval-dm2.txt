@@ -1,0 +1,114 @@
+demos scored: 30
+
+event level (GT enemy+self+team instants): covered 29295/29315 (99.9%)  value-exact 98.9% of covered  attacker-correct 97.6% of matched-enemy
+
+== bounded given     n=133 median   0.88%  mean   1.36%  p90   2.75%  <=1%  54.1%  <=2%  81.2%
+    11.93%  dm2_232186 duel lindbergh            gt=3261 rc=2872
+     8.07%  dm2_232179 team george               gt=8887 rc=8170
+     6.76%  dm2_232081 team paniagua             gt=651 rc=607
+     6.59%  dm2_232179 team Schotty              gt=4856 rc=4536
+     5.58%  dm2_232343 duel cronus               gt=3313 rc=3128
+     5.24%  dm2_232186 duel Awup                 gt=4198 rc=3978
+     4.37%  dm2_232375 team BLooD_DoG(D_P)       gt=10973 rc=10493
+     4.07%  dm2_232289 team kwn                  gt=6020 rc=6265
+
+== bounded taken     n=134 median   0.04%  mean   0.15%  p90   0.36%  <=1%  98.5%  <=2%  99.3%
+     2.18%  dm2_232397 duel stepcop              gt=5055 rc=5165
+     1.18%  dm2_232049 team niw                  gt=7290 rc=7204
+     0.83%  dm2_232049 team [Lame].MaMmoTh       gt=8033 rc=7966
+     0.75%  dm2_232378 team T                    gt=6158 rc=6112
+     0.72%  dm2_232179 team george               gt=12366 rc=12277
+     0.60%  dm2_232378 team rOSH                 gt=7128 rc=7085
+     0.59%  dm2_232382 team swoop                gt=9312 rc=9257
+     0.52%  dm2_232212 duel nevamind             gt=7076 rc=7039
+
+== bounded ewep      n=132 median   1.11%  mean   1.72%  p90   3.72%  <=1%  45.5%  <=2%  71.2%
+    13.39%  dm2_232186 duel lindbergh            gt=2906 rc=2517
+    10.14%  dm2_232375 team BLooD_DoG(D_P)       gt=3855 rc=3464
+     9.23%  dm2_232179 team george               gt=2892 rc=2625
+     8.68%  dm2_232081 team paniagua             gt=507 rc=463
+     6.11%  dm2_232343 duel cronus               gt=3029 rc=2844
+     5.79%  dm2_232186 duel Awup                 gt=3453 rc=3253
+     5.33%  dm2_232307 team mj                   gt=1088 rc=1030
+     4.89%  dm2_232078 team tumult               gt=3356 rc=3192
+
+== bounded givenTeam n=77  median   5.05%  mean   6.72%  p90  15.46%  <=1%  27.3%  <=2%  31.2%
+    47.41%  dm2_232358 team Tiba                 gt=580 rc=305
+    34.17%  dm2_232289 team Nexus                gt=515 rc=339
+    26.05%  dm2_232049 team niw                  gt=215 rc=159
+    21.90%  dm2_232421 team zzz                  gt=274 rc=334
+    21.10%  dm2_232380 team gt                   gt=327 rc=258
+    20.48%  dm2_232179 team stedanko             gt=210 rc=167
+    16.72%  dm2_232405 team Darky                gt=335 rc=279
+    15.46%  dm2_232358 team Overon               gt=317 rc=268
+
+== bounded givenSelf n=127 median   3.89%  mean   5.68%  p90  12.93%  <=1%  15.7%  <=2%  26.8%
+    33.82%  dm2_232358 team Supreme              gt=760 rc=1017
+    31.50%  dm2_232358 team Tiba                 gt=619 rc=814
+    28.05%  dm2_232289 team rghst                gt=467 rc=336
+    22.78%  dm2_232378 team rook                 gt=439 rc=339
+    21.68%  dm2_232049 team niw                  gt=1190 rc=932
+    20.43%  dm2_232058 duel multibear            gt=421 rc=335
+    17.36%  dm2_232186 duel Awup                 gt=1740 rc=2042
+    16.70%  dm2_232211 duel nevamind             gt=1024 rc=853
+
+== raw given     n=133 median   1.40%  mean   2.42%  p90   6.22%  <=1%  41.4%  <=2%  59.4%
+    14.50%  dm2_232242 team Anza                 gt=9849 rc=8421
+    11.63%  dm2_232186 duel lindbergh            gt=3516 rc=3107
+    11.08%  dm2_232081 team gnoffa               gt=4404 rc=4892
+     9.25%  dm2_232378 team rOSH                 gt=9337 rc=10201
+     8.99%  dm2_232380 team Dilbert              gt=8484 rc=7721
+     8.30%  dm2_232242 team alice                gt=9744 rc=10553
+     8.16%  dm2_232081 team rusti                gt=2451 rc=2651
+     8.15%  dm2_232358 team Overon               gt=8138 rc=8801
+
+== raw taken     n=134 median   1.45%  mean   2.01%  p90   4.87%  <=1%  41.0%  <=2%  60.4%
+    12.53%  dm2_232081 team rghst                gt=2722 rc=3063
+    10.24%  dm2_232081 team splif                gt=967 rc=1066
+     8.75%  dm2_232179 team george               gt=17544 rc=16009
+     8.65%  dm2_232358 team Supreme              gt=8620 rc=9366
+     6.58%  dm2_232380 team Overon               gt=10289 rc=9612
+     5.76%  dm2_232242 team sailorman            gt=14001 rc=14808
+     5.65%  dm2_232081 team mm2                  gt=4918 rc=5196
+     5.59%  dm2_232078 team Anza                 gt=12127 rc=11449
+
+== raw ewep      n=132 median   1.46%  mean   2.80%  p90   5.92%  <=1%  40.2%  <=2%  60.6%
+    33.54%  dm2_232081 team rusti                gt=316 rc=422
+    18.23%  dm2_232179 team namtsui              gt=4345 rc=3553
+    14.74%  dm2_232277 team rusti                gt=4185 rc=4802
+    14.51%  dm2_232078 team Hooraytio            gt=3778 rc=3230
+    14.15%  dm2_232375 team Pierre               gt=5285 rc=4537
+    12.94%  dm2_232186 duel lindbergh            gt=3161 rc=2752
+    10.06%  dm2_232380 team Dilbert              gt=6781 rc=6099
+     9.81%  dm2_232375 team BLooD_DoG(D_P)       gt=3967 rc=3578
+
+== raw givenTeam n=83  median  10.17%  mean  13.56%  p90  32.90%  <=1%  15.7%  <=2%  19.3%
+    57.69%  dm2_232405 team rOSH                 gt=234 rc=369
+    55.80%  dm2_232078 team Hooraytio            gt=1439 rc=636
+    47.41%  dm2_232358 team Tiba                 gt=580 rc=305
+    46.32%  dm2_232277 team sailorman            gt=1848 rc=992
+    46.22%  dm2_232242 team alice                gt=370 rc=541
+    37.29%  dm2_232081 team paniagua             gt=531 rc=729
+    36.84%  dm2_232277 team eh                   gt=437 rc=598
+    34.09%  dm2_232242 team floc                 gt=484 rc=649
+
+== raw givenSelf n=127 median   3.89%  mean   5.86%  p90  12.57%  <=1%  15.0%  <=2%  27.6%
+    46.84%  dm2_232358 team Supreme              gt=760 rc=1116
+    37.55%  dm2_232289 team rghst                gt=538 rc=336
+    31.50%  dm2_232358 team Tiba                 gt=619 rc=814
+    22.58%  dm2_232058 duel multibear            gt=434 rc=336
+    20.20%  dm2_232378 team rook                 gt=495 rc=395
+    18.62%  dm2_232186 duel Awup                 gt=1740 rc=2064
+    18.41%  dm2_232049 team niw                  gt=1342 rc=1095
+    16.24%  dm2_232211 duel nevamind             gt=1053 rc=882
+
+== per-attacker-weapon event accuracy (GT single-source enemy instants)
+   weapon instants    gt-dmg   covered  val-exact attacker-ok class-enemy
+   rl         9419    686015    100.0%      98.5%       99.2%       99.3%
+   sg        12537    231088     99.9%      98.9%       96.9%       97.8%
+   ssg        1123     35157     99.9%      97.8%       98.0%       98.0%
+   gl          265     21441    100.0%      99.6%       97.7%       98.1%
+   ng          319      2841    100.0%      99.1%       94.4%       97.2%
+   squish       37      1662    100.0%     100.0%       35.1%       35.1%
+   axe          60      1058    100.0%      95.0%       23.3%       25.0%
+   unknown        1         2    100.0%     100.0%        0.0%        0.0%

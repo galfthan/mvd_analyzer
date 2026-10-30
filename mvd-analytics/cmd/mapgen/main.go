@@ -219,13 +219,13 @@ func emitGeometry(path, name string, finder *loc.Finder, outDir string, verbose 
 	if verbose {
 		prune := ""
 		if regions.Pruned != nil {
-			prune = fmt.Sprintf(" pruned=%d/%d demos=%d points=%d",
+			prune = fmt.Sprintf(" pruned=%d/%d underliquid=%d demos=%d points=%d",
 				regions.Pruned.FacesDropped, stats.FacesKept+regions.Pruned.FacesDropped,
-				regions.Pruned.Demos, regions.Pruned.Points)
+				stats.FacesUnderLiq, regions.Pruned.Demos, regions.Pruned.Points)
 		}
-		fmt.Fprintf(os.Stderr, "  ok   %s: locs=%d tris=%d walls=%d liquids=%d/%d submodels=%d/%d faces=%d/%d unnamed=%d ceiling=%d dropped=%d degen=%d%s bytes=%d\n",
+		fmt.Fprintf(os.Stderr, "  ok   %s: locs=%d tris=%d walls=%d liquids=%d/%d volume=%d submodels=%d/%d faces=%d/%d unnamed=%d ceiling=%d dropped=%d degen=%d%s bytes=%d\n",
 			name, stats.Locs, stats.Triangles, stats.WallTris,
-			stats.LiquidFaces, stats.LiquidTris, stats.SubModelMeshes, stats.SubModelTris,
+			stats.LiquidFaces, stats.LiquidTris, stats.LiquidVolTris, stats.SubModelMeshes, stats.SubModelTris,
 			stats.FacesKept, stats.FacesTotal,
 			stats.FacesUnnamed, stats.FacesCeiling, stats.FacesDropped, stats.DegenerateTris, prune, len(data))
 	}

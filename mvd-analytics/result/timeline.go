@@ -87,8 +87,8 @@ type ControlRegion struct {
 //
 // BucketStates may still be populated by query-time results (the
 // JSON shape is unchanged when the field is present): one ASCII char
-// per bucket per region. Codes mirror classifyRegionState in
-// qw-web/static/app.js:
+// per bucket per region. Codes as classifyRegionState in
+// mvd-analytics/view/region_control.go assigns them:
 //
 //	'_'  empty (no living players)
 //	'A'  teamAControl     (only A present armed; or both present, only A armed)

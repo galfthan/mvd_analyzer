@@ -13000,12 +13000,21 @@
   "backpacks": [
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "MH.pipe",
       "origin": [
         479.5,
         -1099.875,
         146.75
       ],
+      "picker": "SS",
+      "pickerEndTime": 15050,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 15050,
+      "pickerRelation": "team",
+      "pickerTeam": "nAnI",
+      "pickupTime": 10753,
       "player": "gLAd",
       "source": "ktx",
       "team": "nAnI",
@@ -13014,12 +13023,21 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         944,
         -867.625,
         -66.25
       ],
+      "picker": "rusti",
+      "pickerEndTime": 54530,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 54530,
+      "pickerRelation": "self",
+      "pickerTeam": "pora",
+      "pickupTime": 9978,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13028,12 +13046,21 @@
     },
     {
       "entNum": 178,
+      "fate": "picked",
       "loc": "big.hatch",
       "origin": [
         856.25,
         -1023.25,
         -63.5
       ],
+      "picker": "kippo",
+      "pickerEndTime": 14856,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 14856,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 8783,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13042,12 +13069,21 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1429,
         -615.375,
         106.25
       ],
+      "picker": "rusti",
+      "pickerEndTime": 54530,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 54530,
+      "pickerRelation": "team",
+      "pickerTeam": "pora",
+      "pickupTime": 22907,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13056,12 +13092,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         1244.625,
         -1112.5,
         266.375
       ],
+      "picker": "rusti",
+      "pickerEndTime": 54530,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 54530,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 27530,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13070,12 +13115,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "MH.behind",
       "origin": [
         217.5,
         -762.125,
         97
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 44530,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 44530,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 37634,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13084,12 +13138,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "MH.pipe",
       "origin": [
         611.75,
         -1118.75,
         70.875
       ],
+      "picker": "SS",
+      "pickerEndTime": 45606,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 45606,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 43586,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13098,12 +13161,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "GA",
       "origin": [
         366.75,
         -1703.25,
         247.25
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 114567,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 114567,
+      "pickerRelation": "self",
+      "pickerTeam": "nAnI",
+      "pickupTime": 46607,
       "player": "gLAd",
       "source": "ktx",
       "team": "nAnI",
@@ -13112,12 +13184,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1121.375,
         -826.375,
         -32.25
       ],
+      "picker": "kippo",
+      "pickerEndTime": 61891,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 61891,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 47351,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13126,12 +13207,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1798,
         -743.75,
         144
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 114567,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 114567,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 56231,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13140,12 +13230,21 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1684.125,
         -355.5,
         171.5
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 114567,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 114567,
+      "pickerRelation": "team",
+      "pickerTeam": "nAnI",
+      "pickupTime": 64059,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13154,12 +13253,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1399.75,
         -611.75,
         122.75
       ],
+      "picker": "SS",
+      "pickerEndTime": 111964,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 111964,
+      "pickerRelation": "self",
+      "pickerTeam": "nAnI",
+      "pickupTime": 69506,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13168,12 +13276,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1255,
         -520.75,
         253.625
       ],
+      "picker": "SS",
+      "pickerEndTime": 111964,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 111964,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 69982,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13182,12 +13299,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "GA",
       "origin": [
         445.75,
         -1826,
         160
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 114567,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 114567,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 104510,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13196,12 +13322,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1717.25,
         -345.75,
         16
       ],
+      "picker": "rusti",
+      "pickerEndTime": 118749,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 118749,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 113996,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13210,12 +13345,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1782.5,
         -409.75,
         144
       ],
+      "picker": "kippo",
+      "pickerEndTime": 117524,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 117524,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 116421,
       "player": "gLAd",
       "source": "ktx",
       "team": "nAnI",
@@ -13224,12 +13368,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1803.375,
         -493.875,
         144
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 118825,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 118825,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 118073,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13238,12 +13391,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1637.875,
         -249.5,
         189.25
       ],
+      "picker": "kippo",
+      "pickerEndTime": 121031,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 121031,
+      "pickerRelation": "team",
+      "pickerTeam": "pora",
+      "pickupTime": 120083,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13252,12 +13414,21 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1634.125,
         -550.75,
         187.875
       ],
+      "picker": "SS",
+      "pickerEndTime": 174874,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 174874,
+      "pickerRelation": "team",
+      "pickerTeam": "nAnI",
+      "pickupTime": 129576,
       "player": "gLAd",
       "source": "ktx",
       "team": "nAnI",
@@ -13266,12 +13437,21 @@
     },
     {
       "entNum": 178,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1465.875,
         -433.75,
         117.5
       ],
+      "picker": "SS",
+      "pickerEndTime": 174874,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 174874,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 121290,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13280,12 +13460,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "big.hatch",
       "origin": [
         849.125,
         -1087.875,
         -86
       ],
+      "picker": "SS",
+      "pickerEndTime": 174874,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 174874,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 137484,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13294,12 +13483,21 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1559,
         -507.5,
         143.75
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 241109,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 241109,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 165741,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13308,12 +13506,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1293.25,
         -366.75,
         187.5
       ],
+      "picker": "rusti",
+      "pickerEndTime": 180003,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 180003,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 177868,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13322,12 +13529,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1759.25,
         -477.625,
         144
       ],
+      "picker": "kippo",
+      "pickerEndTime": 182821,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 182821,
+      "pickerRelation": "team",
+      "pickerTeam": "pora",
+      "pickupTime": 181157,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13336,12 +13552,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1737.625,
         -427.875,
         144
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 241109,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 241109,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 184872,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13350,12 +13575,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         728.875,
         -1138.375,
         -22.375
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 241109,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 241109,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 218753,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13364,12 +13598,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1530.875,
         -477,
         55.875
       ],
+      "picker": "rusti",
+      "pickerEndTime": 280244,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 280244,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 241882,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13378,12 +13621,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1363.5,
         -591.125,
         144
       ],
+      "picker": "kippo",
+      "pickerEndTime": 268073,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 268073,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 242083,
       "player": "gLAd",
       "source": "ktx",
       "team": "nAnI",
@@ -13392,12 +13644,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "RA.tunnel",
       "origin": [
         986.5,
         -790.375,
         10.5
       ],
+      "picker": "kippo",
+      "pickerEndTime": 280378,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 280378,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 278789,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13406,12 +13667,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "GL.below",
       "origin": [
         1328,
         -1178.125,
         -48
       ],
+      "picker": "SS",
+      "pickerEndTime": 285903,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 285903,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 269457,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13420,12 +13690,21 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "MH",
       "origin": [
         295.875,
         -1239,
         88
       ],
+      "picker": "SS",
+      "pickerEndTime": 285903,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 285903,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 272254,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13434,12 +13713,21 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "RA.tunnel",
       "origin": [
         1054.875,
         -564.875,
         16
       ],
+      "picker": "SS",
+      "pickerEndTime": 285903,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 285903,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 281137,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13448,12 +13736,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         740.875,
         -1167.375,
         -5.375
       ],
+      "picker": "kippo",
+      "pickerEndTime": 292112,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 292112,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 290624,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13462,12 +13759,21 @@
     },
     {
       "entNum": 181,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         771.375,
         -1234.25,
         78.375
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 363592,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 363592,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 316570,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13476,12 +13782,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "big.hatch",
       "origin": [
         884.125,
         -1126.5,
         -62.875
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 363592,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 363592,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 293385,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13490,12 +13805,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "RA.tunnel",
       "origin": [
         1075.375,
         -906.25,
         -46.75
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 363592,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 363592,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 294346,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13504,12 +13828,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1731.375,
         -640.5,
         152.25
       ],
+      "picker": "kippo",
+      "pickerEndTime": 329231,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 329231,
+      "pickerRelation": "team",
+      "pickerTeam": "pora",
+      "pickupTime": 303766,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13518,12 +13851,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "LG",
       "origin": [
         519.625,
         -1016.25,
         -302.875
       ],
+      "picker": "kippo",
+      "pickerEndTime": 329231,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 329231,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 313006,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13532,12 +13874,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1161.75,
         -1157.625,
         -64
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 363592,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 363592,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 325668,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13546,12 +13897,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1157.5,
         -1012.875,
         -64
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 363592,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 363592,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 333161,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13560,12 +13920,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1787.625,
         -447.125,
         177.375
       ],
+      "picker": "kippo",
+      "pickerEndTime": 340511,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 340511,
+      "pickerRelation": "self",
+      "pickerTeam": "pora",
+      "pickupTime": 340068,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13574,12 +13943,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         1274.25,
         -1118.625,
         223.25
       ],
+      "picker": "SS",
+      "pickerEndTime": 424881,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 424881,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 358638,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13588,12 +13966,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "big.hatch",
       "origin": [
         853.25,
         -1025.625,
         -64
       ],
+      "picker": "SS",
+      "pickerEndTime": 424881,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 424881,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 363968,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13602,12 +13989,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1411.25,
         -367.125,
         171.125
       ],
+      "picker": "SS",
+      "pickerEndTime": 424881,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 424881,
+      "pickerRelation": "team",
+      "pickerTeam": "nAnI",
+      "pickupTime": 369209,
       "player": "gLAd",
       "source": "ktx",
       "team": "nAnI",
@@ -13616,12 +14012,21 @@
     },
     {
       "entNum": 181,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1306.75,
         -472.75,
         216.125
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 420729,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 420729,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 381002,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13630,12 +14035,21 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1169.375,
         -957.75,
         -64
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 420729,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 420729,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 393623,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13644,12 +14058,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1707.875,
         -506,
         16
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 420729,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 420729,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 398600,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13658,12 +14081,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         710.375,
         -1083.625,
         273.5
       ],
+      "picker": "kippo",
+      "pickerEndTime": 416080,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 416080,
+      "pickerRelation": "self",
+      "pickerTeam": "pora",
+      "pickupTime": 399861,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13672,12 +14104,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         1378.375,
         -1125.25,
         261.875
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 420729,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 420729,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 407168,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13686,12 +14127,21 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "big",
       "origin": [
         1172.875,
         -1199.375,
         -64
       ],
+      "picker": "rusti",
+      "pickerEndTime": 498398,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 498398,
+      "pickerRelation": "team",
+      "pickerTeam": "pora",
+      "pickupTime": 418426,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13700,12 +14150,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         1190.625,
         -1087.75,
         232.25
       ],
+      "picker": "kippo",
+      "pickerEndTime": 469128,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 469128,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 430832,
       "player": "gLAd",
       "source": "ktx",
       "team": "nAnI",
@@ -13714,12 +14173,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "GA",
       "origin": [
         474.5,
         -1953.875,
         144
       ],
+      "picker": "SS",
+      "pickerEndTime": 473725,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 473725,
+      "pickerRelation": "team",
+      "pickerTeam": "nAnI",
+      "pickupTime": 460618,
       "player": "gLAd",
       "source": "ktx",
       "team": "nAnI",
@@ -13728,12 +14196,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1658.75,
         -435.25,
         106.75
       ],
+      "picker": "rusti",
+      "pickerEndTime": 498398,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 498398,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 474166,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13742,12 +14219,21 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1764.5,
         -523.5,
         31.25
       ],
+      "picker": "kippo",
+      "pickerEndTime": 504148,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 504148,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 479175,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13756,12 +14242,21 @@
     },
     {
       "entNum": 91,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1411.5,
         -396.375,
         175.5
       ],
+      "picker": "kippo",
+      "pickerEndTime": 504148,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 504148,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 496943,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13770,12 +14265,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1770.5,
         -832.875,
         144
       ],
+      "picker": "SS",
+      "pickerEndTime": 514812,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 514812,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 512251,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13784,12 +14288,21 @@
     },
     {
       "entNum": 178,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1385.75,
         -332.75,
         144
       ],
+      "picker": "rusti",
+      "pickerEndTime": 513277,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 513277,
+      "pickerRelation": "team",
+      "pickerTeam": "pora",
+      "pickupTime": 507553,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13798,12 +14311,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1581.25,
         -476.5,
         30.75
       ],
+      "picker": "rusti",
+      "pickerEndTime": 513277,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 513277,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 511630,
       "player": "gLAd",
       "source": "ktx",
       "team": "nAnI",
@@ -13812,12 +14334,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1372,
         -390,
         187
       ],
+      "picker": "SS",
+      "pickerEndTime": 514812,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 514812,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 514017,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13826,12 +14357,20 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "GA",
       "origin": [
         475.125,
         -1736.875,
         -7.125
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 600000,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "team",
+      "pickerTeam": "nAnI",
+      "pickupTime": 534758,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13840,12 +14379,20 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "GA",
       "origin": [
         493,
         -1584.125,
         51
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 600000,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 533849,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13854,12 +14401,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "GA.shells",
       "origin": [
         810.125,
         -1701.25,
         38.375
       ],
+      "picker": "SS",
+      "pickerEndTime": 545898,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 545898,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 543028,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13868,12 +14424,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "GL.below",
       "origin": [
         1404.75,
         -1134.5,
         -16
       ],
+      "picker": "rusti",
+      "pickerEndTime": 574212,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 574212,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 549754,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13882,12 +14447,21 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "GA.cells",
       "origin": [
         508.75,
         -1135.375,
         233.875
       ],
+      "picker": "kippo",
+      "pickerEndTime": 570015,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 570015,
+      "pickerRelation": "enemy",
+      "pickerTeam": "pora",
+      "pickupTime": 565065,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13896,12 +14470,21 @@
     },
     {
       "entNum": 92,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         1134.5,
         -999,
         220.875
       ],
+      "picker": "kippo",
+      "pickerEndTime": 576445,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 576445,
+      "pickerRelation": "self",
+      "pickerTeam": "pora",
+      "pickupTime": 574675,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13910,12 +14493,20 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1249,
         -422.5,
         163.75
       ],
+      "picker": "SS",
+      "pickerEndTime": 600000,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerRelation": "self",
+      "pickerTeam": "nAnI",
+      "pickupTime": 581259,
       "player": "SS",
       "source": "ktx",
       "team": "nAnI",
@@ -13924,12 +14515,20 @@
     },
     {
       "entNum": 93,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1711.125,
         -275.625,
         144
       ],
+      "picker": "SS",
+      "pickerEndTime": 600000,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 576042,
       "player": "rusti",
       "source": "ktx",
       "team": "pora",
@@ -13938,12 +14537,20 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "GA.shells",
       "origin": [
         1050.125,
         -1384.375,
         -16
       ],
+      "picker": "SS",
+      "pickerEndTime": 600000,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 596870,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -13952,12 +14559,20 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         1713.5,
         -678.25,
         16
       ],
+      "picker": "gLAd",
+      "pickerEndTime": 600000,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "enemy",
+      "pickerTeam": "nAnI",
+      "pickupTime": 588482,
       "player": "kippo",
       "source": "ktx",
       "team": "pora",
@@ -32213,7 +32828,7 @@
       }
     ]
   },
-  "schemaVersion": 76,
+  "schemaVersion": 78,
   "shots": {
     "byPlayer": [
       {
@@ -137882,6 +138497,7 @@
   },
   "weaponPickups": [
     {
+      "endTime": 7368,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -137893,6 +138509,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 7273,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -137904,6 +138521,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 6523,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -137915,6 +138533,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 7368,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -137926,6 +138545,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 14856,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -137941,6 +138561,7 @@
       "dropTime": 7368,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 14856,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 14856,
@@ -137951,6 +138572,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 14856,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -137966,6 +138588,7 @@
       "dropTime": 7273,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 54530,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 54530,
@@ -137976,6 +138599,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 15050,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -137987,6 +138611,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 44530,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -137998,6 +138623,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 14856,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138013,6 +138639,7 @@
       "dropTime": 6523,
       "dropper": "gLAd",
       "dropperTeam": "nAnI",
+      "endTime": 15050,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 15050,
@@ -138023,6 +138650,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 44530,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -138034,6 +138662,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 26752,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138045,6 +138674,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 29362,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138056,6 +138686,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 29362,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138071,6 +138702,7 @@
       "dropTime": 14856,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 54530,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 54530,
@@ -138081,6 +138713,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 26752,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138092,6 +138725,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 26752,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138103,6 +138737,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 29362,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138118,6 +138753,7 @@
       "dropTime": 26752,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 54530,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 54530,
@@ -138128,6 +138764,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 54530,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138139,6 +138776,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 45606,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138150,6 +138788,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 34142,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138161,6 +138800,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 61891,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138176,6 +138816,7 @@
       "dropTime": 29362,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 44530,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 44530,
@@ -138186,6 +138827,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 61891,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -138197,6 +138839,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 44530,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138212,6 +138855,7 @@
       "dropTime": 34142,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 45606,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 45606,
@@ -138226,6 +138870,7 @@
       "dropTime": 44530,
       "dropper": "gLAd",
       "dropperTeam": "nAnI",
+      "endTime": 114567,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 114567,
@@ -138240,6 +138885,7 @@
       "dropTime": 45606,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 61891,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 61891,
@@ -138250,6 +138896,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 54905,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -138261,6 +138908,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 114567,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138272,6 +138920,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 61891,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -138283,6 +138932,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 61891,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138298,6 +138948,7 @@
       "dropTime": 54530,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 114567,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 114567,
@@ -138308,6 +138959,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 61332,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138319,6 +138971,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 101878,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -138330,6 +138983,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 61332,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138345,6 +138999,7 @@
       "dropTime": 54905,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 114567,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 114567,
@@ -138355,6 +139010,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 117524,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138366,6 +139022,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 111964,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138377,6 +139034,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 111964,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138392,6 +139050,7 @@
       "dropTime": 61332,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 111964,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 111964,
@@ -138406,6 +139065,7 @@
       "dropTime": 61891,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 111964,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 111964,
@@ -138416,6 +139076,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 114567,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138427,6 +139088,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 117524,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138438,6 +139100,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 101878,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138449,6 +139112,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 117524,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -138460,6 +139124,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 117524,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138471,6 +139136,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 101878,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138482,6 +139148,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 114567,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138493,6 +139160,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 118749,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138508,6 +139176,7 @@
       "dropTime": 101878,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 114567,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 114567,
@@ -138518,6 +139187,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 174874,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -138533,6 +139203,7 @@
       "dropTime": 111964,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 118749,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 118749,
@@ -138547,6 +139218,7 @@
       "dropTime": 114567,
       "dropper": "gLAd",
       "dropperTeam": "nAnI",
+      "endTime": 117524,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 117524,
@@ -138561,6 +139233,7 @@
       "dropTime": 117524,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 118825,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 118825,
@@ -138575,6 +139248,7 @@
       "dropTime": 118749,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 121031,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 121031,
@@ -138589,6 +139263,7 @@
       "dropTime": 121031,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 174874,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 174874,
@@ -138599,6 +139274,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 132121,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138610,6 +139286,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 241109,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -138621,6 +139298,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 134757,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138636,6 +139314,7 @@
       "dropTime": 118825,
       "dropper": "gLAd",
       "dropperTeam": "nAnI",
+      "endTime": 174874,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 174874,
@@ -138646,6 +139325,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 241109,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138657,6 +139337,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 241109,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -138668,6 +139349,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 180003,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138679,6 +139361,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 141759,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138694,6 +139377,7 @@
       "dropTime": 132121,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 174874,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 174874,
@@ -138704,6 +139388,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 155161,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138715,6 +139400,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 180003,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -138726,6 +139412,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 155161,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138737,6 +139424,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 174874,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138748,6 +139436,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 163895,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138759,6 +139448,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 241109,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -138770,6 +139460,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 241109,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138785,6 +139476,7 @@
       "dropTime": 163895,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 241109,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 241109,
@@ -138795,6 +139487,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 176574,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138806,6 +139499,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 176574,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138821,6 +139515,7 @@
       "dropTime": 174874,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 180003,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 180003,
@@ -138831,6 +139526,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 182821,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138842,6 +139538,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 211813,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -138857,6 +139554,7 @@
       "dropTime": 180003,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 182821,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 182821,
@@ -138867,6 +139565,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 201311,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138882,6 +139581,7 @@
       "dropTime": 182821,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 241109,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 241109,
@@ -138892,6 +139592,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 186763,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138903,6 +139604,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 201311,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138914,6 +139616,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 211813,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -138925,6 +139628,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 210494,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138936,6 +139640,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 211813,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138947,6 +139652,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 201311,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138958,6 +139664,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 210494,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138969,6 +139676,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 211813,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138980,6 +139688,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 280244,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -138991,6 +139700,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 210494,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139002,6 +139712,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 280244,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -139013,6 +139724,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 240219,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139024,6 +139736,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 268073,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139039,6 +139752,7 @@
       "dropTime": 210494,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 241109,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 241109,
@@ -139049,6 +139763,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 268073,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139064,6 +139779,7 @@
       "dropTime": 240219,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 280244,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 280244,
@@ -139074,6 +139790,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 247290,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139089,6 +139806,7 @@
       "dropTime": 241109,
       "dropper": "gLAd",
       "dropperTeam": "nAnI",
+      "endTime": 268073,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 268073,
@@ -139099,6 +139817,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 363592,
       "hadBefore": false,
       "inferred": true,
       "kills": 7,
@@ -139110,6 +139829,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 285903,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -139121,6 +139841,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 285903,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -139132,6 +139853,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 285903,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139143,6 +139865,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 363592,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139154,6 +139877,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 285903,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139165,6 +139889,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 268073,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139176,6 +139901,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 285903,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139191,6 +139917,7 @@
       "dropTime": 268073,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 285903,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 285903,
@@ -139201,6 +139928,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 271644,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139216,6 +139944,7 @@
       "dropTime": 271644,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 285903,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 285903,
@@ -139226,6 +139955,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 280378,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139241,6 +139971,7 @@
       "dropTime": 247290,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 280378,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 280378,
@@ -139255,6 +139986,7 @@
       "dropTime": 280378,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 285903,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 285903,
@@ -139265,6 +139997,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 285903,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -139276,6 +140009,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 291125,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -139287,6 +140021,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 292112,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139298,6 +140033,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 295045,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139313,6 +140049,7 @@
       "dropTime": 285903,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 292112,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 292112,
@@ -139323,6 +140060,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 295045,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139338,6 +140076,7 @@
       "dropTime": 291125,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 363592,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 363592,
@@ -139348,6 +140087,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 301864,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -139363,6 +140103,7 @@
       "dropTime": 292112,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 363592,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 363592,
@@ -139373,6 +140114,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 329231,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139384,6 +140126,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 312057,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -139395,6 +140138,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 329231,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -139406,6 +140150,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 312057,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139421,6 +140166,7 @@
       "dropTime": 301864,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 329231,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 329231,
@@ -139431,6 +140177,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 308532,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139442,6 +140189,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 312057,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139453,6 +140201,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 329231,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139464,6 +140213,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 313914,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139479,6 +140229,7 @@
       "dropTime": 312057,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 329231,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 329231,
@@ -139489,6 +140240,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 424881,
       "hadBefore": false,
       "inferred": true,
       "kills": 6,
@@ -139504,6 +140256,7 @@
       "dropTime": 285903,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 363592,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 363592,
@@ -139514,6 +140267,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 325668,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139525,6 +140279,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 363592,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139536,6 +140291,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 325668,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139551,6 +140307,7 @@
       "dropTime": 325668,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 363592,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 363592,
@@ -139561,6 +140318,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 424881,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -139572,6 +140330,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 329231,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139583,6 +140342,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 342327,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139594,6 +140354,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 337594,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139609,6 +140370,7 @@
       "dropTime": 329231,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 363592,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 363592,
@@ -139619,6 +140381,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 342327,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139634,6 +140397,7 @@
       "dropTime": 337594,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 340511,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 340511,
@@ -139644,6 +140408,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 358638,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139655,6 +140420,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 362872,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139666,6 +140432,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 362872,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139677,6 +140444,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 358638,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139688,6 +140456,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 362872,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139703,6 +140472,7 @@
       "dropTime": 358638,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 424881,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 424881,
@@ -139713,6 +140483,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 363592,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -139728,6 +140499,7 @@
       "dropTime": 362872,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 424881,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 424881,
@@ -139738,6 +140510,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 367134,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139749,6 +140522,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 420729,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -139764,6 +140538,7 @@
       "dropTime": 363592,
       "dropper": "gLAd",
       "dropperTeam": "nAnI",
+      "endTime": 424881,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 424881,
@@ -139774,6 +140549,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 372482,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139785,6 +140561,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 420729,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139796,6 +140573,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 375468,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139807,6 +140585,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 420729,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -139818,6 +140597,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 393623,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139833,6 +140613,7 @@
       "dropTime": 363592,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 420729,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 420729,
@@ -139843,6 +140624,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 397207,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139854,6 +140636,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 397207,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139865,6 +140648,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 397207,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139880,6 +140664,7 @@
       "dropTime": 393623,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 420729,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 420729,
@@ -139890,6 +140675,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 397170,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139905,6 +140691,7 @@
       "dropTime": 397170,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 420729,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 420729,
@@ -139919,6 +140706,7 @@
       "dropTime": 397207,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 416080,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 416080,
@@ -139929,6 +140717,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 406558,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139940,6 +140729,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 416080,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139951,6 +140741,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 406558,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -139966,6 +140757,7 @@
       "dropTime": 406558,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 420729,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 420729,
@@ -139976,6 +140768,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 498398,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -139987,6 +140780,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 416080,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140002,6 +140796,7 @@
       "dropTime": 416080,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 498398,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 498398,
@@ -140012,6 +140807,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 469128,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -140023,6 +140819,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 469128,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140034,6 +140831,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 459090,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140045,6 +140843,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 459090,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140056,6 +140855,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 469128,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140067,6 +140867,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 473725,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140082,6 +140883,7 @@
       "dropTime": 420729,
       "dropper": "gLAd",
       "dropperTeam": "nAnI",
+      "endTime": 469128,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 469128,
@@ -140092,6 +140894,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 459090,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140103,6 +140906,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 498398,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140114,6 +140918,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 473725,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140129,6 +140934,7 @@
       "dropTime": 459090,
       "dropper": "gLAd",
       "dropperTeam": "nAnI",
+      "endTime": 473725,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 473725,
@@ -140139,6 +140945,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 469128,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140150,6 +140957,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 466202,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140161,6 +140969,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 502981,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -140172,6 +140981,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 504148,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -140187,6 +140997,7 @@
       "dropTime": 473725,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 498398,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 498398,
@@ -140197,6 +141008,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 502981,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140208,6 +141020,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 477776,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140219,6 +141032,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 502981,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -140234,6 +141048,7 @@
       "dropTime": 477776,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 504148,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 504148,
@@ -140244,6 +141059,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 489112,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140255,6 +141071,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 504148,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140266,6 +141083,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 502981,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140277,6 +141095,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 504148,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -140288,6 +141107,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 495252,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140303,6 +141123,7 @@
       "dropTime": 495252,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 504148,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 504148,
@@ -140313,6 +141134,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 505865,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -140324,6 +141146,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 513277,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -140335,6 +141158,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 511108,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140346,6 +141170,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 529366,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -140361,6 +141186,7 @@
       "dropTime": 504148,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 513277,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 513277,
@@ -140371,6 +141197,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 514812,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140386,6 +141213,7 @@
       "dropTime": 511108,
       "dropper": "gLAd",
       "dropperTeam": "nAnI",
+      "endTime": 513277,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 513277,
@@ -140400,6 +141228,7 @@
       "dropTime": 498398,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 514812,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 514812,
@@ -140410,6 +141239,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600000,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -140420,6 +141250,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 529366,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140435,6 +141266,7 @@
       "dropTime": 513277,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 514812,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 514812,
@@ -140445,6 +141277,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 574212,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140456,6 +141289,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600000,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140466,6 +141300,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 529289,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140477,6 +141312,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 529289,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140488,6 +141324,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 529366,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140499,6 +141336,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 574212,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140510,6 +141348,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 545898,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -140525,6 +141364,7 @@
       "dropTime": 529366,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 600000,
       "hadBefore": true,
       "kills": 0,
       "player": "gLAd",
@@ -140534,6 +141374,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 541537,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140549,6 +141390,7 @@
       "dropTime": 529289,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 600000,
       "hadBefore": true,
       "kills": 0,
       "player": "gLAd",
@@ -140558,6 +141400,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 541537,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140573,6 +141416,7 @@
       "dropTime": 541537,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 545898,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 545898,
@@ -140583,6 +141427,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 574212,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -140594,6 +141439,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 570015,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140605,6 +141451,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 570015,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -140616,6 +141463,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 563897,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140631,6 +141479,7 @@
       "dropTime": 545898,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 574212,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 574212,
@@ -140641,6 +141490,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600000,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -140655,6 +141505,7 @@
       "dropTime": 563897,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 570015,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 570015,
@@ -140665,6 +141516,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 574015,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140676,6 +141528,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 574015,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140691,6 +141544,7 @@
       "dropTime": 570015,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 576445,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 576445,
@@ -140701,6 +141555,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 576445,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140716,6 +141571,7 @@
       "dropTime": 574212,
       "dropper": "rusti",
       "dropperTeam": "pora",
+      "endTime": 600000,
       "hadBefore": false,
       "kills": 1,
       "player": "SS",
@@ -140725,6 +141581,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 577714,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140736,6 +141593,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 585818,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140747,6 +141605,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 585818,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140762,6 +141621,7 @@
       "dropTime": 574015,
       "dropper": "SS",
       "dropperTeam": "nAnI",
+      "endTime": 600000,
       "hadBefore": false,
       "kills": 1,
       "player": "SS",
@@ -140771,6 +141631,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 585818,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140782,6 +141643,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 600000,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140796,6 +141658,7 @@
       "dropTime": 585818,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 600000,
       "hadBefore": true,
       "kills": 0,
       "player": "gLAd",
@@ -140805,6 +141668,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 589025,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140816,6 +141680,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 600000,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140826,6 +141691,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 600000,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -140840,6 +141706,7 @@
       "dropTime": 576445,
       "dropper": "kippo",
       "dropperTeam": "pora",
+      "endTime": 600000,
       "hadBefore": true,
       "kills": 0,
       "player": "SS",
@@ -140849,6 +141716,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600000,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,

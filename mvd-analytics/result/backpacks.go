@@ -18,13 +18,15 @@ package result
 //
 //   - A `ktx` row's pickup is a row of weaponPickups with Source
 //     "backpack", joined on (EntNum, Time) — KTX names the picker outright in
-//     `//ktx bp`. Picker / PickerTeam / PickupTime are empty there: nothing
-//     would be gained by restating the join, and a second answer could
-//     disagree with it. Fate is the one exception, and only ever
-//     BackpackFateExpired: KTX's third directive `//ktx expire <ent>`
-//     (ktx/src/g_spawn.c:196-210) announces a pack removed UNTAKEN, which
-//     the join cannot say — the absence of a `//ktx bp` is not evidence,
-//     since a demo can carry the drop hint and no pickup hints at all.
+//     `//ktx bp`. Since v77 the join is also stamped on the row itself
+//     (analyzer/backpack_pickups.go): Fate picked with Picker / PickerTeam /
+//     PickupTime and the pickup's own PickerHadWeapon / PickerKills /
+//     PickerNextDeathTime, copied from that weaponPickups row, so a consumer
+//     reads one list. KTX's third directive `//ktx expire <ent>`
+//     (ktx/src/g_spawn.c:196-210) announces a pack removed UNTAKEN — Fate
+//     expired. A row with neither is Fate unobserved: the absence of a
+//     `//ktx bp` is not evidence that nobody took it, since a demo can carry
+//     the drop hint and no pickup hints at all.
 //   - A `reconstructed` row's pickup is read off the pack ENTITY, and lands
 //     in Fate / Picker / PickerTeam / PickupTime on this row. It is
 //     deliberately NOT written into weaponPickups: that section documents
@@ -56,13 +58,13 @@ type BackpackDrop struct {
 	Source string `json:"source,omitempty"`
 	// Fate is what the wire showed happening to the pack, from the
 	// BackpackFate* vocabulary below (schema v72). On a `reconstructed` row
-	// it is the linkage's reading of the pack-entity track and can take any
-	// of the three values; empty there means the pack's fate was never asked
-	// about, which is a different statement from BackpackFateUnobserved
-	// ("asked, and the wire did not answer"). On a `ktx` row it is only ever
-	// BackpackFateExpired, set from the `//ktx expire` hint; empty there
-	// means "ask weaponPickups", never "nobody took it". Source therefore
-	// carries the provenance of Fate as well as of the row.
+	// it is the linkage's reading of the pack-entity track; empty there
+	// means the pack's fate was never asked about (no player streams),
+	// which is a different statement from BackpackFateUnobserved ("asked,
+	// and the wire did not answer"). On a `ktx` row (v77) it is picked when
+	// a `//ktx bp` pickup joined, expired from the `//ktx expire` hint, and
+	// unobserved otherwise. Source carries the provenance of Fate as well
+	// as of the row.
 	Fate string `json:"fate,omitempty"`
 	// Picker names who took the pack. Set only when Fate is
 	// BackpackFatePicked AND the evidence named exactly one player; a pickup
@@ -76,6 +78,25 @@ type BackpackDrop struct {
 	// PickupTime is the match-relative millisecond the pack left the wire.
 	// Set with Fate == BackpackFatePicked (with or without a Picker).
 	PickupTime int32 `json:"pickupTime,omitempty"`
+	// PickerRelation is the picker's side relative to the dropper (v77):
+	// "self" when the dropper respawned and took their own pack back, "team"
+	// when both carry the same team, else "enemy" — in an individual layout
+	// (duel, FFA) every other picker is an enemy. Set whenever Picker is.
+	PickerRelation string `json:"pickerRelation,omitempty"`
+	// PickerHadWeapon / PickerKills / PickerNextDeathTime are the matched
+	// weaponPickups row's HadBefore / Kills / NextDeathTime (v77): whether
+	// the picker already held the weapon, the kills credited to this pickup
+	// (zero when they already held it — see WeaponPickup), and the picker's
+	// next death in match ms (0 if they never died again). `ktx` rows only —
+	// the entity track a reconstructed row's pickup comes from carries none
+	// of the three, so they are absent there rather than guessed.
+	PickerHadWeapon     *bool `json:"pickerHadWeapon,omitempty"`
+	PickerKills         *int  `json:"pickerKills,omitempty"`
+	PickerNextDeathTime int32 `json:"pickerNextDeathTime,omitempty"`
+	// PickerEndTime is the matched weaponPickups row's EndTime (v78): where
+	// the picker's run with the pack ends — their next death, else the
+	// match end. `ktx` rows only, like the three above.
+	PickerEndTime int32 `json:"pickerEndTime,omitempty"`
 }
 
 // BackpackDrop.Source vocabulary.

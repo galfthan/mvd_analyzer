@@ -20,7 +20,7 @@
 openapi: 3.1.0
 info:
   title: mvdanalyzer-api
-  version: "76"
+  version: "78"
   summary: QuakeWorld MVD demo analysis REST API
   description: |
     REST host for the mvd-analyzer pipeline: point it at a demo
@@ -173,6 +173,8 @@ tags:
     description: The analyzer DAG surface — manifest, graph, generic artifact accessor.
   - name: maps
     description: Per-map static data (no demo needed).
+  - name: playlists
+    description: Links to the web app's light player for scripted reels.
 paths:
   /healthz:
     get:
@@ -872,12 +874,13 @@ paths:
         are never mixed within one demo:
 
           * `ktx` — decoded from KTX's `//ktx drop` hint. `entNum` is the
-            hinted edict and joins to WeaponPickup.backpackEnt, which is
-            where that row's pickup lives; `picker`/`pickerTeam`/
-            `pickupTime` are absent. `fate` appears only as `expired`, and
-            only when KTX announced the 120 s removal in `//ktx expire` —
-            an absent `fate` here means "ask /weapon-pickups", NOT "nobody
-            took it".
+            hinted edict and joins to WeaponPickup.backpackEnt; since schema
+            v77 that join is already on the row: `fate: picked` with
+            `picker`/`pickerTeam`/`pickupTime` and the pickup's
+            `pickerHadWeapon`/`pickerKills`/`pickerNextDeathTime`. `expired`
+            when KTX announced the 120 s removal in `//ktx expire`,
+            `unobserved` when neither hint names the pack (NOT "nobody took
+            it").
           * `reconstructed` — replayed from the server's own drop rule on a
             demo whose mod never hinted. There is no pickup hint to join to,
             so the pickup side is carried on the row itself (schema v72):
@@ -885,7 +888,12 @@ paths:
             `picker`/`pickerTeam` when the wire named one, read off the
             bound backpack entity — whose edict number `entNum` now carries
             as well. A `reconstructed` `entNum` still joins to nothing;
-            it identifies the pack track, not a pickup row.
+            it identifies the pack track, not a pickup row. The three
+            `ktx`-only pickup figures are absent here.
+
+        Every row naming a `picker` carries `pickerRelation` (`self` /
+        `team` / `enemy`, relative to the dropper), so "packs the enemy took" is
+        `pickerRelation == enemy`.
 
         Always 200 — empty when none, which means either no pack dropped or
         the reconstruction stood down; the wire shape does not distinguish
@@ -1928,6 +1936,68 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/playlist-links:
+    post:
+      operationId: createPlaylistLink
+      tags: [playlists]
+      summary: A light-player link for a scripted reel (clips, title cards, text)
+      description: |
+        Builds a link to the web app's light player (`play.html`) that plays
+        the items in order: **clips** from any number of hub demos, **title
+        cards** between them (a colour over the game view for `ms`, fading
+        in and out), and **text** over either (a title on a card, a caption
+        on a clip). The link carries the whole list in its fragment
+        (`#playlist=z…`, deflate-compressed); nothing is stored. It is the
+        backend of the MCP tool `createPlaylistLink`.
+
+        **Clips** name a hub `gameId`, a window in **match-relative ms**
+        (`from` / `to`, as every other endpoint's times — e.g. a
+        `/highlights` row's `time` minus 3000 to plus 2000) and whom to
+        watch (`watch`: a player name in that game, or `auto` / omitted for
+        the engine's autotrack). Each demo is loaded through the cache (a
+        cold demo is fetched and parsed, like any per-demo call) to read
+        its start offset, its players' userids and its title. `slow`
+        plays part of the clip in slow motion (match ms, speed 0.05–1).
+
+        **Text** (`text[]` on a clip or a card, at most 8): `text` (≤ 200
+        characters; `\n` breaks lines), `size` (% of the game view's height,
+        1–30, default 6), `color` (`#rrggbb`, default white), `font`
+        (`title` — a bold display face —, `body`, `mono`), `at` (`center`
+        default, `top`, `bottom`, `left`, `right`, `top-left`, `top-right`,
+        `bottom-left`, `bottom-right`), `from` / `to` (ms from the item's
+        start; default the whole item) and `fadeIn` / `fadeOut` (ms,
+        default 300).
+
+        **Cards**: `ms` (300–30000; a minimum — the card stays up until the
+        next clip plays, covering its demo loading), `bg` (`#rrggbb`,
+        default black), `opacity` (0–1, default 1; below 1 the paused game
+        shows through), `fadeIn` / `fadeOut` (ms, default 400), `label`
+        (the playlist row's name; default its first text).
+
+        The answer is the URL, a Markdown link named like the web app's
+        Copy link (`mvda · <demo or N demos> · <what the clips are>`, or
+        `name`), its length (Discord messages hold 2000 characters; a
+        20-item reel is typically 500–1000) and the demos it plays. At
+        least one clip; at most 100 items over 20 demos. 400
+        `invalid_param` names the item and field at fault — an unknown
+        `watch` lists the game's players.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PlaylistLinkRequest" }
+      responses:
+        "200":
+          description: The link.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PlaylistLink" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
   /v1/games/search:
     get:
       operationId: searchGames
@@ -2282,9 +2352,10 @@ components:
       in: query
       description: >
         CSV of event types: frag, powerup, streak, spawn, death, weapon,
-        item, chat, pickup (the default set), plus the opt-in
-        high-frequency / dedicated lenses damage, health, armor, loc,
-        telefrag, stomp, discharge, quadbore. Omit for the default set. An unknown type value
+        item, chat, pickup, demomark, airgib, discharge, quadbore, pause
+        (the default set), plus the opt-in high-frequency / dedicated
+        lenses damage, health, armor, loc, telefrag, stomp. Omit for the
+        default set. An unknown type value
         400s (invalid_param) rather than silently matching nothing.
       style: form
       explode: false
@@ -3096,8 +3167,95 @@ components:
       additionalProperties: false
       properties:
         hash: { type: string, description: Git commit hash of the build. }
-        tag: { type: string, description: Git tag, if any. }
+        tag: { type: string, description: "Git tag, if any." }
         buildDate: { type: string, description: "Build date." }
+    PlaylistText:
+      type: object
+      required: [text]
+      additionalProperties: false
+      properties:
+        text: { type: string, maxLength: 200, description: "The words; a newline breaks the line." }
+        size: { type: number, minimum: 1, maximum: 30, description: "% of the game view's height (default 6)." }
+        color: { type: string, pattern: "^#[0-9a-fA-F]{6}$", description: "#rrggbb (default #ffffff)." }
+        font: { type: string, enum: [title, body, mono], description: "title (default): bold display face; body; mono." }
+        at:
+          type: string
+          enum: [center, top, bottom, left, right, top-left, top-right, bottom-left, bottom-right]
+          description: Where on the game view (default center).
+        from: { type: integer, minimum: 0, description: "ms from the item's start it shows from (default 0)." }
+        to: { type: integer, description: "ms from the item's start it goes at (default: the item's end)." }
+        fadeIn: { type: integer, minimum: 0, maximum: 5000, description: "ms (default 300)." }
+        fadeOut: { type: integer, minimum: 0, maximum: 5000, description: "ms (default 300)." }
+    PlaylistLinkRequest:
+      type: object
+      required: [items]
+      additionalProperties: false
+      properties:
+        name: { type: string, description: "The Markdown link's text (default: generated from the demos and clip labels)." }
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          description: Played in order. Each item is exactly one of `clip` or `card`.
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              clip:
+                type: object
+                description: A window of a hub demo, watched from one player's view.
+                required: [gameId, from, to]
+                additionalProperties: false
+                properties:
+                  gameId: { type: integer, minimum: 1, description: "hub.quakeworld.nu game id." }
+                  from: { type: integer, minimum: 0, description: "Clip start, int32 ms since match start." }
+                  to: { type: integer, description: "Clip end, int32 ms since match start (after from)." }
+                  watch: { type: string, description: "The player whose view to watch (a name in that game); auto or omitted: the engine's autotrack." }
+                  label: { type: string, description: "The clip's name in the list (its text before ' · ' is its kind in the link's name)." }
+                  slow:
+                    type: object
+                    required: [from, to, speed]
+                    additionalProperties: false
+                    description: A slow-motion window inside the clip.
+                    properties:
+                      from: { type: integer, description: "int32 ms since match start." }
+                      to: { type: integer, description: "int32 ms since match start." }
+                      speed: { type: number, minimum: 0.05, maximum: 1, description: "× real time." }
+                  text: { type: array, maxItems: 8, description: "Text over the clip (captions).", items: { $ref: "#/components/schemas/PlaylistText" } }
+              card:
+                type: object
+                description: A title card — a colour over the game view, the game paused behind it.
+                required: [ms]
+                additionalProperties: false
+                properties:
+                  ms: { type: integer, minimum: 300, maximum: 30000, description: "How long it shows at least, fades included." }
+                  bg: { type: string, pattern: "^#[0-9a-fA-F]{6}$", description: "#rrggbb (default #000000)." }
+                  opacity: { type: number, minimum: 0, maximum: 1, description: "Default 1; below 1 the paused game shows through." }
+                  fadeIn: { type: integer, minimum: 0, maximum: 5000, description: "ms (default 400)." }
+                  fadeOut: { type: integer, minimum: 0, maximum: 5000, description: "ms (default 400)." }
+                  label: { type: string, description: "The card's name in the list (default: its first text)." }
+                  text: { type: array, maxItems: 8, description: "Text on the card (titles).", items: { $ref: "#/components/schemas/PlaylistText" } }
+    PlaylistLink:
+      type: object
+      required: [url, markdown, name, length, clips, cards, demos]
+      additionalProperties: false
+      properties:
+        url: { type: string, description: "The light player with the playlist in its fragment." }
+        markdown: { type: string, description: "[name](url), for Discord." }
+        name: { type: string, description: "The link's name." }
+        length: { type: integer, description: "The URL's length in characters." }
+        clips: { type: integer, description: "Clips in the list." }
+        cards: { type: integer, description: "Title cards in the list." }
+        demos:
+          type: array
+          description: The demos the clips play in, in first-use order.
+          items:
+            type: object
+            required: [gameId, title]
+            additionalProperties: false
+            properties:
+              gameId: { type: integer, description: "hub.quakeworld.nu game id." }
+              title: { type: string, description: "map · teams, as the player lists it." }
     LoadResult:
       type: object
       required: [demoId, sha256, fromCache, schemaVersion]
@@ -5787,13 +5945,16 @@ components:
             which is evidence that nobody took the pack.
 
             A `reconstructed` row can carry any of the three, read off the
-            backpack-entity track. A `ktx` row carries only `expired`, and
-            only because KTX said so in `//ktx expire <ent>` — its other
-            outcomes are the /weapon-pickups join, so an ABSENT `fate` on a
-            `ktx` row means "ask that endpoint", never "nobody took it".
-            Read `source` for a `fate`'s provenance, exactly as for the row.
-            Measured against the `//ktx bp` and `//ktx expire` hints on 223
-            demos with every hint withheld: 100.00% precision and 96.13%
+            backpack-entity track. A `ktx` row (schema v77) is `picked` when
+            the `//ktx bp` pickup on /weapon-pickups joined to it (entNum +
+            drop time — the picker fields below are copied from that row),
+            `expired` when KTX said so in `//ktx expire <ent>`, and
+            `unobserved` otherwise: a demo can carry the drop hint and no
+            pickup hints at all, so no `//ktx bp` is not evidence that nobody
+            took it. Read `source` for a `fate`'s provenance, exactly as for
+            the row. On reconstructed rows, measured against the hints
+            withheld:
+            223 demos, 100.00% precision and 96.13%
             recall on picked-vs-not, 99.98% of named pickers correct.
           enum: [picked, expired, unobserved]
           type: string
@@ -5802,20 +5963,57 @@ components:
             Who took the pack (schema v72). Set only with `fate: picked`, and
             only when the evidence named exactly ONE player — two players on
             one pack with nothing to separate them leave this empty rather
-            than guess. Reconstructed rows only.
+            than guess. On a `ktx` row, the `//ktx bp` pickup's player
+            (schema v77; reconstructed rows since v72).
           type: string
+        pickerRelation:
+          description: >
+            The picker's side relative to the dropper (schema v77): `self`
+            when the dropper respawned and took their own pack back, `team`
+            when both carry the same team, else `enemy` — in a duel or FFA
+            every other picker is an enemy. Set whenever `picker` is.
+          enum: [self, team, enemy]
+          type: string
+        pickerHadWeapon:
+          description: >
+            Whether the picker already held the pack's weapon — the joined
+            /weapon-pickups row's `hadBefore` (schema v77). `ktx` rows only:
+            the entity track a reconstructed pickup is read from cannot say.
+          type: boolean
+        pickerKills:
+          description: >
+            Kills credited to this pickup — the joined /weapon-pickups row's
+            `kills` (0 when the picker already held the weapon; schema v77).
+            `ktx` rows only.
+          type: integer
+        pickerNextDeathTime:
+          description: >
+            The picker's next death, int32 ms since match start — the joined
+            /weapon-pickups row's `nextDeathTime`; absent if they never died
+            again (schema v77). `ktx` rows only.
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        pickerEndTime:
+          description: >
+            Where the picker's run with the pack ends, int32 ms since match
+            start — the joined /weapon-pickups row's `endTime`: their next
+            death, else the match end (schema v78). `ktx` rows only.
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
         pickerTeam:
           description: >
             Team of `picker`. Omitted when the picker has no team — an FFA
             or duel picker is named with no `pickerTeam`, so read its
-            absence as "teamless", not as "no picker". Reconstructed rows
-            only (schema v72).
+            absence as "teamless", not as "no picker". Set with `picker`
+            (reconstructed rows since v72, `ktx` rows since v77).
           type: string
         pickupTime:
           description: >
             When the pack left the wire, int32 ms since match start. Set with
-            `fate: picked` (with or without a `picker`). Reconstructed rows
-            only (schema v72).
+            `fate: picked` (with or without a `picker`; reconstructed rows
+            since v72, `ktx` rows since v77).
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
@@ -5890,6 +6088,14 @@ components:
           type: integer
         nextDeathTime:
           description: "Picker's next death, int32 ms (0 = never died before match end)."
+          maximum: 2.147483647e+09
+          minimum: -2.147483648e+09
+          type: integer
+        endTime:
+          description: >
+            Where the pickup's run ends, int32 ms: `nextDeathTime`, else the
+            match end — the picker was still on the run when the match ended
+            (schema v78). The window `kills` counts over.
           maximum: 2.147483647e+09
           minimum: -2.147483648e+09
           type: integer
@@ -8407,12 +8613,12 @@ components:
                   team: { type: string, description: "Team name." }
                   delta: { type: integer, description: frag delta (frag) or value change (health/armor) }
                   value: { type: integer, description: new value (health/armor/loc index) }
-                  bounded: { type: integer, description: KTX-scoreboard bounded value — on damage events the stored per-hit reconstruction (present only when it differs from the raw damage), on telefrag/stomp events the reconstructed kill value; absent when the bounded reconstruction was skipped; 0 is a real value }
-                  powerup: { type: string, description: "Powerup type." }
+                  bounded: { type: integer, description: "KTX-scoreboard bounded value — on damage events the stored per-hit reconstruction (present only when it differs from the raw damage), on telefrag/stomp events the reconstructed kill value; absent when the bounded reconstruction was skipped; 0 is a real value." }
+                  powerup: { type: string, enum: [quad, pent, ring], description: "Powerup type (powerup events)." }
                   endTime: { type: integer, description: int32 ms (powerup/streak) }
                   frags: { type: integer, description: frags during the powerup run }
                   length: { type: integer, description: streak length }
-                  duration: { type: integer, description: streak duration, int32 ms }
+                  duration: { type: integer, description: "Streak duration, int32 ms." }
                   weapon: { type: string, description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)." }
                   victim: { type: string, description: "Victim (killed player) name." }
                   damage: { type: integer, description: "Raw/unbound wire damage amount, including overkill (see bounded for the KTX-scoreboard value)." }
@@ -8420,10 +8626,10 @@ components:
                   isEnv: { type: boolean, description: "Environmental / world-sourced." }
                   isSelf: { type: boolean, description: "Attacker == victim." }
                   isTeam: { type: boolean, description: "Same team, not self." }
-                  victimWep: { type: string, description: "Victim weapon class at hit time (sg|mid|lg|rl|both)." }
+                  victimWep: { type: string, enum: [sg, mid, lg, rl, both], description: "Victim weapon class at hit time." }
                   gain: { type: string, description: weapon/item code gained (interval start) }
                   lose: { type: string, description: weapon/item code lost (interval end) }
-                  item: { type: string, description: spawner instance name (pickup), e.g. ya_1 }
+                  item: { type: string, description: "Spawner instance name (pickup), e.g. ya_1." }
                   kind: { type: string, description: "Item kind — compact vocabulary (rl/lg/ra/mh/quad/…)." }
                   entNum: { type: integer, description: "Server entity/edict number — stable id within a match." }
                   source:
@@ -8434,7 +8640,7 @@ components:
                   loc: { type: string, description: "Nearest named location from the map .loc file." }
                   li: { type: integer, description: raw LocTable index (loc=index mode) }
                   text: { type: string, description: chat message }
-                  clean: { type: string, description: chat message, color codes stripped }
+                  clean: { type: string, description: "Chat message, color codes stripped." }
                   attackerTeam: { type: string, description: "airgib attacker (rocketeer) team." }
                   victimTeam: { type: string, description: "airgib victim team." }
                   height: { type: number, description: "airgib victim feet above the floor at the hit (units)." }
@@ -8504,7 +8710,7 @@ components:
       properties:
         timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         windowMs: { type: integer, description: "Bucket width, int32 ms." }
-        start: { type: integer, description: First bucket start, int32 ms. }
+        start: { type: integer, description: "First bucket start, int32 ms." }
         count: { type: integer, description: "Number of buckets." }
         partialLastMs:
           type: integer

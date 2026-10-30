@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -91,15 +92,27 @@ func (e *proxyError) Error() string {
 // 5xx responses. Body is decoded into out on 2xx; non-2xx returns
 // *proxyError. Pass *any for opaque pass-through.
 func (p *proxyBackend) do(ctx context.Context, method, path string, query url.Values, out any) error {
+	return p.doBody(ctx, method, path, query, nil, out)
+}
+
+// doBody is do with a JSON request body (nil: none).
+func (p *proxyBackend) doBody(ctx context.Context, method, path string, query url.Values, body []byte, out any) error {
 	full := p.baseURL + path
 	if len(query) > 0 {
 		full += "?" + query.Encode()
 	}
 
 	attempt := func() (*http.Response, error) {
-		req, err := http.NewRequestWithContext(ctx, method, full, nil)
+		var rd io.Reader
+		if body != nil {
+			rd = bytes.NewReader(body)
+		}
+		req, err := http.NewRequestWithContext(ctx, method, full, rd)
 		if err != nil {
 			return nil, err
+		}
+		if body != nil {
+			req.Header.Set("Content-Type", "application/json")
 		}
 		if p.label != "" {
 			req.Header.Set("Authorization", "Bearer "+p.label)
@@ -118,17 +131,17 @@ func (p *proxyBackend) do(ctx context.Context, method, path string, query url.Va
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
+	got, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		if out == nil {
 			return nil
 		}
-		return json.Unmarshal(body, out)
+		return json.Unmarshal(got, out)
 	}
 
-	pe := &proxyError{Status: resp.StatusCode, Body: strings.TrimSpace(string(body))}
+	pe := &proxyError{Status: resp.StatusCode, Body: strings.TrimSpace(string(got))}
 	var env proxyErrorPayload
-	if json.Unmarshal(body, &env) == nil {
+	if json.Unmarshal(got, &env) == nil {
 		pe.Code = env.Error.Code
 		if env.Error.Message != "" {
 			pe.Body = env.Error.Message
@@ -738,6 +751,19 @@ func (p *proxyBackend) GetTopKills(ctx context.Context, in GetTopKillsInput) (an
 	// caller who never asked for the bounded family).
 	q.str("dmg", in.Dmg)
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
+}
+
+// CreatePlaylistLink forwards the reel to POST /v1/playlist-links as JSON.
+func (p *proxyBackend) CreatePlaylistLink(ctx context.Context, in CreatePlaylistLinkInput) (any, error) {
+	body, err := json.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	var out any
+	if err := p.doBody(ctx, "POST", "/v1/playlist-links", nil, body, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (p *proxyBackend) GetHighlights(ctx context.Context, in GetHighlightsInput) (any, error) {

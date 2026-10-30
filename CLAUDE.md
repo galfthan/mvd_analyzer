@@ -59,8 +59,12 @@ Five modules in a Go workspace (`go.work`):
   implements each sub-analyzer. Nothing here reaches into MVD bytes —
   everything flows through events.
 - **`mvd-web/` (Layer 3)** is one consumer of Result. The WASM entry
-  is in `cmd/wasm/`; the static frontend is in `static/`. Nothing
-  mvd-reader or mvd-analytics imports from here.
+  is in `cmd/wasm/`; the frontend is `index.html` + `src/` (Vite + Svelte):
+  `src/app/` loads a demo and owns the URL and tab switching, every tab is
+  a component under `src/tabs/` or `src/player/`, shared state is the
+  stores in `src/state/`, and DOM-free logic is in `src/lib/` with node
+  tests in `test/` (see `mvd-web/README.md`, `plan-frontend-restructure.md`).
+  Nothing mvd-reader or mvd-analytics imports from here.
 - **`mvd-api/`** is another Layer-3 consumer: it serves
   `mvd-analytics/view` as a hosted REST API with an on-disk demo cache.
   It imports mvd-analytics (and transitively mvd-reader); nothing
@@ -87,12 +91,17 @@ belongs in the frontend.
   belongs in the commit history.
 - Match existing code style — no new lint configs, no reformatting
   of untouched files.
+- Delete dead code — unused functions, exports, CSS rules for markup
+  that no longer exists — rather than leaving it behind. git history
+  keeps it.
 - **Team colors (frontend).** There is one canonical team→color
   mapping used everywhere the user sees a team — Summary, scoreboard,
-  map, timeline, region control, loc heatmap. It is `TEAM_COLORS` in
-  `mvd-web/static/app.js` indexed by a team's position in
-  `timelineState.teams`, the frag-sorted order set once via
-  `setCanonicalTeams()` in `displayResults()` (winning team = index 0).
+  map, timeline, region control, loc heatmap. It lives in
+  `mvd-web/src/state/teams.js` (the `teams` store: `order` + `colors`,
+  `colorOf` / `teamIndexOf`). The order is the frag-sorted one
+  (`canonicalTeamOrder`, `src/lib/canonical-teams.js`) set once per demo
+  via `setCanonicalTeams()` in `displayResults()` (`src/app/load.js`;
+  winning team = index 0).
   Which palette entry lands at each index is decided by team NAME
   (`assignTeamColors`): teams literally named "red"/"blue" get those
   colors, everyone else takes the remaining entries in name sort order —
@@ -100,24 +109,29 @@ belongs in the frontend.
   Never derive team colors from `demoInfo.teams` order or any other
   per-feature ordering, and never index the raw `TEAM_PALETTE` by team
   position — both re-introduce the mismatch where a team is e.g. blue in
-  the Summary but red elsewhere. Use `getTeamOrder()` /
-  `timelineState.teams` to map a team name to its color index. The CSS
-  mirror is `--team-a..--team-d`, re-pointed per match by
-  `setCanonicalTeams()`. In an **individual layout**
+  the Summary but red elsewhere. Map a team name to its color index
+  through the store (`teamIndexOf` / `colorOf`). Go's region control
+  names its sides `teamA` / `teamB` in `demoInfo.teams` order — they are
+  labels, not canonical indices: resolve them by name (`regionSides`,
+  `src/lib/regions.js`). The CSS mirror is `--team-a..--team-d`,
+  re-pointed whenever the store changes (`src/main.js`). In an
+  **individual layout**
   (`match.sources.teams` = `individual` — every duel, FFA, race) each
-  player is their own side, so `timelineState.teams` is the frag-sorted
+  player is their own side, so the store's `order` is the frag-sorted
   PLAYER list and every row's `team` equals its name. A **duel keeps the
   team palette and `assignTeamColors`** — two players are a matchup.
-  Only a field of MORE than two switches: `setCanonicalTeams(teams,
-  true)` fills the same one canonical array via `assignPlayerColors`,
+  Only a field of MORE than two switches: `setCanonicalTeams(order,
+  true, players)` fills the same one canonical array via `assignPlayerColors`,
   twelve `PLAYER_PALETTE` entries handed out in NAME sort order. Assign
   a colour by frag RANK in either palette and the stability property
   above is gone — the board recolours when the scoreline changes. The
   array, its index convention and every call site are unchanged — only
   which palette fills it.
 - **Always run tests.** `make test` (which runs
-  `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/...` —
-  mvd-web is wasm-only and is exercised by `make build` instead)
+  `go test ./mvd-reader/... ./mvd-analytics/... ./mvd-api/... ./mvd-mcp/...`,
+  then the frontend's `node --test` suites and svelte-check, which
+  type-checks mvd-web's JS through its JSDoc — see mvd-web/README.md
+  "Tests"; the wasm build itself is exercised by `make build`)
   before every commit, no exceptions for "trivial" changes. If a test you
   don't understand fails, surface it — don't skip it. `make test` also
   gates on `gofmt -l` before running anything; `make fmt` fixes it.

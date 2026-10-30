@@ -259,7 +259,49 @@ func ParseBytes(data []byte) (*BSP, error) {
 		bsp.TexNames = parseMiptexNames(mb)
 	}
 
+	// NODES + LEAFS — the hull-0 tree, supplementary like the textures:
+	// only the liquid-volume extraction walks it.
+	nodeBytes, nerr := lumpBytes(data, lumpNodes)
+	leafBytes, lerr := lumpBytes(data, lumpLeafs)
+	if nerr == nil && lerr == nil {
+		bsp.Nodes, bsp.Leafs = parseTree(nodeBytes, leafBytes, magic)
+	}
+
 	return bsp, nil
+}
+
+// parseTree decodes the hull-0 nodes (plane + children) and the leaf
+// contents codes. Record widths depend on the flavor (see lumps.go); a lump
+// that isn't a whole number of records yields empty slices.
+func parseTree(nb, lb []byte, magic string) ([]Node, []Leaf) {
+	nStride, lStride := nodeSize, leafSize
+	switch magic {
+	case "2PSB":
+		nStride, lStride = nodeSize2PSB, leafSize2PSB
+	case "BSP2":
+		nStride, lStride = nodeSizeBSP2, leafSizeBSP2
+	}
+	if len(nb)%nStride != 0 || len(lb)%lStride != 0 {
+		return nil, nil
+	}
+	nodes := make([]Node, len(nb)/nStride)
+	for i := range nodes {
+		b := nb[i*nStride:]
+		n := Node{PlaneNum: int32(binary.LittleEndian.Uint32(b[0:4]))}
+		if nStride == nodeSize {
+			n.Children[0] = int32(int16(binary.LittleEndian.Uint16(b[4:6])))
+			n.Children[1] = int32(int16(binary.LittleEndian.Uint16(b[6:8])))
+		} else {
+			n.Children[0] = int32(binary.LittleEndian.Uint32(b[4:8]))
+			n.Children[1] = int32(binary.LittleEndian.Uint32(b[8:12]))
+		}
+		nodes[i] = n
+	}
+	leafs := make([]Leaf, len(lb)/lStride)
+	for i := range leafs {
+		leafs[i] = Leaf{Contents: int32(binary.LittleEndian.Uint32(lb[i*lStride:]))}
+	}
+	return nodes, leafs
 }
 
 // parseTexinfos decodes the miptex index from each 40-byte texinfo record.

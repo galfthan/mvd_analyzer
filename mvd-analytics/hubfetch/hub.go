@@ -1,6 +1,6 @@
 // Package hubfetch resolves and downloads MVD demos from
 // hub.quakeworld.nu by game ID, and searches its game catalog. It mirrors
-// the fetch flow already used by the web frontend (mvd-web/static/app.js,
+// the fetch flow already used by the web frontend (mvd-web/src/data/hub.js,
 // the SUPABASE_URL / CDN path): query the Supabase v1_games endpoint for
 // the demo's sha256 + source URL, then try the public CDN before falling
 // back to the original recording server.

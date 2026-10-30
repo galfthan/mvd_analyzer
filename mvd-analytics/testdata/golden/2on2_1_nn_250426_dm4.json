@@ -26289,12 +26289,21 @@
   "backpacks": [
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         349.25,
         -404.5,
         -128
       ],
+      "picker": "shazam",
+      "pickerEndTime": 9398,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 9398,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 6883,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -26303,12 +26312,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         128.25,
         -244.75,
         -55.25
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 15167,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 15167,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 12807,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26317,12 +26335,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         318,
         -518.625,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 13935,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 13935,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 13237,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26331,12 +26358,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "MH.entry",
       "origin": [
         -62.5,
         -214.375,
         -320
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 19809,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 19809,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 19068,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26345,12 +26381,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "high.tele",
       "origin": [
         339.875,
         -633.375,
         0
       ],
+      "picker": "Milton",
+      "pickerEndTime": 64250,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 64250,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 13950,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26359,12 +26404,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         44.5,
         -234.125,
         -94.625
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 19984,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 19984,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 15180,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -26373,12 +26427,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "MH.entry",
       "origin": [
         39.375,
         -253.875,
         -319.25
       ],
+      "picker": "shazam",
+      "pickerEndTime": 42927,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 42927,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 21234,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -26387,12 +26450,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         878.375,
         -356.5,
         -10.5
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 79678,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 79678,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 30366,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26401,12 +26473,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         232.5,
         -493.375,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 29026,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 29026,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 28302,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26415,12 +26496,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         112,
         -311.5,
         -16.125
       ],
+      "picker": "Milton",
+      "pickerEndTime": 64250,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 64250,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 40891,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26429,12 +26519,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "YA.entry",
       "origin": [
         830,
         -267.625,
         1.25
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 79678,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 79678,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 36735,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26443,12 +26542,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         346.125,
         -168.25,
         -191.125
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 79678,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 79678,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 48202,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26457,12 +26565,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "high.tele",
       "origin": [
         382.625,
         -847.875,
         -3.625
       ],
+      "picker": "Milton",
+      "pickerEndTime": 64250,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 64250,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 46849,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26471,12 +26588,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         484,
         -212.625,
         -320
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 79678,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 79678,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 52192,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26485,12 +26611,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "high.tele",
       "origin": [
         260.25,
         -752,
         34.875
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 79678,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 79678,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 57140,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26514,12 +26649,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "low.tele",
       "origin": [
         656,
         -190.25,
         -320
       ],
+      "picker": "Milton",
+      "pickerEndTime": 90189,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 90189,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 71036,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26528,12 +26672,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         98.25,
         -247.5,
         -290.375
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 79678,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 79678,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 75955,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26542,12 +26695,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         235.75,
         -526.125,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 95806,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 95806,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 83276,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -26556,12 +26718,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         767.375,
         -632.625,
         -211.125
       ],
+      "picker": "Milton",
+      "pickerEndTime": 90189,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 90189,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 85373,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26570,12 +26741,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         454.625,
         -271.875,
         -320
       ],
+      "picker": "Milton",
+      "pickerEndTime": 90189,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 90189,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 89013,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26584,12 +26764,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         199,
         -189.5,
         -320
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 98849,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 98849,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 90429,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -26598,12 +26787,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         426.875,
         -525.5,
         20
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 98849,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 98849,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 95014,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26612,12 +26810,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "YA.entry",
       "origin": [
         624,
         -123,
         0
       ],
+      "picker": "Milton",
+      "pickerEndTime": 119029,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 119029,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 109587,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -26626,12 +26833,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         397,
         -213.125,
         -330.25
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 116588,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 116588,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 108818,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26640,12 +26856,21 @@
     },
     {
       "entNum": 163,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         257.625,
         -241.75,
         -320
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 116588,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 116588,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 109786,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26654,12 +26879,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         433,
         -268.375,
         -282.75
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 116588,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 116588,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 109107,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26668,12 +26902,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         65,
         -229.875,
         -55.875
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 132025,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 132025,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 117873,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -26682,12 +26925,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "SSG",
       "origin": [
         304,
         -564.625,
         -126.375
       ],
+      "picker": "Milton",
+      "pickerEndTime": 132756,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 132756,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 128201,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26696,12 +26948,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         545,
         -30.875,
         0
       ],
+      "picker": "shazam",
+      "pickerEndTime": 145715,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 145715,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 121890,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26710,12 +26971,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         261.875,
         -432,
         -69.5
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 132025,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 132025,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 119029,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -26724,12 +26994,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "high.tele",
       "origin": [
         208,
         -752.5,
         0
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 146353,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 146353,
+      "pickerRelation": "self",
+      "pickerTeam": "1",
+      "pickupTime": 138028,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -26738,12 +27017,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         229.875,
         -251,
         -292.25
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 132025,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 132025,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 127137,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -26767,12 +27055,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "low.tele",
       "origin": [
         600.625,
         -232.875,
         -335
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 146353,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 146353,
+      "pickerRelation": "self",
+      "pickerTeam": "1",
+      "pickupTime": 135639,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -26781,12 +27078,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "YA.entry",
       "origin": [
         618,
         -100.125,
         0
       ],
+      "picker": "Milton",
+      "pickerEndTime": 151002,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 151002,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 146600,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26795,12 +27101,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         113.25,
         -496.125,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 154392,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 154392,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 154016,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -26809,12 +27124,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "high.tele",
       "origin": [
         318,
         -573.375,
         0
       ],
+      "picker": "shazam",
+      "pickerEndTime": 153315,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 153315,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 152650,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26823,12 +27147,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         212.625,
         -428.75,
         -128
       ],
+      "picker": "shazam",
+      "pickerEndTime": 180837,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 180837,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 179474,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -26837,12 +27170,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         438.75,
         -520.125,
         15.875
       ],
+      "picker": "Milton",
+      "pickerEndTime": 158404,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 158404,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 155261,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26851,12 +27193,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "LG.GA",
       "origin": [
         461.25,
         -148.625,
         -121.875
       ],
+      "picker": "Milton",
+      "pickerEndTime": 163027,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 163027,
+      "pickerRelation": "self",
+      "pickerTeam": "1",
+      "pickupTime": 161138,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -26865,12 +27216,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "Quad.tele",
       "origin": [
         -24,
         -244.625,
         -117.5
       ],
+      "picker": "Milton",
+      "pickerEndTime": 163027,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 163027,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 159511,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -26894,12 +27254,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "LG.tele",
       "origin": [
         609.375,
         -349.625,
         -128
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 166781,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 166781,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 166657,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26908,12 +27277,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "LG.tele",
       "origin": [
         580.875,
         -374.75,
         -128
       ],
+      "picker": "shazam",
+      "pickerEndTime": 168596,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 168596,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 167508,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -26922,12 +27300,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "LG.tele",
       "origin": [
         625.5,
         -294.25,
         -144.125
       ],
+      "picker": "shazam",
+      "pickerEndTime": 192071,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 192071,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 190508,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26936,12 +27323,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         507.375,
         -261.25,
         -334
       ],
+      "picker": "Milton",
+      "pickerEndTime": 173092,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 173092,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 168708,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26950,12 +27346,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "low.tele",
       "origin": [
         641.125,
         -91.625,
         -320
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 189194,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 189194,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 174639,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -26964,12 +27369,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         208.125,
         -273.625,
         -85.375
       ],
+      "picker": "Milton",
+      "pickerEndTime": 182871,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 182871,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 181261,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -26978,12 +27392,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         485.25,
         -511.875,
         0
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 202581,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 202581,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 191874,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -26992,12 +27415,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         569,
         -2,
         0
       ],
+      "picker": "Milton",
+      "pickerEndTime": 200096,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 200096,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 195045,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27006,12 +27438,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "LG.GA",
       "origin": [
         482.875,
         -64.375,
         -126.375
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 202581,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 202581,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 194521,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27020,12 +27461,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "LG",
       "origin": [
         621.875,
         -288.625,
         -128
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 202581,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 202581,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 195513,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27034,12 +27484,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         1026.625,
         -584.875,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 263651,
+      "pickerHadWeapon": false,
+      "pickerKills": 4,
+      "pickerNextDeathTime": 263651,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 203937,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27048,12 +27507,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "LG",
       "origin": [
         458.5,
         -219.75,
         -98.75
       ],
+      "picker": "shazam",
+      "pickerEndTime": 212210,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 212210,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 209236,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27062,12 +27530,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "high.tele",
       "origin": [
         368,
         -655.875,
         0
       ],
+      "picker": "shazam",
+      "pickerEndTime": 223099,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 223099,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 214097,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27076,12 +27553,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         0.125,
         -271.25,
         -96
       ],
+      "picker": "Milton",
+      "pickerEndTime": 217754,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 217754,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 216764,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27090,12 +27576,21 @@
     },
     {
       "entNum": 162,
+      "fate": "picked",
       "loc": "Quad.tele",
       "origin": [
         -143.75,
         -404.125,
         -96
       ],
+      "picker": "shazam",
+      "pickerEndTime": 223099,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 223099,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 218224,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27104,12 +27599,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         186.75,
         -441.125,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 263651,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 263651,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 224540,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27118,12 +27622,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "LG.tele",
       "origin": [
         565.375,
         -432,
         -129.5
       ],
+      "picker": "Milton",
+      "pickerEndTime": 269324,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 269324,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 264560,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27132,12 +27645,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "LG.GA",
       "origin": [
         568.5,
         -108.5,
         -127
       ],
+      "picker": "shazam",
+      "pickerEndTime": 260889,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 260889,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 244742,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27146,12 +27668,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         544,
         -489.875,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 263651,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 263651,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 233513,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27160,12 +27691,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "high.tele",
       "origin": [
         368,
         -746,
         0.25
       ],
+      "picker": "shazam",
+      "pickerEndTime": 260889,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 260889,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 237818,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27174,12 +27714,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         773.125,
         -715.125,
         -224
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 263651,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 263651,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 239999,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27188,12 +27737,21 @@
     },
     {
       "entNum": 162,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         381.875,
         -176.875,
         -320
       ],
+      "picker": "shazam",
+      "pickerEndTime": 269873,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 269873,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 269194,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27202,12 +27760,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         841.625,
         -400.25,
         -15.875
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 263651,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 263651,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 252458,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27231,12 +27798,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "LG.GA",
       "origin": [
         513.5,
         -87.5,
         -127.75
       ],
+      "picker": "Milton",
+      "pickerEndTime": 269324,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 269324,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 262924,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27245,12 +27821,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "LG",
       "origin": [
         537.75,
         -275.125,
         -121.125
       ],
+      "picker": "Milton",
+      "pickerEndTime": 269324,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 269324,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 261159,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27259,12 +27844,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "YA.entry",
       "origin": [
         675.375,
         -167.75,
         0
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 310729,
+      "pickerHadWeapon": false,
+      "pickerKills": 6,
+      "pickerNextDeathTime": 310729,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 268170,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27273,12 +27867,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "LG.tele",
       "origin": [
         591.25,
         -353.75,
         -128
       ],
+      "picker": "Milton",
+      "pickerEndTime": 284736,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 284736,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 271612,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27287,12 +27890,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         233.25,
         -220.375,
         -301.625
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 276179,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 276179,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 271235,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27301,12 +27913,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         533,
         -208,
         -320
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 276179,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 276179,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 272762,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27315,12 +27936,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         216,
         -505.25,
         0
       ],
+      "picker": "Milton",
+      "pickerEndTime": 284736,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 284736,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 279886,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27329,12 +27959,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         134.375,
         -246.25,
         -95.75
       ],
+      "picker": "shazam",
+      "pickerEndTime": 290580,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 290580,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 285791,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27343,12 +27982,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         88.25,
         -255.375,
         -320
       ],
+      "picker": "shazam",
+      "pickerEndTime": 310448,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 310448,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 298754,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27372,12 +28020,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "LG",
       "origin": [
         494.75,
         -322.25,
         -130.5
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 306821,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 306821,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 296664,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27386,12 +28043,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         239.75,
         -463.625,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 326181,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 326181,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 310258,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27415,12 +28081,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "YA.entry",
       "origin": [
         613.625,
         -144.625,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 326181,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 326181,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 319613,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27429,12 +28104,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         221.5,
         -226.5,
         -320
       ],
+      "picker": "shazam",
+      "pickerEndTime": 323924,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 323924,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 318599,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27443,12 +28127,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         268.5,
         -219,
         -320
       ],
+      "picker": "Milton",
+      "pickerEndTime": 328423,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 328423,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 325373,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27457,12 +28150,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         543.375,
         -423.625,
         0
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 411591,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 411591,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 340193,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27486,12 +28188,21 @@
     },
     {
       "entNum": 163,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         370.75,
         -240.25,
         -318.75
       ],
+      "picker": "Milton",
+      "pickerEndTime": 356027,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 356027,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 333592,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27500,12 +28211,21 @@
     },
     {
       "entNum": 164,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         473,
         -218,
         -320
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 411591,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 411591,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 369327,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27514,12 +28234,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "MH.entry",
       "origin": [
         21.875,
         -272,
         -320
       ],
+      "picker": "shazam",
+      "pickerEndTime": 350879,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 350879,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 347793,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27528,12 +28257,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "SSG",
       "origin": [
         304,
         -664.125,
         -128
       ],
+      "picker": "Milton",
+      "pickerEndTime": 356027,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 356027,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 349844,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27542,12 +28280,21 @@
     },
     {
       "entNum": 163,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         459.25,
         -238.625,
         -320
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 411591,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 411591,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 369340,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27556,12 +28303,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         164.75,
         -245,
         -290.125
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 355732,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 355732,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 355209,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27570,12 +28326,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         786.375,
         -837.75,
         -256
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 355732,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 355732,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 353574,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27584,12 +28349,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         76.25,
         -231.5,
         -320
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 362741,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 362741,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 362236,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27598,12 +28372,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         486.875,
         -197.875,
         41.625
       ],
+      "picker": "shazam",
+      "pickerEndTime": 359872,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 359872,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 356499,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27612,12 +28395,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "LG.GA",
       "origin": [
         567.25,
         -10.75,
         -128
       ],
+      "picker": "Milton",
+      "pickerEndTime": 366651,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 366651,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 360885,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27626,12 +28418,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         116.125,
         -211,
         -320
       ],
+      "picker": "Milton",
+      "pickerEndTime": 366651,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 366651,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 362971,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27655,12 +28456,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         269.5,
         -270.5,
         -320
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 383703,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 383703,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 383000,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27669,12 +28479,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         371.875,
         -517.125,
         0
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 411591,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 411591,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 372751,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27683,12 +28502,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "LG.GA",
       "origin": [
         522,
         -19.375,
         -128
       ],
+      "picker": "Milton",
+      "pickerEndTime": 384494,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 384494,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 379254,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27697,12 +28525,21 @@
     },
     {
       "entNum": 163,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         220.25,
         -243.625,
         -320
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 383703,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 383703,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 383416,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27711,12 +28548,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         152,
         -245.375,
         -320
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 398650,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 398650,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 388694,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27740,12 +28586,21 @@
     },
     {
       "entNum": 168,
+      "fate": "picked",
       "loc": "MH.entry",
       "origin": [
         -87.625,
         -216.25,
         -320
       ],
+      "picker": "Milton",
+      "pickerEndTime": 443102,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 443102,
+      "pickerRelation": "self",
+      "pickerTeam": "1",
+      "pickupTime": 410457,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27754,12 +28609,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         509.125,
         -188.25,
         43.75
       ],
+      "picker": "shazam",
+      "pickerEndTime": 401327,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 401327,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 399873,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27768,12 +28632,21 @@
     },
     {
       "entNum": 164,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         286.5,
         -421.625,
         -128
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 411591,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 411591,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 404389,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27782,12 +28655,21 @@
     },
     {
       "entNum": 162,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         562.875,
         -201.25,
         8
       ],
+      "picker": "Milton",
+      "pickerEndTime": 407122,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 407122,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 402578,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27796,12 +28678,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         449.5,
         -271.625,
         -320
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 411591,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 411591,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 406596,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27810,12 +28701,21 @@
     },
     {
       "entNum": 163,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         315.625,
         -209.625,
         -320
       ],
+      "picker": "Milton",
+      "pickerEndTime": 443102,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 443102,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 411561,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27824,12 +28724,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         430.5,
         -522.375,
         -128
       ],
+      "picker": "shazam",
+      "pickerEndTime": 410548,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 410548,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 407360,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27838,12 +28747,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         367.5,
         -174,
         -213.375
       ],
+      "picker": "Milton",
+      "pickerEndTime": 443102,
+      "pickerHadWeapon": false,
+      "pickerKills": 6,
+      "pickerNextDeathTime": 443102,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 411769,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27852,12 +28770,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         496.25,
         -511.875,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 415989,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 415989,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 413431,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27866,12 +28793,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "YA.entry",
       "origin": [
         624,
         -116.625,
         0
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 424094,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 424094,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 421728,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27880,12 +28816,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         138.875,
         -284.75,
         -80
       ],
+      "picker": "Milton",
+      "pickerEndTime": 443102,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 443102,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 417889,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27894,12 +28839,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "YA.entry",
       "origin": [
         612.125,
         -88.125,
         3.875
       ],
+      "picker": "Milton",
+      "pickerEndTime": 443102,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 443102,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 426676,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -27908,12 +28862,21 @@
     },
     {
       "entNum": 166,
+      "fate": "picked",
       "loc": "LG.GA",
       "origin": [
         539.125,
         -67.875,
         -128
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 459849,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 459849,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 428024,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -27922,12 +28885,21 @@
     },
     {
       "entNum": 162,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         496.625,
         -225.125,
         -320
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 501624,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 501624,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 444208,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27936,12 +28908,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "LG.tele",
       "origin": [
         639.5,
         -284.25,
         -72.5
       ],
+      "picker": "Milton",
+      "pickerEndTime": 443102,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 443102,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 432322,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27950,12 +28931,21 @@
     },
     {
       "entNum": 166,
+      "fate": "picked",
       "loc": "MH.entry",
       "origin": [
         25.5,
         -272,
         -322.375
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 501624,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 501624,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 443055,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -27964,12 +28954,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "LG",
       "origin": [
         494.875,
         -247.25,
         -137.625
       ],
+      "picker": "Milton",
+      "pickerEndTime": 451119,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 451119,
+      "pickerRelation": "self",
+      "pickerTeam": "1",
+      "pickupTime": 445455,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27978,12 +28977,21 @@
     },
     {
       "entNum": 97,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         588.625,
         -170.25,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 501624,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 501624,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 456542,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -27992,12 +29000,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         1087.125,
         -603.125,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 501624,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 501624,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 460847,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -28006,12 +29023,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         263.625,
         -447,
         -125.375
       ],
+      "picker": "shazam",
+      "pickerEndTime": 482483,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 482483,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 476522,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -28020,12 +29046,21 @@
     },
     {
       "entNum": 96,
+      "fate": "picked",
       "loc": "LG",
       "origin": [
         559.375,
         -349.25,
         -128
       ],
+      "picker": "shazam",
+      "pickerEndTime": 482483,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 482483,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 474542,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -28034,12 +29069,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "YA.entry",
       "origin": [
         863.125,
         -270.25,
         23.25
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 483194,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 483194,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 481667,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -28063,12 +29107,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         328.375,
         -237.625,
         -292.5
       ],
+      "picker": "Milton",
+      "pickerEndTime": 485834,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 485834,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 483133,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -28077,12 +29130,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "YA",
       "origin": [
         912.375,
         -432,
         -25.25
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 496229,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 496229,
+      "pickerRelation": "self",
+      "pickerTeam": "1",
+      "pickupTime": 486099,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -28091,12 +29153,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "high.tele",
       "origin": [
         368,
         -661.5,
         0
       ],
+      "picker": "Milton",
+      "pickerEndTime": 508363,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 508363,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 504584,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -28105,12 +29176,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "MH.entry",
       "origin": [
         44,
         -244.5,
         -289.75
       ],
+      "picker": "shazam",
+      "pickerEndTime": 503041,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 503041,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 502541,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -28119,12 +29199,21 @@
     },
     {
       "entNum": 94,
+      "fate": "picked",
       "loc": "GL",
       "origin": [
         285,
         -393.75,
         -128
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 538328,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 538328,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 505472,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -28133,12 +29222,21 @@
     },
     {
       "entNum": 162,
+      "fate": "picked",
       "loc": "RA",
       "origin": [
         789,
         -419.5,
         -128
       ],
+      "picker": "Milton",
+      "pickerEndTime": 563584,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 563584,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 554514,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -28147,12 +29245,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         227.875,
         -201.625,
         -277.5
       ],
+      "picker": "shazam",
+      "pickerEndTime": 507229,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 507229,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 506347,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -28161,6 +29268,7 @@
     },
     {
       "entNum": 94,
+      "fate": "unobserved",
       "loc": "low",
       "origin": [
         112,
@@ -28175,6 +29283,7 @@
     },
     {
       "entNum": 96,
+      "fate": "unobserved",
       "loc": "GL",
       "origin": [
         411.5,
@@ -28189,12 +29298,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "MH.entry",
       "origin": [
         17.375,
         -233.75,
         -305.375
       ],
+      "picker": "Milton",
+      "pickerEndTime": 514899,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 514899,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 514307,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -28203,12 +29321,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         123.375,
         -231,
         -320
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 517533,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 517533,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 516234,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -28217,12 +29344,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "MH.entry",
       "origin": [
         -6.125,
         -260.25,
         -330.25
       ],
+      "picker": "Milton",
+      "pickerEndTime": 527029,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 527029,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 518353,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -28231,12 +29367,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "high.tele",
       "origin": [
         455.125,
         -864,
         19
       ],
+      "picker": "Milton",
+      "pickerEndTime": 527029,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 527029,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 523289,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -28245,12 +29390,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         534,
         -501.875,
         0
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 539946,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 539946,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 527626,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -28259,12 +29413,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         112,
         -319,
         -64
       ],
+      "picker": "shazam",
+      "pickerEndTime": 550034,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 550034,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 549899,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -28273,12 +29436,21 @@
     },
     {
       "entNum": 161,
+      "fate": "picked",
       "loc": "LG.tele",
       "origin": [
         593.875,
         -362.75,
         -128
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 547530,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 547530,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 544141,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -28287,12 +29459,21 @@
     },
     {
       "entNum": 95,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         397.125,
         -181.75,
         -320
       ],
+      "picker": "shazam",
+      "pickerEndTime": 547042,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 547042,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 540922,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -28301,6 +29482,7 @@
     },
     {
       "entNum": 161,
+      "fate": "unobserved",
       "loc": "high",
       "origin": [
         287.75,
@@ -28315,12 +29497,21 @@
     },
     {
       "entNum": 165,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         337.75,
         -258.875,
         -201
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 557041,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 557041,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 551418,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -28329,12 +29520,21 @@
     },
     {
       "entNum": 164,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         389.125,
         -124.5,
         -301.625
       ],
+      "picker": "shazam",
+      "pickerEndTime": 580078,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 580078,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 552805,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -28343,12 +29543,21 @@
     },
     {
       "entNum": 162,
+      "fate": "picked",
       "loc": "SSG.stairs",
       "origin": [
         368,
         -1208.125,
         -48
       ],
+      "picker": "shazam",
+      "pickerEndTime": 580078,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 580078,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 557844,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -28357,12 +29566,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         433.375,
         -215.5,
         -335.125
       ],
+      "picker": "Milton",
+      "pickerEndTime": 580078,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 580078,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 573540,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -28371,12 +29589,21 @@
     },
     {
       "entNum": 163,
+      "fate": "picked",
       "loc": "Quad.stairs",
       "origin": [
         112,
         -331.625,
         -44.375
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 579301,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 579301,
+      "pickerRelation": "self",
+      "pickerTeam": "n n",
+      "pickupTime": 566929,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -28385,12 +29612,21 @@
     },
     {
       "entNum": 168,
+      "fate": "picked",
       "loc": "YA.entry",
       "origin": [
         609.25,
         -107,
         34.375
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 579301,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 579301,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 569782,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -28399,12 +29635,21 @@
     },
     {
       "entNum": 169,
+      "fate": "picked",
       "loc": "LG",
       "origin": [
         522.75,
         -211.875,
         -128
       ],
+      "picker": "shazam",
+      "pickerEndTime": 580078,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 580078,
+      "pickerRelation": "enemy",
+      "pickerTeam": "n n",
+      "pickupTime": 565041,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -28413,12 +29658,20 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         91.375,
         -260.25,
         -278.875
       ],
+      "picker": "Milton",
+      "pickerEndTime": 600050,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 585263,
       "player": "squeeze",
       "source": "ktx",
       "team": "1",
@@ -28427,12 +29680,20 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "LG.GA",
       "origin": [
         447.75,
         -73.625,
         -96.375
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 600050,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 581540,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -28441,6 +29702,7 @@
     },
     {
       "entNum": 164,
+      "fate": "unobserved",
       "loc": "high",
       "origin": [
         507,
@@ -28455,12 +29717,20 @@
     },
     {
       "entNum": 165,
+      "fate": "picked",
       "loc": "high",
       "origin": [
         490.75,
         -322.875,
         5.375
       ],
+      "picker": "squeeze",
+      "pickerEndTime": 600050,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerRelation": "team",
+      "pickerTeam": "1",
+      "pickupTime": 581334,
       "player": "Milton",
       "source": "ktx",
       "team": "1",
@@ -28469,12 +29739,21 @@
     },
     {
       "entNum": 169,
+      "fate": "picked",
       "loc": "MH.entry",
       "origin": [
         -27.375,
         -215.375,
         -293.5
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 598103,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 598103,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 597950,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -28483,12 +29762,20 @@
     },
     {
       "entNum": 165,
+      "fate": "picked",
       "loc": "high.tele",
       "origin": [
         411.875,
         -869.25,
         9.5
       ],
+      "picker": "Milton",
+      "pickerEndTime": 600050,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "enemy",
+      "pickerTeam": "1",
+      "pickupTime": 591751,
       "player": "stepcop",
       "source": "ktx",
       "team": "n n",
@@ -28497,12 +29784,21 @@
     },
     {
       "entNum": 163,
+      "fate": "picked",
       "loc": "low",
       "origin": [
         265.875,
         -267.375,
         -279.625
       ],
+      "picker": "stepcop",
+      "pickerEndTime": 598103,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 598103,
+      "pickerRelation": "team",
+      "pickerTeam": "n n",
+      "pickupTime": 595975,
       "player": "shazam",
       "source": "ktx",
       "team": "n n",
@@ -28511,6 +29807,7 @@
     },
     {
       "entNum": 162,
+      "fate": "unobserved",
       "loc": "MH.entry",
       "origin": [
         -1.875,
@@ -28525,6 +29822,7 @@
     },
     {
       "entNum": 163,
+      "fate": "unobserved",
       "loc": "low",
       "origin": [
         363.5,
@@ -55643,7 +56941,7 @@
       }
     ]
   },
-  "schemaVersion": 76,
+  "schemaVersion": 78,
   "shots": {
     "byPlayer": [
       {
@@ -106808,6 +108106,7 @@
   },
   "weaponPickups": [
     {
+      "endTime": 64250,
       "hadBefore": false,
       "inferred": true,
       "kills": 7,
@@ -106819,6 +108118,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 5234,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -106830,6 +108130,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 10603,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -106841,6 +108142,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 64250,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -106856,6 +108158,7 @@
       "dropTime": 5234,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 9398,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 9398,
@@ -106866,6 +108169,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 64250,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -106877,6 +108181,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 64250,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -106888,6 +108193,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 15167,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -106899,6 +108205,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 15167,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -106910,6 +108217,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 12416,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -106925,6 +108233,7 @@
       "dropTime": 9398,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 15167,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 15167,
@@ -106939,6 +108248,7 @@
       "dropTime": 10603,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 13935,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 13935,
@@ -106953,6 +108263,7 @@
       "dropTime": 13935,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 64250,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 64250,
@@ -106967,6 +108278,7 @@
       "dropTime": 15167,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 19984,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 19984,
@@ -106977,6 +108289,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 42927,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -106988,6 +108301,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 19809,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107003,6 +108317,7 @@
       "dropTime": 12416,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 19809,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 19809,
@@ -107013,6 +108328,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 25639,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107024,6 +108340,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 25639,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107039,6 +108356,7 @@
       "dropTime": 19809,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 42927,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 42927,
@@ -107049,6 +108367,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 79678,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -107060,6 +108379,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 79678,
       "hadBefore": false,
       "inferred": true,
       "kills": 5,
@@ -107075,6 +108395,7 @@
       "dropTime": 25639,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 29026,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 29026,
@@ -107089,6 +108410,7 @@
       "dropTime": 19984,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 79678,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 79678,
@@ -107099,6 +108421,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 35414,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107114,6 +108437,7 @@
       "dropTime": 35414,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 79678,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 79678,
@@ -107124,6 +108448,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 46371,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107135,6 +108460,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 42927,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107150,6 +108476,7 @@
       "dropTime": 29026,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 64250,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 64250,
@@ -107164,6 +108491,7 @@
       "dropTime": 46371,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 64250,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 64250,
@@ -107174,6 +108502,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 79678,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107189,6 +108518,7 @@
       "dropTime": 42927,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 79678,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 79678,
@@ -107199,6 +108529,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 51234,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107210,6 +108541,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 51234,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107221,6 +108553,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 69108,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107236,6 +108569,7 @@
       "dropTime": 51234,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 79678,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 79678,
@@ -107246,6 +108580,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 56496,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107257,6 +108592,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 56496,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107268,6 +108604,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 69108,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107283,6 +108620,7 @@
       "dropTime": 56496,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 79678,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 79678,
@@ -107293,6 +108631,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 60730,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107304,6 +108643,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 60730,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107315,6 +108655,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 69108,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107326,6 +108667,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 90189,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -107337,6 +108679,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 84182,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107348,6 +108691,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 90189,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107363,6 +108707,7 @@
       "dropTime": 69108,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 90189,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 90189,
@@ -107373,6 +108718,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 84182,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107384,6 +108730,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 75055,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107399,6 +108746,7 @@
       "dropTime": 75055,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 79678,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 79678,
@@ -107409,6 +108757,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 95806,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -107424,6 +108773,7 @@
       "dropTime": 79678,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 95806,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 95806,
@@ -107438,6 +108788,7 @@
       "dropTime": 84182,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 90189,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 90189,
@@ -107448,6 +108799,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 88403,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107459,6 +108811,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 98849,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -107474,6 +108827,7 @@
       "dropTime": 88403,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 90189,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 90189,
@@ -107488,6 +108842,7 @@
       "dropTime": 90189,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 98849,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 98849,
@@ -107498,6 +108853,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 94431,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107509,6 +108865,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 95806,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107520,6 +108877,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 94431,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107535,6 +108893,7 @@
       "dropTime": 94431,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 98849,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 98849,
@@ -107545,6 +108904,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 119029,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -107556,6 +108916,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 99889,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -107567,6 +108928,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 119029,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107578,6 +108940,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 99889,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107589,6 +108952,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 119029,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107600,6 +108964,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 110734,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -107611,6 +108976,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 119029,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -107622,6 +108988,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 105769,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107633,6 +109000,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 104085,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107644,6 +109012,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 119029,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107655,6 +109024,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 106884,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107666,6 +109036,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 106884,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107677,6 +109048,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 116588,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -107688,6 +109060,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 110734,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -107699,6 +109072,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 116588,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107714,6 +109088,7 @@
       "dropTime": 99889,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 116588,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 116588,
@@ -107728,6 +109103,7 @@
       "dropTime": 104085,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 116588,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 116588,
@@ -107742,6 +109118,7 @@
       "dropTime": 98849,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 119029,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 119029,
@@ -107756,6 +109133,7 @@
       "dropTime": 99889,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 116588,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 116588,
@@ -107766,6 +109144,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 117390,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -107777,6 +109156,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 117045,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -107792,6 +109172,7 @@
       "dropTime": 110734,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 132025,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 132025,
@@ -107806,6 +109187,7 @@
       "dropTime": 119029,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 132025,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 132025,
@@ -107816,6 +109198,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 123679,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107827,6 +109210,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 125417,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107838,6 +109222,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 125417,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107849,6 +109234,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 145715,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -107864,6 +109250,7 @@
       "dropTime": 117390,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 145715,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 145715,
@@ -107874,6 +109261,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 132743,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -107889,6 +109277,7 @@
       "dropTime": 125417,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 132025,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 132025,
@@ -107903,6 +109292,7 @@
       "dropTime": 116588,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 132756,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 132756,
@@ -107913,6 +109303,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 132756,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107924,6 +109315,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 132743,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107935,6 +109327,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 147066,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107946,6 +109339,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 146353,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107957,6 +109351,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 146353,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107968,6 +109363,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 147066,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -107983,6 +109379,7 @@
       "dropTime": 132743,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 146353,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 146353,
@@ -107997,6 +109394,7 @@
       "dropTime": 123679,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 146353,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 146353,
@@ -108007,6 +109405,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 139876,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108018,6 +109417,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 147066,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108033,6 +109433,7 @@
       "dropTime": 145715,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 151002,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 151002,
@@ -108043,6 +109444,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 153315,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108054,6 +109456,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 159496,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108065,6 +109468,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 153315,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108076,6 +109480,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 159496,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108087,6 +109492,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 151002,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108098,6 +109504,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 158404,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108109,6 +109516,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 158404,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108124,6 +109532,7 @@
       "dropTime": 147066,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 153315,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 153315,
@@ -108138,6 +109547,7 @@
       "dropTime": 146353,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 154392,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 154392,
@@ -108152,6 +109562,7 @@
       "dropTime": 153315,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 158404,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 158404,
@@ -108162,6 +109573,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 165886,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108173,6 +109585,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 167803,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -108184,6 +109597,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 158404,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108195,6 +109609,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 167803,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108210,6 +109625,7 @@
       "dropTime": 159496,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 163027,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 163027,
@@ -108220,6 +109636,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 166781,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108235,6 +109652,7 @@
       "dropTime": 158404,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 163027,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 163027,
@@ -108245,6 +109663,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 173092,
       "hadBefore": false,
       "inferred": true,
       "kills": 5,
@@ -108256,6 +109675,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 167803,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108267,6 +109687,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 173092,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108278,6 +109699,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 166781,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108293,6 +109715,7 @@
       "dropTime": 165886,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 166781,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 166781,
@@ -108307,6 +109730,7 @@
       "dropTime": 166781,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 168596,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 168596,
@@ -108321,6 +109745,7 @@
       "dropTime": 168596,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 173092,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 173092,
@@ -108331,6 +109756,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 189391,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108342,6 +109768,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 170277,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108353,6 +109780,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 173666,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108364,6 +109792,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 189391,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -108375,6 +109804,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 189194,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108386,6 +109816,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 189194,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108397,6 +109828,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 182871,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108412,6 +109844,7 @@
       "dropTime": 173092,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 189194,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 189194,
@@ -108422,6 +109855,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 180837,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108433,6 +109867,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 189391,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108444,6 +109879,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 180837,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108459,6 +109895,7 @@
       "dropTime": 151002,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 180837,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 180837,
@@ -108469,6 +109906,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 189194,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108480,6 +109918,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 180837,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108495,6 +109934,7 @@
       "dropTime": 180837,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 182871,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 182871,
@@ -108505,6 +109945,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 192071,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108516,6 +109957,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 200096,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108527,6 +109969,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 200096,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -108538,6 +109981,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 192071,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108553,6 +109997,7 @@
       "dropTime": 167803,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 192071,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 192071,
@@ -108567,6 +110012,7 @@
       "dropTime": 189194,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 202581,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 202581,
@@ -108577,6 +110023,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 202581,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108588,6 +110035,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 194107,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108603,6 +110051,7 @@
       "dropTime": 192071,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 202581,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 202581,
@@ -108617,6 +110066,7 @@
       "dropTime": 189391,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 200096,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 200096,
@@ -108631,6 +110081,7 @@
       "dropTime": 194107,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 202581,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 202581,
@@ -108641,6 +110092,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 212210,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108652,6 +110104,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 263651,
       "hadBefore": false,
       "inferred": true,
       "kills": 9,
@@ -108663,6 +110116,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 200096,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108674,6 +110128,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 208481,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108685,6 +110140,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 208481,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108700,6 +110156,7 @@
       "dropTime": 202581,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 263651,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 263651,
@@ -108710,6 +110167,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 211845,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108725,6 +110183,7 @@
       "dropTime": 208481,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 212210,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 212210,
@@ -108735,6 +110194,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 216360,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108750,6 +110210,7 @@
       "dropTime": 211845,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 223099,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 223099,
@@ -108760,6 +110221,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 223099,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108771,6 +110233,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 216360,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108782,6 +110245,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 223099,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108793,6 +110257,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 223458,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108808,6 +110273,7 @@
       "dropTime": 212210,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 217754,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 217754,
@@ -108818,6 +110284,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 223458,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108833,6 +110300,7 @@
       "dropTime": 217754,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 223099,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 223099,
@@ -108843,6 +110311,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 263651,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108854,6 +110323,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 223976,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108865,6 +110335,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 223458,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -108880,6 +110351,7 @@
       "dropTime": 223099,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 263651,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 263651,
@@ -108890,6 +110362,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 232243,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108901,6 +110374,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 260889,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -108912,6 +110386,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 227365,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108923,6 +110398,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 235886,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108934,6 +110410,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 235886,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108949,6 +110426,7 @@
       "dropTime": 232243,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 263651,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 263651,
@@ -108959,6 +110437,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 260889,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -108970,6 +110449,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 238649,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -108985,6 +110465,7 @@
       "dropTime": 235886,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 260889,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 260889,
@@ -108999,6 +110480,7 @@
       "dropTime": 238649,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 263651,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 263651,
@@ -109009,6 +110491,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 245055,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109024,6 +110507,7 @@
       "dropTime": 227365,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 260889,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 260889,
@@ -109034,6 +110518,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 245990,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109045,6 +110530,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 251556,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109056,6 +110542,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 251436,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109067,6 +110554,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 251436,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109082,6 +110570,7 @@
       "dropTime": 251556,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 263651,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 263651,
@@ -109092,6 +110581,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 256456,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109103,6 +110593,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 260964,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -109118,6 +110609,7 @@
       "dropTime": 260964,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 269324,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 269324,
@@ -109128,6 +110620,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 310729,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109143,6 +110636,7 @@
       "dropTime": 260889,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 269324,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 269324,
@@ -109157,6 +110651,7 @@
       "dropTime": 223458,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 269324,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 269324,
@@ -109167,6 +110662,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 266547,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109178,6 +110674,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 276179,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109193,6 +110690,7 @@
       "dropTime": 263651,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 310729,
       "hadBefore": false,
       "kills": 6,
       "nextDeathTime": 310729,
@@ -109203,6 +110701,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 269873,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -109214,6 +110713,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 269873,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109229,6 +110729,7 @@
       "dropTime": 251436,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 269873,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 269873,
@@ -109239,6 +110740,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 310729,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109254,6 +110756,7 @@
       "dropTime": 269324,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 276179,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 276179,
@@ -109268,6 +110771,7 @@
       "dropTime": 266547,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 284736,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 284736,
@@ -109278,6 +110782,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 272547,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109293,6 +110798,7 @@
       "dropTime": 269873,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 276179,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 276179,
@@ -109303,6 +110809,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 290580,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -109314,6 +110821,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 290580,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109325,6 +110833,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 290580,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109340,6 +110849,7 @@
       "dropTime": 276179,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 284736,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 284736,
@@ -109350,6 +110860,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 287036,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109365,6 +110876,7 @@
       "dropTime": 284736,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 290580,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 290580,
@@ -109375,6 +110887,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 310729,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109386,6 +110899,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 290580,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -109397,6 +110911,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 306821,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -109408,6 +110923,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 294473,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109419,6 +110935,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 310448,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109430,6 +110947,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 306821,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109445,6 +110963,7 @@
       "dropTime": 294473,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 306821,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 306821,
@@ -109459,6 +110978,7 @@
       "dropTime": 287036,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 310448,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 310448,
@@ -109469,6 +110989,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 328423,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -109480,6 +111001,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 310448,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109491,6 +111013,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 310448,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109502,6 +111025,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 328423,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109517,6 +111041,7 @@
       "dropTime": 306821,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 326181,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 326181,
@@ -109527,6 +111052,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 323924,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -109538,6 +111064,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 318040,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109553,6 +111080,7 @@
       "dropTime": 318040,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 323924,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 323924,
@@ -109563,6 +111091,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 328423,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -109578,6 +111107,7 @@
       "dropTime": 310729,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 326181,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 326181,
@@ -109588,6 +111118,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 323002,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109599,6 +111130,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 411591,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -109614,6 +111146,7 @@
       "dropTime": 323924,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 328423,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 328423,
@@ -109624,6 +111157,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 332167,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -109635,6 +111169,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 411591,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109646,6 +111181,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 329389,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109657,6 +111193,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 337288,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109668,6 +111205,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 356027,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -109679,6 +111217,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 356027,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109694,6 +111233,7 @@
       "dropTime": 332167,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 356027,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 356027,
@@ -109704,6 +111244,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 411591,
       "hadBefore": false,
       "inferred": true,
       "kills": 11,
@@ -109715,6 +111256,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 337288,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109726,6 +111268,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 344292,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109741,6 +111284,7 @@
       "dropTime": 326181,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 411591,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 411591,
@@ -109751,6 +111295,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 350879,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109762,6 +111307,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 349145,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109777,6 +111323,7 @@
       "dropTime": 344292,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 350879,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 350879,
@@ -109791,6 +111338,7 @@
       "dropTime": 349145,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 356027,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 356027,
@@ -109801,6 +111349,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 352664,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109812,6 +111361,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 353547,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109827,6 +111377,7 @@
       "dropTime": 353547,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 355732,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 355732,
@@ -109837,6 +111388,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 355732,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109852,6 +111404,7 @@
       "dropTime": 352664,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 355732,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 355732,
@@ -109866,6 +111419,7 @@
       "dropTime": 356027,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 359872,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 359872,
@@ -109876,6 +111430,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 366651,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -109891,6 +111446,7 @@
       "dropTime": 359872,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 366651,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 366651,
@@ -109901,6 +111457,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 362741,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109912,6 +111469,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 362741,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109923,6 +111481,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 363267,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109938,6 +111497,7 @@
       "dropTime": 355732,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 362741,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 362741,
@@ -109952,6 +111512,7 @@
       "dropTime": 362741,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 366651,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 366651,
@@ -109962,6 +111523,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 368528,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109973,6 +111535,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 368528,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109984,6 +111547,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 372068,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -109995,6 +111559,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 384494,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110010,6 +111575,7 @@
       "dropTime": 337288,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 411591,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 411591,
@@ -110024,6 +111590,7 @@
       "dropTime": 350879,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 411591,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 411591,
@@ -110034,6 +111601,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 374860,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110045,6 +111613,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 374860,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110060,6 +111629,7 @@
       "dropTime": 372068,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 411591,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 411591,
@@ -110070,6 +111640,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 377831,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110081,6 +111652,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 384494,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110092,6 +111664,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 401327,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110103,6 +111676,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 401327,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110118,6 +111692,7 @@
       "dropTime": 374860,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 384494,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 384494,
@@ -110128,6 +111703,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 383703,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110139,6 +111715,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 383703,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110154,6 +111731,7 @@
       "dropTime": 368528,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 383703,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 383703,
@@ -110168,6 +111746,7 @@
       "dropTime": 377831,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 383703,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 383703,
@@ -110178,6 +111757,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 401327,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110189,6 +111769,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 398650,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110200,6 +111781,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 388665,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110215,6 +111797,7 @@
       "dropTime": 383703,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 398650,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 398650,
@@ -110225,6 +111808,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 398291,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110236,6 +111820,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 398650,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110251,6 +111836,7 @@
       "dropTime": 398291,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 401327,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 401327,
@@ -110261,6 +111847,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 403288,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110272,6 +111859,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 403288,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110287,6 +111875,7 @@
       "dropTime": 401327,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 407122,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 407122,
@@ -110297,6 +111886,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 407122,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110312,6 +111902,7 @@
       "dropTime": 398650,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 411591,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 411591,
@@ -110322,6 +111913,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 406579,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110333,6 +111925,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 406579,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110344,6 +111937,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 410548,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110359,6 +111953,7 @@
       "dropTime": 403288,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 411591,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 411591,
@@ -110373,6 +111968,7 @@
       "dropTime": 407122,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 410548,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 410548,
@@ -110383,6 +111979,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 443102,
       "hadBefore": false,
       "inferred": true,
       "kills": 5,
@@ -110394,6 +111991,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 415989,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110409,6 +112007,7 @@
       "dropTime": 388665,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 443102,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 443102,
@@ -110423,6 +112022,7 @@
       "dropTime": 406579,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 443102,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 443102,
@@ -110437,6 +112037,7 @@
       "dropTime": 410548,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 443102,
       "hadBefore": false,
       "kills": 6,
       "nextDeathTime": 443102,
@@ -110447,6 +112048,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 416964,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110462,6 +112064,7 @@
       "dropTime": 411591,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 415989,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 415989,
@@ -110472,6 +112075,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 416964,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110483,6 +112087,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 424094,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -110498,6 +112103,7 @@
       "dropTime": 416964,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 443102,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 443102,
@@ -110508,6 +112114,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 425094,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110519,6 +112126,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 422115,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110534,6 +112142,7 @@
       "dropTime": 415989,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 424094,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 424094,
@@ -110544,6 +112153,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 429378,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110555,6 +112165,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 459849,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110570,6 +112181,7 @@
       "dropTime": 424094,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 443102,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 443102,
@@ -110584,6 +112196,7 @@
       "dropTime": 425094,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 459849,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 459849,
@@ -110594,6 +112207,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 459849,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110605,6 +112219,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 430388,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110616,6 +112231,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 431624,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110631,6 +112247,7 @@
       "dropTime": 431624,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 443102,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 443102,
@@ -110641,6 +112258,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 501624,
       "hadBefore": false,
       "inferred": true,
       "kills": 6,
@@ -110652,6 +112270,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 439694,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110663,6 +112282,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 442444,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110674,6 +112294,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 501624,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110689,6 +112310,7 @@
       "dropTime": 439694,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 501624,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 501624,
@@ -110703,6 +112325,7 @@
       "dropTime": 429378,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 501624,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 501624,
@@ -110713,6 +112336,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 470390,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110728,6 +112352,7 @@
       "dropTime": 443102,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 451119,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 451119,
@@ -110738,6 +112363,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 451119,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110749,6 +112375,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 501624,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -110760,6 +112387,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 470390,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110771,6 +112399,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 501624,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110782,6 +112411,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 470390,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110797,6 +112427,7 @@
       "dropTime": 451119,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 501624,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 501624,
@@ -110807,6 +112438,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 478459,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110822,6 +112454,7 @@
       "dropTime": 459849,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 501624,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 501624,
@@ -110832,6 +112465,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 464340,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110843,6 +112477,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 478459,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110854,6 +112489,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 470390,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110865,6 +112501,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 470892,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110876,6 +112513,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 480397,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110887,6 +112525,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 482483,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110898,6 +112537,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 480397,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110913,6 +112553,7 @@
       "dropTime": 470892,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 482483,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 482483,
@@ -110927,6 +112568,7 @@
       "dropTime": 470390,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 482483,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 482483,
@@ -110937,6 +112579,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 480397,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110948,6 +112591,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 485834,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -110959,6 +112603,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 485834,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -110974,6 +112619,7 @@
       "dropTime": 478459,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 483194,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 483194,
@@ -110988,6 +112634,7 @@
       "dropTime": 482483,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 485834,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 485834,
@@ -110998,6 +112645,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 496229,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111009,6 +112657,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 499591,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111024,6 +112673,7 @@
       "dropTime": 483194,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 496229,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 496229,
@@ -111034,6 +112684,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 499591,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111045,6 +112696,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 499591,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -111056,6 +112708,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 496229,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111067,6 +112720,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 499003,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111078,6 +112732,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 508363,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -111089,6 +112744,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 503041,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111100,6 +112756,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 508363,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111115,6 +112772,7 @@
       "dropTime": 499003,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 503041,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 503041,
@@ -111129,6 +112787,7 @@
       "dropTime": 496229,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 508363,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 508363,
@@ -111139,6 +112798,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 538328,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -111154,6 +112814,7 @@
       "dropTime": 499591,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 538328,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 538328,
@@ -111168,6 +112829,7 @@
       "dropTime": 503041,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 507229,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 507229,
@@ -111178,6 +112840,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 508822,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -111189,6 +112852,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 532013,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111200,6 +112864,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 532013,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111211,6 +112876,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 538328,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111222,6 +112888,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 514899,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -111233,6 +112900,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 512016,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111244,6 +112912,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 517533,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -111259,6 +112928,7 @@
       "dropTime": 512016,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 514899,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 514899,
@@ -111273,6 +112943,7 @@
       "dropTime": 514899,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 517533,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 517533,
@@ -111283,6 +112954,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 527029,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111298,6 +112970,7 @@
       "dropTime": 517533,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 527029,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 527029,
@@ -111308,6 +112981,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 522696,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111319,6 +112993,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 532013,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -111334,6 +113009,7 @@
       "dropTime": 522696,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 527029,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 527029,
@@ -111348,6 +113024,7 @@
       "dropTime": 527029,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 539946,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 539946,
@@ -111358,6 +113035,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 552195,
       "hadBefore": false,
       "inferred": true,
       "kills": 3,
@@ -111369,6 +113047,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 552195,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111380,6 +113059,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 538328,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111391,6 +113071,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 539946,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111402,6 +113083,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 547042,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111413,6 +113095,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 547042,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -111424,6 +113107,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 540363,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111435,6 +113119,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 540363,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111450,6 +113135,7 @@
       "dropTime": 540363,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 547042,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 547042,
@@ -111460,6 +113146,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 552195,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111471,6 +113158,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 557041,
       "hadBefore": false,
       "inferred": true,
       "kills": 2,
@@ -111486,6 +113174,7 @@
       "dropTime": 539946,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 547530,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 547530,
@@ -111496,6 +113185,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 547530,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111507,6 +113197,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 552195,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111522,6 +113213,7 @@
       "dropTime": 538328,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 550034,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 550034,
@@ -111532,6 +113224,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 551462,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111547,6 +113240,7 @@
       "dropTime": 547530,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 557041,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 557041,
@@ -111557,6 +113251,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 580078,
       "hadBefore": false,
       "inferred": true,
       "kills": 7,
@@ -111568,6 +113263,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 580078,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111583,6 +113279,7 @@
       "dropTime": 552195,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 580078,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 580078,
@@ -111593,6 +113290,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 563584,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -111608,6 +113306,7 @@
       "dropTime": 501624,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 563584,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 563584,
@@ -111618,6 +113317,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 563162,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111633,6 +113333,7 @@
       "dropTime": 557041,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 580078,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 580078,
@@ -111643,6 +113344,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 561862,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111654,6 +113356,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 561862,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111665,6 +113368,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 564319,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111680,6 +113384,7 @@
       "dropTime": 564319,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 580078,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 580078,
@@ -111694,6 +113399,7 @@
       "dropTime": 563162,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 579301,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 579301,
@@ -111704,6 +113410,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 568653,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111715,6 +113422,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 580078,
       "hadBefore": false,
       "inferred": true,
       "kills": 1,
@@ -111730,6 +113438,7 @@
       "dropTime": 563584,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 579301,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 579301,
@@ -111740,6 +113449,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 580078,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111755,6 +113465,7 @@
       "dropTime": 561862,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 580078,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 580078,
@@ -111765,6 +113476,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 577273,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111776,6 +113488,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 600050,
       "hadBefore": false,
       "inferred": true,
       "kills": 5,
@@ -111790,6 +113503,7 @@
       "dropTime": 580078,
       "dropper": "Milton",
       "dropperTeam": "1",
+      "endTime": 600050,
       "hadBefore": false,
       "kills": 1,
       "player": "squeeze",
@@ -111803,6 +113517,7 @@
       "dropTime": 579301,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 600050,
       "hadBefore": true,
       "kills": 0,
       "player": "squeeze",
@@ -111812,6 +113527,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 583730,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111823,6 +113539,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 600050,
       "hadBefore": false,
       "inferred": true,
       "kills": 4,
@@ -111833,6 +113550,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 590259,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111848,6 +113566,7 @@
       "dropTime": 568653,
       "dropper": "squeeze",
       "dropperTeam": "1",
+      "endTime": 600050,
       "hadBefore": true,
       "kills": 0,
       "player": "Milton",
@@ -111857,6 +113576,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 590259,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111868,6 +113588,7 @@
       "weapon": "ng"
     },
     {
+      "endTime": 589780,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111879,6 +113600,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 594220,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111890,6 +113612,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 594220,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111905,6 +113628,7 @@
       "dropTime": 590259,
       "dropper": "stepcop",
       "dropperTeam": "n n",
+      "endTime": 600050,
       "hadBefore": true,
       "kills": 0,
       "player": "Milton",
@@ -111914,6 +113638,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 593249,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111925,6 +113650,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 593249,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111936,6 +113662,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 598103,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111947,6 +113674,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 598103,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111962,6 +113690,7 @@
       "dropTime": 594220,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 598103,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 598103,
@@ -111972,6 +113701,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 598973,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -111987,6 +113717,7 @@
       "dropTime": 589780,
       "dropper": "shazam",
       "dropperTeam": "n n",
+      "endTime": 598103,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 598103,
@@ -111997,6 +113728,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 600050,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,
@@ -112007,6 +113739,7 @@
       "weapon": "lg"
     },
     {
+      "endTime": 598973,
       "hadBefore": false,
       "inferred": true,
       "kills": 0,

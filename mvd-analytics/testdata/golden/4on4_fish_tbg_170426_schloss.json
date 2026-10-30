@@ -32635,12 +32635,21 @@
   "backpacks": [
     {
       "entNum": 102,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         792,
         -2267.125,
         319.875
       ],
+      "picker": "gore",
+      "pickerEndTime": 68858,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 68858,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 51637,
       "player": "paniagua",
       "source": "ktx",
       "team": "'tbg",
@@ -32649,12 +32658,21 @@
     },
     {
       "entNum": 118,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -188.75,
         -3381.75,
         413.25
       ],
+      "picker": "gore",
+      "pickerEndTime": 68858,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 68858,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 63858,
       "player": ".N3ophyt3.",
       "source": "ktx",
       "team": "'tbg",
@@ -32663,12 +32681,21 @@
     },
     {
       "entNum": 102,
+      "fate": "picked",
       "loc": "cathedral",
       "origin": [
         287.75,
         -3935.125,
         602.625
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 123877,
+      "pickerHadWeapon": false,
+      "pickerKills": 5,
+      "pickerNextDeathTime": 123877,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 70247,
       "player": "biggz",
       "source": "ktx",
       "team": "'tbg",
@@ -32677,12 +32704,21 @@
     },
     {
       "entNum": 104,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         232.5,
         -3219,
         416
       ],
+      "picker": "paniagua",
+      "pickerEndTime": 244753,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 244753,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 171988,
       "player": "DobeZz",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32691,12 +32727,21 @@
     },
     {
       "entNum": 105,
+      "fate": "picked",
       "loc": "cathedral.SSG",
       "origin": [
         1036.125,
         -3586.875,
         268.375
       ],
+      "picker": "anni",
+      "pickerEndTime": 240922,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 240922,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 198229,
       "player": ".N3ophyt3.",
       "source": "ktx",
       "team": "'tbg",
@@ -32705,12 +32750,21 @@
     },
     {
       "entNum": 113,
+      "fate": "picked",
       "loc": "Quad.high",
       "origin": [
         -319.75,
         -3392,
         576
       ],
+      "picker": "paniagua",
+      "pickerEndTime": 299919,
+      "pickerHadWeapon": false,
+      "pickerKills": 6,
+      "pickerNextDeathTime": 299919,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 248299,
       "player": "anni",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32719,12 +32773,21 @@
     },
     {
       "entNum": 128,
+      "fate": "picked",
       "loc": "yard.Pent",
       "origin": [
         254.75,
         -2303.625,
         260.75
       ],
+      "picker": ".N3ophyt3.",
+      "pickerEndTime": 317597,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 317597,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 297580,
       "player": "DobeZz",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32733,12 +32796,21 @@
     },
     {
       "entNum": 101,
+      "fate": "picked",
       "loc": "cemetary.Ring",
       "origin": [
         1375,
         -2916,
         499.375
       ],
+      "picker": "nexus",
+      "pickerEndTime": 383142,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 383142,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 319454,
       "player": "ocoini",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32747,12 +32819,21 @@
     },
     {
       "entNum": 121,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         638.375,
         -2430,
         243
       ],
+      "picker": ".N3ophyt3.",
+      "pickerEndTime": 487400,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 487400,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 407324,
       "player": "DobeZz",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32761,12 +32842,21 @@
     },
     {
       "entNum": 118,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -271.875,
         -3331.25,
         416
       ],
+      "picker": "biggz",
+      "pickerEndTime": 430839,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 430839,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 429936,
       "player": "anni",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32775,12 +32865,21 @@
     },
     {
       "entNum": 113,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -271.75,
         -3354.5,
         447.125
       ],
+      "picker": "nexus",
+      "pickerEndTime": 463206,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 463206,
+      "pickerRelation": "team",
+      "pickerTeam": "'tbg",
+      "pickupTime": 432296,
       "player": "biggz",
       "source": "ktx",
       "team": "'tbg",
@@ -32789,12 +32888,21 @@
     },
     {
       "entNum": 117,
+      "fate": "picked",
       "loc": "Quad.high",
       "origin": [
         555.75,
         -3058.25,
         557.25
       ],
+      "picker": ".N3ophyt3.",
+      "pickerEndTime": 487400,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 487400,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 440064,
       "player": "gore",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32803,12 +32911,21 @@
     },
     {
       "entNum": 103,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         111.5,
         -3184,
         416
       ],
+      "picker": "anni",
+      "pickerEndTime": 485116,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 485116,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 482922,
       "player": "paniagua",
       "source": "ktx",
       "team": "'tbg",
@@ -32817,12 +32934,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "yard.tunnel",
       "origin": [
         -189.875,
         -2453.25,
         286.75
       ],
+      "picker": "biggz",
+      "pickerEndTime": 496244,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 496244,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 484760,
       "player": "DobeZz",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32831,12 +32957,21 @@
     },
     {
       "entNum": 123,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         410.125,
         -3025.875,
         416
       ],
+      "picker": "paniagua",
+      "pickerEndTime": 543605,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 543605,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 485669,
       "player": "anni",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32845,12 +32980,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "tower.RL",
       "origin": [
         0,
         -2017.375,
         416
       ],
+      "picker": "gore",
+      "pickerEndTime": 557124,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 557124,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 531205,
       "player": ".N3ophyt3.",
       "source": "ktx",
       "team": "'tbg",
@@ -32859,12 +33003,21 @@
     },
     {
       "entNum": 126,
+      "fate": "picked",
       "loc": "tower.RL",
       "origin": [
         -111.375,
         -1705.75,
         503.375
       ],
+      "picker": "biggz",
+      "pickerEndTime": 603570,
+      "pickerHadWeapon": false,
+      "pickerKills": 6,
+      "pickerNextDeathTime": 603570,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 558439,
       "player": "gore",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32873,12 +33026,21 @@
     },
     {
       "entNum": 100,
+      "fate": "picked",
       "loc": "tower.RL",
       "origin": [
         51.375,
         -2136.875,
         576
       ],
+      "picker": "biggz",
+      "pickerEndTime": 603570,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 603570,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 574943,
       "player": "anni",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32887,12 +33049,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         420.75,
         -2384.125,
         217.5
       ],
+      "picker": "anni",
+      "pickerEndTime": 602640,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 602640,
+      "pickerRelation": "team",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 601120,
       "player": "ocoini",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32901,12 +33072,21 @@
     },
     {
       "entNum": 109,
+      "fate": "picked",
       "loc": "cathedral.SSG",
       "origin": [
         1052.125,
         -3556.625,
         256.375
       ],
+      "picker": ".N3ophyt3.",
+      "pickerEndTime": 735193,
+      "pickerHadWeapon": false,
+      "pickerKills": 13,
+      "pickerNextDeathTime": 735193,
+      "pickerRelation": "self",
+      "pickerTeam": "'tbg",
+      "pickupTime": 640399,
       "player": ".N3ophyt3.",
       "source": "ktx",
       "team": "'tbg",
@@ -32915,12 +33095,21 @@
     },
     {
       "entNum": 111,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -235.25,
         -3361.625,
         416
       ],
+      "picker": ".N3ophyt3.",
+      "pickerEndTime": 735193,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 735193,
+      "pickerRelation": "team",
+      "pickerTeam": "'tbg",
+      "pickupTime": 670297,
       "player": "nexus",
       "source": "ktx",
       "team": "'tbg",
@@ -32929,12 +33118,21 @@
     },
     {
       "entNum": 100,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -116.625,
         -3337.625,
         429.625
       ],
+      "picker": ".N3ophyt3.",
+      "pickerEndTime": 735193,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 735193,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 670090,
       "player": "ocoini",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32943,12 +33141,21 @@
     },
     {
       "entNum": 37,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         397,
         -2856.625,
         268.25
       ],
+      "picker": "anni",
+      "pickerEndTime": 702167,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 702167,
+      "pickerRelation": "team",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 693871,
       "player": "gore",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32957,12 +33164,21 @@
     },
     {
       "entNum": 109,
+      "fate": "picked",
       "loc": "tower.RL",
       "origin": [
         -225,
         -2192,
         416
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 709712,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 709712,
+      "pickerRelation": "team",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 703283,
       "player": "anni",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32971,12 +33187,21 @@
     },
     {
       "entNum": 102,
+      "fate": "picked",
       "loc": "tower.RL",
       "origin": [
         64.5,
         -1879,
         481
       ],
+      "picker": ".N3ophyt3.",
+      "pickerEndTime": 735193,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 735193,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 710992,
       "player": "ocoini",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32985,12 +33210,21 @@
     },
     {
       "entNum": 101,
+      "fate": "picked",
       "loc": "RA.window",
       "origin": [
         1040,
         -2467.875,
         289.375
       ],
+      "picker": "biggz",
+      "pickerEndTime": 878040,
+      "pickerHadWeapon": false,
+      "pickerKills": 5,
+      "pickerNextDeathTime": 878040,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 745712,
       "player": "gore",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -32999,12 +33233,21 @@
     },
     {
       "entNum": 102,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -196,
         -3266.5,
         416.25
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 769309,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 769309,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 766675,
       "player": "paniagua",
       "source": "ktx",
       "team": "'tbg",
@@ -33013,12 +33256,21 @@
     },
     {
       "entNum": 102,
+      "fate": "picked",
       "loc": "Quad",
       "origin": [
         -214.25,
         -3405.875,
         413.125
       ],
+      "picker": "nexus",
+      "pickerEndTime": 776503,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 776503,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 770270,
       "player": "ocoini",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33027,12 +33279,21 @@
     },
     {
       "entNum": 118,
+      "fate": "picked",
       "loc": "Quad.high",
       "origin": [
         -27,
         -3221.125,
         633.375
       ],
+      "picker": "gore",
+      "pickerEndTime": 786917,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 786917,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 784505,
       "player": "nexus",
       "source": "ktx",
       "team": "'tbg",
@@ -33041,12 +33302,21 @@
     },
     {
       "entNum": 100,
+      "fate": "picked",
       "loc": "Quad.high",
       "origin": [
         -188.875,
         -3372.625,
         576
       ],
+      "picker": "nexus",
+      "pickerEndTime": 808810,
+      "pickerHadWeapon": false,
+      "pickerKills": 1,
+      "pickerNextDeathTime": 808810,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 787500,
       "player": "gore",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33055,12 +33325,21 @@
     },
     {
       "entNum": 111,
+      "fate": "picked",
       "loc": "cemetary.tele",
       "origin": [
         1170.75,
         -1986.75,
         450.875
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 894880,
+      "pickerHadWeapon": false,
+      "pickerKills": 4,
+      "pickerNextDeathTime": 894880,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 856235,
       "player": ".N3ophyt3.",
       "source": "ktx",
       "team": "'tbg",
@@ -33069,12 +33348,21 @@
     },
     {
       "entNum": 124,
+      "fate": "picked",
       "loc": "cemetary",
       "origin": [
         772.125,
         -3181.5,
         160
       ],
+      "picker": "gore",
+      "pickerEndTime": 867244,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 867244,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 862301,
       "player": ".N3ophyt3.",
       "source": "ktx",
       "team": "'tbg",
@@ -33083,12 +33371,21 @@
     },
     {
       "entNum": 121,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         973.75,
         -2771.25,
         157.5
       ],
+      "picker": "gore",
+      "pickerEndTime": 902975,
+      "pickerHadWeapon": false,
+      "pickerKills": 2,
+      "pickerNextDeathTime": 902975,
+      "pickerRelation": "self",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 872712,
       "player": "gore",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33097,12 +33394,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "cemetary",
       "origin": [
         1257.25,
         -2857.375,
         160.625
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 894880,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 894880,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 874652,
       "player": "paniagua",
       "source": "ktx",
       "team": "'tbg",
@@ -33111,12 +33417,21 @@
     },
     {
       "entNum": 98,
+      "fate": "picked",
       "loc": "yard.Pent",
       "origin": [
         496,
         -2273.5,
         322
       ],
+      "picker": "nexus",
+      "pickerEndTime": 901590,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 901590,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 896047,
       "player": "ocoini",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33125,12 +33440,21 @@
     },
     {
       "entNum": 129,
+      "fate": "picked",
       "loc": "yard.Pent",
       "origin": [
         208,
         -2228.25,
         301.875
       ],
+      "picker": "gore",
+      "pickerEndTime": 902975,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 902975,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 902400,
       "player": "nexus",
       "source": "ktx",
       "team": "'tbg",
@@ -33139,12 +33463,21 @@
     },
     {
       "entNum": 125,
+      "fate": "picked",
       "loc": "yard.Pent",
       "origin": [
         271.375,
         -2364,
         243.25
       ],
+      "picker": "paniagua",
+      "pickerEndTime": 939208,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 939208,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 903727,
       "player": "gore",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33153,12 +33486,21 @@
     },
     {
       "entNum": 99,
+      "fate": "picked",
       "loc": "cemetary.tele",
       "origin": [
         1312.625,
         -2253.125,
         288
       ],
+      "picker": "paniagua",
+      "pickerEndTime": 995396,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 995396,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 944426,
       "player": "DobeZz",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33167,12 +33509,21 @@
     },
     {
       "entNum": 130,
+      "fate": "picked",
       "loc": "yard.Pent",
       "origin": [
         256,
         -2105.5,
         256
       ],
+      "picker": "nexus",
+      "pickerEndTime": 1109447,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 1109447,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 990516,
       "player": "DobeZz",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33181,12 +33532,21 @@
     },
     {
       "entNum": 109,
+      "fate": "picked",
       "loc": "tower.RL",
       "origin": [
         -54.75,
         -1751.375,
         462
       ],
+      "picker": "nexus",
+      "pickerEndTime": 1166811,
+      "pickerHadWeapon": false,
+      "pickerKills": 3,
+      "pickerNextDeathTime": 1166811,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 1113193,
       "player": "anni",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33195,12 +33555,21 @@
     },
     {
       "entNum": 123,
+      "fate": "picked",
       "loc": "cathedral",
       "origin": [
         216,
         -3561.5,
         427.875
       ],
+      "picker": "DobeZz",
+      "pickerEndTime": 1128828,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 1128828,
+      "pickerRelation": "team",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 1118470,
       "player": "ocoini",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33209,12 +33578,21 @@
     },
     {
       "entNum": 111,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         632.625,
         -2485.375,
         312
       ],
+      "picker": "ocoini",
+      "pickerEndTime": 1131473,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 1131473,
+      "pickerRelation": "team",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 1130496,
       "player": "DobeZz",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33223,12 +33601,21 @@
     },
     {
       "entNum": 103,
+      "fate": "picked",
       "loc": "RA.low",
       "origin": [
         656,
         -2541.375,
         185.625
       ],
+      "picker": ".N3ophyt3.",
+      "pickerEndTime": 1175318,
+      "pickerHadWeapon": false,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 1175318,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 1137340,
       "player": "ocoini",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33237,12 +33624,21 @@
     },
     {
       "entNum": 111,
+      "fate": "picked",
       "loc": "yard",
       "origin": [
         316.5,
         -2596.875,
         224
       ],
+      "picker": "anni",
+      "pickerEndTime": 1179796,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerNextDeathTime": 1179796,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 1176243,
       "player": ".N3ophyt3.",
       "source": "ktx",
       "team": "'tbg",
@@ -33251,12 +33647,20 @@
     },
     {
       "entNum": 117,
+      "fate": "picked",
       "loc": "Quad.low",
       "origin": [
         -310.25,
         -2863,
         288
       ],
+      "picker": "paniagua",
+      "pickerEndTime": 1200017,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'tbg",
+      "pickupTime": 1194256,
       "player": "anni",
       "source": "ktx",
       "team": "'\u003e\u003c\u003e",
@@ -33265,12 +33669,20 @@
     },
     {
       "entNum": 102,
+      "fate": "picked",
       "loc": "Quad.low",
       "origin": [
         -317.875,
         -2768.75,
         325
       ],
+      "picker": "gore",
+      "pickerEndTime": 1200017,
+      "pickerHadWeapon": true,
+      "pickerKills": 0,
+      "pickerRelation": "enemy",
+      "pickerTeam": "'\u003e\u003c\u003e",
+      "pickupTime": 1199890,
       "player": "biggz",
       "source": "ktx",
       "team": "'tbg",
@@ -93802,7 +94214,7 @@
       }
     ]
   },
-  "schemaVersion": 76,
+  "schemaVersion": 78,
   "shots": {
     "byPlayer": [
       {
@@ -243790,6 +244202,7 @@
   },
   "weaponPickups": [
     {
+      "endTime": 3234,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 3234,
@@ -243800,6 +244213,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 50804,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 50804,
@@ -243810,6 +244224,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 13032,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 13032,
@@ -243820,6 +244235,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 50760,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 50760,
@@ -243830,6 +244246,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 63339,
       "hadBefore": false,
       "kills": 5,
       "nextDeathTime": 63339,
@@ -243840,6 +244257,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 50804,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 50804,
@@ -243850,6 +244268,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 50760,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 50760,
@@ -243860,6 +244279,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 32372,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 32372,
@@ -243870,6 +244290,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 37018,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 37018,
@@ -243880,6 +244301,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 50760,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 50760,
@@ -243890,6 +244312,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 47193,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 47193,
@@ -243904,6 +244327,7 @@
       "dropTime": 50760,
       "dropper": "paniagua",
       "dropperTeam": "'tbg",
+      "endTime": 68858,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 68858,
@@ -243914,6 +244338,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 68858,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 68858,
@@ -243924,6 +244349,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 243298,
       "hadBefore": false,
       "kills": 12,
       "nextDeathTime": 243298,
@@ -243934,6 +244360,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 67479,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 67479,
@@ -243948,6 +244375,7 @@
       "dropTime": 63339,
       "dropper": ".N3ophyt3.",
       "dropperTeam": "'tbg",
+      "endTime": 68858,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 68858,
@@ -243962,6 +244390,7 @@
       "dropTime": 67479,
       "dropper": "biggz",
       "dropperTeam": "'tbg",
+      "endTime": 123877,
       "hadBefore": false,
       "kills": 5,
       "nextDeathTime": 123877,
@@ -243972,6 +244401,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 91532,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 91532,
@@ -243982,6 +244412,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 81791,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 81791,
@@ -243992,6 +244423,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 98310,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 98310,
@@ -244002,6 +244434,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 122838,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 122838,
@@ -244012,6 +244445,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 170902,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 170902,
@@ -244022,6 +244456,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 121816,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 121816,
@@ -244032,6 +244467,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 123006,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 123006,
@@ -244042,6 +244478,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 123006,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 123006,
@@ -244052,6 +244489,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 128137,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 128137,
@@ -244062,6 +244500,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 243298,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 243298,
@@ -244072,6 +244511,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 197641,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 197641,
@@ -244082,6 +244522,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 170902,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 170902,
@@ -244092,6 +244533,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 157092,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 157092,
@@ -244102,6 +244544,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 240922,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 240922,
@@ -244112,6 +244555,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 197641,
       "hadBefore": false,
       "kills": 5,
       "nextDeathTime": 197641,
@@ -244122,6 +244566,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 163657,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 163657,
@@ -244136,6 +244581,7 @@
       "dropTime": 170902,
       "dropper": "DobeZz",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 244753,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 244753,
@@ -244146,6 +244592,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 240922,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 240922,
@@ -244156,6 +244603,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 178298,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 178298,
@@ -244166,6 +244614,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 242496,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 242496,
@@ -244176,6 +244625,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 244753,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 244753,
@@ -244186,6 +244636,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 197641,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 197641,
@@ -244196,6 +244647,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 203469,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 203469,
@@ -244210,6 +244662,7 @@
       "dropTime": 197641,
       "dropper": ".N3ophyt3.",
       "dropperTeam": "'tbg",
+      "endTime": 240922,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 240922,
@@ -244220,6 +244673,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 240922,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 240922,
@@ -244230,6 +244684,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 243298,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 243298,
@@ -244240,6 +244695,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 227740,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 227740,
@@ -244250,6 +244706,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 241731,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 241731,
@@ -244260,6 +244717,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 243298,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 243298,
@@ -244270,6 +244728,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 244753,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 244753,
@@ -244280,6 +244739,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 317597,
       "hadBefore": false,
       "kills": 6,
       "nextDeathTime": 317597,
@@ -244294,6 +244754,7 @@
       "dropTime": 240922,
       "dropper": "anni",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 299919,
       "hadBefore": false,
       "kills": 6,
       "nextDeathTime": 299919,
@@ -244304,6 +244765,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 383142,
       "hadBefore": false,
       "kills": 11,
       "nextDeathTime": 383142,
@@ -244314,6 +244776,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 253176,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 253176,
@@ -244324,6 +244787,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 264718,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 264718,
@@ -244334,6 +244798,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 296137,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 296137,
@@ -244344,6 +244809,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 296137,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 296137,
@@ -244354,6 +244820,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 301231,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 301231,
@@ -244364,6 +244831,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 296208,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 296208,
@@ -244378,6 +244846,7 @@
       "dropTime": 296137,
       "dropper": "DobeZz",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 317597,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 317597,
@@ -244388,6 +244857,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 299919,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 299919,
@@ -244398,6 +244868,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 405892,
       "hadBefore": false,
       "kills": 7,
       "nextDeathTime": 405892,
@@ -244408,6 +244879,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 317908,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 317908,
@@ -244418,6 +244890,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 317908,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 317908,
@@ -244428,6 +244901,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 319173,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 319173,
@@ -244442,6 +244916,7 @@
       "dropTime": 317908,
       "dropper": "ocoini",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 383142,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 383142,
@@ -244452,6 +244927,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 337407,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 337407,
@@ -244462,6 +244938,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 340185,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 340185,
@@ -244472,6 +244949,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 381866,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 381866,
@@ -244482,6 +244960,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 374454,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 374454,
@@ -244492,6 +244971,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 381866,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 381866,
@@ -244502,6 +244982,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 357054,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 357054,
@@ -244512,6 +244993,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 360323,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 360323,
@@ -244522,6 +245004,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 374454,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 374454,
@@ -244532,6 +245015,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 427492,
       "hadBefore": false,
       "kills": 6,
       "nextDeathTime": 427492,
@@ -244542,6 +245026,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 374945,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 374945,
@@ -244552,6 +245037,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 487400,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 487400,
@@ -244562,6 +245048,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 487400,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 487400,
@@ -244572,6 +245059,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 434957,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 434957,
@@ -244582,6 +245070,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 460864,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 460864,
@@ -244592,6 +245081,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 407129,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 407129,
@@ -244606,6 +245096,7 @@
       "dropTime": 405892,
       "dropper": "DobeZz",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 487400,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 487400,
@@ -244616,6 +245107,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 460864,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 460864,
@@ -244630,6 +245122,7 @@
       "dropTime": 427492,
       "dropper": "anni",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 430839,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 430839,
@@ -244644,6 +245137,7 @@
       "dropTime": 430839,
       "dropper": "biggz",
       "dropperTeam": "'tbg",
+      "endTime": 463206,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 463206,
@@ -244654,6 +245148,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 456349,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 456349,
@@ -244664,6 +245159,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 485116,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 485116,
@@ -244674,6 +245170,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 485116,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 485116,
@@ -244688,6 +245185,7 @@
       "dropTime": 434957,
       "dropper": "gore",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 487400,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 487400,
@@ -244698,6 +245196,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 485116,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 485116,
@@ -244708,6 +245207,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 463206,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 463206,
@@ -244718,6 +245218,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 463206,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 463206,
@@ -244728,6 +245229,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 483545,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 483545,
@@ -244738,6 +245240,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 482908,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 482908,
@@ -244748,6 +245251,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 485116,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 485116,
@@ -244762,6 +245266,7 @@
       "dropTime": 482908,
       "dropper": "paniagua",
       "dropperTeam": "'tbg",
+      "endTime": 485116,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 485116,
@@ -244776,6 +245281,7 @@
       "dropTime": 483545,
       "dropper": "DobeZz",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 496244,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 496244,
@@ -244790,6 +245296,7 @@
       "dropTime": 485116,
       "dropper": "anni",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 543605,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 543605,
@@ -244800,6 +245307,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 562450,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 562450,
@@ -244810,6 +245318,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 562450,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 562450,
@@ -244820,6 +245329,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 543618,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 543618,
@@ -244830,6 +245340,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 508254,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 508254,
@@ -244840,6 +245351,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 528531,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 528531,
@@ -244850,6 +245362,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 528202,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 528202,
@@ -244860,6 +245373,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 562450,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 562450,
@@ -244874,6 +245388,7 @@
       "dropTime": 528531,
       "dropper": ".N3ophyt3.",
       "dropperTeam": "'tbg",
+      "endTime": 557124,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 557124,
@@ -244884,6 +245399,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 576190,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 576190,
@@ -244894,6 +245410,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 543618,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 543618,
@@ -244904,6 +245421,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 603570,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 603570,
@@ -244914,6 +245432,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 563324,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 563324,
@@ -244928,6 +245447,7 @@
       "dropTime": 557124,
       "dropper": "gore",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 603570,
       "hadBefore": false,
       "kills": 6,
       "nextDeathTime": 603570,
@@ -244938,6 +245458,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 631700,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 631700,
@@ -244948,6 +245469,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 575595,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 575595,
@@ -244958,6 +245480,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 765492,
       "hadBefore": false,
       "kills": 13,
       "nextDeathTime": 765492,
@@ -244972,6 +245495,7 @@
       "dropTime": 562450,
       "dropper": "anni",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 603570,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 603570,
@@ -244982,6 +245506,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 631700,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 631700,
@@ -244992,6 +245517,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 602640,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 602640,
@@ -245002,6 +245528,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 600593,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 600593,
@@ -245012,6 +245539,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 601431,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 601431,
@@ -245022,6 +245550,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 668972,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 668972,
@@ -245036,6 +245565,7 @@
       "dropTime": 600593,
       "dropper": "ocoini",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 602640,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 602640,
@@ -245046,6 +245576,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 604988,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 604988,
@@ -245056,6 +245587,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 647783,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 647783,
@@ -245066,6 +245598,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 765492,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 765492,
@@ -245076,6 +245609,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 665861,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 665861,
@@ -245086,6 +245620,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 632407,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 632407,
@@ -245096,6 +245631,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 765492,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 765492,
@@ -245106,6 +245642,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 647783,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 647783,
@@ -245120,6 +245657,7 @@
       "dropTime": 631700,
       "dropper": ".N3ophyt3.",
       "dropperTeam": "'tbg",
+      "endTime": 735193,
       "hadBefore": false,
       "kills": 13,
       "nextDeathTime": 735193,
@@ -245130,6 +245668,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 669575,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 669575,
@@ -245140,6 +245679,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 663628,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 663628,
@@ -245150,6 +245690,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 699837,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 699837,
@@ -245160,6 +245701,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 663628,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 663628,
@@ -245174,6 +245716,7 @@
       "dropTime": 669575,
       "dropper": "ocoini",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 735193,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 735193,
@@ -245184,6 +245727,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 672317,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 672317,
@@ -245198,6 +245742,7 @@
       "dropTime": 668972,
       "dropper": "nexus",
       "dropperTeam": "'tbg",
+      "endTime": 735193,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 735193,
@@ -245208,6 +245753,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 692784,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 692784,
@@ -245218,6 +245764,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 702167,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 702167,
@@ -245232,6 +245779,7 @@
       "dropTime": 692784,
       "dropper": "gore",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 702167,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 702167,
@@ -245242,6 +245790,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 702167,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 702167,
@@ -245252,6 +245801,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 699837,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 699837,
@@ -245266,6 +245816,7 @@
       "dropTime": 702167,
       "dropper": "anni",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 709712,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 709712,
@@ -245276,6 +245827,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 765492,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 765492,
@@ -245290,6 +245842,7 @@
       "dropTime": 709712,
       "dropper": "ocoini",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 735193,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 735193,
@@ -245300,6 +245853,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 719479,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 719479,
@@ -245310,6 +245864,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 776503,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 776503,
@@ -245320,6 +245875,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 776503,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 776503,
@@ -245330,6 +245886,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 748758,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 748758,
@@ -245340,6 +245897,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 786917,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 786917,
@@ -245354,6 +245912,7 @@
       "dropTime": 719479,
       "dropper": "gore",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 878040,
       "hadBefore": false,
       "kills": 5,
       "nextDeathTime": 878040,
@@ -245364,6 +245923,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 878040,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 878040,
@@ -245374,6 +245934,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 776503,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 776503,
@@ -245384,6 +245945,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 769309,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 769309,
@@ -245398,6 +245960,7 @@
       "dropTime": 765492,
       "dropper": "paniagua",
       "dropperTeam": "'tbg",
+      "endTime": 769309,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 769309,
@@ -245412,6 +245975,7 @@
       "dropTime": 769309,
       "dropper": "ocoini",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 776503,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 776503,
@@ -245422,6 +245986,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 776111,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 776111,
@@ -245432,6 +245997,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 802001,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 802001,
@@ -245442,6 +246008,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 789959,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 789959,
@@ -245456,6 +246023,7 @@
       "dropTime": 776503,
       "dropper": "nexus",
       "dropperTeam": "'tbg",
+      "endTime": 786917,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 786917,
@@ -245470,6 +246038,7 @@
       "dropTime": 786917,
       "dropper": "gore",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 808810,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 808810,
@@ -245480,6 +246049,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 799050,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 799050,
@@ -245490,6 +246060,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 802001,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 802001,
@@ -245500,6 +246071,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 878040,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 878040,
@@ -245510,6 +246082,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 975884,
       "hadBefore": false,
       "kills": 7,
       "nextDeathTime": 975884,
@@ -245520,6 +246093,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 830390,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 830390,
@@ -245530,6 +246104,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 870181,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 870181,
@@ -245540,6 +246115,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 861273,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 861273,
@@ -245550,6 +246126,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 845440,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 845440,
@@ -245560,6 +246137,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 845440,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 845440,
@@ -245570,6 +246148,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 901590,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 901590,
@@ -245580,6 +246159,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 861476,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 861476,
@@ -245590,6 +246170,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 861476,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 861476,
@@ -245604,6 +246185,7 @@
       "dropTime": 802001,
       "dropper": ".N3ophyt3.",
       "dropperTeam": "'tbg",
+      "endTime": 894880,
       "hadBefore": false,
       "kills": 4,
       "nextDeathTime": 894880,
@@ -245618,6 +246200,7 @@
       "dropTime": 861476,
       "dropper": ".N3ophyt3.",
       "dropperTeam": "'tbg",
+      "endTime": 867244,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 867244,
@@ -245628,6 +246211,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 894880,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 894880,
@@ -245638,6 +246222,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 902975,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 902975,
@@ -245648,6 +246233,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1036346,
       "hadBefore": false,
       "kills": 10,
       "nextDeathTime": 1036346,
@@ -245662,6 +246248,7 @@
       "dropTime": 867244,
       "dropper": "gore",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 902975,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 902975,
@@ -245676,6 +246263,7 @@
       "dropTime": 870181,
       "dropper": "paniagua",
       "dropperTeam": "'tbg",
+      "endTime": 894880,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 894880,
@@ -245686,6 +246274,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 939208,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 939208,
@@ -245696,6 +246285,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 939208,
       "hadBefore": false,
       "kills": 5,
       "nextDeathTime": 939208,
@@ -245706,6 +246296,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 892599,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 892599,
@@ -245720,6 +246311,7 @@
       "dropTime": 894880,
       "dropper": "ocoini",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 901590,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 901590,
@@ -245734,6 +246326,7 @@
       "dropTime": 901590,
       "dropper": "nexus",
       "dropperTeam": "'tbg",
+      "endTime": 902975,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 902975,
@@ -245744,6 +246337,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 975884,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 975884,
@@ -245758,6 +246352,7 @@
       "dropTime": 902975,
       "dropper": "gore",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 939208,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 939208,
@@ -245768,6 +246363,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 946738,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 946738,
@@ -245778,6 +246374,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 946738,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 946738,
@@ -245788,6 +246385,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 928127,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 928127,
@@ -245798,6 +246396,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 930699,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 930699,
@@ -245808,6 +246407,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 973845,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 973845,
@@ -245818,6 +246418,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 942556,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 942556,
@@ -245828,6 +246429,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 939208,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 939208,
@@ -245842,6 +246444,7 @@
       "dropTime": 942556,
       "dropper": "DobeZz",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 995396,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 995396,
@@ -245852,6 +246455,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 995396,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 995396,
@@ -245862,6 +246466,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 973845,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 973845,
@@ -245872,6 +246477,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1109447,
       "hadBefore": false,
       "kills": 12,
       "nextDeathTime": 1109447,
@@ -245882,6 +246488,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 988981,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 988981,
@@ -245892,6 +246499,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 995396,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 995396,
@@ -245902,6 +246510,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 991312,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 991312,
@@ -245916,6 +246525,7 @@
       "dropTime": 988981,
       "dropper": "DobeZz",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 1109447,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 1109447,
@@ -245926,6 +246536,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 996007,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 996007,
@@ -245936,6 +246547,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 996440,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 996440,
@@ -245946,6 +246558,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1013848,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 1013848,
@@ -245956,6 +246569,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1006744,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1006744,
@@ -245966,6 +246580,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1026341,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1026341,
@@ -245976,6 +246591,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1028316,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1028316,
@@ -245986,6 +246602,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 1032327,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1032327,
@@ -245996,6 +246613,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1199877,
       "hadBefore": false,
       "kills": 20,
       "nextDeathTime": 1199877,
@@ -246006,6 +246624,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1199877,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1199877,
@@ -246016,6 +246635,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1058929,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1058929,
@@ -246026,6 +246646,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 1088400,
       "hadBefore": false,
       "kills": 2,
       "nextDeathTime": 1088400,
@@ -246036,6 +246657,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1061058,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1061058,
@@ -246046,6 +246668,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1086253,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1086253,
@@ -246056,6 +246679,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1085304,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1085304,
@@ -246066,6 +246690,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 1086253,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1086253,
@@ -246076,6 +246701,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1111587,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1111587,
@@ -246086,6 +246712,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1099637,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1099637,
@@ -246096,6 +246723,7 @@
       "weapon": "gl"
     },
     {
+      "endTime": 1109447,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 1109447,
@@ -246110,6 +246738,7 @@
       "dropTime": 1111587,
       "dropper": "anni",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 1166811,
       "hadBefore": false,
       "kills": 3,
       "nextDeathTime": 1166811,
@@ -246120,6 +246749,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1124694,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1124694,
@@ -246130,6 +246760,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1117120,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1117120,
@@ -246144,6 +246775,7 @@
       "dropTime": 1117120,
       "dropper": "ocoini",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 1128828,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1128828,
@@ -246154,6 +246786,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1124694,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1124694,
@@ -246164,6 +246797,7 @@
       "weapon": "sng"
     },
     {
+      "endTime": 1140712,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1140712,
@@ -246174,6 +246808,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1140712,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1140712,
@@ -246188,6 +246823,7 @@
       "dropTime": 1128828,
       "dropper": "DobeZz",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 1131473,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1131473,
@@ -246202,6 +246838,7 @@
       "dropTime": 1131473,
       "dropper": "ocoini",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 1175318,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1175318,
@@ -246212,6 +246849,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1144334,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1144334,
@@ -246222,6 +246860,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1200017,
       "hadBefore": false,
       "kills": 3,
       "player": "paniagua",
@@ -246231,6 +246870,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1179796,
       "hadBefore": false,
       "kills": 1,
       "nextDeathTime": 1179796,
@@ -246241,6 +246881,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1174083,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1174083,
@@ -246251,6 +246892,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1176526,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1176526,
@@ -246265,6 +246907,7 @@
       "dropTime": 1175318,
       "dropper": ".N3ophyt3.",
       "dropperTeam": "'tbg",
+      "endTime": 1179796,
       "hadBefore": true,
       "kills": 0,
       "nextDeathTime": 1179796,
@@ -246275,6 +246918,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1184853,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1184853,
@@ -246285,6 +246929,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1200017,
       "hadBefore": false,
       "kills": 0,
       "player": "gore",
@@ -246294,6 +246939,7 @@
       "weapon": "ssg"
     },
     {
+      "endTime": 1200017,
       "hadBefore": false,
       "kills": 1,
       "player": "gore",
@@ -246303,6 +246949,7 @@
       "weapon": "rl"
     },
     {
+      "endTime": 1192108,
       "hadBefore": false,
       "kills": 0,
       "nextDeathTime": 1192108,
@@ -246317,6 +246964,7 @@
       "dropTime": 1179796,
       "dropper": "anni",
       "dropperTeam": "'\u003e\u003c\u003e",
+      "endTime": 1200017,
       "hadBefore": true,
       "kills": 0,
       "player": "paniagua",
@@ -246330,6 +246978,7 @@
       "dropTime": 1199877,
       "dropper": "biggz",
       "dropperTeam": "'tbg",
+      "endTime": 1200017,
       "hadBefore": true,
       "kills": 0,
       "player": "gore",

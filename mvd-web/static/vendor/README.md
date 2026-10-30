@@ -9,12 +9,13 @@ unpkg or Google Fonts are unreachable.
 ## Cytoscape + fcose (Loc Graph tab)
 
 Fetched from unpkg at the exact pinned versions referenced by
-`../index.html`. `index.html` loads them in this order — it matters,
+`../../index.html`. `index.html` loads them in this order — it matters,
 because each UMD bundle reads the previous one's `window` global
 (`cytoscape` is independent; `layout-base` → `window.layoutBase` →
 `cose-base` reads it and sets `window.coseBase` → `cytoscape-fcose` reads
-that and sets `window.cytoscapeFcose`, which `app.js`
-`registerCytoscapeExtensions()` hands to `cytoscape.use()`).
+that and sets `window.cytoscapeFcose`, which
+`registerCytoscapeExtensions()` in `src/tabs/locgraph/loc-graph-view.js`
+hands to `cytoscape.use()`).
 
 | File | Version | Source URL | sha256 | bytes |
 |---|---|---|---|---|
@@ -59,7 +60,7 @@ License 1.1**, which permits bundling and redistribution.
    the filename), e.g.
    `curl -fL -o cytoscape-3.x.y.min.js https://unpkg.com/cytoscape@3.x.y/dist/cytoscape.min.js`.
 2. Update the matching `<script src="vendor/...">` (or the fonts `<link>`)
-   in `../index.html`.
+   in `../../index.html`.
 3. Update the row (version, URL, sha256, bytes) in this file; delete the
    old file.
 

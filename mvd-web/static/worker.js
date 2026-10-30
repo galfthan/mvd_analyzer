@@ -120,7 +120,7 @@ function logWorkerTimings(t) {
 // side, cheap enough to answer per request. Whitelisted by name rather than
 // dispatching whatever the message asks for: the message body decides which
 // global is invoked, so the set of invokable globals is pinned here.
-const VIEW_QUERY_FNS = new Set(['getTopWindows', 'getTopKills']);
+const VIEW_QUERY_FNS = new Set(['getTopWindows', 'getTopKills', 'getLives', 'getHighlights', 'getEvents', 'getBackpacks', 'getFrags', 'getWeaponPickups']);
 
 let wasmReady = false;
 
@@ -143,7 +143,7 @@ initWasm().catch(err => {
 
 onmessage = function(e) {
     // reqId correlates each reply with its caller's pending promise on the
-    // main thread (see app.js pendingWorkerReqs). Echo it back on every
+    // main thread (see src/data/worker-client.js). Echo it back on every
     // request-scoped reply; the un-correlated init-failure 'error' above has
     // no reqId and the main thread drops it.
     const reqId = e.data.reqId;
@@ -211,7 +211,7 @@ onmessage = function(e) {
             // stored default regions — no need to JSON.parse the multi-MB
             // result here just to hand the default regions straight back. On a
             // non-binary team layout it returns an {"error":...} envelope,
-            // which applyDeferredBuckets tolerates (it skips when rs.error set).
+            // which DemoHandle._applyBuckets tolerates (it skips when rs.error set).
             let regionStatesJSON = '';
             const tRegion = performance.now();
             try {
@@ -248,7 +248,7 @@ onmessage = function(e) {
             postMessage({ type: 'recompute_error', reqId, message: err.message || String(err) });
         }
     } else if (e.data.type === 'viewQuery') {
-        // One view-layer query (view.TopWindows / view.TopKills) over the demo
+        // One view-layer query (view.TopWindows, view.Events, …) over the demo
         // already held on the Go side. Like recomputeRegions and computeLos,
         // this has to round-trip through the worker: the Go exports live on
         // this worker's global (js.Global() == worker scope), so the main page

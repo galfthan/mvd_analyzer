@@ -135,7 +135,8 @@ func getDemoInfo(this js.Value, args []js.Value) interface{} {
 // frontend's Timeline/Map panels read (50 ms, all fields, legacy
 // "first-sample-of-bucket" reducers, team aggregates). Columnar always
 // emits the raw loc index "li". See mvd-analytics/view/columnar.go for
-// the shape and the app.js accessors that consume it.
+// the shape and mvd-map-view/src/frames.js for the JS accessors that
+// consume it.
 func getDefaultBuckets(this js.Value, args []js.Value) interface{} {
 	if lastResult == nil {
 		return errorJSON("no demo analyzed yet")
@@ -288,6 +289,109 @@ func getTopKills(this js.Value, args []js.Value) interface{} {
 		return errorJSON(err.Error())
 	}
 	return respondJSON(v)
+}
+
+// getLives returns every life of the match (view.Lives). Argument is an
+// optional JSON string of view.LivesOptions. Same raw-by-default family
+// caveat as getTopWindows.
+func getLives(this js.Value, args []js.Value) interface{} {
+	if lastResult == nil {
+		return errorJSON("no demo analyzed yet")
+	}
+	var opts view.LivesOptions
+	if len(args) >= 1 && args[0].String() != "" {
+		if err := json.Unmarshal([]byte(args[0].String()), &opts); err != nil {
+			return errorJSON("bad options JSON: " + err.Error())
+		}
+	}
+	v, err := view.Lives(lastResult, opts)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	return respondJSON(v)
+}
+
+// getBackpacks returns the RL/LG backpack drops (view.Backpacks) in the
+// /backpacks envelope. Argument is an optional JSON string of
+// view.BackpackOptions.
+func getBackpacks(this js.Value, args []js.Value) interface{} {
+	if lastResult == nil {
+		return errorJSON("no demo analyzed yet")
+	}
+	var opts view.BackpackOptions
+	if len(args) >= 1 && args[0].String() != "" {
+		if err := json.Unmarshal([]byte(args[0].String()), &opts); err != nil {
+			return errorJSON("bad options JSON: " + err.Error())
+		}
+	}
+	bp, err := view.Backpacks(lastResult, opts)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	return respondJSON(view.BackpacksEnvelope{TimeUnit: view.UnitMs, Backpacks: bp})
+}
+
+// getFrags returns the kill log (view.Frags) in the /frags envelope.
+// Argument is an optional JSON string of view.FragOptions.
+func getFrags(this js.Value, args []js.Value) interface{} {
+	if lastResult == nil {
+		return errorJSON("no demo analyzed yet")
+	}
+	var opts view.FragOptions
+	if len(args) >= 1 && args[0].String() != "" {
+		if err := json.Unmarshal([]byte(args[0].String()), &opts); err != nil {
+			return errorJSON("bad options JSON: " + err.Error())
+		}
+	}
+	fr, err := view.Frags(lastResult, opts)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	return respondJSON(view.FragsEnvelope{TimeUnit: view.UnitMs, FragResult: fr})
+}
+
+// getWeaponPickups returns the slot-weapon acquisitions
+// (view.WeaponPickups) in the /weapon-pickups envelope. Argument is an
+// optional JSON string of view.WeaponPickupOptions.
+func getWeaponPickups(this js.Value, args []js.Value) interface{} {
+	if lastResult == nil {
+		return errorJSON("no demo analyzed yet")
+	}
+	var opts view.WeaponPickupOptions
+	if len(args) >= 1 && args[0].String() != "" {
+		if err := json.Unmarshal([]byte(args[0].String()), &opts); err != nil {
+			return errorJSON("bad options JSON: " + err.Error())
+		}
+	}
+	wp, err := view.WeaponPickups(lastResult, opts)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	return respondJSON(view.WeaponPickupsEnvelope{TimeUnit: view.UnitMs, Pickups: wp})
+}
+
+// getHighlights returns the stored highlight catalogue narrowed by
+// view.HighlightsOptions Kinds / Players — the /highlights body at its
+// default airgib look-back (AirgibPreMs is not read here).
+func getHighlights(this js.Value, args []js.Value) interface{} {
+	if lastResult == nil {
+		return errorJSON("no demo analyzed yet")
+	}
+	var opts view.HighlightsOptions
+	if len(args) >= 1 && args[0].String() != "" {
+		if err := json.Unmarshal([]byte(args[0].String()), &opts); err != nil {
+			return errorJSON("bad options JSON: " + err.Error())
+		}
+	}
+	h, err := view.Highlights(lastResult)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	env, err := view.FilterHighlights(h, view.HighlightsOptions{Kinds: opts.Kinds, Players: opts.Players}, view.DefaultAirgibPreMs)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	return respondJSON(env)
 }
 
 // getLocTrails returns per-player loc residences.
@@ -455,6 +559,11 @@ func main() {
 	js.Global().Set("getLocTrails", js.FuncOf(getLocTrails))
 	js.Global().Set("getTopWindows", js.FuncOf(getTopWindows))
 	js.Global().Set("getTopKills", js.FuncOf(getTopKills))
+	js.Global().Set("getLives", js.FuncOf(getLives))
+	js.Global().Set("getHighlights", js.FuncOf(getHighlights))
+	js.Global().Set("getBackpacks", js.FuncOf(getBackpacks))
+	js.Global().Set("getFrags", js.FuncOf(getFrags))
+	js.Global().Set("getWeaponPickups", js.FuncOf(getWeaponPickups))
 	js.Global().Set("getAnalysisTimings", js.FuncOf(getAnalysisTimings))
 	js.Global().Set("getDemoInfo", js.FuncOf(getDemoInfo))
 	js.Global().Set("wasmVersion", map[string]interface{}{

@@ -123,6 +123,11 @@ that downstream consumers render, summarise, or feed to an agent.
   `liquids` (water/slime/lava volume meshes from the engine's turbulent
   `*` textures) and `submodels` (brush-model lifts/doors, keyed by their
   `*id` index and posed at runtime from the result's mover streams) (v4).
+  Version 5 adds `liquids[].volume`: the liquid itself as closed convex
+  cells — every water/slime/lava leaf of the BSP's hull-0 tree, built by
+  clipping the half-spaces on its root path, wound outward — for the
+  viewer's volumetric haze. qbsp makes teleporter fields liquid too, so
+  only cells connected to a visible (non-teleport) `*` surface are kept.
   (A v3 top-level `walls` list fed a since-removed occluding "solid"
   render; walls are still classified for diagnostics but no longer
   emitted.) Degenerate zero-area fan triangles are dropped. Extraction thresholds
@@ -134,9 +139,12 @@ that downstream consumers render, summarise, or feed to an agent.
   (`(X, Y, Z − PlayerFeetOffset − H)`) is collected per map, and floor
   faces no sample lands on (within `-prune-xy-tol`, default
   `mapclip.FootprintReach` = 24, and `-prune-z-tol`, default 16) are
-  dropped. Pruned files carry a `pruned` provenance block; maps with no
-  matching demos emit unpruned. The committed 3D corpus (the ~18 maps
-  with BSPs) is pruned this way against recent competitive games —
+  dropped — except floors lying under a liquid surface, which swimmers
+  never touch, so pruning would leave every pool bottomless. Pruned files
+  carry a `pruned` provenance block; maps with no matching demos emit
+  unpruned. The committed 3D corpus (the maps with provisioned BSPs, bar
+  dad2 / spinev2 / zeal, which stay unpruned) is pruned this way against
+  recent competitive games —
   [`scripts/prune-demos.tsv`](../scripts/prune-demos.tsv) records the
   exact map → mode → hub gameIds used, so the prune is reproducible.
 - `cmd/qw-recon-eval/` — damage-reconstruction accuracy harness: runs
@@ -630,9 +638,12 @@ flowchart TB
   end
   subgraph d9["depth 9"]
     player_stats["player-stats"]
+    backpack_pickups["backpack-pickups"]
   end
   aim -->|"aim"| player_stats
+  backpack_linkage -->|"backpack-linkage"| backpack_pickups
   backpack_recon -->|"backpacks:final"| backpack_linkage
+  backpack_recon -->|"backpacks:final"| backpack_pickups
   backpack_recon -->|"backpacks:final"| player_stats
   backpacks -->|"backpacks"| backpack_recon
   clock -->|"clock"| backpacks
@@ -730,12 +741,12 @@ flowchart TB
   timeline -->|"timeline"| region_control
   timeline -->|"timeline"| shots
   timeline -->|"timeline"| wall_clock
+  weapon_pickups -->|"weapon-pickups"| backpack_pickups
   weapon_pickups -->|"weapon-pickups"| player_stats
   classDef post stroke:#2563eb,stroke-width:4px;
-  class frags_final,aim,highlights,match_final,loc_graph,no_match,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage post;
+  class frags_final,aim,highlights,match_final,loc_graph,no_match,wall_clock,region_control,opening,player_stats,damage_recon,backpack_recon,backpack_linkage,backpack_pickups post;
   classDef lazy stroke-dasharray:4 3;
   class los lazy;
-
 ```
 
 <!-- dag-mermaid:end -->

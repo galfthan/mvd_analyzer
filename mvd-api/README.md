@@ -12,7 +12,7 @@ binary).
 ## Usage
 
 ```
-mvd-api [serve] [-addr ADDR] [-cache-dir PATH] [-cache-max-bytes N] [-max-parses N] [-log-format text|json] [-auth-dir DIR] [-portal -portal-base-url URL]
+mvd-api [serve] [-addr ADDR] [-cache-dir PATH] [-cache-max-bytes N] [-max-parses N] [-log-format text|json] [-auth-dir DIR] [-portal -portal-base-url URL] [-play-url URL]
 mvd-api version
 mvd-api cache stats [-cache-dir PATH]
 mvd-api cache prune [-cache-dir PATH] [-max-bytes N | -older-than 30d | -all]
@@ -40,6 +40,7 @@ mvd-api keys list   -auth-dir DIR
 | `-burst-service`    | `200`                                   | Auth mode: per-key burst for service keys |
 | `-portal`           | `false`                                 | Enable the Discord key portal at `/portal` (users self-service their own key). **Off = no `/portal` routes at all.** Requires `-auth-dir` **and** the three env vars below; see "The Discord key portal" |
 | `-portal-base-url`  | _(empty)_                               | Public origin of the deployment, e.g. `https://qw.example.com`. Used to build the OAuth `redirect_uri` (`<base>/portal/callback`) and absolute links. Required with `-portal` |
+| `-play-url`         | `https://mvdanalyzer.com/play.html`     | The web app's light player that `POST /v1/playlist-links` links to — point it at a branch deploy's `play.html` until production has the player |
 
 The portal's secrets are supplied via **environment variables, never
 flags** (a flag value is visible in `ps`):
@@ -233,7 +234,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/aim` | — | `result.AimResult` (per-player per-weapon effectiveness + crosshair-error samples (hitscan) + LG ramp; from the always-full base parse, so RL/GL direct/splash + the LG whiff split are always present) |
 | GET | `/v1/demos/{id}/loc-graph` | — | `result.LocGraphResult` (per-map loc adjacency + edge weights) |
 | GET | `/v1/demos/{id}/chat` | `from`, `to`, `players`, `types` | `{timeUnit, messages: []result.MatchEvent}` (chat + teamsay only; types defaults to both) |
-| GET | `/v1/demos/{id}/backpacks` | `players`, `weapons`, `from`, `to` | `{timeUnit, backpacks: []result.BackpackDrop}` (RL/LG drops; `source` is `ktx` from `//ktx drop`, or `reconstructed` on demos older than that hint) |
+| GET | `/v1/demos/{id}/backpacks` | `players`, `weapons`, `from`, `to` | `{timeUnit, backpacks: []result.BackpackDrop}` (RL/LG drops with their pickup side — `fate`, `picker`, `pickerRelation`, …; `source` is `ktx` from `//ktx drop`, or `reconstructed` on demos older than that hint) |
 | GET | `/v1/demos/{id}/items` | `items`, `players`, `kinds` | `result.ItemsResult` (per-item pickup/respawn timeline) |
 | GET | `/v1/demos/{id}/weapon-pickups` | `players`, `weapons`, `source`, `from`, `to` | `{timeUnit, pickups: []result.WeaponPickup}` (kills-before-next-death; joins to backpacks via `backpackEnt`) |
 | GET | `/v1/demos/{id}/buckets` | `windowMs`, `from`, `to`, `players`, `fields`, `reducers`, `includeTeam`, `loc`, `layout` | `view.ColumnarBuckets` (`layout=column`, default) or `view.BucketsView` (`layout=row`) |
@@ -252,6 +253,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/top-windows` | `metric`, `mode`, `windowMs`, `gapMs`, `limit`, `perPlayer`, `players`, `weapons`, `from`, `to`, `dmg`, `minScore` | `view.TopWindowsView` — each player's best stretches, ranked by a summable metric (`frags`/`deaths`/`netFrags`/`damageGiven`/`damageTaken`/`netDamage`/`shots`/`hits`); one flat list, `scoredBy` on the envelope; ties on `score` (the common case) break on a fixed complementary metric — `damageGiven` ↔ `frags`, `damageTaken` ↔ `deaths` — summed unscoped in the response's damage family, so it equals the row's own stats field; `limit` and `perPlayer` share one rule — default on omit, negative = uncapped, explicit `0` a 400 (`limit` also caps at 200); `mode` picks the segmentation — `fixed` (default, every window `windowMs` long) or `gap` (a maximal run of scoring events no more than `gapMs` apart, scored by their sum), each rejecting the other's knob with a 400 and `gapMs` REQUIRED under `gap` with no default (start ~10000 on the frag metrics, ~3000 on damage/shots); both knobs are bounded to `[1, match duration]` |
 | GET | `/v1/demos/{id}/top-kills` | `gapMs`, `contestedMs`, `limit`, `players`, `weapons`, `minDamage`, `from`, `to`, `dmg` | `view.TopKillsView` — the match's hardest kill BURSTS, ranked by burst damage: for each enemy kill, the contiguous run of KILLING-WEAPON hits leading up to it (clipped by the victim's current life start), as `{rank, killer, victim, team, time, weapon, damage, hits, spanMs, maxGapMs, victimWep, returnDamage}`. `gapMs` is a CAPTURE gap (default 3000, max 5000) — narrow client-side by keeping rows with `maxGapMs <= your gap`, which reproduces the tighter walk exactly; `spanMs` is the display figure. Positional kills (telefrag/stomp) produce no row; kills by an already-dead killer stay in. Out-of-range `gapMs`/`contestedMs`/`limit` are 400s naming the range, never clamps |
 | GET | `/v1/demos/{id}/lives` | `players`, `from`, `to`, `minMs`, `dmg`, `summary` | `view.LivesView` — one row per spawn-to-death life (segmented by `streams.players[].alive`), with `endReason`, `spawnLoc`/`deathLoc`, `killedBy`, `itemsTaken`, `weaponsHeld` and the same per-interval stats block `/top-windows` uses; lives partition the match, so unfiltered per-life sums reconcile with the per-event LOGS (`/frags` `frags[]`, `/damage` `events[]`) — not necessarily with the KTX-sourced `byPlayer` scoreboards; `summary=1` keeps every row and drops the per-row collections |
+| POST | `/v1/playlist-links` | JSON body `{items, name?}` | `{url, markdown, name, length, clips, cards, demos}` — a link to the light player (`-play-url`) that plays a scripted reel: clips (`gameId`, match-ms `from`/`to`, `watch` player name, `label`, `slow`, `text`) from up to 20 hub games, title cards (`ms`, `bg`, `opacity`, fades, `text`) and text (size, colour, font, place, timing) — packed exactly as the web app's share link (format v2, nothing stored). Loads each game through the cache. 400 `invalid_param` names the item at fault. Backs the MCP `createPlaylistLink` tool |
 | GET | `/v1/games/search` | `players`, `teams`, `map`, `mode`, `matchtag`, `from`, `to`, `limit`, `offset`, `roster` | `{limit, offset, count, total?, games}` — hub.quakeworld.nu game discovery (no demo; live upstream, 502 `hub_upstream`). REST twin of the MCP `searchGames` tool (shared `hubfetch` impl) |
 | GET | `/v1/maps/{map}/entities` | `types`, `kinds` | `result.MapEntitiesResult` (static layout by map name, no demo needed) |
 | GET | `/v1/maps/{map}/geometry` | — | `mapgeom.MapRegions` floor-polygon JSON (needs `-maps-dir`; REST-only) |
@@ -264,7 +266,9 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 The per-endpoint reference (every operation, parameter, full field-level
 response schema, and error code) is the OpenAPI document the server
 serves at `/openapi.yaml`, browsable at `/docs` — drift-tested against
-the code, so it can't go stale. [`API.md`](API.md) is the high-level
+the code, so it can't go stale. The web clip finder documents its six sources
+from the same spec, through an extract (`mvd-web/src/lib/api-docs.json`)
+that `webdocs_test.go` regenerates (`-update-webdocs`) and pins. [`API.md`](API.md) is the high-level
 guide around it:
 
 - **Getting started** — demo addressing, auto-load, the typical flow.

@@ -1324,8 +1324,30 @@ package result
 //     (`/highlights?kinds=airgib&preMs=` replaces the endpoint). The
 //     `airgib` /events kind reads the new list with the same detail keys.
 //
+// v77 — backpack drops carry their own pickup side on every demo.
+//   - ADDED on `backpacks[]`: `pickerRelation` ("self" | "team" | "enemy",
+//     the picker's side relative to the dropper — self when the dropper
+//     took their own pack back; every other picker in a duel / FFA is an
+//     enemy) on every row naming a `picker`, and — `ktx` rows only —
+//     `pickerHadWeapon`, `pickerKills`, `pickerNextDeathTime`, copied from
+//     the joined weaponPickups row's hadBefore / kills / nextDeathTime.
+//   - CHANGED on `ktx` rows of `backpacks[]`: the `//ktx bp` pickup that
+//     weaponPickups carries (joined on entNum + drop time) is stamped on the
+//     drop — `fate: "picked"` with `picker` / `pickerTeam` / `pickupTime` —
+//     and a drop with neither a pickup nor KTX's `//ktx expire` hint is
+//     `fate: "unobserved"`. Before, a `ktx` row carried `fate` only as
+//     `expired` and left the rest to the consumer's join; the join's answer
+//     is unchanged, and weaponPickups itself is untouched.
+//
+// v78 — a weapon pickup's run has an end on every row.
+//   - ADDED on `weaponPickups[]`: `endTime` — `nextDeathTime`, else the
+//     match end (the picker was still on the run when it ended), the
+//     window `kills` counts over; and on `ktx` rows of `backpacks[]` the
+//     same value as `pickerEndTime`. `nextDeathTime` is unchanged (absent
+//     when the picker never died again).
+//
 // See RELEASE_NOTES.md.
-const CurrentSchemaVersion = 76
+const CurrentSchemaVersion = 78
 
 // Result is the aggregate output of a qwanalytics pipeline run. Each
 // top-level field is produced by one or more analyzers; omitted fields

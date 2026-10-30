@@ -521,8 +521,8 @@ func TestBuild_LiquidsAndSubmodels(t *testing.T) {
 
 	regions, stats := Build("test", b, finder)
 
-	if regions.Version != 4 {
-		t.Errorf("Version = %d, want 4", regions.Version)
+	if regions.Version != 5 {
+		t.Errorf("Version = %d, want 5", regions.Version)
 	}
 
 	// Liquids: '*water2' surface and vertical '*lava1' — emitted water

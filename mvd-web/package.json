@@ -1,0 +1,20 @@
+{
+  "name": "mvd-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "check": "svelte-check --threshold error"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "7.3.1",
+    "svelte": "5.57.2",
+    "svelte-check": "4.7.6",
+    "vite": "8.3.4"
+  },
+  "dependencies": {
+    "@lucide/svelte": "1.55.0",
+    "jsep": "1.4.0",
+    "paneforge": "1.0.2"
+  }
+}

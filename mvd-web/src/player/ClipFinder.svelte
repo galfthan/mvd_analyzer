@@ -1,0 +1,797 @@
+<script module>
+    // What the finder holds survives its pane being collapsed or moved.
+    /** @type {{ title: string, presetId: string, about: string, aboutKey: string, draft: import('../lib/clip-query.js').Draft | null, code: boolean }} */
+    const memo = { title: '', presetId: '', about: '', aboutKey: '', draft: null, code: false };
+</script>
+
+<script>
+    // The clip finder: a clip query (src/lib/clip-query.js) over the loaded
+    // demo, in four stages, each showing how many rows it passes on — find
+    // rows (an mvd-api endpoint and its params), keep the rows a filter
+    // (and / or / not groups) matches, order them and keep the first N, cut clips from each row.
+    // Every source, param and field is documented from the API spec
+    // (api-docs.js). Load a preset, name and save your own, share it as a
+    // link, edit it all as code, add the clips to the playlist. The clips it
+    // finds sit in a column beside the stages when the pane is wide enough,
+    // under them otherwise.
+    import Plus from '@lucide/svelte/icons/plus';
+    import X from '@lucide/svelte/icons/x';
+    import ListPlus from '@lucide/svelte/icons/list-plus';
+    import Save from '@lucide/svelte/icons/save';
+    import Share2 from '@lucide/svelte/icons/share-2';
+    import Trash2 from '@lucide/svelte/icons/trash-2';
+    import Info from '@lucide/svelte/icons/info';
+    import Snail from '@lucide/svelte/icons/snail';
+    import ExprGroup from './ExprGroup.svelte';
+    import FinderFlow from './FinderFlow.svelte';
+    import FieldBrowser from './FieldBrowser.svelte';
+    import { demo, teams, colorOf } from '../state/index.js';
+    import { formatDuration } from '../lib/result.js';
+    import {
+        SOURCES, PRESETS, SLOW_DEFAULT, viewCall, stages, fieldPaths, fieldStats, fieldOf, toDraft, fromDraft, encodeQuery,
+    } from '../lib/clip-query.js';
+    import { parseQueryText, queryToText } from '../lib/clip-query-text.js';
+    import { miniMarkdown } from '../lib/mini-md.js';
+    import { runner, currentRef } from './index.js';
+    import { addClips } from './playlist-store.js';
+    import { userPresets, savePreset, deletePreset, finderInput } from './clip-presets.js';
+    import { apiDocs, loadApiDocs, fieldDoc, fieldEnum, shortDoc } from './api-docs.js';
+    import { toast } from './toast.js';
+
+    /** @typedef {import('../lib/clip-query.js').Draft} Draft */
+
+    const SHOWN = 100;
+    const LABEL_HELP = 'A label template: {field} is the row\'s value by its full path, e.g. {player} or {detail.frags}; {field|s} adds a plural s unless the value is 1; {field|sec} turns ms into whole seconds, {field|mmss} into m:ss; {field|upper} upper-cases. A value the row lacks prints ?.';
+
+    // The first time, the first preset.
+    const first = memo.draft ? memo : {
+        ...memo, title: PRESETS[0].title, about: PRESETS[0].about, aboutKey: JSON.stringify(fromDraft(toDraft(PRESETS[0].query))), draft: toDraft(PRESETS[0].query),
+    };
+    let title = $state(first.title);
+    let presetId = $state(first.presetId);  // the user preset the draft was loaded from
+    // What the loaded built-in preset finds, said while the query is still
+    // that preset's.
+    let about = $state(first.about);
+    let aboutKey = $state(first.aboutKey);
+    let draft = $state(/** @type {Draft} */ (first.draft));
+    let code = $state(memo.code);           // the whole query as text
+    // The open panel: the source's (what it finds, its params — stage 1)
+    // or its rows' fields and values, opened from stage 2, 3 or 4 (`for`):
+    // a field clicked there orders by it (3) or goes into the label (4).
+    let panel = $state(/** @type {'' | 'source' | 'fields'} */ (''));
+    let panelFor = $state(/** @type {'keep' | 'order' | 'clip'} */ ('keep'));
+    /** @param {'keep' | 'order' | 'clip'} stage */
+    function openFields(stage) {
+        panelFor = stage;
+        panel = 'fields';
+    }
+    let pathAction = $derived(panelFor === 'order'
+        ? { what: 'order by it', fn: (/** @type {string} */ f) => { draft.rank.by = f; syncCode(); toast(`Ordering by ${f}`); } }
+        : panelFor === 'clip'
+            ? { what: 'add it to the default label as {field}', fn: (/** @type {string} */ f) => { draft.label = `${draft.label}${draft.label && !/\s$/.test(draft.label) ? ' ' : ''}{${f}}`; syncCode(); toast(`Label: ${draft.label}`); } }
+            : undefined);
+
+    // The builder changed from a panel while Code shows: show it there too.
+    function syncCode() {
+        if (code) codeText = queryToText(fromDraft(draft), title);
+    }
+
+    $effect(() => {
+        Object.assign(memo, { title, presetId, about, aboutKey, draft: $state.snapshot(draft), code });
+    });
+
+    loadApiDocs();
+    let doc = $derived($apiDocs?.[draft.source]);
+
+    /**
+     * @param {string} t
+     * @param {import('../lib/clip-query.js').ClipQuery} q
+     * @param {{ id?: string, about?: string }} [from]
+     */
+    function load(t, q, from = {}) {
+        title = t;
+        presetId = from.id || '';
+        about = from.about || '';
+        draft = toDraft(q);
+        aboutKey = JSON.stringify(fromDraft(draft));
+        codeText = queryToText(q, t);
+        codeError = '';
+    }
+
+    // The whole query as code (src/lib/clip-query-text.js): good text
+    // replaces the draft and the name, bad text says which line and keeps
+    // the last good query running.
+    let codeText = $state(queryToText(fromDraft(/** @type {Draft} */ (first.draft)), first.title));
+    let codeError = $state('');
+
+    /** @param {boolean} on */
+    function setCode(on) {
+        if (on) {
+            codeText = queryToText(fromDraft(draft), title);
+            codeError = '';
+        }
+        code = on;
+    }
+
+    /** @param {Event & { currentTarget: HTMLTextAreaElement }} e */
+    function editCode(e) {
+        codeText = e.currentTarget.value;
+        const r = parseQueryText(codeText);
+        if (r.query == null) {
+            codeError = r.error;
+            return;
+        }
+        codeError = '';
+        draft = toDraft(r.query);
+        title = r.title;
+    }
+
+    // A preset picked elsewhere or a #clipquery= link opens here.
+    $effect(() => {
+        const input = $finderInput;
+        if (!input) return;
+        finderInput.set(null);
+        load(input.title, input.query);
+    });
+
+    /** @param {Event & { currentTarget: HTMLSelectElement }} e */
+    function pickPreset(e) {
+        const v = e.currentTarget.value;
+        e.currentTarget.value = '';
+        const builtin = PRESETS.find((p) => p.id === v);
+        if (builtin) return load(builtin.title, builtin.query, { about: builtin.about });
+        const mine = $userPresets.find((p) => p.id === v);
+        if (mine) load(mine.title, mine.query, { id: mine.id });
+    }
+
+    /** @param {Event & { currentTarget: HTMLSelectElement }} e */
+    function setSource(e) {
+        draft.source = e.currentTarget.value;
+        draft.params = {};
+    }
+
+    let query = $derived(fromDraft(draft));
+    let src = $derived(SOURCES[draft.source]);
+
+    // The endpoint's body, refetched when the source or params change (and
+    // the demo); filtering, ordering and clips re-run on it without a call.
+    let body = $state(/** @type {any} */ (null));
+    let error = $state('');
+    let fetchKey = $derived(JSON.stringify([query.source, query.params || {}]));
+    $effect(() => {
+        const handle = $demo;
+        const key = fetchKey;
+        if (!handle) return;
+        let live = true;
+        const timer = setTimeout(() => {
+            const [source, params] = JSON.parse(key);
+            viewCall(handle.view.bind(handle), source, params)
+                .then((b) => { if (live) { body = b; error = ''; } })
+                .catch((err) => { if (live) { body = null; error = err?.message || String(err); } });
+        }, 250);
+        return () => { live = false; clearTimeout(timer); };
+    });
+
+    let run = $derived.by(() => {
+        $teams;
+        const ref = $demo ? currentRef() : null;
+        if (!body || !ref || !$demo) return null;
+        try {
+            return stages(query, body, $demo.result, ref);
+        } catch {
+            return null;
+        }
+    });
+    let rows = $derived(run?.rows || []);
+    let clips = $derived(run?.clips || []);
+    // Suggested fields: the ones these rows carry and every one the spec
+    // documents (a kind of row this demo lacks still has its fields).
+    let fields = $derived([...new Set([...fieldPaths(rows), ...Object.keys(doc?.fields || {})])].sort());
+    let stats = $derived(fieldStats(rows, 40));
+    let playerNames = $derived(Object.keys($demo?.result?.timelineAnalysis?.playerUserIDs || {}).sort());
+
+    // A condition's value suggestions: the spec's allowed values, then the
+    // ones these rows hold, most common first.
+    /** @param {string} f */
+    const valuesOf = (f) => [...new Set([...fieldEnum(doc, f), ...(stats.get(f)?.values || []).map(([v]) => String(v))])];
+
+    // The fields whose values name a player in this demo: what a clip can
+    // watch.
+    let playerFields = $derived.by(() => {
+        const names = new Set(Object.keys($demo?.result?.timelineAnalysis?.playerUserIDs || {}));
+        const sample = rows.slice(0, 200);
+        return fields.filter((f) => sample.some((r) => names.has(String(fieldOf(r, f)))));
+    });
+
+    /** @param {string} f */
+    const fieldTip = (f) => shortDoc(fieldDoc(doc, f)?.description);
+
+    /** @param {string} name */
+    const paramDoc = (name) => doc?.params[name];
+
+    /** @param {number} n @param {string} what */
+    const count = (n, what) => `${n} ${what}${n === 1 ? '' : 's'}`;
+
+    /**
+     * @param {MouseEvent | KeyboardEvent} e
+     * @param {import('../lib/playlist.js').Clip} c
+     */
+    function clickClip(e, c) {
+        if (e.shiftKey) {
+            addClips([{ ...c, demo: { ...c.demo } }]);
+            toast(`Added to playlist: ${c.label}`);
+        } else {
+            runner.start([c], 0, true);
+        }
+    }
+
+    function addAll() {
+        if (!clips.length) return;
+        addClips(clips.map((c) => ({ ...c, demo: { ...c.demo } })));
+        toast(`Added ${count(clips.length, 'clip')}${title ? `: ${title}` : ''}`);
+    }
+
+    /** @type {HTMLInputElement | undefined} */
+    let nameInput = $state();
+
+    function save() {
+        const name = title.trim();
+        if (!name) {
+            toast('Name the query first');
+            nameInput?.focus();
+            return;
+        }
+        title = name;
+        presetId = savePreset(name, query);
+        toast(`Saved "${name}" — Load and the playlist's Generate list it under My presets`);
+    }
+
+    function remove() {
+        const p = $userPresets.find((x) => x.id === presetId);
+        if (!p || !window.confirm(`Delete your preset "${p.title}"?`)) return;
+        deletePreset(p.id);
+        presetId = '';
+    }
+
+    async function share() {
+        const params = new URLSearchParams();
+        const gameId = $demo ? currentRef()?.gameId : null;
+        if (gameId) params.set('gameId', String(gameId));
+        params.set('tab', 'player');
+        const url = `${location.origin}${location.pathname}?${params}#clipquery=${encodeQuery(query, title)}`;
+        try {
+            await navigator.clipboard.writeText(url);
+            toast('Query link copied');
+        } catch {
+            window.prompt('Copy the query link:', url);
+        }
+    }
+
+    function addClipSpec() {
+        draft.clips.push({
+            from: '', before: '', to: '', after: '', pov: '', label: '',
+            slow: { on: false, at: '', before: '', to: '', after: '', speed: '' },
+        });
+    }
+
+    // A value picked in the field browser: keep the rows with it — a
+    // condition added to the filter's top group.
+    /**
+     * @param {string} field
+     * @param {'=' | '~'} op
+     * @param {import('../lib/clip-query.js').Scalar} value
+     */
+    function pickValue(field, op, value) {
+        draft.where.items.push({ kind: 'cond', field, op, value: String(value) });
+        syncCode();
+        toast(`Keeping rows where ${field} ${op} ${value}`);
+    }
+
+    /** @param {KeyboardEvent} e */
+    function panelKey(e) {
+        if (e.key === 'Escape') panel = '';
+    }
+</script>
+
+<svelte:window onkeydown={panel ? panelKey : undefined} />
+
+<div class="clip-finder">
+    <div class="cf-row cf-top">
+        <input class="cf-name" type="text" placeholder="Untitled query — name it to save it" bind:value={title} bind:this={nameInput}
+            title="The query's name: what Save stores it as, and the toast when its clips are added">
+        <select class="pt-select" title="Load a preset into the finder" onchange={pickPreset}>
+            <option value="">Load…</option>
+            <optgroup label="Presets">
+                {#each PRESETS as p (p.id)}
+                    <option value={p.id} title={p.about}>{p.title}</option>
+                {/each}
+            </optgroup>
+            {#if $userPresets.length}
+                <optgroup label="My presets">
+                    {#each $userPresets as p (p.id)}
+                        <option value={p.id}>{p.title}</option>
+                    {/each}
+                </optgroup>
+            {/if}
+        </select>
+        <button class="pt-btn" title="Save under this name in My presets (same name: replaced)" onclick={save}><Save size={14} /> Save</button>
+        {#if presetId && $userPresets.some((p) => p.id === presetId)}
+            <button class="pt-btn icon" title="Delete this preset from My presets" onclick={remove}><Trash2 size={14} /></button>
+        {/if}
+        <button class="pt-btn" title="Copy a link to this page carrying the query" onclick={share}><Share2 size={14} /> Link</button>
+        <span class="pt-group" title="Edit the query as a form, or all of it as code">
+            <button class="pt-btn" class:active={!code} onclick={() => setCode(false)}>Builder</button>
+            <button class="pt-btn" class:active={code} onclick={() => setCode(true)}>Code</button>
+        </span>
+        <button class="pt-btn cf-add" disabled={!clips.length} title="Append every clip below to the playlist" onclick={addAll}>
+            <ListPlus size={14} /> Add {count(clips.length, 'clip')} to playlist
+        </button>
+    </div>
+    {#if about && JSON.stringify(query) === aboutKey}<div class="cf-about">{about}</div>{/if}
+
+    <div class="cf-body">
+    <div class="cf-build">
+    <datalist id="cf-fields">
+        {#each fields as f (f)}<option value={f} label={fieldTip(f)}></option>{/each}
+    </datalist>
+
+    {#if code}
+        <textarea class="cf-text cf-code" rows="8" spellcheck="false" value={codeText} oninput={editCode}></textarea>
+        {#if codeError}<span class="cf-error">{codeError}</span>{/if}
+        <div class="cf-help">
+            One line per stage: <code>name "…"</code>, <code>source endpoint param=value …</code>,
+            <code>keep</code> a filter, <code>order field desc first 5</code>, a <code>clip from=field-3s to=field+2s watch=field label="…"</code>
+            line per clip (add <code>slow=time-1s..time+1s@0.3</code> for slow motion), <code>label "…"</code> for clips without their own. Indent to continue a line; <code>#</code> comments.
+            A filter: <code>detail.powerup = quad and detail.frags &gt;= 3</code> — <code>and</code>, <code>or</code>, <code>not</code>, parentheses,
+            <code>= != &lt; &lt;= &gt; &gt;=</code>, <code>~</code> (contains / has), <code>weapon in [rl, lg]</code>, a bare <code>field</code> for "is true",
+            <code>victims[0].name</code> for a list's first item. <button class="cf-linkbtn" onclick={() => openFields('keep')}>Fields and values</button>
+        </div>
+        {#if run}
+            <div class="cf-flow-line">
+                <FinderFlow n={rows.length} what="row" tone="rows" />
+                <FinderFlow n={run.kept.length} what="kept row" tone="kept" />
+                <FinderFlow n={run.ranked.length} what="ordered row" tone="ordered" />
+                <FinderFlow n={clips.length} what="clip" tone="clips" />
+            </div>
+        {/if}
+    {:else}
+        <!-- 1 · Find rows -->
+        <section class="cf-stage">
+            <div class="cf-stage-head">
+                <span class="cf-step">1</span><span class="cf-heading">Find rows</span>
+                <select class="pt-select" value={draft.source} onchange={setSource} title={doc?.summary || ''}>
+                    {#each Object.keys(SOURCES) as s (s)}
+                        <option value={s} title={$apiDocs?.[s]?.summary || ''}>/{s}{$apiDocs?.[s] ? ` — ${$apiDocs[s].summary}` : ''}</option>
+                    {/each}
+                </select>
+                <button class="pt-btn icon" title="What this source finds and its params" onclick={() => (panel = 'source')}><Info size={14} /></button>
+            </div>
+            {#if src.params.length}
+                <div class="cf-params">
+                    {#each src.params as name (name)}
+                        {@const p = paramDoc(name)}
+                        <label class="cf-label" title={shortDoc(p?.description, draft.source)}>{name}
+                            {#if p?.enum?.length && p.type !== 'array'}
+                                <select class="pt-select" bind:value={draft.params[name]}>
+                                    <option value="">{p.default != null ? `default (${p.default})` : 'default'}</option>
+                                    {#each p.enum as v (v)}<option value={v}>{v}</option>{/each}
+                                </select>
+                            {:else}
+                                {@const opts = p?.enum?.length ? p.enum : name === 'players' ? playerNames : []}
+                                <input class="cf-param" type="text" list={opts.length ? `cf-enum-${name}` : undefined}
+                                    placeholder={p?.default != null ? String(p.default) : p?.type === 'array' ? 'a, b' : /(?:^|[a-z])Ms$|^(?:from|to)$/.test(name) ? 'ms' : ''} bind:value={draft.params[name]}>
+                                {#if opts.length}
+                                    <datalist id="cf-enum-{name}">{#each opts as v (v)}<option value={v}></option>{/each}</datalist>
+                                {/if}
+                            {/if}
+                        </label>
+                    {/each}
+                </div>
+            {/if}
+        </section>
+        <FinderFlow n={run ? rows.length : null} what="row" tone="rows" error={!!error}
+            note={!$demo ? 'load a demo' : error || (run ? '' : '…')} />
+
+        <!-- 2 · Keep rows where -->
+        <section class="cf-stage">
+            <div class="cf-stage-head">
+                <span class="cf-step">2</span><span class="cf-heading">Keep rows where</span>
+                <button class="pt-btn icon" title="Fields and values: every field of these rows — its full path, what it means, the values it allows and the ones this demo has — and a real row; click a value to keep the rows with it" onclick={() => openFields('keep')}><Info size={14} /></button>
+                <span class="muted cf-note">nothing set: keep every row</span>
+            </div>
+            <ExprGroup bind:group={draft.where} fields="cf-fields" tip={fieldTip} values={valuesOf} />
+        </section>
+        <FinderFlow n={run ? run.kept.length : null} what="row" tone="kept" />
+
+        <!-- 3 · Order and keep the first N -->
+        <section class="cf-stage">
+            <div class="cf-stage-head">
+                <span class="cf-step">3</span><span class="cf-heading">Order</span>
+                <button class="pt-btn icon" title="Fields and values: every field of these rows, its values and a real row; click a field to order by it" onclick={() => openFields('order')}><Info size={14} /></button>
+                <span class="muted cf-note">nothing set: time order, every row</span>
+            </div>
+            <div class="cf-row">
+                <label class="cf-label" title="Sort the rows by this field — e.g. detail.frags for the best quad runs">by
+                    <input class="cf-field" type="text" list="cf-fields" placeholder={src.clip.from} bind:value={draft.rank.by}
+                        title={draft.rank.by ? fieldTip(draft.rank.by) : ''}>
+                </label>
+                <select class="pt-select" disabled={!draft.rank.by.trim()} bind:value={draft.rank.desc}>
+                    <option value={true}>highest first</option>
+                    <option value={false}>lowest first</option>
+                </select>
+                <label class="cf-label" title="Keep only the first N rows of that order (empty: all of them)">keep the first
+                    <input class="cf-num" type="text" inputmode="numeric" placeholder="all" bind:value={draft.rank.limit}>
+                </label>
+            </div>
+        </section>
+        <FinderFlow n={run ? run.ranked.length : null} what="row" tone="ordered" />
+
+        <!-- 4 · Clips per row -->
+        <section class="cf-stage">
+            <div class="cf-stage-head">
+                <span class="cf-step">4</span><span class="cf-heading">Clips from each row</span>
+                <button class="pt-btn icon" title="Fields and values: every field of these rows — the times a clip can start and end at, the players it can watch, the values a label can say; click a field to add it to the default label" onclick={() => openFields('clip')}><Info size={14} /></button>
+            </div>
+            {#each draft.clips as c, i (c)}
+                <div class="cf-clip">
+                    {#if draft.clips.length > 1}<span class="cf-clip-n">clip {i + 1}</span>{/if}
+                    <div class="cf-row">
+                        <label class="cf-label" title="The clip starts at this row field (a time), minus the seconds in the − box">from
+                            <input class="cf-field" type="text" list="cf-fields" placeholder={src.clip.from} bind:value={c.from} title={fieldTip(c.from || src.clip.from)}>
+                        </label>
+                        <label class="cf-label" title="Seconds before that time">−<input class="cf-num" type="text" placeholder={String(src.clip.before / 1000)} bind:value={c.before}>s</label>
+                        <label class="cf-label" title="The clip ends at this row field (a time), plus the seconds in the + box">to
+                            <input class="cf-field" type="text" list="cf-fields" placeholder={src.clip.to} bind:value={c.to} title={fieldTip(c.to || src.clip.to)}>
+                        </label>
+                        <label class="cf-label" title="Seconds after that time">+<input class="cf-num" type="text" placeholder={String(src.clip.after / 1000)} bind:value={c.after}>s</label>
+                    </div>
+                    <div class="cf-row">
+                        <label class="cf-label" title="Which player the camera follows: a row field holding a player's name">watch
+                            <select class="pt-select" bind:value={c.pov}>
+                                <option value="">{src.clip.pov} (default)</option>
+                                {#each playerFields.filter((f) => f !== src.clip.pov) as f (f)}
+                                    <option value={f} title={fieldTip(f)}>{f}</option>
+                                {/each}
+                                {#if c.pov && !playerFields.includes(c.pov) && c.pov !== src.clip.pov}<option value={c.pov}>{c.pov}</option>{/if}
+                            </select>
+                        </label>
+                        <label class="cf-label cf-grow" title={LABEL_HELP}>label
+                            <input class="cf-labeltpl" type="text" placeholder={draft.label ? 'the default label below' : 'e.g. {player} · {detail.frags} frags'} bind:value={c.label}>
+                        </label>
+                        {#if draft.clips.length > 1}
+                            <button class="pt-btn icon" title="Remove this clip" onclick={() => draft.clips.splice(i, 1)}><X size={13} /></button>
+                        {/if}
+                    </div>
+                    <div class="cf-row">
+                        <label class="cf-label" title="Play part of the clip in slow motion — around the event: a moment (an airgib) or a stretch (a top-kills window)">
+                            <input type="checkbox" bind:checked={c.slow.on}><Snail size={13} /> slow-mo
+                        </label>
+                        {#if c.slow.on}
+                            <label class="cf-label" title="From this row field (a time), minus the seconds in the − box — default: the clip's from field">at
+                                <input class="cf-field" type="text" list="cf-fields" placeholder={c.from || src.clip.from} bind:value={c.slow.at}>
+                            </label>
+                            <label class="cf-label" title="Seconds before that time">−<input class="cf-num" type="text" placeholder={String(SLOW_DEFAULT.before / 1000)} bind:value={c.slow.before}>s</label>
+                            <label class="cf-label" title="To this row field (a time), plus the seconds in the + box — default: the same field as at">to
+                                <input class="cf-field" type="text" list="cf-fields" placeholder={c.slow.at || c.from || src.clip.from} bind:value={c.slow.to}>
+                            </label>
+                            <label class="cf-label" title="Seconds after that time">+<input class="cf-num" type="text" placeholder={String(SLOW_DEFAULT.after / 1000)} bind:value={c.slow.after}>s</label>
+                            <label class="cf-label" title="The slow-motion speed, 0.05–1 (× normal; outside that it is brought into it)">at
+                                <input class="cf-num" type="text" placeholder={String(SLOW_DEFAULT.speed)} bind:value={c.slow.speed}>×
+                            </label>
+                        {/if}
+                    </div>
+                </div>
+            {/each}
+            {#if draft.clips.length < 4}
+                <div class="cf-row">
+                    <button class="pt-btn" title="Cut another clip from each row — e.g. a pack's pickup after its drop" onclick={addClipSpec}><Plus size={13} /> clip</button>
+                </div>
+            {/if}
+            <div class="cf-row">
+                <label class="cf-label cf-grow" title={LABEL_HELP}>default label
+                    <input class="cf-labeltpl" type="text" placeholder="for clips without their own, e.g. {'{'}player{'}'} · {'{'}detail.frags{'}'} frag{'{'}detail.frags|s{'}'}" bind:value={draft.label}>
+                </label>
+            </div>
+            <div class="cf-help">{LABEL_HELP}</div>
+        </section>
+        <FinderFlow n={run ? clips.length : null} what="clip" tone="clips" />
+    {/if}
+    </div>
+
+    <div class="cf-found">
+        <div class="cf-found-head">
+            <span class="cf-heading">Clips found</span>
+            {#if clips.length}<span class="muted cf-note">click: play · shift-click: add</span>{/if}
+        </div>
+        {#if clips.length}
+        <ol class="pp-feed cf-results">
+            {#each clips.slice(0, SHOWN) as c (c)}
+                <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
+                <li title="Click: play · Shift-click: add to playlist" role="button" tabindex="0"
+                    onclick={(e) => clickClip(e, c)} onkeydown={(e) => e.key === 'Enter' && clickClip(e, c)}>
+                    <span class="t">{formatDuration(Math.max(0, c.from - c.demo.offset))}</span>
+                    <span style:color={c.who ? colorOf($teams, c.who, $teams.perPlayer) : '#ccc'}>{c.label || c.who || 'clip'}</span>
+                    {#if c.slow}<span class="cf-slow" title="Slow motion at {c.slow.speed}×"><Snail size={11} /></span>{/if}
+                </li>
+            {/each}
+            {#if clips.length > SHOWN}<li class="muted">… and {clips.length - SHOWN} more</li>{/if}
+        </ol>
+        {:else}
+            <div class="muted cf-note">{run ? 'No clips — loosen the filter or the order' : 'Nothing yet'}</div>
+        {/if}
+    </div>
+    </div>
+
+    {#if panel === 'source'}
+        <div class="cf-info" role="dialog" aria-label="/{draft.source}">
+            <div class="cf-row">
+                <strong>/{draft.source}</strong><span class="muted">{doc?.summary || ''}</span>
+                <button class="pt-btn icon cf-close" title="Close (Esc)" onclick={() => (panel = '')}><X size={14} /></button>
+            </div>
+            {#if doc}
+                <div class="cf-md">{@html miniMarkdown(doc.description)}</div>
+                <h4>Params</h4>
+                <dl>
+                    {#each src.params as name (name)}
+                        {@const p = doc.params[name]}
+                        <dt><code>{name}</code>{#if p?.enum?.length} <span class="muted">{p.enum.join(' · ')}</span>{/if}{#if p?.default != null} <span class="muted">default {p.default}</span>{/if}</dt>
+                        <dd class="cf-md">{@html miniMarkdown(p?.description || '')}</dd>
+                    {/each}
+                </dl>
+                <p><button class="cf-linkbtn" onclick={() => openFields('keep')}>The fields and values of its rows →</button></p>
+            {:else}
+                <p class="muted">Loading the API docs…</p>
+            {/if}
+        </div>
+    {:else if panel === 'fields'}
+        <div class="cf-info" role="dialog" aria-label="Fields and values of /{draft.source}">
+            <div class="cf-row">
+                <strong>Fields and values</strong><span class="muted">of the rows /{draft.source} returns</span>
+                <button class="pt-btn icon cf-close" title="Close (Esc)" onclick={() => (panel = '')}><X size={14} /></button>
+            </div>
+            <FieldBrowser {doc} {rows} onpick={pickValue} path={pathAction} />
+        </div>
+    {/if}
+</div>
+
+<style>
+    .clip-finder {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        container-type: inline-size;
+    }
+    .cf-body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+    }
+    .cf-build {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+    .cf-found {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+    .cf-found-head {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+    }
+    @container (min-width: 760px) {
+        .cf-body {
+            grid-template-columns: minmax(0, 3fr) minmax(220px, 2fr);
+        }
+        .cf-found {
+            position: sticky;
+            top: 0;
+            align-self: start;
+            border-left: 1px solid var(--bg-panel);
+            padding-left: 10px;
+        }
+        .cf-found .cf-results {
+            max-height: 70vh;
+        }
+    }
+    .cf-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+    }
+    .cf-name {
+        flex: 1 1 200px;
+        font-size: 14px !important;
+        font-weight: 600;
+    }
+    .cf-add {
+        margin-left: auto;
+    }
+    .cf-about {
+        font-size: 12px;
+        color: #aaa;
+    }
+    .cf-stage {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        border: 1px solid var(--bg-panel);
+        border-radius: 4px;
+        padding: 6px 8px;
+    }
+    .cf-stage-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+    }
+    .cf-step {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--bg-panel);
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .cf-heading {
+        font-size: 12px;
+        font-weight: 600;
+        color: #ccc;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .cf-note {
+        font-size: 11px;
+    }
+    .cf-flow-line {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 12px;
+    }
+    .cf-params {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 12px;
+    }
+    .cf-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: #bbb;
+    }
+    .cf-grow {
+        flex: 1 1 220px;
+    }
+    .cf-clip {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .cf-clip + .cf-clip {
+        border-top: 1px dashed var(--bg-panel);
+        padding-top: 6px;
+    }
+    .cf-clip-n {
+        font-size: 11px;
+        color: #888;
+    }
+    .cf-param {
+        width: 120px;
+    }
+    .cf-field {
+        width: 150px;
+    }
+    .cf-num {
+        width: 44px;
+    }
+    .cf-labeltpl {
+        flex: 1 1 auto;
+        min-width: 140px;
+    }
+    .cf-help {
+        font-size: 11px;
+        color: #888;
+    }
+    .clip-finder :global(input[type='text']) {
+        height: 24px;
+        padding: 0 6px;
+        background: var(--bg-deep);
+        color: var(--fg-default);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 3px;
+        font: inherit;
+        font-size: 12px;
+        min-width: 0;
+    }
+    .clip-finder :global(input[type='text']:focus) {
+        outline: none;
+        border-color: var(--accent-cyan);
+    }
+    .clip-finder :global(input[type='text']::placeholder) {
+        color: #777;
+    }
+    .cf-text {
+        width: 100%;
+        box-sizing: border-box;
+        background: var(--bg-deep);
+        color: var(--fg-default);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 13px;
+        padding: 4px 6px;
+        resize: vertical;
+    }
+    .cf-slow {
+        color: #e070f0;
+    }
+    .cf-error {
+        color: #ff8080;
+        font-size: 12px;
+    }
+    .cf-results {
+        max-height: 260px;
+        overflow-y: auto;
+    }
+    .cf-info {
+        position: absolute;
+        inset: 0 0 auto 0;
+        max-height: 70vh;
+        overflow-y: auto;
+        z-index: 20;
+        background: var(--bg-deep);
+        border: 1px solid var(--accent-cyan);
+        border-radius: 4px;
+        padding: 8px 10px;
+        font-size: 12px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+    }
+    .cf-close {
+        margin-left: auto;
+    }
+    .cf-linkbtn {
+        padding: 0;
+        background: none;
+        border: none;
+        color: var(--accent-cyan);
+        font: inherit;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    .cf-info h4 {
+        margin: 10px 0 4px;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #aaa;
+    }
+    .cf-info dl {
+        margin: 0;
+    }
+    .cf-info dt {
+        margin-top: 6px;
+    }
+    .cf-info dd {
+        margin: 2px 0 0 12px;
+        color: #bbb;
+    }
+    .cf-md :global(p),
+    .cf-md :global(ul) {
+        margin: 4px 0;
+    }
+    .cf-md :global(code),
+    .cf-info code,
+    .cf-help code {
+        font-family: monospace;
+        color: var(--accent-cyan);
+    }
+</style>
