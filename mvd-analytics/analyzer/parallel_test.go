@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
+	"github.com/mvd-analyzer/mvd-reader/events"
 )
 
 // TestParallelMatchesSerial pins Registry.Parallel's promise that the
@@ -47,5 +48,51 @@ func TestParallelMatchesSerial(t *testing.T) {
 	}
 	if !bytes.Contains(serial, []byte("unexpected EOF")) {
 		t.Fatalf("truncated demo: no stream error in the result")
+	}
+}
+
+// panickySource stands in for a parser bug: Next panics on its third call.
+type panickySource struct{ n int }
+
+func (s *panickySource) Next() (events.Event, error) {
+	s.n++
+	if s.n == 3 {
+		panic("parser bug")
+	}
+	return &events.UserInfoEvent{Player: &events.PlayerInfo{Name: "a"}}, nil
+}
+
+func (s *panickySource) Close() error { return nil }
+
+// panickyReader stands in for a decompressor bug: its first Read serves
+// the format sniff (on the caller), the next one panics — on the inflate
+// goroutine.
+type panickyReader struct{ n int }
+
+func (r *panickyReader) Read(p []byte) (int, error) {
+	r.n++
+	if r.n > 1 {
+		panic("inflate bug")
+	}
+	return copy(p, []byte{0, 0}), nil
+}
+
+// TestParallelPanicReachesCaller pins that a panic on one of Parallel's
+// pipeline goroutines (the parser's, the inflater's) re-panics on the
+// caller's goroutine, where mvd-api's singleflight recovers it — rather
+// than killing the process as an unrecovered goroutine panic would.
+func TestParallelPanicReachesCaller(t *testing.T) {
+	recovered := func(run func()) (v any) {
+		defer func() { v = recover() }()
+		run()
+		return nil
+	}
+	reg := analyzer.NewDefaultRegistry()
+	reg.Parallel = true
+	if v := recovered(func() { reg.AnalyzeSource(&panickySource{}, "x") }); v != "parser bug" {
+		t.Fatalf("parser goroutine panic: caller recovered %v", v)
+	}
+	if v := recovered(func() { reg.AnalyzeReader(&panickyReader{}, "x") }); v != "inflate bug" {
+		t.Fatalf("inflate goroutine panic: caller recovered %v", v)
 	}
 }

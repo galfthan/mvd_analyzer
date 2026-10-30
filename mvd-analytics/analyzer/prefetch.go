@@ -11,7 +11,15 @@ import (
 type prefetchBatch struct {
 	events []events.Event
 	err    error
+	panic  *goroutinePanic
 }
+
+// goroutinePanic carries a panic off a pipeline goroutine to the
+// consumer, which re-raises it on its own goroutine. Unforwarded, a
+// parser bug on a malformed demo would kill the whole process instead of
+// reaching the caller's recover (mvd-api's singleflight turns it into a
+// 500).
+type goroutinePanic struct{ value any }
 
 // prefetchBatchSize is events per hand-off: large enough that the channel
 // costs nothing next to the events' parse, small enough that the consumer
@@ -24,9 +32,12 @@ const prefetchBatchSize = 512
 // one core's sum of both. The consumer sees the identical event sequence
 // and the identical terminating error, after every event before it.
 //
-// Sharing is safe because the event pass only reads what a Source hands
-// out, and the parser never touches an event after queueing it —
-// TestParallelMatchesSerial run with -race checks both.
+// Sharing is safe because the parser does not touch an event after
+// queueing it — with one exception: ServerDataEvent.Data is the parser's
+// own record, whose MapFile it fills in from the model list after
+// emitting. That field is read only in Finalize, after the hand-off, so
+// reading it in OnEvent would race. TestParallelMatchesSerial run with
+// -race checks the rest.
 type prefetchSource struct {
 	ch   chan prefetchBatch
 	stop chan struct{}
@@ -45,6 +56,14 @@ func newPrefetchSource(src events.Source) *prefetchSource {
 	go func() {
 		defer close(p.done)
 		defer close(p.ch)
+		defer func() {
+			if v := recover(); v != nil {
+				select {
+				case p.ch <- prefetchBatch{panic: &goroutinePanic{v}}:
+				case <-p.stop:
+				}
+			}
+		}()
 		for {
 			b := prefetchBatch{events: make([]events.Event, 0, prefetchBatchSize)}
 			for len(b.events) < prefetchBatchSize && b.err == nil {
@@ -76,6 +95,9 @@ func (p *prefetchSource) Next() (events.Event, error) {
 			return nil, p.err
 		}
 		b := <-p.ch
+		if b.panic != nil {
+			panic(b.panic.value)
+		}
 		p.cur, p.head, p.err = b.events, 0, b.err
 	}
 	e := p.cur[p.head]
@@ -97,8 +119,9 @@ func (p *prefetchSource) halt() {
 const readAheadChunk = 256 << 10
 
 type readAheadChunkMsg struct {
-	buf []byte
-	err error
+	buf   []byte
+	err   error
+	panic *goroutinePanic
 }
 
 // readAhead runs a reader (the demo's gunzip) on its own goroutine, a
@@ -127,6 +150,14 @@ func newReadAhead(r io.Reader) *readAhead {
 	go func() {
 		defer close(a.done)
 		defer close(a.ch)
+		defer func() {
+			if v := recover(); v != nil {
+				select {
+				case a.ch <- readAheadChunkMsg{panic: &goroutinePanic{v}}:
+				case <-a.stop:
+				}
+			}
+		}()
 		for {
 			var buf []byte
 			select {
@@ -166,6 +197,9 @@ func (a *readAhead) Read(p []byte) (int, error) {
 			}
 		}
 		m := <-a.ch
+		if m.panic != nil {
+			panic(m.panic.value)
+		}
 		a.buf, a.cur, a.err = m.buf, m.buf, m.err
 	}
 	n := copy(p, a.cur)
