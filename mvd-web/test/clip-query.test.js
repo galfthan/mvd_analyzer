@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-    SOURCES, PRESETS, SLOW_DEFAULT, MOMENT_GROUPS, viewCall, matches, renderLabel, clipsOf, runQuery,
+    SOURCES, PRESETS, SLOW_DEFAULT, MOMENT_GROUPS, viewCall, matches, fieldStats, renderLabel, clipsOf, runQuery,
     fieldPaths, toEditTree, toExpr, validateQuery, encodeQuery, decodeQuery, toDraft, fromDraft,
 } from '../src/lib/clip-query.js';
 
@@ -197,4 +197,26 @@ test('the Moments groups are presets; airgibs start 2.5 s before the hit', () =>
     const air = /** @type {any} */ (PRESETS.find((p) => p.id === 'airgibs')).query;
     const [c] = clipsOf(air, { airgibs: [{ time: 30000, actor: { name: 'bps' }, victims: [{ name: 'x' }] }] }, result, demo);
     assert.equal(c.from, 37, '40 s demo time less 2.5 s, whole seconds');
+});
+
+test('fieldStats: coverage, types, values by count, ranges, list members', () => {
+    const rows = [
+        { time: 1000, type: 'powerup', detail: { powerup: 'quad', frags: 2 }, weapons: ['rl', 'lg'] },
+        { time: 5000, type: 'powerup', detail: { powerup: 'quad', frags: 0 }, weapons: ['rl'] },
+        { time: 3000, type: 'frag', detail: { victim: 'a' }, weapons: [] },
+    ];
+    const st = fieldStats(rows);
+    assert.deepEqual([...st.keys()], ['detail.frags', 'detail.powerup', 'detail.victim', 'time', 'type', 'weapons']);
+    assert.deepEqual(st.get('detail.powerup'), { path: 'detail.powerup', n: 2, type: 'string', list: false, values: [['quad', 2]], distinct: 1 });
+    assert.deepEqual([st.get('time').min, st.get('time').max, st.get('time').n], [1000, 5000, 3]);
+    assert.deepEqual(st.get('type').values, [['powerup', 2], ['frag', 1]], 'most common first');
+    assert.deepEqual([st.get('weapons').list, st.get('weapons').values], [true, [['rl', 2], ['lg', 1]]]);
+});
+
+test('a row without the field matches only !=; order by text sorts by text', () => {
+    const rows = [{ time: 1, detail: { frags: 2 } }, { time: 2, detail: {} }];
+    assert.deepEqual(rows.filter((r) => matches(r, { field: 'detail.frags', op: '<', value: 3 })).map((r) => r.time), [1]);
+    assert.deepEqual(rows.filter((r) => matches(r, { field: 'detail.frags', op: '!=', value: 3 })).map((r) => r.time), [1, 2]);
+    assert.equal(renderLabel('{time|mmss}', { time: 75000 }), '1:15');
+    assert.equal(renderLabel('{nope|mmss}', {}), '?');
 });

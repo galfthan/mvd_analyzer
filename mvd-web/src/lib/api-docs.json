@@ -174,7 +174,7 @@
         "type": "string"
       },
       "detail.bounded": {
-        "description": "KTX-scoreboard bounded value — on damage events the stored per-hit reconstruction (present only when it differs from the raw damage)",
+        "description": "KTX-scoreboard bounded value — on damage events the stored per-hit reconstruction (present only when it differs from the raw damage), on telefrag/stomp events the reconstructed kill value; absent when the bounded reconstruction was skipped; 0 is a real value.",
         "type": "integer"
       },
       "detail.cells": {
@@ -182,7 +182,7 @@
         "type": "integer"
       },
       "detail.clean": {
-        "description": "chat message",
+        "description": "Chat message, color codes stripped.",
         "type": "string"
       },
       "detail.damage": {
@@ -198,7 +198,7 @@
         "type": "string"
       },
       "detail.duration": {
-        "description": "streak duration",
+        "description": "Streak duration, int32 ms.",
         "type": "integer"
       },
       "detail.durationMs": {
@@ -250,7 +250,7 @@
         "type": "boolean"
       },
       "detail.item": {
-        "description": "spawner instance name (pickup)",
+        "description": "Spawner instance name (pickup), e.g. ya_1.",
         "type": "string"
       },
       "detail.kind": {
@@ -278,8 +278,13 @@
         "type": "string"
       },
       "detail.powerup": {
-        "description": "Powerup type.",
-        "type": "string"
+        "description": "Powerup type (powerup events).",
+        "type": "string",
+        "enum": [
+          "quad",
+          "pent",
+          "ring"
+        ]
       },
       "detail.quadFrags": {
         "description": "quadbore: the actor's kills in that quad run before the bore.",
@@ -323,8 +328,15 @@
         "type": "string"
       },
       "detail.victimWep": {
-        "description": "Victim weapon class at hit time (sg|mid|lg|rl|both).",
-        "type": "string"
+        "description": "Victim weapon class at hit time.",
+        "type": "string",
+        "enum": [
+          "sg",
+          "mid",
+          "lg",
+          "rl",
+          "both"
+        ]
       },
       "detail.victims": {
         "description": "discharge/quadbore: names of everyone else the event touched (killed or hurt).",

@@ -1275,9 +1275,11 @@ drops it).
   endpoint (`events`, `highlights`, `backpacks`, `top-kills`, `top-windows`, `lives`)
   with its query params under their API names, a `where` over the rows it
   returns (an and / or / not tree of conditions — `= != < <= > >=`,
-  `~` contains, `in` any of — fields as dotted paths into the row), an
-  optional order + limit (`rank`: sort by a field, keep the first N; a
-  limit alone keeps the earliest), the clip window (row
+  `~` contains on text and membership on a list, `in` any of — fields as
+  dotted paths into the row; a row without the field matches `!=` only),
+  an optional order + limit (`rank`: sort by a field — numbers as numbers,
+  text alphabetically — and keep the first N; a limit alone keeps the
+  earliest), the clip window (row
   fields plus padding, the POV a row's player field — or a list of windows,
   one clip each per row) and a label template.
   On the loaded demo it runs the same Go view through `DemoHandle.view`
@@ -1319,7 +1321,7 @@ drops it).
   source events types=powerup
   keep   detail.powerup = "quad" and detail.frags > 0
   order  detail.frags desc first 5
-  clip   from=-3s to=detail.endTime+2s
+  clip   from=-2s to=detail.endTime+1s
   label  "Quad run · {player} · {detail.frags} frag{detail.frags|s}"
   ```
 
@@ -1333,7 +1335,20 @@ drops it).
   `SOURCES` offers is documented). It loads lazily (`src/player/api-docs.js`)
   into tooltips, the param value lists and the field suggestions, and the
   ⓘ page per source (rendered by `src/lib/mini-md.js`, which escapes
-  first). Results update as you type (the endpoint is re-queried only when
+  first). Its **Fields and values** part (`FieldBrowser.svelte`; also
+  stage 2's *Fields and values* button) lists every field these rows
+  carry by its full path, with its type and unit, the spec's text, how
+  many rows carry it, the values it allows (its enum, or the enum of the
+  param that filters by it — events' `type` by `types`) and the values
+  this demo has, with counts (`fieldStats`), or a number's range — and a
+  real row as JSON, stepped with ◀ ▶. Rows that come in kinds (events by
+  `type`, highlights by `kind`) narrow to one kind, which is what shows
+  which `detail.*` fields a powerup has; the documented fields these rows
+  lack are behind a toggle. A value click adds `field = value` (`~` on a
+  list) to the filter; a path click copies it. In stage 2 a condition's
+  field box suggests every documented field and says what the one typed
+  means, its value box suggests the allowed values and the ones this demo
+  has, and `players` params suggest this demo's names. Results update as you type (the endpoint is re-queried only when
   the source or a param changes): click one to play it, shift-click to add
   it. *Link* copies `?gameId=…&tab=player#clipquery=<base64url JSON>`,
   which opens the query in the finder, reopening its pane if needed

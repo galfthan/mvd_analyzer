@@ -13,9 +13,9 @@
 //   where    rows to keep: an expression tree — { and: [...] }, { or: [...] },
 //            { not: expr } or a condition { field, op, value }, field a
 //            dotted path into the row ('detail.frags', 'victims.0.name');
-//            absent keeps all
-//   rank     optional { by, desc, limit }: order by that field (ties by
-//            time), then keep the first `limit`; without `by` rows stay in
+//            a row without the field matches only `!=`; absent keeps all
+//   rank     optional { by, desc, limit }: order by that field (numbers
+//            as numbers, text alphabetically; ties by time), then keep the first `limit`; without `by` rows stay in
 //            time order, so `limit` alone keeps the earliest
 //   clip     { from, before, to, after, pov, label }: the window runs from row
 //            field `from` minus `before` ms to field `to` plus `after` ms,
@@ -29,12 +29,14 @@
 //            speed to 0.3 (clamped into the clip).
 //   label    a template: {field} is the row's value, {field|s} a plural 's'
 //            unless the value is 1, {field|sec} ms as whole seconds,
-//            {field|upper} upper case; a clip entry's own label wins
+//            {field|mmss} ms as m:ss, {field|upper} upper case; a missing
+//            value prints '?'; a clip entry's own label wins
 //
 // Rows, fields and params are the endpoint's own — mvd-api/openapi/openapi.yaml
 // is their reference. The finder adds no detection of its own.
 
 import { makeClip, base64UrlEncode, base64UrlDecode, SLOW_MIN, SLOW_MAX } from './playlist.js';
+import { formatDuration } from './result.js';
 
 /**
  * @typedef {import('./result.js').Result} Result
@@ -112,10 +114,10 @@ export const SOURCES = {
     },
     'top-windows': {
         fn: 'getTopWindows',
-        params: ['metric', 'mode', 'windowMs', 'gapMs', 'players', 'limit', 'perPlayer', 'dmg'],
+        params: ['metric', 'mode', 'windowMs', 'gapMs', 'players', 'weapons', 'limit', 'perPlayer', 'dmg'],
         opts: (p) => ({
             Metric: p.metric, Mode: p.mode, WindowMs: int(p.windowMs), GapMs: int(p.gapMs),
-            Players: csv(p.players), Limit: int(p.limit), PerPlayer: int(p.perPlayer), Dmg: p.dmg,
+            Players: csv(p.players), Weapons: csv(p.weapons), Limit: int(p.limit), PerPlayer: int(p.perPlayer), Dmg: p.dmg,
         }),
         rows: (b) => b?.windows || [],
         clip: { from: 'start', before: 2000, to: 'end', after: 2000, pov: 'player' },
@@ -171,7 +173,9 @@ export const OPS = /** @type {const} */ (['=', '!=', '<', '<=', '>', '>=', '~', 
 
 // Comparisons: numbers as numbers when the row's value is one, everything
 // else as case-insensitive text; `~` is a substring on text and membership
-// on a list, `in` is "equals any of" a list.
+// on a list, `in` is "equals any of" a list. A row without the field
+// (a frag's detail has no `powerup`) matches `!=` only: "frags < 3" must not
+// keep the rows that have no frags at all.
 /**
  * @param {unknown} v
  * @param {string} op
@@ -183,6 +187,7 @@ function compare(v, op, want) {
         if (Array.isArray(v)) return v.some((x) => String(x).toLowerCase() === w);
         return v != null && String(v).toLowerCase().includes(w);
     }
+    if (v == null) return op === '!=';
     const num = typeof v === 'number' && want !== '' && Number.isFinite(Number(want));
     const a = num ? v : String(v ?? '').toLowerCase();
     const b = num ? Number(want) : String(want).toLowerCase();
@@ -221,6 +226,7 @@ export function renderLabel(template, row) {
         const v = fieldOf(row, path.trim());
         if (filter === 's') return v === 1 ? '' : 's';
         if (filter === 'sec') return String(Math.round((Number(v) || 0) / 1000));
+        if (filter === 'mmss') return v == null ? '?' : formatDuration(Math.max(0, Number(v) || 0) / 1000);
         if (filter === 'upper') return v == null ? '?' : String(v).toUpperCase();
         return v == null ? '?' : String(v);
     });
@@ -249,8 +255,14 @@ export function stages(query, body, result, demo) {
     if (rank?.by) {
         const by = rank.by;
         const dir = rank.desc ? -1 : 1;
-        const key = (/** @type {any} */ r) => Number(fieldOf(r, by)) || 0;
-        sorted.sort((a, b) => dir * (key(a) - key(b)) || start(a) - start(b));
+        // Numbers as numbers, anything else as text (a name, a weapon).
+        const cmp = (/** @type {any} */ a, /** @type {any} */ b) => {
+            const x = fieldOf(a, by);
+            const y = fieldOf(b, by);
+            if (typeof x === 'number' || typeof y === 'number') return (Number(x) || 0) - (Number(y) || 0);
+            return String(x ?? '').localeCompare(String(y ?? ''));
+        };
+        sorted.sort((a, b) => dir * cmp(a, b) || start(a) - start(b));
     } else {
         sorted.sort((a, b) => start(a) - start(b));
     }
@@ -462,6 +474,84 @@ export function fieldPaths(rows) {
     };
     for (const r of rows.slice(0, 200)) walk(r, '', 0);
     return [...out].sort();
+}
+
+// fieldStats: what the rows hold, per field path (the finder's field
+// browser) — how many rows carry it, its type, the values seen with their
+// counts (most common first, at most `top`; a list's members count one
+// each, `list` set) and, for numbers, the range. Read off up to 2000 rows.
+/**
+ * @typedef {{ path: string, n: number, type: string, list: boolean, values: Array<[Scalar, number]>, distinct: number, min?: number, max?: number }} FieldStat
+ * @param {any[]} rows
+ * @param {number} [top]
+ * @returns {Map<string, FieldStat>}
+ */
+export function fieldStats(rows, top = 12) {
+    /** @type {Map<string, { n: number, types: Set<string>, list: boolean, counts: Map<Scalar, number>, min: number, max: number }>} */
+    const acc = new Map();
+    /** @param {string} path */
+    const entry = (path) => {
+        let a = acc.get(path);
+        if (!a) acc.set(path, a = { n: 0, types: new Set(), list: false, counts: new Map(), min: Infinity, max: -Infinity });
+        return a;
+    };
+    /**
+     * @param {string} path
+     * @param {Scalar} v
+     */
+    const see = (path, v) => {
+        const a = entry(path);
+        a.types.add(typeof v);
+        if (typeof v === 'number') {
+            a.min = Math.min(a.min, v);
+            a.max = Math.max(a.max, v);
+        }
+        if (a.counts.size < 500 || a.counts.has(v)) a.counts.set(v, (a.counts.get(v) || 0) + 1);
+    };
+    /** @type {Set<string>} */
+    let seenInRow = new Set();
+    /**
+     * @param {any} v
+     * @param {string} path
+     * @param {number} depth
+     */
+    const walk = (v, path, depth) => {
+        if (v && typeof v === 'object' && !Array.isArray(v) && depth < 4) {
+            for (const k of Object.keys(v)) walk(v[k], path ? `${path}.${k}` : k, depth + 1);
+            return;
+        }
+        if (Array.isArray(v) && v.length && v[0] && typeof v[0] === 'object' && depth < 4) {
+            walk(v[0], `${path}.0`, depth + 1);
+            return;
+        }
+        if (!path) return;
+        seenInRow.add(path);
+        if (Array.isArray(v)) {
+            entry(path).list = true;
+            for (const x of v) if (x == null || typeof x !== 'object') see(path, x ?? '');
+        } else if (v == null) {
+            entry(path);
+        } else if (typeof v !== 'object') {
+            see(path, v);
+        }
+    };
+    for (const r of rows.slice(0, 2000)) {
+        seenInRow = new Set();
+        walk(r, '', 0);
+        for (const p of seenInRow) entry(p).n++;
+    }
+    /** @type {Map<string, FieldStat>} */
+    const out = new Map();
+    for (const path of [...acc.keys()].sort()) {
+        const a = entry(path);
+        const values = [...a.counts].filter(([v]) => v !== '').sort((x, y) => y[1] - x[1] || String(x[0]).localeCompare(String(y[0])));
+        out.set(path, {
+            path, n: a.n, type: [...a.types].join(' | ') || 'null',
+            list: a.list, values: values.slice(0, top), distinct: values.length,
+            ...(Number.isFinite(a.min) ? { min: a.min, max: a.max } : {}),
+        });
+    }
+    return out;
 }
 
 // ── The builder's editable tree ─────────────────────────────────────────────

@@ -1,7 +1,10 @@
 <script>
     // One group of the clip finder's filter: all / any of its items, or
     // neither (not), each item a condition or a nested group. Edits the
-    // builder's tree (src/lib/clip-query.js toEditTree) in place.
+    // builder's tree (src/lib/clip-query.js toEditTree) in place. A
+    // condition's field box suggests the source's fields and says what the
+    // one typed means (`tip`); its value box suggests the values the field
+    // allows and the ones these rows hold (`values`).
     import Plus from '@lucide/svelte/icons/plus';
     import X from '@lucide/svelte/icons/x';
     import Self from './ExprGroup.svelte';
@@ -12,13 +15,18 @@
      * @typedef {import('../lib/clip-query.js').EditCond} EditCond
      */
 
-    /** @type {{ group: EditGroup, fields: string, depth?: number, onremove?: () => void }} */
-    let { group = $bindable(), fields, depth = 0, onremove } = $props();
+    /** @type {{ group: EditGroup, fields: string, tip: (field: string) => string, values: (field: string) => string[], depth?: number, onremove?: () => void }} */
+    let { group = $bindable(), fields, tip, values, depth = 0, onremove } = $props();
 
     const OP_TITLES = /** @type {Record<string, string>} */ ({
-        '~': 'contains (text) / has (list)',
+        '=': 'is (numbers as numbers, text ignoring case)',
+        '!=': 'is not — also keeps the rows without the field',
+        '<': 'less than', '<=': 'at most', '>': 'more than', '>=': 'at least',
+        '~': 'contains (text) / has as a member (list)',
         in: 'is any of (comma-separated)',
     });
+
+    let uid = $props.id();
 
     function addCond() {
         group.items.push({ kind: 'cond', field: '', op: '=', value: '' });
@@ -51,17 +59,21 @@
     </div>
     {#each group.items as item, i (item)}
         {#if item.kind === 'group'}
-            <Self group={/** @type {EditGroup} */ (item)} {fields} depth={depth + 1} onremove={() => remove(i)} />
+            <Self group={/** @type {EditGroup} */ (item)} {fields} {tip} {values} depth={depth + 1} onremove={() => remove(i)} />
         {:else}
             {@const cond = /** @type {EditCond} */ (item)}
+            {@const vals = cond.field ? values(cond.field) : []}
             <div class="cf-cond">
-                <input class="cf-field" type="text" list={fields} placeholder="field" bind:value={cond.field}>
-                <select class="pt-select" bind:value={cond.op}>
+                <input class="cf-field" type="text" list={fields} placeholder="field, e.g. detail.frags" bind:value={cond.field}
+                    title={cond.field ? tip(cond.field) || cond.field : 'A row field by its full path — ⓘ lists them with their values'}>
+                <select class="pt-select" bind:value={cond.op} title={OP_TITLES[cond.op] || ''}>
                     {#each OPS as op (op)}
                         <option value={op} title={OP_TITLES[op] || ''}>{op}</option>
                     {/each}
                 </select>
-                <input class="cf-value" type="text" placeholder={cond.op === 'in' ? 'a, b, c' : 'value'} bind:value={cond.value}>
+                <input class="cf-value" type="text" placeholder={cond.op === 'in' ? 'a, b, c' : vals.length ? `e.g. ${vals[0]}` : 'value'} bind:value={cond.value}
+                    list={vals.length ? `${uid}-v${i}` : undefined}>
+                {#if vals.length}<datalist id="{uid}-v{i}">{#each vals as v (v)}<option value={v}></option>{/each}</datalist>{/if}
                 <button class="pt-btn icon" title="Remove this condition" onclick={() => remove(i)}><X size={13} /></button>
             </div>
         {/if}

@@ -30,6 +30,18 @@ export function fieldDoc(doc, path) {
     return doc?.fields[path] || doc?.fields[path.replace(/\.\d+(?=\.|$)/g, '.0')];
 }
 
+// fieldEnum: the values a row field allows — its own enum, else the enum
+// of the param that filters by it (events' `type` by `types`, highlights'
+// `kind` by `kinds`), which the spec states once, on the param.
+/**
+ * @param {SourceDoc | undefined} doc
+ * @param {string} path
+ * @returns {string[]}
+ */
+export function fieldEnum(doc, path) {
+    return fieldDoc(doc, path)?.enum || doc?.params[`${path}s`]?.enum || [];
+}
+
 /** @param {string} text */
 const flat = (text) => text.replace(/\s+/g, ' ').replace(/[`*]/g, '').trim();
 

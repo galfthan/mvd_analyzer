@@ -22,25 +22,28 @@
     import Trash2 from '@lucide/svelte/icons/trash-2';
     import Info from '@lucide/svelte/icons/info';
     import Snail from '@lucide/svelte/icons/snail';
+    import Table from '@lucide/svelte/icons/table-2';
+    import { tick } from 'svelte';
     import ExprGroup from './ExprGroup.svelte';
     import FinderFlow from './FinderFlow.svelte';
+    import FieldBrowser from './FieldBrowser.svelte';
     import { demo, teams, colorOf } from '../state/index.js';
     import { formatDuration } from '../lib/result.js';
     import {
-        SOURCES, PRESETS, SLOW_DEFAULT, viewCall, stages, fieldPaths, fieldOf, toDraft, fromDraft, encodeQuery,
+        SOURCES, PRESETS, SLOW_DEFAULT, viewCall, stages, fieldPaths, fieldStats, fieldOf, toDraft, fromDraft, encodeQuery,
     } from '../lib/clip-query.js';
     import { parseQueryText, queryToText } from '../lib/clip-query-text.js';
     import { miniMarkdown } from '../lib/mini-md.js';
     import { runner, currentRef } from './index.js';
     import { addClips } from './playlist-store.js';
     import { userPresets, savePreset, deletePreset, finderInput } from './clip-presets.js';
-    import { apiDocs, loadApiDocs, fieldDoc, shortDoc } from './api-docs.js';
+    import { apiDocs, loadApiDocs, fieldDoc, fieldEnum, shortDoc } from './api-docs.js';
     import { toast } from './toast.js';
 
     /** @typedef {import('../lib/clip-query.js').Draft} Draft */
 
     const SHOWN = 100;
-    const LABEL_HELP = 'A label template: {field} is the row\'s value, e.g. {player}; {field|s} adds a plural s unless the value is 1; {field|sec} turns ms into whole seconds; {field|upper} upper-cases.';
+    const LABEL_HELP = 'A label template: {field} is the row\'s value by its full path, e.g. {player} or {detail.frags}; {field|s} adds a plural s unless the value is 1; {field|sec} turns ms into whole seconds, {field|mmss} into m:ss; {field|upper} upper-cases. A value the row lacks prints ?.';
 
     // The first time, the first preset.
     const first = memo.draft ? memo : {
@@ -164,7 +167,16 @@
     });
     let rows = $derived(run?.rows || []);
     let clips = $derived(run?.clips || []);
-    let fields = $derived(fieldPaths(rows));
+    // Suggested fields: the ones these rows carry and every one the spec
+    // documents (a kind of row this demo lacks still has its fields).
+    let fields = $derived([...new Set([...fieldPaths(rows), ...Object.keys(doc?.fields || {})])].sort());
+    let stats = $derived(fieldStats(rows, 40));
+    let playerNames = $derived(Object.keys($demo?.result?.timelineAnalysis?.playerUserIDs || {}).sort());
+
+    // A condition's value suggestions: the spec's allowed values, then the
+    // ones these rows hold, most common first.
+    /** @param {string} f */
+    const valuesOf = (f) => [...new Set([...fieldEnum(doc, f), ...(stats.get(f)?.values || []).map(([v]) => String(v))])];
 
     // The fields whose values name a player in this demo: what a clip can
     // watch.
@@ -245,6 +257,29 @@
         });
     }
 
+    // A value picked in the field browser: keep the rows with it — a
+    // condition added to the filter's top group.
+    /**
+     * @param {string} field
+     * @param {'=' | '~'} op
+     * @param {import('../lib/clip-query.js').Scalar} value
+     */
+    function pickValue(field, op, value) {
+        draft.where.items.push({ kind: 'cond', field, op, value: String(value) });
+        if (code) codeText = queryToText(fromDraft(draft), title);
+        toast(`Keeping rows where ${field} ${op} ${value}`);
+    }
+
+    /** @type {HTMLElement | undefined} */
+    let fieldsHead = $state();
+    // The info panel, at the fields or at its top.
+    /** @param {boolean} atFields */
+    async function openInfo(atFields) {
+        info = true;
+        await tick();
+        if (atFields) fieldsHead?.scrollIntoView({ block: 'start' });
+    }
+
     /** @param {KeyboardEvent} e */
     function infoKey(e) {
         if (e.key === 'Escape') info = false;
@@ -300,6 +335,9 @@
             One line per stage: <code>name "…"</code>, <code>source endpoint param=value …</code>,
             <code>keep</code> a filter, <code>order field desc first 5</code>, a <code>clip from=field-3s to=field+2s watch=field label="…"</code>
             line per clip (add <code>slow=time-1s..time+1s@0.3</code> for slow motion), <code>label "…"</code> for clips without their own. Indent to continue a line; <code>#</code> comments.
+            A filter: <code>detail.powerup = quad and detail.frags &gt;= 3</code> — <code>and</code>, <code>or</code>, <code>not</code>, parentheses,
+            <code>= != &lt; &lt;= &gt; &gt;=</code>, <code>~</code> (contains / has), <code>weapon in [rl, lg]</code>, a bare <code>field</code> for "is true",
+            <code>victims[0].name</code> for a list's first item. <button class="cf-linkbtn" onclick={() => openInfo(true)}>Fields and values</button>
         </div>
         {#if run}
             <div class="cf-flow-line">
@@ -319,7 +357,7 @@
                         <option value={s} title={$apiDocs?.[s]?.summary || ''}>/{s}{$apiDocs?.[s] ? ` — ${$apiDocs[s].summary}` : ''}</option>
                     {/each}
                 </select>
-                <button class="pt-btn icon" title="What this source finds, its params and its row fields" onclick={() => (info = true)}><Info size={14} /></button>
+                <button class="pt-btn icon" title="What this source finds, its params and its row fields" onclick={() => openInfo(false)}><Info size={14} /></button>
             </div>
             {#if src.params.length}
                 <div class="cf-params">
@@ -332,10 +370,11 @@
                                     {#each p.enum as v (v)}<option value={v}>{v}</option>{/each}
                                 </select>
                             {:else}
-                                <input class="cf-param" type="text" list={p?.enum?.length ? `cf-enum-${name}` : undefined}
-                                    placeholder={p?.default != null ? String(p.default) : p?.type === 'array' ? 'a, b' : ''} bind:value={draft.params[name]}>
-                                {#if p?.enum?.length}
-                                    <datalist id="cf-enum-{name}">{#each p.enum as v (v)}<option value={v}></option>{/each}</datalist>
+                                {@const opts = p?.enum?.length ? p.enum : name === 'players' ? playerNames : []}
+                                <input class="cf-param" type="text" list={opts.length ? `cf-enum-${name}` : undefined}
+                                    placeholder={p?.default != null ? String(p.default) : p?.type === 'array' ? 'a, b' : /(?:^|[a-z])Ms$|^(?:from|to)$/.test(name) ? 'ms' : ''} bind:value={draft.params[name]}>
+                                {#if opts.length}
+                                    <datalist id="cf-enum-{name}">{#each opts as v (v)}<option value={v}></option>{/each}</datalist>
                                 {/if}
                             {/if}
                         </label>
@@ -351,8 +390,9 @@
             <div class="cf-stage-head">
                 <span class="cf-step">2</span><span class="cf-heading">Keep rows where</span>
                 <span class="muted cf-note">nothing set: keep every row</span>
+                <button class="pt-btn" title="Every field of these rows: its full path, what it means, the values it allows and the ones this demo has, and a real row — click a value to keep the rows with it" onclick={() => openInfo(true)}><Table size={13} /> Fields and values</button>
             </div>
-            <ExprGroup bind:group={draft.where} fields="cf-fields" />
+            <ExprGroup bind:group={draft.where} fields="cf-fields" tip={fieldTip} values={valuesOf} />
         </section>
         <FinderFlow n={run ? run.kept.length : null} what="row" tone="kept" />
 
@@ -364,7 +404,7 @@
             </div>
             <div class="cf-row">
                 <label class="cf-label" title="Sort the rows by this field — e.g. detail.frags for the best quad runs">by
-                    <input class="cf-field" type="text" list="cf-fields" placeholder="time" bind:value={draft.rank.by}
+                    <input class="cf-field" type="text" list="cf-fields" placeholder={src.clip.from} bind:value={draft.rank.by}
                         title={draft.rank.by ? fieldTip(draft.rank.by) : ''}>
                 </label>
                 <select class="pt-select" disabled={!draft.rank.by.trim()} bind:value={draft.rank.desc}>
@@ -387,11 +427,11 @@
                 <div class="cf-clip">
                     {#if draft.clips.length > 1}<span class="cf-clip-n">clip {i + 1}</span>{/if}
                     <div class="cf-row">
-                        <label class="cf-label" title="The clip starts at this row field (a time), minus the seconds after it">from
+                        <label class="cf-label" title="The clip starts at this row field (a time), minus the seconds in the − box">from
                             <input class="cf-field" type="text" list="cf-fields" placeholder={src.clip.from} bind:value={c.from} title={fieldTip(c.from || src.clip.from)}>
                         </label>
                         <label class="cf-label" title="Seconds before that time">−<input class="cf-num" type="text" placeholder={String(src.clip.before / 1000)} bind:value={c.before}>s</label>
-                        <label class="cf-label" title="The clip ends at this row field (a time), plus the seconds after it">to
+                        <label class="cf-label" title="The clip ends at this row field (a time), plus the seconds in the + box">to
                             <input class="cf-field" type="text" list="cf-fields" placeholder={src.clip.to} bind:value={c.to} title={fieldTip(c.to || src.clip.to)}>
                         </label>
                         <label class="cf-label" title="Seconds after that time">+<input class="cf-num" type="text" placeholder={String(src.clip.after / 1000)} bind:value={c.after}>s</label>
@@ -418,11 +458,11 @@
                             <input type="checkbox" bind:checked={c.slow.on}><Snail size={13} /> slow-mo
                         </label>
                         {#if c.slow.on}
-                            <label class="cf-label" title="From this row field (a time), minus the seconds after it — default: the clip's from field">at
+                            <label class="cf-label" title="From this row field (a time), minus the seconds in the − box — default: the clip's from field">at
                                 <input class="cf-field" type="text" list="cf-fields" placeholder={c.from || src.clip.from} bind:value={c.slow.at}>
                             </label>
                             <label class="cf-label" title="Seconds before that time">−<input class="cf-num" type="text" placeholder={String(SLOW_DEFAULT.before / 1000)} bind:value={c.slow.before}>s</label>
-                            <label class="cf-label" title="To this row field (a time), plus the seconds after it — default: the same field as at">to
+                            <label class="cf-label" title="To this row field (a time), plus the seconds in the + box — default: the same field as at">to
                                 <input class="cf-field" type="text" list="cf-fields" placeholder={c.slow.at || c.from || src.clip.from} bind:value={c.slow.to}>
                             </label>
                             <label class="cf-label" title="Seconds after that time">+<input class="cf-num" type="text" placeholder={String(SLOW_DEFAULT.after / 1000)} bind:value={c.slow.after}>s</label>
@@ -489,14 +529,8 @@
                         <dd class="cf-md">{@html miniMarkdown(p?.description || '')}</dd>
                     {/each}
                 </dl>
-                <h4>Row fields</h4>
-                <dl>
-                    {#each Object.keys(doc.fields).sort() as f (f)}
-                        {@const d = doc.fields[f]}
-                        <dt><code>{f}</code> <span class="muted">{d.type || ''}{d.enum?.length ? ` · ${d.enum.join(' · ')}` : ''}</span></dt>
-                        <dd class="cf-md">{@html miniMarkdown(d.description || '')}</dd>
-                    {/each}
-                </dl>
+                <h4 bind:this={fieldsHead}>Fields and values</h4>
+                <FieldBrowser {doc} {rows} onpick={pickValue} />
                 <h4>Labels</h4>
                 <p>{LABEL_HELP}</p>
             {:else}
@@ -710,6 +744,15 @@
     }
     .cf-close {
         margin-left: auto;
+    }
+    .cf-linkbtn {
+        padding: 0;
+        background: none;
+        border: none;
+        color: var(--accent-cyan);
+        font: inherit;
+        text-decoration: underline;
+        cursor: pointer;
     }
     .cf-info h4 {
         margin: 10px 0 4px;

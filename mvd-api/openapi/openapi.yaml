@@ -3102,7 +3102,7 @@ components:
       additionalProperties: false
       properties:
         hash: { type: string, description: Git commit hash of the build. }
-        tag: { type: string, description: Git tag, if any. }
+        tag: { type: string, description: "Git tag, if any." }
         buildDate: { type: string, description: "Build date." }
     LoadResult:
       type: object
@@ -8445,12 +8445,12 @@ components:
                   team: { type: string, description: "Team name." }
                   delta: { type: integer, description: frag delta (frag) or value change (health/armor) }
                   value: { type: integer, description: new value (health/armor/loc index) }
-                  bounded: { type: integer, description: KTX-scoreboard bounded value — on damage events the stored per-hit reconstruction (present only when it differs from the raw damage), on telefrag/stomp events the reconstructed kill value; absent when the bounded reconstruction was skipped; 0 is a real value }
-                  powerup: { type: string, description: "Powerup type." }
+                  bounded: { type: integer, description: "KTX-scoreboard bounded value — on damage events the stored per-hit reconstruction (present only when it differs from the raw damage), on telefrag/stomp events the reconstructed kill value; absent when the bounded reconstruction was skipped; 0 is a real value." }
+                  powerup: { type: string, enum: [quad, pent, ring], description: "Powerup type (powerup events)." }
                   endTime: { type: integer, description: int32 ms (powerup/streak) }
                   frags: { type: integer, description: frags during the powerup run }
                   length: { type: integer, description: streak length }
-                  duration: { type: integer, description: streak duration, int32 ms }
+                  duration: { type: integer, description: "Streak duration, int32 ms." }
                   weapon: { type: string, description: "Weapon — lowercase KTX class name (axe/sg/ssg/ng/sng/gl/rl/lg)." }
                   victim: { type: string, description: "Victim (killed player) name." }
                   damage: { type: integer, description: "Raw/unbound wire damage amount, including overkill (see bounded for the KTX-scoreboard value)." }
@@ -8458,10 +8458,10 @@ components:
                   isEnv: { type: boolean, description: "Environmental / world-sourced." }
                   isSelf: { type: boolean, description: "Attacker == victim." }
                   isTeam: { type: boolean, description: "Same team, not self." }
-                  victimWep: { type: string, description: "Victim weapon class at hit time (sg|mid|lg|rl|both)." }
+                  victimWep: { type: string, enum: [sg, mid, lg, rl, both], description: "Victim weapon class at hit time." }
                   gain: { type: string, description: weapon/item code gained (interval start) }
                   lose: { type: string, description: weapon/item code lost (interval end) }
-                  item: { type: string, description: spawner instance name (pickup), e.g. ya_1 }
+                  item: { type: string, description: "Spawner instance name (pickup), e.g. ya_1." }
                   kind: { type: string, description: "Item kind — compact vocabulary (rl/lg/ra/mh/quad/…)." }
                   entNum: { type: integer, description: "Server entity/edict number — stable id within a match." }
                   source:
@@ -8472,7 +8472,7 @@ components:
                   loc: { type: string, description: "Nearest named location from the map .loc file." }
                   li: { type: integer, description: raw LocTable index (loc=index mode) }
                   text: { type: string, description: chat message }
-                  clean: { type: string, description: chat message, color codes stripped }
+                  clean: { type: string, description: "Chat message, color codes stripped." }
                   attackerTeam: { type: string, description: "airgib attacker (rocketeer) team." }
                   victimTeam: { type: string, description: "airgib victim team." }
                   height: { type: number, description: "airgib victim feet above the floor at the hit (units)." }
@@ -8542,7 +8542,7 @@ components:
       properties:
         timeUnit: { type: string, enum: [ms], description: "Constant \"ms\" self-description echo — in the v57 pure-ms model every time value is int32 milliseconds." }
         windowMs: { type: integer, description: "Bucket width, int32 ms." }
-        start: { type: integer, description: First bucket start, int32 ms. }
+        start: { type: integer, description: "First bucket start, int32 ms." }
         count: { type: integer, description: "Number of buckets." }
         partialLastMs:
           type: integer

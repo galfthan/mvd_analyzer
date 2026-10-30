@@ -50,6 +50,19 @@ alike. The map's
 toolbar controls moved into its right-click menu (follow, trails, learn
 the map), and the Map tab's player table replaced the Player tab's.
 
+The clip finder says what its rows hold: **Fields and values** (from ⓘ or
+the filter's own button) lists every field by its full path
+(`detail.powerup`, not "powerup"), what it means, its unit, the values it
+allows and the ones this demo has with counts, and shows a real row;
+events and highlights narrow to one kind of row, so a powerup's fields
+show apart from a frag's. Click a value to filter on it. A condition's
+value box suggests values too, every field box says what its field means,
+and `players` suggests this demo's names. A row without a field no
+longer passes `<` / `>` tests on it (only `!=`), ordering by a text field
+sorts it, labels gain `{field|mmss}`, top damage windows take `weapons`,
+and the API reference fixes descriptions that were cut off at a comma and
+lists the allowed powerup and victim-weapon values.
+
 ## unreleased (web-svelte) — schema v77: backpack drops say who took them
 
 Every RL/LG backpack drop now carries its own pickup side, on every demo:
