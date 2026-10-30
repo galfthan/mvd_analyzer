@@ -30,6 +30,8 @@
     import { playerMenuItems } from '../player/player-menu.js';
     import MapMenu from '../ui/MapMenu.svelte';
     import Keyboard from '@lucide/svelte/icons/keyboard';
+    import Maximize from '@lucide/svelte/icons/maximize';
+    import Minimize from '@lucide/svelte/icons/minimize';
 
     /** @type {{ clips: import('../lib/playlist.js').Clip[], code: string }} */
     let { clips, code } = $props();
@@ -42,6 +44,9 @@
     let pending = null;
     const demo = store(/** @type {any} */ (null));
     const engine = new PlayerEngine({ clock, demo, activeTab: store('player') });
+    // A shared clip is watched for the fight: both teams' health, armor and
+    // weapons show from the start (`t` hides them).
+    engine.teamInfo = true;
     const runner = createRunner({
         engine, demo, teams, demoRefOf,
         segment: store(/** @type {{ start: number, end: number } | null} */ (null)),
@@ -119,12 +124,20 @@
     }
     /** @param {number} by */
     const seek = (by) => clock.seek(Math.max(0, clock.t + by));
-    const key = createPlayerKeys({ toggle: togglePlay, step, seek });
+    // Fullscreen: the game view and its controls (`f`, the button).
+    /** @type {HTMLElement | undefined} */
+    let stage = $state();
+    let fullscreen = $state(false);
+    function toggleFullscreen() {
+        if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+        else stage?.requestFullscreen?.()?.catch(() => {});
+    }
+    const key = createPlayerKeys({ toggle: togglePlay, step, seek, teamInfo: () => engine.toggleTeamInfo(), fullscreen: toggleFullscreen });
 
     // The player menu (src/player/player-menu.js), as the Player pane's:
     // the keyboard button or a right-click on the game view.
     let menu = $state(/** @type {{ x: number, y: number } | null} */ (null));
-    let menuItems = $derived(playerMenuItems({ engine, status: $status, toggle: togglePlay, step, seek }));
+    let menuItems = $derived(playerMenuItems({ engine, status: $status, toggle: togglePlay, step, seek, fullscreen: toggleFullscreen }));
     engine.screenMenu = (x, y) => { menu = { x, y }; };
     engine.screenDismiss = () => {
         if (!menu) return false;
@@ -137,6 +150,7 @@
 </script>
 
 <svelte:window onkeydown={key} />
+<svelte:document onfullscreenchange={() => { fullscreen = !!document.fullscreenElement; }} />
 
 <div class="clips-page">
     <header class="clips-head">
@@ -149,11 +163,11 @@
     {#if !playable.length}
         <p class="clips-empty">{clips.length ? 'These clips are from local files — open them in the full analyzer and load the files there.' : 'No clips in this link.'}</p>
     {:else}
-        <div class="clips-stage">
+        <div class="clips-stage" bind:this={stage}>
             <div class="clips-screen"><PlayerFrame {engine} /></div>
             <div class="clips-controls">
                 <button class="clips-btn" title="Previous clip" disabled={index <= 0} onclick={() => playFrom(index - 1)}><SkipBack size={16} /></button>
-                <button class="clips-btn clips-play" title={$status.playing ? 'Pause' : 'Play'} onclick={togglePlay}>
+                <button class="clips-btn clips-play" title={$status.playing ? 'Pause (space)' : 'Play (space)'} onclick={togglePlay}>
                     {#if $status.playing}<Pause size={18} fill="currentColor" />{:else}<Play size={18} fill="currentColor" />{/if}
                 </button>
                 <button class="clips-btn" title="Next clip" disabled={index < 0 || index >= playable.length - 1} onclick={() => playFrom(index + 1)}><SkipForward size={16} /></button>
@@ -173,9 +187,13 @@
                 </button>
                 <button class="clips-btn clips-menu-btn" title="Keys and player options (or right-click the game view)"
                     onclick={(e) => {
-                        const stage = /** @type {HTMLElement} */ (e.currentTarget.closest('.clips-stage'));
-                        menu = menu ? null : { x: stage.clientWidth - 230, y: stage.clientHeight - 330 };
+                        const el = /** @type {HTMLElement} */ (e.currentTarget.closest('.clips-stage'));
+                        menu = menu ? null : { x: el.clientWidth - 230, y: el.clientHeight - 400 };
                     }}><Keyboard size={16} /></button>
+                <button class="clips-btn" title={fullscreen ? 'Exit fullscreen (f or Esc)' : 'Fullscreen (f)'} aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                    onclick={toggleFullscreen}>
+                    {#if fullscreen}<Minimize size={16} />{:else}<Maximize size={16} />{/if}
+                </button>
             </div>
             <MapMenu bind:at={menu} items={menuItems} keep=".clips-menu-btn" />
         </div>
@@ -249,6 +267,18 @@
         aspect-ratio: 16 / 9;
         max-height: 75vh;
         background: #000;
+    }
+    .clips-stage:fullscreen {
+        display: flex;
+        flex-direction: column;
+        padding: 0 12px;
+        background: #000;
+    }
+    .clips-stage:fullscreen .clips-screen {
+        flex: 1;
+        min-height: 0;
+        aspect-ratio: auto;
+        max-height: none;
     }
     .clips-controls {
         display: flex;

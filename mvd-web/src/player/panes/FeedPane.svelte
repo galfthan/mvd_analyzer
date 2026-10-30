@@ -4,7 +4,7 @@
     // a few seconds before.
     import { clock, demo, teams, colorOf } from '../../state/index.js';
     import { formatDuration } from '../../lib/result.js';
-    import { engine } from '../index.js';
+    import { followName } from '../follow.js';
     import { onFrame } from './tick.js';
 
     const ROWS = 12;
@@ -38,7 +38,7 @@
     /** @param {Record<string, any>} f  a result.frags.frags row */
     function watch(f) {
         clock.seek(Math.max(0, f.time / 1000 - LEAD_S));
-        engine.trackName((!f.isSuicide && f.killer) || f.victim);
+        followName((!f.isSuicide && f.killer) || f.victim);
     }
 </script>
 

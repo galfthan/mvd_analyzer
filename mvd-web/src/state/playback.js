@@ -12,7 +12,8 @@
 // motion (slowPlayback) plays at its speed instead of the bar's, which
 // stays what it was.
 // Forward past the end wraps to the start; reverse stops at 0. A tab without
-// the bar, the Player tab, and a new demo stop it. Stopping seeks the clock
+// the bar, the Player engine taking over the clock (setPlaybackGate), and a
+// new demo stop it. Stopping seeks the clock
 // to where it stopped (an untagged seek), which is what makes the views
 // that only follow playback every so often catch up.
 

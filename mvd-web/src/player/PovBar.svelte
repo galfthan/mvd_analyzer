@@ -2,7 +2,8 @@
     // "Auto" (FTE's stats-based autotrack) plus one button per player,
     // grouped and coloured by the canonical team order. "Auto" lights while
     // autotrack is on; the followed player lights either way, so autotrack
-    // shows whom it picked. At the end: sound, and hiding / showing the side pane column.
+    // shows whom it picked. At the end: the keys menu, sound, and hiding /
+    // showing the side pane column.
     import Volume2 from '@lucide/svelte/icons/volume-2';
     import VolumeX from '@lucide/svelte/icons/volume-x';
     import PanelRightOpen from '@lucide/svelte/icons/panel-right-open';

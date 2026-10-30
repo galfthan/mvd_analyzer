@@ -1,6 +1,7 @@
 // player-keys.js — the demo player's keys, for the analyzer's playback and
 // the light player alike: Space plays / pauses, ↑ / ↓ track the previous /
-// next player, ← / → step a second back / on and Shift ← / → ten. Tab (the
+// next player, ← / → step a second back / on and Shift ← / → ten, t shows /
+// hides the team info and (where given) f toggles fullscreen. Tab (the
 // scoreboard) and ` (the console) are the engine's own binds
 // (mvd-fte-player/config.cfg), as on hub. Keys typed into a field are left
 // alone.
@@ -11,6 +12,9 @@
  * @property {((dir: 1 | -1) => void) | null} [step]  track the next / previous
  *   player; null where there is nobody to watch (↑ / ↓ then scroll the page)
  * @property {(by: number) => void} seek  move the playhead by seconds
+ * @property {() => void} [teamInfo]  show / hide the engine's team info
+ * @property {() => void} [fullscreen]  fullscreen on / off (the light
+ *   player; the analyzer's `f` is src/app/fullscreen.js's)
  * @property {() => boolean} [enabled]  whether the keys apply now
  */
 
@@ -24,10 +28,13 @@ const typing = (t) => !!(/** @type {Element} */ (t)?.closest?.('input, textarea,
 export function createPlayerKeys(actions) {
     return (e) => {
         if (actions.enabled && !actions.enabled()) return;
+        // Taken already (a focused pane divider resizes with the arrows).
+        if (e.defaultPrevented) return;
         if (e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return;
         if (e.key === ' ') {
-            // Space on a button presses it.
-            if (/** @type {Element} */ (e.target)?.closest?.('button, a')) return;
+            // Space on a button reached by keyboard presses it; one that
+            // only kept the focus after a click (Chrome) does not.
+            if (/** @type {Element} */ (e.target)?.closest?.('button, a')?.matches(':focus-visible')) return;
             e.preventDefault();
             if (!e.repeat) actions.toggle();
         } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -36,6 +43,12 @@ export function createPlayerKeys(actions) {
         } else if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && actions.step && !e.shiftKey) {
             e.preventDefault();
             actions.step(e.key === 'ArrowUp' ? -1 : 1);
+        } else if (e.key === 't' && actions.teamInfo && !e.repeat) {
+            e.preventDefault();
+            actions.teamInfo();
+        } else if (e.key === 'f' && actions.fullscreen && !e.repeat) {
+            e.preventDefault();
+            actions.fullscreen();
         }
     };
 }

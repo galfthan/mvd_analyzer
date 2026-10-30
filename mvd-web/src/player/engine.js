@@ -3,12 +3,13 @@
 // analysed through a blob URL — no second download, and local files play
 // too. Same origin is the point: we drive the engine directly via
 // iframe.contentWindow (seek, POV, speed) instead of reloading a
-// cross-origin hub embed, which accepts no commands. The engine boots on the
-// first visit to the tab (~6 MB of wasm plus assets) and is discarded on the
-// next demo load; one iframe page holds one engine for its lifetime.
+// cross-origin hub embed, which accepts no commands. The engine boots when
+// the Map or Player tab shows a Player pane (~6 MB of wasm plus assets) and
+// is dropped 20 s after none does, or on the next demo load
+// (src/player/index.js); one iframe page holds one engine for its lifetime.
 //
 // Clock: FTE runs on demo-relative seconds, the page on match-relative
-// ones (demoOffsetSec). While the tab is active the engine is the clock: a
+// ones (demoOffsetSec). While it is active() the engine is the clock: a
 // poll once per display frame pushes its time into the page clock as an
 // 'engine' seek — the Map pane's follow camera moves with it, so a slower
 // poll shows as stepping — and any other seek (scrub, time links) becomes a
@@ -33,6 +34,7 @@ import { demoOffsetSec, mapFileKey, userIdOf, nameOfUserId } from '../lib/result
  * @property {number | null} track  the tracked userid
  * @property {boolean} autotrack
  * @property {boolean} muted
+ * @property {boolean} teamInfo   the team info table is shown
  */
 
 const SEEK_THROTTLE_MS = 150;
@@ -46,7 +48,7 @@ const SEEK_SETTLE_MS = 2000;
 const CLOCK_WAIT_MS = 30000;
 
 /** @type {EngineStatus} */
-const IDLE = { ready: false, playing: false, speed: 100, rate: 100, ended: false, track: null, autotrack: false, muted: true };
+const IDLE = { ready: false, playing: false, speed: 100, rate: 100, ended: false, track: null, autotrack: false, muted: true, teamInfo: false };
 
 export class PlayerEngine {
     /**
@@ -76,6 +78,12 @@ export class PlayerEngine {
         // A click that closes an open menu instead (true: taken).
         /** @type {() => boolean} */
         this.screenDismiss = () => false;
+        // Whether the engine's console is open (toggleConsole, and ` / ~ /
+        // Escape typed in the game view): its keys then stay the engine's.
+        this.consoleOpen = false;
+        // FTE's team info table (hud_teaminfo, mvd-fte-player/config.cfg):
+        // kept across engines, set on each as it comes up.
+        this.teamInfo = false;
         /** @type {DemoHandle | null} */
         this.handle = null;
         /** @type {HTMLElement | null} */
@@ -124,8 +132,13 @@ export class PlayerEngine {
     // host drops it after a while unwanted: src/player/index.js).
     syncActive() {
         if (this.active()) {
+            // Back from suspension: the clock may have moved meanwhile (a
+            // time link on another tab), and the first tick would pull it
+            // back to the engine's time — jump the engine there instead.
+            const back = !!this.fte && !this.syncFrame;
             this.fte?.resume();
             this.ensure();
+            if (back && this.fte && Math.abs(this.fte.getDemoElapsedTime() - this.offset() - this.clock.t) > 0.5) this.requestSeek(this.clock.t);
             this.startSync();
         } else if (this.fte) {
             this.stopSync();
@@ -178,6 +191,7 @@ export class PlayerEngine {
                 .then((/** @type {FteController} */ fte) => {
                     if (this.iframe !== iframe) return;
                     this.fte = fte;
+                    if (this.teamInfo) fte.command('hud_teaminfo_show 1');
                     // Open where the cursor already is, paused — the same
                     // entry hub's ?from= gives.
                     if (this.clock.t > 0) this.jump(this.clock.t);
@@ -215,14 +229,17 @@ export class PlayerEngine {
             e.preventDefault();
             this.screenMenu(e.clientX, e.clientY);
         }, true);
-        let consoleOpen = false;
         /** @param {KeyboardEvent} e */
         const forward = (e) => {
             if (e.key === '`' || e.key === '~') {
-                if (e.type === 'keydown' && !e.repeat) consoleOpen = !consoleOpen;
+                if (e.type === 'keydown' && !e.repeat) this.consoleOpen = !this.consoleOpen;
                 return;
             }
-            if (consoleOpen || e.key === 'Tab') return;
+            if (this.consoleOpen) {
+                if (e.key === 'Escape' && e.type === 'keydown') this.consoleOpen = false;
+                return;
+            }
+            if (e.key === 'Tab') return;
             e.preventDefault();
             e.stopPropagation();
             document.dispatchEvent(new KeyboardEvent(e.type, {
@@ -326,6 +343,7 @@ export class PlayerEngine {
             track: fte.getTrackUserid(),
             autotrack: fte.isUsingAutotrack(),
             muted: fte.isMuted(),
+            teamInfo: this.teamInfo,
         };
         const cur = this.status.get();
         if (/** @type {Array<keyof EngineStatus>} */ (Object.keys(next)).some((k) => next[k] !== cur[k])) this.status.set(next);
@@ -441,6 +459,21 @@ export class PlayerEngine {
     povTrack() {
         const s = this.status.get();
         return !s.ready || s.autotrack || s.track == null ? 'auto' : s.track;
+    }
+
+    // toggleConsole opens / closes the engine's console (the player menu's
+    // Console), keeping hookScreen's key routing in step.
+    toggleConsole() {
+        if (!this.fte) return;
+        this.fte.command('toggleconsole');
+        this.consoleOpen = !this.consoleOpen;
+    }
+
+    // toggleTeamInfo shows / hides both teams' health, armor and weapons.
+    toggleTeamInfo() {
+        this.teamInfo = !this.teamInfo;
+        this.fte?.command(`hud_teaminfo_show ${this.teamInfo ? 1 : 0}`);
+        this.publish();
     }
 
     toggleMute() {

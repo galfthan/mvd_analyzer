@@ -40,10 +40,17 @@ test('keys typed into a field are left alone', () => {
     const field = { closest: (sel) => (sel.includes('input') ? {} : null) };
     key(ev(' ', { target: field }));
     key(ev('ArrowLeft', { target: field }));
-    const button = { closest: (sel) => (sel === 'button, a' ? {} : null) };
-    key(ev(' ', { target: button }));
-    key(ev('ArrowLeft', { target: button }));
-    assert.deepEqual(log, [-1], 'Space presses a focused button; arrows still step');
+    const button = (keyboard) => ({ closest: (sel) => (sel === 'button, a' ? { matches: () => keyboard } : null) });
+    key(ev(' ', { target: button(true) }));
+    key(ev('ArrowLeft', { target: button(true) }));
+    key(ev(' ', { target: button(false) }));
+    assert.deepEqual(log, [-1, 'toggle'], 'Space presses a keyboard-focused button, not one a click left focused; arrows still step');
+});
+
+test('a key something took already (a focused pane divider) is not ours', () => {
+    const { log, key } = setup();
+    key(ev('ArrowLeft', { defaultPrevented: true }));
+    assert.deepEqual(log, []);
 });
 
 test('nextName wraps both ways and starts from an end', () => {

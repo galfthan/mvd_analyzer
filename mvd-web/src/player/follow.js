@@ -18,6 +18,13 @@ export function watch(name) {
     else mapFollow.set(mapFollow.get() === name ? null : name);
 }
 
+// followName: watch `name` — no toggling off (a feed row, ↑ / ↓).
+/** @param {string} name */
+export function followName(name) {
+    if (engine.drives()) engine.trackName(name);
+    else mapFollow.set(name);
+}
+
 // watched: the player the tab watches now — the engine's POV, else the
 // map's follow target.
 export function watched() {
@@ -42,7 +49,5 @@ export function watchOrder(handle, t) {
 /** @param {1 | -1} dir */
 export function watchNext(dir) {
     const name = nextName(watchOrder(demo.get(), teams.get()), watched(), dir);
-    if (!name) return;
-    if (engine.drives()) engine.trackName(name);
-    else mapFollow.set(name);
+    if (name) followName(name);
 }

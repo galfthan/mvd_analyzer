@@ -11,6 +11,7 @@
     import { watchNext } from './follow.js';
     import { engine } from './index.js';
     import { clock } from '../state/index.js';
+    import { toggleFullscreen } from '../app/fullscreen.js';
 
     /** @param {HTMLElement} el */
     function slot(el) {
@@ -25,6 +26,8 @@
         toggle: () => engine.screenToggle(),
         step: watchNext,
         seek: (by) => clock.seek(Math.max(0, clock.t + by)),
+        fullscreen: () => toggleFullscreen(),
+        selection: true,
     }));
 
     onMount(() => {

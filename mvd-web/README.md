@@ -19,9 +19,10 @@ talks to it through a JS shim.
   built by Vite (`make build` runs `npm ci && npm run build` here, so
   node is needed to build). `src/main.js` is the module entry: it mounts
   the Svelte shell (`src/shell/`) and starts the page (`src/app/boot.js`).
-  Every tab is a Svelte component: the Player tab (`src/player/`) and
-  the Search, Summary, Timeline, Map, Chat, Pack Drops, Pickups, Key
-  Moments, Aim Stats and Locs & Regions tabs (`src/tabs/<name>/`, their
+  Every tab is a Svelte component: the Map and Player tabs (one
+  component, two views: `src/player/`) and the Search, Summary,
+  Timeline, Chat, Pack Drops, Pickups, Key Moments, Aim Stats and Locs &
+  Regions tabs (`src/tabs/<name>/`, their
   DOM-free parts in `src/lib/<name>.js`), with the unified playback bar
   (`src/ui/PlaybackBar.svelte`) above them. The orchestration the tabs
   share is `src/app/`: loading a demo (`load.js`: `loadDemo`, the file /
@@ -35,8 +36,8 @@ talks to it through a JS shim.
   `MvdMapTab` (the map view and loader), `MvdPlayer` (the Player engine),
   `mvdData` (the data source) and `loadDemo`.
   Three packages are bundled (pinned in `package.json`):
-  [PaneForge](https://paneforge.com) for the Player tab's player | panes
-  split, [Lucide](https://lucide.dev) icons, imported one per file
+  [PaneForge](https://paneforge.com) for the Map and Player tabs' two
+  pane columns, [Lucide](https://lucide.dev) icons, imported one per file
   (`@lucide/svelte/icons/<name>`) so only the icons used ship, and
   [jsep](https://github.com/EricSmekens/jsep) (MIT), the expression parser
   behind the clip finder's *Code* view (its `keep` line). Their node tests
@@ -73,7 +74,7 @@ talks to it through a JS shim.
     candidate, watch the frames). Not linked from the app.
 - `dist/fte-player/` (built from the sibling [`mvd-fte-player/`](../mvd-fte-player/README.md))
   — the FTE demo player page the **Player** tab embeds; see
-  [Player tab](#player-tab).
+  [Map and Player tabs](#map-and-player-tabs-one-tab-two-views).
 
 ## Build and deploy
 
@@ -91,6 +92,7 @@ dist/
   analyzer.wasm               ~4 MB, the WASM bundle
   wasm_exec.js                Go glue, from the building toolchain
   index.html, assets/         the page + Vite's hashed bundles
+  play.html                   the light player (shared playlist links)
   styles.css, worker.js       frontend copied from static/
   probe.html                  the QTV proxy probe (dev page, from static/)
   fte-player/                 the Player tab's engine page
@@ -291,10 +293,11 @@ the wire, so the spawn state 100/0 is shown):
   the rows where the teleporter died last.
 
 All four are sortable by any column (`makeSortable`), seek the timeline on
-the time cell, and link the Hub replay from the actor's perspective. The
+the time cell, and carry a play link from the actor's perspective (a
+click plays it in the Player tab, Ctrl / Cmd-click opens hub). The
 **Demo Markers** table lists the
 user-inserted `/demomark` bookmarks (`timelineAnalysis.demoMarkers`) —
-Time, Player, Team, Note, and a Hub Watch link — so a viewer can jump
+Time, Player, Team, Note, and a play link — so a viewer can jump
 straight to the moments players flagged in-game; it is routinely empty
 since demos rarely carry markers, and warmup marks show a negative time.
 
@@ -416,8 +419,9 @@ match clock — every view follows it; the page's playback publishes as
 `'playback'`, the Player engine as `'engine'`, a demo reset as `'reset'`),
 `playback` (`playback.js`: the page's own play loop — at the speed the
 unified bar's dropdown sets, -1 / 0.2 / 0.5 / 1 / 2 / 5×, once per display frame;
-forward wraps at the end, reverse stops at 0, a tab without the bar, the
-Player tab and a new demo stop it), `teams` (the canonical team order and
+forward wraps at the end, reverse stops at 0; a tab without the bar,
+the Player engine taking over the clock (`setPlaybackGate`) and a new
+demo stop it), `teams` (the canonical team order and
 colours; `src/main.js` mirrors them onto the `--team-a..d` CSS
 variables), `segment`, `regionControl`, `activeTab` and `demo` (the
 current `DemoHandle`).
@@ -431,8 +435,8 @@ the sidebar (from `TABS` in `src/state/ui.js`), the unified playback bar
 (`src/ui/PlaybackBar.svelte`, over the Timeline, Chat, Map, Key Moments
 and Player tabs), the layout and every tab (`PlayerTab`, and
 `SummaryTab`, `ChatTab`, `PackDropsTab`, `PickupsTab`, `KeyMomentsTab`,
-`AimStatsTab`, `LocGraphTab`, `TimelineTab`, `MapTab`, `SearchTab` in
-`src/tabs/`). `src/main.js` mounts it synchronously, then
+`AimStatsTab`, `LocGraphTab`, `TimelineTab`, `SearchTab` in
+`src/tabs/`; `PlayerTab` is both the Map and the Player tab). `src/main.js` mounts it synchronously, then
 `src/app/boot.js` starts the page: the URL follows the clock, segment,
 learn mode and tab; the initial tab is picked from the URL; a
 deep-linked demo loads and the URL's search filters fill the form (and
@@ -1050,8 +1054,8 @@ this tab's panes* puts it back to its default, and switching tabs returns
 to a view as it was left. Any pane can open in either tab (a Player pane
 on the Map tab loads the engine there). A clip played on the Map tab
 without a Player pane plays there, on the map (see *Clips and the
-playlist*); anywhere else it opens the Player tab, and its Player pane if
-the viewer closed or collapsed it.
+playlist*), and with one in that pane; anywhere else it opens the Player
+tab, and its Player pane if the viewer closed or collapsed it.
 
 `src/player/` (`PlayerTab.svelte` and its components, mounted by the
 shell) was the first tab ported to Svelte. It watches the loaded demo in the FTE
@@ -1119,9 +1123,10 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   viewport, which does not scroll).
 - **POV bar** in the Player pane, under the picture: `Auto` (FTE's stats
   autotrack) and one button per player in canonical team order and
-  colour; the followed player stays lit under autotrack too. A sound
-  toggle sits at its right end (the player starts muted, as hub's does),
-  then the hide / show toggle of the side pane column.
+  colour; the followed player stays lit under autotrack too. At its
+  right end: the keys menu button (see *Keys*), the sound toggle (the
+  player starts muted, as hub's does) and the hide / show toggle of the
+  side pane column.
 - **Fullscreen** (see *Fullscreen* under the playback bar): the whole
   player panel — both pane columns, the Player pane's picture included —
   fills the screen, each column scrolling on its own. The tab's controls share one compact
@@ -1143,7 +1148,8 @@ time). Each pane is a Svelte
 component inside a `Pane.svelte` frame and redraws at most once per
 animation frame on the page clock or the engine's status, only while the
 tab shows (`panes/tick.js`). The layout is a per-viewer convenience in
-`localStorage` (`mvd.playerPanes.v3`; a `v2` layout, from before the
+`localStorage` (`mvd.playerPanes.v4`, one layout per view; a `v3`
+layout becomes the Player view's, a `v2` layout, from before the
 player was a pane, gets it on top of the main column, and the PoC's `v1`
 order is migrated): which panes are open in each column and in what
 order (the views' defaults above — the Clip finder and the rest are one
@@ -1172,7 +1178,7 @@ Player pane avoids that.)
   right-drag orbits, the wheel zooms, double-click resets. A right-click
   that does not drag (or the sliders button) opens the overlay menu: follow,
   view and velocity arrows, line of sight and PVS (running the map model's
-  `ensureLineOfSight` once per demo), occlusion, trails (none / the watched
+  `ensureLineOfSight` once per demo), occlusion, fog, trails (none / the watched
   player / everyone, the last 10 s), 3D and reset view; Escape or a click
   elsewhere closes it. With no engine (no Player pane — the Map preset)
   the camera follows `mapFollow` (`src/player/follow.js`) instead of the
@@ -1205,7 +1211,8 @@ Player pane avoids that.)
 - **Region status** (`panes/RegionsPane.svelte`): one row per control
   region, its state and the players in it as their map symbols (only
   with two sides).
-- **Graph panes** (`GraphPane.svelte`, off by default): *Score*, *Team
+- **Graph panes** (`GraphPane.svelte`; only *Team weapons* is open by default, in the
+  Player view): *Score*, *Team
   weapons*, *Team health / armor*, *Weapons per player*, *Powerups* and
   *Region control* — the Timeline tab's series and renderers over the
   pane's window (`PANE_WINDOWS`, `paneWindow` in `src/lib/timeline.js`):
@@ -1419,9 +1426,11 @@ demo's bytes (`fetchGame` + `downloadDemo`) and a minimal handle whose
 result carries just the map (hub's game row) and the demo offset (from
 the clips). The page lists the clips (label, who, length, slow motion,
 demo), starts the run at once (muted, as the tab does), and has play /
-pause, previous / next and sound; a click on a clip plays from it. A
-click on the game view plays / pauses, and the keys are hub's (below), on
-this page and the full one alike. Clips
+pause, previous / next, sound, the keys menu and fullscreen (the game
+view and these controls; `f`); a click on a clip plays from it. The team
+info shows from the start. A click on the game view plays / pauses, and
+the keys are the full page's (*Keys*), on this page and the full one
+alike. Clips
 of a local file are listed as skipped. A click while a demo downloads
 wins over the run that asked first (and shares its download when it is
 the same demo). *Open in the full analyzer* (head
@@ -1651,8 +1660,9 @@ it yet) are eligible for kill credit; redundant grabs — where
 new — always show 0 and are dimmed. The denial semantics still
 show through the status chip (`enemy RL`, `xfer RL`).
 
-The `Drop` and `Run` columns are hub.quakeworld.nu replay links.
-`Drop` spans 10 s leading into the drop, tracking the dropper;
+The `Drop` and `Run` columns are play links (a click plays in the
+Player tab, Ctrl / Cmd-click opens hub). `Drop` runs from 4 s before the
+drop to 2 s after, tracking the dropper;
 `Run` spans 3 s before pickup to the picker's next death (or +15 s
 if they survived to match end), tracking the picker.
 
@@ -1700,17 +1710,26 @@ the match; held keys (Space, `i` / `o` / `c`) do not repeat.
 **Keys** (`src/player/player-keys.js`): Space plays / pauses, ↑ / ↓ watch
 the previous / next player on the Map and Player tabs (`watchNext`, in the
 POV bar's order; on the Map tab the map follows them; elsewhere ↑ / ↓
-scroll), ← / → step a second, Shift ← / → ten. Tab (scoreboard) and ` / ~
-(console) are hub's binds in the engine's `config.cfg`. A click on the
-game view plays / pauses. The **player menu** (`player-menu.js`, drawn by
-the map's `MapMenu.svelte`) lists them all as items to click, then
-autotrack and sound: the POV bar's keyboard button or a right-click on
+scroll), ← / → step a second, Shift ← / → ten, and `t` shows / hides
+the engine's team info — both teams' players with their loc, health /
+armor and weapon, at the right edge (FTE's `hud_teaminfo`, set up in the
+engine's `config.cfg`; off in the analyzer, on in the light player, kept
+across engines: `engine.toggleTeamInfo`). A key something else took
+already (a focused pane divider's arrows) is left to it, and Space on a
+button reached by keyboard presses it, while one a click left focused
+plays / pauses. Tab (scoreboard) and ` / ~ (console) are hub's binds in
+the engine's `config.cfg`. A click on the game view plays / pauses. The
+**player menu** (`player-menu.js`, drawn by the map's `MapMenu.svelte`)
+lists them all as items to click — with `f` and, on the full page, the
+selection's `i` / `o` / `c` — then team info, autotrack and sound: the POV bar's keyboard button or a right-click on
 the game view (`engine.screenMenu`) opens it, and a click on the game
 view while it is open only closes it (`engine.screenDismiss`). The light
 player has the same keys and menu. The engine's frame keeps the focus after a click in
 it, so `hookScreen` (`engine.js`) sends the keys typed there on to the
 page as if typed there — these, `i` / `o` / `c`, `f` — but for Tab and
-the console's (and everything while the console is open); the click is
+the console's (and everything while the console is open: ` / ~ / Escape
+typed there, and the menu's *Console* through `engine.toggleConsole`,
+keep that state); the click is
 `engine.screenToggle`, the host's play / pause (the bar's; the light
 page's). Keys typed into a field are left alone. On the
 Player tab play waits for the engine to be up. A playlist clip

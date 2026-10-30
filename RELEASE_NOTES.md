@@ -29,7 +29,17 @@ read **play** (Shift: **+add**, Ctrl / Cmd: **hub**), the clip finder
 starts closed and shows its clips beside the stages, and the map's depth
 fog is an option again — off by default — in the map's right-click menu.
 The fullscreen button moved from the tab list to the right end of the
-playback bar, where it stays as the way out in fullscreen.
+playback bar, where it stays as the way out in fullscreen. The light
+player goes fullscreen too (a button, or `f`) and shows the engine's
+team info — both teams' players with their loc, health / armor and
+weapon — from the start; `t` shows / hides it in either player, and the
+keys menu lists it, `f` and the selection keys. Fixes: opening the
+console from the menu no longer leaves the game view's keys in the wrong
+state; coming back to the Player tab after picking a time on another
+tab plays from that time instead of jumping back; a frag feed click
+follows the killer on the Map tab too; Space after clicking a button
+(a player, a playlist row) plays / pauses instead of pressing it again;
+the arrows on a focused pane divider only resize.
 
 The **Map and Player tabs are now two views of one tab**, sharing all of
 their panes: *Map* (a large map, the players' table, moments, items and
@@ -37,8 +47,8 @@ region status — no demo player to load, so it opens instantly and scrubs
 freely) and *Player* (the game view and the playlist, the map beside).
 Each remembers how you arranged it, and any pane can go in either. A
 moment or the playlist played on the Map tab plays right there, on the
-map, following the clip's player; from any other tab it opens the Player
-tab. Loading another demo clears the previous demo's clips from the
+map, following the clip's player (in the Player pane if the tab has
+one); from any other tab it opens the Player tab. Loading another demo clears the previous demo's clips from the
 playlist (a share link over several demos keeps them). A click on the
 game view, or Space, plays and pauses — in the analyzer and the light
 player. The light player's *Open in the full analyzer* opens its
@@ -51,9 +61,9 @@ selection), and its hover readout is no longer cut off in fullscreen or
 at the bar's ends. Resizing the Player pane's height now resizes the game
 view too (any aspect, not only 16:9). The player has keys — Space plays /
 pauses, ↑ / ↓ switch to the previous / next player (on the Map tab the
-map follows them), ← / → step a second and Shift ← / → ten seconds, Tab
-shows the scoreboard and ` the console — with the focus in the game view
-or not, in the analyzer and the light player; a keyboard button (or a
+map follows them), ← / → step a second and Shift ← / → ten seconds —
+with the focus in the game view or not — and in the game view Tab shows
+the scoreboard and ` the console, in the analyzer and the light player; a keyboard button (or a
 right-click on the game view) opens a menu listing them, with autotrack
 and sound. The players' table has no play column — click a name to follow. The graph panes and the health /
 armor strips show the selection (or the whole match) by default and grow

@@ -860,7 +860,7 @@ mvd-analyzer/
     No mvd-analytics import — outputs are opaque JSON pass-through
 
   mvd-web/                 Module: browser UX + WASM glue (Layer 3, frontend)
-    index.html, src/       Vite + Svelte: app/ (load, URL, tabs), shell/, tabs/, player/ (Player tab), data/, state/, lib/, ui/ (shared widgets: playback bar, panels)
+    index.html, src/       Vite + Svelte: app/ (load, URL, tabs), shell/, tabs/, player/ (Map and Player tabs), play/ (play.html, the light player), data/, state/, lib/, ui/ (shared widgets: playback bar, panels)
     static/                worker.js, styles.css, vendor/, maps/ (copied as-is)
     test/                  node --test unit tests for the DOM-free modules
     cmd/wasm/              WASM entry (exports analyzeMVD to JS)

@@ -1,8 +1,7 @@
 // fullscreen.js — a tab's fullscreen: the tab's panel fills the screen and
 // the unified playback bar moves into it on top, so seeking, the speed
-// buttons and the way out stay at hand, and back out however fullscreen
-// ends (the tab bar's icon, `f`, the bar's exit button, Escape, the
-// browser). A tab offers it by naming its panel here and reacts to
+// and the way out stay at hand, and back out however fullscreen ends (the
+// bar's button, `f`, Escape, the browser). A tab offers it by naming its panel here and reacts to
 // `fullscreenTab` (the map resizes its canvas, the player caps its height
 // through the panel's class).
 

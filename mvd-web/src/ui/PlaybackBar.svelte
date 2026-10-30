@@ -182,6 +182,9 @@
         get step() {
             return isWatchTab(activeTab.get()) ? watchNext : null;
         },
+        get teamInfo() {
+            return isWatchTab(activeTab.get()) ? () => engine.toggleTeamInfo() : undefined;
+        },
         seek: (by) => clock.seek(Math.max(0, clock.t + by)),
     });
 
