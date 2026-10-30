@@ -69,10 +69,12 @@ type Registry struct {
 	// volume, so this is a separate request (qw-analyze -include nails).
 	BuildNails bool
 
-	// Parallel opts heavy finalize passes into goroutine fan-out (see
-	// Context.Parallel). Off by default so bulk hosts that already run
-	// one demo per worker don't oversubscribe; single-demo callers
-	// (qw-analyze -parallel) can turn it on. Output is identical.
+	// Parallel opts into goroutine fan-out: the event pass reads the demo
+	// on its own goroutine (prefetchSource), and heavy finalize passes fan
+	// out (see Context.Parallel). Off by default so bulk hosts that already
+	// run one demo per worker don't oversubscribe; single-demo callers
+	// (qw-analyze -parallel, mvd-api) turn it on. Output is identical
+	// (TestParallelMatchesSerial).
 	Parallel bool
 
 	// PhaseTimings holds per-phase wall-clock durations from the most
@@ -218,9 +220,15 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 	record("init", initStart)
 
 	eventStart := time.Now()
+	next := source.Next
+	if r.Parallel {
+		pf := newPrefetchSource(source)
+		defer pf.halt()
+		next = pf.Next
+	}
 	var streamErr error
 	for {
-		event, err := source.Next()
+		event, err := next()
 		if err == io.EOF {
 			break
 		}
