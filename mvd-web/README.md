@@ -1729,11 +1729,12 @@ Player pane on the Map tab, ends a run whose driver that takes away.
 
 **Fullscreen** is one feature for every tab that offers it
 (`src/app/fullscreen.js`; the Map and Player tabs, naming their shared
-panel in `FULLSCREEN_PANELS` — the active tab is the one in fullscreen): the active tab's row in the tab bar carries the
-icon for it, and `f` toggles it (not while a field has the keys). The
-tab's panel fills the screen and the playback bar moves into it on top,
-ending with *Exit*, so the way out sits in the top-right corner (Esc
-works too); however fullscreen ends, the bar moves back. A tab reacts to
+panel in `FULLSCREEN_PANELS` — the active tab is the one in fullscreen): the playback bar ends with the button for it,
+where a video player has it — four corners out to go in, in to come out —
+and `f` toggles it (not while a field has the keys). The tab's panel
+fills the screen and the playback bar moves into it on top, so the same
+button, now in the top-right corner, is the way out (Esc works too);
+however fullscreen ends, the bar moves back. A tab reacts to
 the `fullscreenTab` store — the Map / Player panel takes
 `player-panel--fullscreen`.
 

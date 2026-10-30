@@ -28,6 +28,8 @@ inside a Discord message — and links copied before still open. Hub links every
 read **play** (Shift: **+add**, Ctrl / Cmd: **hub**), the clip finder
 starts closed and shows its clips beside the stages, and the map's depth
 fog is an option again — off by default — in the map's right-click menu.
+The fullscreen button moved from the tab list to the right end of the
+playback bar, where it stays as the way out in fullscreen.
 
 The **Map and Player tabs are now two views of one tab**, sharing all of
 their panes: *Map* (a large map, the players' table, moments, items and

@@ -25,13 +25,15 @@
     // It follows the clock on every tick (a few style writes and a text). A
     // tab's fullscreen (src/app/fullscreen.js) moves the root element into
     // the tab's panel and back, so it is always rendered and hidden by style
-    // only; there it ends with the button out of fullscreen.
+    // only. On a tab that can go fullscreen it ends with the button in and
+    // out of it, where a video player has it.
     import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
     import Play from '@lucide/svelte/icons/play';
     import Pause from '@lucide/svelte/icons/pause';
+    import Maximize from '@lucide/svelte/icons/maximize';
     import Minimize from '@lucide/svelte/icons/minimize';
-    import { fullscreenTab, toggleFullscreen } from '../app/fullscreen.js';
+    import { FULLSCREEN_PANELS, fullscreenTab, toggleFullscreen } from '../app/fullscreen.js';
     import {
         clock, demo, activeTab, isWatchTab, segment, playback, setPlaybackSpeed, togglePlayback, TABS_WITH_TIMELINE,
     } from '../state/index.js';
@@ -256,8 +258,12 @@
             {/if}
         {/if}
         {#if $fullscreenTab}
-            <button class="pb-exit-fs" title="Leave fullscreen (Esc or f)" aria-label="Leave fullscreen" onclick={() => toggleFullscreen()}>
-                <Minimize size={16} /> Exit
+            <button class="pb-fs" title="Exit fullscreen (f or Esc)" aria-label="Exit fullscreen" onclick={() => toggleFullscreen()}>
+                <Minimize size={16} />
+            </button>
+        {:else if Object.hasOwn(FULLSCREEN_PANELS, tab)}
+            <button class="pb-fs" title="Fullscreen (f)" aria-label="Fullscreen" onclick={() => toggleFullscreen(tab)}>
+                <Maximize size={16} />
             </button>
         {/if}
     </div>
@@ -438,22 +444,21 @@
         pointer-events: none;
         z-index: 30;
     }
-    .pb-exit-fs {
+    .pb-fs {
         margin-left: auto;
         display: inline-flex;
         align-items: center;
-        gap: 4px;
-        height: 24px;
-        padding: 0 8px;
+        justify-content: center;
+        width: 28px;
+        height: 26px;
+        padding: 0;
         background: none;
-        border: 1px solid rgba(0, 217, 255, 0.3);
-        border-radius: 3px;
-        color: #7a8ba8;
-        font-size: 0.85rem;
+        border: none;
+        border-radius: 4px;
+        color: var(--accent-cyan);
         cursor: pointer;
     }
-    .pb-exit-fs:hover {
-        color: var(--accent-cyan);
-        border-color: var(--accent-cyan);
+    .pb-fs:hover {
+        background: rgba(0, 217, 255, 0.15);
     }
 </style>
