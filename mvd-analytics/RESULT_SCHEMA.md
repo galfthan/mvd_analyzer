@@ -30,7 +30,7 @@ analyzer are also covered there.
 | Shots | `shots` | *ShotsResult | Per-shot weapon-fire stream (who fired what, at what ms) from `svc_sound` fire sounds + LG `TE_LIGHTNING2` beams, with same-frame hitscan→damage links and a KTX-accuracy cross-check. |
 | Aim | `aim` | *AimResult | Per-player aim analysis: normalized crosshair-error samples (hitscan), LG ramp-onto-target, rocket direct/splash, LG reach/whiff. Derived (post-process) from Shots + Streams + Damage. |
 | MapEntities | `mapEntities` | *MapEntitiesResult | Static designed map layout (item spawns, spawnpoints, teleporters, buttons) from the BSP entity corpus. |
-| Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops, each stamped `source`: `ktx` from the `//ktx drop` hint, or (v72) `reconstructed` — replayed from DropBackpack's own rule on demos older than that hint. Every row carries the pack's `fate` (`picked` / `expired` / `unobserved`) with `picker` / `pickerTeam` / `pickupTime` / `pickerRelation` — read off the wire's backpack-entity track on a reconstructed row (v72), and on a `ktx` row (v77) copied from the `//ktx bp` weaponPickups row, with that pickup's `pickerHadWeapon` / `pickerKills` / `pickerNextDeathTime`, or from `//ktx expire`. |
+| Backpacks | `backpacks` | []BackpackDrop | RL/LG backpack drops, each stamped `source`: `ktx` from the `//ktx drop` hint, or (v72) `reconstructed` — replayed from DropBackpack's own rule on demos older than that hint. Every row carries the pack's `fate` (`picked` / `expired` / `unobserved`) with `picker` / `pickerTeam` / `pickupTime` / `pickerRelation` — read off the wire's backpack-entity track on a reconstructed row (v72), and on a `ktx` row (v77) copied from the `//ktx bp` weaponPickups row, with that pickup's `pickerHadWeapon` / `pickerKills` / `pickerNextDeathTime` / `pickerEndTime` (v78), or from `//ktx expire`. |
 | WeaponPickups | `weaponPickups` | []WeaponPickup | Slot-weapon acquisitions with kills-before-next-death effectiveness. |
 | Opening | `opening` | *OpeningResult | Match opening: per-player match-start spawn loc + first in-match take of each contested spawner (armors, mega, powerups, RL/LG). Pure projection of items + streams (schema v51). |
 | PlayerStats | `playerStats` | *PlayerStatsResult | Canonical per-player + per-team statistics with per-family provenance: corrected scoreboard, damage, pickup tallies, and **possession time** (time with each weapon / armor type / **no armor**). Computed for every demo (schema v63). |
@@ -4396,7 +4396,7 @@ Defined in `result/backpacks.go`. Each `BackpackDrop` is
 `{ time, player, team, weapon ("rl"|"lg"), origin, loc, entNum, source }`
 plus the pickup side `{ fate, picker, pickerTeam, pickupTime, pickerRelation }`
 — on a reconstructed row since v72, on a `ktx` row since v77, which also
-carries `{ pickerHadWeapon, pickerKills, pickerNextDeathTime }` — see below.
+carries `{ pickerHadWeapon, pickerKills, pickerNextDeathTime, pickerEndTime }` — see below.
 `entNum` is the join key with `WeaponPickup.BackpackEnt` on a `ktx` row.
 
 `origin` is the **pack's** position, not the victim's: KTX copies the

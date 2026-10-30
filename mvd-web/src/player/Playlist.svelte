@@ -100,7 +100,7 @@
             toast(clips.length ? 'A hub link needs every clip from one hub demo — use the share link' : 'The playlist is empty');
             return;
         }
-        if (clips.length > MAX_HUB_CLIPS) toast(`Hub plays only the first ${MAX_HUB_CLIPS} clips`);
+        if (clips.filter((c) => !c.card).length > MAX_HUB_CLIPS) toast(`Hub plays only the first ${MAX_HUB_CLIPS} clips`);
         copyText(hubClipsUrl(gameId, clips), 'Hub link');
     }
 

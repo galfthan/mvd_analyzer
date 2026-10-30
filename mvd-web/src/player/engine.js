@@ -261,7 +261,7 @@ export class PlayerEngine {
         Object.assign(this, {
             blobUrl: null, iframe: null, fte: null, seekTimer: null,
             pendingSeek: null, seekTarget: null, onReady: null,
-            rate: 100, slow: null,
+            rate: 100, slow: null, consoleOpen: false,
         });
         this.status.set({ ...IDLE });
     }

@@ -22,7 +22,6 @@
     import Trash2 from '@lucide/svelte/icons/trash-2';
     import Info from '@lucide/svelte/icons/info';
     import Snail from '@lucide/svelte/icons/snail';
-    import Table from '@lucide/svelte/icons/table-2';
     import ExprGroup from './ExprGroup.svelte';
     import FinderFlow from './FinderFlow.svelte';
     import FieldBrowser from './FieldBrowser.svelte';
@@ -397,8 +396,8 @@
         <section class="cf-stage">
             <div class="cf-stage-head">
                 <span class="cf-step">2</span><span class="cf-heading">Keep rows where</span>
+                <button class="pt-btn icon" title="Fields and values: every field of these rows — its full path, what it means, the values it allows and the ones this demo has — and a real row; click a value to keep the rows with it" onclick={() => openFields('keep')}><Info size={14} /></button>
                 <span class="muted cf-note">nothing set: keep every row</span>
-                <button class="pt-btn" title="Every field of these rows: its full path, what it means, the values it allows and the ones this demo has, and a real row — click a value to keep the rows with it" onclick={() => openFields('keep')}><Table size={13} /> Fields and values</button>
             </div>
             <ExprGroup bind:group={draft.where} fields="cf-fields" tip={fieldTip} values={valuesOf} />
         </section>
@@ -408,8 +407,8 @@
         <section class="cf-stage">
             <div class="cf-stage-head">
                 <span class="cf-step">3</span><span class="cf-heading">Order</span>
+                <button class="pt-btn icon" title="Fields and values: every field of these rows, its values and a real row; click a field to order by it" onclick={() => openFields('order')}><Info size={14} /></button>
                 <span class="muted cf-note">nothing set: time order, every row</span>
-                <button class="pt-btn" title="Every field of these rows, its values and a real row — click a field to order by it" onclick={() => openFields('order')}><Table size={13} /> Fields and values</button>
             </div>
             <div class="cf-row">
                 <label class="cf-label" title="Sort the rows by this field — e.g. detail.frags for the best quad runs">by
@@ -431,7 +430,7 @@
         <section class="cf-stage">
             <div class="cf-stage-head">
                 <span class="cf-step">4</span><span class="cf-heading">Clips from each row</span>
-                <button class="pt-btn" title="Every field of these rows — the times a clip can start and end at, the players it can watch, the values a label can say — click a field to add it to the default label" onclick={() => openFields('clip')}><Table size={13} /> Fields and values</button>
+                <button class="pt-btn icon" title="Fields and values: every field of these rows — the times a clip can start and end at, the players it can watch, the values a label can say; click a field to add it to the default label" onclick={() => openFields('clip')}><Info size={14} /></button>
             </div>
             {#each draft.clips as c, i (c)}
                 <div class="cf-clip">

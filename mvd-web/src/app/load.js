@@ -82,8 +82,9 @@ function setAnalysisStatus(result) {
  * @param {import('../data/wasm-source.js').LoadInput} input
  * @param {{ deepLink?: boolean, keepTab?: boolean, stillWanted?: () => boolean }} [opts]
  *   keepTab: stay on the tab (a playlist run loading its next clip's
- *   demo); stillWanted: asked once the demo is in — false drops it (the
- *   run moved on to a clip of the demo already shown)
+ *   demo); stillWanted: asked once the bytes are in, before the analyze —
+ *   false drops the load (the run moved on to a clip of the demo shown, or
+ *   stopped), the demo shown and its queries untouched
  * @returns {Promise<boolean>}
  */
 export async function loadDemo(input, { deepLink = false, keepTab = false, stillWanted } = {}) {
@@ -99,14 +100,19 @@ export async function loadDemo(input, { deepLink = false, keepTab = false, still
     try {
         handle = await mvdData.load(input, {
             onStage: (stage) => { setStatus(LOAD_STAGE_TEXT[stage], loadStatus.get().cls); },
+            stillWanted,
         });
     } catch (err) {
-        if (/** @type {{ superseded?: boolean }} */ (err).superseded) return false;
+        if (/** @type {{ superseded?: boolean }} */ (err).superseded) {
+            // A run's load it no longer wanted: the page is as it was —
+            // unless a newer load has taken the status line and hub box.
+            if (stillWanted && currentDemo && hubId != null && hubInput.get() === String(hubId)) {
+                setAnalysisStatus(currentDemo.result);
+                hubInput.set(currentDemo.game ? String(currentDemo.game.id) : '');
+            }
+            return false;
+        }
         throw err;
-    }
-    if (stillWanted && !stillWanted()) {
-        if (currentDemo) setAnalysisStatus(currentDemo.result);
-        return false;
     }
     // load() sets the timings before it resolves.
     recordLoadTimings(/** @type {import('../data/wasm-source.js').LoadTimings} */ (handle.timings));

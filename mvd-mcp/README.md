@@ -45,7 +45,7 @@ mvd-mcp version
 
 ## Tool surface
 
-Twenty-six tools. Inputs are typed Go structs with JSON-Schema inference
+Thirty tools. Inputs are typed Go structs with JSON-Schema inference
 (this file); outputs are passed through as opaque JSON — see
 [`../mvd-api/README.md`](../mvd-api/README.md) for the response shape
 of each per-demo endpoint, and
@@ -632,7 +632,8 @@ the pickup side differently**:
 - A `ktx` row's `entNum` is the hinted edict and joins to
   `weapon-pickups[].backpackEnt`; since v77 that join is stamped on the
   row: `fate: "picked"` with `picker` / `pickerTeam` / `pickupTime` and the
-  pickup's `pickerHadWeapon` / `pickerKills` / `pickerNextDeathTime`.
+  pickup's `pickerHadWeapon` / `pickerKills` / `pickerNextDeathTime` /
+  `pickerEndTime` (v78: the next death, else the match end).
   `fate: "expired"` is KTX's third backpack directive `//ktx expire` (a pack
   removed untaken at the 120 s timeout), and `unobserved` means neither
   hint named the pack — never "nobody took it": across the archive only

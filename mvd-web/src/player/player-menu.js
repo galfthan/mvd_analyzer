@@ -39,7 +39,7 @@ export function playerMenuItems({ engine, status, toggle, step, seek, fullscreen
         { kind: 'info', label: 'Scoreboard (hold)', title: 'Hold Tab with the game view focused (click it first — the click also plays / pauses)', keys: 'Tab' },
         { kind: 'action', label: 'Console', title: 'The engine\'s console; ` again closes it', run: () => engine.toggleConsole(), close: true, keys: '`' },
         { kind: 'sep' },
-        { kind: 'check', label: 'Team info', title: 'Both teams\' health, armor and weapons, top right', on: status.ready && status.teamInfo, run: () => engine.toggleTeamInfo(), keys: 't' },
+        { kind: 'check', label: 'Team info', title: 'Both teams\' health, armor and weapons, at the right edge', on: status.ready && status.teamInfo, run: () => engine.toggleTeamInfo(), keys: 't' },
         { kind: 'check', label: 'Autotrack', title: 'Follow whoever the engine picks', on: status.ready && status.autotrack, run: () => engine.track('auto') },
         { kind: 'check', label: 'Sound', on: status.ready && !status.muted, run: () => engine.toggleMute() },
     ];

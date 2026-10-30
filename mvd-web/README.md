@@ -311,7 +311,7 @@ other one, so the main page reaches them — and `getEvents`, `getLives`,
 `getHighlights`, `getBackpacks`, `getFrags`, `getWeaponPickups`, the worker's other whitelisted view exports — through a `viewQuery` worker
 message (`DemoHandle.view`, `src/data/wasm-source.js`) — the same round-trip as region recompute
 and line of sight. **Top Damage Windows (10 s)** is the top 10 windows by bounded enemy
-damage (`metric=damageGiven`, `windowMs=10000`, `dmg=bounded` — the same
+damage (`metric=damageGiven`, `windowMs=10000`, bounded — raw where the mode skips it — the same
 family as the kill-burst tables beside it, ties breaking on the window's
 frags via the view's complementary tie-break), showing the frag count
 beside the damage; **Top RL Kills** (10) and **Top LG
@@ -488,7 +488,7 @@ failure in it when the analyzer does not load.
    purely that the worker no longer blocks on the bucket build before
    delivering the result.
 
-### The Summary tab reads `playerStats`, and only `playerStats`
+### The Summary tab reads `playerStats` (and `opening`)
 
 Every table on the Summary tab — Basic Stats, Weapon Stats, Item Pickups
 & Drops, and the three per-team variants — renders
@@ -611,7 +611,8 @@ rather than carrying a copy: the Basic Stats damage columns, Weapon Stats'
 `Dmg` and `Acc`, the Aim tab's `Dmg` and recovered `Hits`, and the three
 damage-ranked tables on Key Moments (**Top Damage Windows**, **Top RL
 Kills**, **Top LG Kills** — their `Dmg`, `Hits` and `Return` figures are the
-same bounded family, read through `view.TopWindows` / `view.TopKills`). So
+same bounded family — raw on a mode that skips it, as their heading then
+says — read through `view.TopWindows` / `view.TopKills`). So
 one renderer (`damageProvenanceHtml`) states it once above each of those six
 panels, in a `.panel-provenance` banner — always visible, unlike the
 `More info` disclosures, because a reconstructed damage figure read as a
@@ -1280,14 +1281,16 @@ drops it).
 - **Generate** (in the playlist's head; each built-in preset with the
   number of rows it found in this demo, the empty ones left out — the
   Moments pane lists those too) from the loaded demo: quad, best
-  quad, pent and ring runs, frag streaks, top damage windows, top RL / LG
-  kills (the Key Moments tab's queries), demo markers, RL/LG pack drops (all, the enemy took, a teammate took, the
+  quad, pent and ring runs, RL / LG runs and the best five of each
+  (weapon pickups that got a kill, to the picker's next death or the
+  match end), frag streaks (the ten best lives), top damage windows, top
+  RL / LG kills (the Key Moments tab's queries), teamkills, demo markers, RL/LG pack drops (all, the enemy took, a teammate took, the
   enemy took without having the weapon — each pack as the dropper's last
   4 s, then a 4 s look at the pickup from the picker's view), quadbores,
   airgibs, telefrags, discharges — presets of the clip finder below — and
   one player's frags (merged when 5 s apart or less). The windows are kept
   tight so a playlist keeps moving: powerup runs from 2 s before the
-  pickup to 1 s after it ends, streaks to 2 s after the last frag,
+  pickup to 1 s after it ends, streaks from the spawn to 2 s after the death,
   highlights 3 s before to 2 s after (airgibs 2.5 s before), demo markers
   8 s before to 2 s after; the Key Moments and Pack Drops tabs' play links
   use the same windows.
@@ -1361,8 +1364,8 @@ drops it).
   into tooltips, the param value lists and the field suggestions, and the
   ⓘ page per source (rendered by `src/lib/mini-md.js`, which escapes
   first) — the source and its params, stage 1's. **Fields and values**
-  (`FieldBrowser.svelte`), a panel of its own opened from stages 2, 3 and
-  4, lists every field these rows
+  (`FieldBrowser.svelte`), a panel of its own opened by the same ⓘ
+  button in the heads of stages 2, 3 and 4, lists every field these rows
   carry by its full path, with its type and unit, the spec's text, how
   many rows carry it, the values it allows (its enum, or the enum of the
   param that filters by it — events' `type` by `types`) and the values
@@ -1442,8 +1445,9 @@ drops it).
   from / to, and its fades — a card with text is a title screen, a clip
   with text a caption. `PlaylistOverlay.svelte` draws both, in the
   analyzer's Player tab and the light player alike; a card's time is a
-  minimum: it stays up, with its texts, until the next clip plays (its
-  demo downloading or the engine booting underneath). In the model a card
+  minimum: it stays up, with its texts, until the next clip plays — its
+  demo downloading or the engine booting underneath — for at most 20 s
+  more. In the model a card
   is a clip of no demo (`CARD_DEMO`, `isCard`) so the list stays one
   array; hub links, the playlist's name and the per-demo steps skip it,
   and loading another demo keeps it. In the link a clip row gains the
@@ -1476,7 +1480,7 @@ another one (the runner's `prefetch`; the page keeps the downloads by
 gameId, and a pick shares one in flight). A click on the game view plays / pauses, and
 the keys are the full page's (*Keys*), on this page and the full one
 alike. Clips
-of a local file are listed as skipped. A click while a demo downloads
+of a local file are left out of the list, with a note counting them. A click while a demo downloads
 wins over the run that asked first (and shares its download when it is
 the same demo). *Open in the full analyzer* (head
 and foot) goes to the Player tab with this playlist as its own, to edit
@@ -1627,7 +1631,8 @@ The Pack Drops tab shows every RL / LG backpack drop as one row with its
 pickup outcome, both read off the `result.backpacks` row itself (schema
 v77): `fate` with `picker` / `pickerTeam` / `pickupTime`, and on a `ktx`
 row the pickup's `pickerHadWeapon` / `pickerKills` /
-`pickerNextDeathTime`. The pipeline joins KTX's `//ktx bp` pickups onto
+`pickerNextDeathTime` / `pickerEndTime` (where the run ends: the next
+death, else the match end). The pipeline joins KTX's `//ktx bp` pickups onto
 the drops (`analyzer/backpack_pickups.go`); `packDropPickup()`
 (`src/lib/packdrops.js`) only converts those fields to seconds. A drop
 with no pickup is shown as `expired` only when KTX announced the removal

@@ -31,6 +31,7 @@
 
     function fadeOut() {
         holding = false;
+        cancelAnimationFrame(frame);
         clearTimeout(fadeTimer);
         cardUp = false;
         const gone = card;
@@ -92,7 +93,7 @@
             style:opacity={cardUp ? card.card.opacity : 0}
             style:transition-duration="{cardUp ? card.card.fadeIn : card.card.fadeOut}ms"></div>
     {/if}
-    {#each texts.list as x, i (i)}
+    {#each texts.list as x (x)}
         {@const on = shown(x)}
         <div class="po-text at-{x.at} font-{x.font}" style:font-size="{x.size}cqh" style:color={x.color}
             style:opacity={on ? 1 : 0} style:transition-duration="{on ? x.fadeIn : x.fadeOut}ms">{x.t}</div>

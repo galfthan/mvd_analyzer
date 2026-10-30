@@ -241,7 +241,7 @@
         <tr>
             <th>Time</th>
             <th>Kill</th>
-            <th title="Burst damage, bounded family">Dmg</th>
+            <th title="Burst damage, bounded family (raw where the heading says so)">Dmg</th>
             <th title="Hits in the burst">Hits</th>
             <th title="First hit of the burst to the kill">Span</th>
             <th title="Victim's weapon class at the killing hit">Victim wep</th>
@@ -297,7 +297,7 @@
         {@render emptyMsg('fragstreaks', 'No frag streaks detected in this demo.')}
     </div>
     <div data-panel="top-damage" class="panel">
-        <h3 title="The ten 10-second stretches with the most bounded enemy damage dealt; ties break on frags">Top Damage Windows (10 s){@render rawNote('topdmg')}</h3>
+        <h3 title="The ten 10-second stretches with the most enemy damage dealt (bounded; raw where the heading says so); ties break on frags">Top Damage Windows (10 s){@render rawNote('topdmg')}</h3>
         {@render provenance('topdmg')}
         <table class="stats-table" id="topdmg-table">
             <thead>

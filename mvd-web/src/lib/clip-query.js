@@ -402,21 +402,21 @@ export const PRESETS = [
         },
     },
     {
-        id: 'rl-runs', title: 'RL runs', about: 'Every rocket launcher pickup that got a kill before the picker died: from the pickup to that death.',
+        id: 'rl-runs', title: 'RL runs', about: 'Every rocket launcher pickup that got a kill: from the pickup to the picker\'s next death, or the match end.',
         query: {
             source: 'weapon-pickups', params: { weapons: 'rl' }, where: { field: 'kills', op: '>', value: 0 },
             label: 'RL run · {player} · {kills} kill{kills|s}',
         },
     },
     {
-        id: 'lg-runs', title: 'LG runs', about: 'Every lightning gun pickup that got a kill before the picker died: from the pickup to that death.',
+        id: 'lg-runs', title: 'LG runs', about: 'Every lightning gun pickup that got a kill: from the pickup to the picker\'s next death, or the match end.',
         query: {
             source: 'weapon-pickups', params: { weapons: 'lg' }, where: { field: 'kills', op: '>', value: 0 },
             label: 'LG run · {player} · {kills} kill{kills|s}',
         },
     },
     {
-        id: 'best-rl-runs', title: 'Best RL runs (most kills)', about: 'The five rocket launcher pickups with the most kills before the picker died.',
+        id: 'best-rl-runs', title: 'Best RL runs (most kills)', about: 'The five rocket launcher pickups with the most kills before the picker\'s next death (or the match end).',
         query: {
             source: 'weapon-pickups', params: { weapons: 'rl' }, where: { field: 'kills', op: '>', value: 0 },
             rank: { by: 'kills', desc: true, limit: 5 },
@@ -424,7 +424,7 @@ export const PRESETS = [
         },
     },
     {
-        id: 'best-lg-runs', title: 'Best LG runs (most kills)', about: 'The five lightning gun pickups with the most kills before the picker died.',
+        id: 'best-lg-runs', title: 'Best LG runs (most kills)', about: 'The five lightning gun pickups with the most kills before the picker\'s next death (or the match end).',
         query: {
             source: 'weapon-pickups', params: { weapons: 'lg' }, where: { field: 'kills', op: '>', value: 0 },
             rank: { by: 'kills', desc: true, limit: 5 },

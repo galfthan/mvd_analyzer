@@ -11,7 +11,8 @@ Schema v78 (additive): a weapon pickup's run has an end on every row —
 `weaponPickups[].endTime`, the picker's next death or else the match end
 (they were still on the run when it ended), and `backpacks[].pickerEndTime`
 on `ktx` rows; see [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md).
-Otherwise web UI only.
+Otherwise the web UI, plus a new mvd-api endpoint and MCP tool for
+playlist links (below).
 
 **Playlists can hold title cards and text** (share-link format v2; older
 links still open). A card is a colour over the game view for a few

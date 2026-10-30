@@ -27,7 +27,10 @@ import * as hub from './hub.js';
  * @typedef {import('./worker-client.js').WorkerMessage} WorkerMessage
  * @typedef {'info' | 'download' | 'analyze'} LoadStage
  * @typedef {{ bytes: Uint8Array<ArrayBuffer>, name: string } | { game: HubGame } | { gameId: number | string }} LoadInput
- * @typedef {{ onStage?: (stage: LoadStage) => void }} LoadOptions
+ * @typedef {{ onStage?: (stage: LoadStage) => void, stillWanted?: () => boolean }} LoadOptions
+ *   stillWanted: asked once the bytes are in, before the analyze — false
+ *   drops the load (SupersededError) with the shown demo untouched; once
+ *   the analyze is posted the worker holds the new demo, so it is shown
  * @typedef {{ net: { gameInfoFetch?: number, demoDownload?: number }, worker: any, parseMs: number }} LoadTimings
  */
 
@@ -84,7 +87,7 @@ export class WasmSource {
      * @param {() => boolean} stale
      * @returns {Promise<DemoHandle>}
      */
-    async _load(input, { onStage = () => {} }, stale) {
+    async _load(input, { onStage = () => {}, stillWanted }, stale) {
         const live = () => { if (stale()) throw new SupersededError(); };
         await this.ready;
         live();
@@ -108,6 +111,7 @@ export class WasmSource {
             net.demoDownload = +(performance.now() - t).toFixed(1);
             name = hub.demoFilename(game);
         }
+        if (stillWanted && !stillWanted()) throw new SupersededError();
         onStage('analyze');
         // The analyze transfers (detaches) the buffer, so the player's copy
         // is taken first.

@@ -208,16 +208,15 @@ export function markerRowHtml(marker, ctx) {
 // rankings (view.TopWindows / view.TopKills) computed on demand from the
 // analysed demo the worker still holds, so they arrive after the rest of the
 // tab has painted. Each table settles on its own — a query the demo cannot
-// answer (no damage log, no measurable liveness, no bounded family) leaves
-// that table's empty state up and never disturbs its neighbours, exactly as
-// the powerup table stays independent of the frag streaks.
+// answer (no damage log, no measurable liveness) leaves that table's empty
+// state up and never disturbs its neighbours, exactly as the powerup table
+// stays independent of the frag streaks.
 //
-// dmg is named explicitly on every query: the VIEW default is raw while
-// mvd-api's is bounded, and these tables show the same numbers the API
-// does. A demo whose bounded family was never reconstructed (BoundedMode
-// "skipped:*" — the KTX midair / instagib / dmgfrags modes) therefore
-// answers ErrBoundedUnavailable and the table shows its empty state, rather
-// than quietly ranking a different damage family under the same heading.
+// The damage family is bounded, as mvd-api's default (the VIEW default is
+// raw), through clip-query.js boundedOrRaw: a demo whose bounded family
+// was never reconstructed (BoundedMode "skipped:*" — CA, wipeout, midair,
+// instagib, dmgfrags) is ranked by raw damage instead, and the table's
+// heading says so (KeyMomentsTab's raw-damage note).
 
 // The window length for the damage-window ranking. 10 s is the "he just went
 // off" unit — long enough to hold a whole engagement's damage, short enough

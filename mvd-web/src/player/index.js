@@ -101,8 +101,11 @@ async function importPlaylistFromHash() {
     linkDemos = decoded.map((c) => c.demo.key);
     // Opening your own link again must not double the list.
     /** @type {(a: import('../lib/playlist.js').Clip, b: import('../lib/playlist.js').Clip) => boolean} */
+    // A card is nothing but its settings, label and text, so two reels'
+    // like intro cards are still two cards only if every one matches.
     const same = (a, b) => a.demo.key === b.demo.key && a.from === b.from && a.to === b.to && a.track === b.track
-        && JSON.stringify([a.slow, a.card, a.text]) === JSON.stringify([b.slow, b.card, b.text]);
+        && JSON.stringify([a.slow, a.card, a.text]) === JSON.stringify([b.slow, b.card, b.text])
+        && (!a.card || a.label === b.label);
     const have = playlist.get().clips;
     // The light player's "Open in the full analyzer" (&open): this list is
     // the playlist now, to edit — not clips added to whatever was there.
@@ -118,7 +121,7 @@ async function importPlaylistFromHash() {
                 showPane('playlist');
             });
         });
-        const unchanged = have.length === decoded.length && have.every((c, i) => same(c, decoded[i]));
+        const unchanged = have.length === decoded.length && have.every((c, i) => same(c, decoded[i]) && c.label === decoded[i].label);
         if (!have.length || unchanged || confirm(`Replace your playlist (${have.length} clip${have.length === 1 ? '' : 's'}) with this one (${decoded.length})?\n\nCancel adds its clips to yours instead.`)) {
             setClips(decoded);
             toast(`Opened the playlist: ${decoded.length} clip${decoded.length === 1 ? '' : 's'}`);

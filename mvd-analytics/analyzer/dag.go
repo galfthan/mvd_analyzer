@@ -235,7 +235,7 @@ var postNodeMeta = map[string]nodeMeta{
 	"backpackPickupsPost": {
 		name: "backpack-pickups", mutates: true,
 		requires: []string{"backpacks:final", "weapon-pickups", "backpack-linkage"},
-		desc:     "Pickup side of each `ktx` backpack drop, stamped on the drop row: the `//ktx bp` weaponPickups row joined on (entNum, drop time) gives `fate: picked` with `picker`/`pickerTeam`/`pickupTime` and the pickup's `pickerHadWeapon`/`pickerKills`/`pickerNextDeathTime`; an unjoined row keeps `expired` from `//ktx expire` or becomes `unobserved`. Every row naming a picker also gets `pickerRelation` (self/team/enemy). Runs after backpack-linkage, the other writer of backpacks[].fate.",
+		desc:     "Pickup side of each `ktx` backpack drop, stamped on the drop row: the `//ktx bp` weaponPickups row joined on (entNum, drop time) gives `fate: picked` with `picker`/`pickerTeam`/`pickupTime` and the pickup's `pickerHadWeapon`/`pickerKills`/`pickerNextDeathTime`/`pickerEndTime`; an unjoined row keeps `expired` from `//ktx expire` or becomes `unobserved`. Every row naming a picker also gets `pickerRelation` (self/team/enemy). Runs after backpack-linkage, the other writer of backpacks[].fate.",
 	},
 	"damageReconPost": {
 		name: "damage-recon", mutates: true,

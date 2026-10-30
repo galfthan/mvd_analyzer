@@ -266,9 +266,14 @@ export function markdownLink(text, url) {
 
 // ── Share encoding ──────────────────────────────────────────────────────────
 //
-// `#playlist=z<base64url(deflate-raw(JSON))>`. Compact rows keep the URL
-// short: [from, to, track, who, label, demoIndex, slow?] plus a demo table
-// (slow as [from, to, speed]); deflate then takes the labels' repeats (a
+// `#playlist=z<base64url(deflate-raw(JSON))>`, v2:
+//   { v: 2, d: [[key, gameId, title, offsetSec]…],
+//     c: [ [from, to, track, who, label, demoIndex, slow|0, texts?]  (a clip)
+//          | { k: [ms, bg, opacity, fadeIn, fadeOut], l: label, x: texts } ] }
+// slow as [from, to, speed] (0 when only texts follow), texts in the short
+// keys t s c f a b e i o with defaults left out (packText). mvd-api's
+// POST /v1/playlist-links writes the same (mvd-api/playlist.go). Compact
+// rows keep the URL short, and deflate then takes the labels' repeats (a
 // generated list's labels share their kind and players) — about half the
 // length. Links from before the compression, `#playlist=<base64url(JSON)>`,
 // still decode: their base64 opens with "eyJ" ('{"'), never with the "z".

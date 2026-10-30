@@ -43,9 +43,10 @@
     // Player tab".
     const clock = createClock();
     let picks = 0;
-    // The demos downloading or downloaded and not yet shown, by gameId: a
-    // pick shares a download in flight, and the runner starts the next
-    // clip's demo ahead of it (prefetch).
+    // The demos downloading or downloaded, by gameId — kept, so a reel
+    // that returns to a game does not download it again: a pick shares a
+    // download in flight, and the runner starts the next clip's demo ahead
+    // of it (prefetch).
     /** @type {Map<number, Promise<import('./light-demo.js').LightHandle>>} */
     const downloads = new Map();
     /** @param {number} gameId */
@@ -77,7 +78,6 @@
             if (demo.get()?.ref.gameId === gameId) return true;
             const handle = await download(gameId);
             if (pick !== picks || (stillWanted && !stillWanted())) return false;
-            downloads.delete(gameId);
             demo.set(handle);
             return true;
         },

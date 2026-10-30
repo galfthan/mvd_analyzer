@@ -36,6 +36,8 @@ func TestInputSchemasHaveNoNullUnions(t *testing.T) {
 		"getLives":    inputSchema[GetLivesInput](),
 		// highlights carries kinds/players slices and the *int preMs.
 		"getHighlights": inputSchema[GetHighlightsInput](),
+		// nested items with pointer fields (opacity, fades, text sizes).
+		"createPlaylistLink": inputSchema[CreatePlaylistLinkInput](),
 	} {
 		assertNoNullTypes(t, name, s)
 	}

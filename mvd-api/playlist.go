@@ -29,6 +29,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
+	"unicode/utf16"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-api/internal/democache"
@@ -139,129 +141,110 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	demos := map[int]*playlistDemoRef{}
-	var demoRows [][]any
-	var demoList []playlistDemo
-	rows := make([]any, 0, len(req.Items))
-	var labels []string
-	clips, cards := 0, 0
+	// 1 · Check every item before any demo is loaded (a load is a fetch
+	// and a parse; a bad item at the end must not cost twenty of them).
+	items := make([]checkedItem, len(req.Items))
+	var gameIDs []int
+	seen := map[int]bool{}
 	for i, it := range req.Items {
-		bad := func(format string, a ...any) {
-			writeError(w, http.StatusBadRequest, "invalid_param", fmt.Sprintf("items[%d]: ", i)+fmt.Sprintf(format, a...))
-		}
-		switch {
-		case (it.Clip == nil) == (it.Card == nil):
-			bad("exactly one of clip or card")
+		ci, err := checkItem(it)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid_param", fmt.Sprintf("items[%d]: %v", i, err))
 			return
-		case it.Card != nil:
-			c := it.Card
-			if c.Ms < cardMsMin || c.Ms > cardMsMax {
-				bad("card.ms: between %d and %d", cardMsMin, cardMsMax)
+		}
+		items[i] = ci
+		if ci.clip != nil && !seen[ci.clip.GameID] {
+			if len(gameIDs) == playlistMaxDemos {
+				writeError(w, http.StatusBadRequest, "invalid_param", fmt.Sprintf("items[%d]: at most %d demos in one playlist", i, playlistMaxDemos))
 				return
 			}
-			bg := "#000000"
-			if c.Bg != "" {
-				if !hexColor.MatchString(c.Bg) {
-					bad("card.bg: #rrggbb")
-					return
-				}
-				bg = strings.ToLower(c.Bg)
-			}
-			op := 1.0
-			if c.Opacity != nil {
-				if *c.Opacity < 0 || *c.Opacity > 1 {
-					bad("card.opacity: 0 to 1")
-					return
-				}
-				op = *c.Opacity
-			}
-			texts, err := packTexts(c.Text)
-			if err != nil {
-				bad("card.%v", err)
-				return
-			}
-			fi, fo := fadeOr(c.FadeIn, 400), fadeOr(c.FadeOut, 400)
-			label := c.Label
-			if label == "" && len(c.Text) > 0 {
-				label = c.Text[0].Text
-			}
-			row := map[string]any{"k": []any{c.Ms, bg, op, fi, fo}, "l": label}
-			if len(texts) > 0 {
-				row["x"] = texts
-			}
-			rows = append(rows, row)
-			cards++
-		default:
-			c := it.Clip
-			if c.GameID <= 0 {
-				bad("clip.gameId: a hub game id")
-				return
-			}
-			if c.To <= c.From || c.From < 0 {
-				bad("clip: from (ms) before to (ms), match-relative")
-				return
-			}
-			d := demos[c.GameID]
-			if d == nil {
-				if len(demos) == playlistMaxDemos {
-					bad("at most %d demos in one playlist", playlistMaxDemos)
-					return
-				}
-				id, err := democache.ParseDemoID(fmt.Sprintf("gameId:%d", c.GameID))
-				if err != nil {
-					bad("clip.gameId: %v", err)
-					return
-				}
-				res, _, err := s.store.GetResult(r.Context(), id)
-				if err != nil {
-					s.mapStoreError(w, r, err)
-					return
-				}
-				d = demoRefFor(res, len(demoRows))
-				demos[c.GameID] = d
-				demoRows = append(demoRows, []any{fmt.Sprintf("hub:%d", c.GameID), c.GameID, d.title, float64(d.offsetMs) / 1000})
-				demoList = append(demoList, playlistDemo{GameID: c.GameID, Title: d.title})
-			}
-			track, who := any("auto"), ""
-			if c.Watch != "" && c.Watch != "auto" {
-				uid, ok := d.userIDs[c.Watch]
-				if !ok {
-					bad("clip.watch: no player %q in game %d (players: %s)", c.Watch, c.GameID, strings.Join(d.names, ", "))
-					return
-				}
-				track, who = uid, c.Watch
-			}
-			from := math.Floor(float64(c.From+d.offsetMs) / 1000)
-			to := math.Ceil(float64(c.To+d.offsetMs) / 1000)
-			row := []any{from, to, track, who, c.Label, d.index}
-			texts, err := packTexts(c.Text)
-			if err != nil {
-				bad("clip.%v", err)
-				return
-			}
-			if c.Slow != nil || len(texts) > 0 {
-				var slow any = 0
-				if c.Slow != nil {
-					if c.Slow.Speed < 0.05 || c.Slow.Speed > 1 || c.Slow.To <= c.Slow.From {
-						bad("clip.slow: from before to (match ms), speed 0.05 to 1")
-						return
-					}
-					tenth := func(ms int32) float64 { return math.Round(float64(ms+d.offsetMs)/100) / 10 }
-					slow = []any{tenth(c.Slow.From), tenth(c.Slow.To), c.Slow.Speed}
-				}
-				row = append(row, slow)
-			}
-			if len(texts) > 0 {
-				row = append(row, texts)
-			}
-			rows = append(rows, row)
-			labels = append(labels, c.Label)
-			clips++
+			seen[ci.clip.GameID] = true
+			gameIDs = append(gameIDs, ci.clip.GameID)
 		}
 	}
-	if clips == 0 {
+	if len(gameIDs) == 0 {
 		writeError(w, http.StatusBadRequest, "invalid_param", "items: at least one clip")
 		return
+	}
+
+	// 2 · Load the demos, side by side (the cache's parse limit still
+	// bounds the cold ones).
+	results := make([]*result.Result, len(gameIDs))
+	errs := make([]error, len(gameIDs))
+	var wg sync.WaitGroup
+	for k, gid := range gameIDs {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			id, err := democache.ParseDemoID(fmt.Sprintf("gameId:%d", gid))
+			if err == nil {
+				results[k], _, err = s.store.GetResult(r.Context(), id)
+			}
+			errs[k] = err
+		}()
+	}
+	wg.Wait()
+	for _, err := range errs {
+		if err != nil {
+			s.mapStoreError(w, r, err)
+			return
+		}
+	}
+	demos := map[int]*playlistDemoRef{}
+	demoRows := make([][]any, len(gameIDs))
+	demoList := make([]playlistDemo, len(gameIDs))
+	for k, gid := range gameIDs {
+		d := demoRefFor(results[k], k)
+		demos[gid] = d
+		demoRows[k] = []any{fmt.Sprintf("hub:%d", gid), gid, d.title, float64(d.offsetMs) / 1000}
+		demoList[k] = playlistDemo{GameID: gid, Title: d.title}
+	}
+
+	// 3 · The rows, in demo time.
+	rows := make([]any, 0, len(items))
+	var labels []string
+	clips, cards := 0, 0
+	for i, ci := range items {
+		if ci.card != nil {
+			rows = append(rows, ci.card)
+			cards++
+			continue
+		}
+		c := ci.clip
+		d := demos[c.GameID]
+		track, who := any("auto"), ""
+		if c.Watch != "" && c.Watch != "auto" {
+			uid, ok := d.userIDs[c.Watch]
+			if !ok {
+				players := "none known"
+				if len(d.names) > 0 {
+					players = strings.Join(d.names, ", ")
+				}
+				writeError(w, http.StatusBadRequest, "invalid_param",
+					fmt.Sprintf("items[%d]: clip.watch: no player %q in game %d (players: %s)", i, c.Watch, c.GameID, players))
+				return
+			}
+			track, who = uid, c.Watch
+		}
+		// int64: a from / to near the int32 bound must not wrap.
+		off := int64(d.offsetMs)
+		from := math.Floor(float64(int64(c.From)+off) / 1000)
+		to := math.Ceil(float64(int64(c.To)+off) / 1000)
+		row := []any{from, to, track, who, ci.label, d.index}
+		if c.Slow != nil || len(ci.texts) > 0 {
+			var slow any = 0
+			if c.Slow != nil {
+				tenth := func(ms int32) float64 { return math.Round(float64(int64(ms)+off)/100) / 10 }
+				slow = []any{tenth(c.Slow.From), tenth(c.Slow.To), c.Slow.Speed}
+			}
+			row = append(row, slow)
+		}
+		if len(ci.texts) > 0 {
+			row = append(row, ci.texts)
+		}
+		rows = append(rows, row)
+		labels = append(labels, ci.label)
+		clips++
 	}
 
 	doc, err := json.Marshal(map[string]any{"v": 2, "d": demoRows, "c": rows})
@@ -290,6 +273,122 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// checkedItem is one item past checkItem: a clip (its demo still to be
+// read) or a card's finished row, with the label and texts packed.
+type checkedItem struct {
+	clip  *playlistClip
+	card  map[string]any
+	label string
+	texts []map[string]any
+}
+
+// playlistMaxMs bounds a clip's times: far past any match (four hours),
+// well inside int32 once the demo offset is added.
+const playlistMaxMs = 4 * 3600 * 1000
+
+// checkItem validates one item without its demo; what needs the demo
+// (the watched player) is checked once it is loaded.
+func checkItem(it playlistItem) (checkedItem, error) {
+	switch {
+	case (it.Clip == nil) == (it.Card == nil):
+		return checkedItem{}, fmt.Errorf("exactly one of clip or card")
+	case it.Card != nil:
+		c := it.Card
+		if c.Ms < cardMsMin || c.Ms > cardMsMax {
+			return checkedItem{}, fmt.Errorf("card.ms: between %d and %d", cardMsMin, cardMsMax)
+		}
+		bg := "#000000"
+		if c.Bg != "" {
+			if !hexColor.MatchString(c.Bg) {
+				return checkedItem{}, fmt.Errorf("card.bg: #rrggbb")
+			}
+			bg = strings.ToLower(c.Bg)
+		}
+		op := 1.0
+		if c.Opacity != nil {
+			if *c.Opacity < 0 || *c.Opacity > 1 {
+				return checkedItem{}, fmt.Errorf("card.opacity: 0 to 1")
+			}
+			op = *c.Opacity
+		}
+		fi, fo, err := cardFades(c.FadeIn, c.FadeOut)
+		if err != nil {
+			return checkedItem{}, err
+		}
+		texts, err := packTexts(c.Text)
+		if err != nil {
+			return checkedItem{}, fmt.Errorf("card.%w", err)
+		}
+		label, err := cleanLabel(c.Label)
+		if err != nil {
+			return checkedItem{}, fmt.Errorf("card.%w", err)
+		}
+		if label == "" && len(texts) > 0 {
+			label = texts[0]["t"].(string)
+		}
+		row := map[string]any{"k": []any{c.Ms, bg, op, fi, fo}, "l": label}
+		if len(texts) > 0 {
+			row["x"] = texts
+		}
+		return checkedItem{card: row, label: label}, nil
+	default:
+		c := it.Clip
+		if c.GameID <= 0 {
+			return checkedItem{}, fmt.Errorf("clip.gameId: a hub game id")
+		}
+		if c.From < 0 || c.To <= c.From || c.To > playlistMaxMs {
+			return checkedItem{}, fmt.Errorf("clip: from before to, in ms since match start (0 to %d)", playlistMaxMs)
+		}
+		if sl := c.Slow; sl != nil {
+			// The player keeps only the part of the window inside the clip.
+			if sl.Speed < 0.05 || sl.Speed > 1 || sl.To <= sl.From || sl.From < c.From || sl.To > c.To {
+				return checkedItem{}, fmt.Errorf("clip.slow: from before to, inside the clip (match ms), speed 0.05 to 1")
+			}
+		}
+		texts, err := packTexts(c.Text)
+		if err != nil {
+			return checkedItem{}, fmt.Errorf("clip.%w", err)
+		}
+		label, err := cleanLabel(c.Label)
+		if err != nil {
+			return checkedItem{}, fmt.Errorf("clip.%w", err)
+		}
+		return checkedItem{clip: c, label: label, texts: texts}, nil
+	}
+}
+
+// cardFades: a card's fades, default 400 ms.
+func cardFades(in, out *int) (int, int, error) {
+	get := func(v *int) (int, error) {
+		if v == nil {
+			return 400, nil
+		}
+		if *v < 0 || *v > fadeMax {
+			return 0, fmt.Errorf("card fades: 0 to %d ms", fadeMax)
+		}
+		return *v, nil
+	}
+	fi, err := get(in)
+	if err != nil {
+		return 0, 0, err
+	}
+	fo, err := get(out)
+	return fi, fo, err
+}
+
+// utf16Len counts as the page's String.length does (its limits are in
+// UTF-16 units).
+func utf16Len(s string) int { return len(utf16.Encode([]rune(s))) }
+
+// cleanLabel: a label trimmed, at most playlistMaxText long.
+func cleanLabel(l string) (string, error) {
+	l = strings.TrimSpace(l)
+	if utf16Len(l) > playlistMaxText {
+		return "", fmt.Errorf("label: at most %d characters", playlistMaxText)
+	}
+	return l, nil
+}
+
 // demoRefFor reads what a clip needs from its demo: the title the web app
 // gives it (map · teams by frags, as demoRefOf does), the demo→match
 // offset and the userids by name.
@@ -305,7 +404,12 @@ func demoRefFor(res *result.Result, index int) *playlistDemoRef {
 		}
 	}
 	sort.Strings(d.names)
-	mapName := strings.ToLower(res.EffectiveMap())
+	// The web's mapFileKey: demoinfo / serverinfo, else match.map.
+	mapName := res.EffectiveMap()
+	if mapName == "" && res.Match != nil {
+		mapName = res.Match.Map
+	}
+	mapName = strings.ToLower(mapName)
 	if i := strings.LastIndex(mapName, "/"); i >= 0 {
 		mapName = mapName[i+1:]
 	}
@@ -346,7 +450,7 @@ func packTexts(list []playlistText) ([]map[string]any, error) {
 	out := make([]map[string]any, 0, len(list))
 	for i, x := range list {
 		t := strings.TrimSpace(x.Text)
-		if t == "" || len([]rune(t)) > playlistMaxText {
+		if t == "" || utf16Len(t) > playlistMaxText {
 			return nil, fmt.Errorf("text[%d].text: 1 to %d characters", i, playlistMaxText)
 		}
 		o := map[string]any{"t": t}
@@ -414,13 +518,6 @@ func packTexts(list []playlistText) ([]map[string]any, error) {
 	return out, nil
 }
 
-func fadeOr(v *int, dflt int) int {
-	if v == nil {
-		return dflt
-	}
-	return min(fadeMax, max(0, *v))
-}
-
 func deflateBase64URL(b []byte) (string, error) {
 	var buf bytes.Buffer
 	fw, err := flate.NewWriter(&buf, flate.BestCompression)
@@ -436,8 +533,8 @@ func deflateBase64URL(b []byte) (string, error) {
 	return base64.RawURLEncoding.EncodeToString(buf.Bytes()), nil
 }
 
-// playlistName is the web app's playlistName: "mvda", the demo (or "N
-// demos") and what the list holds, from the clips' labels — one clip by
+// playlistName is the web app's playlistName, without the date the web
+// takes from the loaded demo: "mvda", the demo (or "N demos") and what the list holds, from the clips' labels — one clip by
 // its label, up to three kinds (a label's text before " · ") with counts,
 // else the number of clips.
 func playlistName(demos []playlistDemo, labels []string) string {

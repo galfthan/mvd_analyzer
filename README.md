@@ -178,7 +178,7 @@ make build-all-platforms                    # cross-compile both mvd-api and mvd
 
 #### Tool surface
 
-Twenty-six tools — one for discovery, two for cache control + curated
+Thirty tools — one for discovery, two for cache control + curated
 summary, the high-level Result-section pass-throughs (KTX demoinfo,
 metadata, player-stats, frags, damage, aim, loc-graph, chat, backpacks,
 items, map entities, weapon-pickups, loc-table), eight for the view
@@ -214,11 +214,13 @@ from any number of games into a link that plays them:
 | `getEvents(demoId, types, …)` | `mvd-api` `/events` |
 | `getStreamSlice(demoId, from, to, fields, …)` | `mvd-api` `/stream-slice` |
 | `getStateAt(demoId, time, fields, …)` | `mvd-api` `/state-at` |
+| `getPointEffects(demoId, from, to, …)` | `mvd-api` `/streams/point-effects` |
 | `getLocTrails(demoId, minDwellMs, …)` | `mvd-api` `/loc-trails` |
 | `getRegionControl(demoId, windowMs, regions, …)` | `mvd-api` `/region-control` |
 | `getTopWindows(demoId, metric, mode, windowMs, gapMs, limit, perPlayer, …)` | `mvd-api` `/top-windows` (each player's best stretches, ranked — fixed-length windows or gap-delimited runs) |
 | `getTopKills(demoId, gapMs, weapons, minDamage, …)` | `mvd-api` `/top-kills` (the hardest kill bursts, ranked) |
 | `getLives(demoId, players, minMs, …)` | `mvd-api` `/lives` (one row per spawn-to-death life) |
+| `getHighlights(demoId, kinds, players, preMs)` | `mvd-api` `/highlights` (discharges, quadbores, telefrags, airgibs with what everyone had) |
 | **Generic DAG artifacts** | |
 | `listArtifacts()` | `mvd-api` `GET /v1/artifacts` (the DAG manifest) |
 | `getArtifact(demoId, name)` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` (any servable artifact by name) |

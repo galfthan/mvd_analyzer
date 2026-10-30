@@ -3,14 +3,17 @@ package main
 import (
 	"bytes"
 	"compress/flate"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/result"
+	"github.com/mvd-analyzer/mvd-api/internal/democache"
 )
 
 func playlistDemoResult(mapName string, offset int32, ids map[string]int, teams ...string) *result.Result {
@@ -115,6 +118,10 @@ func TestPlaylistLinkRejects(t *testing.T) {
 		{`{"items": [{"card": {"ms": 50}}, {"clip": {"gameId": 1, "from": 0, "to": 1000}}]}`, "card.ms"},
 		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000, "text": [{"text": "x", "at": "middle"}]}}]}`, "text[0].at"},
 		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}}], "extra": 1}`, "unknown field"},
+		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 2147483000}}]}`, "clip: from before to"},
+		{`{"items": [{"clip": {"gameId": 1, "from": 1000, "to": 5000, "slow": {"from": 0, "to": 2000, "speed": 0.3}}}]}`, "inside the clip"},
+		{`{"items": [{"card": {"ms": 1000, "fadeIn": 9000}}, {"clip": {"gameId": 1, "from": 0, "to": 1000}}]}`, "card fades"},
+		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000, "label": "` + strings.Repeat("x", 201) + `"}}]}`, "clip.label"},
 	} {
 		code, out := postPlaylist(t, srv.URL, tc.body)
 		e, _ := out["error"].(map[string]any)
@@ -126,5 +133,36 @@ func TestPlaylistLinkRejects(t *testing.T) {
 	code, out := postPlaylist(t, srv.URL, `{"items": [{"clip": {"gameId": 99, "from": 0, "to": 1000}}]}`)
 	if code != http.StatusNotFound {
 		t.Errorf("unknown game: %d %v", code, out)
+	}
+}
+
+// countingStore counts the demos a request loads.
+type countingStore struct {
+	*fakeStore
+	mu    sync.Mutex
+	loads int
+}
+
+func (c *countingStore) GetResult(ctx context.Context, id democache.DemoID) (*result.Result, democache.CacheMeta, error) {
+	c.mu.Lock()
+	c.loads++
+	c.mu.Unlock()
+	return c.fakeStore.GetResult(ctx, id)
+}
+
+func TestPlaylistLinkChecksBeforeLoading(t *testing.T) {
+	store := &countingStore{fakeStore: &fakeStore{byID: map[string]*result.Result{
+		"gameId:1": playlistDemoResult("dm3", 0, map[string]int{"bps": 7}),
+		"gameId:2": playlistDemoResult("dm2", 0, map[string]int{"valla": 3}),
+	}}}
+	srv := newTestServer(t, store)
+	defer srv.Close()
+	code, _ := postPlaylist(t, srv.URL, `{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}}, {"clip": {"gameId": 2, "from": 0, "to": 1000}}, {"card": {"ms": 1}}]}`)
+	if code != http.StatusBadRequest || store.loads != 0 {
+		t.Errorf("a bad last item: %d, %d demos loaded; want 400 and none", code, store.loads)
+	}
+	code, out := postPlaylist(t, srv.URL, `{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}}, {"clip": {"gameId": 2, "from": 0, "to": 1000}}, {"clip": {"gameId": 1, "from": 5000, "to": 6000}}]}`)
+	if code != http.StatusOK || store.loads != 2 || len(out["demos"].([]any)) != 2 {
+		t.Errorf("two games, three clips: %d, %d loads, %v", code, store.loads, out["demos"])
 	}
 }
