@@ -23,7 +23,6 @@
     import Info from '@lucide/svelte/icons/info';
     import Snail from '@lucide/svelte/icons/snail';
     import Table from '@lucide/svelte/icons/table-2';
-    import { tick } from 'svelte';
     import ExprGroup from './ExprGroup.svelte';
     import FinderFlow from './FinderFlow.svelte';
     import FieldBrowser from './FieldBrowser.svelte';
@@ -57,7 +56,26 @@
     let aboutKey = $state(first.aboutKey);
     let draft = $state(/** @type {Draft} */ (first.draft));
     let code = $state(memo.code);           // the whole query as text
-    let info = $state(false);
+    // The open panel: the source's (what it finds, its params — stage 1)
+    // or its rows' fields and values, opened from stage 2, 3 or 4 (`for`):
+    // a field clicked there orders by it (3) or goes into the label (4).
+    let panel = $state(/** @type {'' | 'source' | 'fields'} */ (''));
+    let panelFor = $state(/** @type {'keep' | 'order' | 'clip'} */ ('keep'));
+    /** @param {'keep' | 'order' | 'clip'} stage */
+    function openFields(stage) {
+        panelFor = stage;
+        panel = 'fields';
+    }
+    let pathAction = $derived(panelFor === 'order'
+        ? { what: 'order by it', fn: (/** @type {string} */ f) => { draft.rank.by = f; syncCode(); toast(`Ordering by ${f}`); } }
+        : panelFor === 'clip'
+            ? { what: 'add it to the default label as {field}', fn: (/** @type {string} */ f) => { draft.label = `${draft.label}${draft.label && !/\s$/.test(draft.label) ? ' ' : ''}{${f}}`; syncCode(); toast(`Label: ${draft.label}`); } }
+            : undefined);
+
+    // The builder changed from a panel while Code shows: show it there too.
+    function syncCode() {
+        if (code) codeText = queryToText(fromDraft(draft), title);
+    }
 
     $effect(() => {
         Object.assign(memo, { title, presetId, about, aboutKey, draft: $state.snapshot(draft), code });
@@ -266,27 +284,17 @@
      */
     function pickValue(field, op, value) {
         draft.where.items.push({ kind: 'cond', field, op, value: String(value) });
-        if (code) codeText = queryToText(fromDraft(draft), title);
+        syncCode();
         toast(`Keeping rows where ${field} ${op} ${value}`);
     }
 
-    /** @type {HTMLElement | undefined} */
-    let fieldsHead = $state();
-    // The info panel, at the fields or at its top.
-    /** @param {boolean} atFields */
-    async function openInfo(atFields) {
-        info = true;
-        await tick();
-        if (atFields) fieldsHead?.scrollIntoView({ block: 'start' });
-    }
-
     /** @param {KeyboardEvent} e */
-    function infoKey(e) {
-        if (e.key === 'Escape') info = false;
+    function panelKey(e) {
+        if (e.key === 'Escape') panel = '';
     }
 </script>
 
-<svelte:window onkeydown={info ? infoKey : undefined} />
+<svelte:window onkeydown={panel ? panelKey : undefined} />
 
 <div class="clip-finder">
     <div class="cf-row cf-top">
@@ -337,7 +345,7 @@
             line per clip (add <code>slow=time-1s..time+1s@0.3</code> for slow motion), <code>label "…"</code> for clips without their own. Indent to continue a line; <code>#</code> comments.
             A filter: <code>detail.powerup = quad and detail.frags &gt;= 3</code> — <code>and</code>, <code>or</code>, <code>not</code>, parentheses,
             <code>= != &lt; &lt;= &gt; &gt;=</code>, <code>~</code> (contains / has), <code>weapon in [rl, lg]</code>, a bare <code>field</code> for "is true",
-            <code>victims[0].name</code> for a list's first item. <button class="cf-linkbtn" onclick={() => openInfo(true)}>Fields and values</button>
+            <code>victims[0].name</code> for a list's first item. <button class="cf-linkbtn" onclick={() => openFields('keep')}>Fields and values</button>
         </div>
         {#if run}
             <div class="cf-flow-line">
@@ -357,7 +365,7 @@
                         <option value={s} title={$apiDocs?.[s]?.summary || ''}>/{s}{$apiDocs?.[s] ? ` — ${$apiDocs[s].summary}` : ''}</option>
                     {/each}
                 </select>
-                <button class="pt-btn icon" title="What this source finds, its params and its row fields" onclick={() => openInfo(false)}><Info size={14} /></button>
+                <button class="pt-btn icon" title="What this source finds and its params" onclick={() => (panel = 'source')}><Info size={14} /></button>
             </div>
             {#if src.params.length}
                 <div class="cf-params">
@@ -390,7 +398,7 @@
             <div class="cf-stage-head">
                 <span class="cf-step">2</span><span class="cf-heading">Keep rows where</span>
                 <span class="muted cf-note">nothing set: keep every row</span>
-                <button class="pt-btn" title="Every field of these rows: its full path, what it means, the values it allows and the ones this demo has, and a real row — click a value to keep the rows with it" onclick={() => openInfo(true)}><Table size={13} /> Fields and values</button>
+                <button class="pt-btn" title="Every field of these rows: its full path, what it means, the values it allows and the ones this demo has, and a real row — click a value to keep the rows with it" onclick={() => openFields('keep')}><Table size={13} /> Fields and values</button>
             </div>
             <ExprGroup bind:group={draft.where} fields="cf-fields" tip={fieldTip} values={valuesOf} />
         </section>
@@ -401,6 +409,7 @@
             <div class="cf-stage-head">
                 <span class="cf-step">3</span><span class="cf-heading">Order</span>
                 <span class="muted cf-note">nothing set: time order, every row</span>
+                <button class="pt-btn" title="Every field of these rows, its values and a real row — click a field to order by it" onclick={() => openFields('order')}><Table size={13} /> Fields and values</button>
             </div>
             <div class="cf-row">
                 <label class="cf-label" title="Sort the rows by this field — e.g. detail.frags for the best quad runs">by
@@ -422,6 +431,7 @@
         <section class="cf-stage">
             <div class="cf-stage-head">
                 <span class="cf-step">4</span><span class="cf-heading">Clips from each row</span>
+                <button class="pt-btn" title="Every field of these rows — the times a clip can start and end at, the players it can watch, the values a label can say — click a field to add it to the default label" onclick={() => openFields('clip')}><Table size={13} /> Fields and values</button>
             </div>
             {#each draft.clips as c, i (c)}
                 <div class="cf-clip">
@@ -513,11 +523,11 @@
     </div>
     </div>
 
-    {#if info}
+    {#if panel === 'source'}
         <div class="cf-info" role="dialog" aria-label="/{draft.source}">
             <div class="cf-row">
                 <strong>/{draft.source}</strong><span class="muted">{doc?.summary || ''}</span>
-                <button class="pt-btn icon cf-close" title="Close (Esc)" onclick={() => (info = false)}><X size={14} /></button>
+                <button class="pt-btn icon cf-close" title="Close (Esc)" onclick={() => (panel = '')}><X size={14} /></button>
             </div>
             {#if doc}
                 <div class="cf-md">{@html miniMarkdown(doc.description)}</div>
@@ -529,13 +539,18 @@
                         <dd class="cf-md">{@html miniMarkdown(p?.description || '')}</dd>
                     {/each}
                 </dl>
-                <h4 bind:this={fieldsHead}>Fields and values</h4>
-                <FieldBrowser {doc} {rows} onpick={pickValue} />
-                <h4>Labels</h4>
-                <p>{LABEL_HELP}</p>
+                <p><button class="cf-linkbtn" onclick={() => openFields('keep')}>The fields and values of its rows →</button></p>
             {:else}
                 <p class="muted">Loading the API docs…</p>
             {/if}
+        </div>
+    {:else if panel === 'fields'}
+        <div class="cf-info" role="dialog" aria-label="Fields and values of /{draft.source}">
+            <div class="cf-row">
+                <strong>Fields and values</strong><span class="muted">of the rows /{draft.source} returns</span>
+                <button class="pt-btn icon cf-close" title="Close (Esc)" onclick={() => (panel = '')}><X size={14} /></button>
+            </div>
+            <FieldBrowser {doc} {rows} onpick={pickValue} path={pathAction} />
         </div>
     {/if}
 </div>

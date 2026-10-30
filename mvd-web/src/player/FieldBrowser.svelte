@@ -8,7 +8,8 @@
     // `type`, highlights by `kind`) narrows to one kind, which is how the
     // fields of `detail` that belong to a powerup show apart from a frag's.
     // Clicking a value adds `field = value` to the filter (onpick); clicking
-    // a path copies it.
+    // a path does what the stage the panel was opened from does with a
+    // field (`path`: order by it, put it in the label), else copies it.
     import ChevronLeft from '@lucide/svelte/icons/chevron-left';
     import ChevronRight from '@lucide/svelte/icons/chevron-right';
     import { fieldStats, fieldOf } from '../lib/clip-query.js';
@@ -16,8 +17,14 @@
     import { fieldDoc, fieldEnum, shortDoc } from './api-docs.js';
     import { toast } from './toast.js';
 
-    /** @type {{ doc: import('./api-docs.js').SourceDoc | undefined, rows: any[], onpick: (field: string, op: '=' | '~', value: import('../lib/clip-query.js').Scalar) => void }} */
-    let { doc, rows, onpick } = $props();
+    /**
+     * @type {{
+     *   doc: import('./api-docs.js').SourceDoc | undefined, rows: any[],
+     *   onpick: (field: string, op: '=' | '~', value: import('../lib/clip-query.js').Scalar) => void,
+     *   path?: { what: string, fn: (field: string) => void },
+     * }}
+     */
+    let { doc, rows, onpick, path } = $props();
 
     // The field the rows come in kinds by, if any.
     let kindField = $derived(['type', 'kind'].find((f) => rows.some((r) => typeof fieldOf(r, f) === 'string')) || '');
@@ -84,7 +91,7 @@
     <p class="muted fb-hint">
         {shown.length ? `What ${kind ? `the ${shown.length} ${kind} rows` : `these ${shown.length} rows`} hold.` : 'No rows to read yet — the spec\'s fields only.'}
         Type the <strong>full path</strong> in a field box (<code>detail.powerup</code>, <code>victims.0.name</code> — the first victim's name).
-        Click a value to keep the rows with it; click a path to copy it. Times are match ms (60000 = 1:00).
+        Click a value to keep the rows with it; click a path to {path ? path.what : 'copy it'}. Times are match ms (60000 = 1:00).
     </p>
     <table class="fb-table">
         <tbody>
@@ -95,7 +102,7 @@
                 {@const u = unit(p)}
                 <tr class:absent={!st}>
                     <td class="fb-path">
-                        <button class="fb-pathbtn" title="Copy {p}" onclick={() => copy(p)}>{p}</button>
+                        <button class="fb-pathbtn" class:act={!!path} title={path ? `${p}: ${path.what}` : `Copy ${p}`} onclick={() => (path ? path.fn(p) : copy(p))}>{p}</button>
                         <div class="fb-type">{st?.type || d?.type || ''}{st?.list ? ' list' : ''}{u ? ` · ${u}` : ''}</div>
                     </td>
                     <td>
@@ -195,6 +202,9 @@
         font-size: 12px;
         color: var(--accent-cyan);
         cursor: copy;
+    }
+    .fb-pathbtn.act {
+        cursor: pointer;
     }
     .fb-type {
         font-size: 10px;

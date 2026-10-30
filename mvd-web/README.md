@@ -1335,8 +1335,9 @@ drops it).
   `SOURCES` offers is documented). It loads lazily (`src/player/api-docs.js`)
   into tooltips, the param value lists and the field suggestions, and the
   ⓘ page per source (rendered by `src/lib/mini-md.js`, which escapes
-  first). Its **Fields and values** part (`FieldBrowser.svelte`; also
-  stage 2's *Fields and values* button) lists every field these rows
+  first) — the source and its params, stage 1's. **Fields and values**
+  (`FieldBrowser.svelte`), a panel of its own opened from stages 2, 3 and
+  4, lists every field these rows
   carry by its full path, with its type and unit, the spec's text, how
   many rows carry it, the values it allows (its enum, or the enum of the
   param that filters by it — events' `type` by `types`) and the values
@@ -1345,7 +1346,9 @@ drops it).
   `type`, highlights by `kind`) narrow to one kind, which is what shows
   which `detail.*` fields a powerup has; the documented fields these rows
   lack are behind a toggle. A value click adds `field = value` (`~` on a
-  list) to the filter; a path click copies it. In stage 2 a condition's
+  list) to the filter; a path click does the stage's thing with it —
+  copies it (stage 2), orders by it (3), appends `{field}` to the default
+  label (4). In stage 2 a condition's
   field box suggests every documented field and says what the one typed
   means, its value box suggests the allowed values and the ones this demo
   has, and `players` params suggest this demo's names. Results update as you type (the endpoint is re-queried only when
