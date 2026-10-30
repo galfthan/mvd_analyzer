@@ -18,9 +18,11 @@ replacing the In / Out bar. Clips can carry slow motion around the event
 (the airgib, telefrag, quadbore and discharge presets have it on). The
 player itself is now a pane that can sit in either column or collapse
 without restarting the demo. The Moments pane lists the Key Moments and
-Pack Drops tables as groups with their counts. A playlist's share link
-opens a light player page that plays the clips without loading the
-analyzer, with a link on to the full Player tab. Hub links everywhere
+Pack Drops tables as groups with their counts. A playlist's link opens
+a light player page that plays the clips without loading the analyzer,
+with a link on to the full Player tab; the playlist's one **Copy link**
+button copies it as a named Markdown link for Discord ("mvda · date ·
+map · teams · Quad run ×5"), Shift the bare URL, Ctrl / Cmd a hub link. Hub links everywhere
 read **play** (Shift: **+add**, Ctrl / Cmd: **hub**), the clip finder
 starts closed and shows its clips beside the stages, and the map's depth
 fog is an option again — off by default — in the map's right-click menu.

@@ -1360,13 +1360,19 @@ drops it).
   run, label and watched player for a couple of seconds. A clip of another hub demo loads that demo
   (`loadDemo`) and carries on; a clip of another local file is
   skipped with a note.
-- **Copy hub link**: one `hub.quakeworld.nu/games/?gameId=…&clip=F-T:U…`
-  link (hub's own multi-clip format) when every clip is from one hub demo;
-  hub reads the first 20.
-- **Copy share link**: the light player, `play.html#playlist=<base64url
-  JSON>` (below). This page still reads `?gameId=…&tab=player#playlist=…`
-  — the light player's *Open in the full analyzer* link — and appends the
-  clips not already in the viewer's list.
+- **Copy link**, one button: the light player, `play.html#playlist=<base64url
+  JSON>` (below). A click copies it as Markdown, `[name](url)`, which
+  Discord shows as a named link; the name is `playlistName`
+  (`src/lib/playlist.js`): "mvda", the demo's date (the loaded demo's, by
+  the topbar's precedence — `matchDay`, `src/lib/wall-clock.js`), map and
+  teams (the clips' demo title; "N demos" over several), and what the list
+  holds, read off the clips' labels — one clip by its label, up to three
+  kinds with counts ("Quad run ×5, Airgib ×2"), else "N clips".
+  Shift-click copies the bare URL; Ctrl / Cmd-click hub's own multi-clip
+  link (`hub.quakeworld.nu/games/?gameId=…&clip=F-T:U…`) when every clip
+  is from one hub demo — hub reads the first 20. This page still reads
+  `?gameId=…&tab=player#playlist=…` — the light player's *Open in the full
+  analyzer* link — and appends the clips not already in the viewer's list.
 
 ### The light player (`play.html`)
 

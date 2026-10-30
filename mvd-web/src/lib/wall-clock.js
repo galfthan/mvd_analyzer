@@ -88,3 +88,16 @@ export function matchDateHtml(result) {
     const wc = matchWallClock(result);
     return wc ? wc.html : '-';
 }
+
+// matchDay: the match's day (YYYY-MM-DD) by the topbar's precedence —
+// KTX's demoinfo date, else the wall-clock anchor, "~"-hedged as the
+// topbar hedges it — or '' with neither.
+/** @param {import('./result.js').Result | null | undefined} result */
+export function matchDay(result) {
+    const kt = String(result?.demoInfo?.date || '').match(/\d{4}-\d{2}-\d{2}/);
+    if (kt) return kt[0];
+    const w = matchWallClock(result);
+    const day = w?.text.match(/\d{4}-\d{2}-\d{2}/);
+    if (!w || !day) return '';
+    return (w.text.startsWith('~') ? '~' : '') + day[0];
+}

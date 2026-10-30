@@ -4,8 +4,9 @@ import { readFileSync, existsSync } from 'node:fs';
 
 import {
     parseHubReplayUrl, hubClipsUrl, singleHubGame, encodePlaylist, decodePlaylist,
-    playlistStep, playerFragClips, MAX_HUB_CLIPS, cleanSlow, slowAt,
+    playlistStep, playerFragClips, MAX_HUB_CLIPS, cleanSlow, slowAt, playlistName, markdownLink,
 } from '../src/lib/playlist.js';
+import { matchDay } from '../src/lib/wall-clock.js';
 
 const demo = { key: 'hub:212260', gameId: 212260, title: 'dm3', offset: 10.3 };
 
@@ -101,4 +102,22 @@ test('slow motion: clamped into the clip, carried by the share link, read per ti
     assert.equal(slowAt(clips[0], 24), 0.25);
     assert.equal(slowAt(clips[0], 26), null, 'the window is half-open');
     assert.equal(slowAt(clips[1], 45), null);
+});
+
+test('playlistName: mvda, the demo, what the list holds', () => {
+    const d = { key: 'hub:1', gameId: 1, title: 'dm2 · PEX vs tbg', offset: 10 };
+    const c = (label, demo = d) => ({ from: 1, to: 2, track: 'auto', who: '', label, demo });
+    const loaded = { key: 'hub:1', date: '2026-03-08' };
+    assert.equal(playlistName([c('Quad run · gore · 2 frags'), c('Quad run · nexus · 5 frags'), c('Airgib · a → b')], loaded),
+        'mvda · 2026-03-08 · dm2 · PEX vs tbg · Quad run ×2, Airgib');
+    assert.equal(playlistName([c('Airgib · a → b')], loaded), 'mvda · 2026-03-08 · dm2 · PEX vs tbg · Airgib · a → b', 'one clip by its label');
+    assert.equal(playlistName([c('A'), c('B'), c('C'), c('D')], null), 'mvda · dm2 · PEX vs tbg · 4 clips', 'no date without the demo loaded');
+    assert.equal(playlistName([c('A'), c('B', { ...d, key: 'hub:2' })], loaded), 'mvda · 2 demos · A, B');
+    assert.equal(markdownLink('x [y]', 'https://u'), '[x (y)](https://u)');
+});
+
+test('matchDay: the demoinfo date, else the hedged wall clock', () => {
+    assert.equal(matchDay({ demoInfo: { date: '2026-03-08 21:16:56 +0000' } }), '2026-03-08');
+    assert.equal(matchDay({ streams: { global: { matchStartUnixMs: Date.UTC(2002, 7, 4, 11), matchStartConfidence: 'unverified' } } }), '~2002-08-04');
+    assert.equal(matchDay({}), '');
 });

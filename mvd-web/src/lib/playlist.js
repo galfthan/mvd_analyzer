@@ -88,6 +88,49 @@ export function singleHubGame(clips) {
     return clips.every((c) => c.demo?.gameId === id) ? id : null;
 }
 
+// playlistName names a shared playlist for the link text people paste
+// into Discord: "mvda", the demo (its date where the loaded demo gives
+// one, its map and teams — the clip's demo title) and what the list holds,
+// read off the clips' labels (a generated label opens with its kind,
+// "Quad run · gore · 2 frags"): one clip by its label, up to three kinds
+// with their counts, else the number of clips. A list over several demos
+// says how many.
+/**
+ * @param {Clip[]} clips
+ * @param {{ key: string, date: string } | null} [loaded]  the loaded demo's key and date
+ */
+export function playlistName(clips, loaded) {
+    const parts = ['mvda'];
+    const keys = new Set(clips.map((c) => c.demo?.key));
+    if (keys.size === 1) {
+        const d = clips[0].demo;
+        if (loaded?.date && d?.key === loaded.key) parts.push(loaded.date);
+        if (d?.title) parts.push(d.title);
+    } else if (keys.size > 1) {
+        parts.push(`${keys.size} demos`);
+    }
+    /** @type {Map<string, number>} */
+    const kinds = new Map();
+    for (const c of clips) {
+        const kind = (c.label || '').split(' · ')[0].trim() || 'Clip';
+        kinds.set(kind, (kinds.get(kind) || 0) + 1);
+    }
+    if (clips.length === 1) parts.push(clips[0].label || 'Clip');
+    else if (kinds.size <= 3) parts.push([...kinds].map(([k, n]) => (n > 1 ? `${k} ×${n}` : k)).join(', '));
+    else parts.push(`${clips.length} clips`);
+    return parts.join(' · ');
+}
+
+// markdownLink: `[text](url)`, the text's brackets swapped for parentheses
+// so a label cannot end the link early.
+/**
+ * @param {string} text
+ * @param {string} url
+ */
+export function markdownLink(text, url) {
+    return `[${text.replace(/\[/g, '(').replace(/\]/g, ')')}](${url})`;
+}
+
 // ── Share encoding ──────────────────────────────────────────────────────────
 //
 // `#playlist=<base64url(JSON)>`. Compact rows keep the URL short:

@@ -1,7 +1,6 @@
 <script>
     import Play from '@lucide/svelte/icons/play';
     import Square from '@lucide/svelte/icons/square';
-    import Link from '@lucide/svelte/icons/link';
     import Share2 from '@lucide/svelte/icons/share-2';
     import Trash2 from '@lucide/svelte/icons/trash-2';
     import ArrowUp from '@lucide/svelte/icons/arrow-up';
@@ -11,8 +10,9 @@
     import { demo, teams, colorOf, teamIndexOf } from '../state/index.js';
     import { formatDuration } from '../lib/result.js';
     import {
-        playerFragClips, singleHubGame, hubClipsUrl, encodePlaylist, MAX_HUB_CLIPS,
+        playerFragClips, singleHubGame, hubClipsUrl, encodePlaylist, playlistName, markdownLink, MAX_HUB_CLIPS,
     } from '../lib/playlist.js';
+    import { matchDay } from '../lib/wall-clock.js';
     import { PRESETS, runQuery } from '../lib/clip-query.js';
     import { presetRuns } from './preset-runs.js';
     import { userPresets } from './clip-presets.js';
@@ -95,16 +95,23 @@
         copyText(hubClipsUrl(gameId, clips), 'Hub link');
     }
 
-    // Share link: the light player (play.html, no analyzer) with the whole
-    // playlist in the fragment (#playlist=…); it links on to this page's
-    // Player tab with the same playlist.
-    function copyShareLink() {
+    // The one link button. The link is the light player (play.html, no
+    // analyzer) with the whole playlist in the fragment (#playlist=…); it
+    // links on to this page's Player tab with the same playlist. A click
+    // copies it as Markdown named by playlistName — a named link once
+    // pasted into Discord — Shift the bare URL, Ctrl / Cmd a hub link.
+    /** @param {MouseEvent} e */
+    function copyLink(e) {
+        if (e.ctrlKey || e.metaKey) return copyHubLink();
         if (!clips.length) {
             toast('The playlist is empty');
             return;
         }
         const dir = location.pathname.replace(/[^/]*$/, '');
-        copyText(`${location.origin}${dir}play.html#playlist=${encodePlaylist(clips)}`, 'Share link');
+        const url = `${location.origin}${dir}play.html#playlist=${encodePlaylist(clips)}`;
+        if (e.shiftKey) return copyText(url, 'Link');
+        const loaded = ref ? { key: ref.key, date: matchDay($demo?.result) } : null;
+        copyText(markdownLink(playlistName(clips, loaded), url), 'Markdown link');
     }
 
     function clear() {
@@ -178,10 +185,7 @@
                 {/if}
             {/if}
         </select>
-        <span class="pt-group">
-            <button class="pt-btn" title="Copy one hub.quakeworld.nu link playing every clip (one hub demo, up to 20 clips)" onclick={copyHubLink}><Link size={14} /> Hub link</button>
-            <button class="pt-btn" title="Copy a link to a light player of these clips (no analysis to wait for; it links on to the full analyzer)" onclick={copyShareLink}><Share2 size={14} /> Share link</button>
-        </span>
+        <button class="pt-btn" title="Copy a link to these clips in a light player (no analysis to wait for; it links on to the full analyzer). Click: as a named Markdown link, for Discord · Shift: the bare URL · Ctrl / Cmd: a hub.quakeworld.nu link (one hub demo, up to {MAX_HUB_CLIPS} clips)" onclick={copyLink}><Share2 size={14} /> Copy link</button>
         <button class="pt-btn icon" title="Remove every clip" disabled={!clips.length} onclick={clear}><Trash2 size={15} /></button>
         <span class="player-clip-hint">
             {run ? (run.transient ? `Playing: ${run.clips[0].label}` : `Playing ${run.index + 1} / ${run.clips.length}`) : ''}
