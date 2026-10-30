@@ -1,6 +1,7 @@
 <script>
     // The Summary tab: Match Info, Match Settings, Server Info, the Teams
-    // box, the Opening (spawns and first takes, result.opening), Basic Stats / Weapon Stats / Item Pickups & Drops (per team and
+    // box, Basic Stats, the Opening (spawns and first takes,
+    // result.opening), Weapon Stats / Item Pickups & Drops (per team and
     // per player, all from result.playerStats), Kills by Weapon, and — on a
     // recording that holds no match — the no-match panel at the top
     // (src/lib/summary.js has the rules and the row markup). src/app/tabs.js
@@ -331,15 +332,6 @@
         </div>
     </div>
 
-    <div data-panel="opening" id="opening-panel" class="panel" style:display={v.tables.opening.length ? null : 'none'}>
-        <h3>Opening</h3>
-        <p class="panel-note">Where each player spawned at match start, and the armors, mega, powerups and RL / LG pads they were first to take — with the match time.</p>
-        <table id="opening-table" class="stats-table">
-            <thead><tr><th>Player</th><th>Spawn</th><th>First to take</th></tr></thead>
-            <tbody id="opening-body" use:rows={{ rows: v.tables.opening, colors: v.colors }}></tbody>
-        </table>
-    </div>
-
     <div data-panel="basic-stats" id="players-panel" class="panel">
         <h3>Basic Stats</h3>
         <div id="players-provenance" class={provenanceClass(v.note)} style:display={v.note ? null : 'none'}>{@html v.note?.html ?? ''}</div>
@@ -394,6 +386,15 @@
                 </tr>
             </thead>
             <tbody id="scoreboard-body" use:rows={{ rows: v.tables.basicPlayer, colors: v.colors }}></tbody>
+        </table>
+    </div>
+
+    <div data-panel="opening" id="opening-panel" class="panel" style:display={v.tables.opening.length ? null : 'none'}>
+        <h3>Opening</h3>
+        <p class="panel-note">Where each player spawned at match start, and the armors, mega, powerups and RL / LG pads they were first to take — with the match time.</p>
+        <table id="opening-table" class="stats-table">
+            <thead><tr><th>Player</th><th>Spawn</th><th>First to take</th></tr></thead>
+            <tbody id="opening-body" use:rows={{ rows: v.tables.opening, colors: v.colors }}></tbody>
         </table>
     </div>
 

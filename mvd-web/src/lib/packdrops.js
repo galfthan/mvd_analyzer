@@ -26,7 +26,8 @@ import { hubReplayUrl, hubLinkHtml } from './hub-url.js';
  * @typedef {'dropplayer' | 'dropteam' | 'pickplayer' | 'pickteam' | 'status'} FilterKey
  * @typedef {Partial<Record<FilterKey, string>>} PackDropFilter
  * Hub-link context: the game id, name → userid map and demo offset (s).
- * @typedef {{ gameId?: number | null, userIDs?: Record<string, number>, demoOffset: number }} HubLinkCtx
+ * @typedef {{ gameId?: number | null, userIDs?: Record<string, number>, demoOffset: number, matchEnd?: number }} HubLinkCtx
+ *   matchEnd: the match's length, seconds
  */
 
 // packDropPickup reads a drop's pickup side (ms on the row) into seconds.
@@ -167,7 +168,8 @@ export function hubAnchor(ctx, from, to, trackName) {
 
 // The cells of one row (a <tr>'s innerHTML). The drop link starts 4 s
 // before the drop; the run link from 3 s before the pickup to the picker's
-// next death (15 s when there is none).
+// next death — the match end when there is none (they were still on the
+// run when it ended; 15 s past the pickup without a known match length).
 /**
  * @param {PackDropRow} r
  * @param {HubLinkCtx | null | undefined} ctx
@@ -181,7 +183,7 @@ export function rowHtml(r, ctx) {
     let pickTeamLabel = '-';
     let killsCell = '-';
     if (pickup) {
-        const endTime = pickup.nextDeathTime > 0 ? pickup.nextDeathTime : pickup.time + 15;
+        const endTime = pickup.nextDeathTime > 0 ? pickup.nextDeathTime : (ctx?.matchEnd || pickup.time + 15);
         runHub = hubAnchor(ctx, pickup.time - 3, endTime, pickup.player);
         pickerLabel = escapeHtml(pickup.player || '?');
         pickTeamLabel = escapeHtml(pickup.team || '-');

@@ -58,8 +58,8 @@ teamkills and suicides included, from the killer's view — a *Teamkills*
 preset) and **weapon pickups** (every pickup with the kills before the
 picker's next death — *RL runs*, *LG runs* and the five best of each,
 from the pickup to that death, or to the match end when the picker
-never died again; RL / LG runs are Moments groups too). The
-Summary tab has an **Opening** panel: where each player spawned and who
+never died again — as the Pack Drops tab's *Run* link now does too; RL / LG runs are Moments groups too). The
+Summary tab has an **Opening** panel (after Basic Stats): where each player spawned and who
 was first to take each armor, mega, powerup and RL / LG. Switching
 between the Map and Player tabs keeps the map (no new WebGL context or
 first frame, about twice as fast), and dragging a pane's height no

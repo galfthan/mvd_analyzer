@@ -1683,7 +1683,7 @@ show through the status chip (`enemy RL`, `xfer RL`).
 The `Drop` and `Run` columns are play links (a click plays in the
 Player tab, Ctrl / Cmd-click opens hub). `Drop` runs from 4 s before the
 drop to 2 s after, tracking the dropper;
-`Run` spans 3 s before pickup to the picker's next death (or +15 s
+`Run` spans 3 s before pickup to the picker's next death (or the match end
 if they survived to match end), tracking the picker.
 
 ## The map model and the playback bar

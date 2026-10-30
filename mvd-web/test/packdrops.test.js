@@ -78,8 +78,8 @@ test('hubAnchor: demo-relative whole seconds, a play link, "-" without a hub gam
     assert.equal(hubAnchor(ctx, 1, 2, 'nobody'), '-');
 });
 
-test('rowHtml: time cell, escaped names, run link to the next death or +15 s', () => {
-    const ctx = { gameId: 5, userIDs: { '<a>': 1, b: 2 }, demoOffset: 0 };
+test('rowHtml: time cell, escaped names, run link to the next death or the match end', () => {
+    const ctx = { gameId: 5, userIDs: { '<a>': 1, b: 2 }, demoOffset: 0, matchEnd: 1200 };
     const row = {
         drop: { time: 75, player: '<a>', team: 'red', weapon: 'rl' },
         pickup: { player: 'b', team: 'red', time: 80, nextDeathTime: 0, kills: 3, hadBefore: true },
@@ -89,7 +89,8 @@ test('rowHtml: time cell, escaped names, run link to the next death or +15 s', (
     assert.match(h, /<td class="time-cell time-link">1:15<\/td>/);
     assert.match(h, /<td>&lt;a&gt;<\/td>/);
     assert.match(h, /from=71&to=77&track=1/);
-    assert.match(h, /from=77&to=95&track=2/);
+    assert.match(h, /from=77&to=1200&track=2/, 'the picker never died again: to the match end');
+    assert.match(rowHtml(row, { ...ctx, matchEnd: undefined }), /from=77&to=95&track=2/, 'no match length: 15 s');
     assert.match(h, /<span class="kills-redundant">3<\/span>/);
     assert.match(h, /<td class="weapon-cell weapon-rl">RL<\/td>/);
     assert.match(h, /<span class="pack-status status-xfer-had">xfer RL<\/span>/);
