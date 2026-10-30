@@ -7,8 +7,7 @@
 
 import { drawPlayerSymbolAt, drawBadgesAroundCenter, PLAYER_SYMBOL_BASE_SIZE } from '../../../../mvd-map-view/src/index.js';
 import { makeSortable } from '../../ui/sortable.js';
-import { demoOffsetSec } from '../../lib/result.js';
-import { fragsAt, hubWatchLinkHtml } from '../../lib/timeline.js';
+import { fragsAt } from '../../lib/timeline.js';
 import {
     legendTeams, legendRowHtml, LEGEND_HEAD, teamFragsAt, stackCell, weaponsText, regionStatusRows,
 } from '../../lib/map.js';
@@ -53,7 +52,7 @@ export function buildLegend(el, teams, symbols, colors) {
 }
 
 // syncLegend fills the legend at `time`: team frag totals, each player's
-// loc, stack, weapons and hub watch link.
+// loc, stack and weapons.
 /**
  * @param {HTMLElement} el
  * @param {MvdMap} view
@@ -82,12 +81,6 @@ export function syncLegend(el, view, result, time) {
     }
     for (const cell of /** @type {NodeListOf<HTMLElement>} */ (el.querySelectorAll('.map-legend-wpn'))) {
         cell.textContent = weaponsText(pd?.[/** @type {string} */ (cell.dataset.player)]);
-    }
-    const hubInfo = result?.hubInfo;
-    const ids = result?.timelineAnalysis?.playerUserIDs || {};
-    const offset = demoOffsetSec(result);
-    for (const cell of /** @type {NodeListOf<HTMLElement>} */ (el.querySelectorAll('.map-legend-hub'))) {
-        cell.innerHTML = hubWatchLinkHtml(/** @type {string} */ (cell.dataset.player), time, hubInfo, ids, offset);
     }
 }
 

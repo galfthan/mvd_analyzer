@@ -2,7 +2,10 @@
 // and step to the next one when playback crosses its end (the stepping rules
 // are hub's, in src/lib/playlist.js playlistStep). A clip of another hub
 // demo loads that demo and carries on there; a clip of another local file
-// is skipped with a note. The clip playing is the selected segment (the
+// is skipped with a note. A run plays in the engine, or — started on the
+// Map tab without a Player pane — on the map, by the page's own playback
+// (page-driver.js); the driver is picked when it starts. The clip playing
+// is the selected segment (the
 // playback bar shows it, the Timeline tab zooms to it); stopping clears it
 // unless the user selected another meanwhile. Inside a clip's slow-motion
 // window (clip.slow) the engine plays at its speed, then at the viewer's
@@ -16,10 +19,14 @@ import { toast } from './toast.js';
  * @typedef {import('../lib/playlist.js').Clip} Clip
  * @typedef {import('../lib/playlist.js').PlaylistStep} PlaylistStep
  * @typedef {import('./playlist-store.js').Run} Run
+ * @typedef {ReturnType<typeof import('./page-driver.js').createPageDriver>} PageDriver
+ * @typedef {import('./engine.js').PlayerEngine | PageDriver} Driver
  * @typedef {import('../data/wasm-source.js').DemoHandle} DemoHandle
  *
  * @typedef {object} RunnerDeps
  * @property {import('./engine.js').PlayerEngine} engine
+ * @property {PageDriver} [page]  the map's (none on the light page)
+ * @property {() => Driver} [driverFor]  what a run started now plays in
  * @property {import('../state/store.js').Store<DemoHandle | null>} demo
  * @property {typeof import('../state/teams.js').teams} teams
  * @property {(id: string) => void} selectTab
@@ -29,7 +36,9 @@ import { toast } from './toast.js';
  */
 
 /** @param {RunnerDeps} deps */
-export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRefOf, segment }) {
+export function createRunner({ engine, page, driverFor = () => engine, demo, teams, selectTab, loadDemo, demoRefOf, segment }) {
+    /** @type {Driver} */
+    let drv = engine;         // what the run plays in
     /** @type {Run | null} */
     let loadingRun = null;   // the run whose next clip's demo is being loaded
     let awaitingFrames = false;   // a clip waits for the shown engine to repaint
@@ -50,6 +59,11 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
      */
     function start(clips, index = 0, transient = false) {
         if (!clips.length) return;
+        const next = driverFor();
+        if (next !== drv) {
+            slowTo(null);
+            drv = next;
+        }
         setRun({ clips, index, prev: null, transient });
         playClip(index);
     }
@@ -58,7 +72,7 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
     let shownSpan = null;   // the segment this run set, while it is still the segment
     /** @param {Clip} c  a clip of the current demo */
     function showSpan(c) {
-        const off = engine.offset();
+        const off = drv.offset();
         shownSpan = { start: Math.max(0, c.from - off), end: Math.max(0, c.to - off) };
         segment.set(shownSpan);
     }
@@ -69,7 +83,7 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
     function slowTo(speed) {
         if (speed === slowing) return;
         slowing = speed;
-        engine.slowTo(speed);
+        drv.slowTo(speed);
     }
 
     function stop() {
@@ -104,7 +118,7 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             return playClip(index + 1);
         }
         showSpan(c);
-        if (!engine.active()) {
+        if (drv === engine && !engine.active()) {
             // The engine's iframe was hidden (or not there: selectTab
             // opens a Player pane too): showing it costs a repaint
             // (seconds under software GL), and a jump sent before that
@@ -131,16 +145,16 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
             return;
         }
         showTries = 0;
-        if (!engine.fte) {
+        if (drv === engine && !engine.fte) {
             // Engine still booting: park the cursor at the clip (the opening
             // jump goes there) and start once it is up.
             engine.clock.seek(Math.max(0, c.from - engine.offset()));
             engine.whenReady(() => playClip(index));
             return;
         }
-        engine.jumpToDemoTime(c.from);
-        engine.track(c.track);
-        engine.play();
+        drv.jumpToDemoTime(c.from);
+        drv.track(c.track);
+        drv.play();
     }
 
     /** @param {Clip} c  a hub clip: demo.gameId is set */
@@ -178,13 +192,17 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
         playClip(run.index);
     }
 
-    // One tick of the run, after every engine poll. Skipped while a jump is
-    // in flight (the clock is still at the pre-jump time).
-    engine.onTick((demoT) => {
+    // One tick of the run, after every poll of the driver it plays in.
+    // Skipped while a jump is in flight (the clock is still at the pre-jump
+    // time).
+    /**
+     * @param {Driver} d
+     * @param {number} demoT
+     */
+    function tick(d, demoT) {
         const run = playlist.get().run;
-        const fte = engine.fte;
-        if (!run || !fte || awaitingFrames) return;
-        if (engine.seeking()) {
+        if (!run || d !== drv || !d.ready() || awaitingFrames) return;
+        if (d.seeking()) {
             run.prev = null;
             return;
         }
@@ -197,29 +215,31 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
         // The demo can run out inside a clip padded past its last frame; FTE
         // then reports not playing and `to` is never crossed — it is done.
         /** @type {PlaylistStep} */
-        const step = fte.hasEnded()
+        const step = d.hasEnded()
             ? { type: 'end' }
-            : playlistStep(local.map((i) => run.clips[i]), li, run.prev, demoT, fte.isPlaying());
+            : playlistStep(local.map((i) => run.clips[i]), li, run.prev, demoT, d.isPlaying());
         run.prev = demoT;
         // Paused, nothing is slowed: play resumes at the rate and the next
         // tick slows it again inside the window.
-        if (step.type === 'none') slowTo(fte.isPlaying() ? slowAt(run.clips[run.index], demoT) : null);
+        if (step.type === 'none') slowTo(d.isPlaying() ? slowAt(run.clips[run.index], demoT) : null);
         if (step.type === 'follow') {
             // A seek into another clip: it is the active one, with its POV.
             const next = run.clips[local[step.index]];
             setRun({ ...run, index: local[step.index] });
             showSpan(next);
-            if (next.track !== run.clips[run.index].track) engine.track(next.track);
+            if (next.track !== run.clips[run.index].track) d.track(next.track);
         } else if (step.type === 'next' || step.type === 'end') {
             if (run.index + 1 < run.clips.length) {
                 playClip(run.index + 1);
             } else {
-                engine.pause();
+                d.pause();
                 if (!run.transient) toast('Playlist finished');
                 stop();
             }
         }
-    });
+    }
+    engine.onTick((demoT) => tick(engine, demoT));
+    page?.onTick((demoT) => tick(page, demoT));
 
     // A demo the user loaded ends the run; one the run loaded itself
     // (loadForRun) carries it on.
@@ -231,5 +251,5 @@ export function createRunner({ engine, demo, teams, selectTab, loadDemo, demoRef
         if (run && loadingRun !== run) stop();
     });
 
-    return { start, stop, isCurrent, currentRef };
+    return { start, stop, isCurrent, currentRef, driver: () => drv };
 }

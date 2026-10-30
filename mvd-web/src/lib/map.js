@@ -186,11 +186,10 @@ export function legendRowHtml(name, symbol, color) {
                     <td class="map-legend-loc" data-player="${n}">-</td>
                     <td class="map-legend-stack" data-player="${n}" data-sort-value="0">-</td>
                     <td class="map-legend-wpn" data-player="${n}">-</td>
-                    <td class="map-legend-hub" data-player="${n}"></td>
                 `;
 }
 
-export const LEGEND_HEAD = '<thead><tr><th></th><th>Player</th><th>Loc</th><th title="Health + armor (sorted by H+A)">Stack</th><th>Wpn</th><th>View</th></tr></thead>';
+export const LEGEND_HEAD = '<thead><tr><th></th><th>Player</th><th>Loc</th><th title="Health + armor (sorted by H+A)">Stack</th><th>Wpn</th></tr></thead>';
 
 // teamFragsAt: a team's frags from the running per-player counts.
 /**

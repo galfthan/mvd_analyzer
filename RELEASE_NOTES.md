@@ -29,8 +29,10 @@ The **Map and Player tabs are now two views of one tab**, sharing all of
 their panes: *Map* (a large map, the players' table, moments, items and
 region status — no demo player to load, so it opens instantly and scrubs
 freely) and *Player* (the game view and the playlist, the map beside).
-Each remembers how you arranged it, any pane can go in either, and
-playing any clip opens the Player tab. The graph panes and the health /
+Each remembers how you arranged it, and any pane can go in either. A
+moment or the playlist played on the Map tab plays right there, on the
+map, following the clip's player; from any other tab it opens the Player
+tab. The players' table has no play column — click a name to follow. The graph panes and the health /
 armor strips show the selection (or the whole match) by default and grow
 with their pane. The playlist's Generate menu says how many of each
 preset the demo has (and leaves out the ones it lacks), there are new

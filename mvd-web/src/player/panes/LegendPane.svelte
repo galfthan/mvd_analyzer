@@ -1,7 +1,7 @@
 <script>
     // Players: the Map tab's legend as a pane — one sortable table per team
     // (canonical order and colour, running frags in its title), each
-    // player's loc, health / armor, weapons and a play link at the playhead.
+    // player's loc, health / armor and weapons at the playhead.
     // Built by src/tabs/map/sidebar.js over the map model's data; cells
     // refresh at most every 150 ms. The watched player's row is lit; click
     // a row to watch them (follow.js).

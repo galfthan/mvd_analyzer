@@ -93,6 +93,9 @@ function fakeEngine(activeTab) {
     return {
         fte, log, activeTab,
         active: () => activeTab.get() === 'player',
+        ready: () => true,
+        isPlaying: () => fte.playing,
+        hasEnded: () => fte.ended,
         clock: { seek: (t) => log.push(['seek', t]) },
         offset: () => 10,
         seeking: () => false,
@@ -113,7 +116,7 @@ test('runner plays clips in order and steps on crossing `to`', () => {
     const demo = store({ ref: { key: 'hub:1', gameId: 1 }, result: { streams: { global: { demoOffset: 10000 } } } });
     const teams = store({ order: [] });
     const segment = store(null);
-    const runner = createRunner({ engine, demo, teams, selectTab: (t) => activeTab.set(t), loadDemo: async () => {}, demoRefOf, segment });
+    const runner = createRunner({ engine, page: fakeEngine(store('map')), driverFor: () => engine, demo, teams, selectTab: (t) => activeTab.set(t), loadDemo: async () => {}, demoRefOf, segment });
     const clips = [clip(100, 110, { track: 7 }), clip(200, 210, { demo: { key: 'file:x', gameId: null } }), clip(300, 310)];
     runner.start(clips, 0);
     assert.deepEqual(engine.log.slice(0, 2), [['jump', 100], ['track', 7]]);
@@ -142,7 +145,7 @@ test('runner plays a clip\'s slow-motion window at its speed, then at the viewer
     const activeTab = store('player');
     const engine = fakeEngine(activeTab);
     const demo = store({ ref: { key: 'hub:1', gameId: 1 }, result: { streams: { global: { demoOffset: 10000 } } } });
-    const runner = createRunner({ engine, demo, teams: store({ order: [] }), selectTab: () => {}, loadDemo: async () => {}, demoRefOf, segment: store(null) });
+    const runner = createRunner({ engine, page: fakeEngine(store('map')), driverFor: () => engine, demo, teams: store({ order: [] }), selectTab: () => {}, loadDemo: async () => {}, demoRefOf, segment: store(null) });
     runner.start([clip(100, 110, { slow: { from: 104, to: 106, speed: 0.3 } })], 0);
     engine.tick(103);
     engine.tick(104.2);
@@ -164,6 +167,36 @@ test('runner plays a clip\'s slow-motion window at its speed, then at the viewer
     assert.deepEqual(engine.log.at(-1), ['slow', null], 'a run the playlist ends (its clip removed, the list cleared) restores it too');
 });
 
+test('a run started for the map plays there: no tab switch, the engine untouched', () => {
+    const activeTab = store('map');
+    const engine = fakeEngine(activeTab);
+    const page = fakeEngine(activeTab);
+    let driver = page;
+    const demo = store({ ref: { key: 'hub:1', gameId: 1 }, result: {} });
+    const runner = createRunner({ engine, page, driverFor: () => driver, demo, teams: store({ order: [] }),
+        selectTab: (t) => activeTab.set(t), loadDemo: async () => {}, demoRefOf, segment: store(null) });
+    runner.start([clip(100, 110, { track: 7, slow: { from: 104, to: 106, speed: 0.3 } }), clip(200, 210)], 0);
+    assert.equal(activeTab.get(), 'map', 'stays on the Map tab');
+    assert.deepEqual(page.log.slice(0, 2), [['jump', 100], ['track', 7]]);
+    engine.tick(104.5);
+    assert.deepEqual(page.log.filter((e) => e[0] === 'slow'), [], "the engine's ticks do not step a map run");
+    page.tick(104.5);
+    assert.deepEqual(page.log.at(-1), ['slow', 0.3]);
+    page.tick(109.9);
+    page.tick(110.05);
+    assert.deepEqual(page.log.at(-2), ['jump', 200], 'steps on to the next clip');
+    assert.equal(runner.driver(), page);
+    assert.deepEqual(engine.log, [], 'the engine is not driven');
+    runner.start([clip(100, 110, { slow: { from: 104, to: 106, speed: 0.3 } })], 0);
+    page.tick(104.5);
+    activeTab.set('player');
+    driver = engine;
+    runner.start([clip(100, 110)], 0);
+    assert.deepEqual(page.log.at(-1), ['slow', null], 'a run in the other driver leaves the map unslowed');
+    assert.equal(runner.driver(), engine);
+    runner.stop();
+});
+
 test('runner loads another hub demo and carries on there', async () => {
     const activeTab = store('player');
     const engine = fakeEngine(activeTab);
@@ -175,7 +208,7 @@ test('runner loads another hub demo and carries on there', async () => {
         demo.set({ ref: { key: 'hub:9', gameId: 9 }, result: {} });
         return true;
     };
-    const runner = createRunner({ engine, demo, teams, selectTab: () => {}, loadDemo, demoRefOf, segment: store(null) });
+    const runner = createRunner({ engine, page: fakeEngine(store('map')), driverFor: () => engine, demo, teams, selectTab: () => {}, loadDemo, demoRefOf, segment: store(null) });
     runner.start([clip(40, 50, { demo: { key: 'hub:9', gameId: 9, title: 'b', offset: 0 } })], 0);
     await new Promise((r) => setTimeout(r, 0));
     assert.deepEqual(loads, [{ gameId: 9 }]);
@@ -192,7 +225,7 @@ test('a demo the user picks while the run loads its own wins and ends the run', 
     // The run's load is slow; the user's pick lands first, and the run's
     // load then resolves false (superseded — load.js loadDemo).
     const loadDemo = () => new Promise((r) => { finish = r; });
-    const runner = createRunner({ engine, demo, teams, selectTab: () => {}, loadDemo, demoRefOf, segment: store(null) });
+    const runner = createRunner({ engine, page: fakeEngine(store('map')), driverFor: () => engine, demo, teams, selectTab: () => {}, loadDemo, demoRefOf, segment: store(null) });
     runner.start([clip(40, 50, { demo: { key: 'hub:9', gameId: 9, title: 'b', offset: 0 } })], 0);
     demo.set({ ref: { key: 'file:mine.mvd', gameId: null }, result: {} });
     assert.ok(playlist.get().run, 'still loading: the run waits for its own load');

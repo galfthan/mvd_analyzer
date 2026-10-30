@@ -13,6 +13,7 @@ import { crossedEnd } from '../lib/playback-bar.js';
 import { openInFinder } from './clip-presets.js';
 import { PlayerEngine } from './engine.js';
 import { createRunner } from './runner.js';
+import { createPageDriver } from './page-driver.js';
 import { demoRefOf } from './demo-ref.js';
 import { playlist, addClips } from './playlist-store.js';
 import { installHubLinkRouting } from './hub-links.js';
@@ -46,15 +47,27 @@ wanted.subscribe((on) => {
     if (!on) unloadTimer = setTimeout(() => { if (!wanted.get()) engine.teardown(); }, UNLOAD_AFTER_MS);
 });
 
-// A clip plays in the engine: on the Player tab (its view), with its
-// Player pane shown — the viewer may have closed or collapsed it, or
-// hidden the side column it is in.
+// A clip in the engine plays on the Player tab (its view), with its Player
+// pane shown — the viewer may have closed or collapsed it, or hidden the
+// side column it is in.
 /** @param {string} tab */
 function showPlayer(tab) {
     selectTab(tab);
     if (!showsPlayer(paneLayout.get())) showPane('player');
 }
-export const runner = createRunner({ engine, demo, teams, selectTab: showPlayer, loadDemo, demoRefOf, segment });
+// On the Map tab without a Player pane a clip plays there, on the map
+// (page-driver.js); anywhere else in the engine.
+const page = createPageDriver();
+const onMap = () => activeTab.get() === 'map' && !showsPlayer(paneLayout.get());
+const driverFor = () => (onMap() ? page : engine);
+export const runner = createRunner({ engine, page, driverFor, demo, teams, selectTab: showPlayer, loadDemo, demoRefOf, segment });
+// A run ends when what it plays in goes: the tab, or its Player pane,
+// changed under it.
+const keepDriver = () => {
+    if (playlist.get().run && runner.driver() !== driverFor()) runner.stop();
+};
+activeTab.subscribe(keepDriver);
+paneLayout.subscribe(keepDriver);
 
 export function currentRef() {
     return runner.currentRef();

@@ -221,6 +221,20 @@ export class PlayerEngine {
         return () => this.tickListeners.delete(fn);
     }
 
+    // Up, playing, run out — what the playlist runner steps on (the page
+    // driver, page-driver.js, answers the same).
+    ready() {
+        return !!this.fte;
+    }
+
+    isPlaying() {
+        return !!this.fte?.isPlaying();
+    }
+
+    hasEnded() {
+        return !!this.fte?.hasEnded();
+    }
+
     // A jump is in flight: the engine clock still shows the pre-jump time.
     seeking() {
         return this.pendingSeek != null || this.seekTarget != null;

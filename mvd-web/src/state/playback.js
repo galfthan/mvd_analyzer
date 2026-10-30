@@ -7,7 +7,10 @@
 // shows with its engine up, the engine is the clock instead and this loop
 // does not run (setPlaybackGate).
 //
-// Playing into the selected segment's end stops there (crossedEnd).
+// Playing into the selected segment's end stops there (crossedEnd); a
+// segment reaching past the match end stops at the match end. A clip's slow
+// motion (slowPlayback) plays at its speed instead of the bar's, which
+// stays what it was.
 // Forward past the end wraps to the start; reverse stops at 0. A tab without
 // the bar, the Player tab, and a new demo stop it. Stopping seeks the clock
 // to where it stopped (an untagged seek), which is what makes the views
@@ -38,6 +41,8 @@ export function setPlaybackGate(fn) {
 
 /** @type {number | null} */
 let raf = null;
+/** @type {number | null} */
+let slow = null;
 let last = 0;
 
 // setPlaybackSpeed changes the speed; playing, at once, paused, for the
@@ -45,6 +50,12 @@ let last = 0;
 /** @param {number} speed */
 export function setPlaybackSpeed(speed) {
     playback.set({ playing: playback.get().playing, speed });
+}
+
+// slowPlayback plays forward at `speed` (× 1) until called with null.
+/** @param {number | null} speed */
+export function slowPlayback(speed) {
+    slow = speed;
 }
 
 export function startPlayback() {
@@ -81,10 +92,11 @@ function step() {
     last = now;
     const duration = Number.isFinite(clock.duration) ? clock.duration : 600;
     const prev = clock.t;
-    let t = prev + elapsed * playback.get().speed;
+    const speed = playback.get().speed;
+    let t = prev + elapsed * (slow != null && speed > 0 ? slow : speed);
     const seg = segment.get();
-    if (seg && crossedEnd(seg, prev, t)) {
-        stopPlayback(seg.end);
+    if (seg && crossedEnd({ start: seg.start, end: Math.min(seg.end, duration) }, prev, t)) {
+        stopPlayback(Math.min(seg.end, duration));
         return;
     }
     if (t > duration) t = 0;

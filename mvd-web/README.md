@@ -1048,8 +1048,10 @@ Each view is its own saved pane layout (`mvd.playerPanes.v4`:
 Player view): rearranging edits the tab in use, the foot menu's *↺ Reset
 this tab's panes* puts it back to its default, and switching tabs returns
 to a view as it was left. Any pane can open in either tab (a Player pane
-on the Map tab loads the engine there). Playing a clip opens the Player
-tab, and its Player pane if the viewer closed or collapsed it.
+on the Map tab loads the engine there). A clip played on the Map tab
+without a Player pane plays there, on the map (see *Clips and the
+playlist*); anywhere else it opens the Player tab, and its Player pane if
+the viewer closed or collapsed it.
 
 `src/player/` (`PlayerTab.svelte` and its components, mounted by the
 shell) was the first tab ported to Svelte. It watches the loaded demo in the FTE
@@ -1071,9 +1073,10 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   Player switch keeps it). Without it the page's own playback drives the
   clock on these tabs as on any other (instant scrubbing, −1×); while it
   is wanted there, up or still loading, `setPlaybackGate` keeps that loop
-  off. Playing a clip opens the Player tab and shows its Player pane (un-
-  hiding the side column it is in); the runner gives up with a note if the
-  pane still does not show after ~30 two-frame waits.
+  off. Playing a clip outside the Map tab opens the Player tab and shows
+  its Player pane (un-hiding the side column it is in); the runner gives
+  up with a note if the pane still does not show after ~30 two-frame
+  waits.
 - **No second download.** The data layer keeps a copy of the analysed bytes
   as a Blob (`DemoHandle.demoBlob`; the analyze transfers the original
   buffer), handed to the engine as a `blob:` URL — so locally loaded files
@@ -1188,7 +1191,7 @@ Player pane avoids that.)
 - **Players** (`panes/LegendPane.svelte`): the Map tab's legend as a
   pane — one sortable table per team (canonical order and colour, the
   team's running frags in its title), each player's symbol, loc, health +
-  armor, weapons and a play link at the playhead, built by
+  armor and weapons at the playhead, built by
   `src/tabs/map/sidebar.js` over the map model's data (cells refresh at
   most every 150 ms). The watched player's row is lit; click a row to
   watch them (`src/player/follow.js`: the engine's POV with the engine
@@ -1651,6 +1654,15 @@ Player tab play waits for the engine to be up. A playlist clip
 that plays is the selection (the runner sets it, in match time, and
 clears it on stop unless the user picked another meanwhile), so the
 Timeline tab zooms to it too.
+
+A run plays in one of two drivers, picked when it starts: the engine, or
+— started on the Map tab with no Player pane shown — the page's own
+playback (`src/player/page-driver.js`), with the map following the clip's
+player (`mapFollow`) where the engine would take their POV, and a clip's
+slow motion as the playback's speed (`slowPlayback`). Playback stops
+itself at the clip's end (or the match end, for a clip padded past it),
+and that stop is what steps the run on. Switching tab, or opening a
+Player pane on the Map tab, ends a run whose driver that takes away.
 
 **Fullscreen** is one feature for every tab that offers it
 (`src/app/fullscreen.js`; the Map and Player tabs, naming their shared
