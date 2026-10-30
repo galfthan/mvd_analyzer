@@ -56,6 +56,13 @@ body {
     flex-direction: column;
 }
 
+/* The light player (play.html) is a plain page: it scrolls as a whole —
+ * the clip list runs below the game view. */
+body.light-player {
+    overflow: auto;
+    display: block;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
