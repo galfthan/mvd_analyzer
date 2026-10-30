@@ -9,15 +9,14 @@ package analyzer
 //	MVD_PERF=1 MVD_PERF_SERIAL=1 …   # registry.Parallel off
 //
 // It prints, per demo, the wall time, the allocation volume, the slowest
-// phases (Registry.PhaseTimings) and the tier-2 gob encode the API does
-// next. For CPU / memory profiles use the benchmark:
+// phases (Registry.PhaseTimings) and the tier-2 cache encode the API does
+// next (result.EncodeCache), plus the decode a warm tier-2 hit pays. For CPU / memory profiles use the benchmark:
 //
 //	go test ./mvd-analytics/analyzer -run '^$' -bench BenchmarkPipeline -benchtime 3x \
 //	    -cpuprofile cpu.out -memprofile mem.out
 
 import (
 	"bytes"
-	"encoding/gob"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -25,6 +24,8 @@ import (
 	"sort"
 	"testing"
 	"time"
+
+	"github.com/mvd-analyzer/mvd-analytics/result"
 )
 
 func perfDemos(tb testing.TB) []string {
@@ -72,17 +73,22 @@ func TestPipelinePerf(t *testing.T) {
 		total += el
 
 		gstart := time.Now()
-		var buf bytes.Buffer
-		if err := gob.NewEncoder(&buf).Encode(res); err != nil {
-			t.Fatalf("gob: %v", err)
+		enc, err := result.EncodeCache(res)
+		if err != nil {
+			t.Fatalf("encode cache: %v", err)
 		}
 		gel := time.Since(gstart)
+		dstart := time.Now()
+		if _, err := result.DecodeCache(enc); err != nil {
+			t.Fatalf("decode cache: %v", err)
+		}
+		del := time.Since(dstart)
 
 		phases := append([]PhaseTiming(nil), reg.PhaseTimings...)
 		sort.Slice(phases, func(i, j int) bool { return phases[i].Ms > phases[j].Ms })
-		line := fmt.Sprintf("%-16s %6.0f ms  alloc %5.0f MB  gob %4.0f ms %5.1f MB |", filepath.Base(f),
+		line := fmt.Sprintf("%-16s %6.0f ms  alloc %5.0f MB  tier2 enc %4.0f / dec %4.0f ms %5.1f MB |", filepath.Base(f),
 			float64(el.Microseconds())/1000, float64(ms1.TotalAlloc-ms0.TotalAlloc)/(1<<20),
-			float64(gel.Microseconds())/1000, float64(buf.Len())/(1<<20))
+			float64(gel.Microseconds())/1000, float64(del.Microseconds())/1000, float64(len(enc))/(1<<20))
 		for i, p := range phases {
 			if i == 8 {
 				break
