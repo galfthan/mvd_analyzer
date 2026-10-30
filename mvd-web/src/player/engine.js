@@ -81,9 +81,12 @@ export class PlayerEngine {
         // Whether the engine's console is open (toggleConsole, and ` / ~ /
         // Escape typed in the game view): its keys then stay the engine's.
         this.consoleOpen = false;
-        // FTE's team info table (hud_teaminfo, mvd-fte-player/config.cfg):
-        // kept across engines, set on each as it comes up.
+        // FTE's team info table (hud_teaminfo, mvd-fte-player/config.cfg)
+        // and sound on or off: kept across engines, set on each as it comes
+        // up (carrySettings) — each demo gets a fresh engine, which starts
+        // muted, so a run moving on to another demo's clip would mute again.
         this.teamInfo = false;
+        this.sound = false;
         /** @type {DemoHandle | null} */
         this.handle = null;
         /** @type {HTMLElement | null} */
@@ -191,7 +194,7 @@ export class PlayerEngine {
                 .then((/** @type {FteController} */ fte) => {
                     if (this.iframe !== iframe) return;
                     this.fte = fte;
-                    if (this.teamInfo) fte.command('hud_teaminfo_show 1');
+                    this.carrySettings(fte);
                     // Open where the cursor already is, paused — the same
                     // entry hub's ?from= gives.
                     if (this.clock.t > 0) this.jump(this.clock.t);
@@ -207,6 +210,14 @@ export class PlayerEngine {
         this.blobUrl = demoUrl;
         this.iframe = iframe;
         this.host.appendChild(iframe);
+    }
+
+    // carrySettings sets a fresh engine to the settings the user picked on
+    // the ones before it (team info, sound).
+    /** @param {FteController} fte */
+    carrySettings(fte) {
+        if (this.teamInfo) fte.command('hud_teaminfo_show 1');
+        if (this.sound) fte.unmute();
     }
 
     // The game view's input. A click plays / pauses (`screenToggle`, the
@@ -485,7 +496,9 @@ export class PlayerEngine {
     }
 
     toggleMute() {
-        this.fte?.toggleMute();
+        if (!this.fte) return;
+        this.fte.toggleMute();
+        this.sound = !this.fte.isMuted();
         this.publish();
     }
 

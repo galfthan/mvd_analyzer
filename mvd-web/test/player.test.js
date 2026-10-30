@@ -356,3 +356,52 @@ test('presets: a v3 layout becomes the Player view; corrupt storage falls back; 
     fresh.setPreset('player');
     assert.deepEqual(fresh.paneLayout.get().order, ['map', 'players', 'moments', 'team-weapons'], 'a fresh Player view, Moments on');
 });
+
+// Each demo gets a fresh engine (FteController), and each starts muted: the
+// sound the user turned on must come back on the next one, as team info does.
+test('engine keeps sound on across engines', async () => {
+    const { PlayerEngine } = await import('../src/player/engine.js');
+    const { createClock } = await import('../src/state/clock.js');
+    const { FteController } = await import('../../mvd-fte-player/src/fte-controller.js');
+    const fakeWin = () => {
+        const win = {
+            commands: [],
+            FTEC: { cbufadd: (/** @type {string} */ cmd) => win.commands.push(cmd), step: () => {} },
+            Module: {
+                getDemoTime: () => 0,
+                getClientState: () => ({ getPlayerView: () => ({ getTrackedPlayer: () => ({ userid: 1 }) }) }),
+            },
+        };
+        return win;
+    };
+    const fresh = () => {
+        let resumed = 0;
+        const fte = new FteController(fakeWin(), { resumeAudio: () => resumed++ });
+        fte.mute();   // as the loader hands it over
+        return { fte, resumed: () => resumed };
+    };
+    const engine = new PlayerEngine({ clock: createClock(), demo: store(null), activeTab: store('summary') });
+
+    const first = fresh();
+    engine.fte = first.fte;
+    engine.carrySettings(first.fte);
+    assert.ok(first.fte.isMuted(), 'starts muted');
+    engine.toggleMute();
+    assert.equal(engine.status.get().muted, false);
+    assert.equal(first.resumed(), 1, 'unmute resumes the audio');
+
+    engine.teardown();
+    const second = fresh();
+    engine.fte = second.fte;
+    engine.carrySettings(second.fte);
+    assert.ok(!second.fte.isMuted(), 'the next engine comes up with sound');
+    assert.equal(second.resumed(), 1);
+
+    engine.toggleMute();
+    engine.teardown();
+    const third = fresh();
+    engine.fte = third.fte;
+    engine.carrySettings(third.fte);
+    assert.ok(third.fte.isMuted(), 'muted again stays muted');
+    engine.teardown();
+});

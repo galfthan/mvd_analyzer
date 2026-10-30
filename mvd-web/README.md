@@ -1131,8 +1131,10 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   autotrack) and one button per player in canonical team order and
   colour; the followed player stays lit under autotrack too. At its
   right end: the keys menu button (see *Keys*), the sound toggle (the
-  player starts muted, as hub's does) and the hide / show toggle of the
-  side pane column.
+  player starts muted, as hub's does; sound turned on stays on for the
+  next demo's engine, so a playlist over several demos keeps it:
+  `engine.carrySettings`) and the hide / show toggle of the side pane
+  column.
 - **Fullscreen** (see *Fullscreen* under the playback bar): the whole
   player panel — both pane columns, the Player pane's picture included —
   fills the screen, each column scrolling on its own. The tab's controls share one compact
@@ -1471,7 +1473,8 @@ clock and stores; `light-demo.js` stands in for the data layer: a hub
 demo's bytes (`fetchGame` + `downloadDemo`) and a minimal handle whose
 result carries just the map (hub's game row) and the demo offset (from
 the clips). The page lists the clips (label, who, length, slow motion,
-demo), starts the run at once (muted, as the tab does), and has play /
+demo), starts the run at once (muted, as the tab does; sound once on
+stays on from one demo's clips to the next), and has play /
 pause, previous / next, sound, the keys menu and fullscreen (the game
 view and these controls; `f`); a click on a clip plays from it. The team
 info shows from the start. A list over several hub demos plays straight
