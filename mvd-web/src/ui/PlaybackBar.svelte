@@ -33,12 +33,14 @@
     import Minimize from '@lucide/svelte/icons/minimize';
     import { fullscreenTab, toggleFullscreen } from '../app/fullscreen.js';
     import {
-        clock, demo, activeTab, segment, playback, setPlaybackSpeed, togglePlayback, TABS_WITH_TIMELINE,
+        clock, demo, activeTab, isWatchTab, segment, playback, setPlaybackSpeed, togglePlayback, TABS_WITH_TIMELINE,
     } from '../state/index.js';
     import Plus from '@lucide/svelte/icons/plus';
     import X from '@lucide/svelte/icons/x';
     import { engine } from '../player/index.js';
     import { selectionPov, addSelectionClip } from '../player/selection-clip.js';
+    import { createPlayerKeys } from '../player/player-keys.js';
+    import { watchNext } from '../player/follow.js';
     import { formatDuration } from '../lib/result.js';
     import { matchDurationSec } from '../lib/timeline.js';
     import {
@@ -169,18 +171,24 @@
         shownSeg = segment.get();
     }
 
-    /** @param {KeyboardEvent} e */
-    function key(e) {
-        if (!shown || e.key !== ' ' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
-        if (/** @type {Element} */ (e.target).closest?.('input, textarea, select, button, a, [contenteditable]')) return;
-        e.preventDefault();
-        togglePlay();
-    }
+    // Hub's player keys (src/player/player-keys.js): Space the next player
+    // on the Map and Player tabs (elsewhere, with nobody to watch, Space
+    // plays / pauses), Ctrl on its own plays / pauses, arrows step.
+    const keys = createPlayerKeys({
+        enabled: () => shown,
+        toggle: togglePlay,
+        next: () => (isWatchTab(activeTab.get()) ? watchNext() : togglePlay()),
+        seek: (by) => clock.seek(Math.max(0, clock.t + by)),
+    });
 
     // A click or Space on the game view is this play / pause too.
     onMount(() => {
         engine.screenToggle = togglePlay;
-        return () => { engine.screenToggle = () => engine.togglePlay(); };
+        engine.screenPointer = keys.cancel;
+        return () => {
+            engine.screenToggle = () => engine.togglePlay();
+            engine.screenPointer = () => {};
+        };
     });
 
     onMount(() => {
@@ -205,7 +213,7 @@
     });
 </script>
 
-<svelte:window onkeydown={key} />
+<svelte:window onkeydown={keys.down} onkeyup={keys.up} onpointerdowncapture={keys.cancel} />
 
 <div id="unified-timeline" class="panel pb" style:display={shown ? null : 'none'}>
     <!-- svelte-ignore a11y_no_static_element_interactions: a pointer scrubber; play / pause and the speed are the controls -->

@@ -26,6 +26,7 @@
     import { teams } from '../state/teams.js';
     import { formatDuration } from '../lib/result.js';
     import { loadLightDemo } from './light-demo.js';
+    import { createPlayerKeys, nextName } from '../player/player-keys.js';
 
     /** @type {{ clips: import('../lib/playlist.js').Clip[], code: string }} */
     let { clips, code } = $props();
@@ -104,22 +105,25 @@
         if (index < 0) return playFrom(0);
         engine.togglePlay();
     }
-    // A click or Space on the game view, and Space anywhere on the page
-    // but a control (Space on a button presses it), play / pause.
+    // A click on the game view plays / pauses; the keys are hub's
+    // (src/player/player-keys.js), typed on the page or in the game view.
     engine.screenToggle = togglePlay;
-    /** @param {KeyboardEvent} e */
-    function key(e) {
-        if (e.key !== ' ' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
-        if (/** @type {Element} */ (e.target).closest?.('input, textarea, select, button, a')) return;
-        e.preventDefault();
-        togglePlay();
-    }
+    const keys = createPlayerKeys({
+        toggle: togglePlay,
+        next: () => {
+            const ids = (engine.fte?.getPlayers() || []).map((/** @type {{ userid: number }} */ p) => String(p.userid));
+            const id = nextName(ids, String(engine.status.get().track));
+            if (id) engine.track(Number(id));
+        },
+        seek: (by) => clock.seek(Math.max(0, clock.t + by)),
+    });
+    engine.screenPointer = keys.cancel;
 
     /** @param {import('../lib/playlist.js').Clip} c */
     const len = (c) => formatDuration(c.to - c.from);
 </script>
 
-<svelte:window onkeydown={key} />
+<svelte:window onkeydown={keys.down} onkeyup={keys.up} onpointerdowncapture={keys.cancel} />
 
 <div class="clips-page">
     <header class="clips-head">

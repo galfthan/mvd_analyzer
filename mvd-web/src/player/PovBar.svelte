@@ -7,7 +7,8 @@
     import VolumeX from '@lucide/svelte/icons/volume-x';
     import PanelRightOpen from '@lucide/svelte/icons/panel-right-open';
     import PanelRightClose from '@lucide/svelte/icons/panel-right-close';
-    import { demo, teams, teamIndexOf, colorOf } from '../state/index.js';
+    import { demo, teams, colorOf } from '../state/index.js';
+    import { watchOrder } from './follow.js';
     import { engine } from './index.js';
     import { paneLayout, updateLayout } from './layout.js';
 
@@ -16,10 +17,7 @@
     let players = $derived.by(() => {
         const ids = $demo?.result?.timelineAnalysis?.playerUserIDs || {};
         const t = $teams;
-        const idx = (/** @type {string} */ n) => teamIndexOf(t, n, t.perPlayer);
-        return Object.keys(ids)
-            .sort((a, b) => (idx(a) - idx(b)) || a.localeCompare(b))
-            .map((name) => ({ name, userid: ids[name], color: colorOf(t, name, t.perPlayer) }));
+        return watchOrder($demo, t).map((name) => ({ name, userid: ids[name], color: colorOf(t, name, t.perPlayer) }));
     });
 </script>
 

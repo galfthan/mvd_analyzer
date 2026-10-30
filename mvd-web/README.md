@@ -1420,10 +1420,8 @@ result carries just the map (hub's game row) and the demo offset (from
 the clips). The page lists the clips (label, who, length, slow motion,
 demo), starts the run at once (muted, as the tab does), and has play /
 pause, previous / next and sound; a click on a clip plays from it. A
-click on the game view or Space plays / pauses (on the full page too:
-`hookScreen` in `engine.js` catches them inside the engine's frame, which
-holds the focus there, and calls the host's play / pause —
-`engine.screenToggle`, set by the playback bar and by this page). Clips
+click on the game view plays / pauses, and the keys are hub's (below), on
+this page and the full one alike. Clips
 of a local file are listed as skipped. A click while a demo downloads
 wins over the run that asked first (and shares its download when it is
 the same demo). *Open in the full analyzer* (head
@@ -1679,7 +1677,7 @@ is `src/ui/PlaybackBar.svelte` (arithmetic in `src/lib/playback-bar.js`),
 laid out like a video player's: a thin scrubber across the top — the
 played part, a round playhead, minute marks, the selected segment, and
 the time under the pointer floating above it — and under it play / pause
-(or Space, when no field or button has the keys) and pills: the speed
+and pills: the speed
 (-1 / 0.2 / 0.5 / 1 / 2 / 5×; paused, it sets the speed the next play
 runs at), the time over the match length, the selection (× clears it)
 and *+ clip*. A press within
@@ -1697,7 +1695,21 @@ outside a playlist run — `crossedEnd`, on playback steps only, however
 long: a frame hitch or a hidden browser tab still stops), and play
 pressed forward at the end starts it over (anywhere else, or backwards,
 it plays on — `replayFrom`). `i` near the match end clamps the 10 s to
-the match; held keys (Space, `i` / `o` / `c`) do not repeat. On the
+the match; held keys (Space, `i` / `o` / `c`) do not repeat.
+
+**Keys** are hub's demo player's (`src/player/player-keys.js`, after hub's
+`config_v10.cfg`): Space tracks the next player (on the Map tab, follows
+the next one on the map — `watchNext`, in the POV bar's order; on a tab
+with nobody to watch, Space plays / pauses), Ctrl on its own plays /
+pauses (on release, with no other key or click meanwhile, so Ctrl+C does
+not), ← / → step a second, Shift ← / → ten. Tab (scoreboard) and ` / ~
+(console) are binds in the engine's `config.cfg`. A click on the game
+view plays / pauses. The engine's frame keeps the focus after a click in
+it, so `hookScreen` (`engine.js`) sends the keys typed there on to the
+page as if typed there — these, `i` / `o` / `c`, `f` — but for Tab and
+the console's (and everything while the console is open); the click is
+`engine.screenToggle`, the host's play / pause (the bar's; the light
+page's). Keys typed into a field are left alone. On the
 Player tab play waits for the engine to be up. A playlist clip
 that plays is the selection (the runner sets it, in match time, and
 clears it on stop unless the user picked another meanwhile), so the

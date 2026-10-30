@@ -3,8 +3,9 @@
 // `mapFollow` instead. A click on a player in a pane goes through watch().
 
 import { store } from '../state/store.js';
-import { demo } from '../state/index.js';
+import { demo, teams, teamIndexOf } from '../state/index.js';
 import { engine } from './index.js';
+import { nextName } from './player-keys.js';
 
 export const mapFollow = store(/** @type {string | null} */ (null));
 // A new demo follows nobody (its players are others, or the same names in
@@ -21,4 +22,26 @@ export function watch(name) {
 // map's follow target.
 export function watched() {
     return engine.drives() ? engine.povName() : mapFollow.get();
+}
+
+// watchOrder: the demo's players as the POV bar lists them — by the
+// canonical team order, then by name.
+/**
+ * @param {import('../data/wasm-source.js').DemoHandle | null} handle
+ * @param {import('../state/teams.js').TeamsState} t
+ * @returns {string[]}
+ */
+export function watchOrder(handle, t) {
+    const ids = handle?.result?.timelineAnalysis?.playerUserIDs || {};
+    const idx = (/** @type {string} */ n) => teamIndexOf(t, n, t.perPlayer);
+    return Object.keys(ids).sort((a, b) => (idx(a) - idx(b)) || a.localeCompare(b));
+}
+
+// watchNext: watch the player after the one watched now, in that order
+// (Space, src/player/player-keys.js).
+export function watchNext() {
+    const name = nextName(watchOrder(demo.get(), teams.get()), watched());
+    if (!name) return;
+    if (engine.drives()) engine.trackName(name);
+    else mapFollow.set(name);
 }

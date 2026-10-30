@@ -67,9 +67,12 @@ export class PlayerEngine {
         // it, not the rate, is what plays then.
         /** @type {number | null} */
         this.slow = null;
-        // Play / pause from a click or Space on the game view (hookScreen).
+        // Play / pause from a click on the game view, and a pointer press
+        // there (Ctrl+click is no Ctrl alone) — hookScreen.
         /** @type {() => void} */
         this.screenToggle = () => this.togglePlay();
+        /** @type {() => void} */
+        this.screenPointer = () => {};
         /** @type {DemoHandle | null} */
         this.handle = null;
         /** @type {HTMLElement | null} */
@@ -189,23 +192,40 @@ export class PlayerEngine {
         this.host.appendChild(iframe);
     }
 
-    // A click on the game view and Space inside it play / pause: the
-    // engine's frame takes the focus, so the page's own Space never sees
-    // the key there. FTE's config unbinds every key and button
+    // The game view's input. A click plays / pauses (`screenToggle`, the
+    // host's play / pause: the full page's playback bar, the light page's
+    // play button; the engine's own by default); a press is `screenPointer`. Keys typed with the game
+    // in focus — its frame keeps the focus after any click there — go to
+    // the page as if typed there (src/player/player-keys.js, the bar's i /
+    // o / c, f for fullscreen), but for the engine's own binds: Tab (the
+    // scoreboard) and ` / ~ (the console), and all of them while the
+    // console is open. FTE's config binds nothing else
     // (mvd-fte-player/config.cfg), so nothing of the engine's is lost.
-    // `screenToggle` is the host's play / pause — the full page's playback
-    // bar, the light page's play button; the engine's own by default.
     /** @param {Window} win */
     hookScreen(win) {
         win.addEventListener('click', (e) => {
             if (e.button === 0) this.screenToggle();
         }, true);
-        win.addEventListener('keydown', (e) => {
-            if (e.key !== ' ' || e.ctrlKey || e.metaKey || e.altKey) return;
+        let consoleOpen = false;
+        /** @param {KeyboardEvent} e */
+        const forward = (e) => {
+            if (e.key === '`' || e.key === '~') {
+                if (e.type === 'keydown' && !e.repeat) consoleOpen = !consoleOpen;
+                return;
+            }
+            if (consoleOpen || e.key === 'Tab') return;
             e.preventDefault();
             e.stopPropagation();
-            if (!e.repeat) this.screenToggle();
-        }, true);
+            document.dispatchEvent(new KeyboardEvent(e.type, {
+                key: e.key, code: e.code, repeat: e.repeat, bubbles: true, cancelable: true,
+                shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, altKey: e.altKey, metaKey: e.metaKey,
+            }));
+        };
+        win.addEventListener('keydown', forward, true);
+        win.addEventListener('keyup', forward, true);
+        // Not forwarded as an event: a page pointerdown is the layer's
+        // cue to let a drag pass through it (PlayerLayer.svelte).
+        win.addEventListener('pointerdown', () => this.screenPointer(), true);
     }
 
     // teardown drops the engine; removing the iframe frees it.
