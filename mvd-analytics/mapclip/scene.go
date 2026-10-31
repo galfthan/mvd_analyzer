@@ -109,24 +109,32 @@ func HeightAboveFloorBoxScene(world *Hull, movers []PosedHull, x, y, z float32) 
 			cands = append(cands, int32(i))
 		}
 	}
-	best := float32(0)
-	any := false
-	for _, dx := range footprintOffsets {
-		for _, dy := range footprintOffsets {
-			cx, cy := x+dx, y+dy
-			if world != nil {
-				if floorZ, ok := world.FloorBelow(cx, cy, z); ok && (!any || floorZ > best) {
-					best, any = floorZ, true
+	var best float32
+	var any bool
+	if world != nil {
+		cs := newFootprintSet(x, y, 0, 0)
+		best, any = world.floorBelowSet(&cs, z, nil)
+	}
+	for _, i := range cands {
+		m := &movers[i]
+		// The footprint columns this pose can reach; a column outside
+		// them contributes nothing, as in the per-column scan.
+		var pass [3][3]bool
+		reach := false
+		for xi, dx := range footprintOffsets {
+			for yj, dy := range footprintOffsets {
+				if m.columnMayHit(x+dx, y+dy, z) {
+					pass[xi][yj], reach = true, true
 				}
 			}
-			for _, i := range cands {
-				m := &movers[i]
-				if !m.columnMayHit(cx, cy, z) {
-					continue
-				}
-				if floorZ, ok := m.H.FloorBelowAt(cx, cy, z, m.Origin); ok && (!any || floorZ > best) {
-					best, any = floorZ, true
-				}
+		}
+		if !reach {
+			continue
+		}
+		cs := newFootprintSet(x, y, m.Origin[0], m.Origin[1])
+		if floorZ, ok := m.H.floorBelowSet(&cs, z-m.Origin[2], &pass); ok {
+			if floorZ += m.Origin[2]; !any || floorZ > best {
+				best, any = floorZ, true
 			}
 		}
 	}

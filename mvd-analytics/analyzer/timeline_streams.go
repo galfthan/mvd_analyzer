@@ -1176,8 +1176,11 @@ func (a *TimelineAnalyzer) resolveFloorHeightsSlot(b *streamBuilder, posable []p
 		h, solidOk := mapclip.HeightAboveFloorBoxScene(a.clipHull, scratch, x, y, z)
 		// A liquid surface below the origin competes as a support:
 		// the higher of solid floor and surface wins. Heights are
-		// feet-relative, so smaller h = higher support.
-		if a.visBSP != nil {
+		// feet-relative, so smaller h = higher support. A surface
+		// reads hSurf >= 0 (clamped below), so it can only win over a
+		// solid h > 0: at h <= 0 (standing on the floor) the probe is
+		// skipped.
+		if a.visBSP != nil && (!solidOk || h > 0) {
 			if surfZ, _, ok := a.visBSP.LiquidSurfaceBelow(x, y, z); ok {
 				hSurf := (z - mapclip.PlayerFeetOffset) - surfZ
 				if hSurf < 0 {

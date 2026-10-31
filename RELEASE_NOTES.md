@@ -5,12 +5,19 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (perf-wasm-data) — position tracks in binary
+## unreleased (perf-wasm-data) — position tracks in binary, faster floor traces
 
-No schema change. The browser no longer gets the players' position
-tracks as JSON: the WASM build hands them to the page as one binary
-"position pack" (`result.EncodePositionPack`), and the Result JSON
-leaves them out. In WASM a 4on4's analysis drops from ~20 s to ~13 s —
+No schema change, and the floor heights are bit-identical. The floor
+pass traces the player footprint's nine columns as sets that share one
+descent wherever that provably gives each column its own result
+(`mapclip/footprint.go`) — ~2.6 descents per sample instead of nine —
+and skips the liquid-surface probe where it cannot win. The pass is
+2–2.6× faster on most maps; a 4on4's timeline step in WASM drops from
+~6.5 s to ~4 s.
+
+The browser no longer gets the players' position tracks as JSON: the
+WASM build hands them to the page as one binary "position pack"
+(`result.EncodePositionPack`), and the Result JSON leaves them out. In WASM a 4on4's analysis drops from ~20 s to ~13 s —
 the JSON marshal went from ~7 s to ~0.3 s and the page's parse from
 ~0.6 s to under 0.1 s. In the page the columns are typed arrays with the
 analyzer's unrounded float32 values.
