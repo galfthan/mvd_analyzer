@@ -23,8 +23,8 @@ func trackedStreams(_ context.Context, _ []byte, filename string) (*result.Resul
 }
 
 // TestPositionPack_BuiltOnceThenRead: the first request gzips the pack and
-// keeps it in tier 3; the next one serves that file rather than
-// rebuilding — proven by a sentinel only the file could hold.
+// keeps it in tier 3; a later process serves that file without parsing
+// the demo (its parser fails here) and without a Result in memory.
 func TestPositionPack_BuiltOnceThenRead(t *testing.T) {
 	hub := newFakeHub()
 	defer hub.Close()
@@ -50,17 +50,60 @@ func TestPositionPack_BuiltOnceThenRead(t *testing.T) {
 	if !bytes.Equal(raw, result.EncodePositionPack(res.Streams)) {
 		t.Fatal("served pack is not the Result's")
 	}
-	path := positionPackPath(root, testSHA)
-	onDisk, err := os.ReadFile(path)
+	onDisk, err := os.ReadFile(positionPackPath(root, testSHA))
 	if err != nil || !bytes.Equal(onDisk, data) {
 		t.Fatalf("tier-3 pack not written as served (%v)", err)
 	}
 
-	if err := os.WriteFile(path, []byte("sentinel"), 0o644); err != nil {
+	// Without tiers 1 and 2, a GetResult would have to download and parse.
+	_ = os.Remove(resultPath(root, result.CurrentSchemaVersion, testSHA))
+	_ = os.Remove(mvdPath(root, testSHA))
+	fresh := New(root, hub.hubClient())
+	fresh.Parse = func(context.Context, []byte, string) (*result.Result, error) {
+		t.Fatal("a pack on disk must not need the Result")
+		return nil, nil
+	}
+	again, meta, err := fresh.PositionPack(ctx, id)
+	if err != nil || !bytes.Equal(again, data) || !meta.FromCache || meta.SHA256 != testSHA {
+		t.Fatalf("fresh process: %v, %d bytes, %+v", err, len(again), meta)
+	}
+}
+
+// TestPositionPack_CorruptFileRebuilt: a tier-3 pack that fails its check
+// (a valid gzip of the wrong bytes here) is discarded and rebuilt, not
+// served forever.
+func TestPositionPack_CorruptFileRebuilt(t *testing.T) {
+	hub := newFakeHub()
+	defer hub.Close()
+	hub.addGame(42, testSHA, testMVD)
+	c, root := newTestCache(t, hub.hubClient(), &stubParser{})
+	c.Parse = trackedStreams
+	ctx := context.Background()
+	id := DemoID{Kind: "gameId", GameID: 42}
+	good, _, err := c.PositionPack(ctx, id)
+	if err != nil {
 		t.Fatal(err)
 	}
-	again, _, err := c.PositionPack(ctx, id)
-	if err != nil || string(again) != "sentinel" {
-		t.Fatalf("second request rebuilt instead of reading tier 3: %q, %v", again, err)
+
+	for name, bad := range map[string][]byte{
+		"not gzip":  []byte("sentinel"),
+		"truncated": good[:len(good)/2],
+		"not a pack": func() []byte {
+			var b bytes.Buffer
+			zw := gzip.NewWriter(&b)
+			_, _ = zw.Write([]byte("garbage bytes"))
+			_ = zw.Close()
+			return b.Bytes()
+		}(),
+	} {
+		if err := os.WriteFile(positionPackPath(root, testSHA), bad, 0o644); err != nil {
+			t.Fatal(err)
+		}
+		fresh := New(root, hub.hubClient())
+		fresh.Parse = trackedStreams
+		got, _, err := fresh.PositionPack(ctx, id)
+		if err != nil || !bytes.Equal(got, good) {
+			t.Errorf("%s: served %d bytes (%v), want the rebuilt pack", name, len(got), err)
+		}
 	}
 }

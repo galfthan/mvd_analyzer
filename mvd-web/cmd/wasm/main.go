@@ -117,11 +117,6 @@ func withPlayerStatsOverlay(res *analyzer.Result) *analyzer.Result {
 	return &out
 }
 
-// getAnalysisTimings returns the per-phase pipeline timings (init, event
-// pass, each analyzer Finalize, each post-processor) plus the JSON
-// marshal cost from the most recent analyzeMVD call, as a JSON string.
-// Kept separate from analyzeMVD's return value so the frontend's
-// Result-parsing path is unaffected.
 // takePositionPack returns the most recent analyze's position pack as a
 // Uint8Array (null once taken, or before any analyze) and releases Go's
 // copy: the page keeps the only one, viewing its columns in place.
@@ -135,6 +130,11 @@ func takePositionPack(this js.Value, args []js.Value) interface{} {
 	return arr
 }
 
+// getAnalysisTimings returns the per-phase pipeline timings (init, event
+// pass, each analyzer Finalize, each post-processor) plus the cost of the
+// JSON marshal and position pack from the most recent analyzeMVD call, as
+// a JSON string. Kept separate from analyzeMVD's return value so the frontend's
+// Result-parsing path is unaffected.
 func getAnalysisTimings(this js.Value, args []js.Value) interface{} {
 	if lastTimingsJSON == "" {
 		return "{}"

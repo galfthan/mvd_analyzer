@@ -186,6 +186,9 @@ type Cache struct {
 	// packLocks serializes building a demo's position pack (PositionPack)
 	// per SHA, so concurrent first requests compress it once.
 	packLocks KeyedMutex
+	// packVerified holds the SHAs whose tier-3 pack this process has
+	// checked in full (readPositionPack) or written itself.
+	packVerified sync.Map
 }
 
 // New constructs a Cache rooted at the given directory.

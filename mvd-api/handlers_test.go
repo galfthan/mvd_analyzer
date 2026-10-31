@@ -350,8 +350,8 @@ func TestPositions_PackGzipAndRevalidation(t *testing.T) {
 		t.Fatalf("gzip client: pack differs (%d vs %d bytes)", len(got), len(want))
 	}
 	etag := resp.Header.Get("ETag")
-	if !strings.HasSuffix(etag, fmt.Sprintf("-p%d\"", result.PositionPackVersion)) {
-		t.Fatalf("ETag %q lacks the pack version", etag)
+	if !strings.HasSuffix(etag, fmt.Sprintf("-p%d-gz\"", result.PositionPackVersion)) {
+		t.Fatalf("gzip ETag %q lacks the pack version and encoding", etag)
 	}
 
 	req, _ = http.NewRequest("GET", url, nil)
@@ -364,6 +364,9 @@ func TestPositions_PackGzipAndRevalidation(t *testing.T) {
 	resp.Body.Close()
 	if resp.StatusCode != 200 || resp.Header.Get("Content-Encoding") != "" || !bytes.Equal(got, want) {
 		t.Fatalf("identity client: %d %v, %d bytes", resp.StatusCode, resp.Header, len(got))
+	}
+	if resp.Header.Get("ETag") == etag {
+		t.Fatal("the identity and gzip bodies share an ETag")
 	}
 
 	req, _ = http.NewRequest("GET", url, nil)
@@ -379,6 +382,30 @@ func TestPositions_PackGzipAndRevalidation(t *testing.T) {
 
 	if _, status := getRaw(t, srv.URL+"/v1/demos/gameId:7/streams/positions"); status != 404 {
 		t.Fatalf("unknown demo: status %d, want 404", status)
+	}
+}
+
+func TestAcceptsGzip(t *testing.T) {
+	for h, want := range map[string]bool{
+		"":                      false,
+		"gzip":                  true,
+		"gzip, deflate, br":     true,
+		"br, gzip;q=0.5":        true,
+		"GZIP;Q=0":              false,
+		"gzip; q=0":             false,
+		"gzip;level=1;q=0":      false,
+		"identity, gzip;q=0":    false,
+		"x-gzip":                false,
+		"*":                     true,
+		"*;q=0":                 false,
+		"gzip;q=0, *":           false,
+		"identity;q=1, *;q=0.1": true,
+	} {
+		r := httptest.NewRequest("GET", "/", nil)
+		r.Header.Set("Accept-Encoding", h)
+		if got := acceptsGzip(r); got != want {
+			t.Errorf("Accept-Encoding %q: acceptsGzip = %v, want %v", h, got, want)
+		}
 	}
 }
 

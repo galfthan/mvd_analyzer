@@ -22,7 +22,8 @@ const staleTempAge = time.Hour
 var versionDirRe = regexp.MustCompile(`^v\d+(f\d+)?$`)
 
 // cacheFile is one GC eviction unit: a single tier-1 MVD, tier-2 gob, or
-// tier-3 artifact gob, with the mtime the sweep orders by.
+// tier-3 file (artifact gob or position pack), with the mtime the sweep
+// orders by.
 type cacheFile struct {
 	path  string
 	size  int64
@@ -171,7 +172,8 @@ func cleanTemps(temps []cacheFile, logger *slog.Logger) {
 // from the cached bytes (no re-download); dropping a tier-1 MVD still
 // serves everything from its gob (since phase 12 the tier-2 Result is
 // always-full, so no endpoint needs the raw bytes back); dropping a tier-3
-// artifact recomputes it on the next /los. The gameId index is exempt
+// artifact recomputes it on the next /los, a position pack on the next
+// /streams/positions. The gameId index is exempt
 // entirely (tiny; losing it forces a hub re-resolve).
 //
 // Safe to run concurrently with request serving. On Linux, unlinking a file

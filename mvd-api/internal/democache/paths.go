@@ -28,7 +28,8 @@ func mvdRoot(root string) string { return filepath.Join(root, "mvd") }
 // schema/format generation ever written under this cache.
 func resultsRoot(root string) string { return filepath.Join(root, "results") }
 
-// artifactsRoot is the tier-3 subtree (lazy artifact side-gobs).
+// artifactsRoot is the tier-3 subtree (lazy artifact side-gobs and the
+// gzipped position packs).
 func artifactsRoot(root string) string { return filepath.Join(root, "artifacts") }
 
 // indexRoot is the small gameId → sha map subtree. It is exempt from GC

@@ -74,6 +74,16 @@ test('the position tracks the worker sends beside the JSON land on its players',
     assert.equal(got[2].pos, undefined);
 });
 
+test('a pack the page cannot read fails the load and keeps the previous demo', async () => {
+    const { w, src } = await readySource();
+    const { handle } = await analyze(w, src, {});
+    const newer = emptyPack();
+    new DataView(newer).setUint32(4, 2, true);
+    await assert.rejects(analyze(w, src, {}, 'b.mvd', newer), /position pack: unsupported/);
+    assert.equal(src.current, handle);
+    assert.equal(handle.current, true);
+});
+
 test('a failed load rejects and leaves the previous demo queryable', async () => {
     const { w, src } = await readySource();
     const { handle } = await analyze(w, src, {});

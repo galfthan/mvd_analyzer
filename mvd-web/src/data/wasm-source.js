@@ -150,9 +150,20 @@ export class WasmSource {
         // holds this demo until that one posts, and nobody shows it.
         live();
         const tParse = performance.now();
-        const result = JSON.parse(reply.json);
+        let result;
+        try {
+            result = JSON.parse(reply.json);
+        } catch (err) {
+            fail(err);
+        }
         if (result.error) fail(new Error(result.error));
-        attachPositions(result, reply.pos);
+        // A pack this page can't read (a stale cached worker or wasm from
+        // another deploy) fails the load like an analyze error would.
+        try {
+            attachPositions(result, reply.pos);
+        } catch (err) {
+            fail(err);
+        }
         handle.result = result;
         handle.timings = { net, worker: reply.timings || null, parseMs: performance.now() - tParse };
         return handle;

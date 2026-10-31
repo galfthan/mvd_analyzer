@@ -1065,7 +1065,9 @@ func (s *server) handleNails(w http.ResponseWriter, r *http.Request) {
 // as they are; anyone else gets them inflated on the way out.
 //
 // The ETag adds the pack version to the usual sha + schema one, so a layout
-// change can't revalidate a cached older pack.
+// change can't revalidate a cached older pack, and the gzip body's carries
+// a "-gz" tail: a strong ETag names one representation, and the two
+// encodings are two.
 func (s *server) handlePositions(w http.ResponseWriter, r *http.Request) {
 	id, err := democache.ParseDemoID(r.PathValue("id"))
 	if err != nil {
@@ -1080,47 +1082,62 @@ func (s *server) handlePositions(w http.ResponseWriter, r *http.Request) {
 		s.mapStoreError(w, r, err)
 		return
 	}
+	gz := acceptsGzip(r)
 	setCacheHeaders(w, meta)
 	etag := fmt.Sprintf(`"%s-v%d-p%d"`, meta.SHA256, meta.SchemaVersion, result.PositionPackVersion)
+	if gz {
+		etag = etag[:len(etag)-1] + `-gz"`
+	}
 	w.Header().Set("ETag", etag)
 	w.Header().Set("Vary", "Accept-Encoding")
 	if match := r.Header.Get("If-None-Match"); match != "" && strings.Contains(match, etag) {
 		w.WriteHeader(http.StatusNotModified)
 		return
 	}
-	w.Header().Set("Content-Type", result.PositionPackContentType)
-	if acceptsGzip(r) {
+	body := data
+	if gz {
 		w.Header().Set("Content-Encoding", "gzip")
-		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(data)
-		return
+	} else {
+		// Inflated whole before the status goes out, so a bad stream is a
+		// 500 rather than a 200 cut short.
+		zr, err := gzip.NewReader(bytes.NewReader(data))
+		if err == nil {
+			body, err = io.ReadAll(zr)
+		}
+		if err != nil {
+			s.writeInternal(w, r, fmt.Errorf("position pack: %w", err))
+			return
+		}
 	}
-	zr, err := gzip.NewReader(bytes.NewReader(data))
-	if err != nil {
-		s.writeInternal(w, r, fmt.Errorf("position pack: %w", err))
-		return
-	}
+	w.Header().Set("Content-Type", result.PositionPackContentType)
+	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
 	w.WriteHeader(http.StatusOK)
-	_, _ = io.Copy(w, zr)
+	_, _ = w.Write(body)
 }
 
-// acceptsGzip reports whether the request's Accept-Encoding admits gzip
-// (any listed "gzip" not weighted q=0).
+// acceptsGzip reports whether the request's Accept-Encoding admits gzip:
+// a "gzip" entry, or else a "*" one, whose weight is not q=0 (RFC 9110
+// §12.5.3; names and parameters are case-insensitive).
 func acceptsGzip(r *http.Request) bool {
-	for _, part := range strings.Split(r.Header.Get("Accept-Encoding"), ",") {
-		coding, params, _ := strings.Cut(strings.TrimSpace(part), ";")
-		if !strings.EqualFold(strings.TrimSpace(coding), "gzip") {
-			continue
-		}
-		if q, ok := strings.CutPrefix(strings.TrimSpace(params), "q="); ok {
-			if v, err := strconv.ParseFloat(q, 64); err == nil && v == 0 {
-				return false
+	star := false
+	for _, part := range strings.Split(strings.ToLower(r.Header.Get("Accept-Encoding")), ",") {
+		params := strings.Split(part, ";")
+		accepted := true
+		for _, p := range params[1:] {
+			if q, ok := strings.CutPrefix(strings.TrimSpace(p), "q="); ok {
+				if v, err := strconv.ParseFloat(q, 64); err == nil && v == 0 {
+					accepted = false
+				}
 			}
 		}
-		return true
+		switch strings.TrimSpace(params[0]) {
+		case "gzip":
+			return accepted
+		case "*":
+			star = accepted
+		}
 	}
-	return false
+	return star
 }
 
 // teNames maps the point-effect TE codes (result.PointEffectStreams `ty`,

@@ -1298,7 +1298,7 @@ paths:
         `mvd-analytics/result/postrack_wire.go`; mvd-web's
         `src/lib/postrack.js` decodes it. Sent gzip-encoded to a client
         that accepts gzip; the ETag carries the pack layout version
-        (`"<sha>-v<schema>-p<pack>"`).
+        (`"<sha>-v<schema>-p<pack>"`, with a `-gz` tail on the gzip body).
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Label"
