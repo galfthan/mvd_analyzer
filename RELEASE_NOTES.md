@@ -26,6 +26,13 @@ mvd-api serves the same pack at `GET /v1/demos/{id}/streams/positions`
 (gzip-encoded, ~9 MB on a 4on4): built on first request and kept gzipped
 in tier 3, so later requests send the file as it is.
 
+The column-major bucket view (`view.BucketsColumnar` — the WASM build's
+deferred 50 ms buckets, and the API's `layout=column`) resolves each
+column's field and stream once rather than per bucket, and evaluates a
+player's liveness once per bucket instead of twice: 2.6× faster natively
+(a 4on4 0.36 → 0.14 s), with byte-identical output. The Timeline and
+Map tabs' wait after the result drops from ~3.8 s to ~2.6 s in WASM.
+
 ## unreleased (perf-analysis) — a faster full analysis
 
 No schema change; every Result is byte-identical. mvd-api's cold parse

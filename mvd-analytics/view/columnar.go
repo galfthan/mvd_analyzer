@@ -260,10 +260,11 @@ func BucketsColumnar(r *result.Result, opts BucketsOptions) (*ColumnarBuckets, e
 // row builder, which omits a player whose reducePlayer yields nothing,
 // so column and row carry the same player set for any field selection.
 func buildColumnarPlayer(p *result.PlayerStream, fields []string, reds []Reducer, redNames []string, g bucketGrid) *ColumnarPlayer {
+	active := make([]bool, g.count)
 	first, last := -1, -1
-	for i := 0; i < g.count; i++ {
+	for i := range active {
 		bStart, bEnd := g.bounds(i)
-		if playerActiveInWindow(p, bStart, bEnd) {
+		if active[i] = playerActiveInWindow(p, bStart, bEnd); active[i] {
 			if first < 0 {
 				first = i
 			}
@@ -274,12 +275,7 @@ func buildColumnarPlayer(p *result.PlayerStream, fields []string, reds []Reducer
 		return nil
 	}
 	n := last - first + 1
-	cp := &ColumnarPlayer{First: first, N: n, Cols: make(map[string]any)}
-	cp.Alive = make([]bool, n)
-	for j := 0; j < n; j++ {
-		bStart, bEnd := g.bounds(first + j)
-		cp.Alive[j] = playerActiveInWindow(p, bStart, bEnd)
-	}
+	cp := &ColumnarPlayer{First: first, N: n, Cols: make(map[string]any), Alive: active[first : last+1 : last+1]}
 
 	for fi, f := range fields {
 		if f == FieldPosition {
@@ -322,6 +318,7 @@ func buildColumn(p *result.PlayerStream, field, redName string, red Reducer, g b
 		return nil, 0, false
 	}
 	n := cp.N
+	at := newColumnReducer(p, field, redName, red, g)
 	firstNonNil := -1
 	mark := func(i int) {
 		if firstNonNil < 0 {
@@ -332,7 +329,7 @@ func buildColumn(p *result.PlayerStream, field, redName string, red Reducer, g b
 	case "i16":
 		s := make([]int16, n)
 		for j := 0; j < n; j++ {
-			v := reduceFieldValue(p, field, redName, red, g, cp.First+j)
+			v := at.reduce(cp.First + j)
 			if v == nil {
 				continue
 			}
@@ -345,7 +342,7 @@ func buildColumn(p *result.PlayerStream, field, redName string, red Reducer, g b
 	case "i32":
 		s := make([]int32, n)
 		for j := 0; j < n; j++ {
-			v := reduceFieldValue(p, field, redName, red, g, cp.First+j)
+			v := at.reduce(cp.First + j)
 			if v == nil {
 				continue
 			}
@@ -358,7 +355,7 @@ func buildColumn(p *result.PlayerStream, field, redName string, red Reducer, g b
 	case "f32":
 		s := make(result.Coords, n)
 		for j := 0; j < n; j++ {
-			v := reduceFieldValue(p, field, redName, red, g, cp.First+j)
+			v := at.reduce(cp.First + j)
 			if v == nil {
 				continue
 			}
@@ -371,7 +368,7 @@ func buildColumn(p *result.PlayerStream, field, redName string, red Reducer, g b
 	case "f64":
 		s := make([]float64, n)
 		for j := 0; j < n; j++ {
-			v := reduceFieldValue(p, field, redName, red, g, cp.First+j)
+			v := at.reduce(cp.First + j)
 			if v == nil {
 				continue
 			}
@@ -384,7 +381,7 @@ func buildColumn(p *result.PlayerStream, field, redName string, red Reducer, g b
 	case "str":
 		s := make([]string, n)
 		for j := 0; j < n; j++ {
-			v := reduceFieldValue(p, field, redName, red, g, cp.First+j)
+			v := at.reduce(cp.First + j)
 			if v == nil {
 				continue
 			}
@@ -397,7 +394,7 @@ func buildColumn(p *result.PlayerStream, field, redName string, red Reducer, g b
 	case "bool":
 		s := make([]bool, n)
 		for j := 0; j < n; j++ {
-			v := reduceFieldValue(p, field, redName, red, g, cp.First+j)
+			v := at.reduce(cp.First + j)
 			if v == nil {
 				continue
 			}
@@ -424,9 +421,10 @@ func buildColumn(p *result.PlayerStream, field, redName string, red Reducer, g b
 // (matching the row builder, which omits a nil field). All columns
 // share the single validFrom of the first non-nil bucket.
 func buildMultiCols(p *result.PlayerStream, field, redName string, red Reducer, g bucketGrid, cp *ColumnarPlayer, keys []string, cols []any, put func(v any, j int)) {
+	at := newColumnReducer(p, field, redName, red, g)
 	firstNonNil := -1
 	for j := 0; j < cp.N; j++ {
-		v := reduceFieldValue(p, field, redName, red, g, cp.First+j)
+		v := at.reduce(cp.First + j)
 		if v == nil {
 			continue
 		}
@@ -499,15 +497,32 @@ func buildVelocityCols(p *result.PlayerStream, redName string, red Reducer, g bu
 		})
 }
 
-// reduceFieldValue computes the reduced value for one (field, bucket),
-// mirroring reducePlayer's per-field branch exactly (fast path with
-// fallback to collectSamples + Reducer.Apply).
-func reduceFieldValue(p *result.PlayerStream, field, redName string, red Reducer, g bucketGrid, i int) any {
-	bStart, bEnd := g.bounds(i)
-	if v, ok := fastReduce(p, field, redName, bStart, bEnd); ok {
-		return v
+// columnReducer computes one field's reduced value per bucket, mirroring
+// reducePlayer's per-field branch exactly (fast path with fallback to
+// collectSamples + Reducer.Apply). The fast path is resolved once for the
+// column rather than per bucket.
+type columnReducer struct {
+	p      *result.PlayerStream
+	field  string
+	red    Reducer
+	g      bucketGrid
+	fast   fastField
+	isFast bool
+}
+
+func newColumnReducer(p *result.PlayerStream, field, redName string, red Reducer, g bucketGrid) *columnReducer {
+	c := &columnReducer{p: p, field: field, red: red, g: g}
+	c.fast, c.isFast = resolveFast(p, field, redName)
+	return c
+}
+
+// reduce is the value at absolute bucket i.
+func (c *columnReducer) reduce(i int) any {
+	bStart, bEnd := c.g.bounds(i)
+	if c.isFast {
+		return c.fast.reduce(bStart, bEnd)
 	}
-	return red.Apply(collectSamples(p, field, bStart, bEnd))
+	return c.red.Apply(collectSamples(c.p, c.field, bStart, bEnd))
 }
 
 // columnElemType resolves the storage type of a (field, reducer) pair.
@@ -550,15 +565,32 @@ func columnElemType(field, redName string) string {
 // valAt returns the boxed value of a column at absolute bucket i, or
 // nil when the field is absent (no column, or before its validFrom).
 func (cp *ColumnarPlayer) valAt(field string, i int) any {
-	col, ok := cp.Cols[field]
-	if !ok {
+	return cp.column(field).at(i)
+}
+
+// playerColumn is one of a player's columns with its map lookups done, for
+// callers that read the same field at every bucket.
+type playerColumn struct {
+	col       any // nil when the player has no such column
+	validFrom int // absolute index of the first valid value
+	first     int // the player's First
+}
+
+func (cp *ColumnarPlayer) column(field string) playerColumn {
+	c := playerColumn{col: cp.Cols[field], validFrom: cp.First, first: cp.First}
+	if vf, ok := cp.ValidFrom[field]; ok {
+		c.validFrom = vf
+	}
+	return c
+}
+
+// at is valAt for this column.
+func (c playerColumn) at(i int) any {
+	if c.col == nil || i < c.validFrom {
 		return nil
 	}
-	if vf, ok := cp.ValidFrom[field]; ok && i < vf {
-		return nil
-	}
-	j := i - cp.First
-	switch s := col.(type) {
+	j := i - c.first
+	switch s := c.col.(type) {
 	case []int16:
 		return s[j]
 	case []int32:
@@ -618,14 +650,17 @@ func aggregateTeamsColumnar(cps map[string]*ColumnarPlayer, streams []result.Pla
 			continue
 		}
 		ct := teamOf(p.Team)
+		rl, lg, gl := cp.column(FieldRL), cp.column(FieldLG), cp.column(FieldGL)
+		quad, pent, ring := cp.column(FieldQuad), cp.column(FieldPent), cp.column(FieldRing)
+		health, armor, armorType := cp.column(FieldHealth), cp.column(FieldArmor), cp.column(FieldArmorType)
 		for j := 0; j < cp.N; j++ {
 			if !cp.Alive[j] {
 				continue
 			}
 			i := cp.First + j
-			hasRL := asBool(cp.valAt(FieldRL, i))
-			hasLG := asBool(cp.valAt(FieldLG, i))
-			hasGL := asBool(cp.valAt(FieldGL, i))
+			hasRL := asBool(rl.at(i))
+			hasLG := asBool(lg.at(i))
+			hasGL := asBool(gl.at(i))
 			switch {
 			case hasRL && hasLG:
 				bump(ct, "rllg", i)
@@ -640,25 +675,25 @@ func aggregateTeamsColumnar(cps map[string]*ColumnarPlayer, streams []result.Pla
 			if hasGL {
 				bump(ct, "gl", i)
 			}
-			if asBool(cp.valAt(FieldQuad, i)) {
+			if asBool(quad.at(i)) {
 				bump(ct, "q", i)
 				bump(ct, "pw", i)
 			}
-			if asBool(cp.valAt(FieldPent, i)) {
+			if asBool(pent.at(i)) {
 				bump(ct, "pe", i)
 				bump(ct, "pw", i)
 			}
-			if asBool(cp.valAt(FieldRing, i)) {
+			if asBool(ring.at(i)) {
 				bump(ct, "r", i)
 				bump(ct, "pw", i)
 			}
-			if h, ok := numericFromAny(cp.valAt(FieldHealth, i)); ok {
+			if h, ok := numericFromAny(health.at(i)); ok {
 				add(ct, "th", i, int(h))
 			}
-			if a, ok := numericFromAny(cp.valAt(FieldArmor, i)); ok {
+			if a, ok := numericFromAny(armor.at(i)); ok {
 				add(ct, "ta", i, int(a))
 			}
-			if at, ok := cp.valAt(FieldArmorType, i).(string); ok && at != "" {
+			if at, ok := armorType.at(i).(string); ok && at != "" {
 				if ct.ABT == nil {
 					ct.ABT = make(map[string][]int)
 				}
