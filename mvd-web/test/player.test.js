@@ -356,3 +356,152 @@ test('presets: a v3 layout becomes the Player view; corrupt storage falls back; 
     fresh.setPreset('player');
     assert.deepEqual(fresh.paneLayout.get().order, ['map', 'players', 'moments', 'team-weapons'], 'a fresh Player view, Moments on');
 });
+
+// The real engine on a stand-in FTE: a window FTE publishes into, playing a
+// demo with these players (name → userid). `win.demoTime` is its clock.
+/** @param {Record<string, number>} players */
+async function freshFte(players) {
+    const { FteController } = await import('../../mvd-fte-player/src/fte-controller.js');
+    const list = Object.entries(players).map(([name, userid]) => ({ userid, spectator: 0, getNamePlain: () => name }));
+    const win = {
+        commands: /** @type {string[]} */ ([]),
+        demoTime: 0,
+        FTEC: { cbufadd: (/** @type {string} */ cmd) => win.commands.push(cmd.trim()), step: () => {} },
+        Module: {
+            getDemoTime: () => win.demoTime,
+            getClientState: () => ({
+                allocated_client_slots: list.length,
+                getPlayer: (/** @type {number} */ i) => list[i],
+                getPlayerView: () => ({ getTrackedPlayer: () => null }),
+            }),
+        },
+    };
+    let resumed = 0;
+    const fte = new FteController(win, { resumeAudio: () => resumed++ });
+    fte.mute();   // as the loader hands it over
+    // The POV it was last told to take: a userid, or 'auto'.
+    const pov = () => (fte.isUsingAutotrack() ? 'auto' : fte._lastTrackUserId);
+    return { fte, win, pov, resumed: () => resumed };
+}
+
+/** @param {{ activeTab?: string, demo?: any }} [o] */
+async function realEngine({ activeTab = 'summary', demo = store(null) } = {}) {
+    const { PlayerEngine } = await import('../src/player/engine.js');
+    const { createClock } = await import('../src/state/clock.js');
+    // The sync loop is not run here; tests tick by hand.
+    globalThis.requestAnimationFrame ??= () => 1;
+    globalThis.cancelAnimationFrame ??= () => {};
+    return new PlayerEngine({ clock: createClock(), demo, activeTab: store(activeTab) });
+}
+
+// Each demo gets a fresh engine (FteController), at FTE's defaults — muted,
+// autotrack, normal speed: what the user picked carries to the next one.
+test('engine carries sound, speed, team info and the followed player across engines', async () => {
+    const engine = await realEngine();
+    /** @param {Awaited<ReturnType<typeof freshFte>>} e */
+    const adopt = (e) => {
+        engine.teardown();
+        engine.adopt(e.fte);
+    };
+
+    const first = await freshFte({ alpha: 3, bravo: 4 });
+    adopt(first);
+    assert.ok(first.fte.isMuted(), 'starts muted');
+    engine.toggleMute();
+    engine.toggleTeamInfo();
+    engine.setRate(2);
+    engine.track(4);
+    assert.equal(engine.status.get().muted, false);
+    assert.equal(first.resumed(), 1, 'unmute resumes the audio');
+
+    // Another demo: bravo is in it under another userid.
+    const second = await freshFte({ bravo: 9, charlie: 2 });
+    engine.teardown();
+    assert.equal(engine.status.get().rate, 200, 'the bar keeps the speed while the next engine loads');
+    engine.adopt(second.fte);
+    assert.ok(!second.fte.isMuted(), 'comes up with sound');
+    assert.equal(second.resumed(), 1);
+    assert.ok(second.win.commands.includes('hud_teaminfo_show 1'));
+    assert.equal(second.pov(), 9, 'follows bravo by name');
+    engine.play();
+    assert.equal(second.fte.getDemoSpeed(), 200, 'plays at the speed picked before');
+
+    // One without bravo: the engine's autotrack.
+    const third = await freshFte({ charlie: 2 });
+    adopt(third);
+    assert.equal(third.pov(), 'auto');
+    assert.equal(engine.trackedName, 'bravo', 'still wanted for a later demo');
+
+    // Autotrack and mute picked: carried as such.
+    engine.track('auto');
+    engine.toggleMute();
+    const fourth = await freshFte({ bravo: 1 });
+    adopt(fourth);
+    assert.ok(fourth.fte.isMuted());
+    assert.equal(fourth.pov(), 'auto');
+    engine.teardown();
+});
+
+// In a playlist the playlist says whom to watch: a player picked by hand
+// during one clip does not carry into the next, in the same demo or another.
+test('each playlist clip plays from its own POV, whatever was picked by hand before', async () => {
+    const handleA = { ref: { key: 'hub:1', gameId: 1 }, result: { streams: { global: { demoOffset: 0 } } } };
+    const handleB = { ref: { key: 'hub:9', gameId: 9 }, result: { streams: { global: { demoOffset: 0 } } } };
+    const demo = store(/** @type {any} */ (handleA));
+    const engine = await realEngine({ activeTab: 'player', demo });
+    const a = await freshFte({ alpha: 3, bravo: 4 });
+    engine.adopt(a.fte);
+    const loadDemo = async () => {
+        demo.set(handleB);
+        return true;
+    };
+    const runner = createRunner({ engine, page: fakeEngine(store('map')), driverFor: () => engine, demo, teams: store({ order: [] }),
+        selectTab: () => {}, loadDemo, demoRefOf, segment: store(null) });
+    /** @param {Awaited<ReturnType<typeof freshFte>>} e  @param {number} t */
+    const at = (e, t) => {
+        e.win.demoTime = t;
+        engine.tick();
+    };
+    const demoB = { key: 'hub:9', gameId: 9, title: 'b', offset: 0 };
+    runner.start([
+        clip(100, 110, { track: 3 }),
+        clip(110, 120, { track: 3 }),
+        clip(120, 130),                      // no POV: autotrack
+        clip(200, 210),                      // no POV either
+        clip(40, 50, { track: 5, demo: demoB }),
+    ], 0);
+    assert.equal(a.pov(), 3);
+
+    at(a, 100);
+    engine.track(4);                         // by hand, mid-clip
+    at(a, 109.9);
+    at(a, 110.05);
+    assert.equal(playlist.get().run.index, 1);
+    assert.equal(a.pov(), 3, 'the next clip in the same demo: its POV, same as the last one\'s');
+
+    at(a, 110.1);                            // the jump has landed
+    engine.track(4);
+    at(a, 119.9);
+    at(a, 120.05);
+    assert.equal(a.pov(), 'auto', 'a clip without a POV: autotrack');
+
+    at(a, 120.1);
+    engine.track(4);
+    at(a, 205);                              // a seek into another clip
+    assert.equal(playlist.get().run.index, 3);
+    assert.equal(a.pov(), 'auto', 'a seek into another clip with the same POV as the last one takes it too');
+
+    at(a, 205.1);
+    engine.track(4);                         // bravo, by hand
+    at(a, 209.9);
+    at(a, 210.05);                           // on to the other demo
+    await new Promise((r) => setTimeout(r, 0));
+    assert.equal(engine.fte, null, 'waits for the next demo\'s engine');
+    const b = await freshFte({ bravo: 9, charlie: 5 });
+    engine.adopt(b.fte);
+    assert.ok(b.win.commands.indexOf('track 9') < b.win.commands.lastIndexOf('track 5'), 'the hand pick is carried first');
+    assert.equal(b.pov(), 5, 'then the clip\'s POV wins');
+    assert.equal(engine.trackedName, 'bravo', 'clip POVs are not hand picks: a demo loaded by hand later follows bravo');
+    runner.stop();
+    engine.teardown();
+});

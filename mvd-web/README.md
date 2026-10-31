@@ -1133,6 +1133,20 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   right end: the keys menu button (see *Keys*), the sound toggle (the
   player starts muted, as hub's does) and the hide / show toggle of the
   side pane column.
+- **Settings across engines.** Each demo gets a fresh engine (and one
+  dropped after 20 s unshown comes back fresh), at FTE's defaults. What
+  the user picked carries over (`engine.carrySettings`): sound, team
+  info, the speed (`engine.rate`, applied on play), and the player
+  followed by hand — by name, followed on the new engine only when its
+  demo has that player, else autotrack. In a playlist the playlist says
+  whom to watch: every clip — reached by playing on, a seek into it, or
+  in another demo's engine (its POV is set after the carried one) —
+  starts from its own POV, autotrack when it names none, so a player
+  picked by hand during one clip does not carry into the next. A clip's
+  POV is not a hand pick and is not carried to a demo loaded by hand
+  later. Per engine, and not carried: the position (it opens paused at
+  the cursor), a clip's slow motion, the console. Fullscreen, the pane
+  layout and the playlist belong to the page and are untouched.
 - **Fullscreen** (see *Fullscreen* under the playback bar): the whole
   player panel — both pane columns, the Player pane's picture included —
   fills the screen, each column scrolling on its own. The tab's controls share one compact
@@ -1471,7 +1485,8 @@ clock and stores; `light-demo.js` stands in for the data layer: a hub
 demo's bytes (`fetchGame` + `downloadDemo`) and a minimal handle whose
 result carries just the map (hub's game row) and the demo offset (from
 the clips). The page lists the clips (label, who, length, slow motion,
-demo), starts the run at once (muted, as the tab does), and has play /
+demo), starts the run at once (muted, as the tab does; sound once on
+stays on from one demo's clips to the next), and has play /
 pause, previous / next, sound, the keys menu and fullscreen (the game
 view and these controls; `f`); a click on a clip plays from it. The team
 info shows from the start. A list over several hub demos plays straight
