@@ -26,7 +26,7 @@ import (
 //	magic "MVDB" | version uint32 | header length uint32 | header JSON
 //	pad to 8 | body
 //
-// The header is the ColumnarBuckets JSON (windowMs, start, count,
+// The header is the ColumnarBuckets JSON (timeUnit, windowMs, start, count,
 // partialLastMs, locTable; per player first, n, validFrom; per team the
 // counter keys and abt) with every column — including each player's
 // "alive" mask — replaced by {"t": type, "o": byte offset into the body,
@@ -44,6 +44,10 @@ import (
 
 // ColumnarPackVersion is the layout version written after the magic.
 const ColumnarPackVersion = 1
+
+// ColumnarPackContentType is the media type mvd-api serves the pack as
+// (an Accept-negotiated form of GET /v1/demos/{id}/buckets).
+const ColumnarPackContentType = "application/vnd.mvd-analyzer.buckets"
 
 var columnarPackMagic = [4]byte{'M', 'V', 'D', 'B'}
 
@@ -67,6 +71,7 @@ type packTeam struct {
 }
 
 type packHeader struct {
+	TimeUnit      TimeUnit               `json:"timeUnit,omitempty"`
 	WindowMs      int                    `json:"windowMs"`
 	Start         int32                  `json:"start"`
 	Count         int                    `json:"count"`
@@ -161,7 +166,7 @@ func sortedKeys[V any](m map[string]V) []string {
 // columns are laid out in name order, so equal views give equal bytes.
 func EncodeColumnarPack(cb *ColumnarBuckets) ([]byte, error) {
 	w := &packWriter{strIdx: map[string]int{}}
-	h := packHeader{WindowMs: cb.WindowMs, Start: cb.Start, Count: cb.Count, PartialLastMs: cb.PartialLastMs, LocTable: cb.LocTable}
+	h := packHeader{TimeUnit: cb.TimeUnit, WindowMs: cb.WindowMs, Start: cb.Start, Count: cb.Count, PartialLastMs: cb.PartialLastMs, LocTable: cb.LocTable}
 	if len(cb.Players) > 0 {
 		h.Players = make(map[string]*packPlayer, len(cb.Players))
 	}

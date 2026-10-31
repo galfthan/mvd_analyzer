@@ -427,7 +427,7 @@ misses the ETag and the client re-downloads the new shape immediately,
 instead of serving a stale one out of cache (which the previous
 `max-age=86400, immutable` policy allowed for up to a day).
 
-Two families carry a **different ETag shape**:
+Some responses carry a **different ETag shape**:
 
 - The generic artifact endpoint uses a **finer per-artifact** form
   `"<sha>-<name>@v<schemaVersion>"` (e.g. `"abc…-frag@v49"`), so a client can
@@ -440,6 +440,12 @@ Two families carry a **different ETag shape**:
   demo-independent statics: ETags `"ents-<map>-v<corpusVersion>"` and
   `"geo-<map>-<size>"`, with **only** `Cache-Control` + `ETag` (no
   `X-Schema-Version` / `X-Cache`).
+- The binary packs extend the demo ETag with their layout version and, on
+  a gzip body, the encoding: `/streams/positions` is
+  `"<sha>-v<n>-p<pack>"` and the bucket pack of `/buckets` is
+  `"<sha>-v<n>-b<pack>"`, each with a `-gz` tail when gzipped. A pack's
+  validator never revalidates the JSON of the same URL, nor the other way
+  round; `/buckets` sends `Vary: Accept` on every response.
 
 `POST /v1/demos/{id}` (the warm-up call) is a non-cacheable action: it
 returns `X-Cache` / `X-Schema-Version` but **no** `Cache-Control` / `ETag`.
@@ -758,7 +764,7 @@ streams but in different shapes. Pick by what you're drawing:
 | You want… | Use | Why |
 |---|---|---|
 | A value **at one instant** (tooltip, scrubber readout) | **`/state-at`** | One carry-forward sample per field at `time`. |
-| A **series/trend** on a fixed grid (charts, heatmaps) | **`/buckets`** | One reduced value per `windowMs` window. |
+| A **series/trend** on a fixed grid (charts, heatmaps) | **`/buckets`** | One reduced value per `windowMs` window. Send `Accept: application/vnd.mvd-analyzer.buckets` for the column layout as a binary pack (typed-array columns, gzip on the wire) — same view, no JSON to parse. |
 | **Every raw transition** in a window (native-rate detail, replay) | **`/stream-slice`** | Unreduced entries + carry-forward at window start. |
 | A **discrete event log** (kill feed, life events, powerups) | **`/events`** | Tagged event list; authoritative for spawns/deaths. |
 | **Every position sample of the whole match** (a map or replay page loading a demo) | **`/streams/positions`** | One binary pack (typed-array columns, gzip on the wire) — the bulk form of `/stream-slice?fields=pos`. |

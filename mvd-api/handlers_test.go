@@ -409,6 +409,112 @@ func TestAcceptsGzip(t *testing.T) {
 	}
 }
 
+// TestBuckets_PackNegotiation pins the bucket pack as a second
+// representation of /buckets: asked for by name it is the column layout's
+// pack (gzipped to a gzip client), each representation has its own ETag
+// and revalidates only itself, and every response varies on Accept.
+func TestBuckets_PackNegotiation(t *testing.T) {
+	r := stubResult()
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	url := srv.URL + "/v1/demos/gameId:42/buckets?windowMs=1000&fields=h,a&includeTeam=true"
+	cb, err := view.BucketsColumnar(r, view.BucketsOptions{WindowMs: 1000, Fields: []string{"h", "a"}, IncludeTeam: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(cb.Players) == 0 || len(cb.Teams) == 0 {
+		t.Fatal("the stub demo gives an empty bucket view; the comparison would prove nothing")
+	}
+	cb.TimeUnit = view.UnitMs
+	want, err := view.EncodeColumnarPack(cb)
+	if err != nil {
+		t.Fatal(err)
+	}
+	get := func(u string, hdr map[string]string) (*http.Response, []byte) {
+		t.Helper()
+		req, _ := http.NewRequest("GET", u, nil)
+		for k, v := range hdr {
+			req.Header.Set(k, v)
+		}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		b, _ := io.ReadAll(resp.Body)
+		return resp, b
+	}
+
+	resp, body := get(url, map[string]string{"Accept": view.ColumnarPackContentType, "Accept-Encoding": "gzip"})
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Encoding") != "gzip" ||
+		resp.Header.Get("Content-Type") != view.ColumnarPackContentType || resp.Header.Get("Vary") != "Accept, Accept-Encoding" {
+		t.Fatalf("pack, gzip: %d %v", resp.StatusCode, resp.Header)
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := io.ReadAll(zr); !bytes.Equal(got, want) {
+		t.Fatalf("pack, gzip: body differs from EncodeColumnarPack (%d vs %d bytes)", len(got), len(want))
+	}
+	packGz := resp.Header.Get("ETag")
+	if !strings.HasSuffix(packGz, fmt.Sprintf("-b%d-gz\"", view.ColumnarPackVersion)) {
+		t.Fatalf("pack ETag %q lacks the pack version and encoding", packGz)
+	}
+
+	resp, body = get(url, map[string]string{"Accept": "application/json, " + view.ColumnarPackContentType, "Accept-Encoding": "identity"})
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Encoding") != "" || !bytes.Equal(body, want) {
+		t.Fatalf("pack, identity: %d %v, %d bytes", resp.StatusCode, resp.Header, len(body))
+	}
+	pack := resp.Header.Get("ETag")
+
+	resp, body = get(url, map[string]string{"Accept": "*/*"})
+	if resp.StatusCode != 200 || !strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json") ||
+		resp.Header.Get("Vary") != "Accept" || !json.Valid(body) {
+		t.Fatalf("JSON: %d %v", resp.StatusCode, resp.Header)
+	}
+	plain := resp.Header.Get("ETag")
+	if plain == pack || plain == packGz || pack == packGz {
+		t.Fatalf("representations share an ETag: %s %s %s", plain, pack, packGz)
+	}
+
+	// A validator revalidates its own representation only.
+	if resp, _ = get(url, map[string]string{"Accept": view.ColumnarPackContentType, "Accept-Encoding": "gzip", "If-None-Match": packGz}); resp.StatusCode != 304 {
+		t.Fatalf("pack revalidation: %d, want 304", resp.StatusCode)
+	}
+	if resp, _ = get(url, map[string]string{"Accept": view.ColumnarPackContentType, "Accept-Encoding": "gzip", "If-None-Match": plain}); resp.StatusCode != 200 {
+		t.Fatalf("JSON validator on a pack request: %d, want 200", resp.StatusCode)
+	}
+	if resp, _ = get(url, map[string]string{"If-None-Match": packGz}); resp.StatusCode != 200 {
+		t.Fatalf("pack validator on a JSON request: %d, want 200", resp.StatusCode)
+	}
+
+	if resp, _ = get(url+"&layout=row", map[string]string{"Accept": view.ColumnarPackContentType}); resp.StatusCode != 400 {
+		t.Fatalf("pack of the row layout: %d, want 400", resp.StatusCode)
+	}
+}
+
+func TestAcceptsMediaType(t *testing.T) {
+	const mt = "application/vnd.mvd-analyzer.buckets"
+	for h, want := range map[string]bool{
+		"":                                     false,
+		mt:                                     true,
+		"application/json, " + mt + ";q=0.9":   true,
+		"APPLICATION/VND.MVD-ANALYZER.BUCKETS": true,
+		mt + ";q=0":                            false,
+		mt + "; Q=0":                           false,
+		"*/*":                                  false,
+		"application/*":                        false,
+		mt + "x":                               false,
+	} {
+		r := httptest.NewRequest("GET", "/", nil)
+		r.Header.Set("Accept", h)
+		if got := acceptsMediaType(r, mt); got != want {
+			t.Errorf("Accept %q: acceptsMediaType = %v, want %v", h, got, want)
+		}
+	}
+}
+
 // TestPointEffects_LegendAndFilter pins the endpoint's two contracts: the
 // types legend covers the demo's codes even under a filter, and a filter
 // that matches something narrows the columns while one that matches

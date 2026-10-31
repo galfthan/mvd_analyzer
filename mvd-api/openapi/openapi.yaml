@@ -1006,6 +1006,21 @@ paths:
         question. `layout=column` (default) returns the compact columnar
         grid (int32 ms axis); `layout=row` returns row objects (int32 ms
         `time`).
+
+
+        A client that names `application/vnd.mvd-analyzer.buckets` in
+        `Accept` (wildcards don't count) gets the column layout as a binary
+        **bucket pack** instead — the same view, its columns raw so a
+        browser can view each in place as a typed array; floats unrounded.
+        The layout (a JSON header with the view's shape, each column
+        replaced by a type/offset/length descriptor, then 8-aligned
+        little-endian columns) is documented in
+        `mvd-analytics/view/columnar_pack.go`; mvd-web's
+        `src/lib/bucketpack.js` decodes it. Gzip-encoded to a client that
+        accepts gzip (a 4on4's 50 ms view: 8.6 MB raw, 1.2 MB gzipped). Each
+        representation has its own ETag (`-b<pack>` tail for the pack,
+        `-gz` after it for the gzip body) and every response carries
+        `Vary: Accept`. Asking for the pack with `layout=row` is a 400.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/WindowMs"
@@ -1020,11 +1035,15 @@ paths:
         - $ref: "#/components/parameters/Label"
       responses:
         "200":
-          description: Bucketed series (columnar or row layout).
+          description: Bucketed series (columnar or row layout), or the column layout's bucket pack.
           headers: *perDemoHeaders
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Buckets" }
+            application/vnd.mvd-analyzer.buckets:
+              schema:
+                type: string
+                format: binary
         "304": { $ref: "#/components/responses/NotModified" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }

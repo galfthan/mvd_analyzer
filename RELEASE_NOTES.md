@@ -37,8 +37,11 @@ That view then reaches the page as a binary "bucket pack"
 (`view.EncodeColumnarPack`) instead of JSON — 8.6 MB instead of 12 MB on
 a 4on4, decoded in ~40 ms into the same shape with typed-array columns.
 `getDefaultBuckets` in WASM drops from ~2.6 s to ~0.8 s, so Timeline and
-Map are ready about 3 s sooner than before this branch. The API's
-`/buckets` JSON is unchanged.
+Map are ready about 3 s sooner than before this branch. mvd-api serves
+the same pack for any column-layout `/buckets` query to a client whose
+`Accept` names `application/vnd.mvd-analyzer.buckets` (gzip-encoded,
+1.2 MB for a 4on4's 50 ms view); the JSON is unchanged and stays the
+default, and each representation has its own ETag.
 
 ## unreleased (perf-analysis) — a faster full analysis
 

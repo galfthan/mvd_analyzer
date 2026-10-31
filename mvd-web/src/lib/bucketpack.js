@@ -51,6 +51,7 @@ export function decodeBucketPack(buf) {
 
     /** @type {Record<string, any>} */
     const view = { windowMs: h.windowMs, start: h.start, count: h.count };
+    if (h.timeUnit) view.timeUnit = h.timeUnit;
     if (h.partialLastMs) view.partialLastMs = h.partialLastMs;
     if (h.locTable) view.locTable = h.locTable;
     if (h.players) {

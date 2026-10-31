@@ -3239,7 +3239,9 @@ treat `alive[i]==0` as "absent"); loc is always the raw `li` index
 
 The same view also exists in binary, as the **bucket pack**
 (`view.EncodeColumnarPack`): the browser's WASM build hands its deferred
-50 ms view to the page that way instead of as JSON. A JSON header carries
+50 ms view to the page that way instead of as JSON, and mvd-api serves it
+for `/buckets` to a client whose `Accept` names
+`application/vnd.mvd-analyzer.buckets`. A JSON header carries
 the shape above with each column replaced by a type/offset/length
 descriptor; the columns follow raw, so the page views them as typed
 arrays. Same keys and values — floats unrounded, `at` decoded back to
