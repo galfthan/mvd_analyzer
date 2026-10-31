@@ -2828,6 +2828,13 @@ PositionTrack = {
 }
 ```
 
+The same tracks also exist in binary, as the **position pack**: the
+browser's WASM build hands them to the page that way instead of as JSON,
+and mvd-api serves them at `GET /v1/demos/{id}/streams/positions`. Same
+columns and values, unrounded (the JSON rounds floats to 3 decimals); the
+layout is documented in `mvd-analytics/result/postrack_wire.go` and
+decoded by `mvd-web/src/lib/postrack.js`.
+
 `t` is **integer milliseconds** since the stream's time origin. The
 MVD wire format delivers a 1-byte ms delta per message; storing the
 cumulative value

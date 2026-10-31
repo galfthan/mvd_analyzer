@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"strconv"
@@ -29,6 +32,10 @@ type demoStore interface {
 	// streams are baked into the always-full GetResult parse, so /shots, /aim
 	// and /streams/* read them straight off the base Result.)
 	EnsureLOS(ctx context.Context, id democache.DemoID) (*result.Result, democache.CacheMeta, error)
+
+	// PositionPack returns the demo's position pack (result.EncodePositionPack),
+	// gzipped, built on first request and kept in the tier-3 cache.
+	PositionPack(ctx context.Context, id democache.DemoID) ([]byte, democache.CacheMeta, error)
 
 	// PutDemo stores an uploaded demo body under its content SHA and reports
 	// the SHA plus whether the demo already existed (POST /v1/demos). The
@@ -1047,6 +1054,73 @@ func (s *server) handleNails(w http.ResponseWriter, r *http.Request) {
 		TimeUnit view.TimeUnit             `json:"timeUnit"`
 		Nails    *result.ProjectileStreams `json:"nails"`
 	}{view.UnitMs, nl})
+}
+
+// handlePositions serves every player's native-rate position track as one
+// binary position pack (result.EncodePositionPack; layout in
+// mvd-analytics/result/postrack_wire.go) — the bulk form of what
+// /stream-slice serves windowed as JSON, for a page that wants the whole
+// match (mvd-web decodes it with src/lib/postrack.js). The store keeps it
+// gzipped, so a client that accepts gzip (every browser) gets those bytes
+// as they are; anyone else gets them inflated on the way out.
+//
+// The ETag adds the pack version to the usual sha + schema one, so a layout
+// change can't revalidate a cached older pack.
+func (s *server) handlePositions(w http.ResponseWriter, r *http.Request) {
+	id, err := democache.ParseDemoID(r.PathValue("id"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_demo_id", err.Error())
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
+	data, meta, err := s.store.PositionPack(r.Context(), id)
+	if err != nil {
+		s.mapStoreError(w, r, err)
+		return
+	}
+	setCacheHeaders(w, meta)
+	etag := fmt.Sprintf(`"%s-v%d-p%d"`, meta.SHA256, meta.SchemaVersion, result.PositionPackVersion)
+	w.Header().Set("ETag", etag)
+	w.Header().Set("Vary", "Accept-Encoding")
+	if match := r.Header.Get("If-None-Match"); match != "" && strings.Contains(match, etag) {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	w.Header().Set("Content-Type", result.PositionPackContentType)
+	if acceptsGzip(r) {
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+		return
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(data))
+	if err != nil {
+		s.writeInternal(w, r, fmt.Errorf("position pack: %w", err))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	_, _ = io.Copy(w, zr)
+}
+
+// acceptsGzip reports whether the request's Accept-Encoding admits gzip
+// (any listed "gzip" not weighted q=0).
+func acceptsGzip(r *http.Request) bool {
+	for _, part := range strings.Split(r.Header.Get("Accept-Encoding"), ",") {
+		coding, params, _ := strings.Cut(strings.TrimSpace(part), ";")
+		if !strings.EqualFold(strings.TrimSpace(coding), "gzip") {
+			continue
+		}
+		if q, ok := strings.CutPrefix(strings.TrimSpace(params), "q="); ok {
+			if v, err := strconv.ParseFloat(q, 64); err == nil && v == 0 {
+				return false
+			}
+		}
+		return true
+	}
+	return false
 }
 
 // teNames maps the point-effect TE codes (result.PointEffectStreams `ty`,

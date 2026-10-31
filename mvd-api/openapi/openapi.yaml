@@ -1281,6 +1281,43 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/demos/{id}/streams/positions:
+    get:
+      operationId: getPositions
+      tags: [streams]
+      summary: Every player's position track, binary
+      description: >
+        Every player's native-rate position track (the `streams.players[].pos`
+        PositionTrack columns: t, x, y, z and the optional li, h, lq, vp, vya,
+        vx, vy, vz) for the whole match, as one binary **position pack** — the
+        bulk form of what `/stream-slice` serves windowed as JSON, for a page
+        that wants every sample (a 4on4 is ~27 MB raw, ~9 MB gzipped).
+        Values are the analyzer's float32s unrounded (the JSON rounds to 3
+        decimals). The layout (little-endian, 4-byte aligned columns, so a
+        browser can view each in place as a typed array) is documented in
+        `mvd-analytics/result/postrack_wire.go`; mvd-web's
+        `src/lib/postrack.js` decodes it. Sent gzip-encoded to a client
+        that accepts gzip; the ETag carries the pack layout version
+        (`"<sha>-v<schema>-p<pack>"`).
+      parameters:
+        - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
+      responses:
+        "200":
+          description: The position pack.
+          headers: *perDemoHeaders
+          content:
+            application/vnd.mvd-analyzer.positions:
+              schema:
+                type: string
+                format: binary
+        "304": { $ref: "#/components/responses/NotModified" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
   /v1/demos/{id}/streams/point-effects:
     get:
       operationId: getPointEffects

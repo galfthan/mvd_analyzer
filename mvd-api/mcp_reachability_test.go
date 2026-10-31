@@ -70,6 +70,10 @@ var demoViewCoverage = map[string]mcpCoverage{
 	"/v1/demos/{id}/streams/beams":       {tool: "getStreamSlice"},
 	"/v1/demos/{id}/streams/nails":       {tool: "getStreamSlice"},
 
+	// The bulk binary form of the position tracks getStreamSlice serves
+	// windowed as JSON — a page's bulk download, not an LLM-sized surface.
+	"/v1/demos/{id}/streams/positions": {tool: "getStreamSlice"},
+
 	// Point effects are not per-player, so getStreamSlice cannot carry
 	// them — they get their own curated tool.
 	"/v1/demos/{id}/streams/point-effects": {tool: "getPointEffects"},

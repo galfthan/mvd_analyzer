@@ -761,11 +761,13 @@ streams but in different shapes. Pick by what you're drawing:
 | A **series/trend** on a fixed grid (charts, heatmaps) | **`/buckets`** | One reduced value per `windowMs` window. |
 | **Every raw transition** in a window (native-rate detail, replay) | **`/stream-slice`** | Unreduced entries + carry-forward at window start. |
 | A **discrete event log** (kill feed, life events, powerups) | **`/events`** | Tagged event list; authoritative for spawns/deaths. |
+| **Every position sample of the whole match** (a map or replay page loading a demo) | **`/streams/positions`** | One binary pack (typed-array columns, gzip on the wire) — the bulk form of `/stream-slice?fields=pos`. |
 
 Concrete consequences:
 
 - **Native-rate positions (server-configured cadence, typically 13-40 ms per sample — see below)** come **only** from
-  `/stream-slice?fields=pos`. `/buckets` and `/state-at` down-sample
+  `/stream-slice?fields=pos` (JSON, any window) or `/streams/positions`
+  (binary, the whole match). `/buckets` and `/state-at` down-sample
   position to one sample per window / instant.
 - **Spawns & deaths**: `/events?types=spawn,death` is the authoritative
   log. `/stream-slice?fields=sp,d` gives the raw ms timestamp arrays.

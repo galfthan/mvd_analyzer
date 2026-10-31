@@ -245,6 +245,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/streams/projectiles` | — | `{ "projectiles": ProjectileStreams\|null }` — rocket/grenade flights, from the always-full base parse |
 | GET | `/v1/demos/{id}/streams/beams` | — | `{ "beams": BeamStreams\|null }` — LG bolts, from the always-full base parse |
 | GET | `/v1/demos/{id}/streams/nails` | — | `{ "nails": ProjectileStreams\|null }` — ng/sng spike flights, from the always-full base parse |
+| GET | `/v1/demos/{id}/streams/positions` | — | binary position pack (`application/vnd.mvd-analyzer.positions`, gzip-encoded) — every player's whole position track, unrounded; layout in `mvd-analytics/result/postrack_wire.go`, ETag `"<sha>-v<n>-p<pack>"` |
 | GET | `/v1/demos/{id}/streams/point-effects` | `types` | `{ "types": legend, "pointEffects": PointEffectStreams\|null }` — temp-entity point effects (explosion / blood / lightningblood / …), from the always-full base parse |
 | GET | `/v1/demos/{id}/loc-trails` | `from`, `to`, `players`, `minDwellMs`, `loc` | `view.LocTrailsView` |
 | GET | `/v1/demos/{id}/loc-table` | — | `{ "locTable": []string }` (decoder for `loc=index`; index 0 = "" no-loc) |
@@ -385,6 +386,7 @@ Under `-cache-dir`:
 mvd/<sha[:2]>/<sha>.mvd.gz                    # tier 1 — raw bytes from hub
 results/v<N>f<F>/<sha[:2]>/<sha>.gob          # tier 2 — parsed *Result, per schema version + cache format
 artifacts/<sha[:2]>/<sha>/<name>@v<EV>.gob    # tier 3 — lazy artifacts (los)
+artifacts/<sha[:2]>/<sha>/positions-p<PV>@v<EV>.bin.gz  # tier 3 — gzipped position pack
 index/games/<gameId>.txt                      # gameId → sha map
 ```
 
@@ -438,6 +440,15 @@ artifact gob whose `@v<EV>.gob` suffix is not current — including the
 `shot-streams@*.gob` side-gobs orphaned when phase 12 retired that artifact.
 Per-node effective versions arrive with the DAG manifest work if node versions
 ever diverge from the schema.
+
+Tier 3 also keeps each demo's gzipped **position pack** — every player's
+position track in binary (`result.EncodePositionPack`), what
+`/streams/positions` serves. It is ~9 MB gzipped on a 4on4 and the
+compression costs a few hundred ms, so the first request builds it (per-SHA
+locked, under the parse semaphore) and every later one sends the file as
+it is, with `Content-Encoding: gzip`. Its name carries the pack layout
+version `PV` as well as `EV`, so a bump of either is a miss, and startup
+cleanup removes every pack but the current version's.
 
 A 4-on-4 demo typically occupies ~3–7 MB in tier 1 and ~3–10 MB in
 tier 2. When the tier-1 + tier-2 + tier-3 total exceeds

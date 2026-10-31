@@ -5,6 +5,20 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (perf-wasm-data) — position tracks in binary
+
+No schema change. The browser no longer gets the players' position
+tracks as JSON: the WASM build hands them to the page as one binary
+"position pack" (`result.EncodePositionPack`), and the Result JSON
+leaves them out. In WASM a 4on4's analysis drops from ~20 s to ~13 s —
+the JSON marshal went from ~7 s to ~0.3 s and the page's parse from
+~0.6 s to under 0.1 s. In the page the columns are typed arrays with the
+analyzer's unrounded float32 values.
+
+mvd-api serves the same pack at `GET /v1/demos/{id}/streams/positions`
+(gzip-encoded, ~9 MB on a 4on4): built on first request and kept gzipped
+in tier 3, so later requests send the file as it is.
+
 ## unreleased (perf-analysis) — a faster full analysis
 
 No schema change; every Result is byte-identical. mvd-api's cold parse

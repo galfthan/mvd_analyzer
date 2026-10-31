@@ -1,6 +1,7 @@
 package democache
 
 import (
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
@@ -184,9 +185,15 @@ func TestCleanStaleArtifacts(t *testing.T) {
 		"los@v"+strconv.Itoa(result.CurrentSchemaVersion-1)+".gob")
 	retired := filepath.Join(artifactsRoot(root), sha[:2], sha,
 		"shot-streams@v"+strconv.Itoa(result.CurrentSchemaVersion-1)+".gob")
+	// And the position pack: only the current layout + schema version stays.
+	pack := positionPackPath(root, sha)
+	stalePack := filepath.Join(artifactsRoot(root), sha[:2], sha,
+		fmt.Sprintf("positions-p%d@v%d.bin.gz", result.PositionPackVersion-1, result.CurrentSchemaVersion))
 	writeFileWithMtime(t, current, 10, now)
 	writeFileWithMtime(t, staleVer, 10, now)
 	writeFileWithMtime(t, retired, 10, now)
+	writeFileWithMtime(t, pack, 10, now)
+	writeFileWithMtime(t, stalePack, 10, now)
 
 	CleanStaleArtifacts(root, false, quietLogger())
 
@@ -198,6 +205,12 @@ func TestCleanStaleArtifacts(t *testing.T) {
 	}
 	if exists(retired) {
 		t.Errorf("retired shot-streams artifact must be removed")
+	}
+	if !exists(pack) {
+		t.Errorf("current position pack must be kept")
+	}
+	if exists(stalePack) {
+		t.Errorf("older-layout position pack must be removed")
 	}
 }
 

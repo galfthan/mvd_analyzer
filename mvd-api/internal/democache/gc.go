@@ -324,7 +324,8 @@ func CleanOldVersionTrees(root string, currentVersion int, dryRun bool, logger *
 }
 
 // CleanStaleArtifacts deletes every tier-3 gob whose filename does not carry
-// the current effective-version suffix ("@v<EV>.gob"). Tier-3 versioning is
+// the current effective-version suffix ("@v<EV>.gob"), and every position
+// pack but the current version's (positionPackName). Tier-3 versioning is
 // per-file, not per-tree: a stale gob is simply never read again
 // (artifactPath points at the current-version name), so it is pure garbage —
 // this reaps both old-version los gobs after a schema bump and the
@@ -337,7 +338,7 @@ func CleanStaleArtifacts(root string, dryRun bool, logger *slog.Logger) {
 	keep := artifactVersionSuffix()
 	var removed int
 	walkRegular(artifactsRoot(root), func(p string, _ int64, _ time.Time) {
-		if isTempName(p) || strings.HasSuffix(filepath.Base(p), keep) {
+		if isTempName(p) || strings.HasSuffix(filepath.Base(p), keep) || filepath.Base(p) == positionPackName() {
 			return
 		}
 		if dryRun {
