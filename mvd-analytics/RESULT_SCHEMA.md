@@ -3237,6 +3237,15 @@ mask, not the arrays, marks liveness — row-major omits dead players, so
 treat `alive[i]==0` as "absent"); loc is always the raw `li` index
 (`LocIndex` does not apply). Team arrays span the full `count` grid.
 
+The same view also exists in binary, as the **bucket pack**
+(`view.EncodeColumnarPack`): the browser's WASM build hands its deferred
+50 ms view to the page that way instead of as JSON. A JSON header carries
+the shape above with each column replaced by a type/offset/length
+descriptor; the columns follow raw, so the page views them as typed
+arrays. Same keys and values — floats unrounded, `at` decoded back to
+strings; the layout is documented in `mvd-analytics/view/columnar_pack.go`
+and decoded by `mvd-web/src/lib/bucketpack.js`.
+
 The bucket `alive` mask is **not** a resampling of
 `streams.players[].alive`: it comes from `view.playerActiveInWindow`, a
 window-**overlap** test ("did this player appear anywhere in this

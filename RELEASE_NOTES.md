@@ -33,6 +33,13 @@ player's liveness once per bucket instead of twice: 2.6× faster natively
 (a 4on4 0.36 → 0.14 s), with byte-identical output. The Timeline and
 Map tabs' wait after the result drops from ~3.8 s to ~2.6 s in WASM.
 
+That view then reaches the page as a binary "bucket pack"
+(`view.EncodeColumnarPack`) instead of JSON — 8.6 MB instead of 12 MB on
+a 4on4, decoded in ~40 ms into the same shape with typed-array columns.
+`getDefaultBuckets` in WASM drops from ~2.6 s to ~0.8 s, so Timeline and
+Map are ready about 3 s sooner than before this branch. The API's
+`/buckets` JSON is unchanged.
+
 ## unreleased (perf-analysis) — a faster full analysis
 
 No schema change; every Result is byte-identical. mvd-api's cold parse

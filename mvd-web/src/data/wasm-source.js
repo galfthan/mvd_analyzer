@@ -22,6 +22,7 @@
 import { WorkerClient } from './worker-client.js';
 import * as hub from './hub.js';
 import { attachPositions } from '../lib/postrack.js';
+import { decodeBucketPack } from '../lib/bucketpack.js';
 
 /**
  * @typedef {import('./hub.js').HubGame} HubGame
@@ -270,13 +271,11 @@ export class DemoHandle {
     /** @param {WorkerMessage} msg */
     _applyBuckets(msg) {
         const ta = this.result?.timelineAnalysis;
-        if (ta && msg.bucketsJSON) {
+        if (ta && msg.buckets) {
             try {
-                const view = JSON.parse(msg.bucketsJSON);
-                // Column-major ColumnarBuckets object.
-                if (view && typeof view === 'object' && !view.error) ta.bucketView = view;
+                ta.bucketView = decodeBucketPack(msg.buckets);
             } catch (e) {
-                console.warn('parse deferred buckets failed:', e);
+                console.warn('decode deferred buckets failed:', e);
             }
         }
         if (ta && ta.regionControl && msg.regionStatesJSON) {

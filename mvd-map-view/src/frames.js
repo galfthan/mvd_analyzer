@@ -5,9 +5,11 @@
 // mvd-analytics/view/columnar.go):
 //   { windowMs, start, count,
 //     players: { name: { first, n, alive:[0/1], validFrom:{f:idx},
-//                        h|a|li|sh|nl|rk|cl:[i16], x|y|z:[i32], at:[str],
+//                        h|a|li|sh|nl|rk|cl:[i16], x|y|z:[f32], at:[str],
 //                        rl|lg|gl|ssg|sng|q|pe|r|sp|d:[0/1] } },
 //     teams:   { name: { rl|lg|rllg|w|gl|q|pe|r|pw|th|ta:[int], abt:{ra|ya|ga:[int]} } } }
+// The columns may be plain arrays (the JSON) or typed arrays (the web's
+// bucket pack, mvd-web/src/lib/bucketpack.js); everything here only indexes.
 // Time axis is implicit: time(i) = (start + i*windowMs)/1000 seconds, so
 // time→index is O(1) arithmetic (no per-bucket binary search). Booleans and
 // the alive mask are 0/1. A player only "exists" at bucket i while alive[i]

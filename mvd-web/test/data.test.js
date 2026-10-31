@@ -35,6 +35,12 @@ function emptyPack() {
     return buf;
 }
 
+// The Go-written bucket pack the decoder test uses (bucketpack.test.js).
+function bucketPack() {
+    const b = readFileSync(new URL('./fixtures/bucket-pack.bin', import.meta.url));
+    return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+}
+
 async function readySource() {
     const w = new FakeWorker();
     const src = new WasmSource(w);
@@ -106,11 +112,13 @@ test('deferred buckets land on their own demo only', async () => {
     const second = await analyze(w, src, { timelineAnalysis: {} }, 'b.mvd');
     w.reply({
         type: 'buckets', reqId: first.req.reqId, bucketsMs: 3, regionMs: 1,
-        bucketsJSON: JSON.stringify({ t: [0] }),
+        buckets: bucketPack(),
         regionStatesJSON: JSON.stringify({ bucketStates: [1], stats: { x: 1 } }),
     });
     assert.deepEqual(await first.handle.ready('buckets'), { bucketsMs: 3, regionMs: 1 });
-    assert.deepEqual(first.handle.result.timelineAnalysis.bucketView, { t: [0] });
+    const view = first.handle.result.timelineAnalysis.bucketView;
+    assert.equal(view.windowMs, 700);
+    assert.ok(view.players['bär!'].x instanceof Float32Array);
     assert.deepEqual(first.handle.result.timelineAnalysis.regionControl, { bucketStates: [1], stats: { x: 1 } });
     assert.equal(second.handle.result.timelineAnalysis.bucketView, undefined);
     w.reply({ type: 'error', reqId: second.req.reqId, message: 'buckets blew up' });

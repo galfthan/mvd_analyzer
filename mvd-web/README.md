@@ -10,12 +10,13 @@ talks to it through a JS shim.
   for the parse-and-pin call and `takePositionPack()` for its position
   tracks (binary, below), plus the query API as bridge functions:
   `getDefaultBuckets()` (50 ms column-major `ColumnarBuckets` for the
-  Timeline/Map panels), `getBuckets(optsJSON)` (row or column via
-  `opts.layout`), `getEvents(filterJSON)`, `getStreamSlice(optsJSON)`,
+  Timeline/Map panels, as a binary bucket pack — below),
+  `getBuckets(optsJSON)` (row or column via `opts.layout`),
+  `getEvents(filterJSON)`, `getStreamSlice(optsJSON)`,
   `getStateAt(optsJSON)`, `getLocTrails(optsJSON)`, and
-  `recomputeRegionControl(regionsJSON)`. All take a JSON-string argument
-  (or none for `getDefaultBuckets`) and return a JSON string; under the
-  hood they call into `mvd-analytics/view` over the cached `lastResult`.
+  `recomputeRegionControl(regionsJSON)`. The rest take a JSON-string
+  argument and return a JSON string; under the hood they call into
+  `mvd-analytics/view` over the cached `lastResult`.
 - `index.html`, `src/`, `package.json`, `vite.config.js` — the page,
   built by Vite (`make build` runs `npm ci && npm run build` here, so
   node is needed to build). `src/main.js` is the module entry: it mounts
@@ -476,9 +477,17 @@ failure in it when the analyzer does not load.
    `ColumnarBuckets` via `view.BucketsColumnar`) and
    `recomputeRegionControl(defaults)` (region-control bucket states at
    50 ms, same grid) — and posts them as a second `buckets` message.
-   These are expensive (the bucket build alone is ~1 s in WASM), and
+   These are expensive (the bucket view of a 4on4 is ~1 s in WASM), and
    only the Timeline/Map tabs need them, so deferring them roughly halves
-   time-to-interactive. The Timeline/Map panels read the columnar view
+   time-to-interactive. The bucket view travels as a binary bucket pack
+   (`view.EncodeColumnarPack`, layout in
+   `mvd-analytics/view/columnar_pack.go`; 8.6 MB on a 4on4, where the
+   JSON was 12 MB and its marshal ~2 s), transferred, and decoded by
+   `src/lib/bucketpack.js` into the JSON's shape with typed-array
+   columns. A Go test writes `test/fixtures/bucket-pack.{bin,json}` —
+   one view as pack and as JSON — and the decoder's test checks they
+   agree (regenerate: `go test ./mvd-analytics/view -run
+   TestColumnarPackFixture -args -update-bucket-pack-fixture`). The Timeline/Map panels read the columnar view
    through the bucket-view accessors of `mvd-map-view/src/frames.js`
    (`bucketIndexAtTime`, `playerValAt`, `reconstructBucketPlayers`,
    `teamSnapshot`, …).

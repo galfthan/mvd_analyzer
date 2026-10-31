@@ -198,13 +198,16 @@ onmessage = function(e) {
             // Schema v7: highResBuckets and regionControl.bucketStates are
             // not parse-time fields; the existing panels still read them, so
             // build via the bridge and ship a second 'buckets' message.
-            let bucketsJSON = '';
+            // The view arrives as a bucket pack (src/lib/bucketpack.js),
+            // transferred rather than copied; a failure is an error JSON string.
+            let buckets = null;
             const tBuckets = performance.now();
             try {
-                bucketsJSON = getDefaultBuckets();
+                const b = getDefaultBuckets();
+                if (typeof b === 'string') console.warn('[mvd-worker] getDefaultBuckets failed:', b);
+                else buckets = b;
             } catch (err) {
                 console.warn('[mvd-worker] getDefaultBuckets failed:', err);
-                bucketsJSON = '';
             }
             const bucketsMs = performance.now() - tBuckets;
 
@@ -231,7 +234,8 @@ onmessage = function(e) {
                 `recomputeRegionControl ${regionMs.toFixed(1)} ms`
             );
 
-            postMessage({ type: 'buckets', reqId, bucketsJSON, regionStatesJSON, bucketsMs, regionMs });
+            postMessage({ type: 'buckets', reqId, buckets: buckets && buckets.buffer, regionStatesJSON, bucketsMs, regionMs },
+                buckets ? [buckets.buffer] : []);
         } catch (err) {
             postMessage({ type: 'error', reqId, message: err.message || String(err) });
         }

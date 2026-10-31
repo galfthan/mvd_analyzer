@@ -156,10 +156,12 @@ func getDemoInfo(this js.Value, args []js.Value) interface{} {
 
 // getDefaultBuckets returns the column-major ColumnarBuckets the
 // frontend's Timeline/Map panels read (50 ms, all fields, legacy
-// "first-sample-of-bucket" reducers, team aggregates). Columnar always
-// emits the raw loc index "li". See mvd-analytics/view/columnar.go for
-// the shape and mvd-map-view/src/frames.js for the JS accessors that
-// consume it.
+// "first-sample-of-bucket" reducers, team aggregates) as a bucket pack
+// in a Uint8Array — view.EncodeColumnarPack, decoded by
+// mvd-web/src/lib/bucketpack.js — or an {"error":...} JSON string.
+// Columnar always emits the raw loc index "li". See
+// mvd-analytics/view/columnar.go for the shape and
+// mvd-map-view/src/frames.js for the JS accessors that consume it.
 func getDefaultBuckets(this js.Value, args []js.Value) interface{} {
 	if lastResult == nil {
 		return errorJSON("no demo analyzed yet")
@@ -173,7 +175,13 @@ func getDefaultBuckets(this js.Value, args []js.Value) interface{} {
 	if err != nil {
 		return errorJSON(err.Error())
 	}
-	return respondJSON(cb)
+	pack, err := view.EncodeColumnarPack(cb)
+	if err != nil {
+		return errorJSON(err.Error())
+	}
+	arr := js.Global().Get("Uint8Array").New(len(pack))
+	js.CopyBytesToJS(arr, pack)
+	return arr
 }
 
 // getBuckets is the query API surface. Argument is a JSON string of
