@@ -64,6 +64,14 @@ func NewFromReader(r io.Reader) (*Source, error) {
 	return newSource(rc, rc), nil
 }
 
+// NewFromRaw wraps an already-decompressed MVD byte stream: no gzip
+// sniff, so a caller that inflates the demo itself (e.g. on another
+// goroutine) hands the parser exactly those bytes. The caller owns r;
+// Close is a no-op.
+func NewFromRaw(r io.Reader) *Source {
+	return newSource(r, nil)
+}
+
 func newSource(r io.Reader, closer io.Closer) *Source {
 	dec := mvd.NewDecoder(r)
 	p := parser.NewParser(dec)

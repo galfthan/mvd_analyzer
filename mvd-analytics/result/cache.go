@@ -49,7 +49,9 @@ import (
 // the representation this schema is already contracted on (the golden
 // corpus and the OpenAPI spec both pin it). gob is kept for exactly one
 // section, Streams, which is 97% of the bytes (50.5 MB of 52.3 MB on a
-// 4on4) and which JSON decodes 40x slower.
+// 4on4) and which JSON decodes 40x slower — and within it, the position
+// columns that are nearly all of those bytes skip gob too, written raw
+// after it (postrack_cache.go; ~8x cheaper both ways).
 //
 // The cost is ADDITIVE, not a replacement: the gob decode of Streams is
 // unchanged, and the ~1.75 MB of JSON for everything else adds ~11 ms to
@@ -78,10 +80,11 @@ import (
 // to every consumer. TestCacheRoundTripPreservesServedBytes is the proof.
 
 // cacheMagic guards against feeding a bare gob (a cache written by a
-// binary predating this codec) to DecodeCache. democache also keys the
-// tier-2 path on resultCacheFormat, so this is belt-and-braces: a stale
-// file is a miss, never a silent half-decode.
-var cacheMagic = [4]byte{'M', 'V', 'D', 'C'}
+// binary predating this codec), or an earlier layout of it, to
+// DecodeCache. democache also keys the tier-2 path on resultCacheFormat,
+// so this is belt-and-braces: a stale file is a miss, never a silent
+// half-decode.
+var cacheMagic = [4]byte{'M', 'V', 'D', '2'}
 
 // streamsBox wraps the one gob-encoded section so a nil Streams (a
 // degraded parse) is encodable — gob rejects a nil pointer passed
@@ -90,16 +93,18 @@ type streamsBox struct{ S *Streams }
 
 // EncodeCache serializes a Result for the tier-2 cache.
 //
-// Layout: magic[4] | jsonLen uint32 (little-endian) | JSON | gob(Streams).
-// The gob streams straight into the same buffer rather than through an
-// intermediate []byte, so the 30 MB of stream data is not copied twice.
+// Layout: magic[4] | jsonLen uint32 | JSON | gobLen uint32 | gob(Streams
+// without positions) | per player: hasPos byte, then the position columns
+// (postrack_cache.go). Lengths are little-endian. The buffer is sized once
+// up front, so the ~30 MB of columns are written in place, never regrown.
 func EncodeCache(r *Result) ([]byte, error) {
 	if r == nil {
 		return nil, fmt.Errorf("encode cache: nil result")
 	}
 
-	// Shallow copy so the caller's Result is never mutated — this runs on
-	// the live Result the LRU is still handing to concurrent requests.
+	// Shallow copies, never writes: the caller's Result is left exactly as
+	// it was (democache encodes before publishing it to the LRU, but a
+	// cache codec has no business mutating what it serializes).
 	rest := *r
 	rest.Streams = nil
 	restJSON, err := json.Marshal(&rest)
@@ -107,20 +112,55 @@ func EncodeCache(r *Result) ([]byte, error) {
 		return nil, fmt.Errorf("encode cache json: %w", err)
 	}
 
-	var buf bytes.Buffer
-	buf.Write(cacheMagic[:])
-	var lenBuf [4]byte
-	binary.LittleEndian.PutUint32(lenBuf[:], uint32(len(restJSON)))
-	buf.Write(lenBuf[:])
-	buf.Write(restJSON)
+	// Streams minus the position tracks, which follow raw.
+	var streams *Streams
+	posSize := 0
+	if r.Streams != nil {
+		s := *r.Streams
+		s.Players = make([]PlayerStream, len(r.Streams.Players))
+		for i, p := range r.Streams.Players {
+			if p.Position != nil {
+				posSize += positionTrackSize(p.Position)
+			}
+			p.Position = nil
+			s.Players[i] = p
+		}
+		streams = &s
+	}
+	var gobBuf bytes.Buffer
 	// Boxed: gob refuses a nil pointer at top level, and Streams is nil on
 	// a degraded parse. Inside a struct gob simply omits the field, which
 	// decodes back to nil — the right answer for a section that genuinely
 	// was not produced.
-	if err := gob.NewEncoder(&buf).Encode(streamsBox{S: r.Streams}); err != nil {
+	if err := gob.NewEncoder(&gobBuf).Encode(streamsBox{S: streams}); err != nil {
 		return nil, fmt.Errorf("encode cache streams: %w", err)
 	}
-	return buf.Bytes(), nil
+
+	out := make([]byte, 0, len(cacheMagic)+8+len(restJSON)+gobBuf.Len()+posSize+len(streams.playersOrNil()))
+	out = append(out, cacheMagic[:]...)
+	out = binary.LittleEndian.AppendUint32(out, uint32(len(restJSON)))
+	out = append(out, restJSON...)
+	out = binary.LittleEndian.AppendUint32(out, uint32(gobBuf.Len()))
+	out = append(out, gobBuf.Bytes()...)
+	if r.Streams != nil {
+		for i := range r.Streams.Players {
+			p := r.Streams.Players[i].Position
+			if p == nil {
+				out = append(out, 0)
+				continue
+			}
+			out = append(out, 1)
+			out = appendPositionTrack(out, p)
+		}
+	}
+	return out, nil
+}
+
+func (s *Streams) playersOrNil() []PlayerStream {
+	if s == nil {
+		return nil
+	}
+	return s.Players
 }
 
 // DecodeCache is EncodeCache's inverse.
@@ -132,15 +172,14 @@ func DecodeCache(data []byte) (*Result, error) {
 		return nil, fmt.Errorf("decode cache: bad magic (stale or foreign cache file)")
 	}
 	rest := data[len(cacheMagic):]
-	jsonLen := int(binary.LittleEndian.Uint32(rest[:4]))
-	rest = rest[4:]
-	// jsonLen < 0 is only reachable on a 32-bit build, where a corrupt
-	// length >= 2^31 wraps negative and rest[:jsonLen] would panic instead
-	// of erroring. Unreachable on the amd64 target; one comparison closes it.
-	if jsonLen < 0 || jsonLen > len(rest) {
-		return nil, fmt.Errorf("decode cache: json length %d exceeds payload %d", jsonLen, len(rest))
+	jsonBytes, rest, err := cacheSection(rest, "json")
+	if err != nil {
+		return nil, err
 	}
-	jsonBytes, gobBytes := rest[:jsonLen], rest[jsonLen:]
+	gobBytes, posBytes, err := cacheSection(rest, "streams")
+	if err != nil {
+		return nil, err
+	}
 
 	var r Result
 	if err := json.Unmarshal(jsonBytes, &r); err != nil {
@@ -151,6 +190,33 @@ func DecodeCache(data []byte) (*Result, error) {
 	if err := gob.NewDecoder(bytes.NewReader(gobBytes)).Decode(&box); err != nil {
 		return nil, fmt.Errorf("decode cache streams: %w", err)
 	}
+	cr := colReader{b: posBytes}
+	for i := range box.S.playersOrNil() {
+		if len(cr.b) == 0 {
+			return nil, fmt.Errorf("decode cache positions: truncated at player %d", i)
+		}
+		has := cr.b[0]
+		cr.b = cr.b[1:]
+		if has != 0 {
+			box.S.Players[i].Position = readPositionTrack(&cr)
+		}
+	}
+	if cr.bad || len(cr.b) != 0 {
+		return nil, fmt.Errorf("decode cache positions: malformed")
+	}
 	r.Streams = box.S
 	return &r, nil
+}
+
+// cacheSection splits a uint32-length-prefixed section off data.
+func cacheSection(data []byte, name string) (section, rest []byte, err error) {
+	if len(data) < 4 {
+		return nil, nil, fmt.Errorf("decode cache: short payload before %s", name)
+	}
+	n := binary.LittleEndian.Uint32(data)
+	data = data[4:]
+	if uint64(n) > uint64(len(data)) {
+		return nil, nil, fmt.Errorf("decode cache: %s length %d exceeds payload %d", name, n, len(data))
+	}
+	return data[:n], data[n:], nil
 }

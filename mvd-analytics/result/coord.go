@@ -74,9 +74,10 @@ func (cs Coords) MarshalJSON() ([]byte, error) {
 //  2. recordPosition (append at record time) — analyzer/timeline_streams.go
 //  3. toPlayerStream (builder → result.PlayerStream) — analyzer/timeline_streams.go
 //  4. appendSlice (window concatenation) — analyzer/timeline_streams.go
-//  5. shiftAndFilterPosition (match-relative trim) — analyzer/postprocess.go
+//  5. shiftAndFilterPosition (match-relative trim) — analyzer/timeshift.go
 //  6. this MarshalJSON shadow struct — result/coord.go
 //  7. the view-layer kind/slice/columnar plumbing — mvd-analytics/view
+//  8. the tier-2 cache codec (append/readPositionTrack) — result/postrack_cache.go
 func (p PositionTrack) MarshalJSON() ([]byte, error) {
 	type shadow struct {
 		T   []int32 `json:"t"`

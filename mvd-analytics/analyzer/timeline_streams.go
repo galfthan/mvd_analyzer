@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"math"
+	"slices"
 	"sort"
 	"strconv"
 	"sync"
@@ -398,6 +399,43 @@ func (b *streamBuilder) appendSlice(src *streamBuilder, startMs, endMs int32) {
 	hasVX := len(src.posVX) == len(src.posT)
 	hasVY := len(src.posVY) == len(src.posT)
 	hasVZ := len(src.posVZ) == len(src.posT)
+	// Size the position columns once: a whole-match fragment is hundreds
+	// of thousands of samples, and growing nine columns by doubling
+	// copies each several times over.
+	n := 0
+	for _, t := range src.posT {
+		if in(t) {
+			n++
+		}
+	}
+	b.posT = slices.Grow(b.posT, n)
+	b.posX = slices.Grow(b.posX, n)
+	b.posY = slices.Grow(b.posY, n)
+	b.posZ = slices.Grow(b.posZ, n)
+	if hasLi {
+		b.posLi = slices.Grow(b.posLi, n)
+	}
+	if hasH {
+		b.posH = slices.Grow(b.posH, n)
+	}
+	if hasLq {
+		b.posLq = slices.Grow(b.posLq, n)
+	}
+	if hasVP {
+		b.posVP = slices.Grow(b.posVP, n)
+	}
+	if hasVYa {
+		b.posVYa = slices.Grow(b.posVYa, n)
+	}
+	if hasVX {
+		b.posVX = slices.Grow(b.posVX, n)
+	}
+	if hasVY {
+		b.posVY = slices.Grow(b.posVY, n)
+	}
+	if hasVZ {
+		b.posVZ = slices.Grow(b.posVZ, n)
+	}
 	for i, t := range src.posT {
 		if !in(t) {
 			continue
@@ -943,6 +981,15 @@ func (b *streamBuilder) emitLocStream() {
 type posableMover struct {
 	track *moverTrack
 	hull  *mapclip.Hull
+	// lo, hi bound the sample origins the hull can reach over the whole
+	// track (Hull.SweptFootprintBox); a sample outside them leaves the
+	// mover out of its scene without posing it.
+	lo, hi [3]float32
+	reach  bool
+}
+
+func (p *posableMover) mayReach(x, y, z float32) bool {
+	return p.reach && x >= p.lo[0] && x <= p.hi[0] && y >= p.lo[1] && y <= p.hi[1] && z >= p.lo[2]
 }
 
 // resolveFloorHeights populates each player's PositionTrack.H column —
@@ -993,7 +1040,18 @@ func (a *TimelineAnalyzer) resolveFloorHeights() {
 	posable := make([]posableMover, len(moverEnts))
 	for i, ent := range moverEnts {
 		mt := a.movers[ent]
-		posable[i] = posableMover{track: mt, hull: a.moverHulls[mt.subModel]}
+		p := posableMover{track: mt, hull: a.moverHulls[mt.subModel]}
+		if len(mt.org) > 0 {
+			minOrg, maxOrg := mt.org[0], mt.org[0]
+			for _, o := range mt.org[1:] {
+				for k := range o {
+					minOrg[k] = min(minOrg[k], o[k])
+					maxOrg[k] = max(maxOrg[k], o[k])
+				}
+			}
+			p.lo, p.hi, p.reach = p.hull.SweptFootprintBox(minOrg, maxOrg)
+		}
+		posable[i] = p
 	}
 	slots := make([]int, 0, len(a.playerState))
 	for slot := range a.playerState {
@@ -1066,12 +1124,17 @@ func (a *TimelineAnalyzer) resolveFloorHeightsSlot(b *streamBuilder, posable []p
 			continue
 		}
 
-		// Mover poses advance per sample regardless of the liquid
-		// short-circuit below: atCursor is a monotonic forward scan, so
-		// touching it every sample keeps the cursors cheap and lets the
-		// repeat check compare this sample's scene against the last.
+		// The scene is the movers this sample can reach, posed at its
+		// time. A mover out of reach over its whole track can't affect
+		// the floor, so it is left out unposed — its cursor just scans
+		// further on the next sample that reaches it (atCursor is a
+		// monotonic forward scan) — and its moving or toggling doesn't
+		// break the repeat check below.
 		scratch = scratch[:0]
 		for mi := range posable {
+			if !posable[mi].mayReach(x, y, z) {
+				continue
+			}
 			org, vis := posable[mi].track.atCursor(b.posT[i], &cursors[mi])
 			if !vis {
 				continue

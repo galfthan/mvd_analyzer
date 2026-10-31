@@ -9,6 +9,10 @@ import (
 
 // UserInfoEvent is emitted when player info is updated
 type UserInfoEvent struct {
+	// Player is a snapshot of the slot's info as of this event — the
+	// parser's own record keeps changing (later userinfo, setinfo and
+	// svc_updatefrags), and an event must not change after it is emitted
+	// (a consumer may hold it, or read it on another goroutine).
 	Player *mvd.PlayerInfo
 	TimeMs int32
 
@@ -130,7 +134,8 @@ func (p *Parser) parseUserInfo(r *mvd.BufferReader, timeMs int32) error {
 	// Emit event. An empty userinfo string is the server's drop broadcast
 	// (see UserInfoEvent.Vacated); svc_setinfo can never carry it, so only
 	// this path sets the flag.
-	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs, Vacated: userinfo == ""})
+	snap := *player
+	return p.emit(&UserInfoEvent{Player: &snap, TimeMs: timeMs, Vacated: userinfo == ""})
 }
 
 // parseSetInfo parses svc_setinfo (single key/value update for a player).
@@ -183,7 +188,8 @@ func (p *Parser) parseSetInfo(r *mvd.BufferReader, timeMs int32) error {
 		return nil
 	}
 
-	return p.emit(&UserInfoEvent{Player: player, TimeMs: timeMs, Partial: true})
+	snap := *player
+	return p.emit(&UserInfoEvent{Player: &snap, TimeMs: timeMs, Partial: true})
 }
 
 // parseUserInfoString parses a backslash-delimited userinfo string

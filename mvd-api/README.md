@@ -422,6 +422,12 @@ a demo is *not* streams, so a smaller game pays proportionally more (a
 repaired (the information is gone), so the bump re-parses them once on
 next touch.
 
+`f4` takes the position columns — nearly all of `Streams`' bytes — out of
+gob: they follow it raw, little-endian, length-prefixed
+(`mvd-analytics/result/postrack_cache.go`). Served bytes are unchanged; a
+4on4's tier-2 write drops from ~335 ms to ~85 ms and its read from ~265 ms
+to ~105 ms.
+
 Tier 3 holds the lazily-materialised `los` artifact (per-player LOS/PVS) as a
 side-gob so its multi-second raycast survives a process restart or an LRU
 eviction: after the base `Result` is served from tier 2, `/los` splices the

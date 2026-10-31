@@ -202,7 +202,16 @@ func (a *TimelineAnalyzer) detectFragStreaks(topN int, names *NameTable, userIDs
 		if allStreaks[i].Frags != allStreaks[j].Frags {
 			return allStreaks[i].Frags > allStreaks[j].Frags
 		}
-		return allStreaks[i].Duration < allStreaks[j].Duration // Tie-break: shorter run = more impressive
+		if allStreaks[i].Duration != allStreaks[j].Duration {
+			return allStreaks[i].Duration < allStreaks[j].Duration // Tie-break: shorter run = more impressive
+		}
+		// Equal runs: earlier first, then by name, so the order never
+		// depends on the (map-ordered) input — two players' equal streaks
+		// swapped places from run to run.
+		if allStreaks[i].Time != allStreaks[j].Time {
+			return allStreaks[i].Time < allStreaks[j].Time
+		}
+		return allStreaks[i].PlayerName < allStreaks[j].PlayerName
 	})
 
 	// Stamp the userid of the connection the player held at the run's OWN

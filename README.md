@@ -447,7 +447,10 @@ points, TE_GUNSHOT miss puffs, plus the rest of the TE vocabulary),
 `MoverSpawnEvent` / `MoverStateEvent` (inline brush-model entities —
 lifts, doors, trains — identity plus per-frame origin while moving).
 Domain types carried by events — `ServerData`, `PlayerInfo` — are
-source-agnostic.
+source-agnostic. An event never changes after the Source hands it out
+(`UserInfoEvent.Player` is a snapshot, not the parser's live record), so
+with `Registry.Parallel` the event pass reads the Source on its own
+goroutine, overlapping decompress + parse with the analyzers.
 
 `DeathEvent` / `SpawnEvent` are derived events the parser synthesises
 from `StatHealth` edges so analytics never has to reconstruct

@@ -5,6 +5,20 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (perf-analysis) — a faster full analysis
+
+No schema change; every Result is byte-identical. mvd-api's cold parse
+of a 4on4 drops from ~2.9 s to ~1.9 s and the tier-2 cache write / read
+from ~335 / ~265 ms to ~70 / ~105 ms:
+
+- Floor-height traces test and pose only the movers a sample can reach.
+- With `Registry.Parallel` the event pass is a pipeline: the demo is
+  inflated, parsed and analysed on three goroutines.
+  `UserInfoEvent.Player` is now a snapshot rather than the parser's live
+  record, so events are immutable once emitted.
+- The tier-2 cache writes position columns raw instead of via gob
+  (`resultCacheFormat` 4 — f3 files are re-parsed once on next touch).
+
 ## unreleased (web-svelte) — a player-like timeline, clips from the selection, a light player
 
 Schema v78 (additive): a weapon pickup's run has an end on every row —
