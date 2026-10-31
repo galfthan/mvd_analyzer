@@ -21,6 +21,7 @@
 
 import { WorkerClient } from './worker-client.js';
 import * as hub from './hub.js';
+import { attachPositions } from '../lib/postrack.js';
 
 /**
  * @typedef {import('./hub.js').HubGame} HubGame
@@ -151,6 +152,7 @@ export class WasmSource {
         const tParse = performance.now();
         const result = JSON.parse(reply.json);
         if (result.error) fail(new Error(result.error));
+        attachPositions(result, reply.pos);
         handle.result = result;
         handle.timings = { net, worker: reply.timings || null, parseMs: performance.now() - tParse };
         return handle;

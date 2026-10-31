@@ -163,6 +163,9 @@ onmessage = function(e) {
 
             const tAnalyze = performance.now();
             const jsonStr = analyzeMVD(bytes, filename);
+            // The position tracks, which the JSON leaves out (null after a
+            // failed analyze). Transferred, not copied, to the main thread.
+            const pos = takePositionPack();
             const wasmAnalyzeMs = performance.now() - tAnalyze;
 
             // Per-phase pipeline timings from the Go side (init, event
@@ -189,7 +192,7 @@ onmessage = function(e) {
             // are built *after* the result is sent. The worker being busy
             // here does not block the main thread — the result message is
             // already queued for it and renders while we compute.
-            postMessage({ type: 'result', reqId, json: jsonStr, timings });
+            postMessage({ type: 'result', reqId, json: jsonStr, pos: pos && pos.buffer, timings }, pos ? [pos.buffer] : []);
 
             // ---- Deferred: legacy 50ms buckets + region-control states ----
             // Schema v7: highResBuckets and regionControl.bucketStates are

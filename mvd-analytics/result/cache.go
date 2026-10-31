@@ -113,19 +113,12 @@ func EncodeCache(r *Result) ([]byte, error) {
 	}
 
 	// Streams minus the position tracks, which follow raw.
-	var streams *Streams
+	streams := r.Streams.WithoutPositions()
 	posSize := 0
-	if r.Streams != nil {
-		s := *r.Streams
-		s.Players = make([]PlayerStream, len(r.Streams.Players))
-		for i, p := range r.Streams.Players {
-			if p.Position != nil {
-				posSize += positionTrackSize(p.Position)
-			}
-			p.Position = nil
-			s.Players[i] = p
+	for _, p := range r.Streams.playersOrNil() {
+		if p.Position != nil {
+			posSize += positionTrackSize(p.Position)
 		}
-		streams = &s
 	}
 	var gobBuf bytes.Buffer
 	// Boxed: gob refuses a nil pointer at top level, and Streams is nil on

@@ -78,6 +78,8 @@ func (cs Coords) MarshalJSON() ([]byte, error) {
 //  6. this MarshalJSON shadow struct — result/coord.go
 //  7. the view-layer kind/slice/columnar plumbing — mvd-analytics/view
 //  8. the tier-2 cache codec (append/readPositionTrack) — result/postrack_cache.go
+//  9. the position pack (EncodePositionPack) — result/postrack_wire.go, and
+//     its decoder, mvd-web/src/lib/postrack.js
 func (p PositionTrack) MarshalJSON() ([]byte, error) {
 	type shadow struct {
 		T   []int32 `json:"t"`

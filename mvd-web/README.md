@@ -7,7 +7,8 @@ talks to it through a JS shim.
 ## What's in the box
 
 - `cmd/wasm/` — WASM entry point. Exports `analyzeMVD(bytes, filename)`
-  for the parse-and-pin call, plus the query API as bridge functions:
+  for the parse-and-pin call and `takePositionPack()` for its position
+  tracks (binary, below), plus the query API as bridge functions:
   `getDefaultBuckets()` (50 ms column-major `ColumnarBuckets` for the
   Timeline/Map panels), `getBuckets(optsJSON)` (row or column via
   `opts.layout`), `getEvents(filterJSON)`, `getStreamSlice(optsJSON)`,
@@ -455,9 +456,21 @@ failure in it when the analyzer does not load.
    and posts the bytes to `worker.js`.
 3. The worker calls `analyzeMVD(bytes, filename)` on the WASM instance.
 4. WASM code (`cmd/wasm/main.go`) runs the mvd-analytics default pipeline
-   and marshals the Result to JSON. The worker posts this back
-   **immediately** as a `result` message — the main thread renders the
-   Summary and the other non-bucket tabs right away.
+   and marshals the Result to JSON — all but the players' native-rate
+   position tracks, which are ~92% of it (45 of 49 MB on a 4on4) and as
+   JSON cost ~7 s to marshal in WASM. They come out of
+   `takePositionPack()` as one binary pack (`result.EncodePositionPack`,
+   layout in `mvd-analytics/result/postrack_wire.go`), which the worker
+   transfers rather than copies. The worker posts both back
+   **immediately** as a `result` message; `wasm-source.js` puts the
+   tracks back on `streams.players[].pos` (`src/lib/postrack.js`), so the
+   Result reads as before — except that each column is a typed array
+   viewing the pack (index and `.length` work, `Array.isArray` does not)
+   holding the unrounded float32s. The main thread renders the Summary
+   and the other non-bucket tabs right away. A Go test pins the pack
+   bytes in `test/fixtures/position-pack.bin`, which the decoder's test
+   reads (regenerate: `go test ./mvd-analytics/result -run
+   TestPositionPackFixture -args -update-pack-fixture`).
 5. **Then**, off the critical path, the worker runs the two bridge
    calls — `getDefaultBuckets()` (builds the 50 ms column-major
    `ColumnarBuckets` via `view.BucketsColumnar`) and

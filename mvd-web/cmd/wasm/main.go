@@ -25,6 +25,11 @@ var lastResult *analyzer.Result
 // browser console via getAnalysisTimings. Replaced by each analyze call.
 var lastTimingsJSON string
 
+// lastPositionPack is the most recent analyze's position tracks in
+// binary form (result.EncodePositionPack), which the JSON leaves out.
+// takePositionPack hands it to JS once and drops it.
+var lastPositionPack []byte
+
 func analyze(this js.Value, args []js.Value) interface{} {
 	if len(args) < 1 {
 		return errorJSON("missing data argument")
@@ -63,11 +68,17 @@ func analyze(this js.Value, args []js.Value) interface{} {
 
 	lastResult = res
 
+	// The position tracks are ~92% of the Result's JSON and nearly all of
+	// its marshal time, so they go to the page as a binary pack instead
+	// (takePositionPack) and the JSON omits them.
 	marshalStart := time.Now()
-	jsonBytes, err := json.Marshal(withPlayerStatsOverlay(res))
+	out := withPlayerStatsOverlay(res)
+	out.Streams = res.Streams.WithoutPositions()
+	jsonBytes, err := json.Marshal(out)
 	if err != nil {
 		return errorJSON(err.Error())
 	}
+	lastPositionPack = result.EncodePositionPack(res.Streams)
 	marshalMs := float64(time.Since(marshalStart).Microseconds()) / 1000
 
 	if tb, err := json.Marshal(map[string]interface{}{
@@ -92,18 +103,17 @@ func analyze(this js.Value, args []js.Value) interface{} {
 // splits, the KTX pickup tallies and ping/handicap/bot as if the demo had
 // no demoinfo block at all.
 //
-// Returns a shallow COPY with the section swapped: lastResult keeps the
-// stored derived form, so a later view call over it starts from the same
+// Returns a shallow COPY with the section swapped (and always a copy, so
+// the caller may swap more sections on it): lastResult keeps the stored
+// derived form, so a later view call over it starts from the same
 // state the analyzer produced rather than from an already-overlaid one.
 // ErrUnavailable (no section — a parse that produced no player streams)
 // leaves the payload untouched; the frontend handles an absent section.
 func withPlayerStatsOverlay(res *analyzer.Result) *analyzer.Result {
-	ps, err := view.PlayerStats(res, view.PlayerStatsOptions{})
-	if err != nil {
-		return res
-	}
 	out := *res
-	out.PlayerStats = ps
+	if ps, err := view.PlayerStats(res, view.PlayerStatsOptions{}); err == nil {
+		out.PlayerStats = ps
+	}
 	return &out
 }
 
@@ -112,6 +122,19 @@ func withPlayerStatsOverlay(res *analyzer.Result) *analyzer.Result {
 // marshal cost from the most recent analyzeMVD call, as a JSON string.
 // Kept separate from analyzeMVD's return value so the frontend's
 // Result-parsing path is unaffected.
+// takePositionPack returns the most recent analyze's position pack as a
+// Uint8Array (null once taken, or before any analyze) and releases Go's
+// copy: the page keeps the only one, viewing its columns in place.
+func takePositionPack(this js.Value, args []js.Value) interface{} {
+	if lastPositionPack == nil {
+		return js.Null()
+	}
+	arr := js.Global().Get("Uint8Array").New(len(lastPositionPack))
+	js.CopyBytesToJS(arr, lastPositionPack)
+	lastPositionPack = nil
+	return arr
+}
+
 func getAnalysisTimings(this js.Value, args []js.Value) interface{} {
 	if lastTimingsJSON == "" {
 		return "{}"
@@ -565,6 +588,7 @@ func main() {
 	js.Global().Set("getFrags", js.FuncOf(getFrags))
 	js.Global().Set("getWeaponPickups", js.FuncOf(getWeaponPickups))
 	js.Global().Set("getAnalysisTimings", js.FuncOf(getAnalysisTimings))
+	js.Global().Set("takePositionPack", js.FuncOf(takePositionPack))
 	js.Global().Set("getDemoInfo", js.FuncOf(getDemoInfo))
 	js.Global().Set("wasmVersion", map[string]interface{}{
 		"hash": GitHash,
