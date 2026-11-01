@@ -317,7 +317,10 @@ authentication. The data is public and read-only. The optional
 `Authorization: Bearer <label>` header (or `?label=` query param) is **not
 validated** — it's a non-secret request-source tag captured in the access log
 for analytics. Common labels: `mcp-claude-desktop`, `web-community`,
-`cli-script`. This paragraph applies **only** to this mode.
+`cli-script`. This paragraph applies **only** to this mode. In either mode
+the `?label=` query param is also logged on its own as `src` (cut to 32
+bytes): the web page tags its calls `web` and the light player `play`, so a
+report can tell them apart although both use the one web key.
 
 **Keyed (hosted) mode — `-auth-dir DIR` set.** `/v1/*` and
 `POST /v1/demos/{id}` require `Authorization: Bearer qwmvd_…`. Here the Bearer

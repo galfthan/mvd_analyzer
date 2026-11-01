@@ -8,7 +8,7 @@
         "type": "integer"
       },
       "label": {
-        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "description": "Non-secret traffic-source tag for access-log attribution (logged as `src`, cut to 32 bytes). Accepted on every endpoint; never affects the response.",
         "type": "string"
       },
       "players": {
@@ -122,7 +122,7 @@
         "type": "integer"
       },
       "label": {
-        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "description": "Non-secret traffic-source tag for access-log attribution (logged as `src`, cut to 32 bytes). Accepted on every endpoint; never affects the response.",
         "type": "string"
       },
       "loc": {
@@ -373,7 +373,7 @@
         "type": "integer"
       },
       "label": {
-        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "description": "Non-secret traffic-source tag for access-log attribution (logged as `src`, cut to 32 bytes). Accepted on every endpoint; never affects the response.",
         "type": "string"
       },
       "players": {
@@ -452,7 +452,7 @@
         ]
       },
       "label": {
-        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "description": "Non-secret traffic-source tag for access-log attribution (logged as `src`, cut to 32 bytes). Accepted on every endpoint; never affects the response.",
         "type": "string"
       },
       "players": {
@@ -736,7 +736,7 @@
         "type": "integer"
       },
       "label": {
-        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "description": "Non-secret traffic-source tag for access-log attribution (logged as `src`, cut to 32 bytes). Accepted on every endpoint; never affects the response.",
         "type": "string"
       },
       "minMs": {
@@ -932,7 +932,7 @@
         "default": 3000
       },
       "label": {
-        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "description": "Non-secret traffic-source tag for access-log attribution (logged as `src`, cut to 32 bytes). Accepted on every endpoint; never affects the response.",
         "type": "string"
       },
       "limit": {
@@ -1030,7 +1030,7 @@
         "type": "integer"
       },
       "label": {
-        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "description": "Non-secret traffic-source tag for access-log attribution (logged as `src`, cut to 32 bytes). Accepted on every endpoint; never affects the response.",
         "type": "string"
       },
       "limit": {
@@ -1210,7 +1210,7 @@
         "type": "integer"
       },
       "label": {
-        "description": "Non-secret traffic-source tag for access-log attribution. Accepted on every endpoint; never affects the response.",
+        "description": "Non-secret traffic-source tag for access-log attribution (logged as `src`, cut to 32 bytes). Accepted on every endpoint; never affects the response.",
         "type": "string"
       },
       "players": {

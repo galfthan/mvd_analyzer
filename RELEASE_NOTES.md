@@ -7,6 +7,10 @@ detail.
 
 ## unreleased (hub-warm) — new hub demos are ready before anyone opens them
 
+mvd-api's access log has a `src` field, the request's `?label=`: the web
+page tags its API calls `web` and the light player `play`, so usage reports
+can tell the two apart (both use the one web key).
+
 The Player (the tab and the light player) now starts with sound on; it
 was muted until switched on. Browsers hold a page's audio until a user
 gesture, so the sound starts with the first play.

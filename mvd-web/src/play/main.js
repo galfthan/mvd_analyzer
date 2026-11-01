@@ -4,6 +4,9 @@
 import { mount } from 'svelte';
 import PlayApp from './PlayApp.svelte';
 import { decodePlaylist } from '../lib/playlist.js';
+import { setApiSource } from '../data/api.js';
+
+setApiSource('play');
 
 const code = (location.hash.match(/^#playlist=([A-Za-z0-9_-]+)$/) || [])[1] || '';
 const clips = (code && await decodePlaylist(code)) || [];
