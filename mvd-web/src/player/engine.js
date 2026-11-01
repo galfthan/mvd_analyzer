@@ -21,7 +21,7 @@ import { demoOffsetSec, mapFileKey, userIdOf, nameOfUserId } from '../lib/result
 
 /**
  * @typedef {import('../../../mvd-fte-player/src/fte-controller.js').FteController} FteController
- * @typedef {import('../data/wasm-source.js').DemoHandle} DemoHandle
+ * @typedef {import('../state/demo.js').DemoHandle} DemoHandle  (or the light player's LightHandle: result, ref, demo())
  * @typedef {ReturnType<typeof import('../state/clock.js').createClock>} Clock
  * @typedef {import('../state/store.js').Store<string>} TabStore
  * @typedef {import('../lib/playlist.js').Track} Track
@@ -101,6 +101,8 @@ export class PlayerEngine {
         this.iframe = null;
         /** @type {string | null} */
         this.blobUrl = null;
+        /** @type {Promise<void> | null} */
+        this.demoWait = null;      // the demo's bytes, while they download
         /** @type {FteController | null} */
         this.fte = null;
         /** @type {number | null} */
@@ -182,11 +184,33 @@ export class PlayerEngine {
         if (this.active()) this.ensure();
     }
 
+    // ensure starts the engine on the current demo once its bytes are in:
+    // at once for a local file, after the hub CDN download for a demo read
+    // from mvd-api, which fetches them only when something wants to play it
+    // (DemoHandle.demo()). A teardown or another demo meanwhile drops it.
     ensure() {
-        if (this.iframe || !this.handle?.result || !this.host) return;
+        if (this.iframe || this.demoWait || !this.handle?.result || !this.host) return;
         const handle = this.handle;
-        const demoUrl = URL.createObjectURL(handle.demoBlob);
-        const demoPath = handle.gzipped ? 'qw/match.mvd.gz' : 'qw/match.mvd';
+        const wait = handle.demo().then(({ blob, gzipped }) => {
+            if (this.demoWait !== wait) return;
+            this.demoWait = null;
+            if (this.handle === handle && this.host && this.active()) this.start(handle, blob, gzipped);
+        }, (/** @type {unknown} */ err) => {
+            if (this.demoWait === wait) this.demoWait = null;
+            console.error('player: the demo download failed:', err);
+        });
+        this.demoWait = wait;
+    }
+
+    /**
+     * @param {DemoHandle} handle
+     * @param {Blob} blob
+     * @param {boolean} gzipped
+     */
+    start(handle, blob, gzipped) {
+        const host = /** @type {HTMLElement} */ (this.host);
+        const demoUrl = URL.createObjectURL(blob);
+        const demoPath = gzipped ? 'qw/match.mvd.gz' : 'qw/match.mvd';
         const iframe = document.createElement('iframe');
         iframe.src = 'fte-player/player.html';
         iframe.title = 'Demo player';
@@ -203,7 +227,7 @@ export class PlayerEngine {
         }, { once: true });
         this.blobUrl = demoUrl;
         this.iframe = iframe;
-        this.host.appendChild(iframe);
+        host.appendChild(iframe);
     }
 
     // adopt takes a fresh engine once its demo runs: the settings carried
@@ -286,7 +310,7 @@ export class PlayerEngine {
         if (this.iframe) this.iframe.remove();
         if (this.blobUrl) URL.revokeObjectURL(this.blobUrl);
         Object.assign(this, {
-            blobUrl: null, iframe: null, fte: null, seekTimer: null,
+            blobUrl: null, demoWait: null, iframe: null, fte: null, seekTimer: null,
             pendingSeek: null, seekTarget: null, onReady: null,
             slow: null, consoleOpen: false,
         });

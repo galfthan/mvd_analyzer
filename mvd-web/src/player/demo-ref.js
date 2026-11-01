@@ -3,7 +3,7 @@
 import { demoOffsetSec, mapFileKey } from '../lib/result.js';
 
 /**
- * @param {import('../data/wasm-source.js').DemoHandle | null} handle
+ * @param {import('../state/demo.js').DemoHandle | null} handle
  * @param {string[] | null | undefined} teamOrder
  * @returns {import('../lib/playlist.js').ClipDemo | null}
  */

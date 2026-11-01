@@ -104,7 +104,9 @@ MVD_API=http://127.0.0.1:8090/v1/ make serve   # …or via a local `mvd-api serv
 The page reads hub search, game lookup and (soon) hub demos from
 mvd-api at `/api` on its own origin; `scripts/serve-dev.py` forwards that
 path to `MVD_API` with `MVD_API_KEY` added, as Caddy does in production.
-Without a reachable API, search reports the error.
+Without a reachable API the page still works on its own: search and
+game lookup query the hub directly, and hub demos are analysed in the
+browser.
 
 ### Build the WASM bundle for deploy
 

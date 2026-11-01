@@ -25,11 +25,14 @@ export class ApiError extends Error {
     }
 
     // canFallBack: the answer says nothing about the demo — the API is
-    // unreachable, refused the key, is throttling or failing — so analysing
-    // it in the browser could still succeed. A 404 (no such game) or a 4xx
-    // for the request itself would fail there too.
+    // unreachable, refused the key, is throttling or failing, or is not
+    // there at all (a 404 without mvd-api's error envelope: a static server
+    // with no /api) — so the hub directly, or analysing in the browser,
+    // could still succeed. mvd-api's own 404 (no such game) or a 4xx for
+    // the request itself would fail there too.
     get canFallBack() {
-        return this.status === 0 || this.status === 401 || this.status === 403 || this.status === 429 || this.status >= 500;
+        return this.status === 0 || this.status === 401 || this.status === 403 || this.status === 429 ||
+            this.status >= 500 || (this.status === 404 && !this.code);
     }
 }
 

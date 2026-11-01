@@ -32,7 +32,7 @@ import { regionRowsFromRegions, readRegionDefs, resolveRegions, regionOverrideJS
  * @typedef {import('../lib/regions.js').RegionDef} RegionDef
  * @typedef {import('../lib/regions.js').Region} Region
  * @typedef {import('../lib/regions.js').RegionPoint} RegionPoint
- * @typedef {import('../data/wasm-source.js').DemoHandle} DemoHandle
+ * @typedef {import('../state/demo.js').DemoHandle} DemoHandle
  *
  * @typedef {object} RegionControl
  * @property {'loaded' | 'resolved' | 'computed'} stage

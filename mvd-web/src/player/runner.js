@@ -24,7 +24,7 @@ import { toast } from './toast.js';
  * @typedef {import('./playlist-store.js').Run} Run
  * @typedef {ReturnType<typeof import('./page-driver.js').createPageDriver>} PageDriver
  * @typedef {import('./engine.js').PlayerEngine | PageDriver} Driver
- * @typedef {import('../data/wasm-source.js').DemoHandle} DemoHandle
+ * @typedef {import('../state/demo.js').DemoHandle} DemoHandle
  *
  * @typedef {object} RunnerDeps
  * @property {import('./engine.js').PlayerEngine} engine

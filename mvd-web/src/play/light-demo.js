@@ -6,7 +6,7 @@
 import { fetchGame, downloadDemo } from '../data/hub.js';
 
 /**
- * @typedef {{ ref: { key: string, gameId: number }, demoBlob: Blob, gzipped: boolean, result: any }} LightHandle
+ * @typedef {{ ref: { key: string, gameId: number }, demo: () => Promise<{ blob: Blob, gzipped: boolean }>, result: any }} LightHandle
  */
 
 // lightResult: the few Result fields the engine and demoRefOf read.
@@ -30,10 +30,10 @@ export function lightResult(map, offsetSec) {
 export async function loadLightDemo(gameId, offsetSec) {
     const game = await fetchGame(gameId);
     const bytes = await downloadDemo(game);
+    const file = { blob: new Blob([bytes]), gzipped: bytes.length > 1 && bytes[0] === 0x1f && bytes[1] === 0x8b };
     return {
         ref: { key: `hub:${gameId}`, gameId },
-        demoBlob: new Blob([bytes]),
-        gzipped: bytes.length > 1 && bytes[0] === 0x1f && bytes[1] === 0x8b,
+        demo: async () => file,
         result: lightResult(game.map || '', offsetSec),
     };
 }

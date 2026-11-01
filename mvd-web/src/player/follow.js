@@ -34,7 +34,7 @@ export function watched() {
 // watchOrder: the demo's players as the POV bar lists them — by the
 // canonical team order, then by name.
 /**
- * @param {import('../data/wasm-source.js').DemoHandle | null} handle
+ * @param {import('../state/demo.js').DemoHandle | null} handle
  * @param {import('../state/teams.js').TeamsState} t
  * @returns {string[]}
  */

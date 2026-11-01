@@ -1,11 +1,14 @@
 // wasm-source.js — the data layer's in-browser implementation: demos are
 // analysed by the Go pipeline compiled to WASM, running in static/worker.js.
+// The page's source (src/data/page-source.js) uses it for local files, and
+// for a hub demo mvd-api cannot answer for; it is created, and the wasm
+// loaded, on the first such load.
 //
 // The page asks a source to `load()` a demo and gets a DemoHandle back; it
-// never posts to the worker or fetches from the hub itself. A later
-// API-backed source answers the same calls from mvd-api (see
-// plan-frontend-restructure.md), which is why the handle speaks in Result
-// sections and view-query names rather than worker messages.
+// never posts to the worker or fetches from the hub itself. The API-backed
+// source (src/data/api-source.js) answers the same calls from mvd-api,
+// which is why the handle speaks in Result sections and view-query names
+// rather than worker messages.
 //
 // The worker holds ONE analysed demo (the Go side's lastResult), so a handle
 // is only queryable while it is the current one: a new load() supersedes it
@@ -27,16 +30,18 @@ import { decodeBucketPack } from '../lib/bucketpack.js';
 /**
  * @typedef {import('./hub.js').HubGame} HubGame
  * @typedef {import('./worker-client.js').WorkerMessage} WorkerMessage
- * @typedef {'info' | 'download' | 'analyze'} LoadStage
+ * @typedef {'info' | 'server' | 'engine' | 'download' | 'analyze'} LoadStage
+ *   info: the hub row; server: mvd-api analysing (src/data/api-source.js);
+ *   engine: this analyzer starting; download: the demo file; analyze: here
  * @typedef {{ bytes: Uint8Array<ArrayBuffer>, name: string } | { game: HubGame } | { gameId: number | string }} LoadInput
  * @typedef {{ onStage?: (stage: LoadStage) => void, stillWanted?: () => boolean }} LoadOptions
  *   stillWanted: asked once the bytes are in, before the analyze — false
  *   drops the load (SupersededError) with the shown demo untouched; once
  *   the analyze is posted the worker holds the new demo, so it is shown
- * @typedef {{ net: { gameInfoFetch?: number, demoDownload?: number }, worker: any, parseMs: number }} LoadTimings
+ * @typedef {{ net: { gameInfoFetch?: number, demoDownload?: number, resultFetch?: number }, worker: any, parseMs: number }} LoadTimings
  */
 
-class SupersededError extends Error {
+export class SupersededError extends Error {
     constructor() {
         super('load superseded by a newer one');
         /** @type {true} */
@@ -53,6 +58,8 @@ export class WasmSource {
         this.client = new WorkerClient(worker);
         this.fetchImpl = fetchImpl;
         this.ready = this.client.ready;
+        this.up = false;  // the wasm has loaded
+        this.ready.then(() => { this.up = true; }, () => {});
         /** @type {DemoHandle | null} */
         this.current = null;
         this._loadSeq = 0;
@@ -223,6 +230,11 @@ export class DemoHandle {
         const p = new Promise((resolve, reject) => { settle = { resolve, reject }; });
         p.catch(() => {});
         this._buckets = { promise: p, ...settle };
+    }
+
+    // demo(): the demo file, for the Player (src/player/engine.js).
+    async demo() {
+        return { blob: this.demoBlob, gzipped: this.gzipped };
     }
 
     // section(name) resolves one top-level Result section.

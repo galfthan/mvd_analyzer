@@ -416,18 +416,41 @@ The page is Svelte behind a data layer
 ([`plan-frontend-restructure.md`](../plan-frontend-restructure.md)).
 The data layer is `src/data/` — `api.js` (the mvd-api client: every
 call goes to `api/...` on the page's origin, where the host adds the
-key), `hub.js` (game lookup and search through it, demo download from
-the hub's CDN), `worker-client.js` (reqId-correlated RPC over `worker.js`) and
+key), `hub.js` (game lookup and search through it, or the hub's catalog
+directly when it cannot answer; demo download from the hub's CDN), `worker-client.js` (reqId-correlated RPC over `worker.js`) and
 `wasm-source.js` (`WasmSource.load()` → a `DemoHandle` with the Result,
 `view()` queries, region recompute, line of sight, the deferred buckets
-and the demo bytes). The page's one source is `src/app/source.js`
+and `demo()`, the demo file), `api-source.js` (`ApiSource`: the same
+handle, answered by mvd-api) and `page-source.js` (`PageSource`, which
+picks one per load). The page's one source is `src/app/source.js`
 (`window.mvdData` for the console); `src/app/load.js` loads every demo
 through `loadDemo()`, and only it and the Search tab (`searchGames`) call
-the hub. A handle answers only while it is
-the current demo — the worker holds one.
-Hub demos are moving to mvd-api (an `ApiSource` beside `WasmSource`,
-WASM loaded only for local files):
-[`plan-web-api.md`](../plan-web-api.md).
+the hub ([`plan-web-api.md`](../plan-web-api.md)):
+
+- **A hub demo is read from mvd-api**: `/result` (the Result as the WASM
+  build hands it over, `view.PageResult`) and `/streams/positions` (the
+  position pack); `ready('buckets')` fetches `/buckets` as a bucket pack
+  and `/region-control?windowMs=50`; `view(fn, opts)` asks that view's
+  endpoint, the options as its query params; the demo file comes from the
+  hub's CDN only when the Player wants it. The browser loads no analyzer.
+- **A local file is analysed in the browser** by the WASM build, whose
+  worker and wasm are created on the first load that needs them. A
+  `WasmSource` handle answers only while it is the current demo — the
+  worker holds one; an API handle answers for as long as it is kept.
+- **The API cannot answer** (unreachable, the key refused, throttled,
+  failing, no `/api` at all) **or serves another schema** than the one
+  `make build` stamped into the page (`<meta name="schema">` — a preview
+  of a branch that changed it reads the production API): the demo is
+  analysed in the browser instead, and the console says why. A demo the
+  hub does not know fails as before.
+- **`?engine=wasm`** analyses every demo in the browser, as before the
+  API — for checking a branch's analysis changes on its preview.
+
+The two sources give the page the same data: one demo through each
+compares identical section by section — the Result, every position
+column, the bucket view, the region states and every view query — but
+for `filePath` (the API names the demo by its hash) and the API's
+`timeUnit` field on its envelopes.
 
 Shared state is in `src/state/` (`window.MvdState`): `clock` (the one
 match clock — every view follows it; the page's playback publishes as
@@ -460,14 +483,19 @@ run, when no demo is deep-linked). The sidebar sets
 subscribers, toggling the `active` class on the tab's `.tab-content`,
 and `switchTab()` re-selecting the current tab re-runs each tab's show
 path. The loading overlay is plain markup in `index.html`, so it shows
-before any script runs; `src/app/overlay.js` drops it when the analyzer
-is up (or, for a deep link, once the demo has rendered) and puts the
-failure in it when the analyzer does not load.
+before any script runs; `src/app/overlay.js` drops it at once (or, for a
+deep link, once the demo has rendered). The version tag comes from the
+build stamps on the page (`<meta name="build">`, `build-tag`,
+`build-date`); once the in-browser analyzer is up, its embedded hash is
+checked against the page's, and a mismatch (a deploy landing between
+the two fetches) reloads once.
 
 1. User drops an MVD file on the Search tab, pastes a hub.quakeworld.nu
    URL, or picks a row from the search results.
-2. `loadDemo()` hands it to `mvdData.load()`, which downloads hub demos
-   and posts the bytes to `worker.js`.
+2. `loadDemo()` hands it to `mvdData.load()`. A hub demo is read from
+   mvd-api (above) and goes straight to step 6, its buckets fetched on
+   `ready('buckets')`; the steps between are the in-browser path, which
+   downloads the demo when it has to and posts the bytes to `worker.js`.
 3. The worker calls `analyzeMVD(bytes, filename)` on the WASM instance.
 4. WASM code (`cmd/wasm/main.go`) runs the mvd-analytics default pipeline
    and marshals the Result to JSON — all but the players' native-rate
@@ -1566,8 +1594,9 @@ Map tab into this one as preset views in
 ## Demo search
 
 The Search tab queries the hub's `v1_games` catalog through mvd-api's
-`GET /v1/games/search` (as the game lookup does `/v1/games/{id}`; the
-page holds no hub key) and lets the user filter by
+`GET /v1/games/search` (as the game lookup does `/v1/games/{id}`) —
+or, when the API cannot answer or there is none, the hub's Supabase
+directly with its public anon key — and lets the user filter by
 player, team, map, mode (1v1 / 2v2 / 4v4 / FFA / CTF), game tag, and
 date range. All filters are AND-combined, empty fields act as
 wildcards, and matches are listed sorted by date descending in pages

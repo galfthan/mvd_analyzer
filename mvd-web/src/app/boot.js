@@ -1,6 +1,6 @@
 // boot.js — the page's start-up, run by src/main.js once the shell is
 // mounted: the URL follows the clock, segment, learn mode and tab; the
-// initial tab; the analyzer's readiness on the overlay; a deep-linked demo
+// initial tab; the version tag and the loading overlay; a deep-linked demo
 // (?gameId=, or the legacy ?hub=) and the URL's search filters.
 
 import { clock } from '../state/clock.js';
@@ -10,8 +10,7 @@ import { learnMode } from '../tabs/map/map-model.js';
 import { SEARCH_FIELDS } from '../data/hub.js';
 import { filtersFromParams } from '../lib/search.js';
 import { setSearchForm, runSearch } from '../tabs/search/search-model.js';
-import { mvdData } from './source.js';
-import { onAnalyzerReady, onAnalyzerFailed } from './overlay.js';
+import { showBuildVersion, prepareLoadingOverlay } from './overlay.js';
 import { updateUrlState, onClockTick } from './url.js';
 import { switchTab, setupTabs } from './tabs.js';
 import { installFullscreen } from './fullscreen.js';
@@ -36,7 +35,7 @@ export function boot() {
 
     // Pick the initial active tab. When deep-linking to a demo we want
     // the destination tab to be active even before the demo finishes
-    // loading, so the wasm-loading overlay covers the right pane and
+    // loading, so the loading overlay covers the right pane and
     // the user never glimpses the Search panel mid-flight.
     if (hubId) {
         switchTab(requestedTab || 'summary');
@@ -44,10 +43,10 @@ export function boot() {
         switchTab(requestedTab);
     } // else: leave the default (Search) active.
 
-    mvdData.ready.then(onAnalyzerReady, onAnalyzerFailed);
+    showBuildVersion();
+    prepareLoadingOverlay(!!hubId);
 
     // Auto-load demo if URL has ?gameId= (canonical) or ?hub= (legacy) param.
-    // The load waits for the analyzer itself.
     if (hubId) {
         hubInput.set(hubId);
         loadDeepLink();

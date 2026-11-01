@@ -21,14 +21,14 @@ import { topbarView } from '../lib/topbar.js';
 import { makeSortable } from '../ui/sortable.js';
 import { mvdData } from './source.js';
 import { startLoadTiming, recordLoadTimings, timeRender, finishLoadTiming } from './timing.js';
-import { hideLoadingOverlay, analyzerHasFailed } from './overlay.js';
+import { hideLoadingOverlay } from './overlay.js';
 import { applyUrlState, updateUrlState } from './url.js';
 import { switchTab, activeTabName } from './tabs.js';
 import { urlTab } from '../lib/url-state.js';
 
 // The DemoHandle behind the page: its view queries, region recompute and
 // line of sight answer for that demo only.
-/** @type {import('../data/wasm-source.js').DemoHandle | null} */
+/** @type {import('../state/demo.js').DemoHandle | null} */
 let currentDemo = null;
 
 /** @typedef {import('../lib/result.js').Result} Result */
@@ -36,6 +36,8 @@ let currentDemo = null;
 /** @type {Record<import('../data/wasm-source.js').LoadStage, string>} */
 const LOAD_STAGE_TEXT = {
     info: 'Fetching game info...',
+    server: 'Analyzing on the server...',
+    engine: 'Starting the in-browser analyzer...',
     download: 'Downloading demo...',
     analyze: 'Analyzing...',
 };
@@ -68,7 +70,7 @@ function setAnalysisStatus(result) {
 }
 
 // loadDemo loads one demo through the data source (`input` is what
-// WasmSource.load takes: a file's bytes, a hub row, or a hub game id) and
+// PageSource.load takes: a file's bytes, a hub row, or a hub game id) and
 // renders it. Shared by the file drop, the hub box, search clicks and
 // playlist runs. Resolves true once the demo is shown, false when a newer
 // load was asked for before this one finished (the last pick wins — the
@@ -92,9 +94,6 @@ export async function loadDemo(input, { deepLink = false, keepTab = false, still
     const ids = /** @type {{ game?: import('../data/hub.js').HubGame, gameId?: number | string }} */ (input);
     const hubId = ids.game?.id ?? ids.gameId;
     if (hubId != null) hubInput.set(String(hubId));
-    // The timing window opens once the analyzer is up, so a deep link's
-    // total does not include the wasm load (logged on its own).
-    await mvdData.ready;
     startLoadTiming();
     let handle;
     try {
@@ -176,8 +175,8 @@ async function loadHubInput(deepLink) {
         setLoadError(error);
         // If we were holding the loading overlay up for a deep-link auto-load,
         // drop it so the user sees the error message instead of a stuck
-        // spinner — unless the analyzer itself failed, which the overlay says.
-        if (!analyzerHasFailed()) hideLoadingOverlay();
+        // spinner.
+        hideLoadingOverlay();
     } finally {
         hubBusy.set(false);
     }
@@ -204,7 +203,7 @@ export async function loadGameFromSearch(game) {
 /** @param {{ bucketsMs: number, regionMs: number }} data */
 function onBucketsReady(data) {
     // Called only for the handle that is still currentDemo.
-    const cur = /** @type {import('../data/wasm-source.js').DemoHandle} */ (currentDemo);
+    const cur = /** @type {import('../state/demo.js').DemoHandle} */ (currentDemo);
     if (cur.result.timelineAnalysis) loadMapAndRegions(cur.result);
     switchTab(activeTabName());
 

@@ -256,6 +256,29 @@ test('hub helpers', async () => {
     const missing = async () => ({ ok: false, status: 404, json: async () => ({ error: { code: 'demo_not_found', message: 'the hub has no game 9' } }) });
     await assert.rejects(fetchGame(9, missing), (e) => e.status === 404 && /no game 9/.test(e.message) && !e.canFallBack);
 
+    // No API (a static server's bare 404) or one that cannot answer: the
+    // hub's catalog directly, with its anon key.
+    for (const apiDown of [{ ok: false, status: 404, json: async () => { throw new Error('not json'); } },
+        { ok: false, status: 503, json: async () => ({}) }]) {
+        const urls = [];
+        const direct = async (url, init) => {
+            urls.push({ url, init });
+            if (url.startsWith('api/')) return apiDown;
+            return url.includes('id=eq.')
+                ? { ok: true, json: async () => [{ id: 9 }] }
+                : { ok: true, json: async () => [], headers: new Map([['content-range', '0-99/1234']]) };
+        };
+        assert.deepEqual(await fetchGame(9, direct), { id: 9 });
+        const page = await searchGames({ player: 'milton', to: '2026-01-01' }, 100, direct);
+        assert.equal(page.total, 1234);
+        const hub = urls.filter((u) => u.url.includes('supabase.co'));
+        assert.equal(hub.length, 2);
+        assert.match(hub[1].url, /players_fts=fts\.'milton'/);
+        assert.match(hub[1].url, /timestamp=lte\.2026-01-01T23%3A59%3A59/);
+        assert.equal(hub[1].init.headers.Prefer, 'count=exact');
+        assert.ok(hub[0].init.headers.apikey);
+    }
+
     const fallback = async (url) => (url.startsWith('https://d.quake.world')
         ? { ok: false } : { ok: true, arrayBuffer: async () => new Uint8Array([4]).buffer });
     assert.deepEqual([...await downloadDemo({ demo_sha256: 'xyz1', demo_source_url: 'http://srv/x' }, fallback)], [4]);

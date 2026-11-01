@@ -15,7 +15,7 @@ const DEFAULT_S = 15;
 /**
  * @param {object} deps
  * @param {ReturnType<typeof import('./runner.js').createRunner>} deps.runner
- * @param {import('../state/store.js').Store<import('../data/wasm-source.js').DemoHandle | null>} deps.demo
+ * @param {import('../state/store.js').Store<import('../state/demo.js').DemoHandle | null>} deps.demo
  * @param {(clips: import('../lib/playlist.js').Clip[]) => void} deps.addClips
  * @param {(text: string) => void} deps.toast
  */

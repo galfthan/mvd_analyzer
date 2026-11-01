@@ -64,7 +64,7 @@
 
     function apply() {
         // The editor shows only while a demo's regions are in effect.
-        applyRegionDefs(/** @type {import('../../data/wasm-source.js').DemoHandle} */ (demo.get()), readRegionDefs(rows));
+        applyRegionDefs(/** @type {import('../../state/demo.js').DemoHandle} */ (demo.get()), readRegionDefs(rows));
     }
 
     /**
