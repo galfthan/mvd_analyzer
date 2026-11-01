@@ -84,7 +84,7 @@ From the repo root:
 
 ```bash
 make build                    # -> dist/
-make serve                    # build + python3 -m http.server 8080
+make serve                    # build + serve dist/ on :8080, /api forwarded (scripts/serve-dev.py)
 ```
 
 `make build` produces:
@@ -129,6 +129,14 @@ container (it has `curl` and `bash`), fetches the ~14 competitive-map
 BSPs from the public mirrors documented in `scripts/fetch-bsps.sh`, and
 verifies each sha256 — a missing or corrupt BSP hard-fails the deploy,
 which is preferred to a silent V1-everywhere regression.
+
+The page's `/api` path is the edge function
+`netlify/edge-functions/api.js` there: it forwards the page's routes
+(the allowlist the Caddyfile and `scripts/serve-dev.py` share,
+`test/api-routes.test.js`) to the production mvd-api with the key from
+the `MVD_API_KEY` environment variable (a service key, scoped to Deploy
+Previews and Branch deploys — `deploy/README.md` §4b). A preview of a
+branch therefore reads the production API.
 
 ## Tests
 
@@ -406,8 +414,10 @@ strip above the main pane.
 
 The page is Svelte behind a data layer
 ([`plan-frontend-restructure.md`](../plan-frontend-restructure.md)).
-The data layer is `src/data/` — `hub.js` (hub lookup, search, demo
-download), `worker-client.js` (reqId-correlated RPC over `worker.js`) and
+The data layer is `src/data/` — `api.js` (the mvd-api client: every
+call goes to `api/...` on the page's origin, where the host adds the
+key), `hub.js` (game lookup and search through it, demo download from
+the hub's CDN), `worker-client.js` (reqId-correlated RPC over `worker.js`) and
 `wasm-source.js` (`WasmSource.load()` → a `DemoHandle` with the Result,
 `view()` queries, region recompute, line of sight, the deferred buckets
 and the demo bytes). The page's one source is `src/app/source.js`
@@ -1032,7 +1042,7 @@ is no UI for it. Stages reported, in load order:
 
 - **wasm load** (one-time): fetch + `instantiateStreaming` + `go.run`,
   timed in `worker.js` and sent on the `ready` message.
-- **network**: `gameInfoFetch` (Supabase metadata) and `demoDownload`,
+- **network**: `gameInfoFetch` (the hub row, via `/api/games/{id}`) and `demoDownload`,
   timed on the main thread by the data layer.
 - **WASM analyze**: total wall time of the `analyzeMVD` call, plus the
   Go-side per-phase split from `getAnalysisTimings()` — `init`,
@@ -1555,13 +1565,14 @@ Map tab into this one as preset views in
 
 ## Demo search
 
-The Search tab queries the same Supabase `v1_games` table that the
-hub-loader uses (so no backend of our own) and lets the user filter by
+The Search tab queries the hub's `v1_games` catalog through mvd-api's
+`GET /v1/games/search` (as the game lookup does `/v1/games/{id}`; the
+page holds no hub key) and lets the user filter by
 player, team, map, mode (1v1 / 2v2 / 4v4 / FFA / CTF), game tag, and
 date range. All filters are AND-combined, empty fields act as
 wildcards, and matches are listed sorted by date descending in pages
 of 100. A footer under the list shows "N of M matches" (M is the exact
-total, from PostgREST's `count=exact` Content-Range) with a **Load
+total, the hub's exact count as the API reports it) with a **Load
 more** button that appends the next offset page until every match is
 shown. Clicking a row downloads the demo and runs the normal analysis
 pipeline; the user lands on the Summary tab.

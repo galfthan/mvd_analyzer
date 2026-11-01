@@ -213,7 +213,8 @@ be revoked on its own:
 
   Set it in the Netlify UI as `MVD_API_KEY` (Site configuration →
   Environment variables), scoped to **Deploy Previews** and **Branch
-  deploys**. The edge function that adds it ships with the web change.
+  deploys**. The edge function that adds it is
+  `netlify/edge-functions/api.js`.
 
 Rotating either: issue a new key, swap it in (restart Caddy, or redeploy
 the preview), then `keys revoke -hash …` the old one.

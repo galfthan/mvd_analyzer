@@ -130,9 +130,10 @@ bsps:
 	@./scripts/fetch-bsps.sh $(BSP_DIR)
 
 # Serve the built web bundle on localhost.
+# The built page plus its /api path, forwarded to MVD_API (default the
+# production API) with MVD_API_KEY added — see scripts/serve-dev.py.
 serve: build
-	@echo "Serving on http://localhost:8080"
-	@cd $(DIST_DIR) && python3 -m http.server 8080
+	@python3 scripts/serve-dev.py $(DIST_DIR) 8080
 
 # Run tests across every workspace module.
 #

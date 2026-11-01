@@ -31,7 +31,7 @@ mvd-api's `/v1/...` and adds `Authorization: Bearer <key>`.
 |---|---|---|
 | mvdanalyzer.com | Caddy route: `/api/*` → rewrite to `/v1/*`, `header_up Authorization` | `MVD_WEB_KEY` in Caddy's systemd env file |
 | Netlify previews | edge function `netlify/edge-functions/api.js` on `/api/*`, `fetch` to `https://mvdanalyzer.com/v1/...`, response streamed through | `MVD_API_KEY` Netlify env var, scoped to Deploy Previews + Branch deploys |
-| local dev | Vite dev proxy `/api` → local mvd-api (no auth) | none |
+| local dev | `make serve` (`scripts/serve-dev.py`): `/api` → `MVD_API` with `MVD_API_KEY` added | the environment |
 
 Both proxies forward only an allowlist of the GET paths the page uses
 (plus the region-control POST), so `/api` is not a general relay for the
@@ -75,7 +75,11 @@ is small).
 4. Per-client-IP rate limiting for a web key class.
 5. openapi.yaml, API.md, mvd-api README, RELEASE_NOTES.
 
-### 2. Plumbing; the Supabase key leaves the code
+### 2. Plumbing; the Supabase key leaves the code — done (web-client)
+
+`make serve` became `scripts/serve-dev.py` (dist/ plus the forwarded
+`/api`, `MVD_API` / `MVD_API_KEY`), and the Vite dev proxy was dropped:
+the page is not served by Vite in development.
 
 1. Caddy `/api` route, Netlify edge function, Vite dev proxy; `/api`
    joins the reserved prefixes the web bundle must not use.
@@ -112,3 +116,10 @@ is small).
    `analyzer.wasm` request; a local file loads WASM; the fallbacks work.
 4. mvd-web README, deploy/README.md (keys, Caddy route, Netlify env var),
    Caddyfile, netlify.toml, API.md, RELEASE_NOTES.
+
+### 6. Next: prepare new hub demos ahead of time
+
+Owner, 2026-11-01: once the page reads the API, watch the hub for new
+demos every ~5 minutes and parse them, so they are cached before anyone
+opens one. The tier GC already evicts the oldest files past
+`-cache-max-bytes`, so warming needs no pruning of its own.
