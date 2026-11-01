@@ -43,6 +43,8 @@ func runServe(args []string) error {
 		enablePortal  = fs.Bool("portal", false, "enable the Discord key portal at /portal (requires -auth-dir and the DISCORD_CLIENT_ID/DISCORD_CLIENT_SECRET/PORTAL_COOKIE_SECRET env vars); off = no /portal routes")
 		portalBaseURL = fs.String("portal-base-url", "", "public origin for the portal, e.g. https://qw.example.com; used to build the OAuth redirect_uri and links (required with -portal)")
 		playURL       = fs.String("play-url", playPageURL, "the web app's light player that POST /v1/playlist-links links to (a branch deploy's play.html, say)")
+		warmInterval  = fs.Duration("warm-interval", 0, "prepare new hub demos ahead of their first visitor: list the hub's games every interval and download, parse and pack each new one (needs the hub env vars); 0 disables")
+		warmWindow    = fs.Duration("warm-window", 7*24*time.Hour, "how far back -warm-interval prepares games: the first tick backfills this window")
 	)
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -129,6 +131,14 @@ func runServe(args []string) error {
 		"authEnabled", auth != nil,
 		"maxUploadBytes", *maxUpload, "uploadDailyBytes", *uploadBytes, "uploadDailyCount", *uploadCount,
 		"schemaVersion", result.CurrentSchemaVersion)
+
+	// The hub warmer stops with the server.
+	warmCtx, stopWarm := context.WithCancel(context.Background())
+	defer stopWarm()
+	if *warmInterval > 0 {
+		logger.Info("hub warm enabled", "interval", warmInterval.String(), "window", warmWindow.String())
+		go newWarmer(hub, cache, logger, *warmInterval, *warmWindow).run(warmCtx)
+	}
 
 	errCh := make(chan error, 1)
 	go func() {

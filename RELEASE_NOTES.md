@@ -5,6 +5,16 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (hub-warm) — new hub demos are ready before anyone opens them
+
+`mvd-api serve -warm-interval 5m` lists the hub's games every five
+minutes and downloads, parses and packs each new one, so a demo's first
+visitor gets the cached path (a 4on4's Result in ~0.2 s) instead of a
+cold parse. On start it backfills `-warm-window` (default a week, ~1300
+games). It runs one demo at a time through the same parse slots as
+visitors, keeps warmed demos out of the in-memory LRU, and never touches
+the files of a demo nobody opens, so the tier GC evicts those first.
+
 ## unreleased (web-client) — the web page talks to mvd-api
 
 The page's Search tab and game lookup go through mvd-api

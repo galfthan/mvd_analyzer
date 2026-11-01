@@ -337,7 +337,7 @@ func (c *Cache) GetResult(ctx context.Context, id DemoID) (*result.Result, Cache
 		// in acquireParse — so one caller's cancel can never become the shared
 		// inflight error that 500s the others. WithoutCancel preserves ctx
 		// values while making Done() never fire (go1.25).
-		return c.loadResult(context.WithoutCancel(ctx), sha, id)
+		return c.loadResult(context.WithoutCancel(ctx), sha, id, true)
 	})
 }
 
@@ -382,7 +382,10 @@ func (c *Cache) resolveSHA(id DemoID) (string, error) {
 }
 
 // loadResult walks the cache tiers. Runs once per SHA via singleflight.
-func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID) (*result.Result, CacheMeta, error) {
+// remember puts the Result in the in-memory LRU; the hub warmer (Warm)
+// leaves it out, so preparing demos nobody asked for yet does not push out
+// the ones being viewed.
+func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID, remember bool) (*result.Result, CacheMeta, error) {
 	meta := CacheMeta{SHA256: sha, SchemaVersion: result.CurrentSchemaVersion}
 
 	// Drain any GameInfo stashed by resolveSHA unconditionally, regardless
@@ -411,7 +414,9 @@ func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID) (*result.
 		if r, decErr := decodeResult(data); decErr == nil {
 			touch(rp)
 			touch(mp)
-			c.mem.put(sha, r)
+			if remember {
+				c.mem.put(sha, r)
+			}
 			meta.FromCache = true
 			return r, meta, nil
 		}
@@ -481,7 +486,9 @@ func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID) (*result.
 	} else if writeErr := writeFileAtomic(rp, data, 0o644); writeErr == nil {
 		c.maybeGC()
 	}
-	c.mem.put(sha, r)
+	if remember {
+		c.mem.put(sha, r)
+	}
 	return r, meta, nil
 }
 

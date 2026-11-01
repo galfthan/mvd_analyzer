@@ -125,7 +125,11 @@ source per load and falls back. Parity checked in headless Chromium on
 4. mvd-web README, deploy/README.md (keys, Caddy route, Netlify env var),
    Caddyfile, netlify.toml, API.md, RELEASE_NOTES.
 
-### 6. Next: prepare new hub demos ahead of time
+### 6. Prepare new hub demos ahead of time — done (hub-warm)
+
+`-warm-interval` / `-warm-window` on mvd-api (`mvd-api/warm.go`,
+`democache.Cache.Warm`). Owner, 2026-11-01: backfill a week, then every
+5 minutes; cache budget raised to fit (disk 81G).
 
 Owner, 2026-11-01: once the page reads the API, watch the hub for new
 demos every ~5 minutes and parse them, so they are cached before anyone
