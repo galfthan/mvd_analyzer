@@ -15,6 +15,7 @@ consistent with each other (and with the binaries).
 | Service | Bind | Behind Caddy at |
 |---|---|---|
 | mvd-api | `localhost:8080` | `/v1/*`, `/docs*`, `/openapi.yaml`, `/healthz`, `/portal*` |
+| mvd-api, for the web page | `localhost:8080` | `/api/*` → `/v1/*` with the page's key added (an allowlist of the routes the page reads; the rest of `/api` is a 404) |
 | mvd-mcp | `localhost:8081` | `/mcp*` (streamable HTTP) |
 | mvd-web | static files, `/opt/mvd/web` | everything else (`/`, `/assets/*`, `/analyzer.wasm`, …) |
 
@@ -34,7 +35,7 @@ Two rules keep the split sound (also in the Caddyfile header):
   the file server — prefer new endpoints under `/v1/` so the matcher
   never changes.
 - The web bundle must never ship assets under a reserved prefix
-  (`/v1`, `/docs`, `/openapi.yaml`, `/healthz`, `/portal`, `/mcp`).
+  (`/v1`, `/api`, `/docs`, `/openapi.yaml`, `/healthz`, `/portal`, `/mcp`).
 
 **Auth split:** the REST API requires an API key on every `/v1/*` call;
 MCP requires none — mvd-mcp holds its own operator-issued **service key**
@@ -159,10 +160,54 @@ EOF
 sudo chmod 600 /etc/mvd/mcp.env
 ```
 
-The full key is printed **once** — capture it. The same recipe (with
-`-note "mvd-web"`) issues the web client's key in phase 17+. End users
-who want direct REST access get their own keys from the portal at
+The full key is printed **once** — capture it. End users who want direct
+REST access get their own keys from the portal at
 `https://<domain>/portal`.
+
+### 4b. Issue the web page's keys
+
+The page reads hub demos from mvd-api at `/api/...` on its own origin
+([plan-web-api.md](../plan-web-api.md)). Whatever serves the page adds
+the key, so it never reaches the browser — one key per host, so each can
+be revoked on its own:
+
+- **This host (Caddy's `/api` route)** — a **per-client** key: a service
+  key rate-limited per visitor IP (`-rate-web`, `-burst-web` on
+  mvd-api), since every visitor shares it. Caddy reads it from its
+  environment per request:
+
+  ```sh
+  sudo -u mvd /opt/mvd/bin/mvd-api keys issue \
+      -auth-dir /opt/mvd/auth -per-client -note "mvd-web"
+  sudo tee /etc/caddy/mvd-web.env >/dev/null <<'EOF'
+  MVD_WEB_KEY=qwmvd_…
+  EOF
+  sudo chmod 600 /etc/caddy/mvd-web.env
+  sudo mkdir -p /etc/systemd/system/caddy.service.d
+  sudo tee /etc/systemd/system/caddy.service.d/mvd-web.conf >/dev/null <<'EOF'
+  [Service]
+  EnvironmentFile=/etc/caddy/mvd-web.env
+  EOF
+  sudo systemctl daemon-reload
+  ```
+
+  (The Caddy restart in §5 picks it up.) Without it every `/api` request
+  is a 401 and the page falls back to analysing in the browser.
+- **Netlify previews** — an ordinary **service** key: preview requests
+  arrive from Netlify's edge, so a visitor IP means nothing there, and
+  preview traffic is small enough for one shared bucket.
+
+  ```sh
+  sudo -u mvd /opt/mvd/bin/mvd-api keys issue \
+      -auth-dir /opt/mvd/auth -service -note "mvd-web-preview"
+  ```
+
+  Set it in the Netlify UI as `MVD_API_KEY` (Site configuration →
+  Environment variables), scoped to **Deploy Previews** and **Branch
+  deploys**. The edge function that adds it ships with the web change.
+
+Rotating either: issue a new key, swap it in (restart Caddy, or redeploy
+the preview), then `keys revoke -hash …` the old one.
 
 ## 5. Install the units and Caddy config
 
@@ -190,6 +235,12 @@ curl -sS https://qw.example.com/healthz            # {"ok":true,...} (mvd-api)
 #    mvd-mcp's healthz is on its own port; probe it ON THE BOX (Caddy only
 #    forwards /mcp* to the streamable handler, not /healthz):
 curl -sS http://localhost:8081/healthz             # {"ok":true} (mvd-mcp)
+
+# a1. The web page's API path adds the key (no Authorization sent here),
+#     and forwards only the page's routes:
+curl -sS -o /dev/null -w '%{http_code}\n' https://qw.example.com/api/games/222649       # 200
+curl -sS -o /dev/null -w '%{http_code}\n' https://qw.example.com/api/demos/gameId:222649/overview  # 404 (not on the allowlist)
+curl -sS -o /dev/null -w '%{http_code}\n' -X POST https://qw.example.com/api/demos          # 404 (no uploads on the page's key)
 
 # a2. Web app is served at the root (and API routes are NOT shadowed):
 curl -sS https://qw.example.com/ | grep -o '<title>[^<]*'   # the mvd-web title

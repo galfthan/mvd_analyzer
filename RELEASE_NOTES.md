@@ -28,6 +28,12 @@ page's key, which the page's proxy adds for every visitor. It is
 rate-limited per key and client IP (`-rate-web` 10/s, `-burst-web` 60)
 instead of per key, so one visitor cannot exhaust everyone's budget.
 
+The deploy Caddyfile forwards the web page's API path: `/api/...` on the
+page's own origin reaches mvd-api's `/v1/...` with the page's per-client
+key added (`MVD_WEB_KEY` in Caddy's environment), so the key never reaches
+the browser. Only the routes the page reads are forwarded; the rest of
+`/api` is a 404. Nothing calls it until the web change lands.
+
 ## unreleased (perf-wasm-data) — position tracks in binary, faster floor traces
 
 No schema change, and the floor heights are bit-identical. The floor
