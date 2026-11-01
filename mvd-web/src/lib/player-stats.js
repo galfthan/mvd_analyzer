@@ -86,7 +86,7 @@ export function teamOrder(canonical, sortedPlayers) {
 //
 // result.playerStats is the canonical per-player section (schema v61). The
 // WASM entry point applies the KTX overlay before marshalling
-// (mvd-web/cmd/wasm/main.go withPlayerStatsOverlay), so what reaches the
+// (view.PageResult, mvd-analytics/view/page_result.go), so what reaches the
 // browser is already merged — every family carries `src` saying whether the
 // numbers came from KTX's demoinfo block or from this pipeline's
 // reconstruction. The summary tab reads it and nothing else; the old

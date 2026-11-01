@@ -16,7 +16,7 @@ mvd-api [serve] [-addr ADDR] [-cache-dir PATH] [-cache-max-bytes N] [-max-parses
 mvd-api version
 mvd-api cache stats [-cache-dir PATH]
 mvd-api cache prune [-cache-dir PATH] [-max-bytes N | -older-than 30d | -all]
-mvd-api keys issue  -auth-dir DIR [-service] [-note S] [-discord-id ID] [-discord-name N]
+mvd-api keys issue  -auth-dir DIR [-service | -per-client] [-note S] [-discord-id ID] [-discord-name N]
 mvd-api keys revoke -auth-dir DIR (-key K | -hash H | -discord-id ID)
 mvd-api keys list   -auth-dir DIR
 ```
@@ -34,10 +34,12 @@ mvd-api keys list   -auth-dir DIR
 | `-parse-timeout`    | `120s`                                  | Wall-clock budget for a single cold demo parse (hub download or upload); `0` disables. Bounds how long a pathological demo can hold a parse slot |
 | `-log-format`       | `text`                                  | Access log format: `text` or `json` |
 | `-auth-dir`         | _(empty)_                               | Directory holding `keys.json`. **Empty = no auth** (localhost mode; today's behaviour). When set, `/v1/*` and `POST /v1/demos/{id}` require an `Authorization: Bearer qwmvd_…` key; see "Running authenticated vs local" below |
-| `-rate-user`        | `5`                                     | Auth mode: per-key sustained request rate (req/s) for portal (user) keys |
-| `-burst-user`       | `20`                                    | Auth mode: per-key burst (token-bucket size) for user keys |
-| `-rate-service`     | `50`                                    | Auth mode: per-key sustained request rate (req/s) for `service` keys (e.g. the first-party web app) |
-| `-burst-service`    | `200`                                   | Auth mode: per-key burst for service keys |
+| `-rate-user`        | `50`                                    | Auth mode: per-key sustained request rate (req/s) for portal (user) keys |
+| `-burst-user`       | `200`                                   | Auth mode: per-key burst (token-bucket size) for user keys |
+| `-rate-service`     | `500`                                   | Auth mode: per-key sustained request rate (req/s) for `service` keys (e.g. the first-party web app) |
+| `-burst-service`    | `2000`                                  | Auth mode: per-key burst for service keys |
+| `-rate-web`         | `100`                                   | Auth mode: per-client sustained request rate (req/s) for a `per-client` key (the web page's, added by its proxy) |
+| `-burst-web`        | `600`                                   | Auth mode: per-client burst for a per-client key |
 | `-portal`           | `false`                                 | Enable the Discord key portal at `/portal` (users self-service their own key). **Off = no `/portal` routes at all.** Requires `-auth-dir` **and** the three env vars below; see "The Discord key portal" |
 | `-portal-base-url`  | _(empty)_                               | Public origin of the deployment, e.g. `https://qw.example.com`. Used to build the OAuth `redirect_uri` (`<base>/portal/callback`) and absolute links. Required with `-portal` |
 | `-play-url`         | `https://mvdanalyzer.com/play.html`     | The web app's light player that `POST /v1/playlist-links` links to — point it at a branch deploy's `play.html` until production has the player |
@@ -64,11 +66,11 @@ tree so the anon key can rotate without a rebuild):
 | `HUB_SUPABASE_KEY` | Supabase anon key (public, read-only) |
 | `HUB_CDN_URL`      | Demo CDN base (e.g. `https://d.quake.world`); optional — without it, downloads fall back to each demo's source URL |
 
-These back on-demand demo fetch (cache miss) and `GET /v1/games/search`.
-Unlike the portal, they are **not** a startup requirement — the server
-starts and serves the local cache without them, but a cache miss and any
-`/games/search` return `502 hub_upstream` with a "hub not configured"
-message.
+These back on-demand demo fetch (cache miss), `GET /v1/games/search` and
+`GET /v1/games/{id}`. Unlike the portal, they are **not** a startup
+requirement — the server starts and serves the local cache without them,
+but a cache miss and any `/games/...` call return `502 hub_upstream` with
+a "hub not configured" message.
 
 Running the server is the default action — bare flags (or an explicit
 `serve`) start it. A positional first argument that isn't a known
@@ -112,11 +114,16 @@ and a looser `service` class (the four `-rate-*`/`-burst-*` flags above).
 Keys are managed with the `keys` subcommands (they edit `keys.json` directly —
 no running server needed):
 
-- `mvd-api keys issue -auth-dir DIR [-service] [-note S] [-discord-id ID] [-discord-name N]`
+- `mvd-api keys issue -auth-dir DIR [-service | -per-client] [-note S] [-discord-id ID] [-discord-name N]`
   — mint a key. **The full key is printed once, to stdout, and is never
   recoverable** (only its SHA-256 hash is stored). `-service` marks it for the
-  looser rate class. Issuing for a `-discord-id` that already has a key
-  **revokes the old one** (one active key per Discord user).
+  looser rate class. `-per-client` mints the web page's key — a service key
+  the page's own proxy adds for every visitor (Caddy's `/api` route on
+  mvdanalyzer.com) — rate-limited per key **and client IP** in the
+  `-rate-web` class, so one visitor cannot spend the others' budget; the
+  client IP is the `X-Forwarded-For` that proxy overwrites. Issuing for a
+  `-discord-id` that already has a key **revokes the old one** (one active
+  key per Discord user).
 - `mvd-api keys revoke -auth-dir DIR (-key K | -hash H | -discord-id ID)`
   — revoke by full key, key hash, or every active key of a Discord user.
 - `mvd-api keys list -auth-dir DIR` — hash **prefix** + metadata
@@ -225,6 +232,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | POST | `/v1/demos` | — (raw `.mvd`/`.mvd.gz` request body) | `{demoId, sha256, fromCache, schemaVersion}` (`uploadDemo` — analyze a local demo file; REST-only, deliberately not an MCP tool) |
 | POST | `/v1/demos/{id}` | — | `{demoId, sha256, fromCache, schemaVersion}` (`loadDemo` — warms the cache) |
 | GET | `/v1/demos/{id}/overview` | — | `Overview` (map, teams, players, playerUserIDs, analyzer `errors`, reader `parseWarnings`, and **`noMatch`** — present only on the 2% of demos that yield no analyzable match, naming why so "no match here" is distinguishable from "the parse failed") plus **`available`**, the per-demo capability manifest: one flag per detailed view, each mirroring that view's 422 predicate, so a consumer branches instead of probing. Includes `height` / `liquid` / `los`, which depend on the server's BSP provisioning and are otherwise undiscoverable. The inlined `topKills` / `topStreaks` / `topPowerups` lists were removed in v70 — fetch `/top-kills`, `/lives` or `/events` for those rows. |
+| GET | `/v1/demos/{id}/result` | — | the whole Result as the web page reads it (`view.PageResult`: `playerStats` with the KTX overlay, no position tracks — those are `/streams/positions` — and no line of sight — `/los`), gzip-encoded for a client that accepts it (ETag `…-gz"`); built once per demo and kept in memory |
 | GET | `/v1/demos/{id}/player-stats` | `players`, `teams` | `result.PlayerStatsResult` (canonical per-player + per-team row: corrected scoreboard incl. `maxSpree` / `maxQuadSpree` — always derived, gated with `kills`, best-of-team on a team row — plus damage, accuracy, pickup tallies, and possession time — time with each weapon / armor type / **no armor**. Computed for every demo; each family carries `src`: "derived" / "ktx" / "derived:unbounded" (damage) / "reconstructed" (damage rebuilt for a pre-instrumentation demo, and accuracy whose `hits` come from the aim reconstruction tier)) |
 | GET | `/v1/demos/{id}/demoinfo` | — | `result.DemoInfoResult` (KTX scoreboard — per-player weapon accuracy, kills/deaths/TK, damage, sprees, item counts, RL/LG transfers) |
 | GET | `/v1/demos/{id}/metadata` | — | `result.MetadataResult` (full fullserverinfo cvars + KTX match settings: timelimit, fraglimit, spawnmodel, antilag, midair, instagib, …) |
@@ -250,12 +258,14 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/loc-trails` | `from`, `to`, `players`, `minDwellMs`, `loc` | `view.LocTrailsView` |
 | GET | `/v1/demos/{id}/loc-table` | — | `{ "locTable": []string }` (decoder for `loc=index`; index 0 = "" no-loc) |
 | GET | `/v1/demos/{id}/region-control` | `windowMs, from, to, regions` | `result.RegionControlResult` |
+| POST | `/v1/demos/{id}/region-control` | `windowMs, from, to, regions`; body `{"regions": [{"name", "locs"}]}` | `result.RegionControlResult` over the posted layout in place of the stored one (the web region editor's) |
 | GET | `/v1/demos/{id}/highlights` | `kinds`, `players`, `preMs` | `view.HighlightsEnvelope` — `{timeUnit, kinds, preMs, discharges, quadbores, telefrags, airgibs}`, the stored highlight catalogue (`highlights`): every LG water discharge, quadbore (self-kill by own rl/gl while holding quad), telefrag (incl. pentagram deflections / spawnicides) and airgib as four lists of one `HighlightEvent` shape — `actor`, `victims[]`, `enemyKills`, `teamKills`, `damage`, `sources`, plus per kind `cells`, `weapon` + `quadHeldMs` + `quadFrags`, `teleKind`, `height` + `heightAboveAttacker`; every participant carries relation to the actor, health / armor / armorType / stack read one ms before the event, weapons, activeWeapon, powerups, loc and `stateSource`. All four lists always present (`[]` when none / excluded by `kinds`); `players` matches actor or victim; `preMs` recomputes the airgib list only. 422 `highlights_unavailable` without match streams or a frag log |
 | GET | `/v1/demos/{id}/top-windows` | `metric`, `mode`, `windowMs`, `gapMs`, `limit`, `perPlayer`, `players`, `weapons`, `from`, `to`, `dmg`, `minScore` | `view.TopWindowsView` — each player's best stretches, ranked by a summable metric (`frags`/`deaths`/`netFrags`/`damageGiven`/`damageTaken`/`netDamage`/`shots`/`hits`); one flat list, `scoredBy` on the envelope; ties on `score` (the common case) break on a fixed complementary metric — `damageGiven` ↔ `frags`, `damageTaken` ↔ `deaths` — summed unscoped in the response's damage family, so it equals the row's own stats field; `limit` and `perPlayer` share one rule — default on omit, negative = uncapped, explicit `0` a 400 (`limit` also caps at 200); `mode` picks the segmentation — `fixed` (default, every window `windowMs` long) or `gap` (a maximal run of scoring events no more than `gapMs` apart, scored by their sum), each rejecting the other's knob with a 400 and `gapMs` REQUIRED under `gap` with no default (start ~10000 on the frag metrics, ~3000 on damage/shots); both knobs are bounded to `[1, match duration]` |
 | GET | `/v1/demos/{id}/top-kills` | `gapMs`, `contestedMs`, `limit`, `players`, `weapons`, `minDamage`, `from`, `to`, `dmg` | `view.TopKillsView` — the match's hardest kill BURSTS, ranked by burst damage: for each enemy kill, the contiguous run of KILLING-WEAPON hits leading up to it (clipped by the victim's current life start), as `{rank, killer, victim, team, time, weapon, damage, hits, spanMs, maxGapMs, victimWep, returnDamage}`. `gapMs` is a CAPTURE gap (default 3000, max 5000) — narrow client-side by keeping rows with `maxGapMs <= your gap`, which reproduces the tighter walk exactly; `spanMs` is the display figure. Positional kills (telefrag/stomp) produce no row; kills by an already-dead killer stay in. Out-of-range `gapMs`/`contestedMs`/`limit` are 400s naming the range, never clamps |
 | GET | `/v1/demos/{id}/lives` | `players`, `from`, `to`, `minMs`, `dmg`, `summary` | `view.LivesView` — one row per spawn-to-death life (segmented by `streams.players[].alive`), with `endReason`, `spawnLoc`/`deathLoc`, `killedBy`, `itemsTaken`, `weaponsHeld` and the same per-interval stats block `/top-windows` uses; lives partition the match, so unfiltered per-life sums reconcile with the per-event LOGS (`/frags` `frags[]`, `/damage` `events[]`) — not necessarily with the KTX-sourced `byPlayer` scoreboards; `summary=1` keeps every row and drops the per-row collections |
 | POST | `/v1/playlist-links` | JSON body `{items, name?}` | `{url, markdown, name, length, clips, cards, demos}` — a link to the light player (`-play-url`) that plays a scripted reel: clips (`gameId`, match-ms `from`/`to`, `watch` player name, `label`, `slow`, `text`) from up to 20 hub games, title cards (`ms`, `bg`, `opacity`, fades, `text`) and text (size, colour, font, place, timing) — packed exactly as the web app's share link (format v2, nothing stored). Loads each game through the cache. 400 `invalid_param` names the item at fault. Backs the MCP `createPlaylistLink` tool |
 | GET | `/v1/games/search` | `players`, `teams`, `map`, `mode`, `matchtag`, `from`, `to`, `limit`, `offset`, `roster` | `{limit, offset, count, total?, games}` — hub.quakeworld.nu game discovery (no demo; live upstream, 502 `hub_upstream`). REST twin of the MCP `searchGames` tool (shared `hubfetch` impl) |
+| GET | `/v1/games/{id}` | — | one hub game's catalog row, verbatim, with a `roster=1` search row's columns; `404 demo_not_found` for an unknown id |
 | GET | `/v1/maps/{map}/entities` | `types`, `kinds` | `result.MapEntitiesResult` (static layout by map name, no demo needed) |
 | GET | `/v1/maps/{map}/geometry` | — | `mapgeom.MapRegions` floor-polygon JSON (needs `-maps-dir`; REST-only) |
 | GET | `/v1/artifacts` | — | `{schemaVersion, artifacts:[…]}` — the DAG manifest (name, cost, lazy, requires/provides, resultKey, servable); static, ETag `"artifacts-v<n>"` |

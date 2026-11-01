@@ -34,10 +34,12 @@ func runServe(args []string) error {
 		parseTimeout  = fs.Duration("parse-timeout", 120*time.Second, "wall-clock timeout for a single cold demo parse; 0 disables")
 		logFormat     = fs.String("log-format", "text", "access log format: text | json")
 		authDir       = fs.String("auth-dir", "", "directory holding keys.json; when set, /v1/* and POST /v1/demos/{id} require an API key. Empty = no auth (localhost mode)")
-		rateUser      = fs.Float64("rate-user", 5, "per-key sustained request rate (req/s) for portal (user) keys")
-		burstUser     = fs.Int("burst-user", 20, "per-key burst (bucket size) for portal (user) keys")
-		rateService   = fs.Float64("rate-service", 50, "per-key sustained request rate (req/s) for service keys (e.g. mvd-web)")
-		burstService  = fs.Int("burst-service", 200, "per-key burst (bucket size) for service keys")
+		rateUser      = fs.Float64("rate-user", 50, "per-key sustained request rate (req/s) for portal (user) keys")
+		burstUser     = fs.Int("burst-user", 200, "per-key burst (bucket size) for portal (user) keys")
+		rateService   = fs.Float64("rate-service", 500, "per-key sustained request rate (req/s) for service keys (e.g. mvd-web)")
+		burstService  = fs.Int("burst-service", 2000, "per-key burst (bucket size) for service keys")
+		rateWeb       = fs.Float64("rate-web", 100, "per-client sustained request rate (req/s) for a per-client key (the web page's, added by its proxy)")
+		burstWeb      = fs.Int("burst-web", 600, "per-client burst (bucket size) for a per-client key")
 		enablePortal  = fs.Bool("portal", false, "enable the Discord key portal at /portal (requires -auth-dir and the DISCORD_CLIENT_ID/DISCORD_CLIENT_SECRET/PORTAL_COOKIE_SECRET env vars); off = no /portal routes")
 		portalBaseURL = fs.String("portal-base-url", "", "public origin for the portal, e.g. https://qw.example.com; used to build the OAuth redirect_uri and links (required with -portal)")
 		playURL       = fs.String("play-url", playPageURL, "the web app's light player that POST /v1/playlist-links links to (a branch deploy's play.html, say)")
@@ -72,6 +74,7 @@ func runServe(args []string) error {
 			limiter: newKeyLimiter(
 				rateClass{rate: *rateUser, burst: *burstUser},
 				rateClass{rate: *rateService, burst: *burstService},
+				rateClass{rate: *rateWeb, burst: *burstWeb},
 			),
 			logger: logger,
 		}

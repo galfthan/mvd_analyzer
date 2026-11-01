@@ -7,6 +7,8 @@
 #   /mcp*                        -> localhost:8081  (mvd-mcp, streamable HTTP)
 #   /v1/*  /docs*  /openapi.yaml
 #   /healthz  /portal*           -> localhost:8080  (mvd-api REST + portal)
+#   /api/*                       -> localhost:8080  (the web page's API path:
+#                                   /v1/*, with the page's key added)
 #   everything else              -> static files    (mvd-web bundle)
 #
 # The API prefix list is EXHAUSTIVE on purpose: those five prefixes are
@@ -14,7 +16,7 @@
 # you add a new top-level path to mvd-api, you MUST extend the @api
 # matcher below — otherwise the new route 404s from the file server.
 # Prefer new endpoints under /v1/ so the matcher never needs to change.
-# The web app must NOT claim these prefixes for its own assets.
+# The web app must NOT claim these prefixes, or /api, for its own assets.
 #
 # X-Forwarded-For is rewritten to the REAL client IP so mvd-api's access
 # log (middleware.go clientIP) records the caller, not Caddy.
@@ -25,11 +27,28 @@
 #
 #   MVD_DOMAIN=qw.example.com caddy run --config /etc/caddy/Caddyfile
 #
+# EDIT: set MVD_WEB_KEY in Caddy's environment to the web page's key
+# (mvd-api keys issue -per-client; see README.md §4b). It is read per request
+# ({env.…}, not {$…}), so it is not baked into the adapted config that
+# Caddy's admin endpoint serves.
+#
 # Port map (must match the systemd units in this directory):
 #   mvd-api  -> localhost:8080   (REST, portal, /v1/auth/check)
 #   mvd-mcp  -> localhost:8081   (MCP streamable HTTP at /mcp)
 # Web root (must match the publish step in README.md):
 #   /opt/mvd/web                 (mvd-web `make build` output)
+
+# The web page's API forward (imported by the /api routes below): /api/x
+# becomes /v1/x, with the page's key and the real client IP.
+(webapi) {
+	# One directive: Caddy runs rewrite before uri whatever their order in
+	# the file, so strip_prefix + rewrite would not compose.
+	uri replace /api/ /v1/ 1
+	reverse_proxy localhost:8080 {
+		header_up Authorization "Bearer {env.MVD_WEB_KEY}"
+		header_up X-Forwarded-For {remote_host}
+	}
+}
 
 {$MVD_DOMAIN} {
 	# --- MCP streamable HTTP --------------------------------------------
@@ -73,6 +92,36 @@
 			# entry (middleware.go), so it must be the real client, set by
 			# the trusted edge (this Caddy), never an inbound spoof.
 			header_up X-Forwarded-For {remote_host}
+		}
+	}
+
+	# --- The web page's API path ----------------------------------------
+	# The page calls /api/... on its own origin; this forwards it to
+	# mvd-api's /v1/... and adds the page's key, so the key never reaches
+	# the browser. It is a per-client key (rate-limited per key and visitor
+	# IP, from the XFF set here), and only the routes the page reads are
+	# forwarded: everything else under /api is a 404, so the path cannot be
+	# used to reach the rest of the API (uploads, playlist links, artifacts)
+	# on the page's key.
+	# All of /api is this one block, so the only ordering that matters is
+	# inside it, where the matcher-less 404 always sorts last.
+	handle /api/* {
+		@webapi {
+			method GET
+			path_regexp ^/api/(demos/[^/]+/(result|streams/positions|buckets|region-control|los|top-windows|top-kills|lives|highlights|events|backpacks|frags|weapon-pickups)|games/(search|[0-9]+))$
+		}
+		@webapiPost {
+			method POST
+			path_regexp ^/api/demos/[^/]+/region-control$
+		}
+		handle @webapi {
+			import webapi
+		}
+		handle @webapiPost {
+			import webapi
+		}
+		handle {
+			respond 404
 		}
 	}
 

@@ -46,9 +46,14 @@ type Record struct {
 	DiscordID   string `json:"discordId,omitempty"`
 	DiscordName string `json:"discordName,omitempty"`
 	Service     bool   `json:"service,omitempty"`
-	Note        string `json:"note,omitempty"`
-	Created     string `json:"created"`           // RFC3339
-	Revoked     string `json:"revoked,omitempty"` // RFC3339 revoked-at; empty = active
+	// PerClient marks a service key that a web page's own proxy adds for
+	// every visitor (mvdanalyzer.com's /api route): it is rate-limited per
+	// key and client IP, not per key, so one visitor cannot spend everyone's
+	// budget.
+	PerClient bool   `json:"perClient,omitempty"`
+	Note      string `json:"note,omitempty"`
+	Created   string `json:"created"`           // RFC3339
+	Revoked   string `json:"revoked,omitempty"` // RFC3339 revoked-at; empty = active
 }
 
 // Active reports whether the record can authenticate.
@@ -221,19 +226,25 @@ func newKey() (string, error) {
 // has an active key revokes the prior one first, so the old key stops
 // authenticating the moment the new one is issued.
 func (s *Store) Issue(discordID, discordName string, service bool, note string) (string, Record, error) {
+	return s.issue(Record{DiscordID: discordID, DiscordName: discordName, Service: service, Note: note})
+}
+
+// IssuePerClient mints a per-client service key (Record.PerClient): the key
+// a web page's proxy adds for every visitor. It is bound to no Discord user.
+func (s *Store) IssuePerClient(note string) (string, Record, error) {
+	return s.issue(Record{Service: true, PerClient: true, Note: note})
+}
+
+// issue mints a key for rec's attributes; see Issue.
+func (s *Store) issue(rec Record) (string, Record, error) {
 	key, err := newKey()
 	if err != nil {
 		return "", Record{}, err
 	}
 	now := time.Now().UTC().Format(time.RFC3339)
-	rec := Record{
-		KeyHash:     hashKey(key),
-		DiscordID:   discordID,
-		DiscordName: discordName,
-		Service:     service,
-		Note:        note,
-		Created:     now,
-	}
+	rec.KeyHash = hashKey(key)
+	rec.Created = now
+	discordID := rec.DiscordID
 
 	s.mu.Lock()
 	defer s.mu.Unlock()

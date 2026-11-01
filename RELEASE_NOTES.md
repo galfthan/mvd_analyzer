@@ -5,6 +5,41 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (web-api) — what the web page needs from the API
+
+mvd-api serves `GET /v1/demos/{id}/result`: the demo's whole Result in
+one body, as the web page reads it — `playerStats` with the KTX overlay,
+no position tracks (`/streams/positions` serves those) and no line of
+sight (`/los`); the gzipped body is built once per demo and kept in
+memory. The WASM build
+and the endpoint marshal the same `view.PageResult`, so a page reading
+the API renders a demo exactly as one analysing it in the browser. A
+4on4 is ~4 MB of JSON, ~0.9 MB gzip-encoded on the wire. No schema change.
+
+`GET /v1/games/{id}` returns one hub game's catalog row, the same columns
+a `/v1/games/search?roster=1` row carries, so a page holding a gameId no
+longer has to query the hub's Supabase itself.
+
+`POST /v1/demos/{id}/region-control` computes region control over a layout
+in the request body — a regions file, `{"regions": [{"name", "locs"}]}`,
+as the map tab's region editor saves it — instead of the map's stored
+one; query params and response are the GET's.
+
+A third key class, `mvd-api keys issue -per-client`, is for the web
+page's key, which the page's proxy adds for every visitor. It is
+rate-limited per key and client IP (`-rate-web` 100/s, `-burst-web` 600)
+instead of per key, so one visitor cannot exhaust everyone's budget.
+The other rate defaults go up tenfold with it: user keys 50/s, burst
+200; service keys 500/s, burst 2000 (`deploy/mvd-api.service` sets them
+explicitly, so a running server keeps its old values until its unit is
+updated).
+
+The deploy Caddyfile forwards the web page's API path: `/api/...` on the
+page's own origin reaches mvd-api's `/v1/...` with the page's per-client
+key added (`MVD_WEB_KEY` in Caddy's environment), so the key never reaches
+the browser. Only the routes the page reads are forwarded; the rest of
+`/api` is a 404. Nothing calls it until the web change lands.
+
 ## unreleased (perf-wasm-data) — position tracks in binary, faster floor traces
 
 No schema change, and the floor heights are bit-identical. The floor

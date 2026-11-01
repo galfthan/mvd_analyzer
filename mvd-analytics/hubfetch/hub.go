@@ -16,12 +16,13 @@
 // Its consumers are the golden test harness
 // (mvd-analytics/analyzer/golden_test.go), mvd-api (via
 // mvd-api/internal/democache for demo fetch and directly for
-// GET /v1/games/search), and the mvd-mcp shim's searchGames tool. It is
+// GET /v1/games/search and /v1/games/{id}), and the mvd-mcp shim's searchGames tool. It is
 // intentionally small and has no dependency on the analyzer or result
 // packages so it can be reused for ad-hoc tooling.
 package hubfetch
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -30,6 +31,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -116,39 +118,53 @@ func (c *Client) configErr() error {
 	return nil
 }
 
+// catalogGet issues one GET against the v1_games endpoint with query (a
+// PostgREST query string) and the hub's headers, plus any extra header
+// pairs, and returns the response with its body read under the
+// maxCatalogBytes cap (one byte past it is read so an over-cap body is
+// detectable). Errors are prefixed with what. The caller checks the status:
+// the cap applies to error and success bodies alike, since both come from
+// this upstream.
+func (c *Client) catalogGet(ctx context.Context, what, query string, header ...string) (*http.Response, []byte, error) {
+	if err := c.configErr(); err != nil {
+		return nil, nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, "GET", c.SupabaseURL+"?"+query, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	req.Header.Set("apikey", c.APIKey)
+	req.Header.Set("Authorization", "Bearer "+c.APIKey)
+	req.Header.Set("accept-profile", "public")
+	for i := 0; i+1 < len(header); i += 2 {
+		req.Header.Set(header[i], header[i+1])
+	}
+	resp, err := c.HTTP.Do(req)
+	if err != nil {
+		return nil, nil, fmt.Errorf("%s: %w", what, err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxCatalogBytes+1))
+	if err != nil {
+		return nil, nil, fmt.Errorf("%s: %w", what, err)
+	}
+	if int64(len(body)) > maxCatalogBytes {
+		return nil, nil, fmt.Errorf("%s: response exceeds %d-byte cap", what, maxCatalogBytes)
+	}
+	return resp, body, nil
+}
+
 // Resolve looks up game metadata by hub gameId. It returns the
 // minimal info needed for download. The Supabase REST API answers
 // `?id=eq.N` with a JSON array of rows; an empty array means the game
 // does not exist.
 func (c *Client) Resolve(gameID int) (*GameInfo, error) {
-	if err := c.configErr(); err != nil {
-		return nil, err
-	}
 	q := url.Values{}
 	q.Set("select", "id,demo_sha256,demo_source_url")
 	q.Set("id", "eq."+strconv.Itoa(gameID))
-	req, err := http.NewRequest("GET", c.SupabaseURL+"?"+q.Encode(), nil)
+	resp, body, err := c.catalogGet(context.Background(), "supabase resolve", q.Encode())
 	if err != nil {
 		return nil, err
-	}
-	req.Header.Set("apikey", c.APIKey)
-	req.Header.Set("Authorization", "Bearer "+c.APIKey)
-	req.Header.Set("accept-profile", "public")
-
-	resp, err := c.HTTP.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("supabase resolve: %w", err)
-	}
-	defer resp.Body.Close()
-	// Cap the metadata read: read one byte past the cap so an over-cap body
-	// is detectable (see maxCatalogBytes). Applies to both the error and the
-	// success bodies since both come from this upstream response.
-	body, err := io.ReadAll(io.LimitReader(resp.Body, maxCatalogBytes+1))
-	if err != nil {
-		return nil, fmt.Errorf("supabase resolve: %w", err)
-	}
-	if int64(len(body)) > maxCatalogBytes {
-		return nil, fmt.Errorf("supabase resolve: response exceeds %d-byte cap", maxCatalogBytes)
 	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("supabase resolve: status %d: %s", resp.StatusCode, string(body))
@@ -162,6 +178,29 @@ func (c *Client) Resolve(gameID int) (*GameInfo, error) {
 		return nil, fmt.Errorf("game %d %w", gameID, ErrNotFound)
 	}
 	return &rows[0], nil
+}
+
+// Game returns one game's catalog row, verbatim, with the column set a
+// search row carries (SearchSelect, full roster) — what a page that found
+// a game by id needs to show and fetch it. ErrNotFound when the hub has no
+// such game.
+func (c *Client) Game(ctx context.Context, gameID int) (map[string]any, error) {
+	q := "select=" + url.QueryEscape(SearchSelect) + "&id=eq." + strconv.Itoa(gameID)
+	resp, body, err := c.catalogGet(ctx, "hub game", q)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("hub game: status %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
+	}
+	var rows []map[string]any
+	if err := json.Unmarshal(body, &rows); err != nil {
+		return nil, fmt.Errorf("hub game: decode: %w", err)
+	}
+	if len(rows) == 0 {
+		return nil, fmt.Errorf("game %d %w", gameID, ErrNotFound)
+	}
+	return rows[0], nil
 }
 
 // Download fetches the MVD bytes for a resolved game. It tries the

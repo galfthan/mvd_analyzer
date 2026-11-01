@@ -20,8 +20,9 @@
 //	-max-parses       max concurrent download+parse operations (0 = max(1, NumCPU/2))
 //	-log-format       text | json (default "text")
 //	-auth-dir         keys.json dir; when set, /v1/* requires an API key (empty = no auth)
-//	-rate-user        per-key req/s for portal keys (default 5); -burst-user (default 20)
-//	-rate-service     per-key req/s for service keys (default 50); -burst-service (default 200)
+//	-rate-user        per-key req/s for portal keys (default 50); -burst-user (default 200)
+//	-rate-service     per-key req/s for service keys (default 500); -burst-service (default 2000)
+//	-rate-web         per-client req/s for a per-client key (default 100); -burst-web (default 600)
 //	-portal           enable the Discord key portal at /portal (requires -auth-dir + env)
 //	-portal-base-url  public origin for the portal, e.g. https://qw.example.com
 //

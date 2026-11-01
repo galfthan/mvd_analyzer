@@ -161,7 +161,7 @@ type Cache struct {
 	Logger *slog.Logger
 
 	once         sync.Once
-	mem          *resultLRU
+	mem          *lru[*result.Result]
 	inflight     sync.Map // sha → *inflightEntry
 	lastResolved sync.Map // sha → *hubfetch.GameInfo (drained by loadResult)
 
@@ -189,6 +189,11 @@ type Cache struct {
 	// packVerified holds the SHAs whose tier-3 pack this process has
 	// checked in full (readPositionPack) or written itself.
 	packVerified sync.Map
+
+	// pages holds encoded /result bodies (PageResult) by SHA; pageLocks
+	// serializes building one per SHA.
+	pages     *lru[[]byte]
+	pageLocks KeyedMutex
 }
 
 // New constructs a Cache rooted at the given directory.
@@ -217,7 +222,8 @@ func (c *Cache) ensureInit() {
 			}
 		}
 		c.parseSem = make(chan struct{}, c.MaxParses)
-		c.mem = newResultLRU(c.MemoryLRU)
+		c.mem = newLRU[*result.Result](c.MemoryLRU)
+		c.pages = newLRU[[]byte](pageLRUSize)
 	})
 }
 
@@ -556,6 +562,7 @@ func (c *Cache) RemoveDemo(sha string) {
 	_ = os.Remove(mvdPath(c.Root, sha))
 	_ = os.Remove(resultPath(c.Root, result.CurrentSchemaVersion, sha))
 	c.mem.delete(sha)
+	c.pages.delete(sha)
 }
 
 // EnsureLOS returns the demo's Result with the per-player line-of-sight / PVS

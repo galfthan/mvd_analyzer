@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -32,6 +34,7 @@ func newAuthTestServer(t *testing.T, store demoStore) (*httptest.Server, *authen
 		store: keys,
 		limiter: newKeyLimiter(
 			rateClass{rate: 1000, burst: 1000}, // generous; rate tests use their own limiter
+			rateClass{rate: 1000, burst: 1000},
 			rateClass{rate: 1000, burst: 1000},
 		),
 		logger: logger,
@@ -301,6 +304,7 @@ func TestRateLimit_BurstThen429(t *testing.T) {
 		limiter: newKeyLimiter(
 			rateClass{rate: 0.001, burst: 2},
 			rateClass{rate: 0.001, burst: 100},
+			rateClass{rate: 0.001, burst: 100},
 		),
 		logger: logger,
 	}
@@ -339,6 +343,7 @@ func TestRateLimit_ServiceLooser(t *testing.T) {
 		limiter: newKeyLimiter(
 			rateClass{rate: 0.001, burst: 1},
 			rateClass{rate: 0.001, burst: 50},
+			rateClass{rate: 0.001, burst: 50},
 		),
 		logger: logger,
 	}
@@ -365,6 +370,7 @@ func TestRateLimit_IndependentBuckets(t *testing.T) {
 	auth := &authenticator{
 		store: keys,
 		limiter: newKeyLimiter(
+			rateClass{rate: 0.001, burst: 1},
 			rateClass{rate: 0.001, burst: 1},
 			rateClass{rate: 0.001, burst: 1},
 		),
@@ -421,5 +427,127 @@ func TestTokenBucket_RefillAndRetryAfter(t *testing.T) {
 	// After a full second, one token accrues.
 	if ok, _ := b.allow(now.Add(time.Second)); !ok {
 		t.Error("allow after 1s refill should pass")
+	}
+}
+
+// TestRateLimit_PerClient: a per-client key's budget is split by client IP
+// (the X-Forwarded-For its proxy sets), so one visitor exhausting theirs
+// leaves another's whole; an ordinary service key keeps one budget whatever
+// XFF says.
+func TestRateLimit_PerClient(t *testing.T) {
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	keys, _ := authkeys.Open(t.TempDir())
+	auth := &authenticator{
+		store: keys,
+		limiter: newKeyLimiter(
+			rateClass{rate: 0.001, burst: 1},
+			rateClass{rate: 0.001, burst: 2},
+			rateClass{rate: 0.001, burst: 2},
+		),
+		logger: logger,
+	}
+	srv := httptest.NewServer(newRouter(rlStore(), logger, "", testUploadConfig, auth, nil, &fakeSearcher{}))
+	defer srv.Close()
+	get := func(key, xff string) int {
+		t.Helper()
+		req, _ := http.NewRequest(http.MethodGet, srv.URL+"/v1/auth/check", nil)
+		req.Header.Set("Authorization", "Bearer "+key)
+		req.Header.Set("X-Forwarded-For", xff)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		return resp.StatusCode
+	}
+
+	web, rec, _ := auth.store.IssuePerClient("mvd-web")
+	if !rec.PerClient || !rec.Service {
+		t.Fatalf("IssuePerClient record = %+v", rec)
+	}
+	for i := 0; i < 2; i++ {
+		if st := get(web, "1.1.1.1"); st != http.StatusNoContent {
+			t.Fatalf("client A request %d: %d", i, st)
+		}
+	}
+	if st := get(web, "1.1.1.1"); st != http.StatusTooManyRequests {
+		t.Errorf("client A past its burst: %d, want 429", st)
+	}
+	if st := get(web, "2.2.2.2"); st != http.StatusNoContent {
+		t.Errorf("client B after A is throttled: %d, want 204", st)
+	}
+
+	svc, _, _ := auth.store.Issue("", "", true, "svc")
+	get(svc, "3.3.3.3")
+	get(svc, "4.4.4.4")
+	if st := get(svc, "5.5.5.5"); st != http.StatusTooManyRequests {
+		t.Errorf("service key spread over IPs: %d, want 429 (one budget per key)", st)
+	}
+}
+
+// TestKeyLimiter_SweepsIdleClients: per-client buckets are swept when their
+// number has doubled since the last sweep; the sweep drops the ones that
+// have refilled and keeps the busy ones.
+func TestKeyLimiter_SweepsIdleClients(t *testing.T) {
+	now := time.Now()
+	l := newKeyLimiter(rateClass{rate: 1, burst: 1}, rateClass{rate: 1, burst: 1}, rateClass{rate: 1, burst: 10})
+	l.nowFn = func() time.Time { return now }
+	web := authkeys.Record{KeyHash: "web", Service: true, PerClient: true}
+	for i := 0; i < firstClientSweep; i++ {
+		l.allow(web, fmt.Sprintf("a%d", i))
+	}
+	now = now.Add(5 * time.Second) // the first sweep: nobody has refilled (10 s)
+	l.allow(web, "busy")
+	if n := len(l.clientBuckets); n != firstClientSweep+1 || l.nextSweep != 2*(firstClientSweep) {
+		t.Fatalf("first sweep: %d buckets, next sweep at %d", n, l.nextSweep)
+	}
+	now = now.Add(6 * time.Second) // the a* batch has refilled, "busy" has not
+	for i := len(l.clientBuckets); i < l.nextSweep; i++ {
+		l.allow(web, fmt.Sprintf("b%d", i))
+	}
+	l.allow(web, "trigger")
+	for id := range l.clientBuckets {
+		if strings.HasPrefix(id, "web a") {
+			t.Fatalf("refilled bucket %q survived the sweep", id)
+		}
+	}
+	if _, ok := l.clientBuckets["web busy"]; !ok {
+		t.Error("the sweep dropped a bucket that had not refilled")
+	}
+}
+
+// TestKeyLimiter_CapsClients: new clients faster than buckets refill (here
+// they never do) stay under maxClientBuckets.
+func TestKeyLimiter_CapsClients(t *testing.T) {
+	l := newKeyLimiter(rateClass{rate: 1, burst: 1}, rateClass{rate: 1, burst: 1}, rateClass{rate: 0, burst: 1})
+	web := authkeys.Record{KeyHash: "web", Service: true, PerClient: true}
+	peak := 0
+	for i := 0; i < 2*maxClientBuckets; i++ {
+		l.allow(web, strconv.Itoa(i))
+		peak = max(peak, len(l.clientBuckets))
+	}
+	if peak > maxClientBuckets {
+		t.Errorf("per-client buckets peaked at %d, cap %d", peak, maxClientBuckets)
+	}
+}
+
+// limiterClient: the port is dropped, IPv4 is kept whole, IPv6 is reduced to
+// its /64.
+func TestLimiterClient(t *testing.T) {
+	for _, c := range []struct{ xff, remote, want string }{
+		{"203.0.113.7", "127.0.0.1:5555", "203.0.113.7"},
+		{"", "198.51.100.2:443", "198.51.100.2"},
+		{"2001:db8:1:2:aaaa::1", "", "2001:db8:1:2::/64"},
+		{"2001:db8:1:2:bbbb::9", "", "2001:db8:1:2::/64"},
+		{"", "[2001:db8:9::5]:80", "2001:db8:9::/64"},
+	} {
+		r := httptest.NewRequest(http.MethodGet, "/", nil)
+		r.RemoteAddr = c.remote
+		if c.xff != "" {
+			r.Header.Set("X-Forwarded-For", c.xff)
+		}
+		if got := limiterClient(r); got != c.want {
+			t.Errorf("xff %q remote %q: %q, want %q", c.xff, c.remote, got, c.want)
+		}
 	}
 }

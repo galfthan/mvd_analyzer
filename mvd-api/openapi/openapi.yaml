@@ -496,6 +496,50 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/demos/{id}/result:
+    get:
+      operationId: getResult
+      tags: [demo]
+      summary: The whole Result, as the web page reads it
+      description: >
+        The demo's whole analysed Result in one body — the shape
+        [/docs/result-schema](/docs/result-schema) documents — as the
+        mvd-web page reads it: `playerStats` carries the KTX demoinfo
+        overlay (as `/player-stats` serves it) and `streams.players[]` has
+        no `pos` position tracks, which `/streams/positions` serves as a
+        binary pack (a 4on4's tracks are ~45 MB of JSON), and no `los` /
+        `pvs` (the lazy line-of-sight pass; read `/los`). It is the
+        payload the in-browser WASM build hands the page, for a client that
+        renders every tab from one load; the curated endpoints remain the
+        way to read one section. A 4on4 is ~4 MB of JSON, gzip-encoded for
+        a client that accepts gzip (that body's ETag ends in `-gz`); the
+        server builds it once per demo and keeps it in memory.
+      parameters:
+        - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
+      responses:
+        "200":
+          description: The Result, without position tracks.
+          headers: *perDemoHeaders
+          content:
+            application/json:
+              schema:
+                type: object
+                description: >
+                  The Result; RESULT_SCHEMA.md
+                  ([/docs/result-schema](/docs/result-schema)) is the
+                  field-level reference.
+                required: [schemaVersion]
+                properties:
+                  schemaVersion: { type: integer }
+                additionalProperties: true
+        "304": { $ref: "#/components/responses/NotModified" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
   /v1/demos/{id}/demoinfo:
     get:
       operationId: getDemoInfo
@@ -1504,6 +1548,49 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+    post:
+      operationId: postRegionControl
+      tags: [timeline]
+      summary: Region-control timeline for an edited layout
+      description: |
+        The GET's region-control timeline, computed over a layout the caller
+        supplies in place of the demo's stored one — the web map tab's
+        region editor. The body is a regions file, the shape the editor
+        saves and loads: `{"regions": [{"name", "locs": [loc names]}]}`. A
+        loc name matches the demo's loc table case-insensitively; a region
+        whose locs match none is simply never held. Query params and the
+        response are the GET's, except that the answer depends on the
+        body, so it carries no ETag and is never a 304. An empty `regions`
+        list is a layout with no regions (no states, no stats). 400
+        `invalid_param` for a malformed body, a missing `regions` list, or
+        a region without a name.
+      parameters:
+        - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/WindowMs"
+        - $ref: "#/components/parameters/From"
+        - $ref: "#/components/parameters/To"
+        - $ref: "#/components/parameters/RegionsMode"
+        - $ref: "#/components/parameters/Label"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegionLayout" }
+      responses:
+        "200":
+          description: The control timeline over the posted layout.
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegionControl" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "422": { $ref: "#/components/responses/Unavailable" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
   /v1/demos/{id}/top-windows:
     get:
       operationId: getTopWindows
@@ -2097,6 +2184,41 @@ paths:
               schema: { $ref: "#/components/schemas/GamesSearchResult" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
+        "500": { $ref: "#/components/responses/Internal" }
+  /v1/games/{id}:
+    get:
+      operationId: getGame
+      tags: [demo]
+      summary: One hub game by id
+      description: >
+        One game's row from hub.quakeworld.nu's public catalog, passed
+        through verbatim with the columns a `/v1/games/search?roster=true`
+        row carries (id, timestamp, mode, matchtag, map, teams, the full
+        players roster, demo_sha256, demo_source_url, server_hostname) —
+        what a client holding a gameId shows before, or instead of,
+        analysing the demo. The id is the bare hub gameId; analyse it with
+        any per-demo endpoint as `gameId:<id>`. Discovery data, not cached
+        per demo: no long-lived cache headers.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The hub gameId, a positive 32-bit integer.
+          schema: { type: integer, minimum: 1, maximum: 2147483647 }
+        - $ref: "#/components/parameters/Label"
+      responses:
+        "200":
+          description: The game's catalog row.
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HubGame" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
         "429": { $ref: "#/components/responses/RateLimited" }
         "502": { $ref: "#/components/responses/HubUpstream" }
         "500": { $ref: "#/components/responses/Internal" }
@@ -3361,6 +3483,36 @@ components:
             key). Empty = internal / no direct section.
         servable: { type: boolean, description: "Exposed via GET /v1/demos/{id}/artifacts/{name}." }
         description: { type: string, description: "Human-readable description." }
+    HubGame:
+      type: object
+      description: >
+        One hub game-catalog row (GET /v1/games/{id}), verbatim from the hub
+        — the hub owns its shape, so it is left open here.
+      required: [id]
+      additionalProperties: true
+      properties:
+        id: { type: integer, description: "The hub gameId." }
+    RegionLayout:
+      type: object
+      description: >
+        A region layout (POST /v1/demos/{id}/region-control): named regions,
+        each a list of loc names.
+      required: [regions]
+      additionalProperties: false
+      properties:
+        regions:
+          type: array
+          description: The regions, in display order.
+          items:
+            type: object
+            required: [name]
+            additionalProperties: false
+            properties:
+              name: { type: string, minLength: 1, description: "The region's display name." }
+              locs:
+                type: array
+                description: Loc names belonging to the region.
+                items: { type: string }
     GamesSearchResult:
       type: object
       description: >

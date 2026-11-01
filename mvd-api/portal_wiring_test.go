@@ -49,6 +49,7 @@ func TestPortalExemptFromAPIKey(t *testing.T) {
 		limiter: newKeyLimiter(
 			rateClass{rate: 1000, burst: 1000},
 			rateClass{rate: 1000, burst: 1000},
+			rateClass{rate: 1000, burst: 1000},
 		),
 		logger: logger,
 	}

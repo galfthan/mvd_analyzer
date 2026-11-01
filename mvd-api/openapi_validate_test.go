@@ -30,6 +30,7 @@ import (
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
+	"github.com/mvd-analyzer/mvd-analytics/config"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"gopkg.in/yaml.v3"
 )
@@ -541,6 +542,10 @@ func validationCases(t *testing.T) []validationCase {
 		// object, but an empty one would still satisfy the schema, and the
 		// whole value of the manifest is that its flags are actually filled
 		// in from the 422 predicates.
+		// The positions-free Result: every section, so the case names one
+		// the page needs and the track the body must leave out.
+		{name: "result", url: "/v1/demos/gameId:42/result", path: "/v1/demos/{id}/result", status: 200,
+			mustContain: []string{`"schemaVersion":`, `"playerStats":`}, mustNotContain: []string{`"pos":`}},
 		{name: "overview", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200,
 			mustContain: []string{`"available":{"demoInfo":`, `"los":`}},
 		// parseWarnings is omitempty and every golden demo parses clean, so
@@ -718,6 +723,8 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "region-control", url: "/v1/demos/gameId:42/region-control?windowMs=5000", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "region-control-summary", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=summary", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "region-control-none", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=none", path: "/v1/demos/{id}/region-control", status: 200},
+		{name: "region-control-layout", method: "POST", url: "/v1/demos/gameId:42/region-control?windowMs=5000", path: "/v1/demos/{id}/region-control", status: 200,
+			body: regionLayoutBody(t), mustContain: []string{`"bucketStates":{`}},
 		{name: "top-windows", url: "/v1/demos/gameId:42/top-windows", path: "/v1/demos/{id}/top-windows", status: 200},
 		{name: "top-windows-net", url: "/v1/demos/gameId:42/top-windows?metric=netFrags&windowMs=10000&perPlayer=1", path: "/v1/demos/{id}/top-windows", status: 200},
 		{name: "top-windows-damage", url: "/v1/demos/gameId:42/top-windows?metric=damageGiven&windowMs=5000&weapons=rl,lg&limit=3", path: "/v1/demos/{id}/top-windows", status: 200},
@@ -754,6 +761,8 @@ func validationCases(t *testing.T) []validationCase {
 			mustContain: []string{`"demoMarkers"`, `"playerUserID":17`, `"spectator":true`, `"label":"0 round-07"`}},
 
 		{name: "games-search", url: "/v1/games/search?map=dm3&mode=4on4", path: "/v1/games/search", status: 200},
+		{name: "game", url: "/v1/games/12345", path: "/v1/games/{id}", status: 200, mustContain: []string{`"demo_sha256":`}},
+		{name: "err-game-not-found", url: "/v1/games/7", path: "/v1/games/{id}", status: 404},
 		// The timeUnit echo (schema v56) is asserted by the schema-validated
 		// cases above: overview / events / state-at / stream-slice / loc-trails /
 		// buckets-row / items-summary, the three list envelopes (chat,
@@ -1335,4 +1344,19 @@ func TestOpenAPIParamSweep(t *testing.T) {
 	if swept < 25 {
 		t.Fatalf("param sweep covered only %d GET ops — has the enumeration regressed?", swept)
 	}
+}
+
+// regionLayoutBody is the golden demo's stored region layout as the regions
+// file POST /region-control takes.
+func regionLayoutBody(t *testing.T) []byte {
+	t.Helper()
+	var ov config.MapRegionOverrides
+	for _, rg := range goldenResult(t).TimelineAnalysis.RegionControl.Regions {
+		ov.Regions = append(ov.Regions, config.MapRegionOverride{Name: rg.Name, Locs: rg.Locs})
+	}
+	b, err := json.Marshal(ov)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return b
 }

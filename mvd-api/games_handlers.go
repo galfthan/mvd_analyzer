@@ -2,19 +2,24 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"math"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/mvd-analyzer/mvd-analytics/hubfetch"
 )
 
-// gameSearcher runs a hub.quakeworld.nu game search. *hubfetch.Client
-// satisfies it; tests inject a fake. It is the one live-upstream dependency
-// the demo-analysis handlers do not have, so it is isolated behind this
-// seam and its failures map to the hub_upstream 502 convention.
-type gameSearcher interface {
+// gameCatalog reads hub.quakeworld.nu's game catalog: a search, and one
+// game by id. *hubfetch.Client satisfies it; tests inject a fake. It is the
+// one live-upstream dependency the demo-analysis handlers do not have, so
+// it is isolated behind this seam and its failures map to the hub_upstream
+// 502 convention.
+type gameCatalog interface {
 	Search(ctx context.Context, params hubfetch.SearchParams) (any, error)
+	Game(ctx context.Context, gameID int) (map[string]any, error)
 }
 
 // gamesSearchTimeout bounds a single upstream search so a slow/hung hub
@@ -135,4 +140,41 @@ func (s *server) handleGamesSearch(w http.ResponseWriter, r *http.Request) {
 	// a demo's analysis, so no long-lived cache headers here — writeJSON's
 	// bare 200 lets the default (revalidate) behaviour apply.
 	writeJSON(w, http.StatusOK, out)
+}
+
+// handleGame: GET /v1/games/{id} — one hub game's catalog row, verbatim,
+// with the columns a /v1/games/search?roster=1 row carries: what a page
+// that has a gameId (a link, a playlist clip) shows and fetches. 404
+// demo_not_found when the hub has no such game; 502 hub_upstream when the
+// hub fails or no hub is configured.
+func (s *server) handleGame(w http.ResponseWriter, r *http.Request) {
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id <= 0 || id > math.MaxInt32 {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("invalid game id %q (want a positive hub gameId)", r.PathValue("id")))
+		return
+	}
+	if s.searcher == nil {
+		writeError(w, http.StatusBadGateway, "hub_upstream", "the game catalog is not configured on this server")
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), gamesSearchTimeout)
+	defer cancel()
+	row, err := s.searcher.Game(ctx, id)
+	if errors.Is(err, hubfetch.ErrNotFound) {
+		writeError(w, http.StatusNotFound, "demo_not_found", fmt.Sprintf("the hub has no game %d", id))
+		return
+	}
+	if err != nil {
+		// As for search: the raw error carries the upstream body and URL,
+		// so it goes to the log and the client gets a generic message.
+		s.logger.Error("hub game upstream error",
+			"request_id", requestID(r.Context()), "err", err.Error())
+		writeError(w, http.StatusBadGateway, "hub_upstream", "game catalog lookup failed upstream")
+		return
+	}
+	writeJSON(w, http.StatusOK, row)
 }

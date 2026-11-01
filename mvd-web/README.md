@@ -415,6 +415,9 @@ and the demo bytes). The page's one source is `src/app/source.js`
 through `loadDemo()`, and only it and the Search tab (`searchGames`) call
 the hub. A handle answers only while it is
 the current demo — the worker holds one.
+Hub demos are moving to mvd-api (an `ApiSource` beside `WasmSource`,
+WASM loaded only for local files):
+[`plan-web-api.md`](../plan-web-api.md).
 
 Shared state is in `src/state/` (`window.MvdState`): `clock` (the one
 match clock — every view follows it; the page's playback publishes as
@@ -541,7 +544,7 @@ load while the rows come back in their default order, as before.
 Two consequences worth knowing:
 
 - **`analyze()` applies the KTX overlay before marshalling**
-  (`withPlayerStatsOverlay` in `cmd/wasm/main.go`). The analyzer *stores*
+  (`view.PageResult`, which mvd-api's `/result` marshals too). The analyzer *stores*
   the fully derived section on purpose, so the golden corpus records what
   the pipeline computed; folding in KTX's own numbers where KTX is the
   better source is a read-time step (`view.PlayerStats`). mvd-api runs it
@@ -667,7 +670,7 @@ off the wire, and marking half the corpus would make the mark meaningless.
 ### The `≠` on an Acc cell: two scales, one column
 
 The WASM entry point applies the KTX overlay (`view.PlayerStats`, in
-`withPlayerStatsOverlay`), so the `Acc` column serves whichever accuracy
+`view.PageResult`), so the `Acc` column serves whichever accuracy
 family the demo has — and they were not all counted the same way. KTX's
 own counter is direct impacts for `rl`/`gl` and PELLETS for `sg`/`ssg`;
 before v75 the `derived` family counted any fire that landed damage, on

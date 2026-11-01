@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
+	"github.com/mvd-analyzer/mvd-analytics/config"
 	"github.com/mvd-analyzer/mvd-analytics/hubfetch"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
@@ -115,6 +116,22 @@ func (f *fakeStore) PositionPack(ctx context.Context, id democache.DemoID) ([]by
 	var buf bytes.Buffer
 	zw := gzip.NewWriter(&buf)
 	_, _ = zw.Write(result.EncodePositionPack(res.Streams))
+	_ = zw.Close()
+	return buf.Bytes(), meta, nil
+}
+
+func (f *fakeStore) PageResult(ctx context.Context, id democache.DemoID) ([]byte, democache.CacheMeta, error) {
+	res, meta, err := f.GetResult(ctx, id)
+	if err != nil {
+		return nil, meta, err
+	}
+	raw, err := json.Marshal(view.PageResult(res))
+	if err != nil {
+		return nil, meta, err
+	}
+	var buf bytes.Buffer
+	zw := gzip.NewWriter(&buf)
+	_, _ = zw.Write(raw)
 	_ = zw.Close()
 	return buf.Bytes(), meta, nil
 }
@@ -318,6 +335,75 @@ func TestShotStreamEndpoints(t *testing.T) {
 // TestPositions_PackGzipAndRevalidation: the endpoint serves the store's
 // gzipped pack as it is to a gzip client, inflates it for one that isn't,
 // and answers its own pack-versioned ETag with a 304.
+// TestResult_PageResult: /result is view.PageResult's JSON, gzipped for a
+// client that accepts gzip, with its own ETag per encoding and a 304 on
+// revalidation.
+func TestResult_PageResult(t *testing.T) {
+	r := stubResult()
+	r.Streams.Players[0].Position = &result.PositionTrack{T: []int32{0}, X: []float32{1}, Y: []float32{2}, Z: []float32{3}}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	want, err := json.Marshal(view.PageResult(r))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(want, []byte(`"pos":`)) {
+		t.Fatal("PageResult kept the position track")
+	}
+	url := srv.URL + "/v1/demos/gameId:42/result"
+
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept-Encoding", "gzip")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Encoding") != "gzip" ||
+		resp.Header.Get("Content-Type") != "application/json" || resp.Header.Get("Vary") != "Accept-Encoding" {
+		t.Fatalf("gzip client: %d %v", resp.StatusCode, resp.Header)
+	}
+	zr, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ := io.ReadAll(zr)
+	resp.Body.Close()
+	if !bytes.Equal(got, want) {
+		t.Fatalf("gzip client: body differs from PageResult's JSON (%d vs %d bytes)", len(got), len(want))
+	}
+	etag := resp.Header.Get("ETag")
+	if !strings.HasSuffix(etag, `-gz"`) {
+		t.Fatalf("gzip ETag %q lacks the encoding tail", etag)
+	}
+
+	req, _ = http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept-Encoding", "identity")
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ = io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Encoding") != "" || !bytes.Equal(got, want) {
+		t.Fatalf("identity client: %d %v, %d bytes", resp.StatusCode, resp.Header, len(got))
+	}
+	if resp.Header.Get("ETag") == etag {
+		t.Fatal("the identity and gzip bodies share an ETag")
+	}
+
+	req, _ = http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept-Encoding", "gzip")
+	req.Header.Set("If-None-Match", etag)
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusNotModified {
+		t.Fatalf("If-None-Match: status %d, want 304", resp.StatusCode)
+	}
+}
+
 func TestPositions_PackGzipAndRevalidation(t *testing.T) {
 	r := stubResult()
 	r.Streams.Players[0].Position = &result.PositionTrack{
@@ -1055,9 +1141,10 @@ func newTestServerMaps(t *testing.T, store demoStore, mapsDir string) *httptest.
 	return httptest.NewServer(newRouter(store, logger, mapsDir, testUploadConfig, nil, nil, &fakeSearcher{}))
 }
 
-// fakeSearcher stands in for the hub game search in handler tests. The
-// default response is schema-valid for GET /v1/games/search; err simulates
-// an upstream failure.
+// fakeSearcher stands in for the hub game catalog in handler tests. The
+// default responses are schema-valid for GET /v1/games/search and
+// /v1/games/12345 (any other id is not found); err simulates an upstream
+// failure.
 type fakeSearcher struct {
 	out any
 	err error
@@ -1088,6 +1175,17 @@ func (f *fakeSearcher) Search(_ context.Context, _ hubfetch.SearchParams) (any, 
 			},
 		},
 	}, nil
+}
+
+func (f *fakeSearcher) Game(ctx context.Context, gameID int) (map[string]any, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	if gameID != 12345 {
+		return nil, fmt.Errorf("game %d %w", gameID, hubfetch.ErrNotFound)
+	}
+	out, _ := f.Search(ctx, hubfetch.SearchParams{})
+	return out.(map[string]any)["games"].([]any)[0].(map[string]any), nil
 }
 
 // testUploadConfig is the default upload config for handler tests: the
@@ -4064,5 +4162,85 @@ func TestHighlights_Unavailable(t *testing.T) {
 	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights")
 	if status != 422 || errBodyCode(t, resp) != "highlights_unavailable" {
 		t.Errorf("status = %d code = %q; want 422 highlights_unavailable (%s)", status, errBodyCode(t, resp), resp)
+	}
+}
+
+// POST /region-control computes the edited layout the body names: the stored
+// layout re-sent as a regions file answers as the GET does, one region alone
+// as view.RegionControl does with just it, and a malformed body is a 400.
+func TestRegionLayout(t *testing.T) {
+	res := goldenResult(t)
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": res}})
+	defer srv.Close()
+	url := srv.URL + "/v1/demos/gameId:42/region-control?regions=none"
+	post := func(body string, want int) map[string]any {
+		t.Helper()
+		resp, err := http.Post(url, "application/json", strings.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		var m map[string]any
+		_ = json.NewDecoder(resp.Body).Decode(&m)
+		if resp.StatusCode != want {
+			t.Fatalf("POST %.80s = %d, want %d: %v", body, resp.StatusCode, want, m)
+		}
+		return m
+	}
+	layout := func(regions []result.ControlRegion) string {
+		var ov config.MapRegionOverrides
+		for _, rg := range regions {
+			ov.Regions = append(ov.Regions, config.MapRegionOverride{Name: rg.Name, Locs: rg.Locs})
+		}
+		b, _ := json.Marshal(ov)
+		return string(b)
+	}
+	stored := res.TimelineAnalysis.RegionControl.Regions
+	if len(stored) < 2 {
+		t.Fatalf("golden demo has %d regions; the test needs two", len(stored))
+	}
+
+	got := post(layout(stored), 200)
+	if bs, _ := got["bucketStates"].(map[string]any); len(bs) == 0 {
+		t.Fatalf("no bucket states to compare: %v", got)
+	}
+	if want := getJSON(t, url, 200); fmt.Sprint(got["bucketStates"], got["stats"]) != fmt.Sprint(want["bucketStates"], want["stats"]) {
+		t.Error("the stored layout, posted, differs from the GET")
+	}
+
+	one := stored[:1]
+	got = post(layout(one), 200)
+	rcv, err := view.RegionControl(res, view.RegionControlOptions{WindowMs: 50, Regions: one})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := json.Marshal(map[string]any{"bucketStates": rcv.BucketStates, "stats": rcv.Stats})
+	var want map[string]any
+	_ = json.Unmarshal(b, &want)
+	if fmt.Sprint(got["bucketStates"], got["stats"]) != fmt.Sprint(want["bucketStates"], want["stats"]) {
+		t.Error("a one-region layout differs from view.RegionControl over it")
+	}
+
+	// No regions at all: what the editor sends once every row is cleared.
+	if got := post(`{"regions":[]}`, 200); got["bucketStates"] != nil || got["stats"] != nil {
+		t.Errorf("empty layout: %v", got)
+	}
+
+	for _, bad := range []string{``, `{}`, `{"regions":[{"locs":["ra"]}]}`, `{"regions":[{"name":"x"}],"extra":1}`, `[1]`, `{"regions":[]} junk`} {
+		post(bad, 400)
+	}
+
+	// The answer depends on the body: no ETag, and the GET's ETag in
+	// If-None-Match never turns a POST into an empty 304.
+	etag := doGet(t, url, "").Header.Get("ETag")
+	req, _ := http.NewRequest(http.MethodPost, url, strings.NewReader(layout(one)))
+	req.Header.Set("If-None-Match", etag)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != 200 || resp.Header.Get("ETag") != "" {
+		t.Errorf("POST with If-None-Match: %d, ETag %q; want 200 with no ETag", resp.StatusCode, resp.Header.Get("ETag"))
 	}
 }

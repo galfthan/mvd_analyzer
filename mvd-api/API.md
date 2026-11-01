@@ -40,7 +40,8 @@ Base URL defaults to `http://localhost:8080`. A demo is addressed by an
 Don't have a `gameId` yet? **`GET /v1/games/search`** discovers demos in
 the hub catalog by player / team / map / mode / matchtag / date, returns
 `{limit, offset, count, total?, games}`, and each row's `id` becomes the
-`gameId:<id>` you feed the flow below. Each row also carries
+`gameId:<id>` you feed the flow below (**`GET /v1/games/{id}`** returns
+one game's row by that id). Each row also carries
 `server_hostname` (the QW server the game was played on). The `players`
 filter is a **case-insensitive** full-text search (unlike the per-demo
 endpoints' exact, case-sensitive `players` filter). Its `from`/`to` are
@@ -589,7 +590,9 @@ Authorization: Bearer qwmvd_<...>
   `curl -sSD- -o/dev/null -H "Authorization: Bearer qwmvd_…" https://host/v1/auth/check`.
 - Requests are rate-limited **per key** (not per IP). Over the limit →
   `429 rate_limited` + `Retry-After: <seconds>`. Two classes exist: normal
-  (portal) keys and looser `service` keys (issued to first-party apps).
+  (portal) keys and looser `service` keys (issued to first-party apps). The
+  one exception is the operator's web page key, which its own proxy adds for
+  every visitor: that is limited per key and visitor IP.
 
 **Getting a key.** On a deployment that runs with `-portal`, a user signs in
 with Discord at **`https://<host>/portal`** and self-services one key (sign in
@@ -792,6 +795,17 @@ Concrete consequences:
   sample's timestamp. `/region-control`, `/loc-graph` and `/loc-trails`
   drop a sample once its age reaches 250 ms; apply the same rule to
   `posAgeMs` and the four endpoints answer "where was X" consistently.
+
+### Everything at once: `/result`
+
+A client that renders every tab from one load — mvd-web's page is one —
+reads **`/result`**: the whole Result in one body (~4 MB of JSON on a
+4on4, gzip on the wire), shaped as
+[RESULT_SCHEMA.md](../mvd-analytics/RESULT_SCHEMA.md) documents, with
+`playerStats` already carrying the KTX overlay and the position tracks
+left out — take those from `/streams/positions`. It is exactly what the
+in-browser WASM build hands the page. To read one section, use its
+curated endpoint instead: they filter, shape and validate.
 
 ### Aggregates: whole match, chosen stretches, or per life?
 
@@ -997,6 +1011,9 @@ Common frontend features → the call that backs them.
   full.
 - **"Who controlled QUAD?"** → `GET /region-control?windowMs=10000`,
   read `stats.QUAD.byPlayer`.
+- **"Who held my own regions?"** → `POST /region-control` with a regions
+  file, `{"regions": [{"name": "high", "locs": ["ra", "mega"]}]}`, in
+  place of the map's stored layout.
 - **Loc heatmap / movement graph** → `GET /loc-graph` (aggregate) or
   `/loc-trails` (per-player sequence with dwell).
 - **Draw the map (items, spawns, teleporters as overlays)** → `GET /v1/maps/{map}/entities`
