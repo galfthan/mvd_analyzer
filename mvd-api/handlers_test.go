@@ -1124,9 +1124,10 @@ func newTestServerMaps(t *testing.T, store demoStore, mapsDir string) *httptest.
 	return httptest.NewServer(newRouter(store, logger, mapsDir, testUploadConfig, nil, nil, &fakeSearcher{}))
 }
 
-// fakeSearcher stands in for the hub game search in handler tests. The
-// default response is schema-valid for GET /v1/games/search; err simulates
-// an upstream failure.
+// fakeSearcher stands in for the hub game catalog in handler tests. The
+// default responses are schema-valid for GET /v1/games/search and
+// /v1/games/12345 (any other id is not found); err simulates an upstream
+// failure.
 type fakeSearcher struct {
 	out any
 	err error
@@ -1157,6 +1158,17 @@ func (f *fakeSearcher) Search(_ context.Context, _ hubfetch.SearchParams) (any, 
 			},
 		},
 	}, nil
+}
+
+func (f *fakeSearcher) Game(ctx context.Context, gameID int) (map[string]any, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	if gameID != 12345 {
+		return nil, fmt.Errorf("game %d %w", gameID, hubfetch.ErrNotFound)
+	}
+	out, _ := f.Search(ctx, hubfetch.SearchParams{})
+	return out.(map[string]any)["games"].([]any)[0].(map[string]any), nil
 }
 
 // testUploadConfig is the default upload config for handler tests: the

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http/httptest"
@@ -33,7 +34,11 @@ func (c *capturingSearcher) Search(_ context.Context, params hubfetch.SearchPara
 	return map[string]any{"limit": 20, "offset": 0, "count": 0, "games": []any{}}, nil
 }
 
-func newSearchServer(t *testing.T, sr gameSearcher) *httptest.Server {
+func (c *capturingSearcher) Game(context.Context, int) (map[string]any, error) {
+	return nil, errors.New("capturingSearcher only searches")
+}
+
+func newSearchServer(t *testing.T, sr gameCatalog) *httptest.Server {
 	t.Helper()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	return httptest.NewServer(newRouter(&fakeStore{}, logger, "", testUploadConfig, nil, nil, sr))
@@ -285,5 +290,34 @@ func TestGamesSearch_NotConfigured(t *testing.T) {
 	}
 	if !strings.Contains(string(body), `"hub_upstream"`) || !strings.Contains(string(body), "not configured") {
 		t.Errorf("body does not explain the missing config: %s", body)
+	}
+}
+
+// GET /v1/games/{id}: the row for a known game, 404 demo_not_found for an
+// unknown one, 400 for an id that is not a positive integer, 502 when the
+// hub fails — with the upstream detail kept out of the body.
+func TestGame(t *testing.T) {
+	srv := newSearchServer(t, &fakeSearcher{})
+	defer srv.Close()
+	m := getJSON(t, srv.URL+"/v1/games/12345", 200)
+	if m["id"] != float64(12345) || m["demo_sha256"] != "abc" {
+		t.Errorf("row = %v", m)
+	}
+	code := func(m map[string]any) any { e, _ := m["error"].(map[string]any); return e["code"] }
+	if m := getJSON(t, srv.URL+"/v1/games/7", 404); code(m) != "demo_not_found" {
+		t.Errorf("unknown game: %v", m)
+	}
+	for _, bad := range []string{"abc", "0", "-3", "gameId:12345"} {
+		if m := getJSON(t, srv.URL+"/v1/games/"+bad, 400); code(m) != "invalid_param" {
+			t.Errorf("%s: %v", bad, m)
+		}
+	}
+	getJSON(t, srv.URL+"/v1/games/12345?x=1", 400)
+
+	failing := newSearchServer(t, &fakeSearcher{err: errors.New("hub game: status 500: secret upstream body")})
+	defer failing.Close()
+	m = getJSON(t, failing.URL+"/v1/games/12345", 502)
+	if code(m) != "hub_upstream" || strings.Contains(fmt.Sprint(m), "secret") {
+		t.Errorf("upstream failure: %v", m)
 	}
 }

@@ -2,6 +2,7 @@ package hubfetch
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -234,5 +235,40 @@ func TestDownload_BodySizeCap(t *testing.T) {
 	}
 	if int64(len(data)) != maxDownloadBytes {
 		t.Errorf("got %d bytes; want %d", len(data), maxDownloadBytes)
+	}
+}
+
+// Game asks for the search's column set for one id, sends the hub's headers,
+// and returns the row verbatim — full roster included.
+func TestGame_RowAndNotFound(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("apikey") != "test-anon-key" || r.Header.Get("Authorization") != "Bearer test-anon-key" {
+			t.Errorf("missing auth headers: %v", r.Header)
+		}
+		q := r.URL.Query()
+		if q.Get("select") != SearchSelect {
+			t.Errorf("select = %q, want %q", q.Get("select"), SearchSelect)
+		}
+		if q.Get("id") != "eq.212111" {
+			w.Write([]byte(`[]`))
+			return
+		}
+		w.Write([]byte(`[{"id":212111,"map":"dm2","players":[{"name":"a","team":"red","frags":3,"ping":12}]}]`))
+	}))
+	defer srv.Close()
+	c := NewClient()
+	c.SupabaseURL = srv.URL
+	c.APIKey = "test-anon-key"
+
+	row, err := c.Game(context.Background(), 212111)
+	if err != nil {
+		t.Fatalf("Game: %v", err)
+	}
+	pl := row["players"].([]any)[0].(map[string]any)
+	if row["map"] != "dm2" || pl["ping"] != float64(12) {
+		t.Errorf("row not verbatim: %v", row)
+	}
+	if _, err := c.Game(context.Background(), 1); !errors.Is(err, ErrNotFound) {
+		t.Errorf("unknown id: err = %v, want ErrNotFound", err)
 	}
 }

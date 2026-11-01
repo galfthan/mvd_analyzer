@@ -5,7 +5,7 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (web-api) — the whole Result from the API
+## unreleased (web-api) — what the web page needs from the API
 
 mvd-api serves `GET /v1/demos/{id}/result`: the demo's whole Result in
 one body, as the web page reads it — `playerStats` with the KTX overlay,
@@ -13,6 +13,10 @@ no position tracks (`/streams/positions` serves those). The WASM build
 and the endpoint marshal the same `view.PageResult`, so a page reading
 the API renders a demo exactly as one analysing it in the browser. A
 4on4 is ~4 MB of JSON, ~0.9 MB gzip-encoded on the wire. No schema change.
+
+`GET /v1/games/{id}` returns one hub game's catalog row, the same columns
+a `/v1/games/search?roster=1` row carries, so a page holding a gameId no
+longer has to query the hub's Supabase itself.
 
 ## unreleased (perf-wasm-data) — position tracks in binary, faster floor traces
 

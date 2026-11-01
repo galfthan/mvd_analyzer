@@ -2142,6 +2142,41 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "502": { $ref: "#/components/responses/HubUpstream" }
         "500": { $ref: "#/components/responses/Internal" }
+  /v1/games/{id}:
+    get:
+      operationId: getGame
+      tags: [demo]
+      summary: One hub game by id
+      description: >
+        One game's row from hub.quakeworld.nu's public catalog, passed
+        through verbatim with the columns a `/v1/games/search?roster=true`
+        row carries (id, timestamp, mode, matchtag, map, teams, the full
+        players roster, demo_sha256, demo_source_url, server_hostname) —
+        what a client holding a gameId shows before, or instead of,
+        analysing the demo. The id is the bare hub gameId; analyse it with
+        any per-demo endpoint as `gameId:<id>`. Discovery data, not cached
+        per demo: no long-lived cache headers.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The hub gameId, a positive integer.
+          schema: { type: integer, minimum: 1 }
+        - $ref: "#/components/parameters/Label"
+      responses:
+        "200":
+          description: The game's catalog row.
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HubGame" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
+        "500": { $ref: "#/components/responses/Internal" }
   /v1/maps/{map}/entities:
     get:
       operationId: getMapEntitiesByMap
@@ -3403,6 +3438,15 @@ components:
             key). Empty = internal / no direct section.
         servable: { type: boolean, description: "Exposed via GET /v1/demos/{id}/artifacts/{name}." }
         description: { type: string, description: "Human-readable description." }
+    HubGame:
+      type: object
+      description: >
+        One hub game-catalog row (GET /v1/games/{id}), verbatim from the hub
+        — the hub owns its shape, so it is left open here.
+      required: [id]
+      additionalProperties: true
+      properties:
+        id: { type: integer, description: "The hub gameId." }
     GamesSearchResult:
       type: object
       description: >

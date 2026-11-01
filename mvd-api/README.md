@@ -64,11 +64,11 @@ tree so the anon key can rotate without a rebuild):
 | `HUB_SUPABASE_KEY` | Supabase anon key (public, read-only) |
 | `HUB_CDN_URL`      | Demo CDN base (e.g. `https://d.quake.world`); optional — without it, downloads fall back to each demo's source URL |
 
-These back on-demand demo fetch (cache miss) and `GET /v1/games/search`.
-Unlike the portal, they are **not** a startup requirement — the server
-starts and serves the local cache without them, but a cache miss and any
-`/games/search` return `502 hub_upstream` with a "hub not configured"
-message.
+These back on-demand demo fetch (cache miss), `GET /v1/games/search` and
+`GET /v1/games/{id}`. Unlike the portal, they are **not** a startup
+requirement — the server starts and serves the local cache without them,
+but a cache miss and any `/games/...` call return `502 hub_upstream` with
+a "hub not configured" message.
 
 Running the server is the default action — bare flags (or an explicit
 `serve`) start it. A positional first argument that isn't a known
@@ -257,6 +257,7 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/lives` | `players`, `from`, `to`, `minMs`, `dmg`, `summary` | `view.LivesView` — one row per spawn-to-death life (segmented by `streams.players[].alive`), with `endReason`, `spawnLoc`/`deathLoc`, `killedBy`, `itemsTaken`, `weaponsHeld` and the same per-interval stats block `/top-windows` uses; lives partition the match, so unfiltered per-life sums reconcile with the per-event LOGS (`/frags` `frags[]`, `/damage` `events[]`) — not necessarily with the KTX-sourced `byPlayer` scoreboards; `summary=1` keeps every row and drops the per-row collections |
 | POST | `/v1/playlist-links` | JSON body `{items, name?}` | `{url, markdown, name, length, clips, cards, demos}` — a link to the light player (`-play-url`) that plays a scripted reel: clips (`gameId`, match-ms `from`/`to`, `watch` player name, `label`, `slow`, `text`) from up to 20 hub games, title cards (`ms`, `bg`, `opacity`, fades, `text`) and text (size, colour, font, place, timing) — packed exactly as the web app's share link (format v2, nothing stored). Loads each game through the cache. 400 `invalid_param` names the item at fault. Backs the MCP `createPlaylistLink` tool |
 | GET | `/v1/games/search` | `players`, `teams`, `map`, `mode`, `matchtag`, `from`, `to`, `limit`, `offset`, `roster` | `{limit, offset, count, total?, games}` — hub.quakeworld.nu game discovery (no demo; live upstream, 502 `hub_upstream`). REST twin of the MCP `searchGames` tool (shared `hubfetch` impl) |
+| GET | `/v1/games/{id}` | — | one hub game's catalog row, verbatim, with a `roster=1` search row's columns; `404 demo_not_found` for an unknown id |
 | GET | `/v1/maps/{map}/entities` | `types`, `kinds` | `result.MapEntitiesResult` (static layout by map name, no demo needed) |
 | GET | `/v1/maps/{map}/geometry` | — | `mapgeom.MapRegions` floor-polygon JSON (needs `-maps-dir`; REST-only) |
 | GET | `/v1/artifacts` | — | `{schemaVersion, artifacts:[…]}` — the DAG manifest (name, cost, lazy, requires/provides, resultKey, servable); static, ETag `"artifacts-v<n>"` |

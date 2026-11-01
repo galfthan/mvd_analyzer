@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -45,9 +44,6 @@ type SearchParams struct {
 // the hub reports a Content-Range. Rosters are compacted to
 // {name, team, frags} unless params.Roster is set.
 func (c *Client) Search(ctx context.Context, params SearchParams) (any, error) {
-	if err := c.configErr(); err != nil {
-		return nil, err
-	}
 	parts := []string{
 		"select=" + url.QueryEscape(SearchSelect),
 		"order=timestamp.desc",
@@ -103,34 +99,13 @@ func (c *Client) Search(ctx context.Context, params SearchParams) (any, error) {
 		parts = append(parts, "timestamp=lte."+url.QueryEscape(params.To+"T23:59:59"))
 	}
 
-	full := c.SupabaseURL + "?" + strings.Join(parts, "&")
-	req, err := http.NewRequestWithContext(ctx, "GET", full, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("apikey", c.APIKey)
-	req.Header.Set("Authorization", "Bearer "+c.APIKey)
-	req.Header.Set("accept-profile", "public")
 	// Ask PostgREST for the total match count (Content-Range: 0-19/1234)
 	// so pagination is honest: `count` is rows-in-this-page, `total` is
 	// all matching rows. With a count preference PostgREST may answer
 	// 206 Partial Content for a partial page — that is success here.
-	req.Header.Set("Prefer", "count=exact")
-
-	resp, err := c.HTTP.Do(req)
+	resp, body, err := c.catalogGet(ctx, "hub search", strings.Join(parts, "&"), "Prefer", "count=exact")
 	if err != nil {
-		return nil, fmt.Errorf("hub search: %w", err)
-	}
-	defer resp.Body.Close()
-	// Cap the metadata read: read one byte past the cap so an over-cap body
-	// is detectable (see maxCatalogBytes) — a compromised/buggy hub must not
-	// be able to OOM the host with an oversized catalog page.
-	body, err := io.ReadAll(io.LimitReader(resp.Body, maxCatalogBytes+1))
-	if err != nil {
-		return nil, fmt.Errorf("hub search: %w", err)
-	}
-	if int64(len(body)) > maxCatalogBytes {
-		return nil, fmt.Errorf("hub search: response exceeds %d-byte cap", maxCatalogBytes)
+		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusPartialContent {
 		return nil, fmt.Errorf("hub search: status %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))

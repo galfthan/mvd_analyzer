@@ -15,8 +15,8 @@ import (
 type server struct {
 	store    demoStore
 	logger   *slog.Logger
-	mapsDir  string       // directory of per-map geometry JSON; "" disables /geometry
-	searcher gameSearcher // hub game search backing GET /v1/games/search; nil disables it
+	mapsDir  string      // directory of per-map geometry JSON; "" disables /geometry
+	searcher gameCatalog // hub catalog backing GET /v1/games/search and /v1/games/{id}; nil disables both
 
 	// upload holds the POST /v1/demos limits; uploadLedger is the per-key
 	// daily quota (skipped in no-auth mode). Both are inert when uploads are
@@ -40,7 +40,7 @@ type uploadConfig struct {
 // between accessLog and recover. p may be nil (portal disabled); when non-nil
 // its /portal routes are registered on the mux (and are auth-exempt, so they
 // are reachable without an API key even in auth mode — see authExempt).
-func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uploadConfig, auth *authenticator, p *portal.Portal, searcher gameSearcher) http.Handler {
+func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uploadConfig, auth *authenticator, p *portal.Portal, searcher gameCatalog) http.Handler {
 	s := &server{store: store, logger: logger, mapsDir: mapsDir, searcher: searcher, upload: upload, uploadLedger: newUploadLedger()}
 	mux := http.NewServeMux()
 
@@ -112,6 +112,7 @@ func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uplo
 
 	// Hub game discovery (no demo needed; hits a live upstream).
 	mux.HandleFunc("GET /v1/games/search", s.handleGamesSearch)
+	mux.HandleFunc("GET /v1/games/{id}", s.handleGame)
 
 	// Per-map static data (no demo needed).
 	mux.HandleFunc("GET /v1/maps/{map}/entities", s.handleMapEntitiesByMap)

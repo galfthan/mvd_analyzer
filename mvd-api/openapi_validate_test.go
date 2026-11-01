@@ -758,6 +758,8 @@ func validationCases(t *testing.T) []validationCase {
 			mustContain: []string{`"demoMarkers"`, `"playerUserID":17`, `"spectator":true`, `"label":"0 round-07"`}},
 
 		{name: "games-search", url: "/v1/games/search?map=dm3&mode=4on4", path: "/v1/games/search", status: 200},
+		{name: "game", url: "/v1/games/12345", path: "/v1/games/{id}", status: 200, mustContain: []string{`"demo_sha256":`}},
+		{name: "err-game-not-found", url: "/v1/games/7", path: "/v1/games/{id}", status: 404},
 		// The timeUnit echo (schema v56) is asserted by the schema-validated
 		// cases above: overview / events / state-at / stream-slice / loc-trails /
 		// buckets-row / items-summary, the three list envelopes (chat,
