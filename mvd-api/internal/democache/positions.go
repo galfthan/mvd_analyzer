@@ -64,21 +64,28 @@ func (c *Cache) PositionPack(ctx context.Context, id DemoID) ([]byte, CacheMeta,
 	if err != nil {
 		return nil, meta, err
 	}
+	data, err := c.buildPositionPack(ctx, sha, path, res)
+	return data, meta, err
+}
+
+// buildPositionPack gzips res's position pack and writes it to path (the
+// demo's tier-3 file). Caller holds the demo's pack lock.
+func (c *Cache) buildPositionPack(ctx context.Context, sha, path string, res *result.Result) ([]byte, error) {
 	// Distinct demos' first requests share the parse semaphore with every
 	// other heavy cold operation (F15).
 	release, err := c.acquireParse(ctx)
 	if err != nil {
-		return nil, meta, err
+		return nil, err
 	}
 	defer release()
 
 	var buf bytes.Buffer
 	zw := gzip.NewWriter(&buf)
 	if _, err := zw.Write(result.EncodePositionPack(res.Streams)); err != nil {
-		return nil, meta, fmt.Errorf("compress position pack: %w", err)
+		return nil, fmt.Errorf("compress position pack: %w", err)
 	}
 	if err := zw.Close(); err != nil {
-		return nil, meta, fmt.Errorf("compress position pack: %w", err)
+		return nil, fmt.Errorf("compress position pack: %w", err)
 	}
 	data := buf.Bytes()
 	// A failed write only costs the next request a rebuild.
@@ -88,7 +95,7 @@ func (c *Cache) PositionPack(ctx context.Context, id DemoID) ([]byte, CacheMeta,
 		c.packVerified.Store(sha, true)
 		c.maybeGC()
 	}
-	return data, meta, nil
+	return data, nil
 }
 
 // readPositionPack reads a demo's tier-3 pack. The first read of each

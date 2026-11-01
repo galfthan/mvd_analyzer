@@ -204,6 +204,7 @@ func accessLogMiddleware(logger *slog.Logger, next http.Handler) http.Handler {
 			"latency_ms", time.Since(start).Milliseconds(),
 			"remote", clientIP(r),
 			"label", label,
+			"src", requestSource(r),
 			"discord", info.discord,
 			"key", info.keyPrefix,
 			"cache", w.Header().Get("X-Cache"),
@@ -246,6 +247,19 @@ func limiterClient(r *http.Request) string {
 		return host
 	}
 	return ip.Mask(net.CIDRMask(64, 128)).String() + "/64"
+}
+
+// requestSource is the ?label= a client sends to say which of its parts
+// made the request — the web page tags its calls "web" and the light player
+// "play" (mvd-web/src/data/api.js) — logged as `src` in every mode: in auth
+// mode `label` is the key's identity, which is one key for both. It is the
+// client's own word, so it is cut to 32 bytes.
+func requestSource(r *http.Request) string {
+	s := r.URL.Query().Get("label")
+	if len(s) > 32 {
+		s = s[:32]
+	}
+	return s
 }
 
 // requestLabel extracts the non-secret traffic-source label from

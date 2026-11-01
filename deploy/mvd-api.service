@@ -53,6 +53,11 @@ Environment=MVDA_BSP_DIR=/opt/mvd/bsps
 
 # -auth-dir enables API-key auth; -portal enables the Discord portal (needs
 # the three env vars above). Tune -cache-max-bytes / -max-parses to the box;
+# -warm-interval prepares new hub demos (and on start the -warm-window's
+# backfill) before anyone opens one. A week is ~15-20 GB on top of what
+# visitors keep, hence the 60 GiB -cache-max-bytes: size it to the disk
+# (leave ~10 GB free), and shorten -warm-window (or drop -warm-interval)
+# on a small one. It takes one of -max-parses' slots while it works.
 # -rate-*/-burst-* set the token buckets: per key for the user and service
 # classes, per key and client IP for the web class (a -per-client key).
 #
@@ -71,7 +76,7 @@ Environment=MVDA_BSP_DIR=/opt/mvd/bsps
 ExecStart=/opt/mvd/bin/mvd-api serve \
     -addr 127.0.0.1:8080 \
     -cache-dir /opt/mvd/cache \
-    -cache-max-bytes 21474836480 \
+    -cache-max-bytes 64424509440 \
     -max-parses 2 \
     -parse-timeout 120s \
     -auth-dir /opt/mvd/auth \
@@ -81,6 +86,7 @@ ExecStart=/opt/mvd/bin/mvd-api serve \
     -max-upload-bytes 67108864 \
     -upload-daily-bytes 536870912 \
     -upload-daily-count 50 \
+    -warm-interval 5m -warm-window 168h \
     -portal \
     -portal-base-url https://qw.example.com \
     -log-format json

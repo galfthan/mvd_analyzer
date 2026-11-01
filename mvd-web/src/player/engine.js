@@ -87,8 +87,10 @@ export class PlayerEngine {
         // and sound on or off: kept across engines, set on each as it comes
         // up (carrySettings) — each demo gets a fresh engine, which starts
         // muted, so a run moving on to another demo's clip would mute again.
+        // Sound starts on; the browser holds the audio until the first play
+        // (FteController.play resumes it).
         this.teamInfo = false;
-        this.sound = false;
+        this.sound = true;
         // The player last followed by hand, by name — userids differ from
         // demo to demo: followed on the next engine when it has them, else
         // the engine's autotrack. null: autotrack.
@@ -104,6 +106,7 @@ export class PlayerEngine {
         this.blobUrl = null;
         /** @type {Promise<void> | null} */
         this.demoWait = null;      // the demo's bytes, while they download
+        this.wakeHooked = false;   // the page's gestures wake the audio (attachHost)
         /** @type {FteController | null} */
         this.fte = null;
         /** @type {number | null} */
@@ -183,6 +186,16 @@ export class PlayerEngine {
     /** @param {HTMLElement} el */
     attachHost(el) {
         this.host = el;
+        // Sound starts on, but the browser holds the audio until a user
+        // gesture: the first click or key anywhere on the page wakes it
+        // (one inside the game view, hookScreen). A light player run starts
+        // playing by itself, so it gets no play gesture to wait for.
+        if (!this.wakeHooked) {
+            this.wakeHooked = true;
+            const wake = () => this.fte?.wakeAudio();
+            el.ownerDocument.addEventListener('pointerdown', wake, true);
+            el.ownerDocument.addEventListener('keydown', wake, true);
+        }
         if (this.active()) this.ensure();
     }
 
@@ -279,6 +292,7 @@ export class PlayerEngine {
     // (mvd-fte-player/config.cfg), so nothing of the engine's is lost.
     /** @param {Window} win */
     hookScreen(win) {
+        win.addEventListener('pointerdown', () => this.fte?.wakeAudio(), true);
         win.addEventListener('click', (e) => {
             if (e.button === 0 && !this.screenDismiss()) this.screenToggle();
         }, true);

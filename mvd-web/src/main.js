@@ -17,9 +17,11 @@ import { setupPresetRuns } from './player/preset-runs.js';
 import * as MvdMapTab from './tabs/map/map-model.js';
 import { setupPanels } from './ui/panels/index.js';
 import { mvdData } from './app/source.js';
+import { setApiSource } from './data/api.js';
 import { loadDemo } from './app/load.js';
 import { boot } from './app/boot.js';
 
+setApiSource('web');
 window.MvdState = MvdState;
 window.MvdPlayer = engine;
 window.MvdMapTab = MvdMapTab;

@@ -5,6 +5,28 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (hub-warm) — new hub demos are ready before anyone opens them
+
+mvd-api's access log has a `src` field, the request's `?label=`: the web
+page tags its API calls `web` and the light player `play`, so usage reports
+can tell the two apart (both use the one web key).
+
+The Player (the tab and the light player) now starts with sound on; it
+was muted until switched on. Browsers hold a page's audio until a user
+gesture, so the sound starts with the first play.
+
+`mvd-api serve -warm-interval 5m` lists the hub's games every five
+minutes and downloads, parses and packs each new one, so a demo's first
+visitor gets the cached path (a 4on4's Result in ~0.2 s) instead of a
+cold parse. On start it backfills `-warm-window` (default a week, ~1300
+games), back to back until done, re-listing every interval so new games
+go first. It runs one demo at a time through the same parse slots as
+visitors and keeps warmed demos out of the in-memory LRU. A failed
+download is retried with a doubling wait (up to hourly), so an outage
+gives nothing up. Warmed files are the newest in the cache when written,
+so size `-cache-max-bytes` for the window on top of what visitors keep
+(a week is ~15-20 GB), or the backfill evicts their history.
+
 ## unreleased (web-client) — the web page talks to mvd-api
 
 The page's Search tab and game lookup go through mvd-api

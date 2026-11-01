@@ -278,3 +278,15 @@ test('an answer the page cannot read is analysed in the browser; the body\'s sch
     await noHeader.src.load({ gameId: 7 });
     assert.equal(noHeader.wasms.length, 1, 'v77 in the body, the page is v78');
 });
+
+test('each call says which part of the page made it', async () => {
+    const { setApiSource } = await import('../src/data/api.js');
+    const { fetchImpl, calls } = fakeApi(resultRoutes());
+    setApiSource('play');
+    try {
+        await new ApiSource({ fetchImpl }).load(GAME, {});
+    } finally {
+        setApiSource('');
+    }
+    assert.ok(calls.length > 0 && calls.every((c) => c.url.searchParams.get('label') === 'play'));
+});

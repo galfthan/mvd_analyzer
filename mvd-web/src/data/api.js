@@ -11,6 +11,16 @@
 // Relative, like every asset the page loads (vite base './').
 export const API_BASE = 'api/';
 
+// The page's part, sent as ?label= on every call and logged by mvd-api as
+// `src`, so its access log tells the analyzer ("web") from the light player
+// ("play") — both use the one web key. Set once by each entry point.
+let source = '';
+
+/** @param {string} label */
+export function setApiSource(label) {
+    source = label;
+}
+
 // ApiError is a non-2xx answer: its status, and the error envelope's code
 // and message ({"error": {"code", "message"}}) when the body had one.
 export class ApiError extends Error {
@@ -47,6 +57,7 @@ export class ApiError extends Error {
  * @returns {Promise<Response>}
  */
 export async function apiFetch(path, init = {}, fetchImpl = fetch) {
+    if (source) path += (path.includes('?') ? '&' : '?') + 'label=' + encodeURIComponent(source);
     let resp;
     try {
         resp = await fetchImpl(API_BASE + path, init);

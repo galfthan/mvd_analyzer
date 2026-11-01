@@ -42,6 +42,8 @@ mvd-api keys list   -auth-dir DIR
 | `-burst-web`        | `600`                                   | Auth mode: per-client burst for a per-client key |
 | `-portal`           | `false`                                 | Enable the Discord key portal at `/portal` (users self-service their own key). **Off = no `/portal` routes at all.** Requires `-auth-dir` **and** the three env vars below; see "The Discord key portal" |
 | `-portal-base-url`  | _(empty)_                               | Public origin of the deployment, e.g. `https://qw.example.com`. Used to build the OAuth `redirect_uri` (`<base>/portal/callback`) and absolute links. Required with `-portal` |
+| `-warm-interval`    | `0` (off)                               | Prepare new hub demos before their first visitor: every interval, list the hub's games in `-warm-window`, newest first, and download, parse and pack each one not yet cached (one at a time, through the parse slots; never into the in-memory LRU). The first tick backfills the window, running back to back until done and re-listing every interval so new games go first. A demo whose download fails is retried with a doubling wait (5 min … 1 h), a demo that does not parse is not; five failures in a row end a tick (an outage). Needs the hub env vars. `journalctl -u mvd-api \| grep 'hub warm'` shows each tick |
+| `-warm-window`      | `168h`                                  | How far back `-warm-interval` prepares games (≈1300 hub games a week at 2026 rates — roughly 15-20 GB of cache; size `-cache-max-bytes` for it) |
 | `-play-url`         | `https://mvdanalyzer.com/play.html`     | The web app's light player that `POST /v1/playlist-links` links to — point it at a branch deploy's `play.html` until production has the player |
 
 The portal's secrets are supplied via **environment variables, never
@@ -315,7 +317,10 @@ authentication. The data is public and read-only. The optional
 `Authorization: Bearer <label>` header (or `?label=` query param) is **not
 validated** — it's a non-secret request-source tag captured in the access log
 for analytics. Common labels: `mcp-claude-desktop`, `web-community`,
-`cli-script`. This paragraph applies **only** to this mode.
+`cli-script`. This paragraph applies **only** to this mode. In either mode
+the `?label=` query param is also logged on its own as `src` (cut to 32
+bytes): the web page tags its calls `web` and the light player `play`, so a
+report can tell them apart although both use the one web key.
 
 **Keyed (hosted) mode — `-auth-dir DIR` set.** `/v1/*` and
 `POST /v1/demos/{id}` require `Authorization: Bearer qwmvd_…`. Here the Bearer

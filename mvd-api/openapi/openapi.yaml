@@ -2295,8 +2295,9 @@ components:
       in: query
       required: false
       description: >
-        Non-secret traffic-source tag for access-log attribution. Accepted on
-        every endpoint; never affects the response.
+        Non-secret traffic-source tag for access-log attribution (logged as
+        `src`, cut to 32 bytes). Accepted on every endpoint; never affects
+        the response.
       schema: { type: string }
     DemoId:
       name: id
