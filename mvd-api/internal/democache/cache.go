@@ -330,7 +330,7 @@ func (c *Cache) GetResult(ctx context.Context, id DemoID) (*result.Result, Cache
 		return nil, CacheMeta{}, err
 	}
 
-	return c.getOrCompute(sha, func() (*result.Result, CacheMeta, error) {
+	r, meta, err := c.getOrCompute(sha, func() (*result.Result, CacheMeta, error) {
 		// The cold load runs inside the per-SHA singleflight, so its error is
 		// shared with every co-waiter. Strip the caller's cancellation (and
 		// deadline) from the ctx it threads — notably the parse-semaphore wait
@@ -339,6 +339,12 @@ func (c *Cache) GetResult(ctx context.Context, id DemoID) (*result.Result, Cache
 		// values while making Done() never fire (go1.25).
 		return c.loadResult(context.WithoutCancel(ctx), sha, id, true)
 	})
+	// Into the LRU here rather than in loadResult, so a visitor who joined
+	// the hub warmer's computation (Warm, which keeps it out) has it too.
+	if err == nil {
+		c.mem.put(sha, r)
+	}
+	return r, meta, err
 }
 
 // resolveSHA converts a DemoID to a canonical lowercased SHA-256 hex.
@@ -382,10 +388,11 @@ func (c *Cache) resolveSHA(id DemoID) (string, error) {
 }
 
 // loadResult walks the cache tiers. Runs once per SHA via singleflight.
-// remember puts the Result in the in-memory LRU; the hub warmer (Warm)
-// leaves it out, so preparing demos nobody asked for yet does not push out
-// the ones being viewed.
-func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID, remember bool) (*result.Result, CacheMeta, error) {
+// visit is a visitor's load (GetResult): a hit touches the demo's files for
+// the GC's recency, and GetResult puts the Result in the in-memory LRU. The
+// hub warmer's (Warm) does neither, so preparing demos nobody asked for
+// yet neither pushes out the ones being viewed nor refreshes its own.
+func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID, visit bool) (*result.Result, CacheMeta, error) {
 	meta := CacheMeta{SHA256: sha, SchemaVersion: result.CurrentSchemaVersion}
 
 	// Drain any GameInfo stashed by resolveSHA unconditionally, regardless
@@ -404,18 +411,19 @@ func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID, remember 
 	if r := c.mem.get(sha); r != nil {
 		// Keep both on-disk tiers hot so an actively-queried demo is not the
 		// GC's eviction target even while it lives only in the mem LRU.
-		touch(rp)
-		touch(mp)
+		if visit {
+			touch(rp)
+			touch(mp)
+		}
 		meta.FromCache = true
 		return r, meta, nil
 	}
 
 	if data, err := os.ReadFile(rp); err == nil {
 		if r, decErr := decodeResult(data); decErr == nil {
-			touch(rp)
-			touch(mp)
-			if remember {
-				c.mem.put(sha, r)
+			if visit {
+				touch(rp)
+				touch(mp)
 			}
 			meta.FromCache = true
 			return r, meta, nil
@@ -433,7 +441,9 @@ func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID, remember 
 
 	var mvdBytes []byte
 	if data, err := os.ReadFile(mp); err == nil {
-		touch(mp)
+		if visit {
+			touch(mp)
+		}
 		mvdBytes = data
 		meta.FromMVDTier = true
 	} else {
@@ -485,9 +495,6 @@ func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID, remember 
 		slog.Warn("tier-2 result encode failed", "sha", sha, "err", err)
 	} else if writeErr := writeFileAtomic(rp, data, 0o644); writeErr == nil {
 		c.maybeGC()
-	}
-	if remember {
-		c.mem.put(sha, r)
 	}
 	return r, meta, nil
 }

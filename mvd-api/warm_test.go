@@ -101,7 +101,9 @@ func TestWarmer_LongTickYieldsToNewGames(t *testing.T) {
 	store := &warmFake{cost: 2 * time.Minute}
 	w := newTestWarmer(cat, store, &now)
 
-	w.tick(context.Background())
+	if !w.tick(context.Background()) {
+		t.Fatal("a tick that ran out of time with games left must say so (run starts the next at once)")
+	}
 	if fmt.Sprint(store.calls) != "[100 99 98]" {
 		t.Fatalf("first tick warmed %v, want three (2 min each, 5 min interval)", store.calls)
 	}
@@ -113,24 +115,84 @@ func TestWarmer_LongTickYieldsToNewGames(t *testing.T) {
 	}
 }
 
-// An upstream failure is retried for a few ticks; a demo that does not
-// parse is not.
+// A game that fails to download is retried with a doubling wait; a demo
+// that does not parse is not tried again.
 func TestWarmer_Failures(t *testing.T) {
 	now := time.Date(2026, 11, 1, 12, 0, 0, 0, time.UTC)
-	cat := &warmCatalog{rows: []map[string]any{warmRow(2, now), warmRow(1, now)}}
+	cat := &warmCatalog{rows: []map[string]any{warmRow(3, now), warmRow(2, now), warmRow(1, now)}}
 	store := &warmFake{fail: map[int]error{
 		2: fmt.Errorf("%w: cdn 503", democache.ErrHubUpstream),
 		1: fmt.Errorf("%w: bad demo", democache.ErrParse),
 	}}
 	w := newTestWarmer(cat, store, &now)
-	for i := 0; i < warmTries+2; i++ {
+	var at []string
+	for i := 0; i < 8; i++ { // ticks at 0, 5, … 35 min
+		n := len(store.calls)
 		w.tick(context.Background())
+		for _, id := range store.calls[n:] {
+			if id == 2 {
+				at = append(at, fmt.Sprint(i*5))
+			}
+		}
+		now = now.Add(5 * time.Minute)
 	}
 	n := map[int]int{}
 	for _, id := range store.calls {
 		n[id]++
 	}
-	if n[2] != warmTries || n[1] != 1 {
-		t.Fatalf("tries %v, want game 2 %d times (upstream), game 1 once (parse)", n, warmTries)
+	if n[1] != 1 || n[3] != 1 {
+		t.Fatalf("calls %v: the parse failure and the success once each", n)
+	}
+	if fmt.Sprint(at) != "[0 5 15 35]" {
+		t.Fatalf("game 2 tried at minutes %v, want [0 5 15 35] (waits 5, 10, 20)", at)
+	}
+}
+
+// An outage stops a tick after a few failures in a row and gives up no
+// game: once the hub is back, the whole window warms within the backoff
+// cap.
+func TestWarmer_OutageGivesUpNothing(t *testing.T) {
+	now := time.Date(2026, 11, 1, 12, 0, 0, 0, time.UTC)
+	var rows []map[string]any
+	for id := 50; id > 0; id-- {
+		rows = append(rows, warmRow(id, now.Add(-time.Duration(51-id)*time.Minute)))
+	}
+	cat := &warmCatalog{rows: rows}
+	down := fmt.Errorf("%w: cdn unreachable", democache.ErrHubUpstream)
+	store := &warmFake{fail: map[int]error{}}
+	for id := 1; id <= 50; id++ {
+		store.fail[id] = down
+	}
+	w := newTestWarmer(cat, store, &now)
+	for i := 0; i < 4; i++ {
+		n := len(store.calls)
+		w.tick(context.Background())
+		if len(store.calls)-n != warmOutage {
+			t.Fatalf("tick %d made %d attempts in an outage, want %d", i, len(store.calls)-n, warmOutage)
+		}
+		now = now.Add(5 * time.Minute)
+	}
+	store.fail = nil
+	now = now.Add(warmMaxBackoff)
+	store.calls = nil
+	w.tick(context.Background())
+	if len(store.calls) != 50 || len(w.done) != 50 {
+		t.Fatalf("after the outage %d games tried, %d done; want all 50", len(store.calls), len(w.done))
+	}
+}
+
+// Rows repeated across pages (games published while paging) are warmed
+// once.
+func TestWarmer_PagesDeduplicated(t *testing.T) {
+	now := time.Date(2026, 11, 1, 12, 0, 0, 0, time.UTC)
+	var rows []map[string]any
+	for i := 0; i < hubfetch.MaxSearchLimit+5; i++ {
+		rows = append(rows, warmRow(5000-i, now.Add(-time.Duration(i)*time.Second)))
+	}
+	rows = append(rows[:hubfetch.MaxSearchLimit+1], rows[hubfetch.MaxSearchLimit-1:]...)
+	w := newTestWarmer(&warmCatalog{rows: rows}, &warmFake{}, &now)
+	games, err := w.list(context.Background(), now.Add(-time.Hour))
+	if err != nil || len(games) != hubfetch.MaxSearchLimit+5 {
+		t.Fatalf("listed %d (%v), want %d distinct", len(games), err, hubfetch.MaxSearchLimit+5)
 	}
 }

@@ -11,9 +11,13 @@ detail.
 minutes and downloads, parses and packs each new one, so a demo's first
 visitor gets the cached path (a 4on4's Result in ~0.2 s) instead of a
 cold parse. On start it backfills `-warm-window` (default a week, ~1300
-games). It runs one demo at a time through the same parse slots as
-visitors, keeps warmed demos out of the in-memory LRU, and never touches
-the files of a demo nobody opens, so the tier GC evicts those first.
+games), back to back until done, re-listing every interval so new games
+go first. It runs one demo at a time through the same parse slots as
+visitors and keeps warmed demos out of the in-memory LRU. A failed
+download is retried with a doubling wait (up to hourly), so an outage
+gives nothing up. Warmed files are the newest in the cache when written,
+so size `-cache-max-bytes` for the window on top of what visitors keep
+(a week is ~15-20 GB), or the backfill evicts their history.
 
 ## unreleased (web-client) — the web page talks to mvd-api
 

@@ -17,10 +17,11 @@ import (
 // lookup: game is the catalog row the warmer listed (id, sha, source URL).
 //
 // It reports false, doing nothing, when the Result and the pack are on disk
-// already; it does not touch them either, so warming leaves the GC's
-// recency to the demos people open. Nor does it put the Result in the
-// in-memory LRU (loadResult's remember). The download and parse go through
-// the per-SHA singleflight and the parse semaphore like a visitor's.
+// already. It touches no file it finds (loadResult's visit), so the GC's
+// recency stays the visitors', and keeps the Result out of the in-memory
+// LRU. The files it writes are the newest in the cache, and age from there.
+// The download and parse go through the per-SHA singleflight and the parse
+// semaphore like a visitor's.
 func (c *Cache) Warm(ctx context.Context, game hubfetch.GameInfo) (bool, error) {
 	c.ensureInit()
 	if game.ID <= 0 || !isValidSHA(game.DemoSHA256) {
