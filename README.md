@@ -101,7 +101,7 @@ MVD_API_KEY=qwmvd_… make serve              # hub search + demos via the produ
 MVD_API=http://127.0.0.1:8090/v1/ make serve   # …or via a local `mvd-api serve -addr 127.0.0.1:8090`
 ```
 
-The page reads hub search, game lookup and (soon) hub demos from
+The page reads hub search, game lookup and hub demos from
 mvd-api at `/api` on its own origin; `scripts/serve-dev.py` forwards that
 path to `MVD_API` with `MVD_API_KEY` added, as Caddy does in production.
 Without a reachable API the page still works on its own: search and
@@ -313,16 +313,16 @@ score?", "who played?"), the agent should stop there — no
 
 #### Authentication
 
-There is none, by design. The QW demo corpus is public and the API is
-read-only. The optional `-label TAG` flag (or `Authorization: Bearer
-<label>` on `mvd-api`) is **not** validated — it's a non-secret
-request-source tag captured in `mvd-api`'s access log for analytics.
-Common labels: `mcp-claude-desktop`, `claude-code-local`,
-`web-community`.
-
-If real auth ever becomes necessary (abuse / rate-limit enforcement),
-the surface is small enough to add bearer-token validation in
-`mvd-api`'s middleware without changes to the MCP shim.
+A local `mvd-api` started without `-auth-dir` has none: every route is
+open, and the optional `-label TAG` flag (or `Authorization: Bearer
+<label>`) is **not** validated — it's a non-secret request-source tag
+captured in the access log (common labels: `mcp-claude-desktop`,
+`claude-code-local`, `web-community`). The hosted API at mvdanalyzer.com
+runs with `-auth-dir`: every `/v1` call needs an API key (from the
+Discord portal at `/portal`, or one the operator issues), rate-limited
+per key; its MCP endpoint forwards the operator's own service key, so MCP
+clients need none. See [mvd-api/README.md](mvd-api/README.md) and
+[mvd-api/API.md](mvd-api/API.md) §2.5.
 
 #### Client setup
 

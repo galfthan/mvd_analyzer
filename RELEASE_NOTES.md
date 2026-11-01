@@ -28,7 +28,10 @@ every demo in the browser. The Player downloads the demo file from the
 hub's CDN only when it plays one. The version tag now comes from build
 stamps on the page (`make build` adds the tag, date and schema version).
 On three demos (a duel and two 4on4s) the API path gives the page the same
-data as the in-browser one, section by section.
+data as the in-browser one, section by section. When the Player cannot
+download a demo file it now says so over the frame instead of spinning,
+and a page whose cached build differs from the analyzer's asks to be
+reloaded in the version tag instead of reloading mid-session.
 
 ## unreleased (web-api) — what the web page needs from the API
 

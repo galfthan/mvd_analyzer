@@ -65,11 +65,16 @@ export class PageSource {
     async load(input, opts = {}) {
         const seq = ++this._loadSeq;
         const stale = () => seq !== this._loadSeq;
+        let handle;
         try {
-            return await this._load(input, opts, stale);
+            handle = await this._load(input, opts, stale);
         } catch (err) {
             throw stale() ? new SupersededError() : err;
         }
+        // WasmSource checks only for newer loads of its own, so an analyze
+        // that outlasted a newer API load still answers: drop it here.
+        if (stale()) throw new SupersededError();
+        return handle;
     }
 
     /**
@@ -98,7 +103,10 @@ export class PageSource {
         onStage('server');
         try {
             const handle = await this.api.load(game, net);
-            live();
+            // The server's analysis is the slow part here (in the browser
+            // it is the download, before stillWanted is asked), so ask again:
+            // nothing was handed to a worker, the shown demo stays as it is.
+            if (!wanted()) throw new SupersededError();
             return handle;
         } catch (err) {
             if (/** @type {{ superseded?: boolean }} */ (err).superseded) throw err;

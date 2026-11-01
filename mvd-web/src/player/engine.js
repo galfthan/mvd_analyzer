@@ -35,6 +35,7 @@ import { demoOffsetSec, mapFileKey, userIdOf, nameOfUserId } from '../lib/result
  * @property {boolean} autotrack
  * @property {boolean} muted
  * @property {boolean} teamInfo   the team info table is shown
+ * @property {string} error       why the engine cannot start ('' when it can)
  */
 
 const SEEK_THROTTLE_MS = 150;
@@ -48,7 +49,7 @@ const SEEK_SETTLE_MS = 2000;
 const CLOCK_WAIT_MS = 30000;
 
 /** @type {EngineStatus} */
-const IDLE = { ready: false, playing: false, speed: 100, rate: 100, ended: false, track: null, autotrack: false, muted: true, teamInfo: false };
+const IDLE = { ready: false, playing: false, speed: 100, rate: 100, ended: false, track: null, autotrack: false, muted: true, teamInfo: false, error: '' };
 
 export class PlayerEngine {
     /**
@@ -168,9 +169,10 @@ export class PlayerEngine {
         return !!this.fte && this.active();
     }
 
-    // Wanted on the tab but not up yet: the clock waits for it.
+    // Wanted on the tab but not up yet: the clock waits for it — unless it
+    // cannot start (the demo file did not download).
     loading() {
-        return this.active() && !this.fte;
+        return this.active() && !this.fte && !this.status.get().error;
     }
 
     offset() {
@@ -196,10 +198,15 @@ export class PlayerEngine {
             this.demoWait = null;
             if (this.handle === handle && this.host && this.active()) this.start(handle, blob, gzipped);
         }, (/** @type {unknown} */ err) => {
-            if (this.demoWait === wait) this.demoWait = null;
+            if (this.demoWait !== wait) return;
+            this.demoWait = null;
+            // Shown over the frame (PlayerFrame); the next ensure() — the tab
+            // shown again — tries again.
             console.error('player: the demo download failed:', err);
+            this.status.set({ ...this.status.get(), error: `The demo file could not be downloaded (${/** @type {Error} */ (err)?.message || err}).` });
         });
         this.demoWait = wait;
+        if (this.status.get().error) this.status.set({ ...this.status.get(), error: '' });
     }
 
     /**
@@ -403,6 +410,7 @@ export class PlayerEngine {
             autotrack: fte.isUsingAutotrack(),
             muted: fte.isMuted(),
             teamInfo: this.teamInfo,
+            error: '',
         };
         const cur = this.status.get();
         if (/** @type {Array<keyof EngineStatus>} */ (Object.keys(next)).some((k) => next[k] !== cur[k])) this.status.set(next);

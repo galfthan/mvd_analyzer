@@ -240,3 +240,41 @@ test('the last load asked for wins, across the API and the browser', async () =>
     await assert.rejects(slow, (e) => e.superseded === true);
     assert.equal(file.input.name, 'a.mvd');
 });
+
+test('an older in-browser analysis answering after a newer API load is dropped', async () => {
+    let release;
+    class SlowWasm extends FakeWasm {
+        async load(input, opts) {
+            assert.ok(opts.stillWanted(), 'still wanted when its analyze is posted');
+            await new Promise((r) => { release = r; });
+            return { result: {}, timings: { net: {} }, input };
+        }
+    }
+    const { fetchImpl } = fakeApi({ ...gameRoute, ...resultRoutes() });
+    const src = new PageSource({ api: new ApiSource({ fetchImpl }), makeWasm: () => new SlowWasm(), fetchImpl });
+    const file = src.load({ bytes: new Uint8Array([1]), name: 'a.mvd' });
+    while (!release) await tick();
+    const hub = await src.load({ gameId: 7 });
+    assert.equal(hub.game.id, 7);
+    release();
+    await assert.rejects(file, (e) => e.superseded === true);
+});
+
+test('a load its caller stopped wanting during the server analysis is dropped', async () => {
+    let wanted = true;
+    const { src } = page({ ...gameRoute, ...resultRoutes({
+        '/api/demos/gameId:7/result': () => { wanted = false; return { json: {}, headers: {} }; },
+    }) });
+    await assert.rejects(src.load({ gameId: 7 }, { stillWanted: () => wanted }), (e) => e.superseded === true);
+});
+
+test('an answer the page cannot read is analysed in the browser; the body\'s schema backs up the header', async () => {
+    const badPack = new ArrayBuffer(12);
+    const unreadable = page({ ...gameRoute, ...resultRoutes({ '/api/demos/gameId:7/streams/positions': () => ({ body: badPack }) }) });
+    await unreadable.src.load({ gameId: 7 });
+    assert.equal(unreadable.wasms.length, 1);
+
+    const noHeader = page({ ...gameRoute, ...resultRoutes({ '/api/demos/gameId:7/result': () => ({ json: { schemaVersion: 77 }, headers: {} }) }) });
+    await noHeader.src.load({ gameId: 7 });
+    assert.equal(noHeader.wasms.length, 1, 'v77 in the body, the page is v78');
+});

@@ -31,7 +31,7 @@ const BUCKET_PACK = 'application/vnd.mvd-analyzer.buckets';
 
 // The view queries the page runs (DemoHandle.view) and their endpoints.
 /** @type {Record<string, string>} */
-const VIEW_ENDPOINTS = {
+export const VIEW_ENDPOINTS = {
     getTopWindows: 'top-windows',
     getTopKills: 'top-kills',
     getLives: 'lives',
@@ -41,6 +41,17 @@ const VIEW_ENDPOINTS = {
     getFrags: 'frags',
     getWeaponPickups: 'weapon-pickups',
 };
+
+// UnreadableError: the API answered with data this page cannot read — a
+// body that does not parse, a position pack of another layout version. The
+// in-browser analyzer writes what the page reads, so the demo goes there.
+export class UnreadableError extends Error {
+    /** @param {unknown} cause */
+    constructor(cause) {
+        super(`mvd-api's answer is unreadable here: ${/** @type {Error} */ (cause)?.message || cause}`);
+        this.canFallBack = true;
+    }
+}
 
 // SchemaMismatchError: the API serves another schema version than this page
 // was built for (a preview of a branch that changed it reads the production
@@ -101,11 +112,21 @@ export class ApiSource {
             apiFetch(`demos/${id}/result`, {}, this.fetchImpl),
             apiFetch(`demos/${id}/streams/positions`, {}, this.fetchImpl),
         ]);
-        const served = Number(resp.headers.get('X-Schema-Version'));
+        let result, pos;
+        try {
+            [result, pos] = await Promise.all([resp.json(), posResp.arrayBuffer()]);
+        } catch (err) {
+            throw new UnreadableError(err);
+        }
+        // The header, else the body's own (a proxy may drop the header).
+        const served = Number(resp.headers.get('X-Schema-Version')) || result?.schemaVersion;
         if (this.schema != null && served && served !== this.schema) throw new SchemaMismatchError(served, this.schema);
-        const [result, pos] = await Promise.all([resp.json(), posResp.arrayBuffer()]);
         const tParse = performance.now();
-        attachPositions(result, pos);
+        try {
+            attachPositions(result, pos);
+        } catch (err) {
+            throw new UnreadableError(err);
+        }
         return new ApiDemoHandle(this, game, result, {
             net: { ...net, resultFetch: +(tParse - t).toFixed(1) },
             worker: null,

@@ -35,7 +35,7 @@ mvd-api's `/v1/...` and adds `Authorization: Bearer <key>`.
 | Netlify previews | edge function `netlify/edge-functions/api.js` on `/api/*`, `fetch` to `https://mvdanalyzer.com/v1/...`, response streamed through | `MVD_API_KEY` Netlify env var, scoped to Deploy Previews + Branch deploys |
 | local dev | `make serve` (`scripts/serve-dev.py`): `/api` → `MVD_API` with `MVD_API_KEY` added | the environment |
 
-Both proxies forward only an allowlist of the GET paths the page uses
+All three hosts forward only an allowlist of the GET paths the page uses
 (plus the region-control POST), so `/api` is not a general relay for the
 key. Anyone can still call `/api` through the site: the point is that the
 key is not copyable and each host's key can be revoked and rate-limited
@@ -85,7 +85,7 @@ The Supabase path stays as the fallback (see Goal).
 `/api`, `MVD_API` / `MVD_API_KEY`), and the Vite dev proxy was dropped:
 the page is not served by Vite in development.
 
-1. Caddy `/api` route, Netlify edge function, Vite dev proxy; `/api`
+1. Caddy `/api` route, Netlify edge function, the dev server; `/api`
    joins the reserved prefixes the web bundle must not use.
 2. `hub.js`: search → `/api/games/search?roster=1`, game lookup →
    `/api/games/{id}`. The light player (`play.html`) too; both fall back

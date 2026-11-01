@@ -6,7 +6,10 @@
 //
 // MVD_API_KEY is a Netlify environment variable, scoped to Deploy Previews
 // and Branch deploys: an ordinary service key (deploy/README.md §4b). Without
-// it every call is a 401 and the page analyses in the browser instead.
+// it every call is a 401 and the page analyses in the browser instead. The
+// repository is public: the variable must be marked secret and kept from
+// fork pull requests' previews, or a fork could rewrite this file to print
+// it (§4b).
 //
 // Only the routes the page reads are forwarded — the same allowlist as the
 // Caddyfile's /api block and scripts/serve-dev.py (test/api-routes.test.js
@@ -22,11 +25,8 @@ export const POST_ROUTES = /^\/api\/demos\/[^/]+\/region-control$/;
 // stays here.
 const FORWARD = ['accept', 'accept-encoding', 'content-type', 'if-none-match'];
 
-/**
- * @param {Request} request
- * @param {{ ip: string }} context
- */
-export default async (request, context) => {
+/** @param {Request} request */
+export default async (request) => {
     const url = new URL(request.url);
     const post = request.method === 'POST';
     if (!(post ? POST_ROUTES : GET_ROUTES).test(url.pathname) || !(post || request.method === 'GET')) {
@@ -39,7 +39,6 @@ export default async (request, context) => {
     }
     // @ts-ignore — Netlify's edge runtime global
     headers.set('authorization', `Bearer ${Netlify.env.get('MVD_API_KEY') || ''}`);
-    headers.set('x-forwarded-for', context.ip);
     const upstream = await fetch(UPSTREAM + url.pathname.slice('/api/'.length) + url.search, {
         method: request.method,
         headers,

@@ -2,7 +2,8 @@
 // page's own origin; whatever serves the page forwards it to mvd-api's
 // /v1/... and adds the key (Caddy's /api route on mvdanalyzer.com, the
 // Netlify edge function netlify/edge-functions/api.js on previews,
-// scripts/serve-dev.py locally — plan-web-api.md), so the page holds no key.
+// scripts/serve-dev.py locally — plan-web-api.md), so the page holds no API
+// key. (It does hold the hub's public anon key: src/data/hub.js.)
 // No DOM; `fetchImpl` is injectable for tests.
 
 /** @typedef {typeof fetch} FetchImpl */

@@ -35,10 +35,11 @@ function setLoadingOverlayMessage(text) {
 // with the git hash, and the wasm reports the hash it was built from. Both
 // deploy as one unit, so a mismatch means the browser is running mixed
 // cached versions (a deploy landed between fetching the page and the wasm,
-// or a cache served a stale asset). Reload once — assets are served
-// Cache-Control: no-cache, so the reload revalidates everything — and if
-// the mismatch survives the reload (deploy still propagating), just flag it
-// in the version tag instead of looping.
+// or a cache served a stale asset). The wasm loads mid-session now — on the
+// first local file, or a hub demo the API cannot answer for — so a reload
+// would drop what the user just asked for: the version tag asks them to
+// reload instead (assets are served Cache-Control: no-cache, so a reload
+// revalidates everything).
 /** @param {{ hash?: string } | null | undefined} v */
 function checkBuildCoherence(v) {
     /** @type {HTMLMetaElement | null} */
@@ -49,14 +50,7 @@ function checkBuildCoherence(v) {
     if (!wasmBuild || wasmBuild === 'dev' || wasmBuild === 'unknown') return;
     if (pageBuild === wasmBuild) return;
 
-    const guard = 'mvd-build-reload';
-    const attempted = (() => { try { return sessionStorage.getItem(guard); } catch { return null; } })();
-    const key = `${pageBuild}:${wasmBuild}`;
-    if (attempted !== key) {
-        try { sessionStorage.setItem(guard, key); } catch {}
-        location.reload();
-        return;
-    }
+    console.warn(`[mvd] this page is build ${pageBuild}, the analyzer ${wasmBuild}: reload for the current version`);
     buildStale.set(true);
 }
 

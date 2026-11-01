@@ -12,10 +12,14 @@ in mvd-web pins the three together).
     MVD_API_KEY  the key to add (optional)
 
 Without a reachable API or a valid key, hub demos are analysed in the
-browser instead and the Search tab reports the error.
+browser instead, and search goes to the hub directly.
+
+It listens on localhost only: /api spends MVD_API_KEY, which nobody else on
+the network should be able to.
 
 usage: serve-dev.py DIR [PORT]
 """
+import http.client
 import http.server
 import os
 import re
@@ -48,7 +52,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return
         body = None
         if self.command == "POST":
-            body = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+            try:
+                body = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+            except ValueError:
+                self.send_error(400, "bad Content-Length")
+                return
         req = urllib.request.Request(API + path[len("/api/"):] + ("?" + query if query else ""),
                                      data=body, method=self.command)
         for name in FORWARD:
@@ -56,15 +64,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 req.add_header(name, self.headers[name])
         if KEY:
             req.add_header("Authorization", "Bearer " + KEY)
-        req.add_header("X-Forwarded-For", self.client_address[0])
         try:
-            resp = urllib.request.urlopen(req, timeout=180)
-        except urllib.error.HTTPError as e:
-            resp = e
-        except OSError as e:
+            try:
+                resp = urllib.request.urlopen(req, timeout=180)
+            except urllib.error.HTTPError as e:
+                resp = e
+            data = resp.read()
+        except (OSError, http.client.HTTPException) as e:
             self.send_error(502, "mvd-api unreachable: %s" % e)
             return
-        data = resp.read()
         self.send_response(resp.status)
         for name, value in resp.headers.items():
             if name.lower() not in ("content-length", "transfer-encoding", "connection", "date", "server"):
@@ -81,7 +89,7 @@ def main():
     port = int(sys.argv[2]) if len(sys.argv) > 2 else 8080
     print("Serving %s on http://localhost:%d (/api -> %s%s)"
           % (sys.argv[1], port, API, ", with MVD_API_KEY" if KEY else ""))
-    http.server.ThreadingHTTPServer(("", port), Handler).serve_forever()
+    http.server.ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
 
 
 if __name__ == "__main__":

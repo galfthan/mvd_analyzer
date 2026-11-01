@@ -7,6 +7,9 @@
     // (src/play/) can host its own without the analyzer's modules.
     /** @type {{ engine: import('./engine.js').PlayerEngine }} */
     let { engine } = $props();
+    // Why the engine cannot start (a demo file that did not download).
+    let error = $state('');
+    $effect(() => engine.status.subscribe((s) => { error = s.error; }));
 
     /** @param {HTMLElement} el */
     function host(el) {
@@ -14,4 +17,4 @@
     }
 </script>
 
-<div class="player-frame-host" use:host><ClipCard {engine} /><PlaylistOverlay {engine} /></div>
+<div class="player-frame-host" use:host><ClipCard {engine} /><PlaylistOverlay {engine} />{#if error}<div class="player-frame-error">{error}</div>{/if}</div>

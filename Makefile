@@ -25,7 +25,10 @@ BSP_DIR    := bsps
 GIT_HASH   := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 GIT_TAG    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
 BUILD_DATE := $(shell date -u +%Y-%m-%d)
-SCHEMA_VERSION := $(shell sed -n 's/^const CurrentSchemaVersion = //p' mvd-analytics/result/result.go)
+SCHEMA_VERSION := $(shell sed -n 's/^const CurrentSchemaVersion = \([0-9][0-9]*\).*/\1/p' mvd-analytics/result/result.go)
+# Values the build stamps into index.html with sed: / and & escaped (a tag
+# may hold either).
+sed_escape = $(subst &,\&,$(subst /,\/,$(1)))
 LDFLAGS    := -ldflags "-s -w -X main.GitHash=$(GIT_HASH) -X main.GitTag=$(GIT_TAG) -X main.BuildDate=$(BUILD_DATE)"
 
 .PHONY: build build-api build-mcp build-bin build-all-platforms \
@@ -49,8 +52,12 @@ build:
 	if [ -f "$$goroot/lib/wasm/wasm_exec.js" ]; then cp "$$goroot/lib/wasm/wasm_exec.js" $(DIST_DIR)/; \
 	elif [ -f "$$goroot/misc/wasm/wasm_exec.js" ]; then cp "$$goroot/misc/wasm/wasm_exec.js" $(DIST_DIR)/; \
 	else echo "  toolchain wasm_exec.js not found; using $(STATIC_DIR)/wasm_exec.js"; cp $(STATIC_DIR)/wasm_exec.js $(DIST_DIR)/; fi
-	@sed -i -e 's/<meta name="build" content="dev">/<meta name="build" content="$(GIT_HASH)">/' \
-		-e 's/<meta name="build-tag" content="dev">/<meta name="build-tag" content="$(GIT_TAG)">/' \
+	@# The page reads the schema to send a hub demo the API serves in
+	@# another to the in-browser analyzer (src/data/api-source.js); an
+	@# unstamped page would skip that check, so a missing value stops here.
+	@test -n "$(SCHEMA_VERSION)" || { echo "CurrentSchemaVersion not found in mvd-analytics/result/result.go" >&2; exit 1; }
+	@sed -i -e 's/<meta name="build" content="dev">/<meta name="build" content="$(call sed_escape,$(GIT_HASH))">/' \
+		-e 's/<meta name="build-tag" content="dev">/<meta name="build-tag" content="$(call sed_escape,$(GIT_TAG))">/' \
 		-e 's/<meta name="build-date" content="dev">/<meta name="build-date" content="$(BUILD_DATE)">/' \
 		-e 's/<meta name="schema" content="dev">/<meta name="schema" content="$(SCHEMA_VERSION)">/' $(DIST_DIR)/index.html
 	@echo "Copying mvd-fte-player..."

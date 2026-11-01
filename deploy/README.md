@@ -216,6 +216,15 @@ be revoked on its own:
   deploys**. The edge function that adds it is
   `netlify/edge-functions/api.js`.
 
+  **The repository is public, so keep the key from fork pull requests.**
+  A fork's deploy preview builds the fork's code; if it sees the
+  variable, the fork can rewrite the edge function (or the build) to
+  print it, and that key reaches every route, uploads included. Mark the
+  variable **Contains secret values**, and set deploy previews of fork
+  pull requests to require approval or to run without sensitive
+  variables (Site configuration → Build & deploy → Continuous
+  deployment).
+
 Rotating either: issue a new key, swap it in (restart Caddy, or redeploy
 the preview), then `keys revoke -hash …` the old one.
 

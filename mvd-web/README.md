@@ -424,8 +424,8 @@ and `demo()`, the demo file), `api-source.js` (`ApiSource`: the same
 handle, answered by mvd-api) and `page-source.js` (`PageSource`, which
 picks one per load). The page's one source is `src/app/source.js`
 (`window.mvdData` for the console); `src/app/load.js` loads every demo
-through `loadDemo()`, and only it and the Search tab (`searchGames`) call
-the hub ([`plan-web-api.md`](../plan-web-api.md)):
+through `loadDemo()`, and only it, the Search tab (`searchGames`) and the
+light player (`src/play/light-demo.js`) call the hub ([`plan-web-api.md`](../plan-web-api.md)):
 
 - **A hub demo is read from mvd-api**: `/result` (the Result as the WASM
   build hands it over, `view.PageResult`) and `/streams/positions` (the
@@ -1070,7 +1070,7 @@ is no UI for it. Stages reported, in load order:
 
 - **wasm load** (one-time): fetch + `instantiateStreaming` + `go.run`,
   timed in `worker.js` and sent on the `ready` message.
-- **network**: `gameInfoFetch` (the hub row, via `/api/games/{id}`) and `demoDownload`,
+- **network**: `gameInfoFetch` (the hub row, via `/api/games/{id}`, or the hub when the API cannot answer), `resultFetch` (a demo read from mvd-api: `/result` and the position pack) and `demoDownload`,
   timed on the main thread by the data layer.
 - **WASM analyze**: total wall time of the `analyzeMVD` call, plus the
   Go-side per-phase split from `getAnalysisTimings()` — `init`,
