@@ -230,6 +230,21 @@ func TestDecodeCacheRejectsForeignPayload(t *testing.T) {
 	if _, err := DecodeCache([]byte("xx")); err == nil {
 		t.Error("a short payload decoded without error")
 	}
+	blob, err := EncodeCache(&Result{Streams: &Streams{Players: []PlayerStream{
+		{Name: "a", Position: &PositionTrack{T: []int32{1, 2}, X: []float32{3, 4}}},
+		{Name: "b"},
+	}}})
+	if err != nil {
+		t.Fatalf("EncodeCache: %v", err)
+	}
+	if _, err := DecodeCache(blob); err != nil {
+		t.Fatalf("DecodeCache: %v", err)
+	}
+	for _, bad := range [][]byte{blob[:len(blob)-1], append(append([]byte{}, blob...), 0)} {
+		if _, err := DecodeCache(bad); err == nil {
+			t.Errorf("a %d-byte corruption of a %d-byte payload decoded without error", len(bad), len(blob))
+		}
+	}
 }
 
 // firstJSONDiff reports a short window around the first differing byte.

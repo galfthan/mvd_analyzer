@@ -5,6 +5,58 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (perf-wasm-data) — position tracks in binary, faster floor traces
+
+No schema change, and the floor heights are bit-identical. The floor
+pass traces the player footprint's nine columns as sets that share one
+descent wherever that provably gives each column its own result
+(`mapclip/footprint.go`) — ~2.6 descents per sample instead of nine —
+and skips the liquid-surface probe where it cannot win. The pass is
+2–2.6× faster on most maps; a 4on4's timeline step in WASM drops from
+~6.5 s to ~4 s.
+
+The browser no longer gets the players' position tracks as JSON: the
+WASM build hands them to the page as one binary "position pack"
+(`result.EncodePositionPack`), and the Result JSON leaves them out. In WASM a 4on4's analysis drops from ~20 s to ~13 s —
+the JSON marshal went from ~7 s to ~0.3 s and the page's parse from
+~0.6 s to under 0.1 s. In the page the columns are typed arrays with the
+analyzer's unrounded float32 values.
+
+mvd-api serves the same pack at `GET /v1/demos/{id}/streams/positions`
+(gzip-encoded, ~9 MB on a 4on4): built on first request and kept gzipped
+in tier 3, so later requests send the file as it is.
+
+The column-major bucket view (`view.BucketsColumnar` — the WASM build's
+deferred 50 ms buckets, and the API's `layout=column`) resolves each
+column's field and stream once rather than per bucket, and evaluates a
+player's liveness once per bucket instead of twice: 2.6× faster natively
+(a 4on4 0.36 → 0.14 s), with byte-identical output. The Timeline and
+Map tabs' wait after the result drops from ~3.8 s to ~2.6 s in WASM.
+
+That view then reaches the page as a binary "bucket pack"
+(`view.EncodeColumnarPack`) instead of JSON — 8.6 MB instead of 12 MB on
+a 4on4, decoded in ~40 ms into the same shape with typed-array columns.
+`getDefaultBuckets` in WASM drops from ~2.6 s to ~0.8 s, so Timeline and
+Map are ready about 3 s sooner than before this branch. mvd-api serves
+the same pack for any column-layout `/buckets` query to a client whose
+`Accept` names `application/vnd.mvd-analyzer.buckets` (gzip-encoded,
+1.2 MB for a 4on4's 50 ms view); the JSON is unchanged and stays the
+default, and each representation has its own ETag.
+
+## unreleased (perf-analysis) — a faster full analysis
+
+No schema change; every Result is byte-identical. mvd-api's cold parse
+of a 4on4 drops from ~2.9 s to ~1.9 s and the tier-2 cache write / read
+from ~335 / ~265 ms to ~70 / ~105 ms:
+
+- Floor-height traces test and pose only the movers a sample can reach.
+- With `Registry.Parallel` the event pass is a pipeline: the demo is
+  inflated, parsed and analysed on three goroutines.
+  `UserInfoEvent.Player` is now a snapshot rather than the parser's live
+  record, so events are immutable once emitted.
+- The tier-2 cache writes position columns raw instead of via gob
+  (`resultCacheFormat` 4 — f3 files are re-parsed once on next touch).
+
 ## unreleased (web-svelte) — a player-like timeline, clips from the selection, a light player
 
 Schema v78 (additive): a weapon pickup's run has an end on every row —

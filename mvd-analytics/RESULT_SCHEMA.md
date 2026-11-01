@@ -2828,6 +2828,13 @@ PositionTrack = {
 }
 ```
 
+The same tracks also exist in binary, as the **position pack**: the
+browser's WASM build hands them to the page that way instead of as JSON,
+and mvd-api serves them at `GET /v1/demos/{id}/streams/positions`. Same
+columns and values, unrounded (the JSON rounds floats to 3 decimals); the
+layout is documented in `mvd-analytics/result/postrack_wire.go` and
+decoded by `mvd-web/src/lib/postrack.js`.
+
 `t` is **integer milliseconds** since the stream's time origin. The
 MVD wire format delivers a 1-byte ms delta per message; storing the
 cumulative value
@@ -3229,6 +3236,17 @@ when the player never has it; values carry forward through dead buckets
 mask, not the arrays, marks liveness — row-major omits dead players, so
 treat `alive[i]==0` as "absent"); loc is always the raw `li` index
 (`LocIndex` does not apply). Team arrays span the full `count` grid.
+
+The same view also exists in binary, as the **bucket pack**
+(`view.EncodeColumnarPack`): the browser's WASM build hands its deferred
+50 ms view to the page that way instead of as JSON, and mvd-api serves it
+for `/buckets` to a client whose `Accept` names
+`application/vnd.mvd-analyzer.buckets`. A JSON header carries
+the shape above with each column replaced by a type/offset/length
+descriptor; the columns follow raw, so the page views them as typed
+arrays. Same keys and values — floats unrounded, `at` decoded back to
+strings; the layout is documented in `mvd-analytics/view/columnar_pack.go`
+and decoded by `mvd-web/src/lib/bucketpack.js`.
 
 The bucket `alive` mask is **not** a resampling of
 `streams.players[].alive`: it comes from `view.playerActiveInWindow`, a

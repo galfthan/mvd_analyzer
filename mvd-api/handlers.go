@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"strconv"
@@ -29,6 +32,10 @@ type demoStore interface {
 	// streams are baked into the always-full GetResult parse, so /shots, /aim
 	// and /streams/* read them straight off the base Result.)
 	EnsureLOS(ctx context.Context, id democache.DemoID) (*result.Result, democache.CacheMeta, error)
+
+	// PositionPack returns the demo's position pack (result.EncodePositionPack),
+	// gzipped, built on first request and kept in the tier-3 cache.
+	PositionPack(ctx context.Context, id democache.DemoID) ([]byte, democache.CacheMeta, error)
 
 	// PutDemo stores an uploaded demo body under its content SHA and reports
 	// the SHA plus whether the demo already existed (POST /v1/demos). The
@@ -95,6 +102,15 @@ func writeJSON(w http.ResponseWriter, status int, body any) {
 // sets the cache headers. Returns (r, meta, ok=true) on success; on
 // failure, writes the error to w and returns ok=false.
 func (s *server) resolveDemo(w http.ResponseWriter, r *http.Request) (*result.Result, democache.CacheMeta, bool) {
+	return s.resolveDemoAs(w, r, "")
+}
+
+// resolveDemoAs is resolveDemo for a handler that serves more than one
+// representation of a view: etagTail is appended inside the ETag's quotes,
+// so each representation has its own strong ETag and a validator held for
+// one never revalidates the other. The handler picks the representation
+// from the request before calling, since revalidation happens here.
+func (s *server) resolveDemoAs(w http.ResponseWriter, r *http.Request, etagTail string) (*result.Result, democache.CacheMeta, bool) {
 	raw := r.PathValue("id")
 	id, err := democache.ParseDemoID(raw)
 	if err != nil {
@@ -107,18 +123,22 @@ func (s *server) resolveDemo(w http.ResponseWriter, r *http.Request) (*result.Re
 		return nil, democache.CacheMeta{}, false
 	}
 	setCacheHeaders(w, meta)
-	if revalidated(w, r, meta) {
+	if etagTail != "" {
+		etag := w.Header().Get("ETag")
+		w.Header().Set("ETag", etag[:len(etag)-1]+etagTail+`"`)
+	}
+	if revalidated(w, r) {
 		return nil, meta, false
 	}
 	return res, meta, true
 }
 
 // revalidated writes a cheap 304 (and reports true) when the request's
-// If-None-Match matches meta's ETag. setCacheHeaders must have run first
-// so the ETag header is already set. This is the shared conditional-GET
-// tail of resolveDemo and the /los handler.
-func revalidated(w http.ResponseWriter, r *http.Request, meta democache.CacheMeta) bool {
-	etag := fmt.Sprintf(`"%s-v%d"`, meta.SHA256, meta.SchemaVersion)
+// If-None-Match matches the response's ETag, which the caller has set
+// (setCacheHeaders, plus any representation tail). This is the shared
+// conditional-GET tail of resolveDemo, /los and /streams/positions.
+func revalidated(w http.ResponseWriter, r *http.Request) bool {
+	etag := w.Header().Get("ETag")
 	if match := r.Header.Get("If-None-Match"); match != "" && strings.Contains(match, etag) {
 		w.WriteHeader(http.StatusNotModified)
 		return true
@@ -792,8 +812,28 @@ func (s *server) handleWeaponPickups(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, view.WeaponPickupsEnvelope{TimeUnit: view.UnitMs, Pickups: wp})
 }
 
+// handleBuckets serves the bucket view as JSON, or — to a request whose
+// Accept names view.ColumnarPackContentType — the column layout as a
+// bucket pack (view.EncodeColumnarPack; mvd-web decodes it with
+// src/lib/bucketpack.js), gzip-encoded when the client accepts gzip. Same
+// URL, same parameters, same view: each representation has its own ETag
+// tail ("-b<pack>", plus "-gz"), and every response varies on Accept.
+// The pack is built per request like the JSON — ~0.3 s for a 4on4's
+// full 50 ms view, most of it the view itself.
 func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
-	res, _, ok := s.resolveDemo(w, r)
+	pack := acceptsMediaType(r, view.ColumnarPackContentType)
+	gz := pack && acceptsGzip(r)
+	tail := ""
+	if pack {
+		tail = fmt.Sprintf("-b%d", view.ColumnarPackVersion)
+		w.Header().Set("Vary", "Accept, Accept-Encoding")
+	} else {
+		w.Header().Set("Vary", "Accept")
+	}
+	if gz {
+		tail += "-gz"
+	}
+	res, _, ok := s.resolveDemoAs(w, r, tail)
 	if !ok {
 		return
 	}
@@ -816,6 +856,20 @@ func (s *server) handleBuckets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if windowMsZero(w, p, opts.WindowMs, 50) {
+		return
+	}
+	if pack && opts.Layout != "column" {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			"the bucket pack is the column layout; use layout=column, or Accept JSON for layout=row")
+		return
+	}
+	if pack {
+		cb, err := view.BucketsColumnar(res, opts)
+		if writeInvalidParam(w, err) {
+			return
+		}
+		cb.TimeUnit = view.UnitMs
+		s.writeBucketPack(w, r, cb, gz)
 		return
 	}
 	if opts.Layout == "column" {
@@ -956,7 +1010,7 @@ func (s *server) handleLOS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setCacheHeaders(w, meta)
-	if revalidated(w, r, meta) {
+	if revalidated(w, r) {
 		return
 	}
 	writeJSON(w, http.StatusOK, losBody(res))
@@ -1047,6 +1101,133 @@ func (s *server) handleNails(w http.ResponseWriter, r *http.Request) {
 		TimeUnit view.TimeUnit             `json:"timeUnit"`
 		Nails    *result.ProjectileStreams `json:"nails"`
 	}{view.UnitMs, nl})
+}
+
+// handlePositions serves every player's native-rate position track as one
+// binary position pack (result.EncodePositionPack; layout in
+// mvd-analytics/result/postrack_wire.go) — the bulk form of what
+// /stream-slice serves windowed as JSON, for a page that wants the whole
+// match (mvd-web decodes it with src/lib/postrack.js). The store keeps it
+// gzipped, so a client that accepts gzip (every browser) gets those bytes
+// as they are; anyone else gets them inflated on the way out.
+//
+// The ETag adds the pack version to the usual sha + schema one, so a layout
+// change can't revalidate a cached older pack, and the gzip body's carries
+// a "-gz" tail: a strong ETag names one representation, and the two
+// encodings are two.
+func (s *server) handlePositions(w http.ResponseWriter, r *http.Request) {
+	id, err := democache.ParseDemoID(r.PathValue("id"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_demo_id", err.Error())
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
+	data, meta, err := s.store.PositionPack(r.Context(), id)
+	if err != nil {
+		s.mapStoreError(w, r, err)
+		return
+	}
+	gz := acceptsGzip(r)
+	setCacheHeaders(w, meta)
+	etag := fmt.Sprintf(`"%s-v%d-p%d"`, meta.SHA256, meta.SchemaVersion, result.PositionPackVersion)
+	if gz {
+		etag = etag[:len(etag)-1] + `-gz"`
+	}
+	w.Header().Set("ETag", etag)
+	w.Header().Set("Vary", "Accept-Encoding")
+	if revalidated(w, r) {
+		return
+	}
+	body := data
+	if gz {
+		w.Header().Set("Content-Encoding", "gzip")
+	} else {
+		// Inflated whole before the status goes out, so a bad stream is a
+		// 500 rather than a 200 cut short.
+		zr, err := gzip.NewReader(bytes.NewReader(data))
+		if err == nil {
+			body, err = io.ReadAll(zr)
+		}
+		if err != nil {
+			s.writeInternal(w, r, fmt.Errorf("position pack: %w", err))
+			return
+		}
+	}
+	w.Header().Set("Content-Type", result.PositionPackContentType)
+	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(body)
+}
+
+// writeBucketPack encodes cb as a bucket pack and writes it, gzipped at
+// BestSpeed when gz (on a 4on4's 50 ms view: 8.6 MB → 1.2 MB in ~60 ms).
+func (s *server) writeBucketPack(w http.ResponseWriter, r *http.Request, cb *view.ColumnarBuckets, gz bool) {
+	body, err := view.EncodeColumnarPack(cb)
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	if gz {
+		var buf bytes.Buffer
+		zw, _ := gzip.NewWriterLevel(&buf, gzip.BestSpeed)
+		_, _ = zw.Write(body)
+		_ = zw.Close()
+		body = buf.Bytes()
+		w.Header().Set("Content-Encoding", "gzip")
+	}
+	w.Header().Set("Content-Type", view.ColumnarPackContentType)
+	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(body)
+}
+
+// acceptsMediaType reports whether the request's Accept header names
+// mediaType itself with a non-zero weight. Wildcards (*/*, application/*)
+// do not count: a binary representation is served only to a client that
+// asked for it by name, and everyone else keeps the JSON.
+func acceptsMediaType(r *http.Request, mediaType string) bool {
+	for _, part := range strings.Split(strings.ToLower(r.Header.Get("Accept")), ",") {
+		params := strings.Split(part, ";")
+		if strings.TrimSpace(params[0]) != mediaType {
+			continue
+		}
+		for _, p := range params[1:] {
+			if q, ok := strings.CutPrefix(strings.TrimSpace(p), "q="); ok {
+				if v, err := strconv.ParseFloat(q, 64); err == nil && v == 0 {
+					return false
+				}
+			}
+		}
+		return true
+	}
+	return false
+}
+
+// acceptsGzip reports whether the request's Accept-Encoding admits gzip:
+// a "gzip" entry, or else a "*" one, whose weight is not q=0 (RFC 9110
+// §12.5.3; names and parameters are case-insensitive).
+func acceptsGzip(r *http.Request) bool {
+	star := false
+	for _, part := range strings.Split(strings.ToLower(r.Header.Get("Accept-Encoding")), ",") {
+		params := strings.Split(part, ";")
+		accepted := true
+		for _, p := range params[1:] {
+			if q, ok := strings.CutPrefix(strings.TrimSpace(p), "q="); ok {
+				if v, err := strconv.ParseFloat(q, 64); err == nil && v == 0 {
+					accepted = false
+				}
+			}
+		}
+		switch strings.TrimSpace(params[0]) {
+		case "gzip":
+			return accepted
+		case "*":
+			star = accepted
+		}
+	}
+	return star
 }
 
 // teNames maps the point-effect TE codes (result.PointEffectStreams `ty`,

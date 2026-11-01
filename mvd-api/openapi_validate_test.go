@@ -955,6 +955,8 @@ func TestOpenAPIGoldenResponsesValidate(t *testing.T) {
 			"GET /docs/result-schema":     true, // html
 			"GET /v1/auth/check":          true, // 204, validated above but no 200
 			"GET /v1/maps/{map}/geometry": true, // needs -maps-dir; 404 path validated above
+			// binary; the bytes are pinned by TestPositions_PackGzipAndRevalidation
+			"GET /v1/demos/{id}/streams/positions": true,
 		}
 		for op := range specPaths(t) {
 			if exempt[op] {

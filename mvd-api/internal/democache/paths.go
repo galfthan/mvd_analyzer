@@ -28,7 +28,8 @@ func mvdRoot(root string) string { return filepath.Join(root, "mvd") }
 // schema/format generation ever written under this cache.
 func resultsRoot(root string) string { return filepath.Join(root, "results") }
 
-// artifactsRoot is the tier-3 subtree (lazy artifact side-gobs).
+// artifactsRoot is the tier-3 subtree (lazy artifact side-gobs and the
+// gzipped position packs).
 func artifactsRoot(root string) string { return filepath.Join(root, "artifacts") }
 
 // indexRoot is the small gameId → sha map subtree. It is exempt from GC
@@ -69,10 +70,15 @@ func mvdPath(root, sha string) string {
 // tree (`results/v<N>f3/…`) and they are re-parsed on next touch. Unlike
 // the f1→f2 bump this one DOES change served bodies, which is the point.
 //
+// Format 4 writes the PositionTrack columns raw, outside gob
+// (result/postrack_cache.go): the same Result, ~8x cheaper to write and read.
+// A format-3 file's Streams would not decode under it, so the tree moves
+// (`results/v<N>f4/…`); served bodies are unchanged.
+//
 // Bump this whenever the cached Result's populated-ness changes under a fixed
 // schema version (the "which optional passes are baked in" contract), or when
 // the tier-2 encoding itself changes.
-const resultCacheFormat = 3
+const resultCacheFormat = 4
 
 // resultsVersionName is the directory name of the tier-2 tree for a schema
 // version + the current cache-format generation — the single source of truth

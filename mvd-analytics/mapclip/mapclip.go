@@ -162,21 +162,12 @@ func (h *Hull) HeightAboveFloor(x, y, z float32) (float32, bool) {
 // edge still attaches to the rim. Columns only ever see surfaces at or
 // below z (the trace runs downward from z), so the result is never
 // pulled up by geometry above the player.
+//
+// The nine columns are traced as sets sharing one descent where that
+// provably gives each column's own result (footprint.go).
 func (h *Hull) HeightAboveFloorBox(x, y, z float32) (float32, bool) {
-	best := float32(0)
-	any := false
-	for _, dx := range footprintOffsets {
-		for _, dy := range footprintOffsets {
-			floorZ, ok := h.FloorBelow(x+dx, y+dy, z)
-			if !ok {
-				continue
-			}
-			if !any || floorZ > best {
-				best = floorZ
-				any = true
-			}
-		}
-	}
+	cs := newFootprintSet(x, y, 0, 0)
+	best, any := h.floorBelowSet(&cs, z, nil)
 	if !any {
 		return 0, false
 	}

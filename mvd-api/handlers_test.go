@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/sha256"
 	"encoding/json"
@@ -102,6 +104,19 @@ func (f *fakeStore) EnsureLOS(ctx context.Context, id democache.DemoID) (*result
 		return nil, meta, fmt.Errorf("compute los: %w", err)
 	}
 	return res, meta, nil
+}
+
+// PositionPack gzips the stored Result's pack, as the real store keeps it.
+func (f *fakeStore) PositionPack(ctx context.Context, id democache.DemoID) ([]byte, democache.CacheMeta, error) {
+	res, meta, err := f.GetResult(ctx, id)
+	if err != nil {
+		return nil, meta, err
+	}
+	var buf bytes.Buffer
+	zw := gzip.NewWriter(&buf)
+	_, _ = zw.Write(result.EncodePositionPack(res.Streams))
+	_ = zw.Close()
+	return buf.Bytes(), meta, nil
 }
 
 // stubResult builds a minimal but well-formed *Result so handlers
@@ -296,6 +311,206 @@ func TestShotStreamEndpoints(t *testing.T) {
 		resp := getJSON(t, srv.URL+c.path, 200)
 		if resp[c.key] == nil {
 			t.Errorf("%s: %q missing/null, body=%v", c.path, c.key, resp)
+		}
+	}
+}
+
+// TestPositions_PackGzipAndRevalidation: the endpoint serves the store's
+// gzipped pack as it is to a gzip client, inflates it for one that isn't,
+// and answers its own pack-versioned ETag with a 304.
+func TestPositions_PackGzipAndRevalidation(t *testing.T) {
+	r := stubResult()
+	r.Streams.Players[0].Position = &result.PositionTrack{
+		T: []int32{0, 13}, X: []float32{1.125, 2}, Y: []float32{3, 4}, Z: []float32{24, 25}, H: []float32{0, result.NoFloor},
+	}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	want := result.EncodePositionPack(r.Streams)
+	url := srv.URL + "/v1/demos/gameId:42/streams/positions"
+
+	// The default Transport would ask for gzip and inflate it silently;
+	// set the header by hand so the raw response is what's seen.
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept-Encoding", "gzip")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Encoding") != "gzip" ||
+		resp.Header.Get("Content-Type") != result.PositionPackContentType || resp.Header.Get("Vary") != "Accept-Encoding" {
+		t.Fatalf("gzip client: %d %v", resp.StatusCode, resp.Header)
+	}
+	zr, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ := io.ReadAll(zr)
+	resp.Body.Close()
+	if !bytes.Equal(got, want) {
+		t.Fatalf("gzip client: pack differs (%d vs %d bytes)", len(got), len(want))
+	}
+	etag := resp.Header.Get("ETag")
+	if !strings.HasSuffix(etag, fmt.Sprintf("-p%d-gz\"", result.PositionPackVersion)) {
+		t.Fatalf("gzip ETag %q lacks the pack version and encoding", etag)
+	}
+
+	req, _ = http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept-Encoding", "identity, gzip;q=0")
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ = io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Encoding") != "" || !bytes.Equal(got, want) {
+		t.Fatalf("identity client: %d %v, %d bytes", resp.StatusCode, resp.Header, len(got))
+	}
+	if resp.Header.Get("ETag") == etag {
+		t.Fatal("the identity and gzip bodies share an ETag")
+	}
+
+	req, _ = http.NewRequest("GET", url, nil)
+	req.Header.Set("If-None-Match", etag)
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusNotModified {
+		t.Fatalf("If-None-Match: status %d, want 304", resp.StatusCode)
+	}
+
+	if _, status := getRaw(t, srv.URL+"/v1/demos/gameId:7/streams/positions"); status != 404 {
+		t.Fatalf("unknown demo: status %d, want 404", status)
+	}
+}
+
+func TestAcceptsGzip(t *testing.T) {
+	for h, want := range map[string]bool{
+		"":                      false,
+		"gzip":                  true,
+		"gzip, deflate, br":     true,
+		"br, gzip;q=0.5":        true,
+		"GZIP;Q=0":              false,
+		"gzip; q=0":             false,
+		"gzip;level=1;q=0":      false,
+		"identity, gzip;q=0":    false,
+		"x-gzip":                false,
+		"*":                     true,
+		"*;q=0":                 false,
+		"gzip;q=0, *":           false,
+		"identity;q=1, *;q=0.1": true,
+	} {
+		r := httptest.NewRequest("GET", "/", nil)
+		r.Header.Set("Accept-Encoding", h)
+		if got := acceptsGzip(r); got != want {
+			t.Errorf("Accept-Encoding %q: acceptsGzip = %v, want %v", h, got, want)
+		}
+	}
+}
+
+// TestBuckets_PackNegotiation pins the bucket pack as a second
+// representation of /buckets: asked for by name it is the column layout's
+// pack (gzipped to a gzip client), each representation has its own ETag
+// and revalidates only itself, and every response varies on Accept.
+func TestBuckets_PackNegotiation(t *testing.T) {
+	r := stubResult()
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	url := srv.URL + "/v1/demos/gameId:42/buckets?windowMs=1000&fields=h,a&includeTeam=true"
+	cb, err := view.BucketsColumnar(r, view.BucketsOptions{WindowMs: 1000, Fields: []string{"h", "a"}, IncludeTeam: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(cb.Players) == 0 || len(cb.Teams) == 0 {
+		t.Fatal("the stub demo gives an empty bucket view; the comparison would prove nothing")
+	}
+	cb.TimeUnit = view.UnitMs
+	want, err := view.EncodeColumnarPack(cb)
+	if err != nil {
+		t.Fatal(err)
+	}
+	get := func(u string, hdr map[string]string) (*http.Response, []byte) {
+		t.Helper()
+		req, _ := http.NewRequest("GET", u, nil)
+		for k, v := range hdr {
+			req.Header.Set(k, v)
+		}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		b, _ := io.ReadAll(resp.Body)
+		return resp, b
+	}
+
+	resp, body := get(url, map[string]string{"Accept": view.ColumnarPackContentType, "Accept-Encoding": "gzip"})
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Encoding") != "gzip" ||
+		resp.Header.Get("Content-Type") != view.ColumnarPackContentType || resp.Header.Get("Vary") != "Accept, Accept-Encoding" {
+		t.Fatalf("pack, gzip: %d %v", resp.StatusCode, resp.Header)
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := io.ReadAll(zr); !bytes.Equal(got, want) {
+		t.Fatalf("pack, gzip: body differs from EncodeColumnarPack (%d vs %d bytes)", len(got), len(want))
+	}
+	packGz := resp.Header.Get("ETag")
+	if !strings.HasSuffix(packGz, fmt.Sprintf("-b%d-gz\"", view.ColumnarPackVersion)) {
+		t.Fatalf("pack ETag %q lacks the pack version and encoding", packGz)
+	}
+
+	resp, body = get(url, map[string]string{"Accept": "application/json, " + view.ColumnarPackContentType, "Accept-Encoding": "identity"})
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Encoding") != "" || !bytes.Equal(body, want) {
+		t.Fatalf("pack, identity: %d %v, %d bytes", resp.StatusCode, resp.Header, len(body))
+	}
+	pack := resp.Header.Get("ETag")
+
+	resp, body = get(url, map[string]string{"Accept": "*/*"})
+	if resp.StatusCode != 200 || !strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json") ||
+		resp.Header.Get("Vary") != "Accept" || !json.Valid(body) {
+		t.Fatalf("JSON: %d %v", resp.StatusCode, resp.Header)
+	}
+	plain := resp.Header.Get("ETag")
+	if plain == pack || plain == packGz || pack == packGz {
+		t.Fatalf("representations share an ETag: %s %s %s", plain, pack, packGz)
+	}
+
+	// A validator revalidates its own representation only.
+	if resp, _ = get(url, map[string]string{"Accept": view.ColumnarPackContentType, "Accept-Encoding": "gzip", "If-None-Match": packGz}); resp.StatusCode != 304 {
+		t.Fatalf("pack revalidation: %d, want 304", resp.StatusCode)
+	}
+	if resp, _ = get(url, map[string]string{"Accept": view.ColumnarPackContentType, "Accept-Encoding": "gzip", "If-None-Match": plain}); resp.StatusCode != 200 {
+		t.Fatalf("JSON validator on a pack request: %d, want 200", resp.StatusCode)
+	}
+	if resp, _ = get(url, map[string]string{"If-None-Match": packGz}); resp.StatusCode != 200 {
+		t.Fatalf("pack validator on a JSON request: %d, want 200", resp.StatusCode)
+	}
+
+	if resp, _ = get(url+"&layout=row", map[string]string{"Accept": view.ColumnarPackContentType}); resp.StatusCode != 400 {
+		t.Fatalf("pack of the row layout: %d, want 400", resp.StatusCode)
+	}
+}
+
+func TestAcceptsMediaType(t *testing.T) {
+	const mt = "application/vnd.mvd-analyzer.buckets"
+	for h, want := range map[string]bool{
+		"":                                     false,
+		mt:                                     true,
+		"application/json, " + mt + ";q=0.9":   true,
+		"APPLICATION/VND.MVD-ANALYZER.BUCKETS": true,
+		mt + ";q=0":                            false,
+		mt + "; Q=0":                           false,
+		"*/*":                                  false,
+		"application/*":                        false,
+		mt + "x":                               false,
+	} {
+		r := httptest.NewRequest("GET", "/", nil)
+		r.Header.Set("Accept", h)
+		if got := acceptsMediaType(r, mt); got != want {
+			t.Errorf("Accept %q: acceptsMediaType = %v, want %v", h, got, want)
 		}
 	}
 }
@@ -676,7 +891,7 @@ func TestUnknownParam_Rejected(t *testing.T) {
 		"overview?extra=1", "metadata?extra=1", "demoinfo?extra=1",
 		"loc-graph?extra=1", "loc-table?extra=1", "shots?other=1",
 		"streams/projectiles?extra=1", "streams/beams?extra=1",
-		"streams/nails?extra=1", "streams/point-effects?extra=1",
+		"streams/nails?extra=1", "streams/point-effects?extra=1", "streams/positions?extra=1",
 		"highlights?extra=1", "los?extra=1",
 		"artifacts/frag?extra=1",
 	}

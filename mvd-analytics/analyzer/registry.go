@@ -2,6 +2,7 @@ package analyzer
 
 import (
 	"io"
+	"os"
 	"reflect"
 	"runtime"
 	"sort"
@@ -11,6 +12,7 @@ import (
 	"github.com/mvd-analyzer/mvd-analytics/config"
 	resultpkg "github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-reader/events"
+	"github.com/mvd-analyzer/mvd-reader/mvdfile"
 	mvdsource "github.com/mvd-analyzer/mvd-reader/source/mvd"
 )
 
@@ -69,10 +71,12 @@ type Registry struct {
 	// volume, so this is a separate request (qw-analyze -include nails).
 	BuildNails bool
 
-	// Parallel opts heavy finalize passes into goroutine fan-out (see
-	// Context.Parallel). Off by default so bulk hosts that already run
-	// one demo per worker don't oversubscribe; single-demo callers
-	// (qw-analyze -parallel) can turn it on. Output is identical.
+	// Parallel opts into goroutine fan-out: the event pass reads the demo
+	// on its own goroutine (prefetchSource), and heavy finalize passes fan
+	// out (see Context.Parallel). Off by default so bulk hosts that already
+	// run one demo per worker don't oversubscribe; single-demo callers
+	// (qw-analyze -parallel, mvd-api) turn it on. Output is identical
+	// (TestParallelMatchesSerial).
 	Parallel bool
 
 	// PhaseTimings holds per-phase wall-clock durations from the most
@@ -153,24 +157,34 @@ func (r *Registry) RegisterPostProcessor(p ResultPostProcessor) {
 // Analyze runs all registered analyzers on an MVD file at the given path.
 // Gzip is auto-detected.
 func (r *Registry) Analyze(filePath string) (*Result, error) {
-	src, err := mvdsource.Open(filePath)
+	f, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
-	defer src.Close()
-	src.Parser().SetDecodeNails(r.BuildNails)
-	return r.analyzeSource(src, filePath)
+	defer f.Close()
+	return r.AnalyzeReader(f, filePath)
 }
 
 // AnalyzeReader runs all registered analyzers on an MVD byte stream.
 // Provided as a convenience for callers that already have bytes in hand
 // (notably the WASM entry, which receives a JS Uint8Array).
+//
+// With Parallel the demo is inflated on its own goroutine (readAhead)
+// and parsed on another (prefetchSource), so gunzip, parse and the
+// analyzers' OnEvent run as a three-stage pipeline.
 func (r *Registry) AnalyzeReader(reader io.Reader, filename string) (*Result, error) {
-	src, err := mvdsource.NewFromReader(reader)
+	rc, err := mvdfile.NewReader(reader)
 	if err != nil {
 		return nil, err
 	}
-	defer src.Close()
+	defer rc.Close()
+	var raw io.Reader = rc
+	if r.Parallel {
+		ahead := newReadAhead(rc)
+		defer ahead.halt()
+		raw = ahead
+	}
+	src := mvdsource.NewFromRaw(raw)
 	src.Parser().SetDecodeNails(r.BuildNails)
 	return r.analyzeSource(src, filename)
 }
@@ -218,9 +232,15 @@ func (r *Registry) analyzeSource(source events.Source, filename string) (*Result
 	record("init", initStart)
 
 	eventStart := time.Now()
+	next := source.Next
+	if r.Parallel {
+		pf := newPrefetchSource(source)
+		defer pf.halt()
+		next = pf.Next
+	}
 	var streamErr error
 	for {
-		event, err := source.Next()
+		event, err := next()
 		if err == io.EOF {
 			break
 		}

@@ -163,6 +163,9 @@ onmessage = function(e) {
 
             const tAnalyze = performance.now();
             const jsonStr = analyzeMVD(bytes, filename);
+            // The position tracks, which the JSON leaves out (null after a
+            // failed analyze). Transferred, not copied, to the main thread.
+            const pos = takePositionPack();
             const wasmAnalyzeMs = performance.now() - tAnalyze;
 
             // Per-phase pipeline timings from the Go side (init, event
@@ -189,19 +192,22 @@ onmessage = function(e) {
             // are built *after* the result is sent. The worker being busy
             // here does not block the main thread — the result message is
             // already queued for it and renders while we compute.
-            postMessage({ type: 'result', reqId, json: jsonStr, timings });
+            postMessage({ type: 'result', reqId, json: jsonStr, pos: pos && pos.buffer, timings }, pos ? [pos.buffer] : []);
 
             // ---- Deferred: legacy 50ms buckets + region-control states ----
             // Schema v7: highResBuckets and regionControl.bucketStates are
             // not parse-time fields; the existing panels still read them, so
             // build via the bridge and ship a second 'buckets' message.
-            let bucketsJSON = '';
+            // The view arrives as a bucket pack (src/lib/bucketpack.js),
+            // transferred rather than copied; a failure is an error JSON string.
+            let buckets = null;
             const tBuckets = performance.now();
             try {
-                bucketsJSON = getDefaultBuckets();
+                const b = getDefaultBuckets();
+                if (typeof b === 'string') console.warn('[mvd-worker] getDefaultBuckets failed:', b);
+                else buckets = b;
             } catch (err) {
                 console.warn('[mvd-worker] getDefaultBuckets failed:', err);
-                bucketsJSON = '';
             }
             const bucketsMs = performance.now() - tBuckets;
 
@@ -228,7 +234,8 @@ onmessage = function(e) {
                 `recomputeRegionControl ${regionMs.toFixed(1)} ms`
             );
 
-            postMessage({ type: 'buckets', reqId, bucketsJSON, regionStatesJSON, bucketsMs, regionMs });
+            postMessage({ type: 'buckets', reqId, buckets: buckets && buckets.buffer, regionStatesJSON, bucketsMs, regionMs },
+                buckets ? [buckets.buffer] : []);
         } catch (err) {
             postMessage({ type: 'error', reqId, message: err.message || String(err) });
         }

@@ -136,7 +136,7 @@ export function dropEventsOf(result) {
 }
 
 // posStreamsOf: name → native-rate position track, for the players that have
-// samples.
+// samples. The columns are typed arrays (lib/postrack.js), not Arrays.
 /**
  * @param {Result | null | undefined} result
  * @returns {Record<string, any>}
@@ -147,7 +147,7 @@ export function posStreamsOf(result) {
     const players = result?.streams?.players;
     if (Array.isArray(players)) {
         for (const p of players) {
-            if (p && p.pos && Array.isArray(p.pos.t) && p.pos.t.length > 0) out[p.name] = p.pos;
+            if (p && p.pos && p.pos.t && p.pos.t.length > 0) out[p.name] = p.pos;
         }
     }
     return out;

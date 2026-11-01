@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import { readFileSync } from 'node:fs';
+
 import { WasmSource } from '../src/data/wasm-source.js';
 import { parseGameId, demoFilename, searchGames, downloadDemo } from '../src/data/hub.js';
 
@@ -23,6 +25,22 @@ class FakeWorker {
 
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
+// A position pack with no players (lib/postrack.js), what the worker sends
+// beside a Result without streams.
+function emptyPack() {
+    const buf = new ArrayBuffer(12);
+    const dv = new DataView(buf);
+    [...'MVDP'].forEach((c, i) => dv.setUint8(i, c.charCodeAt(0)));
+    dv.setUint32(4, 1, true);
+    return buf;
+}
+
+// The Go-written bucket pack the decoder test uses (bucketpack.test.js).
+function bucketPack() {
+    const b = readFileSync(new URL('./fixtures/bucket-pack.bin', import.meta.url));
+    return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+}
+
 async function readySource() {
     const w = new FakeWorker();
     const src = new WasmSource(w);
@@ -31,11 +49,11 @@ async function readySource() {
     return { w, src };
 }
 
-async function analyze(w, src, result, name = 'a.mvd') {
+async function analyze(w, src, result, name = 'a.mvd', pos = emptyPack()) {
     const p = src.load({ bytes: new Uint8Array([1, 2, 3]), name });
     await tick();
     const req = w.last('analyze');
-    w.reply({ type: 'result', reqId: req.reqId, json: JSON.stringify(result), timings: { wasmAnalyzeMs: 5 } });
+    w.reply({ type: 'result', reqId: req.reqId, json: JSON.stringify(result), pos, timings: { wasmAnalyzeMs: 5 } });
     return { handle: await p, req };
 }
 
@@ -48,6 +66,28 @@ test('load analyses bytes, keeps a copy for the player, and names the demo', asy
     assert.deepEqual(handle.ref, { key: 'file:a.mvd', gameId: null });
     assert.deepEqual(await handle.section('match'), { map: 'dm3' });
     assert.equal(handle.timings.worker.wasmAnalyzeMs, 5);
+});
+
+test('the position tracks the worker sends beside the JSON land on its players', async () => {
+    const { w, src } = await readySource();
+    // The Go-written fixture's three players (see postrack.test.js).
+    const b = readFileSync(new URL('./fixtures/position-pack.bin', import.meta.url));
+    const pack = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+    const players = [{ name: 'bär!' }, { name: 'xy' }, { name: 'spec' }];
+    const { handle } = await analyze(w, src, { streams: { players } }, 'a.mvd', pack);
+    const got = (await handle.section('streams')).players;
+    assert.deepEqual(Array.from(got[0].pos.t), [0, 13, -7]);
+    assert.equal(got[2].pos, undefined);
+});
+
+test('a pack the page cannot read fails the load and keeps the previous demo', async () => {
+    const { w, src } = await readySource();
+    const { handle } = await analyze(w, src, {});
+    const newer = emptyPack();
+    new DataView(newer).setUint32(4, 2, true);
+    await assert.rejects(analyze(w, src, {}, 'b.mvd', newer), /position pack: unsupported/);
+    assert.equal(src.current, handle);
+    assert.equal(handle.current, true);
 });
 
 test('a failed load rejects and leaves the previous demo queryable', async () => {
@@ -72,11 +112,13 @@ test('deferred buckets land on their own demo only', async () => {
     const second = await analyze(w, src, { timelineAnalysis: {} }, 'b.mvd');
     w.reply({
         type: 'buckets', reqId: first.req.reqId, bucketsMs: 3, regionMs: 1,
-        bucketsJSON: JSON.stringify({ t: [0] }),
+        buckets: bucketPack(),
         regionStatesJSON: JSON.stringify({ bucketStates: [1], stats: { x: 1 } }),
     });
     assert.deepEqual(await first.handle.ready('buckets'), { bucketsMs: 3, regionMs: 1 });
-    assert.deepEqual(first.handle.result.timelineAnalysis.bucketView, { t: [0] });
+    const view = first.handle.result.timelineAnalysis.bucketView;
+    assert.equal(view.windowMs, 700);
+    assert.ok(view.players['bär!'].x instanceof Float32Array);
     assert.deepEqual(first.handle.result.timelineAnalysis.regionControl, { bucketStates: [1], stats: { x: 1 } });
     assert.equal(second.handle.result.timelineAnalysis.bucketView, undefined);
     w.reply({ type: 'error', reqId: second.req.reqId, message: 'buckets blew up' });
@@ -144,9 +186,9 @@ test('overlapping loads: an older analyze answering late is dropped, its failure
     const b = src.load({ bytes: new Uint8Array([2]), name: 'b.mvd' });
     await tick();
     const reqB = w.last('analyze');
-    w.reply({ type: 'result', reqId: reqA.reqId, json: '{}' });
+    w.reply({ type: 'result', reqId: reqA.reqId, json: '{}', pos: emptyPack() });
     await assert.rejects(a, (e) => e.superseded === true);
-    w.reply({ type: 'result', reqId: reqB.reqId, json: '{}' });
+    w.reply({ type: 'result', reqId: reqB.reqId, json: '{}', pos: emptyPack() });
     const hb = await b;
     assert.equal(src.current, hb);
 
@@ -157,7 +199,7 @@ test('overlapping loads: an older analyze answering late is dropped, its failure
     await tick();
     w.reply({ type: 'result', reqId: reqC.reqId, json: '{"error":"bad demo"}' });
     await assert.rejects(c, (e) => e.superseded === true && !/bad demo/.test(e.message));
-    w.reply({ type: 'result', reqId: w.last('analyze').reqId, json: '{}' });
+    w.reply({ type: 'result', reqId: w.last('analyze').reqId, json: '{}', pos: emptyPack() });
     assert.equal(src.current, await d);
 });
 
@@ -184,7 +226,7 @@ test('hub loads go info → download → analyze with the hub file name', async 
     while (!w.last('analyze')) await tick();
     const req = w.last('analyze');
     assert.equal(req.filename, '4on4_red_vs_b_l[dm3]2026042401373.mvd.gz');
-    w.reply({ type: 'result', reqId: req.reqId, json: '{}' });
+    w.reply({ type: 'result', reqId: req.reqId, json: '{}', pos: emptyPack() });
     const handle = await p;
     assert.deepEqual(stages, ['info', 'download', 'analyze']);
     assert.match(urls[1], /^https:\/\/d\.quake\.world\/abc\/abcdef\.mvd\.gz$/);

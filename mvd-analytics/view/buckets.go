@@ -393,42 +393,86 @@ func reducePlayer(
 // returned here are byte-identical to the slice path — same boxed types,
 // same carry-forward rules — locked by TestFastReduceParity.
 func fastReduce(p *result.PlayerStream, field, reducer string, bStart, bEnd int32) (any, bool) {
-	kind, ok := FieldKindFor(field)
+	f, ok := resolveFast(p, field, reducer)
 	if !ok {
 		return nil, false
 	}
+	return f.reduce(bStart, bEnd), true
+}
+
+// fastField is fastReduce with the field resolved: the kind lookup and
+// the stream dispatch are done once, so a column builder that reduces one
+// field over thousands of buckets pays only for the reductions.
+type fastField struct {
+	kind  FieldKind
+	first bool // reducer "first"; otherwise "any" over an event list
+	i16   []result.ChangeI16
+	str   []result.ChangeStr
+	iv    []result.Interval
+	ev    []int32
+	pt    *result.PositionTrack
+}
+
+// resolveFast resolves (field, reducer) on p, or ok=false when fastReduce
+// does not specialise the pair.
+func resolveFast(p *result.PlayerStream, field, reducer string) (fastField, bool) {
+	kind, ok := FieldKindFor(field)
+	if !ok {
+		return fastField{}, false
+	}
+	f := fastField{kind: kind}
 	switch reducer {
 	case "first":
+		f.first = true
 		switch kind {
 		case KindChangeI16:
-			return firstChangeI16(streamI16(p, field), bStart, bEnd), true
+			f.i16 = streamI16(p, field)
 		case KindChangeStr:
-			return firstChangeStr(streamStr(p, field), bStart, bEnd), true
+			f.str = streamStr(p, field)
 		case KindInterval:
-			s := streamInterval(p, field)
-			if s == nil {
-				return nil, true
-			}
-			// Matches intervalSamples[0]: held at exactly bStart.
-			return intervalContains(s, bStart), true
-		case KindPosition:
-			return firstPosition(p.Position, bStart, bEnd), true
-		case KindView:
-			return firstView(p.Position, bStart, bEnd), true
-		case KindHeight:
-			return firstHeight(p.Position, bStart, bEnd), true
-		case KindLiquid:
-			return firstLiquid(p.Position, bStart, bEnd), true
-		case KindVelocity:
-			return firstVelocity(p.Position, bStart, bEnd), true
+			f.iv = streamInterval(p, field)
+		case KindPosition, KindView, KindHeight, KindLiquid, KindVelocity:
+			f.pt = p.Position
+		default:
+			return fastField{}, false
 		}
+		return f, true
 	case "any":
 		if kind == KindEventList {
-			// Matches AnyReducer over eventListSamples: a bool (never nil).
-			return anyEventInWindow(streamEventList(p, field), bStart, bEnd), true
+			f.ev = streamEventList(p, field)
+			return f, true
 		}
 	}
-	return nil, false
+	return fastField{}, false
+}
+
+// reduce is the reduced value over [bStart, bEnd).
+func (f *fastField) reduce(bStart, bEnd int32) any {
+	if !f.first {
+		// Matches AnyReducer over eventListSamples: a bool (never nil).
+		return anyEventInWindow(f.ev, bStart, bEnd)
+	}
+	switch f.kind {
+	case KindChangeI16:
+		return firstChangeI16(f.i16, bStart, bEnd)
+	case KindChangeStr:
+		return firstChangeStr(f.str, bStart, bEnd)
+	case KindInterval:
+		if f.iv == nil {
+			return nil
+		}
+		// Matches intervalSamples[0]: held at exactly bStart.
+		return intervalContains(f.iv, bStart)
+	case KindPosition:
+		return firstPosition(f.pt, bStart, bEnd)
+	case KindView:
+		return firstView(f.pt, bStart, bEnd)
+	case KindHeight:
+		return firstHeight(f.pt, bStart, bEnd)
+	case KindLiquid:
+		return firstLiquid(f.pt, bStart, bEnd)
+	}
+	return firstVelocity(f.pt, bStart, bEnd)
 }
 
 // firstChangeI16 returns changeSamplesI16(stream, bStart, bEnd)[0].V

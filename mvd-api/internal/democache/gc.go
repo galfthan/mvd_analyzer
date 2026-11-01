@@ -22,7 +22,8 @@ const staleTempAge = time.Hour
 var versionDirRe = regexp.MustCompile(`^v\d+(f\d+)?$`)
 
 // cacheFile is one GC eviction unit: a single tier-1 MVD, tier-2 gob, or
-// tier-3 artifact gob, with the mtime the sweep orders by.
+// tier-3 file (artifact gob or position pack), with the mtime the sweep
+// orders by.
 type cacheFile struct {
 	path  string
 	size  int64
@@ -171,7 +172,8 @@ func cleanTemps(temps []cacheFile, logger *slog.Logger) {
 // from the cached bytes (no re-download); dropping a tier-1 MVD still
 // serves everything from its gob (since phase 12 the tier-2 Result is
 // always-full, so no endpoint needs the raw bytes back); dropping a tier-3
-// artifact recomputes it on the next /los. The gameId index is exempt
+// artifact recomputes it on the next /los, a position pack on the next
+// /streams/positions. The gameId index is exempt
 // entirely (tiny; losing it forces a hub re-resolve).
 //
 // Safe to run concurrently with request serving. On Linux, unlinking a file
@@ -324,7 +326,8 @@ func CleanOldVersionTrees(root string, currentVersion int, dryRun bool, logger *
 }
 
 // CleanStaleArtifacts deletes every tier-3 gob whose filename does not carry
-// the current effective-version suffix ("@v<EV>.gob"). Tier-3 versioning is
+// the current effective-version suffix ("@v<EV>.gob"), and every position
+// pack but the current version's (positionPackName). Tier-3 versioning is
 // per-file, not per-tree: a stale gob is simply never read again
 // (artifactPath points at the current-version name), so it is pure garbage —
 // this reaps both old-version los gobs after a schema bump and the
@@ -337,7 +340,7 @@ func CleanStaleArtifacts(root string, dryRun bool, logger *slog.Logger) {
 	keep := artifactVersionSuffix()
 	var removed int
 	walkRegular(artifactsRoot(root), func(p string, _ int64, _ time.Time) {
-		if isTempName(p) || strings.HasSuffix(filepath.Base(p), keep) {
+		if isTempName(p) || strings.HasSuffix(filepath.Base(p), keep) || filepath.Base(p) == positionPackName() {
 			return
 		}
 		if dryRun {

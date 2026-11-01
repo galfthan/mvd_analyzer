@@ -21,6 +21,8 @@
 
 import { WorkerClient } from './worker-client.js';
 import * as hub from './hub.js';
+import { attachPositions } from '../lib/postrack.js';
+import { decodeBucketPack } from '../lib/bucketpack.js';
 
 /**
  * @typedef {import('./hub.js').HubGame} HubGame
@@ -149,8 +151,20 @@ export class WasmSource {
         // holds this demo until that one posts, and nobody shows it.
         live();
         const tParse = performance.now();
-        const result = JSON.parse(reply.json);
+        let result;
+        try {
+            result = JSON.parse(reply.json);
+        } catch (err) {
+            fail(err);
+        }
         if (result.error) fail(new Error(result.error));
+        // A pack this page can't read (a stale cached worker or wasm from
+        // another deploy) fails the load like an analyze error would.
+        try {
+            attachPositions(result, reply.pos);
+        } catch (err) {
+            fail(err);
+        }
         handle.result = result;
         handle.timings = { net, worker: reply.timings || null, parseMs: performance.now() - tParse };
         return handle;
@@ -257,13 +271,11 @@ export class DemoHandle {
     /** @param {WorkerMessage} msg */
     _applyBuckets(msg) {
         const ta = this.result?.timelineAnalysis;
-        if (ta && msg.bucketsJSON) {
+        if (ta && msg.buckets) {
             try {
-                const view = JSON.parse(msg.bucketsJSON);
-                // Column-major ColumnarBuckets object.
-                if (view && typeof view === 'object' && !view.error) ta.bucketView = view;
+                ta.bucketView = decodeBucketPack(msg.buckets);
             } catch (e) {
-                console.warn('parse deferred buckets failed:', e);
+                console.warn('decode deferred buckets failed:', e);
             }
         }
         if (ta && ta.regionControl && msg.regionStatesJSON) {
