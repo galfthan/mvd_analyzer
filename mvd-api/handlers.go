@@ -299,6 +299,35 @@ func (s *server) handleOverview(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, OverviewEnvelope{TimeUnit: view.UnitMs, Overview: BuildOverview(res)})
 }
 
+// handleResult: GET /v1/demos/{id}/result — the whole Result as the web
+// page reads it (view.PageResult: playerStats with the KTX overlay, streams
+// without the position tracks, which /streams/positions serves as a pack).
+// It is what the WASM build hands the page, so a page backed by this API
+// renders the same demo the same way. A 4on4 is ~4 MB of JSON, ~0.9 MB
+// gzipped; it is gzipped at BestSpeed for a client that accepts gzip, and
+// that body's ETag ends in -gz.
+func (s *server) handleResult(w http.ResponseWriter, r *http.Request) {
+	gz := acceptsGzip(r)
+	w.Header().Set("Vary", "Accept-Encoding")
+	tail := ""
+	if gz {
+		tail = "-gz"
+	}
+	res, _, ok := s.resolveDemoAs(w, r, tail)
+	if !ok {
+		return
+	}
+	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
+		return
+	}
+	body, err := json.Marshal(view.PageResult(res))
+	if err != nil {
+		s.writeInternal(w, r, err)
+		return
+	}
+	writeBody(w, "application/json", body, gz)
+}
+
 // handleMetadata: GET /v1/demos/{id}/metadata — full server cvars +
 // KTX match settings (timelimit, fraglimit, antilag, midair, spawnmodel,
 // instagib, ...). Used by the web's Summary tab.
@@ -1169,6 +1198,11 @@ func (s *server) writeBucketPack(w http.ResponseWriter, r *http.Request, cb *vie
 		s.writeInternal(w, r, err)
 		return
 	}
+	writeBody(w, view.ColumnarPackContentType, body, gz)
+}
+
+// writeBody writes a 200 with body, gzipped at BestSpeed when gz.
+func writeBody(w http.ResponseWriter, contentType string, body []byte, gz bool) {
 	if gz {
 		var buf bytes.Buffer
 		zw, _ := gzip.NewWriterLevel(&buf, gzip.BestSpeed)
@@ -1177,7 +1211,7 @@ func (s *server) writeBucketPack(w http.ResponseWriter, r *http.Request, cb *vie
 		body = buf.Bytes()
 		w.Header().Set("Content-Encoding", "gzip")
 	}
-	w.Header().Set("Content-Type", view.ColumnarPackContentType)
+	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(body)

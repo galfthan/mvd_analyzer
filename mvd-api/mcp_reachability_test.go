@@ -73,6 +73,8 @@ var demoViewCoverage = map[string]mcpCoverage{
 	// The bulk binary form of the position tracks getStreamSlice serves
 	// windowed as JSON — a page's bulk download, not an LLM-sized surface.
 	"/v1/demos/{id}/streams/positions": {tool: "getStreamSlice"},
+	// The bulk page form of every section; each has its own curated tool.
+	"/v1/demos/{id}/result": {tool: "getOverview"},
 
 	// Point effects are not per-player, so getStreamSlice cannot carry
 	// them — they get their own curated tool.

@@ -75,6 +75,7 @@ func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uplo
 
 	mux.HandleFunc("POST /v1/demos", s.handleUpload)
 	mux.HandleFunc("POST /v1/demos/{id}", s.handleLoad)
+	mux.HandleFunc("GET /v1/demos/{id}/result", s.handleResult)
 	mux.HandleFunc("GET /v1/demos/{id}/overview", s.handleOverview)
 	mux.HandleFunc("GET /v1/demos/{id}/demoinfo", s.handleDemoInfo)
 	mux.HandleFunc("GET /v1/demos/{id}/metadata", s.handleMetadata)

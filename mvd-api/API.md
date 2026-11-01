@@ -793,6 +793,17 @@ Concrete consequences:
   drop a sample once its age reaches 250 ms; apply the same rule to
   `posAgeMs` and the four endpoints answer "where was X" consistently.
 
+### Everything at once: `/result`
+
+A client that renders every tab from one load — mvd-web's page is one —
+reads **`/result`**: the whole Result in one body (~4 MB of JSON on a
+4on4, gzip on the wire), shaped as
+[RESULT_SCHEMA.md](../mvd-analytics/RESULT_SCHEMA.md) documents, with
+`playerStats` already carrying the KTX overlay and the position tracks
+left out — take those from `/streams/positions`. It is exactly what the
+in-browser WASM build hands the page. To read one section, use its
+curated endpoint instead: they filter, shape and validate.
+
 ### Aggregates: whole match, chosen stretches, or per life?
 
 A second family answers *"how did this player do?"* — they differ in how

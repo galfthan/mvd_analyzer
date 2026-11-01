@@ -5,6 +5,15 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (web-api) — the whole Result from the API
+
+mvd-api serves `GET /v1/demos/{id}/result`: the demo's whole Result in
+one body, as the web page reads it — `playerStats` with the KTX overlay,
+no position tracks (`/streams/positions` serves those). The WASM build
+and the endpoint marshal the same `view.PageResult`, so a page reading
+the API renders a demo exactly as one analysing it in the browser. A
+4on4 is ~4 MB of JSON, ~0.9 MB gzip-encoded on the wire. No schema change.
+
 ## unreleased (perf-wasm-data) — position tracks in binary, faster floor traces
 
 No schema change, and the floor heights are bit-identical. The floor

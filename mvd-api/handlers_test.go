@@ -318,6 +318,75 @@ func TestShotStreamEndpoints(t *testing.T) {
 // TestPositions_PackGzipAndRevalidation: the endpoint serves the store's
 // gzipped pack as it is to a gzip client, inflates it for one that isn't,
 // and answers its own pack-versioned ETag with a 304.
+// TestResult_PageResult: /result is view.PageResult's JSON, gzipped for a
+// client that accepts gzip, with its own ETag per encoding and a 304 on
+// revalidation.
+func TestResult_PageResult(t *testing.T) {
+	r := stubResult()
+	r.Streams.Players[0].Position = &result.PositionTrack{T: []int32{0}, X: []float32{1}, Y: []float32{2}, Z: []float32{3}}
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": r}})
+	defer srv.Close()
+	want, err := json.Marshal(view.PageResult(r))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(want, []byte(`"pos":`)) {
+		t.Fatal("PageResult kept the position track")
+	}
+	url := srv.URL + "/v1/demos/gameId:42/result"
+
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept-Encoding", "gzip")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Encoding") != "gzip" ||
+		resp.Header.Get("Content-Type") != "application/json" || resp.Header.Get("Vary") != "Accept-Encoding" {
+		t.Fatalf("gzip client: %d %v", resp.StatusCode, resp.Header)
+	}
+	zr, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ := io.ReadAll(zr)
+	resp.Body.Close()
+	if !bytes.Equal(got, want) {
+		t.Fatalf("gzip client: body differs from PageResult's JSON (%d vs %d bytes)", len(got), len(want))
+	}
+	etag := resp.Header.Get("ETag")
+	if !strings.HasSuffix(etag, `-gz"`) {
+		t.Fatalf("gzip ETag %q lacks the encoding tail", etag)
+	}
+
+	req, _ = http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept-Encoding", "identity")
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ = io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != 200 || resp.Header.Get("Content-Encoding") != "" || !bytes.Equal(got, want) {
+		t.Fatalf("identity client: %d %v, %d bytes", resp.StatusCode, resp.Header, len(got))
+	}
+	if resp.Header.Get("ETag") == etag {
+		t.Fatal("the identity and gzip bodies share an ETag")
+	}
+
+	req, _ = http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept-Encoding", "gzip")
+	req.Header.Set("If-None-Match", etag)
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusNotModified {
+		t.Fatalf("If-None-Match: status %d, want 304", resp.StatusCode)
+	}
+}
+
 func TestPositions_PackGzipAndRevalidation(t *testing.T) {
 	r := stubResult()
 	r.Streams.Players[0].Position = &result.PositionTrack{

@@ -541,6 +541,10 @@ func validationCases(t *testing.T) []validationCase {
 		// object, but an empty one would still satisfy the schema, and the
 		// whole value of the manifest is that its flags are actually filled
 		// in from the 422 predicates.
+		// The positions-free Result: every section, so the case names one
+		// the page needs and the track the body must leave out.
+		{name: "result", url: "/v1/demos/gameId:42/result", path: "/v1/demos/{id}/result", status: 200,
+			mustContain: []string{`"schemaVersion":`, `"playerStats":`}, mustNotContain: []string{`"pos":`}},
 		{name: "overview", url: "/v1/demos/gameId:42/overview", path: "/v1/demos/{id}/overview", status: 200,
 			mustContain: []string{`"available":{"demoInfo":`, `"los":`}},
 		// parseWarnings is omitempty and every golden demo parses clean, so

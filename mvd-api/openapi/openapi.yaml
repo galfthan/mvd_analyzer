@@ -496,6 +496,48 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/demos/{id}/result:
+    get:
+      operationId: getResult
+      tags: [demo]
+      summary: The whole Result, as the web page reads it
+      description: >
+        The demo's whole analysed Result in one body — the shape
+        [/docs/result-schema](/docs/result-schema) documents — as the
+        mvd-web page reads it: `playerStats` carries the KTX demoinfo
+        overlay (as `/player-stats` serves it) and `streams.players[]` has
+        no `pos` position tracks, which `/streams/positions` serves as a
+        binary pack (a 4on4's tracks are ~45 MB of JSON). It is the
+        payload the in-browser WASM build hands the page, for a client that
+        renders every tab from one load; the curated endpoints remain the
+        way to read one section. A 4on4 is ~4 MB of JSON, gzip-encoded for
+        a client that accepts gzip (that body's ETag ends in `-gz`).
+      parameters:
+        - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/Label"
+      responses:
+        "200":
+          description: The Result, without position tracks.
+          headers: *perDemoHeaders
+          content:
+            application/json:
+              schema:
+                type: object
+                description: >
+                  The Result; RESULT_SCHEMA.md
+                  ([/docs/result-schema](/docs/result-schema)) is the
+                  field-level reference.
+                required: [schemaVersion]
+                properties:
+                  schemaVersion: { type: integer }
+                additionalProperties: true
+        "304": { $ref: "#/components/responses/NotModified" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
   /v1/demos/{id}/demoinfo:
     get:
       operationId: getDemoInfo

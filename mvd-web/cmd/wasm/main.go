@@ -70,11 +70,9 @@ func analyze(this js.Value, args []js.Value) interface{} {
 
 	// The position tracks are ~92% of the Result's JSON and nearly all of
 	// its marshal time, so they go to the page as a binary pack instead
-	// (takePositionPack) and the JSON omits them.
+	// (takePositionPack) and the JSON (view.PageResult) omits them.
 	marshalStart := time.Now()
-	out := withPlayerStatsOverlay(res)
-	out.Streams = res.Streams.WithoutPositions()
-	jsonBytes, err := json.Marshal(out)
+	jsonBytes, err := json.Marshal(view.PageResult(res))
 	if err != nil {
 		return errorJSON(err.Error())
 	}
@@ -89,32 +87,6 @@ func analyze(this js.Value, args []js.Value) interface{} {
 	}
 
 	return string(jsonBytes)
-}
-
-// withPlayerStatsOverlay returns the Result to marshal for the frontend,
-// with the KTX demoinfo overlay folded into the playerStats section.
-//
-// The analyzer stores the fully DERIVED section on purpose, so the golden
-// corpus records what this pipeline computed; the merge with KTX's own
-// numbers is a READ-TIME step (view.PlayerStats), exactly as view.Damage
-// overlays the KTX bounded summary. mvd-api runs it in its handler. This
-// WASM entry point is the web's equivalent read boundary, so it runs it
-// here — without this the browser would see accuracy, the KTX damage
-// splits, the KTX pickup tallies and ping/handicap/bot as if the demo had
-// no demoinfo block at all.
-//
-// Returns a shallow COPY with the section swapped (and always a copy, so
-// the caller may swap more sections on it): lastResult keeps the stored
-// derived form, so a later view call over it starts from the same
-// state the analyzer produced rather than from an already-overlaid one.
-// ErrUnavailable (no section — a parse that produced no player streams)
-// leaves the payload untouched; the frontend handles an absent section.
-func withPlayerStatsOverlay(res *analyzer.Result) *analyzer.Result {
-	out := *res
-	if ps, err := view.PlayerStats(res, view.PlayerStatsOptions{}); err == nil {
-		out.PlayerStats = ps
-	}
-	return &out
 }
 
 // takePositionPack returns the most recent analyze's position pack as a
