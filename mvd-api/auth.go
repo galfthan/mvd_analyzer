@@ -128,7 +128,7 @@ func (a *authenticator) middleware(next http.Handler) http.Handler {
 		// Per-key rate limit (D8), per key and client for a per-client key.
 		// Only authenticated keys reach here, so the bucket maps cannot be
 		// grown by unknown traffic.
-		if ok, retry := a.limiter.allow(rec, clientIP(r)); !ok {
+		if ok, retry := a.limiter.allow(rec, limiterClient(r)); !ok {
 			tooManyRequests(w, retry)
 			return
 		}

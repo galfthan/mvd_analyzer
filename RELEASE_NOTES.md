@@ -9,7 +9,9 @@ detail.
 
 mvd-api serves `GET /v1/demos/{id}/result`: the demo's whole Result in
 one body, as the web page reads it — `playerStats` with the KTX overlay,
-no position tracks (`/streams/positions` serves those). The WASM build
+no position tracks (`/streams/positions` serves those) and no line of
+sight (`/los`); the gzipped body is built once per demo and kept in
+memory. The WASM build
 and the endpoint marshal the same `view.PageResult`, so a page reading
 the API renders a demo exactly as one analysing it in the browser. A
 4on4 is ~4 MB of JSON, ~0.9 MB gzip-encoded on the wire. No schema change.

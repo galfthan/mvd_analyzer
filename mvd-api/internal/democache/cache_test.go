@@ -501,7 +501,7 @@ func TestGetResult_Singleflight_OneParseUnderFanout(t *testing.T) {
 }
 
 func TestResultLRU_Eviction(t *testing.T) {
-	l := newResultLRU(2)
+	l := newLRU[*result.Result](2)
 	r1 := &result.Result{FilePath: "a"}
 	r2 := &result.Result{FilePath: "b"}
 	r3 := &result.Result{FilePath: "c"}

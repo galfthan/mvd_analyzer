@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -214,7 +215,8 @@ func accessLogMiddleware(logger *slog.Logger, next http.Handler) http.Handler {
 // clientIP is the caller's address: the first X-Forwarded-For entry, else
 // the connection's. XFF is attacker-controlled unless a trusted proxy
 // overwrites it at the edge, so it decides nothing on its own: the access
-// log records it, and the limiter splits a per-client key's budget by it.
+// log records it, and the limiter splits a per-client key's budget by it
+// (limiterClient).
 // That key only exists to be added by the deployment's own proxy (Caddy's
 // /api route, which also overwrites XFF with the remote address, in front
 // of an mvd-api bound to localhost), so a forged XFF can reach it only
@@ -228,6 +230,22 @@ func clientIP(r *http.Request) string {
 		return strings.TrimSpace(xf)
 	}
 	return r.RemoteAddr
+}
+
+// limiterClient is the client a per-client key's budget is split by:
+// clientIP without a port, and an IPv6 address reduced to its /64 — one
+// host is routinely given a whole /64, and could otherwise rotate through
+// it for a fresh budget on every address.
+func limiterClient(r *http.Request) string {
+	host := clientIP(r)
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
+	}
+	ip := net.ParseIP(host)
+	if ip == nil || ip.To4() != nil {
+		return host
+	}
+	return ip.Mask(net.CIDRMask(64, 128)).String() + "/64"
 }
 
 // requestLabel extracts the non-secret traffic-source label from

@@ -38,6 +38,11 @@ type demoStore interface {
 	// gzipped, built on first request and kept in the tier-3 cache.
 	PositionPack(ctx context.Context, id democache.DemoID) ([]byte, democache.CacheMeta, error)
 
+	// PageResult returns the demo's Result as the web page reads it
+	// (view.PageResult) as gzipped JSON, built once per demo and kept in
+	// memory (GET /v1/demos/{id}/result).
+	PageResult(ctx context.Context, id democache.DemoID) ([]byte, democache.CacheMeta, error)
+
 	// PutDemo stores an uploaded demo body under its content SHA and reports
 	// the SHA plus whether the demo already existed (POST /v1/demos). The
 	// handler then calls GetResult on the returned SHA to parse it.
@@ -302,11 +307,12 @@ func (s *server) handleOverview(w http.ResponseWriter, r *http.Request) {
 
 // handleResult: GET /v1/demos/{id}/result — the whole Result as the web
 // page reads it (view.PageResult: playerStats with the KTX overlay, streams
-// without the position tracks, which /streams/positions serves as a pack).
-// It is what the WASM build hands the page, so a page backed by this API
-// renders the same demo the same way. A 4on4 is ~4 MB of JSON, ~0.9 MB
-// gzipped; it is gzipped at BestSpeed for a client that accepts gzip, and
-// that body's ETag ends in -gz.
+// without the position tracks, which /streams/positions serves as a pack,
+// and without the lazy line of sight). It is what the WASM build hands the
+// page, so a page backed by this API renders the same demo the same way. A
+// 4on4 is ~4 MB of JSON, ~0.9 MB gzipped; the store keeps the gzipped body
+// per demo, sent as it is to a client that accepts gzip (that body's ETag
+// ends in -gz) and inflated for one that does not.
 func (s *server) handleResult(w http.ResponseWriter, r *http.Request) {
 	gz := acceptsGzip(r)
 	w.Header().Set("Vary", "Accept-Encoding")
@@ -314,19 +320,38 @@ func (s *server) handleResult(w http.ResponseWriter, r *http.Request) {
 	if gz {
 		tail = "-gz"
 	}
-	res, _, ok := s.resolveDemoAs(w, r, tail)
-	if !ok {
+	if _, _, ok := s.resolveDemoAs(w, r, tail); !ok {
 		return
 	}
 	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
-	body, err := json.Marshal(view.PageResult(res))
+	id, _ := democache.ParseDemoID(r.PathValue("id"))
+	data, _, err := s.store.PageResult(r.Context(), id)
 	if err != nil {
-		s.writeInternal(w, r, err)
+		s.mapStoreError(w, r, err)
 		return
 	}
-	writeBody(w, "application/json", body, gz)
+	if gz {
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+		return
+	}
+	// Inflated whole before the status goes out, so a bad stream is a 500
+	// rather than a 200 cut short.
+	zr, err := gzip.NewReader(bytes.NewReader(data))
+	var body []byte
+	if err == nil {
+		body, err = io.ReadAll(zr)
+	}
+	if err != nil {
+		s.writeInternal(w, r, fmt.Errorf("page result: %w", err))
+		return
+	}
+	writeBody(w, "application/json", body, false)
 }
 
 // handleMetadata: GET /v1/demos/{id}/metadata — full server cvars +
@@ -1439,7 +1464,10 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 // for a caller-edited layout (the web map tab's region editor): the body is
 // a regions file, {"regions": [{"name", "locs": [loc names]}]}, the shape
 // the editor saves and loads (config.MapRegionOverrides), replacing the
-// demo's stored layout. Query params and response are the GET's.
+// demo's stored layout. Query params and response are the GET's, except
+// that the answer depends on the body, so it is never a 304 and carries no
+// ETag. An empty list is a layout with no regions, as the editor sends once
+// every row is cleared: no states, no stats, as in the browser.
 func (s *server) handleRegionLayout(w http.ResponseWriter, r *http.Request) {
 	var body config.MapRegionOverrides
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 256<<10))
@@ -1448,8 +1476,12 @@ func (s *server) handleRegionLayout(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_param", "body: "+err.Error())
 		return
 	}
-	if len(body.Regions) == 0 {
-		writeError(w, http.StatusBadRequest, "invalid_param", "regions: at least one region")
+	if dec.More() {
+		writeError(w, http.StatusBadRequest, "invalid_param", "body: more than one JSON value")
+		return
+	}
+	if body.Regions == nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", "body: no regions list")
 		return
 	}
 	regions := make([]result.ControlRegion, len(body.Regions))
@@ -1466,9 +1498,22 @@ func (s *server) handleRegionLayout(w http.ResponseWriter, r *http.Request) {
 // serveRegionControl answers both region-control routes; regions, when
 // set, replace the demo's stored layout.
 func (s *server) serveRegionControl(w http.ResponseWriter, r *http.Request, regions []result.ControlRegion) {
-	res, _, ok := s.resolveDemo(w, r)
-	if !ok {
-		return
+	var res *result.Result
+	if regions == nil {
+		var ok bool
+		if res, _, ok = s.resolveDemo(w, r); !ok {
+			return
+		}
+	} else {
+		id, err := democache.ParseDemoID(r.PathValue("id"))
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid_demo_id", err.Error())
+			return
+		}
+		if res, _, err = s.store.GetResult(r.Context(), id); err != nil {
+			s.mapStoreError(w, r, err)
+			return
+		}
 	}
 	// Param hygiene (invalid → unknown) runs BEFORE the availability 422: a
 	// typo'd param on a demo that also lacks region control must 400, not 422.

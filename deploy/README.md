@@ -174,7 +174,10 @@ be revoked on its own:
 - **This host (Caddy's `/api` route)** — a **per-client** key: a service
   key rate-limited per visitor IP (`-rate-web`, `-burst-web` on
   mvd-api), since every visitor shares it. Caddy reads it from its
-  environment per request:
+  environment per request. **Set it when the web change that calls
+  `/api` is deployed, not before**: with the key in place `/api` serves
+  anyone (that is its job), and until then nothing needs it — every
+  `/api` call is a 401.
 
   ```sh
   sudo -u mvd /opt/mvd/bin/mvd-api keys issue \
@@ -187,11 +190,17 @@ be revoked on its own:
   sudo tee /etc/systemd/system/caddy.service.d/mvd-web.conf >/dev/null <<'EOF'
   [Service]
   EnvironmentFile=/etc/caddy/mvd-web.env
+  ExecStart=
+  ExecStart=/usr/bin/caddy run --config /etc/caddy/Caddyfile
   EOF
   sudo systemctl daemon-reload
   ```
 
-  (The Caddy restart in §5 picks it up.) Without it every `/api` request
+  The `ExecStart` override drops `--environ`, which the packaged unit
+  passes and which prints Caddy's whole environment — the key included —
+  to the journal at startup. Check `systemctl cat caddy` first and keep
+  the rest of its `ExecStart` line. A restart (not a reload) picks the
+  key up; §5 does one. Without it every `/api` request
   is a 401 and the page falls back to analysing in the browser.
 - **Netlify previews** — an ordinary **service** key: preview requests
   arrive from Netlify's edge, so a visitor IP means nothing there, and
@@ -238,7 +247,7 @@ curl -sS http://localhost:8081/healthz             # {"ok":true} (mvd-mcp)
 
 # a1. The web page's API path adds the key (no Authorization sent here),
 #     and forwards only the page's routes:
-curl -sS -o /dev/null -w '%{http_code}\n' https://qw.example.com/api/games/222649       # 200
+curl -sS -o /dev/null -w '%{http_code}\n' https://qw.example.com/api/games/222649       # 200 (401 until MVD_WEB_KEY is set, §4b)
 curl -sS -o /dev/null -w '%{http_code}\n' https://qw.example.com/api/demos/gameId:222649/overview  # 404 (not on the allowlist)
 curl -sS -o /dev/null -w '%{http_code}\n' -X POST https://qw.example.com/api/demos          # 404 (no uploads on the page's key)
 

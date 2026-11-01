@@ -485,25 +485,69 @@ func TestRateLimit_PerClient(t *testing.T) {
 	}
 }
 
-// TestKeyLimiter_SweepsIdleClients: past maxClientBuckets, per-client buckets
-// that have refilled are dropped and the busy ones kept, so visitors cannot
-// grow the map without bound.
+// TestKeyLimiter_SweepsIdleClients: per-client buckets are swept when their
+// number has doubled since the last sweep; the sweep drops the ones that
+// have refilled and keeps the busy ones.
 func TestKeyLimiter_SweepsIdleClients(t *testing.T) {
 	now := time.Now()
 	l := newKeyLimiter(rateClass{rate: 1, burst: 1}, rateClass{rate: 1, burst: 1}, rateClass{rate: 1, burst: 10})
 	l.nowFn = func() time.Time { return now }
 	web := authkeys.Record{KeyHash: "web", Service: true, PerClient: true}
-	for i := 0; i < maxClientBuckets; i++ {
-		l.allow(web, fmt.Sprintf("10.0.%d.%d", i/256, i%256))
+	for i := 0; i < firstClientSweep; i++ {
+		l.allow(web, fmt.Sprintf("a%d", i))
 	}
-	now = now.Add(5 * time.Second) // under the 10 s refill: nobody is idle yet
+	now = now.Add(5 * time.Second) // the first sweep: nobody has refilled (10 s)
 	l.allow(web, "busy")
-	if n := len(l.clientBuckets); n != maxClientBuckets+1 {
-		t.Fatalf("swept buckets that had not refilled: %d left", n)
+	if n := len(l.clientBuckets); n != firstClientSweep+1 || l.nextSweep != 2*(firstClientSweep) {
+		t.Fatalf("first sweep: %d buckets, next sweep at %d", n, l.nextSweep)
 	}
-	now = now.Add(6 * time.Second) // the first batch has now refilled, "busy" has not
-	l.allow(web, "new")
-	if _, ok := l.clientBuckets["web busy"]; !ok || len(l.clientBuckets) != 2 {
-		t.Errorf("after the sweep: %d buckets, busy kept = %v; want busy and new", len(l.clientBuckets), ok)
+	now = now.Add(6 * time.Second) // the a* batch has refilled, "busy" has not
+	for i := len(l.clientBuckets); i < l.nextSweep; i++ {
+		l.allow(web, fmt.Sprintf("b%d", i))
+	}
+	l.allow(web, "trigger")
+	for id := range l.clientBuckets {
+		if strings.HasPrefix(id, "web a") {
+			t.Fatalf("refilled bucket %q survived the sweep", id)
+		}
+	}
+	if _, ok := l.clientBuckets["web busy"]; !ok {
+		t.Error("the sweep dropped a bucket that had not refilled")
+	}
+}
+
+// TestKeyLimiter_CapsClients: new clients faster than buckets refill (here
+// they never do) stay under maxClientBuckets.
+func TestKeyLimiter_CapsClients(t *testing.T) {
+	l := newKeyLimiter(rateClass{rate: 1, burst: 1}, rateClass{rate: 1, burst: 1}, rateClass{rate: 0, burst: 1})
+	web := authkeys.Record{KeyHash: "web", Service: true, PerClient: true}
+	peak := 0
+	for i := 0; i < 2*maxClientBuckets; i++ {
+		l.allow(web, strconv.Itoa(i))
+		peak = max(peak, len(l.clientBuckets))
+	}
+	if peak > maxClientBuckets {
+		t.Errorf("per-client buckets peaked at %d, cap %d", peak, maxClientBuckets)
+	}
+}
+
+// limiterClient: the port is dropped, IPv4 is kept whole, IPv6 is reduced to
+// its /64.
+func TestLimiterClient(t *testing.T) {
+	for _, c := range []struct{ xff, remote, want string }{
+		{"203.0.113.7", "127.0.0.1:5555", "203.0.113.7"},
+		{"", "198.51.100.2:443", "198.51.100.2"},
+		{"2001:db8:1:2:aaaa::1", "", "2001:db8:1:2::/64"},
+		{"2001:db8:1:2:bbbb::9", "", "2001:db8:1:2::/64"},
+		{"", "[2001:db8:9::5]:80", "2001:db8:9::/64"},
+	} {
+		r := httptest.NewRequest(http.MethodGet, "/", nil)
+		r.RemoteAddr = c.remote
+		if c.xff != "" {
+			r.Header.Set("X-Forwarded-For", c.xff)
+		}
+		if got := limiterClient(r); got != c.want {
+			t.Errorf("xff %q remote %q: %q, want %q", c.xff, c.remote, got, c.want)
+		}
 	}
 }

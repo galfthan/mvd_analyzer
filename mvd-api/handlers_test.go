@@ -120,6 +120,22 @@ func (f *fakeStore) PositionPack(ctx context.Context, id democache.DemoID) ([]by
 	return buf.Bytes(), meta, nil
 }
 
+func (f *fakeStore) PageResult(ctx context.Context, id democache.DemoID) ([]byte, democache.CacheMeta, error) {
+	res, meta, err := f.GetResult(ctx, id)
+	if err != nil {
+		return nil, meta, err
+	}
+	raw, err := json.Marshal(view.PageResult(res))
+	if err != nil {
+		return nil, meta, err
+	}
+	var buf bytes.Buffer
+	zw := gzip.NewWriter(&buf)
+	_, _ = zw.Write(raw)
+	_ = zw.Close()
+	return buf.Bytes(), meta, nil
+}
+
 // stubResult builds a minimal but well-formed *Result so handlers
 // have something to query.
 // psShare is the pointer form the optional efficiency field takes.
@@ -4205,7 +4221,26 @@ func TestRegionLayout(t *testing.T) {
 		t.Error("a one-region layout differs from view.RegionControl over it")
 	}
 
-	for _, bad := range []string{``, `{}`, `{"regions":[]}`, `{"regions":[{"locs":["ra"]}]}`, `{"regions":[{"name":"x"}],"extra":1}`, `[1]`} {
+	// No regions at all: what the editor sends once every row is cleared.
+	if got := post(`{"regions":[]}`, 200); got["bucketStates"] != nil || got["stats"] != nil {
+		t.Errorf("empty layout: %v", got)
+	}
+
+	for _, bad := range []string{``, `{}`, `{"regions":[{"locs":["ra"]}]}`, `{"regions":[{"name":"x"}],"extra":1}`, `[1]`, `{"regions":[]} junk`} {
 		post(bad, 400)
+	}
+
+	// The answer depends on the body: no ETag, and the GET's ETag in
+	// If-None-Match never turns a POST into an empty 304.
+	etag := doGet(t, url, "").Header.Get("ETag")
+	req, _ := http.NewRequest(http.MethodPost, url, strings.NewReader(layout(one)))
+	req.Header.Set("If-None-Match", etag)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != 200 || resp.Header.Get("ETag") != "" {
+		t.Errorf("POST with If-None-Match: %d, ETag %q; want 200 with no ETag", resp.StatusCode, resp.Header.Get("ETag"))
 	}
 }

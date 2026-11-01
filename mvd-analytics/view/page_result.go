@@ -16,7 +16,11 @@ import "github.com/mvd-analyzer/mvd-analytics/result"
 //     streams) leaves the section as stored.
 //   - streams leaves out the position tracks, ~92% of the Result's JSON:
 //     the page takes them as a position pack (result.EncodePositionPack,
-//     /streams/positions) instead.
+//     /streams/positions) instead. It leaves out the players' line of
+//     sight (los/pvs) too: that is a lazy pass (/los, the page's
+//     lineOfSight), which mvd-api splices into its stored Result once any
+//     caller asks, while the WASM build has not run it when it hands the
+//     Result over.
 //
 // res itself is not modified, so later view calls over it start from the
 // state the analyzer produced.
@@ -26,5 +30,11 @@ func PageResult(res *result.Result) *result.Result {
 		out.PlayerStats = ps
 	}
 	out.Streams = res.Streams.WithoutPositions()
+	if out.Streams != nil {
+		for i := range out.Streams.Players {
+			out.Streams.Players[i].LOS = nil
+			out.Streams.Players[i].PVS = nil
+		}
+	}
 	return &out
 }

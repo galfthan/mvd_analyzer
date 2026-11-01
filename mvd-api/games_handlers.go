@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -151,7 +152,7 @@ func (s *server) handleGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id <= 0 {
+	if err != nil || id <= 0 || id > math.MaxInt32 {
 		writeError(w, http.StatusBadRequest, "invalid_param",
 			fmt.Sprintf("invalid game id %q (want a positive hub gameId)", r.PathValue("id")))
 		return

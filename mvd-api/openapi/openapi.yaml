@@ -507,11 +507,13 @@ paths:
         mvd-web page reads it: `playerStats` carries the KTX demoinfo
         overlay (as `/player-stats` serves it) and `streams.players[]` has
         no `pos` position tracks, which `/streams/positions` serves as a
-        binary pack (a 4on4's tracks are ~45 MB of JSON). It is the
+        binary pack (a 4on4's tracks are ~45 MB of JSON), and no `los` /
+        `pvs` (the lazy line-of-sight pass; read `/los`). It is the
         payload the in-browser WASM build hands the page, for a client that
         renders every tab from one load; the curated endpoints remain the
         way to read one section. A 4on4 is ~4 MB of JSON, gzip-encoded for
-        a client that accepts gzip (that body's ETag ends in `-gz`).
+        a client that accepts gzip (that body's ETag ends in `-gz`); the
+        server builds it once per demo and keeps it in memory.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/Label"
@@ -1557,8 +1559,11 @@ paths:
         saves and loads: `{"regions": [{"name", "locs": [loc names]}]}`. A
         loc name matches the demo's loc table case-insensitively; a region
         whose locs match none is simply never held. Query params and the
-        response are the GET's. 400 `invalid_param` for a malformed body,
-        no regions, or a region without a name.
+        response are the GET's, except that the answer depends on the
+        body, so it carries no ETag and is never a 304. An empty `regions`
+        list is a layout with no regions (no states, no stats). 400
+        `invalid_param` for a malformed body, a missing `regions` list, or
+        a region without a name.
       parameters:
         - $ref: "#/components/parameters/DemoId"
         - $ref: "#/components/parameters/WindowMs"
@@ -1574,7 +1579,8 @@ paths:
       responses:
         "200":
           description: The control timeline over the posted layout.
-          headers: *perDemoHeaders
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
           content:
             application/json:
               schema: { $ref: "#/components/schemas/RegionControl" }
@@ -2199,8 +2205,8 @@ paths:
         - name: id
           in: path
           required: true
-          description: The hub gameId, a positive integer.
-          schema: { type: integer, minimum: 1 }
+          description: The hub gameId, a positive 32-bit integer.
+          schema: { type: integer, minimum: 1, maximum: 2147483647 }
         - $ref: "#/components/parameters/Label"
       responses:
         "200":
@@ -3496,7 +3502,6 @@ components:
       properties:
         regions:
           type: array
-          minItems: 1
           description: The regions, in display order.
           items:
             type: object

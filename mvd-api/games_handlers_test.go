@@ -307,7 +307,7 @@ func TestGame(t *testing.T) {
 	if m := getJSON(t, srv.URL+"/v1/games/7", 404); code(m) != "demo_not_found" {
 		t.Errorf("unknown game: %v", m)
 	}
-	for _, bad := range []string{"abc", "0", "-3", "gameId:12345"} {
+	for _, bad := range []string{"abc", "0", "-3", "gameId:12345", "2147483648"} {
 		if m := getJSON(t, srv.URL+"/v1/games/"+bad, 400); code(m) != "invalid_param" {
 			t.Errorf("%s: %v", bad, m)
 		}
