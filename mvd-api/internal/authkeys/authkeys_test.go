@@ -452,3 +452,31 @@ func TestConcurrentIssueLookup(t *testing.T) {
 		t.Errorf("seed key lost after concurrent load: %v", err)
 	}
 }
+
+// TestIssuePerClientPersists: a per-client key is a service key bound to no
+// Discord user, and a second Store on the same dir reads it back as one.
+func TestIssuePerClientPersists(t *testing.T) {
+	dir := t.TempDir()
+	s1, err := Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	key, rec, err := s1.IssuePerClient("mvd-web")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !rec.PerClient || !rec.Service || rec.DiscordID != "" || rec.Note != "mvd-web" {
+		t.Fatalf("record = %+v", rec)
+	}
+	s2, err := Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := s2.Lookup(key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got.PerClient || !got.Service {
+		t.Errorf("reopened record = %+v", got)
+	}
+}

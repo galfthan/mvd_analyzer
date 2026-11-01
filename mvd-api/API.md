@@ -590,7 +590,9 @@ Authorization: Bearer qwmvd_<...>
   `curl -sSD- -o/dev/null -H "Authorization: Bearer qwmvd_…" https://host/v1/auth/check`.
 - Requests are rate-limited **per key** (not per IP). Over the limit →
   `429 rate_limited` + `Retry-After: <seconds>`. Two classes exist: normal
-  (portal) keys and looser `service` keys (issued to first-party apps).
+  (portal) keys and looser `service` keys (issued to first-party apps). The
+  one exception is the operator's web page key, which its own proxy adds for
+  every visitor: that is limited per key and visitor IP.
 
 **Getting a key.** On a deployment that runs with `-portal`, a user signs in
 with Discord at **`https://<host>/portal`** and self-services one key (sign in

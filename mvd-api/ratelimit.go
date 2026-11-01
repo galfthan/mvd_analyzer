@@ -4,6 +4,8 @@ import (
 	"math"
 	"sync"
 	"time"
+
+	"github.com/mvd-analyzer/mvd-api/internal/authkeys"
 )
 
 // tokenBucket is a lazy (no background goroutine) token bucket. Tokens refill
@@ -59,44 +61,85 @@ type rateClass struct {
 	burst int
 }
 
-// keyLimiter holds one token bucket per key hash, split into user and service
-// classes. Buckets are created lazily on first sight of an *authenticated* key,
-// so unknown keys (rejected with 401 before the limiter runs) never allocate —
-// the map cannot be grown by unauthenticated traffic. At tens of keys no
-// eviction is needed.
+// keyLimiter holds one token bucket per key hash, in the user or service
+// class — and, for a per-client key (the web page's, which its proxy adds
+// for every visitor), one per key and client IP in the web class. Buckets
+// are created lazily on first sight of an *authenticated* key, so unknown
+// keys (rejected with 401 before the limiter runs) never allocate. Per-key
+// buckets are tens and are never evicted; per-client buckets grow with the
+// visitors, so once there are maxClientBuckets of them, those idle long
+// enough to have refilled — indistinguishable from a fresh bucket — are
+// dropped.
 type keyLimiter struct {
 	user    rateClass
 	service rateClass
+	web     rateClass
 
-	mu      sync.Mutex
-	buckets map[string]*tokenBucket
-	nowFn   func() time.Time // injectable for tests
+	mu            sync.Mutex
+	buckets       map[string]*tokenBucket
+	clientBuckets map[string]*tokenBucket
+	nowFn         func() time.Time // injectable for tests
 }
 
-func newKeyLimiter(user, service rateClass) *keyLimiter {
+// maxClientBuckets is how many per-client buckets the limiter holds before
+// it sweeps out the idle ones.
+const maxClientBuckets = 4096
+
+func newKeyLimiter(user, service, web rateClass) *keyLimiter {
 	return &keyLimiter{
-		user:    user,
-		service: service,
-		buckets: make(map[string]*tokenBucket),
-		nowFn:   time.Now,
+		user:          user,
+		service:       service,
+		web:           web,
+		buckets:       make(map[string]*tokenBucket),
+		clientBuckets: make(map[string]*tokenBucket),
+		nowFn:         time.Now,
 	}
 }
 
-// allow admits one request for keyHash in the given class, returning the
-// Retry-After hint when it does not.
-func (l *keyLimiter) allow(keyHash string, service bool) (bool, time.Duration) {
+// allow admits one request for rec (from client, the caller's IP, which
+// only a per-client key reads), returning the Retry-After hint when it
+// does not.
+func (l *keyLimiter) allow(rec authkeys.Record, client string) (bool, time.Duration) {
+	now := l.nowFn()
 	l.mu.Lock()
-	b := l.buckets[keyHash]
-	if b == nil {
+	var b *tokenBucket
+	if rec.PerClient {
+		id := rec.KeyHash + " " + client
+		if b = l.clientBuckets[id]; b == nil {
+			if len(l.clientBuckets) >= maxClientBuckets {
+				l.sweepIdleLocked(now)
+			}
+			b = newTokenBucket(l.web.rate, l.web.burst)
+			l.clientBuckets[id] = b
+		}
+	} else if b = l.buckets[rec.KeyHash]; b == nil {
 		class := l.user
-		if service {
+		if rec.Service {
 			class = l.service
 		}
 		b = newTokenBucket(class.rate, class.burst)
-		l.buckets[keyHash] = b
+		l.buckets[rec.KeyHash] = b
 	}
 	l.mu.Unlock()
-	return b.allow(l.nowFn())
+	return b.allow(now)
+}
+
+// sweepIdleLocked drops the per-client buckets that have refilled to full
+// since their last request: a new bucket starts full, so dropping one
+// changes nothing its client would see. l.mu must be held.
+func (l *keyLimiter) sweepIdleLocked(now time.Time) {
+	if l.web.rate <= 0 {
+		return
+	}
+	full := time.Duration(float64(l.web.burst) / l.web.rate * float64(time.Second))
+	for id, b := range l.clientBuckets {
+		b.mu.Lock()
+		idle := now.Sub(b.last)
+		b.mu.Unlock()
+		if idle >= full {
+			delete(l.clientBuckets, id)
+		}
+	}
 }
 
 // numBuckets reports how many per-key buckets exist. Used by tests to pin the
@@ -105,5 +148,5 @@ func (l *keyLimiter) allow(keyHash string, service bool) (bool, time.Duration) {
 func (l *keyLimiter) numBuckets() int {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	return len(l.buckets)
+	return len(l.buckets) + len(l.clientBuckets)
 }

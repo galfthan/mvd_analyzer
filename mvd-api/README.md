@@ -16,7 +16,7 @@ mvd-api [serve] [-addr ADDR] [-cache-dir PATH] [-cache-max-bytes N] [-max-parses
 mvd-api version
 mvd-api cache stats [-cache-dir PATH]
 mvd-api cache prune [-cache-dir PATH] [-max-bytes N | -older-than 30d | -all]
-mvd-api keys issue  -auth-dir DIR [-service] [-note S] [-discord-id ID] [-discord-name N]
+mvd-api keys issue  -auth-dir DIR [-service | -per-client] [-note S] [-discord-id ID] [-discord-name N]
 mvd-api keys revoke -auth-dir DIR (-key K | -hash H | -discord-id ID)
 mvd-api keys list   -auth-dir DIR
 ```
@@ -38,6 +38,8 @@ mvd-api keys list   -auth-dir DIR
 | `-burst-user`       | `20`                                    | Auth mode: per-key burst (token-bucket size) for user keys |
 | `-rate-service`     | `50`                                    | Auth mode: per-key sustained request rate (req/s) for `service` keys (e.g. the first-party web app) |
 | `-burst-service`    | `200`                                   | Auth mode: per-key burst for service keys |
+| `-rate-web`         | `10`                                    | Auth mode: per-client sustained request rate (req/s) for a `per-client` key (the web page's, added by its proxy) |
+| `-burst-web`        | `60`                                    | Auth mode: per-client burst for a per-client key |
 | `-portal`           | `false`                                 | Enable the Discord key portal at `/portal` (users self-service their own key). **Off = no `/portal` routes at all.** Requires `-auth-dir` **and** the three env vars below; see "The Discord key portal" |
 | `-portal-base-url`  | _(empty)_                               | Public origin of the deployment, e.g. `https://qw.example.com`. Used to build the OAuth `redirect_uri` (`<base>/portal/callback`) and absolute links. Required with `-portal` |
 | `-play-url`         | `https://mvdanalyzer.com/play.html`     | The web app's light player that `POST /v1/playlist-links` links to — point it at a branch deploy's `play.html` until production has the player |
@@ -112,11 +114,16 @@ and a looser `service` class (the four `-rate-*`/`-burst-*` flags above).
 Keys are managed with the `keys` subcommands (they edit `keys.json` directly —
 no running server needed):
 
-- `mvd-api keys issue -auth-dir DIR [-service] [-note S] [-discord-id ID] [-discord-name N]`
+- `mvd-api keys issue -auth-dir DIR [-service | -per-client] [-note S] [-discord-id ID] [-discord-name N]`
   — mint a key. **The full key is printed once, to stdout, and is never
   recoverable** (only its SHA-256 hash is stored). `-service` marks it for the
-  looser rate class. Issuing for a `-discord-id` that already has a key
-  **revokes the old one** (one active key per Discord user).
+  looser rate class. `-per-client` mints the web page's key — a service key
+  the page's own proxy adds for every visitor (Caddy's `/api` route on
+  mvdanalyzer.com) — rate-limited per key **and client IP** in the
+  `-rate-web` class, so one visitor cannot spend the others' budget; the
+  client IP is the `X-Forwarded-For` that proxy overwrites. Issuing for a
+  `-discord-id` that already has a key **revokes the old one** (one active
+  key per Discord user).
 - `mvd-api keys revoke -auth-dir DIR (-key K | -hash H | -discord-id ID)`
   — revoke by full key, key hash, or every active key of a Discord user.
 - `mvd-api keys list -auth-dir DIR` — hash **prefix** + metadata

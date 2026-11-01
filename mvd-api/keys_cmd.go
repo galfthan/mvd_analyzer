@@ -36,6 +36,7 @@ func runKeysIssue(args []string) error {
 	fs := flag.NewFlagSet("keys issue", flag.ContinueOnError)
 	authDir := fs.String("auth-dir", "", "directory holding keys.json")
 	service := fs.Bool("service", false, "issue a service key (looser rate class; for mvd-web/ops, not the portal)")
+	perClient := fs.Bool("per-client", false, "issue the web page's key: a service key the page's proxy adds for every visitor, rate-limited per client IP (-rate-web/-burst-web)")
 	note := fs.String("note", "", "free-text note stored with the key (e.g. \"mvd-web\")")
 	discordID := fs.String("discord-id", "", "Discord user id to bind the key to (issuing revokes that user's prior key)")
 	discordName := fs.String("discord-name", "", "Discord display name (metadata only)")
@@ -46,7 +47,16 @@ func runKeysIssue(args []string) error {
 	if err != nil {
 		return err
 	}
-	key, rec, err := store.Issue(*discordID, *discordName, *service, *note)
+	var key string
+	var rec authkeys.Record
+	if *perClient {
+		if *discordID != "" || *discordName != "" {
+			return fmt.Errorf("-per-client keys are bound to no Discord user")
+		}
+		key, rec, err = store.IssuePerClient(*note)
+	} else {
+		key, rec, err = store.Issue(*discordID, *discordName, *service, *note)
+	}
 	if err != nil {
 		return err
 	}
@@ -55,6 +65,9 @@ func runKeysIssue(args []string) error {
 	fmt.Printf("  (store this now — it is not recoverable)\n")
 	fmt.Printf("hashPrefix:  %s\n", rec.HashPrefix())
 	fmt.Printf("service:     %t\n", rec.Service)
+	if rec.PerClient {
+		fmt.Printf("perClient:   true\n")
+	}
 	if rec.Note != "" {
 		fmt.Printf("note:        %s\n", rec.Note)
 	}
@@ -113,7 +126,9 @@ func runKeysList(args []string) error {
 			status = "revoked"
 		}
 		class := "user"
-		if r.Service {
+		if r.PerClient {
+			class = "per-client"
+		} else if r.Service {
 			class = "service"
 		}
 		discord := r.DiscordName

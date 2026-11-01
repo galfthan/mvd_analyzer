@@ -174,7 +174,7 @@ func TestUpload_QuotaExceeded(t *testing.T) {
 	}
 	auth := &authenticator{
 		store:   keys,
-		limiter: newKeyLimiter(rateClass{rate: 1000, burst: 1000}, rateClass{rate: 1000, burst: 1000}),
+		limiter: newKeyLimiter(rateClass{rate: 1000, burst: 1000}, rateClass{rate: 1000, burst: 1000}, rateClass{rate: 1000, burst: 1000}),
 		logger:  logger,
 	}
 	cfg := uploadConfig{maxBytes: 64 << 20, dailyCount: 1}

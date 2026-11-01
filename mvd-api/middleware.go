@@ -211,11 +211,15 @@ func accessLogMiddleware(logger *slog.Logger, next http.Handler) http.Handler {
 	})
 }
 
-// clientIP is a best-effort remote-address for the access log only. It
-// trusts the first X-Forwarded-For entry, which is attacker-controlled
-// unless a trusted proxy overwrites XFF at the edge — so it must NOT be
-// used for any security decision (e.g. rate limiting keys on the API key,
-// not this; see PLAN-hosting D8/D9). Log-only.
+// clientIP is the caller's address: the first X-Forwarded-For entry, else
+// the connection's. XFF is attacker-controlled unless a trusted proxy
+// overwrites it at the edge, so it decides nothing on its own: the access
+// log records it, and the limiter splits a per-client key's budget by it.
+// That key only exists to be added by the deployment's own proxy (Caddy's
+// /api route, which also overwrites XFF with the remote address, in front
+// of an mvd-api bound to localhost), so a forged XFF can reach it only
+// through that proxy, which replaces it. Every other key is limited by the
+// key alone (PLAN-hosting D8/D9).
 func clientIP(r *http.Request) string {
 	if xf := r.Header.Get("X-Forwarded-For"); xf != "" {
 		if comma := strings.IndexByte(xf, ','); comma > 0 {

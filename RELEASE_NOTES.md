@@ -23,6 +23,11 @@ in the request body — a regions file, `{"regions": [{"name", "locs"}]}`,
 as the map tab's region editor saves it — instead of the map's stored
 one; query params and response are the GET's.
 
+A third key class, `mvd-api keys issue -per-client`, is for the web
+page's key, which the page's proxy adds for every visitor. It is
+rate-limited per key and client IP (`-rate-web` 10/s, `-burst-web` 60)
+instead of per key, so one visitor cannot exhaust everyone's budget.
+
 ## unreleased (perf-wasm-data) — position tracks in binary, faster floor traces
 
 No schema change, and the floor heights are bit-identical. The floor
