@@ -207,7 +207,7 @@ export function loadMap(result) {
 function applyMapGeometry(geom) {
     view.setGeometry(geom);
     // An editable region model exists only once a demo is loaded.
-    if (regionControl.get()?.editable) reapplyRegions(/** @type {import('../../data/wasm-source.js').DemoHandle} */ (demo.get()));
+    if (regionControl.get()?.editable) reapplyRegions(/** @type {import('../../state/demo.js').DemoHandle} */ (demo.get()));
     touch();
 }
 
@@ -222,7 +222,7 @@ export async function ensureLineOfSight() {
     touch();
     try {
         // The Map tab asks only with a demo loaded.
-        const handle = /** @type {import('../../data/wasm-source.js').DemoHandle} */ (demo.get());
+        const handle = /** @type {import('../../state/demo.js').DemoHandle} */ (demo.get());
         const players = JSON.parse(await handle.lineOfSight());
         if (players && players.error) throw new Error(players.error);
         s.losByPair = buildVisByPair(players, 'los');

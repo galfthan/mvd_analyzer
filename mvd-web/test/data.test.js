@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 import { WasmSource } from '../src/data/wasm-source.js';
-import { parseGameId, demoFilename, searchGames, downloadDemo } from '../src/data/hub.js';
+import { parseGameId, demoFilename, searchGames, fetchGame, downloadDemo } from '../src/data/hub.js';
 
 // A stand-in for static/worker.js speaking its message protocol.
 class FakeWorker {
@@ -159,7 +159,7 @@ test('replies are matched by reqId, not arrival order', async () => {
 test('overlapping loads: the last one asked for wins, a slow older one never posts', async () => {
     let release;
     const fetchImpl = async (url) => {
-        if (url.includes('supabase')) return { ok: true, json: async () => [{ id: 7, demo_sha256: 'abcd', timestamp: '2026-01-02T03:04:05Z' }] };
+        if (url.startsWith('api/games/')) return { ok: true, json: async () => ({ id: 7, demo_sha256: 'abcd', timestamp: '2026-01-02T03:04:05Z' }) };
         await new Promise((r) => { release = r; });
         return { ok: true, arrayBuffer: async () => new Uint8Array([9]).buffer };
     };
@@ -215,7 +215,7 @@ test('hub loads go info → download → analyze with the hub file name', async 
     const urls = [];
     const fetchImpl = async (url) => {
         urls.push(url);
-        if (url.includes('supabase')) return { ok: true, json: async () => [game] };
+        if (url.startsWith('api/games/')) return { ok: true, json: async () => game };
         return { ok: true, arrayBuffer: async () => new Uint8Array([9]).buffer };
     };
     const w = new FakeWorker();
@@ -242,16 +242,42 @@ test('hub helpers', async () => {
     assert.equal(demoFilename({ timestamp: '2026-01-02T03:04:05Z' }), 'unknown_unknown[unknown]2026010203040.mvd.gz');
 
     let seen;
-    const fetchImpl = async (url, init) => {
-        seen = { url, init };
-        return { ok: true, json: async () => [], headers: new Map([['content-range', '0-99/1234']]) };
+    const fetchImpl = async (url) => {
+        seen = new URL(url, 'http://page/');
+        return { ok: true, json: async () => ({ limit: 100, offset: 100, count: 0, total: 1234, games: [] }) };
     };
-    const { total } = await searchGames({ player: 'milton', to: '2026-01-01' }, 100, fetchImpl);
+    const { games, total } = await searchGames({ player: 'milton', tag: 'qwsl', to: '2026-01-01' }, 100, fetchImpl);
     assert.equal(total, 1234);
-    assert.match(seen.url, /offset=100/);
-    assert.match(seen.url, /players_fts=fts\.'milton'/);
-    assert.match(seen.url, /timestamp=lte\.2026-01-01T23%3A59%3A59/);
-    assert.equal(seen.init.headers.Prefer, 'count=exact');
+    assert.deepEqual(games, []);
+    assert.equal(seen.pathname, '/api/games/search', 'through mvd-api, not the hub directly');
+    assert.deepEqual(Object.fromEntries(seen.searchParams),
+        { limit: '100', roster: '1', offset: '100', players: 'milton', matchtag: 'qwsl', to: '2026-01-01' });
+
+    const missing = async () => ({ ok: false, status: 404, json: async () => ({ error: { code: 'demo_not_found', message: 'the hub has no game 9' } }) });
+    await assert.rejects(fetchGame(9, missing), (e) => e.status === 404 && /no game 9/.test(e.message) && !e.canFallBack);
+
+    // No API (a static server's bare 404) or one that cannot answer: the
+    // hub's catalog directly, with its anon key.
+    for (const apiDown of [{ ok: false, status: 404, json: async () => { throw new Error('not json'); } },
+        { ok: false, status: 503, json: async () => ({}) }]) {
+        const urls = [];
+        const direct = async (url, init) => {
+            urls.push({ url, init });
+            if (url.startsWith('api/')) return apiDown;
+            return url.includes('id=eq.')
+                ? { ok: true, json: async () => [{ id: 9 }] }
+                : { ok: true, json: async () => [], headers: new Map([['content-range', '0-99/1234']]) };
+        };
+        assert.deepEqual(await fetchGame(9, direct), { id: 9 });
+        const page = await searchGames({ player: 'milton', to: '2026-01-01' }, 100, direct);
+        assert.equal(page.total, 1234);
+        const hub = urls.filter((u) => u.url.includes('supabase.co'));
+        assert.equal(hub.length, 2);
+        assert.match(hub[1].url, /players_fts=fts\.'milton'/);
+        assert.match(hub[1].url, /timestamp=lte\.2026-01-01T23%3A59%3A59/);
+        assert.equal(hub[1].init.headers.Prefer, 'count=exact');
+        assert.ok(hub[0].init.headers.apikey);
+    }
 
     const fallback = async (url) => (url.startsWith('https://d.quake.world')
         ? { ok: false } : { ok: true, arrayBuffer: async () => new Uint8Array([4]).buffer });

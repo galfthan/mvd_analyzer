@@ -25,6 +25,10 @@ BSP_DIR    := bsps
 GIT_HASH   := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 GIT_TAG    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
 BUILD_DATE := $(shell date -u +%Y-%m-%d)
+SCHEMA_VERSION := $(shell sed -n 's/^const CurrentSchemaVersion = \([0-9][0-9]*\).*/\1/p' mvd-analytics/result/result.go)
+# Values the build stamps into index.html with sed: / and & escaped (a tag
+# may hold either).
+sed_escape = $(subst &,\&,$(subst /,\/,$(1)))
 LDFLAGS    := -ldflags "-s -w -X main.GitHash=$(GIT_HASH) -X main.GitTag=$(GIT_TAG) -X main.BuildDate=$(BUILD_DATE)"
 
 .PHONY: build build-api build-mcp build-bin build-all-platforms \
@@ -48,7 +52,14 @@ build:
 	if [ -f "$$goroot/lib/wasm/wasm_exec.js" ]; then cp "$$goroot/lib/wasm/wasm_exec.js" $(DIST_DIR)/; \
 	elif [ -f "$$goroot/misc/wasm/wasm_exec.js" ]; then cp "$$goroot/misc/wasm/wasm_exec.js" $(DIST_DIR)/; \
 	else echo "  toolchain wasm_exec.js not found; using $(STATIC_DIR)/wasm_exec.js"; cp $(STATIC_DIR)/wasm_exec.js $(DIST_DIR)/; fi
-	@sed -i 's/<meta name="build" content="dev">/<meta name="build" content="$(GIT_HASH)">/' $(DIST_DIR)/index.html
+	@# The page reads the schema to send a hub demo the API serves in
+	@# another to the in-browser analyzer (src/data/api-source.js); an
+	@# unstamped page would skip that check, so a missing value stops here.
+	@test -n "$(SCHEMA_VERSION)" || { echo "CurrentSchemaVersion not found in mvd-analytics/result/result.go" >&2; exit 1; }
+	@sed -i -e 's/<meta name="build" content="dev">/<meta name="build" content="$(call sed_escape,$(GIT_HASH))">/' \
+		-e 's/<meta name="build-tag" content="dev">/<meta name="build-tag" content="$(call sed_escape,$(GIT_TAG))">/' \
+		-e 's/<meta name="build-date" content="dev">/<meta name="build-date" content="$(BUILD_DATE)">/' \
+		-e 's/<meta name="schema" content="dev">/<meta name="schema" content="$(SCHEMA_VERSION)">/' $(DIST_DIR)/index.html
 	@echo "Copying mvd-fte-player..."
 	@mkdir -p $(DIST_DIR)/fte-player/src && cp $(FTEPLAYER_DIR)/player.html $(FTEPLAYER_DIR)/config.cfg $(DIST_DIR)/fte-player/ && cp $(FTEPLAYER_DIR)/src/*.js $(DIST_DIR)/fte-player/src/
 	@echo "Copying loc corpus from $(LOC_DATA)..."
@@ -130,9 +141,10 @@ bsps:
 	@./scripts/fetch-bsps.sh $(BSP_DIR)
 
 # Serve the built web bundle on localhost.
+# The built page plus its /api path, forwarded to MVD_API (default the
+# production API) with MVD_API_KEY added — see scripts/serve-dev.py.
 serve: build
-	@echo "Serving on http://localhost:8080"
-	@cd $(DIST_DIR) && python3 -m http.server 8080
+	@python3 scripts/serve-dev.py $(DIST_DIR) 8080
 
 # Run tests across every workspace module.
 #

@@ -97,7 +97,16 @@ per-view knobs and the two places CLI defaults differ from REST.
 
 ```bash
 make serve                                  # http://localhost:8080
+MVD_API_KEY=qwmvd_… make serve              # hub search + demos via the production API
+MVD_API=http://127.0.0.1:8090/v1/ make serve   # …or via a local `mvd-api serve -addr 127.0.0.1:8090`
 ```
+
+The page reads hub search, game lookup and hub demos from
+mvd-api at `/api` on its own origin; `scripts/serve-dev.py` forwards that
+path to `MVD_API` with `MVD_API_KEY` added, as Caddy does in production.
+Without a reachable API the page still works on its own: search and
+game lookup query the hub directly, and hub demos are analysed in the
+browser.
 
 ### Build the WASM bundle for deploy
 
@@ -162,9 +171,8 @@ also served in the spec's own description at `/docs`.
 `mvd-mcp` is a thin (~7 MB) stdio MCP server that lets AI clients
 (Claude Desktop, Claude Code, Cursor, anything that speaks MCP) query
 the QuakeWorld demo corpus. It carries no analytics code of its own
-— two of its tool calls go straight to hub.quakeworld.nu Supabase
-(search), and the rest are forwarded as HTTP requests to a running
-`mvd-api`. The split lets you ship a small distributable binary for
+— every tool call is forwarded as an HTTP request to a running
+`mvd-api`, search included. The split lets you ship a small distributable binary for
 end-users without bundling the parser, and keeps the wire contract
 owned by `mvd-api`.
 
@@ -191,7 +199,7 @@ from any number of games into a link that plays them:
 | Tool | Backing |
 |---|---|
 | **Discovery** | |
-| `searchGames(players, teams, map, mode, matchtag, from, to, limit, offset)` | hub.quakeworld.nu Supabase (direct) |
+| `searchGames(players, teams, map, mode, matchtag, from, to, limit, offset)` | `mvd-api` `GET /v1/games/search` (the hub's catalog) |
 | **Cache + summary** | |
 | `loadDemo({gameId or sha256})` | `mvd-api` `POST /v1/demos/{id}` |
 | `getOverview(demoId)` | `mvd-api` `GET /v1/demos/{id}/overview` |
@@ -273,53 +281,48 @@ score?", "who played?"), the agent should stop there — no
 #### Architecture
 
 ```
-                            ┌─────────────────────────────────────┐
-                            │ hub.quakeworld.nu (Supabase + CDN)  │
-                            └─────────────────┬───────────────────┘
-                                              │
-                            ┌─────────────────┴──────────────────┐
-                            ▼                                    ▼
-                   GET / FTS search                    GET .mvd.gz bytes
-                            │                                    │
-   ┌──────────┐             │                                    │
-   │ mvd-web  │ ────────────┘                                    │
-   └──────────┘                                                  │
-                                                                 │
-                                                          ┌──────┴──────┐
-                                                          │   mvd-api   │
-                                                          │ (parse +    │
-                                                          │  cache +    │
-                                                          │  view)      │
-                                                          └─────┬───────┘
-   ┌──────────┐                                                 │ HTTP REST
-   │ mvd-mcp  │ ◀─── stdio JSON-RPC ─── Claude / Cursor / etc.  │
-   │ (shim)   │ ────────────────────── searchGames ─────────────│
-   │          │ ────────────────────── load/get* ───────────────┘
-   └──────────┘
+                    ┌─────────────────────────────────────┐
+                    │ hub.quakeworld.nu (Supabase + CDN)  │
+                    └───────┬──────────────────┬──────────┘
+          catalog search,   │                  │  .mvd.gz bytes
+          game lookup       ▼                  ▼  (public CDN)
+                    ┌───────────────┐          │
+                    │    mvd-api    │◀─────────┤
+                    │ (parse, cache,│          │
+                    │  view, search)│          │
+                    └───┬───────▲───┘          │
+              HTTP REST │       │ /api (the    │
+                        │       │ host adds    │  local files; the Player's
+   ┌──────────┐         │       │ the key)     │  demo; API fallback
+   │ mvd-mcp  │◀────────┘   ┌───┴──────┐◀──────┘
+   │ (shim)   │             │ mvd-web  │ (WASM build: local files,
+   └────▲─────┘             └──────────┘  or when the API cannot answer)
+        │ stdio / HTTP JSON-RPC
+   Claude / Cursor / etc.
 ```
 
-- **`searchGames`** goes directly to the hub. Discovery is the hub's
-  job — `mvd-api` is narrowly responsible for "given a known
-  `demoId`: fetch bytes, parse, cache, serve view analytics."
+- **`searchGames`** goes through `mvd-api`'s `GET /v1/games/search`,
+  which holds the hub's catalog credentials.
 - **`loadDemo` / `get*`** go through `mvd-api`, which talks to the
   hub only to download `.mvd.gz` bytes (the rest comes from its
   three-tier on-disk cache: raw bytes, parsed Result, lazy artifacts).
-- `mvd-web` (the browser UI) uses the same Supabase search path
-  directly — both consumers behave identically against the hub.
+- `mvd-web` (the browser UI) reads hub demos, search and game lookup
+  from the same `mvd-api` through `/api` on its own origin, where the
+  host adds the key ([plan-web-api.md](plan-web-api.md)); local files,
+  and any demo the API cannot answer for, it analyses in the browser.
 
 #### Authentication
 
-There is none, by design. The QW demo corpus is public, the API is
-read-only, and the Supabase anon key is the same one shipped in the
-web bundle. The optional `-label TAG` flag (or `Authorization: Bearer
-<label>` on `mvd-api`) is **not** validated — it's a non-secret
-request-source tag captured in `mvd-api`'s access log for analytics.
-Common labels: `mcp-claude-desktop`, `claude-code-local`,
-`web-community`.
-
-If real auth ever becomes necessary (abuse / rate-limit enforcement),
-the surface is small enough to add bearer-token validation in
-`mvd-api`'s middleware without changes to the MCP shim.
+A local `mvd-api` started without `-auth-dir` has none: every route is
+open, and the optional `-label TAG` flag (or `Authorization: Bearer
+<label>`) is **not** validated — it's a non-secret request-source tag
+captured in the access log (common labels: `mcp-claude-desktop`,
+`claude-code-local`, `web-community`). The hosted API at mvdanalyzer.com
+runs with `-auth-dir`: every `/v1` call needs an API key (from the
+Discord portal at `/portal`, or one the operator issues), rate-limited
+per key; its MCP endpoint forwards the operator's own service key, so MCP
+clients need none. See [mvd-api/README.md](mvd-api/README.md) and
+[mvd-api/API.md](mvd-api/API.md) §2.5.
 
 #### Client setup
 

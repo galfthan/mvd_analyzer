@@ -10,7 +10,9 @@ packs, `/streams/positions`, Accept-negotiated `/buckets`).
 - A local file is analysed in the browser by the WASM build, as today.
 - The WASM build (worker + `analyzer.wasm`) is only loaded when the user
   opens a local file, or when the API path has to fall back (below).
-- The page holds no API key and no Supabase key.
+- The page holds no API key. It keeps the hub's public Supabase anon key
+  as the fallback for search and game lookup (owner, 2026-11-01: so the
+  page works standalone, without an API).
 
 ## Owner decisions (2026-11-01)
 
@@ -31,9 +33,9 @@ mvd-api's `/v1/...` and adds `Authorization: Bearer <key>`.
 |---|---|---|
 | mvdanalyzer.com | Caddy route: `/api/*` → rewrite to `/v1/*`, `header_up Authorization` | `MVD_WEB_KEY` in Caddy's systemd env file |
 | Netlify previews | edge function `netlify/edge-functions/api.js` on `/api/*`, `fetch` to `https://mvdanalyzer.com/v1/...`, response streamed through | `MVD_API_KEY` Netlify env var, scoped to Deploy Previews + Branch deploys |
-| local dev | Vite dev proxy `/api` → local mvd-api (no auth) | none |
+| local dev | `make serve` (`scripts/serve-dev.py`): `/api` → `MVD_API` with `MVD_API_KEY` added | the environment |
 
-Both proxies forward only an allowlist of the GET paths the page uses
+All three hosts forward only an allowlist of the GET paths the page uses
 (plus the region-control POST), so `/api` is not a general relay for the
 key. Anyone can still call `/api` through the site: the point is that the
 key is not copyable and each host's key can be revoked and rate-limited
@@ -75,17 +77,27 @@ is small).
 4. Per-client-IP rate limiting for a web key class.
 5. openapi.yaml, API.md, mvd-api README, RELEASE_NOTES.
 
-### 2. Plumbing; the Supabase key leaves the code
+### 2. Plumbing; search and lookup through the API — done (web-client)
 
-1. Caddy `/api` route, Netlify edge function, Vite dev proxy; `/api`
+The Supabase path stays as the fallback (see Goal).
+
+`make serve` became `scripts/serve-dev.py` (dist/ plus the forwarded
+`/api`, `MVD_API` / `MVD_API_KEY`), and the Vite dev proxy was dropped:
+the page is not served by Vite in development.
+
+1. Caddy `/api` route, Netlify edge function, the dev server; `/api`
    joins the reserved prefixes the web bundle must not use.
 2. `hub.js`: search → `/api/games/search?roster=1`, game lookup →
-   `/api/games/{id}`. The light player (`play.html`) too. The Supabase
-   anon key is removed from the code (it stays in git history; it is the
-   hub's public anon key, not ours to rotate).
+   `/api/games/{id}`. The light player (`play.html`) too; both fall back
+   to the hub's Supabase directly when the API cannot answer.
 3. Demo bytes keep coming from the public CDN (`d.quake.world`).
 
-### 3. `ApiSource`; WASM only for local files
+### 3. `ApiSource`; WASM only for local files — done (web-client)
+
+With phase 4 in the same step: `src/data/page-source.js` picks the
+source per load and falls back. Parity checked in headless Chromium on
+222649, 212423 and 203199: identical but for `filePath` and the API's
+`timeUnit` envelope field.
 
 1. `src/data/api-source.js`: a handle with the same interface as
    `WasmSource`'s (`result`, `section`, `ready('buckets')`, `view(fn)`,
@@ -112,3 +124,10 @@ is small).
    `analyzer.wasm` request; a local file loads WASM; the fallbacks work.
 4. mvd-web README, deploy/README.md (keys, Caddy route, Netlify env var),
    Caddyfile, netlify.toml, API.md, RELEASE_NOTES.
+
+### 6. Next: prepare new hub demos ahead of time
+
+Owner, 2026-11-01: once the page reads the API, watch the hub for new
+demos every ~5 minutes and parse them, so they are cached before anyone
+opens one. The tier GC already evicts the oldest files past
+`-cache-max-bytes`, so warming needs no pruning of its own.

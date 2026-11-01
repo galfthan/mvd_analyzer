@@ -69,7 +69,7 @@
 
     let dirty = true;
     let queued = false;
-    /** @type {import('../../data/wasm-source.js').DemoHandle | null} */
+    /** @type {import('../../state/demo.js').DemoHandle | null} */
     let lastHandle = null;
 
     function schedule() {
@@ -86,7 +86,7 @@
         schedule();
     }
 
-    /** @param {import('../../data/wasm-source.js').DemoHandle | null} handle */
+    /** @param {import('../../state/demo.js').DemoHandle | null} handle */
     function onDemo(handle) {
         if (handle !== lastHandle) {
             lastHandle = handle;

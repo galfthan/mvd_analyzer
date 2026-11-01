@@ -5,6 +5,34 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (web-client) — the web page talks to mvd-api
+
+The page's Search tab and game lookup go through mvd-api
+(`/v1/games/search`, `/v1/games/{id}`) at `/api` on the page's own
+origin, where the host adds the key: Caddy on mvdanalyzer.com, the
+Netlify edge function `netlify/edge-functions/api.js` on previews, and
+`make serve` locally (`scripts/serve-dev.py`, with `MVD_API` /
+`MVD_API_KEY`). The three hosts forward one allowlist of routes, pinned
+by a test. When the API cannot answer — or there is none, as in a plain
+static serve — search and lookup query the hub's catalog directly with
+its public anon key, as before, so the page still works on its own.
+
+Hub demos are analysed by the server: the page reads the Result, the
+position pack, the bucket pack and region states, and the view queries
+from mvd-api, and loads no in-browser analyzer at all — the worker and
+`analyzer.wasm` are fetched only when a local file is opened, or when the
+API cannot answer for a demo (unreachable, the key refused, throttled,
+failing, or serving another schema version than the page was built for),
+which is then analysed in the browser as before. `?engine=wasm` analyses
+every demo in the browser. The Player downloads the demo file from the
+hub's CDN only when it plays one. The version tag now comes from build
+stamps on the page (`make build` adds the tag, date and schema version).
+On three demos (a duel and two 4on4s) the API path gives the page the same
+data as the in-browser one, section by section. When the Player cannot
+download a demo file it now says so over the frame instead of spinning,
+and a page whose cached build differs from the analyzer's asks to be
+reloaded in the version tag instead of reloading mid-session.
+
 ## unreleased (web-api) — what the web page needs from the API
 
 mvd-api serves `GET /v1/demos/{id}/result`: the demo's whole Result in

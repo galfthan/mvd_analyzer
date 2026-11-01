@@ -1,25 +1,22 @@
-// overlay.js — the wasm-loading overlay (static markup in index.html, so it
-// shows before any script runs) and what happens once the analyzer is up:
-// the version tag and the page / wasm build check.
+// overlay.js — the loading overlay (static markup in index.html, so it
+// shows before any script runs), the version tag, and the page / wasm
+// build check once the in-browser analyzer is up.
 
 import { buildVersion, buildStale } from '../state/shell.js';
 import { mvdTiming } from './timing.js';
 
-/** @typedef {{ tag: string, hash: string, date: string }} BuildVersion  the wasm's build (cmd/wasm) */
+/** @typedef {{ tag: string, hash: string, date: string }} BuildVersion  the build (`make build` stamps the page; the wasm embeds the same) */
 
-let analyzerFailed = false;
-
-// analyzerHasFailed: the wasm did not load; the overlay says why, and a
-// failed hub load must not drop it.
-export function analyzerHasFailed() {
-    return analyzerFailed;
+// prepareLoadingOverlay: on a deep link (?gameId=) the overlay stays up
+// through the demo's load, so the user never sees a half-populated tab
+// behind it — displayResults() drops it once the demo is shown; otherwise
+// it goes at once (nothing has to load before the page is usable).
+/** @param {boolean} deepLink */
+export function prepareLoadingOverlay(deepLink) {
+    if (deepLink) setLoadingOverlayMessage('Loading demo…');
+    else hideLoadingOverlay();
 }
 
-// Hide the wasm-loading overlay. When auto-loading a demo from a URL
-// (?gameId=...), keep it up through the demo download/analyse so the
-// user never sees a half-populated Search/Summary tab in the
-// background — displayResults() calls hideLoadingOverlay() once the
-// pipeline has finished.
 export function hideLoadingOverlay() {
     const overlay = document.getElementById('wasm-loading');
     if (overlay) overlay.style.display = 'none';
@@ -38,10 +35,11 @@ function setLoadingOverlayMessage(text) {
 // with the git hash, and the wasm reports the hash it was built from. Both
 // deploy as one unit, so a mismatch means the browser is running mixed
 // cached versions (a deploy landed between fetching the page and the wasm,
-// or a cache served a stale asset). Reload once — assets are served
-// Cache-Control: no-cache, so the reload revalidates everything — and if
-// the mismatch survives the reload (deploy still propagating), just flag it
-// in the version tag instead of looping.
+// or a cache served a stale asset). The wasm loads mid-session now — on the
+// first local file, or a hub demo the API cannot answer for — so a reload
+// would drop what the user just asked for: the version tag asks them to
+// reload instead (assets are served Cache-Control: no-cache, so a reload
+// revalidates everything).
 /** @param {{ hash?: string } | null | undefined} v */
 function checkBuildCoherence(v) {
     /** @type {HTMLMetaElement | null} */
@@ -52,39 +50,25 @@ function checkBuildCoherence(v) {
     if (!wasmBuild || wasmBuild === 'dev' || wasmBuild === 'unknown') return;
     if (pageBuild === wasmBuild) return;
 
-    const guard = 'mvd-build-reload';
-    const attempted = (() => { try { return sessionStorage.getItem(guard); } catch { return null; } })();
-    const key = `${pageBuild}:${wasmBuild}`;
-    if (attempted !== key) {
-        try { sessionStorage.setItem(guard, key); } catch {}
-        location.reload();
-        return;
-    }
+    console.warn(`[mvd] this page is build ${pageBuild}, the analyzer ${wasmBuild}: reload for the current version`);
     buildStale.set(true);
 }
 
-// onAnalyzerReady runs once the wasm is up (mvdData.ready): records its
-// load time, drops the overlay unless a deep-linked demo is about to load,
-// and fills the version tag.
+// showBuildVersion fills the version tag from the build stamps on the page
+// (`make build`); a dev build has none and shows no tag.
+export function showBuildVersion() {
+    /** @param {string} name */
+    const meta = (name) => /** @type {HTMLMetaElement | null} */ (document.querySelector(`meta[name="${name}"]`))?.content || '';
+    const hash = meta('build');
+    if (!hash || hash === 'dev') return;
+    buildVersion.set({ tag: meta('build-tag'), hash, date: meta('build-date') });
+}
+
+// onAnalyzerReady runs once the in-browser analyzer is up (the first load
+// that needs it): records its load time and checks its build against the
+// page's.
 /** @param {{ version: BuildVersion | null, wasmLoadMs: number }} info */
 export function onAnalyzerReady(info) {
     if (typeof info.wasmLoadMs === 'number') mvdTiming.wasmLoadMs = info.wasmLoadMs;
-    const params = new URLSearchParams(location.search);
-    const willAutoLoadDemo = !!(params.get('gameId') || params.get('hub'));
-    if (willAutoLoadDemo) {
-        // Demo download is about to start; keep the overlay up and
-        // show the next phase.
-        setLoadingOverlayMessage('Loading demo…');
-    } else {
-        hideLoadingOverlay();
-    }
-    if (info.version) buildVersion.set(info.version);
     checkBuildCoherence(info.version);
-}
-
-// onAnalyzerFailed: the wasm did not load — the overlay stays up with why.
-/** @param {Error} err */
-export function onAnalyzerFailed(err) {
-    analyzerFailed = true;
-    setLoadingOverlayMessage(err.message);
 }
