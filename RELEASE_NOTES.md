@@ -7,6 +7,10 @@ detail.
 
 ## unreleased (hub-warm) — new hub demos are ready before anyone opens them
 
+The Player (the tab and the light player) now starts with sound on; it
+was muted until switched on. Browsers hold a page's audio until a user
+gesture, so the sound starts with the first play.
+
 `mvd-api serve -warm-interval 5m` lists the hub's games every five
 minutes and downloads, parses and packs each new one, so a demo's first
 visitor gets the cached path (a 4on4's Result in ~0.2 s) instead of a

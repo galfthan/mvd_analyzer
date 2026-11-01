@@ -229,9 +229,13 @@ export class FteController {
         return this._demoSpeed;
     }
 
+    // Playing is the user's gesture (a click, a key), the moment a browser
+    // lets suspended audio resume: an engine that came up with sound on,
+    // before any gesture, starts sounding here.
     setDemoSpeed(speed) {
         if (this._demoSpeed > 0) this._lastPositiveDemoSpeed = this._demoSpeed;
         this._demoSpeed = Number(speed);
+        if (this._demoSpeed > 0) this.wakeAudio();
         this.command('demo_setspeed', this._demoSpeed);
     }
 
@@ -283,6 +287,13 @@ export class FteController {
         if (this._resumeAudio) this._resumeAudio();
         if (this._lastVolume <= this._maxVolume / 100) this._lastVolume = this._maxVolume / 2;
         this.setVolume(this._lastVolume);
+    }
+
+    // wakeAudio resumes the engine's audio when it should be sounding — the
+    // host calls it on any user gesture (a click, a key), the only moment a
+    // browser lets suspended audio resume; it is a no-op once it runs.
+    wakeAudio() {
+        if (!this.isMuted() && this._resumeAudio) this._resumeAudio();
     }
 
     toggleMute() {

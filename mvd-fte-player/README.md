@@ -63,9 +63,12 @@ link params. mvd-web converts from match time with
   `demoJump` re-issues `playdemo`, jumps once the fresh clock runs, and
   restores track + speed when it arrives. `isRestarting()` is true until
   then. Hub's player has the same dead end.
-- **Sound** starts muted. Browsers suspend audio until a user gesture in
+- **Sound**: the engine starts muted (as hub's does); the host decides
+  (mvd-web turns it on). Browsers suspend audio until a user gesture in
   the engine's window; the loader keeps the engine's `AudioContext`s and
-  `unmute()` resumes them, so a click in the host page is enough.
+  `unmute()` and playing (`setDemoSpeed` above 0) resume them, so a click in the host page is
+  enough — a host that unmutes before any gesture is heard from the
+  first play.
 - **One engine per window.** Emscripten publishes `Module` / `FTEC` as
   globals and has no teardown. To play another demo, reload the iframe.
 - **External hosts.** The engine, its assets and map BSPs load from

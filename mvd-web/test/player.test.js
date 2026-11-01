@@ -405,14 +405,14 @@ test('engine carries sound, speed, team info and the followed player across engi
     };
 
     const first = await freshFte({ alpha: 3, bravo: 4 });
+    assert.ok(first.fte.isMuted(), 'an engine comes up muted');
     adopt(first);
-    assert.ok(first.fte.isMuted(), 'starts muted');
-    engine.toggleMute();
+    assert.ok(!first.fte.isMuted(), 'the player turns the sound on');
     engine.toggleTeamInfo();
     engine.setRate(2);
     engine.track(4);
     assert.equal(engine.status.get().muted, false);
-    assert.equal(first.resumed(), 1, 'unmute resumes the audio');
+    assert.equal(first.resumed(), 1, 'unmute asks the audio to resume');
 
     // Another demo: bravo is in it under another userid.
     const second = await freshFte({ bravo: 9, charlie: 2 });
@@ -425,6 +425,7 @@ test('engine carries sound, speed, team info and the followed player across engi
     assert.equal(second.pov(), 9, 'follows bravo by name');
     engine.play();
     assert.equal(second.fte.getDemoSpeed(), 200, 'plays at the speed picked before');
+    assert.equal(second.resumed(), 2, 'a play (the user\'s gesture) resumes the audio too');
 
     // One without bravo: the engine's autotrack.
     const third = await freshFte({ charlie: 2 });
