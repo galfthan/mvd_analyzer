@@ -65,10 +65,13 @@ is small).
    WASM entry and the API, so they cannot drift. gzip when accepted.
 2. `GET /v1/games/{id}` — the verbatim hub row (replaces the page's
    Supabase `fetchGame`).
-3. Region control for an edited layout (`POST
-   /v1/demos/{id}/region-control`, layout in the body) and the deferred
-   default region states, computed exactly as the worker does (one shared
-   helper again).
+3. Region control for an edited layout: `POST
+   /v1/demos/{id}/region-control`, the layout in the body. The deferred
+   default region states need nothing new: `GET
+   /region-control?windowMs=50&regions=none` equals the worker's
+   argument-less recompute by construction (the stored team pair is the
+   view's own inference; classification reads only the regions' locs),
+   and matched on all 13 cached demos.
 4. Per-client-IP rate limiting for a web key class.
 5. openapi.yaml, API.md, mvd-api README, RELEASE_NOTES.
 

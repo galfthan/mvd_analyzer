@@ -1009,6 +1009,9 @@ Common frontend features → the call that backs them.
   full.
 - **"Who controlled QUAD?"** → `GET /region-control?windowMs=10000`,
   read `stats.QUAD.byPlayer`.
+- **"Who held my own regions?"** → `POST /region-control` with a regions
+  file, `{"regions": [{"name": "high", "locs": ["ra", "mega"]}]}`, in
+  place of the map's stored layout.
 - **Loc heatmap / movement graph** → `GET /loc-graph` (aggregate) or
   `/loc-trails` (per-player sequence with dwell).
 - **Draw the map (items, spawns, teleporters as overlays)** → `GET /v1/maps/{map}/entities`

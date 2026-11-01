@@ -18,6 +18,11 @@ the API renders a demo exactly as one analysing it in the browser. A
 a `/v1/games/search?roster=1` row carries, so a page holding a gameId no
 longer has to query the hub's Supabase itself.
 
+`POST /v1/demos/{id}/region-control` computes region control over a layout
+in the request body — a regions file, `{"regions": [{"name", "locs"}]}`,
+as the map tab's region editor saves it — instead of the map's stored
+one; query params and response are the GET's.
+
 ## unreleased (perf-wasm-data) — position tracks in binary, faster floor traces
 
 No schema change, and the floor heights are bit-identical. The floor

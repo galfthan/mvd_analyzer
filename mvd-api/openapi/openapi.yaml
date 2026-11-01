@@ -1546,6 +1546,45 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+    post:
+      operationId: postRegionControl
+      tags: [timeline]
+      summary: Region-control timeline for an edited layout
+      description: |
+        The GET's region-control timeline, computed over a layout the caller
+        supplies in place of the demo's stored one — the web map tab's
+        region editor. The body is a regions file, the shape the editor
+        saves and loads: `{"regions": [{"name", "locs": [loc names]}]}`. A
+        loc name matches the demo's loc table case-insensitively; a region
+        whose locs match none is simply never held. Query params and the
+        response are the GET's. 400 `invalid_param` for a malformed body,
+        no regions, or a region without a name.
+      parameters:
+        - $ref: "#/components/parameters/DemoId"
+        - $ref: "#/components/parameters/WindowMs"
+        - $ref: "#/components/parameters/From"
+        - $ref: "#/components/parameters/To"
+        - $ref: "#/components/parameters/RegionsMode"
+        - $ref: "#/components/parameters/Label"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegionLayout" }
+      responses:
+        "200":
+          description: The control timeline over the posted layout.
+          headers: *perDemoHeaders
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegionControl" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/DemoNotFound" }
+        "422": { $ref: "#/components/responses/Unavailable" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/HubUpstream" }
   /v1/demos/{id}/top-windows:
     get:
       operationId: getTopWindows
@@ -3447,6 +3486,28 @@ components:
       additionalProperties: true
       properties:
         id: { type: integer, description: "The hub gameId." }
+    RegionLayout:
+      type: object
+      description: >
+        A region layout (POST /v1/demos/{id}/region-control): named regions,
+        each a list of loc names.
+      required: [regions]
+      additionalProperties: false
+      properties:
+        regions:
+          type: array
+          minItems: 1
+          description: The regions, in display order.
+          items:
+            type: object
+            required: [name]
+            additionalProperties: false
+            properties:
+              name: { type: string, minLength: 1, description: "The region's display name." }
+              locs:
+                type: array
+                description: Loc names belonging to the region.
+                items: { type: string }
     GamesSearchResult:
       type: object
       description: >

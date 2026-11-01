@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
+	"github.com/mvd-analyzer/mvd-analytics/config"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
 	"github.com/mvd-analyzer/mvd-api/internal/democache"
@@ -1431,6 +1432,40 @@ func (s *server) handleLocTable(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
+	s.serveRegionControl(w, r, nil)
+}
+
+// handleRegionLayout: POST /v1/demos/{id}/region-control — region control
+// for a caller-edited layout (the web map tab's region editor): the body is
+// a regions file, {"regions": [{"name", "locs": [loc names]}]}, the shape
+// the editor saves and loads (config.MapRegionOverrides), replacing the
+// demo's stored layout. Query params and response are the GET's.
+func (s *server) handleRegionLayout(w http.ResponseWriter, r *http.Request) {
+	var body config.MapRegionOverrides
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 256<<10))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_param", "body: "+err.Error())
+		return
+	}
+	if len(body.Regions) == 0 {
+		writeError(w, http.StatusBadRequest, "invalid_param", "regions: at least one region")
+		return
+	}
+	regions := make([]result.ControlRegion, len(body.Regions))
+	for i, rg := range body.Regions {
+		if rg.Name == "" {
+			writeError(w, http.StatusBadRequest, "invalid_param", fmt.Sprintf("regions[%d]: a name", i))
+			return
+		}
+		regions[i] = result.ControlRegion{Name: rg.Name, Locs: rg.Locs}
+	}
+	s.serveRegionControl(w, r, regions)
+}
+
+// serveRegionControl answers both region-control routes; regions, when
+// set, replace the demo's stored layout.
+func (s *server) serveRegionControl(w http.ResponseWriter, r *http.Request, regions []result.ControlRegion) {
 	res, _, ok := s.resolveDemo(w, r)
 	if !ok {
 		return
@@ -1442,6 +1477,7 @@ func (s *server) handleRegionControl(w http.ResponseWriter, r *http.Request) {
 		WindowMs:  p.Int("windowMs", 50),
 		StartTime: p.Ms("from", 0),
 		EndTime:   p.Ms("to", 0),
+		Regions:   regions,
 	}
 	regionsMode := p.Regions()
 	if writeInvalidParam(w, p.Err()) {

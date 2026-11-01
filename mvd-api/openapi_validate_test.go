@@ -30,6 +30,7 @@ import (
 
 	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
+	"github.com/mvd-analyzer/mvd-analytics/config"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"gopkg.in/yaml.v3"
 )
@@ -722,6 +723,8 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "region-control", url: "/v1/demos/gameId:42/region-control?windowMs=5000", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "region-control-summary", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=summary", path: "/v1/demos/{id}/region-control", status: 200},
 		{name: "region-control-none", url: "/v1/demos/gameId:42/region-control?windowMs=5000&regions=none", path: "/v1/demos/{id}/region-control", status: 200},
+		{name: "region-control-layout", method: "POST", url: "/v1/demos/gameId:42/region-control?windowMs=5000", path: "/v1/demos/{id}/region-control", status: 200,
+			body: regionLayoutBody(t), mustContain: []string{`"bucketStates":{`}},
 		{name: "top-windows", url: "/v1/demos/gameId:42/top-windows", path: "/v1/demos/{id}/top-windows", status: 200},
 		{name: "top-windows-net", url: "/v1/demos/gameId:42/top-windows?metric=netFrags&windowMs=10000&perPlayer=1", path: "/v1/demos/{id}/top-windows", status: 200},
 		{name: "top-windows-damage", url: "/v1/demos/gameId:42/top-windows?metric=damageGiven&windowMs=5000&weapons=rl,lg&limit=3", path: "/v1/demos/{id}/top-windows", status: 200},
@@ -1341,4 +1344,19 @@ func TestOpenAPIParamSweep(t *testing.T) {
 	if swept < 25 {
 		t.Fatalf("param sweep covered only %d GET ops — has the enumeration regressed?", swept)
 	}
+}
+
+// regionLayoutBody is the golden demo's stored region layout as the regions
+// file POST /region-control takes.
+func regionLayoutBody(t *testing.T) []byte {
+	t.Helper()
+	var ov config.MapRegionOverrides
+	for _, rg := range goldenResult(t).TimelineAnalysis.RegionControl.Regions {
+		ov.Regions = append(ov.Regions, config.MapRegionOverride{Name: rg.Name, Locs: rg.Locs})
+	}
+	b, err := json.Marshal(ov)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return b
 }

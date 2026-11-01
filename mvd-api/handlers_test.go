@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/mvd-analyzer/mvd-analytics/analyzer"
+	"github.com/mvd-analyzer/mvd-analytics/config"
 	"github.com/mvd-analyzer/mvd-analytics/hubfetch"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-analytics/view"
@@ -4145,5 +4146,66 @@ func TestHighlights_Unavailable(t *testing.T) {
 	resp, status := getRaw(t, srv.URL+"/v1/demos/gameId:42/highlights")
 	if status != 422 || errBodyCode(t, resp) != "highlights_unavailable" {
 		t.Errorf("status = %d code = %q; want 422 highlights_unavailable (%s)", status, errBodyCode(t, resp), resp)
+	}
+}
+
+// POST /region-control computes the edited layout the body names: the stored
+// layout re-sent as a regions file answers as the GET does, one region alone
+// as view.RegionControl does with just it, and a malformed body is a 400.
+func TestRegionLayout(t *testing.T) {
+	res := goldenResult(t)
+	srv := newTestServer(t, &fakeStore{byID: map[string]*result.Result{"gameId:42": res}})
+	defer srv.Close()
+	url := srv.URL + "/v1/demos/gameId:42/region-control?regions=none"
+	post := func(body string, want int) map[string]any {
+		t.Helper()
+		resp, err := http.Post(url, "application/json", strings.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		var m map[string]any
+		_ = json.NewDecoder(resp.Body).Decode(&m)
+		if resp.StatusCode != want {
+			t.Fatalf("POST %.80s = %d, want %d: %v", body, resp.StatusCode, want, m)
+		}
+		return m
+	}
+	layout := func(regions []result.ControlRegion) string {
+		var ov config.MapRegionOverrides
+		for _, rg := range regions {
+			ov.Regions = append(ov.Regions, config.MapRegionOverride{Name: rg.Name, Locs: rg.Locs})
+		}
+		b, _ := json.Marshal(ov)
+		return string(b)
+	}
+	stored := res.TimelineAnalysis.RegionControl.Regions
+	if len(stored) < 2 {
+		t.Fatalf("golden demo has %d regions; the test needs two", len(stored))
+	}
+
+	got := post(layout(stored), 200)
+	if bs, _ := got["bucketStates"].(map[string]any); len(bs) == 0 {
+		t.Fatalf("no bucket states to compare: %v", got)
+	}
+	if want := getJSON(t, url, 200); fmt.Sprint(got["bucketStates"], got["stats"]) != fmt.Sprint(want["bucketStates"], want["stats"]) {
+		t.Error("the stored layout, posted, differs from the GET")
+	}
+
+	one := stored[:1]
+	got = post(layout(one), 200)
+	rcv, err := view.RegionControl(res, view.RegionControlOptions{WindowMs: 50, Regions: one})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := json.Marshal(map[string]any{"bucketStates": rcv.BucketStates, "stats": rcv.Stats})
+	var want map[string]any
+	_ = json.Unmarshal(b, &want)
+	if fmt.Sprint(got["bucketStates"], got["stats"]) != fmt.Sprint(want["bucketStates"], want["stats"]) {
+		t.Error("a one-region layout differs from view.RegionControl over it")
+	}
+
+	for _, bad := range []string{``, `{}`, `{"regions":[]}`, `{"regions":[{"locs":["ra"]}]}`, `{"regions":[{"name":"x"}],"extra":1}`, `[1]`} {
+		post(bad, 400)
 	}
 }
