@@ -262,9 +262,9 @@ claude mcp add --transport http mvd https://qw.example.com/mcp
 #    If tool calls error with "unauthorized", MVD_API_KEY in
 #    /etc/mvd/mcp.env is missing/revoked — check journalctl -u mvd-mcp.
 
-# e. Rate limit: hammer past the burst (default 20 for a user key) and
+# e. Rate limit: hammer past the burst (default 200 for a user key) and
 #    observe 429 + Retry-After.
-for i in $(seq 1 40); do \
+for i in $(seq 1 260); do \
   curl -sS -H "Authorization: Bearer qwmvd_…" \
        https://qw.example.com/v1/auth/check -o /dev/null -w '%{http_code} '; \
 done; echo    # a run of 204 then 429 once the bucket drains

@@ -34,12 +34,12 @@ mvd-api keys list   -auth-dir DIR
 | `-parse-timeout`    | `120s`                                  | Wall-clock budget for a single cold demo parse (hub download or upload); `0` disables. Bounds how long a pathological demo can hold a parse slot |
 | `-log-format`       | `text`                                  | Access log format: `text` or `json` |
 | `-auth-dir`         | _(empty)_                               | Directory holding `keys.json`. **Empty = no auth** (localhost mode; today's behaviour). When set, `/v1/*` and `POST /v1/demos/{id}` require an `Authorization: Bearer qwmvd_…` key; see "Running authenticated vs local" below |
-| `-rate-user`        | `5`                                     | Auth mode: per-key sustained request rate (req/s) for portal (user) keys |
-| `-burst-user`       | `20`                                    | Auth mode: per-key burst (token-bucket size) for user keys |
-| `-rate-service`     | `50`                                    | Auth mode: per-key sustained request rate (req/s) for `service` keys (e.g. the first-party web app) |
-| `-burst-service`    | `200`                                   | Auth mode: per-key burst for service keys |
-| `-rate-web`         | `10`                                    | Auth mode: per-client sustained request rate (req/s) for a `per-client` key (the web page's, added by its proxy) |
-| `-burst-web`        | `60`                                    | Auth mode: per-client burst for a per-client key |
+| `-rate-user`        | `50`                                    | Auth mode: per-key sustained request rate (req/s) for portal (user) keys |
+| `-burst-user`       | `200`                                   | Auth mode: per-key burst (token-bucket size) for user keys |
+| `-rate-service`     | `500`                                   | Auth mode: per-key sustained request rate (req/s) for `service` keys (e.g. the first-party web app) |
+| `-burst-service`    | `2000`                                  | Auth mode: per-key burst for service keys |
+| `-rate-web`         | `100`                                   | Auth mode: per-client sustained request rate (req/s) for a `per-client` key (the web page's, added by its proxy) |
+| `-burst-web`        | `600`                                   | Auth mode: per-client burst for a per-client key |
 | `-portal`           | `false`                                 | Enable the Discord key portal at `/portal` (users self-service their own key). **Off = no `/portal` routes at all.** Requires `-auth-dir` **and** the three env vars below; see "The Discord key portal" |
 | `-portal-base-url`  | _(empty)_                               | Public origin of the deployment, e.g. `https://qw.example.com`. Used to build the OAuth `redirect_uri` (`<base>/portal/callback`) and absolute links. Required with `-portal` |
 | `-play-url`         | `https://mvdanalyzer.com/play.html`     | The web app's light player that `POST /v1/playlist-links` links to — point it at a branch deploy's `play.html` until production has the player |

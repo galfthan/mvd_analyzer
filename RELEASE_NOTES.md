@@ -25,8 +25,12 @@ one; query params and response are the GET's.
 
 A third key class, `mvd-api keys issue -per-client`, is for the web
 page's key, which the page's proxy adds for every visitor. It is
-rate-limited per key and client IP (`-rate-web` 10/s, `-burst-web` 60)
+rate-limited per key and client IP (`-rate-web` 100/s, `-burst-web` 600)
 instead of per key, so one visitor cannot exhaust everyone's budget.
+The other rate defaults go up tenfold with it: user keys 50/s, burst
+200; service keys 500/s, burst 2000 (`deploy/mvd-api.service` sets them
+explicitly, so a running server keeps its old values until its unit is
+updated).
 
 The deploy Caddyfile forwards the web page's API path: `/api/...` on the
 page's own origin reaches mvd-api's `/v1/...` with the page's per-client

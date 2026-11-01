@@ -53,7 +53,8 @@ Environment=MVDA_BSP_DIR=/opt/mvd/bsps
 
 # -auth-dir enables API-key auth; -portal enables the Discord portal (needs
 # the three env vars above). Tune -cache-max-bytes / -max-parses to the box;
-# -rate-*/-burst-* set the per-key token buckets (user vs service class).
+# -rate-*/-burst-* set the token buckets: per key for the user and service
+# classes, per key and client IP for the web class (a -per-client key).
 #
 # -addr binds loopback ONLY: Caddy is the sole public surface and must run
 # on this same box (its XFF rewrite assumes direct backend access is
@@ -74,8 +75,9 @@ ExecStart=/opt/mvd/bin/mvd-api serve \
     -max-parses 2 \
     -parse-timeout 120s \
     -auth-dir /opt/mvd/auth \
-    -rate-user 5 -burst-user 20 \
-    -rate-service 50 -burst-service 200 \
+    -rate-user 50 -burst-user 200 \
+    -rate-service 500 -burst-service 2000 \
+    -rate-web 100 -burst-web 600 \
     -max-upload-bytes 67108864 \
     -upload-daily-bytes 536870912 \
     -upload-daily-count 50 \
