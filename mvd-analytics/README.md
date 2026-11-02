@@ -171,7 +171,7 @@ that downstream consumers render, summarise, or feed to an agent.
 - `cmd/qw-backpack-eval/` — backpack-reconstruction accuracy harness:
   runs the reconstruction blind on demos that carry the `//ktx drop`
   hints and scores precision/recall/position error against them (tables
-  in `analyzer/BACKPACKS.md`); `-linkage` does the same for the PICKUP
+  in `analyzer/BACKPACK_RECON.md`); `-linkage` does the same for the PICKUP
   side against the `//ktx bp` (picked) and `//ktx expire` (expired)
   hints, with every hint withheld; `-volume`
   reports drops-per-death, the pack-fate mix and an inventory
@@ -476,7 +476,7 @@ with too few rockets to tell. Nothing is gated on it.
 `backpacks:final`: on demos whose mod never emitted a `//ktx drop` hint it
 fills the same `backpacks` section from `DropBackpack`'s own rule, stamped
 `source: "reconstructed"` (see the Backpacks section below and
-[`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md)). A hint-carrying demo is
+[`analyzer/BACKPACK_RECON.md`](analyzer/BACKPACK_RECON.md)). A hint-carrying demo is
 never touched. `player-stats` binds `backpacks:final`, so its per-weapon
 `dropped` tallies gain the reconstructed drops; pack TRANSFERS stay absent
 there, because those need the `//ktx bp` pickup hint that ships with the
@@ -1117,7 +1117,7 @@ suppressed (the one deathtype `DropBackpack` refuses). It stands down
 entirely rather than guess where the evidence is unmeasurable, and never
 touches a hint-carrying demo. Measured against the hints on 316 archive
 demos: **precision 99.97%, recall 99.97%** — method, splits and
-stand-down conditions in [`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md).
+stand-down conditions in [`analyzer/BACKPACK_RECON.md`](analyzer/BACKPACK_RECON.md).
 
 The PICKUP side of a reconstructed row is filled by the `backpack-linkage`
 post from the wire's backpack-ENTITY track: the pack that appears at the

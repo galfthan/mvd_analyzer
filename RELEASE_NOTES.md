@@ -2123,7 +2123,7 @@ versions the volume lands at 0.254 drops/death against the hinted
 population's 0.272, and an oracle independent of `STAT_ACTIVEWEAPON` —
 does the victim's `STAT_ITEMS` inventory agree they held that weapon? —
 agrees on **13 488 of 13 488** drops. Method, splits and residuals:
-[`mvd-analytics/analyzer/BACKPACKS.md`](mvd-analytics/analyzer/BACKPACKS.md).
+[`mvd-analytics/analyzer/BACKPACK_RECON.md`](mvd-analytics/analyzer/BACKPACK_RECON.md).
 
 It refuses rather than guesses. The section is left **absent** — not
 half-filled — when there is no frag log (the only record of which deaths
@@ -2282,7 +2282,7 @@ last broadcast — the obvious fix for that 167 — was implemented and
 measured: it costs 249 real pickups (recall 96.13% → 93.64%) for no
 precision gain, because the pack's last origin is a sample taken in the
 frame it left the wire while its earlier ones are samples of where it no
-longer was. Reverted, with the measurement recorded in `BACKPACKS.md` so it
+longer was. Reverted, with the measurement recorded in `BACKPACK_RECON.md` so it
 is not re-proposed.
 
 ### The third backpack directive: `//ktx expire`
@@ -2307,7 +2307,7 @@ carry all three directives, 10 384 drops split **10 006 `bp` + 190 `expire`
 + 188 claimed by neither hint**, with **zero** rows claiming both. The 188
 are packs the recording ended on top of — none of them has a bound pack
 entity that ever left the wire — and they now read `unobserved`, which is
-what the wire supports. The invariant note in `BACKPACKS.md` that said
+what the wire supports. The invariant note in `BACKPACK_RECON.md` that said
 "drop ≈ bp + expire holds row by row" was measured and corrected: the
 residual is 1.8% of drops, on 102 of the 223 demos.
 

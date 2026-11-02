@@ -112,7 +112,7 @@ func TestBackpackLinkage_TwoDropsInOneFrameTakeTheirOwnPacks(t *testing.T) {
 // shape where the two disagree. The earlier drop's nearest FREE pack is the
 // later drop's pack; a drop-order greedy would let it claim that one and
 // leave the later drop with the far pack, mis-assigning BOTH. The distances
-// are exaggerated well past the measured 28-unit tail (BACKPACKS.md) purely
+// are exaggerated well past the measured 28-unit tail (BACKPACK_RECON.md) purely
 // so the ordering is what decides the outcome and not the 128-unit cap.
 func TestBackpackLinkage_AdjacentDropsDoNotCrossBind(t *testing.T) {
 	f := newLinkFixture()

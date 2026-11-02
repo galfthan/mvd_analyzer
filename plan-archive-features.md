@@ -90,7 +90,7 @@ volume sanity over 551 demos across 40 server versions: 0.254 drops/death
 vs the hinted population's 0.272, with an independent `STAT_ITEMS`
 inventory oracle agreeing on 13 488 / 13 488 drops. Numbers, method and
 the `cmd/qw-backpack-eval` reproduction command live in
-`mvd-analytics/analyzer/BACKPACKS.md`.
+`mvd-analytics/analyzer/BACKPACK_RECON.md`.
 
 What the original sketch below got wrong, from reading the KTX source:
 `DropBackpack` under the shipped default `k_frp 0` packs the victim's
@@ -1140,7 +1140,7 @@ drop-side eval are byte-identical.
 credit stay absent, which is why the linkage output rides the `backpacks`
 row instead of `weaponPickups`. Numbers, method and the
 `cmd/qw-backpack-eval -linkage` reproduction command live in
-`mvd-analytics/analyzer/BACKPACKS.md`.
+`mvd-analytics/analyzer/BACKPACK_RECON.md`.
 
 Original note: Lead 2 reconstructs the DROP; on hint-less demos the pack's
 fate stays `unobserved` — mushi's RL stat-flip 5 s after nexus's death is
