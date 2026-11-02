@@ -4519,7 +4519,7 @@ finds every announced expiry and asserts nothing else. The largest residual
 (2% of all drops) is a pack taken inside the demo frame it dropped in: it
 never reaches the wire at all, so no entity exists to bind. Full tables,
 mismatch classes and the reproduce command:
-[`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md).
+[`analyzer/BACKPACK_RECON.md`](analyzer/BACKPACK_RECON.md).
 
 **What is still absent on a reconstructed row.** `hadBefore` — KTX ORs the
 weapon bit in, so a redundant grab leaves no trace anywhere on the wire —
@@ -4579,7 +4579,7 @@ spanning KTX 1.38–1.48: **precision 99.97%, recall 99.97%** (13 749 hints,
 LG 100%/100%, RL 99.96%/99.96%); drop-time error exactly 0 ms; position
 error p50 9.7 / p90 22.3 / p99 33.9 units. Full method, per-era and
 per-mode splits, residual classes and the reproduction command:
-[`analyzer/BACKPACKS.md`](analyzer/BACKPACKS.md).
+[`analyzer/BACKPACK_RECON.md`](analyzer/BACKPACK_RECON.md).
 
 **Residual with no wire signal:** `dp 0` (drops switched off
 server-side) is published nowhere — no serverinfo key, no countdown row.

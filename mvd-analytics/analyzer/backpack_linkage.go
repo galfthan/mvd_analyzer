@@ -25,7 +25,7 @@ import (
 // frame, a pack's life is one appearance and one disappearance: measured over
 // 24 hint-carrying demos, 3 205 pack lives against 3 319 deaths, and ZERO
 // lives re-opening at the position the previous one ended at. There is no
-// flutter left to stitch (BACKPACKS.md).
+// flutter left to stitch (BACKPACK_RECON.md).
 //
 // # The chain
 //
@@ -337,7 +337,7 @@ func packTouch(packPos, playerPos [3]float32) bool {
 // signal to guard against a class the geometry mostly handles anyway (the
 // waiting area is a separate room from the arena floor where packs drop), and
 // the ground-truth population carries no RA demo to measure either choice on.
-// The residual is recorded in BACKPACKS.md rather than papered over.
+// The residual is recorded in BACKPACK_RECON.md rather than papered over.
 type packTouchRules struct {
 	dmm4     bool // deathmatch 4 — pent carriers may not take a pack
 	midair   bool // k_midair — quad carriers may not
@@ -500,7 +500,7 @@ func packSampledTouchers(pack *PackEntityLife, players []result.PlayerStream, ru
 // that interval and past it at the other — at 30 demo-frames per second a
 // player at running speed covers ~16 units between samples, which is enough
 // to leave a 48-unit box. Testing only the nearer sample cost 2.6% of real
-// pickups (measured, BACKPACKS.md); testing both is not a widened radius but
+// pickups (measured, BACKPACK_RECON.md); testing both is not a widened radius but
 // the correct statement of what the wire says.
 //
 // Dead players are excluded because BackpackTouch returns immediately on
@@ -565,7 +565,7 @@ func packTouchers(pack *PackEntityLife, players []result.PlayerStream, rules pac
 // of where it no longer was. Sweeping the pack backwards tests the overlap at
 // times the touch did not happen at, and cost 249 of 10 000 real pickups
 // (recall 96.13% → 93.64%) for no precision gain — precision is 100% either
-// way. Measured, reverted, and recorded in BACKPACKS.md so it is not
+// way. Measured, reverted, and recorded in BACKPACK_RECON.md so it is not
 // re-proposed.
 func playerOnPack(p *result.PlayerStream, pack *PackEntityLife) bool {
 	pos := positionsBracketing(p.Position, pack.End, packPosStaleMs)

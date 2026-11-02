@@ -1078,7 +1078,7 @@ diff -r /tmp/before /tmp/after
    evidence is unmeasurable — frozen weapon state, no frag log, a
    fairpacks/yawnmode/bloodfest ruleset — the section is left absent
    rather than half-filled. Accuracy tables and stand-down conditions:
-   [`mvd-analytics/analyzer/BACKPACKS.md`](mvd-analytics/analyzer/BACKPACKS.md).
+   [`mvd-analytics/analyzer/BACKPACK_RECON.md`](mvd-analytics/analyzer/BACKPACK_RECON.md).
 
 0c. **2% of the archive holds no analyzable match — and now says so.**
    Streams are built only inside the DETECTED match window, so a demo
