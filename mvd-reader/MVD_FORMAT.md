@@ -1824,7 +1824,7 @@ If `type_id == 0xFFFF`, read another short for extended type range.
 | 0x0008 | `mvdhidden_usercmd_weapons_ss` | Server-side weapon data | **Requires server flag** |
 | 0x0009 | `mvdhidden_usercmd_weapon_instruction` | Weapon instruction | **Requires server flag** |
 | 0x000A | `mvdhidden_paused_duration` | Real ms elapsed during one paused idle frame | Now in .mvd too — **malformed framing**, see below |
-| 0x000B | `mvdhidden_demo_start_timestamp_ms` | Unix timestamp (ms) at demo start (ULEB128 varint) | Newer mvdsv |
+| 0x000B | `mvdhidden_demo_start_timestamp_ms` | Unix timestamp (ms) at demo start (ULEB128 varint; earlier builds: 8-byte little-endian uint64) | Newer mvdsv |
 | 0xFFFF | `mvdhidden_extended` | Extended type (read next short) | - |
 
 **`0x000A` paused_duration — written to the .mvd, but malformed.** Older docs
@@ -1859,7 +1859,7 @@ and fixed servers parse identically. `mvd-analytics` folds the per-frame samples
 into per-pause segments — see `pauses[]` and the `demoStartUnixMs` wall-clock
 formula in RESULT_SCHEMA.md.
 
-**Newer types**: the table above tracks qwprot as of 2026. Older parsers will warn `unknown hidden message type 0x000b` on any demo recorded by an mvdsv that includes the [PR #17 / `500bd4b`](https://github.com/QW-Group/qwprot/commit/500bd4b) addition; the payload is a Unix-millisecond timestamp captured at the moment the server opened the MVD file, **ULEB128 varint-encoded** (7 data bits per byte, high bit = continuation — *not* a fixed-width little-endian `uint64`; a ~2026 value is 6 bytes), intended for stream/voice synchronisation. It's safe to skip if you don't consume it, but recognising it explicitly cleans up the warning stream. mvdsv writes it via `Sys_TimestampMilliseconds()` in `SV_MVDEmbedStartTimestamp` (`src/sv_demo_misc.c`).
+**Newer types**: the table above tracks qwprot as of 2026. Older parsers will warn `unknown hidden message type 0x000b` on any demo recorded by an mvdsv that includes the [PR #17 / `500bd4b`](https://github.com/QW-Group/qwprot/commit/500bd4b) addition; the payload is a Unix-millisecond timestamp captured at the moment the server opened the MVD file, **ULEB128 varint-encoded** by current mvdsv (7 data bits per byte, high bit = continuation; a ~2026 value is 6 bytes). Earlier builds wrote it as a fixed 8-byte little-endian `uint64`, and those demos are common in the archive: of the 24 blocks in the 1500 newest archive demos (2026-11), 18 are 8-byte `uint64` and 6 are 6-byte varints. A body is the `uint64` form when it is 8 bytes and the varint does not consume it exactly; it is intended for stream/voice synchronisation. It's safe to skip if you don't consume it, but recognising it explicitly cleans up the warning stream. mvdsv writes it via `Sys_TimestampMilliseconds()` in `SV_MVDEmbedStartTimestamp` (`src/sv_demo_misc.c`).
 
 ### Hidden Message Availability
 
@@ -4054,7 +4054,7 @@ The hidden message system (`MVD_PEXT1_HIDDEN_MESSAGES`, bit 5 = 0x20) was added 
 - **0x0003 - demoinfo**: Embedded JSON metadata (match info, player stats)
 - **0x0007 - dmgdone**: Damage events with attacker, victim, weapon, and amount
 - **0x000A - paused_duration** *(2026)*: one byte of real wall-clock ms per idle frame while the game is paused, embedded in the .mvd by current production mvdsv (was previously written only to QTV streams). The game clock freezes while paused, so summing these over a pause recovers its real duration — the in-file basis for mapping a paused demo's game time back to wall clock. **Written without the standard 4-byte block-length header** (bare `[type_id][byte]`), so the parser decodes it via a dedicated path; see the `0x000A` note under [Hidden Message Types](#hidden-message-types) and `pauses[]` in RESULT_SCHEMA.md.
-- **0x000B - demo_start_timestamp_ms** *(2026, qwprot PR #17)*: ULEB128 varint-encoded unix-millisecond timestamp captured at demo start, for synchronising voice recordings / stream overlays with the demo timeline. The decoder emits the value faithfully, but **not every 0x000B block is a valid timestamp**: some 2026 demos carry a 1–2 byte block here that decodes to a tiny non-timestamp value (61, 11701 observed; those demos also carry a correct whole-second `epoch` serverinfo cvar). Consumers must range-check before treating it as a wall clock — `mvd-analytics` does this and falls back to `epoch` (see `demoStartUnixMs` in RESULT_SCHEMA.md).
+- **0x000B - demo_start_timestamp_ms** *(2026, qwprot PR #17)*: unix-millisecond timestamp captured at demo start, for synchronising voice recordings / stream overlays with the demo timeline: a ULEB128 varint, or in earlier builds an 8-byte little-endian `uint64` (see the note under [Hidden Message Types](#hidden-message-types)). Reading the `uint64` form as a varint gives tiny bogus values (61, 11701 were observed); the parser reads both forms. `mvd-analytics` still range-checks the value and falls back to the whole-second `epoch` serverinfo cvar (see `demoStartUnixMs` in RESULT_SCHEMA.md).
 
 ### Damage Tracking Evolution
 

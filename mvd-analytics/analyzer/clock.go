@@ -128,8 +128,8 @@ func (a *ClockAnalyzer) OnEvent(event events.Event) error {
 		}
 	case *events.DemoStartTimestampEvent:
 		// mvdhidden 0x000B: server wall-clock (Unix ms) at demo open. Keep the
-		// first plausible one; some 2026 demos carry a non-timestamp payload
-		// (values like 61 / 11701) that must fall back to `epoch` instead.
+		// first plausible one; a body that still decodes to nonsense falls
+		// back to `epoch` instead.
 		if !a.demoStartFromHidden && plausibleDemoStartUnixMs(e.UnixMs) {
 			a.demoStartUnixMs = e.UnixMs
 			a.demoStartFromHidden = true
