@@ -2507,9 +2507,9 @@ P(g)        = Σ pauses[i].durationMs  for  pauses[i].atMs <= g
 countdown start — not match start; `demoOffset` bridges the two).
 `demoStartAccuracyMs` is its resolution: `1` from the millisecond
 [mvdhidden 0x000B block](../mvd-reader/MVD_FORMAT.md#hidden-message-types),
-`1000` from the whole-second serverinfo `epoch` cvar. Implausible
-0x000B payloads (some demos emit a non-timestamp block here) fall back to
-`epoch`. The REST `/overview` endpoint mirrors this anchor in its `timing`
+`1000` from the whole-second serverinfo `epoch` cvar. The parser reads
+both 0x000B encodings (varint, and the 8-byte `uint64` of earlier mvdsv
+builds); an implausible value still falls back to `epoch`. The REST `/overview` endpoint mirrors this anchor in its `timing`
 block.
 
 **Match-start anchor (schema v72).** Only ~25% of the archive carries one

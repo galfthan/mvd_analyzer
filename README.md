@@ -1232,10 +1232,10 @@ diff -r /tmp/before /tmp/after
    deliberately not back-shifted, so `demoStartUnixMs` can still be absent. ~5%
    of the archive carries no date signal at all. It anchors **demo open**, not
    match start — consumers add `demoOffset` to reach the match, or read
-   `matchStartUnixMs`. Some 2026
-   demos emit a `0x000B` block that is not a timestamp at all (a 1–2 byte
-   non-wall-clock value); those are range-checked out and fall back to
-   `epoch`. See [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) and
+   `matchStartUnixMs`. The `0x000B`
+   block comes in two encodings (a varint, or an 8-byte `uint64` from
+   earlier mvdsv builds) and the parser reads both; a value that is still
+   implausible is range-checked out and falls back to `epoch`. See [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) and
    [mvd-reader/MVD_FORMAT.md](mvd-reader/MVD_FORMAT.md#hidden-message-types).
    For **paused** demos the wall-clock mapping also needs
    `streams.global.pauses[]`: the durations come from the mvdhidden `0x000A`
