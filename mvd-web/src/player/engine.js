@@ -5,8 +5,9 @@
 // iframe.contentWindow (seek, POV, speed) instead of reloading a
 // cross-origin hub embed, which accepts no commands. The engine boots when
 // the Map or Player tab shows a Player pane (~6 MB of wasm plus assets) and
-// is dropped 20 s after none does, or on the next demo load
-// (src/player/index.js); one iframe page holds one engine for its lifetime.
+// is dropped 20 s after none does (src/player/index.js); the next demo
+// loads into the same engine (FteController.loadDemo) — one iframe page
+// holds one engine for its lifetime.
 //
 // Clock: FTE runs on demo-relative seconds, the page on match-relative
 // ones (demoOffsetSec). While it is active() the engine is the clock: a
@@ -19,9 +20,10 @@ import { store } from '../state/store.js';
 import { WATCH_TABS } from '../state/ui.js';
 import { demoOffsetSec, mapFileKey, userIdOf, nameOfUserId } from '../lib/result.js';
 import { createAssetFetcher } from '../../../mvd-fte-player/src/asset-fetch.js';
+import { mapPath, mapUrl } from '../../../mvd-fte-player/src/assets.js';
 
-// The engine's files, fetched once for the page and kept: each demo gets a
-// fresh engine, which so boots from memory (asset-fetch.js).
+// The engine's files, fetched once for the page and kept: a second engine
+// (the light player's standby) boots from memory (asset-fetch.js).
 const fetchAsset = createAssetFetcher();
 
 /**
@@ -52,6 +54,9 @@ const SEEK_SETTLE_MS = 2000;
 // has started the demo, and a demo_jump sent then is lost — seen as the
 // opening jump landing at 0:00. Wait for the demo clock to move.
 const CLOCK_WAIT_MS = 30000;
+// The standby runs on every this-many display frames while it loads and
+// seeks: its frames are taken from the shown engine's (one thread).
+const STANDBY_EVERY = 4;
 
 /** @type {EngineStatus} */
 const IDLE = { ready: false, playing: false, speed: 100, rate: 100, ended: false, track: null, autotrack: false, muted: true, teamInfo: false, error: '' };
@@ -90,8 +95,9 @@ export class PlayerEngine {
         this.consoleOpen = false;
         // FTE's team info table (hud_teaminfo, mvd-fte-player/config.cfg)
         // and sound on or off: kept across engines, set on each as it comes
-        // up (carrySettings) — each demo gets a fresh engine, which starts
-        // muted, so a run moving on to another demo's clip would mute again.
+        // up on a demo (carrySettings) — a fresh engine starts muted, and the
+        // standby is kept silent, so a run moving on to another demo's clip
+        // would mute again.
         // Sound starts on; the browser holds the audio until the first play
         // (FteController.play resumes it).
         this.teamInfo = false;
@@ -105,13 +111,13 @@ export class PlayerEngine {
         this.handle = null;
         /** @type {HTMLElement | null} */
         this.host = null;
-        /** @type {HTMLIFrameElement | null} */
-        this.iframe = null;
-        /** @type {string | null} */
-        this.blobUrl = null;
+        // The engine shown: its iframe and the demo it holds or loads.
+        /** @type {Slot | null} */
+        this.shown = null;
         /** @type {Promise<void> | null} */
         this.demoWait = null;      // the demo's bytes, while they download
         this.wakeHooked = false;   // the page's gestures wake the audio (attachHost)
+        // The shown engine, once it plays the current demo.
         /** @type {FteController | null} */
         this.fte = null;
         /** @type {number | null} */
@@ -127,27 +133,25 @@ export class PlayerEngine {
         this.onReady = null;       // run once when the engine is up
         /** @type {Set<(demoT: number) => void>} */
         this.tickListeners = new Set();
-        // The next demo's engine, started while this one plays (prepare):
-        // in the same host under the shown one, invisible, paused at its
-        // clip's start with its frame loop stopped. The demo store moving to
-        // its demo shows it (promote) rather than start an engine then —
-        // the seconds a fresh one takes to boot, load the map and reach the
-        // clip. `standbyWanted`: the demo asked for, until it can start
-        // (the shown engine up, the bytes in).
-        /** @type {Standby | null} */
+        // The other engine (prepare: the light player's runs) — in the same
+        // host under the shown one, invisible, paused at the next clip's
+        // start with its frame loop stopped. The demo store moving to its
+        // demo shows it, and the one shown before waits in its place: no
+        // engine boots for that step, nor for any after it — the next demo
+        // loads into whichever engine is not shown (loadInto).
+        // `standbyWanted`: the demo asked for, until it can load (the shown
+        // engine up, the bytes in, the standby not loading another);
+        // `standbyReady`: the standby is parked at the clip asked for.
+        /** @type {Slot | null} */
         this.standby = null;
-        /** @type {{ handle: DemoHandle, demoT: number } | null} */
+        /** @type {{ handle: DemoHandle, demoT: number, track: Track } | null} */
         this.standbyWanted = null;
+        this.standbyReady = store(false);
 
         demo.subscribe((handle) => {
             if (handle === this.handle) return;
-            this.teardown();
             this.handle = handle;
-            // Another demo than the standby's (a pick elsewhere in the
-            // list): it is dropped, so two engines at most ever live — the
-            // next one wanted is asked for once this one is up.
-            if (handle && this.standby?.handle === handle) this.promote();
-            else this.dropStandby();
+            this.switchTo(handle);
             if (this.active()) this.ensure();
         });
         activeTab.subscribe(() => this.syncActive());
@@ -219,17 +223,26 @@ export class PlayerEngine {
         if (this.active()) this.ensure();
     }
 
-    // ensure starts the engine on the current demo once its bytes are in:
-    // at once for a local file, after the hub CDN download for a demo read
-    // from mvd-api, which fetches them only when something wants to play it
-    // (DemoHandle.demo()). A teardown or another demo meanwhile drops it.
+    // ensure has the shown engine play the current demo once its bytes are
+    // in: at once for a local file, after the hub CDN download for a demo
+    // read from mvd-api, which fetches them only when something wants to
+    // play it (DemoHandle.demo()). An engine already shown loads it (no
+    // boot); none, one starts. A teardown or another demo meanwhile drops it.
     ensure() {
-        if (this.iframe || this.demoWait || !this.handle?.result || !this.host) return;
+        const shown = this.shown;
+        if (this.demoWait || !this.handle?.result || !this.host) return;
+        // Playing it, or loading another: that load ends in booted(), which
+        // asks again.
+        if (shown && (shown.handle === this.handle || shown.loading)) return;
         const handle = this.handle;
-        const wait = handle.demo().then(({ blob, gzipped }) => {
+        const wait = handle.demo().then((file) => {
             if (this.demoWait !== wait) return;
             this.demoWait = null;
-            if (this.handle === handle && this.host && this.active()) this.spawn(handle, blob, gzipped);
+            if (this.handle !== handle || !this.host || !this.active()) return;
+            const s = this.shown;
+            if (s?.loading) return;
+            if (s?.ctl) this.loadInto(s, handle, file);
+            else this.spawn(handle, file, false);
         }, (/** @type {unknown} */ err) => {
             if (this.demoWait !== wait) return;
             this.demoWait = null;
@@ -242,17 +255,47 @@ export class PlayerEngine {
         if (this.status.get().error) this.status.set({ ...this.status.get(), error: '' });
     }
 
-    // spawn starts an engine on a demo's bytes: the shown one, or with
-    // `standbyAt` (demo seconds) the standby, which parks there once up.
-    // Whichever it is by the time its demo runs takes it — a standby
-    // promoted while it booted is the shown one by then.
+    // switchTo: the demo store moved on to `handle`. Its demo in the
+    // standby: the two swap, the engine shown before waiting in the
+    // standby's place with its demo (a run that comes back to it, or the
+    // next demo, loads there). Another demo: the shown engine loads it
+    // (ensure) — or a standby that is up does, the two swapping as before.
+    // Two engines at most ever live; none once no demo is.
+    /** @param {DemoHandle | null} handle */
+    switchTo(handle) {
+        if (!handle) {
+            this.teardown();
+            this.dropStandby();
+            return;
+        }
+        const sb = this.standby;
+        this.resetShown();
+        if (sb && (sb.handle === handle || sb.ctl)) {
+            const out = this.shown;
+            this.standby = null;
+            this.standbyReady.set(false);
+            this.shown = sb;
+            sb.iframe.classList.remove('player-standby');
+            if (out) this.keepAsStandby(out);
+            if (sb.ctl) sb.ctl.throttle(1);
+            // Holding this demo: shown at once — parked at its clip, as it
+            // is; stopped where it was, opening at the cursor. Still loading
+            // it: its load adopts it (booted); another demo: ensure loads
+            // this one.
+            if (sb.ctl && sb.handle === handle && !sb.loading) this.adopt(sb.ctl, !sb.ready);
+        }
+    }
+
+    // spawn starts an engine (a new iframe) on a demo's bytes: the shown
+    // one, or the standby. Whichever it is by the time its demo runs takes
+    // it (booted) — a standby shown while it booted is the shown one by then.
     /**
      * @param {DemoHandle} handle
-     * @param {Blob} blob
-     * @param {boolean} gzipped
-     * @param {number} [standbyAt]
+     * @param {{ blob: Blob, gzipped: boolean }} file
+     * @param {boolean} standby
+     * @returns {Slot}
      */
-    spawn(handle, blob, gzipped, standbyAt) {
+    spawn(handle, { blob, gzipped }, standby) {
         const host = /** @type {HTMLElement} */ (this.host);
         const demoUrl = URL.createObjectURL(blob);
         const demoPath = gzipped ? 'qw/match.mvd.gz' : 'qw/match.mvd';
@@ -260,36 +303,88 @@ export class PlayerEngine {
         iframe.src = 'fte-player/player.html';
         iframe.title = 'Demo player';
         iframe.allow = 'fullscreen; autoplay';
-        const mine = () => this.iframe === iframe || this.standby?.iframe === iframe;
+        /** @type {Slot} */
+        const slot = { iframe, blobUrl: demoUrl, ctl: null, handle, demoT: null, track: 'auto', loading: true, ready: false, seq: 0 };
+        const live = () => this.shown === slot || this.standby === slot;
         iframe.addEventListener('load', () => {
-            if (!mine()) return;
+            if (!live()) return;
             // player.html's window.mvdFte (mvd-fte-player/README.md).
             this.hookScreen(/** @type {Window} */ (iframe.contentWindow));
             /** @type {any} */ (iframe.contentWindow).mvdFte.start({ demoUrl, demoPath, mapName: mapFileKey(handle.result), fetchAsset })
-                .then((/** @type {FteController} */ fte) => waitForDemoClock(fte, mine).then(() => fte))
                 .then((/** @type {FteController} */ fte) => {
-                    if (this.iframe === iframe) this.adopt(fte);
-                    else if (this.standby?.iframe === iframe) this.park(fte);
+                    if (this.standby === slot) fte.throttle(STANDBY_EVERY);
+                    return waitForDemoClock(fte, live).then(() => fte);
+                })
+                .then((/** @type {FteController} */ fte) => {
+                    slot.ctl = fte;
+                    if (live()) this.booted(slot);
                 }, (/** @type {unknown} */ err) => console.error('player:', err));
         }, { once: true });
-        if (standbyAt == null) {
-            this.blobUrl = demoUrl;
-            this.iframe = iframe;
-        } else {
+        if (standby) {
             // Over the shown one in the host, but drawn transparent and
-            // taking no input: still rendering, so it boots at the speed a
-            // shown engine does (a display:none frame gets no frames).
+            // taking no input: still rendering (a display:none frame gets
+            // no frames), throttled once it can be (STANDBY_EVERY).
             iframe.classList.add('player-standby');
-            this.standby = { handle, demoT: standbyAt, iframe, blobUrl: demoUrl, fte: null };
+            this.standby = slot;
+        } else {
+            this.shown = slot;
         }
         host.appendChild(iframe);
+        return slot;
+    }
+
+    // loadInto plays another demo in an engine that is up — the bytes in,
+    // the map fetched when the engine has not got it (FteController.loadDemo)
+    // — then hands it on as a boot would (booted). The shown one stops
+    // playing the demo before meanwhile; the standby loads throttled.
+    /**
+     * @param {Slot} slot  one with an engine (ctl), not loading
+     * @param {DemoHandle} handle
+     * @param {{ blob: Blob, gzipped: boolean }} file
+     */
+    loadInto(slot, handle, { blob, gzipped }) {
+        const ctl = /** @type {FteController} */ (slot.ctl);
+        slot.handle = handle;
+        slot.loading = true;
+        slot.ready = false;
+        const seq = ++slot.seq;
+        const live = () => slot.seq === seq && (this.shown === slot || this.standby === slot);
+        ctl.pause();
+        ctl.resume();
+        ctl.throttle(this.standby === slot ? STANDBY_EVERY : 1);
+        const map = mapFileKey(handle.result);
+        const bsp = map && !ctl.hasFile(mapPath(map)) ? fetchAsset(mapUrl(map)).catch(() => null) : null;
+        Promise.all([blob.arrayBuffer(), bsp]).then(([demo, mapBytes]) => {
+            if (!live()) return false;
+            // A map that could not be had is left to the engine
+            // (cl_download_mapsrc, config.cfg).
+            return ctl.loadDemo({ demo, gzipped, files: mapBytes ? { [mapPath(map)]: mapBytes } : {} }).then(() => true);
+        }).then((done) => {
+            if (done && live()) this.booted(slot);
+        }, (/** @type {unknown} */ err) => console.error('player:', err));
+    }
+
+    // booted: a slot's engine plays its demo. Shown, it is adopted — or,
+    // the demo store having moved on meanwhile, loads that one (ensure).
+    // The standby parks at its clip, or loads the demo asked for since.
+    /** @param {Slot} slot */
+    booted(slot) {
+        slot.loading = false;
+        const ctl = /** @type {FteController} */ (slot.ctl);
+        if (slot === this.shown) {
+            if (slot.handle === this.handle) this.adopt(ctl);
+            else if (this.active()) this.ensure();
+        } else if (slot === this.standby) {
+            if (this.standbyWanted) this.spawnStandby();
+            else this.park(slot);
+        }
     }
 
     // adopt takes an engine once its demo runs: the settings carried from
     // the engines before, then whatever waited for it (whenReady — a
     // playlist clip, which so sets its POV after the carried one). `open`:
-    // jump to where the cursor is (a promoted standby is at its clip
-    // already, and the cursor still holds the demo before's time).
+    // jump to where the cursor is (a standby is at its clip already, and
+    // the cursor still holds the demo before's time).
     /**
      * @param {FteController} fte
      * @param {boolean} [open]
@@ -314,72 +409,110 @@ export class PlayerEngine {
         this.spawnStandby();
     }
 
-    // prepare(handle, demoT): start the standby on that demo, parked at
-    // demoT, for the clip that plays next (the light player's runs). Only
-    // one waits: another demo asked for replaces it.
+    // prepare(handle, demoT, track): have the standby on that demo, parked
+    // at demoT with that POV, for the clip that plays next (the light
+    // player's runs). Only one waits: another demo asked for replaces it.
     /**
      * @param {DemoHandle} handle
      * @param {number} demoT
+     * @param {Track} [track]
      */
-    prepare(handle, demoT) {
-        if (handle === this.handle || this.standbyWanted?.handle === handle || this.standby?.handle === handle) return;
-        this.dropStandby();
-        this.standbyWanted = { handle, demoT };
+    prepare(handle, demoT, track = 'auto') {
+        if (handle === this.handle) return;
+        const sb = this.standby;
+        if (sb?.handle === handle && !this.standbyWanted) {
+            if (sb.demoT === demoT && sb.track === track) return;
+            sb.demoT = demoT;
+            sb.track = track;
+            this.standbyReady.set(false);
+            if (sb.ctl && !sb.loading) this.park(sb);
+            return;
+        }
+        if (this.standbyWanted?.handle === handle) return;
+        this.standbyWanted = { handle, demoT, track };
+        this.standbyReady.set(false);
         this.spawnStandby();
     }
 
-    // spawnStandby starts the standby asked for once the shown engine is
-    // up — two booting at once would both be slow — and its bytes are in.
+    // spawnStandby has the standby asked for load once the shown engine is
+    // up — two loading at once would both be slow — and its bytes are in:
+    // into the standby engine when there is one, else in a new one.
     spawnStandby() {
         const want = this.standbyWanted;
-        if (!want || this.standby || !this.fte || !this.host) return;
-        want.handle.demo().then(({ blob, gzipped }) => {
-            if (this.standbyWanted === want && !this.standby && this.host) this.spawn(want.handle, blob, gzipped, want.demoT);
+        if (!want || !this.fte || !this.host || this.standby?.loading) return;
+        want.handle.demo().then((file) => {
+            const sb = this.standby;
+            if (this.standbyWanted !== want || !this.fte || !this.host || sb?.loading) return;
+            this.standbyWanted = null;
+            if (sb) {
+                sb.demoT = want.demoT;
+                sb.track = want.track;
+                this.loadInto(sb, want.handle, file);
+            } else {
+                const slot = this.spawn(want.handle, file, true);
+                slot.demoT = want.demoT;
+                slot.track = want.track;
+            }
         }, () => {});
     }
 
-    // park: the standby is up — silent (engines start muted), at its clip's
-    // start, paused, and once the jump has landed, its frame loop stopped.
-    /** @param {FteController} fte */
-    park(fte) {
-        const sb = /** @type {Standby} */ (this.standby);
-        sb.fte = fte;
-        fte.pause();
-        fte.demoJump(sb.demoT);
+    // park: the standby plays its demo — silent, throttled, at its clip's
+    // start with its POV, paused, and once the jump has landed, its frame
+    // loop stopped (standbyReady).
+    /** @param {Slot} slot */
+    park(slot) {
+        const ctl = /** @type {FteController} */ (slot.ctl);
+        const seq = ++slot.seq;
+        ctl.resume();
+        ctl.throttle(STANDBY_EVERY);
+        ctl.mute();
+        ctl.pause();
+        const demoT = slot.demoT;
+        if (demoT == null) {
+            ctl.suspend();
+            return;
+        }
+        ctl.demoJump(demoT);
+        if (slot.track === 'auto') ctl.enableAutotrack();
+        else ctl.track(slot.track);
         const started = performance.now();
         const poll = setInterval(() => {
-            if (this.standby?.fte !== fte) return clearInterval(poll);
-            if (Math.abs(fte.getDemoElapsedTime() - Math.floor(sb.demoT)) < 1.5 || performance.now() - started > CLOCK_WAIT_MS) {
+            if (this.standby !== slot || slot.seq !== seq) return clearInterval(poll);
+            if (Math.abs(ctl.getDemoElapsedTime() - Math.floor(demoT)) < 1.5 || performance.now() - started > CLOCK_WAIT_MS) {
                 clearInterval(poll);
-                fte.suspend();
+                ctl.suspend();
+                slot.ready = true;
+                this.standbyReady.set(true);
             }
         }, 100);
     }
 
-    // promote shows the standby as the engine of the demo just set
-    // (teardown dropped the one before). Up, it is adopted at once; still
-    // booting, spawn's chain adopts it when its demo runs.
-    promote() {
-        const sb = /** @type {Standby} */ (this.standby);
-        this.standby = null;
-        this.standbyWanted = null;
-        sb.iframe.classList.remove('player-standby');
-        this.iframe = sb.iframe;
-        this.blobUrl = sb.blobUrl;
-        if (sb.fte) this.adopt(sb.fte, false);
+    // keepAsStandby: the engine shown until now waits hidden, silent and
+    // stopped where it was, its demo still in — for a run that comes back
+    // to it, or to load the next demo into. One still booting is dropped.
+    /** @param {Slot} out */
+    keepAsStandby(out) {
+        if (!out.ctl) return removeSlot(out);
+        out.iframe.classList.add('player-standby');
+        if (document.activeElement === out.iframe) out.iframe.blur();
+        out.ctl.mute();
+        out.ctl.pause();
+        out.ctl.suspend();
+        out.ready = false;
+        out.demoT = null;
+        this.standby = out;
     }
 
     dropStandby() {
         this.standbyWanted = null;
+        this.standbyReady.set(false);
         const sb = this.standby;
         this.standby = null;
-        if (!sb) return;
-        sb.iframe.remove();
-        URL.revokeObjectURL(sb.blobUrl);
+        if (sb) removeSlot(sb);
     }
 
-    // carrySettings sets a fresh engine to the settings the user picked on
-    // the ones before it (team info, sound, the followed player; the rate
+    // carrySettings sets an engine come up on a demo to the settings the
+    // user picked before (team info, sound, the followed player; the rate
     // applies on play).
     /** @param {FteController} fte */
     carrySettings(fte) {
@@ -433,18 +566,29 @@ export class PlayerEngine {
 
     }
 
-    // teardown drops the engine; removing the iframe frees it.
-    teardown() {
+    // The shown engine's iframe (PlayerLayer hooks its wheel).
+    get iframe() {
+        return this.shown?.iframe ?? null;
+    }
+
+    // resetShown: the shown engine no longer plays the current demo — the
+    // sync, the seek and whatever waited for it go; the engine stays.
+    resetShown() {
         this.stopSync();
         if (this.seekTimer) clearTimeout(this.seekTimer);
-        if (this.iframe) this.iframe.remove();
-        if (this.blobUrl) URL.revokeObjectURL(this.blobUrl);
         Object.assign(this, {
-            blobUrl: null, demoWait: null, iframe: null, fte: null, seekTimer: null,
+            demoWait: null, fte: null, seekTimer: null,
             pendingSeek: null, seekTarget: null, onReady: null,
             slow: null, consoleOpen: false,
         });
         this.status.set({ ...IDLE, rate: this.rate });
+    }
+
+    // teardown drops the shown engine; removing the iframe frees it.
+    teardown() {
+        this.resetShown();
+        if (this.shown) removeSlot(this.shown);
+        this.shown = null;
     }
 
     startSync() {
@@ -691,8 +835,18 @@ export class PlayerEngine {
 }
 
 /**
- * @typedef {{ handle: DemoHandle, demoT: number, iframe: HTMLIFrameElement, blobUrl: string, fte: FteController | null }} Standby
+ * An engine and the demo it holds: `ctl` once it is up, `loading` while it
+ * boots or loads a demo, `demoT` / `track` where the standby parks (null:
+ * where it stopped), `ready` once it is parked there; `seq` drops a load or
+ * a park overtaken by another.
+ * @typedef {{ iframe: HTMLIFrameElement, blobUrl: string, ctl: FteController | null, handle: DemoHandle, demoT: number | null, track: Track, loading: boolean, ready: boolean, seq: number }} Slot
  */
+
+/** @param {Slot} slot */
+function removeSlot(slot) {
+    slot.iframe.remove();
+    URL.revokeObjectURL(slot.blobUrl);
+}
 
 // The engine's own player list, not the Result's: the light player's
 // stand-in Result has no userids (src/play/light-demo.js).

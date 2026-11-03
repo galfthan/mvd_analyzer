@@ -15,10 +15,12 @@ export const AUTOTRACK_ON = 'stats';
 export const AUTOTRACK_OFF = 'user';
 
 export class FteController {
-    constructor(win, { demoDuration = null, demoName = 'match', resumeAudio = null } = {}) {
+    constructor(win, { demoDuration = null, demoName = 'match', demoFile = null, resumeAudio = null } = {}) {
         this._win = win;
         this._demoDuration = demoDuration;
         this._demoName = demoName;
+        this._demoFile = demoFile;   // its path in FTE's files (loadDemo releases it)
+        this._loads = 0;
         this._resumeAudio = resumeAudio;
         this._ended = false;
         this._restartTimer = null;
@@ -198,15 +200,30 @@ export class FteController {
     _gateFrameLoop() {
         const ftec = this._win.FTEC;
         const step = ftec.step;
-        const g = { suspended: false, grace: 0, parked: false };
+        const g = { suspended: false, grace: 0, parked: false, every: 1, n: 0 };
         ftec.step = (ts) => {
             if (g.suspended && g.grace-- <= 0) {
                 g.parked = true;
                 return;
             }
+            // Throttled (throttle()): the frames between run nothing but
+            // the reschedule.
+            if (g.every > 1 && ++g.n % g.every) {
+                this._win.requestAnimationFrame(ftec.step);
+                return;
+            }
             step(ts);
         };
         return g;
+    }
+
+    // Not in hub: throttle(n) runs the engine on every n-th display frame
+    // only (1: all of them) — for a host's engine that is not shown but
+    // loading, whose frames run on the thread the shown one draws on (a
+    // same-origin iframe shares its page's). Its demo and map load, and a
+    // demo_jump fast-forwards, n times slower.
+    throttle(every) {
+        this._gate.every = Math.max(1, Math.floor(every) || 1);
     }
 
     suspend() {
@@ -222,6 +239,72 @@ export class FteController {
             g.parked = false;
             this._win.requestAnimationFrame(this._win.FTEC.step);
         }
+    }
+
+    // Not in hub: loadDemo plays another demo in this engine instead of a
+    // fresh one per demo — whose boot (the wasm, the ~450 files, the heap)
+    // costs seconds of the page's thread. FTE 004 keeps its files in a
+    // table of its window (FTEH.f: path → buffer, ref-counted; ftewebgl.js),
+    // which its boot fills from Module.files and its drag-and-drop adds to:
+    // the demo goes in the same way under a name of its own, with `files`
+    // (path → ArrayBuffer: the map, when hasFile says the engine has not
+    // got it), `playdemo` starts it, and the demo before is released — FTE
+    // frees it once it has closed it. Resolves once the new demo's clock
+    // runs (a jump sent before is lost, as after a boot) or after `waitMs`.
+    loadDemo({ demo, gzipped = false, files = {}, demoDuration = null, waitMs = 30000 }) {
+        const win = this._win;
+        const name = `match${++this._loads}`;
+        const path = `qw/${name}.mvd${gzipped ? '.gz' : ''}`;
+        for (const [p, buf] of Object.entries(files)) this._addFile(p, buf);
+        this._addFile(path, demo);
+        for (const t of [this._restoreTimer, this._restartTimer]) if (t) clearInterval(t);
+        this._restoreTimer = null;
+        this._restartTimer = null;
+        const old = this._demoFile;
+        this._demoFile = path;
+        this._demoName = name;
+        this._demoDuration = demoDuration;
+        this._ended = false;
+        // A fresh engine's POV: autotrack (the host sets its own after).
+        this._lastTrackUserId = null;
+        this.enableAutotrack();
+        const from = this.getDemoElapsedTime();
+        this.command('playdemo', name);
+        // Running, so its clock moves: the host had it paused, and a speed
+        // of 0 would hold the new demo's clock at its start.
+        this.setDemoSpeed(100);
+        const started = performance.now();
+        return new Promise((resolve) => {
+            const poll = setInterval(() => {
+                const t = this.getDemoElapsedTime();
+                const waited = performance.now() - started;
+                // The new clock: below where the demo before stood. One that
+                // stood at the very start (or was gone, after its end) gives
+                // no such sign; a clock moving after the command is it then.
+                const fresh = t > 0 && (t < from - 0.5 || (from < 1 && waited > 300));
+                if (!fresh && waited < waitMs) return;
+                clearInterval(poll);
+                if (old && old !== path) this._releaseFile(old);
+                resolve();
+            }, 50);
+        });
+    }
+
+    hasFile(path) {
+        return !!this._win.FTEH?.f[path];
+    }
+
+    _addFile(path, buf) {
+        const win = this._win;
+        if (win.FTEH.f[path]) return;
+        const b = win.FTEH.h[win._emscriptenfte_buf_createfromarraybuf(buf)];
+        b.n = path;
+        win.FTEH.f[path] = b;
+    }
+
+    _releaseFile(path) {
+        const b = this._win.FTEH.f[path];
+        if (b) this._win._emscriptenfte_buf_release(b.h);
     }
 
     // Speed in percent: 100 = normal, 0 = paused.

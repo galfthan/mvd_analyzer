@@ -2,8 +2,8 @@
 // the engine is up. Emscripten builds publish themselves through globals
 // (`Module`, `FTEC`), read their configuration from `win.Module` at script
 // load, and cannot be torn down — so one window hosts at most one engine
-// for its lifetime. player.html is that window; to play another demo the
-// host reloads the iframe.
+// for its lifetime. player.html is that window; another demo plays in the
+// same engine (FteController.loadDemo).
 //
 // Mirrors hub.quakeworld.nu src/lib/fte/hooks.ts useFteLoader @ 5c96205c19c7
 // (MIT, see ../LICENSE): same Module shape, same "engine is ready once
@@ -80,7 +80,7 @@ export function startFte({ win, canvas, demoUrl, demoPath, mapName, configUrl, d
             if (!win.Module.getClientState) return;
             clearInterval(poll);
             const name = demoPath.split('/').pop().replace(/\.mvd(\.gz)?$/, '');
-            fte = new FteController(win, { demoDuration, demoName: name, resumeAudio });
+            fte = new FteController(win, { demoDuration, demoName: name, demoFile: demoPath, resumeAudio });
             // Hub starts muted (config.cfg also sets volume 0); keep that.
             fte.mute();
             resolve(fte);

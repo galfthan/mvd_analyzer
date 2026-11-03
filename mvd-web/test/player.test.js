@@ -506,3 +506,83 @@ test('each playlist clip plays from its own POV, whatever was picked by hand bef
     runner.stop();
     engine.teardown();
 });
+
+// The light player's two engines take turns: the standby, parked at the
+// next demo's clip, is shown when the run gets there, and the engine shown
+// before waits in its place with its demo — the demo after loads into it
+// (FteController.loadDemo), no engine boots.
+test('the shown engine and the standby swap, and the next demo loads into the one not shown', async () => {
+    globalThis.document ??= /** @type {any} */ ({ activeElement: null });
+    globalThis.requestAnimationFrame ??= () => 1;
+    globalThis.cancelAnimationFrame ??= () => {};
+    const { PlayerEngine } = await import('../src/player/engine.js');
+    const { createClock } = await import('../src/state/clock.js');
+    /** @param {number} id */
+    const handle = (id) => ({
+        ref: { key: `hub:${id}`, gameId: id },
+        result: { demoInfo: { map: '' }, streams: { global: { demoOffset: 0 } } },
+        demo: async () => ({ blob: new Blob([new Uint8Array([id])]), gzipped: false }),
+    });
+    const [A, B, C] = [handle(1), handle(2), handle(3)];
+    const demo = store(/** @type {any} */ (null));
+    const engine = new PlayerEngine({ clock: createClock(), demo, activeTab: store('player') });
+    engine.host = /** @type {any} */ ({ appendChild() {} });
+    /** @param {any} h @param {Awaited<ReturnType<typeof freshFte>>} e */
+    const slot = (h, e) => {
+        const cls = new Set();
+        const w = /** @type {any} */ (e.win);
+        w.FTEH = { h: [], f: {} };
+        w._emscriptenfte_buf_createfromarraybuf = (/** @type {ArrayBuffer} */ buf) => w.FTEH.h.push({ r: 1, d: new Uint8Array(buf) }) - 1;
+        w._emscriptenfte_buf_release = () => {};
+        return /** @type {any} */ ({
+            iframe: { classList: { add: (/** @type {string} */ c) => cls.add(c), remove: (/** @type {string} */ c) => cls.delete(c) }, remove() {}, hidden: () => cls.has('player-standby') },
+            blobUrl: '', ctl: e.fte, handle: h, demoT: null, track: 'auto', loading: false, ready: false, seq: 0,
+        });
+    };
+    const a = await freshFte({ alpha: 3 });
+    const b = await freshFte({ bravo: 4 });
+    demo.set(A);
+    const sa = slot(A, a);
+    engine.shown = sa;
+    engine.adopt(a.fte);
+    a.fte.unmute();
+    const sb = slot(B, b);
+    sb.iframe.classList.add('player-standby');
+    sb.ready = true;
+    engine.standby = sb;
+
+    demo.set(B);
+    assert.equal(engine.shown, sb, 'the standby is shown');
+    assert.equal(engine.fte, b.fte, 'and adopted at once: it is parked at its clip');
+    assert.ok(!sb.iframe.hidden());
+    assert.equal(engine.standby, sa, 'the engine shown before waits in its place');
+    assert.ok(sa.iframe.hidden());
+    assert.ok(a.fte.isMuted() && !a.fte.isPlaying() && a.fte._gate.suspended, 'silent, paused, its frame loop stopped');
+    assert.ok(!b.win.commands.some((c) => c.startsWith('demo_jump')), 'no opening jump: the standby is at its clip');
+
+    // A third demo: it loads into the engine that is not shown, which is
+    // shown — the one before waits with its demo, B.
+    a.win.demoTime = 300;
+    demo.set(C);
+    assert.equal(engine.shown, sa);
+    assert.equal(engine.standby, sb);
+    assert.equal(engine.fte, null, 'not adopted until C runs');
+    await new Promise((r) => setTimeout(r, 20));
+    assert.ok(a.win.commands.includes('playdemo match1'), 'C plays in the engine that played A');
+    assert.ok(sa.loading);
+    a.win.demoTime = 0.5;
+    await new Promise((r) => setTimeout(r, 120));
+    assert.equal(engine.fte, a.fte, 'adopted once C runs');
+    assert.ok(!a.fte.isMuted(), 'with the sound carried');
+    assert.equal(sb.handle, B, 'the standby still holds B');
+
+    // Back to B: the standby holds it, though not parked at a clip — shown
+    // and adopted at once, opening at the cursor.
+    engine.clock.seek(42);
+    demo.set(B);
+    assert.equal(engine.shown, sb);
+    assert.equal(engine.fte, b.fte);
+    assert.ok(b.win.commands.includes('demo_jump 42'));
+    engine.dropStandby();
+    engine.teardown();
+});

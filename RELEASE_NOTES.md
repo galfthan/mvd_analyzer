@@ -23,9 +23,19 @@ first clip's demo already loaded and at its start, so the click plays at
 once, with sound.
 
 In a playlist over several demos, the next clip's demo now waits in a
-second, hidden engine that has already booted and jumped to the clip, and
-the switch only swaps which one shows. Not on touch devices or ones
-reporting under 4 GB.
+second, hidden engine already at the clip, and the switch only swaps which
+one shows. The two engines then take turns: each next demo loads into the
+engine not shown instead of booting a fresh one — the boot was what made
+the playing engine stutter, both sharing the page's thread — and the
+hidden one runs at a quarter of the frames while it loads. Both are up
+before the first click (the play button pulses until then). Not on touch
+devices or ones reporting under 4 GB.
+
+The light player's first clip now shows from its own POV before play
+(it followed whoever autotrack picked until the click).
+
+The Player tab's engine also plays the next demo loaded instead of
+booting again.
 
 ## unreleased (hub-warm) — new hub demos are ready before anyone opens them
 

@@ -92,12 +92,17 @@
         // game view, the view itself, space: the browser plays no sound
         // before a gesture on the page, so a run that started by itself
         // played silent. Meanwhile the first clip's demo loads into the
-        // engine, opening at the clip's start, so the click plays at once.
-        const first = playable.find((c) => !c.card);
+        // engine, opening at the clip's start from its POV, so the click
+        // plays at once — and the next demo's into the standby (below).
+        const first = firstClip;
         if (first) {
             clock.seek(Math.max(0, first.from - (first.demo.offset || 0)));
             download(/** @type {number} */ (first.demo.gameId)).then((h) => {
-                if (!playlist.get().run) demo.set(h);
+                if (playlist.get().run) return;
+                demo.set(h);
+                engine.whenReady(() => {
+                    if (!playlist.get().run) engine.track(first.track, { pick: false });
+                });
             }, () => {});
         }
         return () => { off(); runner.stop(); engine.teardown(); engine.dropStandby(); };
@@ -112,24 +117,37 @@
     let run = $derived($playlist.run);
     let index = $derived(run && run.clips === playable ? run.index : -1);
     let current = $derived(index >= 0 ? playable[index] : null);
+    const firstClip = $derived(playable.find((c) => !c.card));
+    // The clip shown: the one playing, or before the run the first.
+    let atClip = $derived(index >= 0 ? current : firstClip);
 
     // The next clip from another demo waits in a standby engine
-    // (engine.prepare): started once the clip playing has its demo shown,
-    // so the step to it shows an engine already at its start. Not on a
-    // touch device or one that reports under 4 GB (navigator.deviceMemory,
-    // Chromium only) — each engine holds 256 MB of wasm memory at least.
+    // (engine.prepare), parked at its start from its POV, so the step to it
+    // shows an engine already there; the two engines then take turns, each
+    // loading the next demo while the other plays — before the first click
+    // both are up. Not on a touch device or one that reports under 4 GB
+    // (navigator.deviceMemory, Chromium only) — each engine holds 256 MB of
+    // wasm memory at least.
     const standbyOK = !window.matchMedia?.('(pointer: coarse)').matches
         && !(/** @type {any} */ (navigator).deviceMemory < 4);
+    const standbyReady = engine.standbyReady;
+    // The next clip of another demo than the one shown.
+    let nextOther = $derived.by(() => {
+        const cur = atClip;
+        if (!standbyOK || !cur || cur.card) return null;
+        return playable.slice(playable.indexOf(cur) + 1).find((c) => !c.card && c.demo.gameId && c.demo.key !== cur.demo.key) || null;
+    });
     $effect(() => {
-        const cur = current;
-        const shown = $demo;
-        if (!standbyOK || !cur || cur.card || shown?.ref.key !== cur.demo.key) return;
-        const next = playable.slice(index + 1).find((c) => !c.card && c.demo.gameId && c.demo.key !== cur.demo.key);
-        if (!next) return;
+        const cur = atClip;
+        const next = nextOther;
+        if (!cur || !next || $demo?.ref.key !== cur.demo.key) return;
         download(/** @type {number} */ (next.demo.gameId)).then((h) => {
-            if (current === cur) engine.prepare(/** @type {any} */ (h), next.from);
+            if (atClip === cur) engine.prepare(/** @type {any} */ (h), next.from, next.track);
         }, () => {});
     });
+    // Before the run: both engines up and parked (or the standby's demo
+    // unavailable — the click plays regardless).
+    let warming = $derived(index < 0 && (!$status.ready || (!!nextOther && !$standbyReady)));
 
     // The full analyzer opens this playlist as its own (`&open`: it
     // replaces the list there rather than adding to it) on the demo of the
@@ -262,7 +280,7 @@
             <div class="clips-screen">
                 <PlayerFrame {engine} />
                 {#if index < 0}
-                    <button class="clips-start" title="Play the clips (space)" aria-label="Play the clips" onclick={() => playFrom(0)}>
+                    <button class="clips-start" class:warming title={warming ? 'Loading the players — play now, or wait for them' : 'Play the clips (space)'} aria-label="Play the clips" onclick={() => playFrom(0)}>
                         <Play size={44} fill="currentColor" />
                     </button>
                 {/if}
@@ -278,8 +296,10 @@
                         <span class="n">{index + 1} / {playable.length}</span>
                         {#if !current.card}<span class="t">{formatDuration(Math.max(0, Math.min(now, current.to) - current.from))} / {len(current)}</span>{/if}
                         <span class="l">{current.label || current.who || 'Clip'}</span>
-                    {:else if $status.ready}
+                    {:else if !warming}
                         <span class="l muted">Press play, or pick a clip</span>
+                    {:else if $status.ready}
+                        <span class="l muted">Loading the next demo…</span>
                     {:else}
                         <span class="l muted">Loading the player and the demo…</span>
                     {/if}
@@ -438,6 +458,13 @@
         border-radius: 50%;
         color: var(--accent-cyan);
         cursor: pointer;
+    }
+    .clips-start.warming {
+        opacity: 0.45;
+        animation: clips-warm 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes clips-warm {
+        to { opacity: 0.8; }
     }
     .clips-start:hover {
         background: var(--accent-cyan);
