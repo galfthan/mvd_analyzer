@@ -88,8 +88,19 @@
     let now = $state(0);   // demo seconds
     onMount(() => {
         const off = engine.onTick((t) => { now = t; });
-        if (playable.length) runner.start(playable, 0);
-        return () => { off(); runner.stop(); engine.teardown(); };
+        // The run starts with the viewer's click — the play button over the
+        // game view, the view itself, space: the browser plays no sound
+        // before a gesture on the page, so a run that started by itself
+        // played silent. Meanwhile the first clip's demo loads into the
+        // engine, opening at the clip's start, so the click plays at once.
+        const first = playable.find((c) => !c.card);
+        if (first) {
+            clock.seek(Math.max(0, first.from - (first.demo.offset || 0)));
+            download(/** @type {number} */ (first.demo.gameId)).then((h) => {
+                if (!playlist.get().run) demo.set(h);
+            }, () => {});
+        }
+        return () => { off(); runner.stop(); engine.teardown(); engine.dropStandby(); };
     });
 
     // Only hub clips (and title cards) play here: a local file's clip needs
@@ -101,6 +112,24 @@
     let run = $derived($playlist.run);
     let index = $derived(run && run.clips === playable ? run.index : -1);
     let current = $derived(index >= 0 ? playable[index] : null);
+
+    // The next clip from another demo waits in a standby engine
+    // (engine.prepare): started once the clip playing has its demo shown,
+    // so the step to it shows an engine already at its start. Not on a
+    // touch device or one that reports under 4 GB (navigator.deviceMemory,
+    // Chromium only) — each engine holds 256 MB of wasm memory at least.
+    const standbyOK = !window.matchMedia?.('(pointer: coarse)').matches
+        && !(/** @type {any} */ (navigator).deviceMemory < 4);
+    $effect(() => {
+        const cur = current;
+        const shown = $demo;
+        if (!standbyOK || !cur || cur.card || shown?.ref.key !== cur.demo.key) return;
+        const next = playable.slice(index + 1).find((c) => !c.card && c.demo.gameId && c.demo.key !== cur.demo.key);
+        if (!next) return;
+        download(/** @type {number} */ (next.demo.gameId)).then((h) => {
+            if (current === cur) engine.prepare(/** @type {any} */ (h), next.from);
+        }, () => {});
+    });
 
     // The full analyzer opens this playlist as its own (`&open`: it
     // replaces the list there rather than adding to it) on the demo of the
@@ -230,7 +259,14 @@
         <p class="clips-empty">{clips.length ? 'These clips are from local files — open them in the full analyzer and load the files there.' : 'No clips in this link.'}</p>
     {:else}
         <div class="clips-stage" bind:this={stage}>
-            <div class="clips-screen"><PlayerFrame {engine} /></div>
+            <div class="clips-screen">
+                <PlayerFrame {engine} />
+                {#if index < 0}
+                    <button class="clips-start" title="Play the clips (space)" aria-label="Play the clips" onclick={() => playFrom(0)}>
+                        <Play size={44} fill="currentColor" />
+                    </button>
+                {/if}
+            </div>
             <div class="clips-controls">
                 <button class="clips-btn" title="Previous clip" disabled={index <= 0} onclick={() => playFrom(index - 1)}><SkipBack size={16} /></button>
                 <button class="clips-btn clips-play" title={$status.playing ? 'Pause (space)' : 'Play (space)'} onclick={togglePlay}>
@@ -243,7 +279,7 @@
                         {#if !current.card}<span class="t">{formatDuration(Math.max(0, Math.min(now, current.to) - current.from))} / {len(current)}</span>{/if}
                         <span class="l">{current.label || current.who || 'Clip'}</span>
                     {:else if $status.ready}
-                        <span class="l muted">Pick a clip</span>
+                        <span class="l muted">Press play, or pick a clip</span>
                     {:else}
                         <span class="l muted">Loading the player and the demo…</span>
                     {/if}
@@ -367,6 +403,7 @@
         position: relative;
     }
     .clips-screen {
+        position: relative;
         width: 100%;
         aspect-ratio: 16 / 9;
         max-height: 75vh;
@@ -383,6 +420,28 @@
         min-height: 0;
         aspect-ratio: auto;
         max-height: none;
+    }
+    .clips-start {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 84px;
+        height: 84px;
+        padding: 0 0 0 6px;
+        background: rgba(10, 14, 30, 0.75);
+        border: 2px solid rgba(0, 217, 255, 0.6);
+        border-radius: 50%;
+        color: var(--accent-cyan);
+        cursor: pointer;
+    }
+    .clips-start:hover {
+        background: var(--accent-cyan);
+        color: var(--bg-deep);
     }
     .clips-controls {
         display: flex;

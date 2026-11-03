@@ -5,6 +5,28 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (player-standby) — the light player: models that load, sound from the first clip, no black between demos
+
+The Player's engine sometimes came up without some of its models — a
+backpack or a player that never drew. FTE requested all ~450 of its files
+at once and Chrome turned part of the burst down
+(`net::ERR_INSUFFICIENT_RESOURCES`); FTE does not retry, so a refused file
+was missing for that engine's life. The page now fetches them itself, 16 at a
+time with retries, and keeps them, so the next demo's engine boots from
+memory (`mvd-fte-player/src/asset-fetch.js`). This applies to the Player
+tab too.
+
+The light player (`play.html`) no longer starts by itself: a shared link
+opened with no click on the page played silent, browsers holding sound
+until a gesture. It waits on a play button over the game view, with the
+first clip's demo already loaded and at its start, so the click plays at
+once, with sound.
+
+In a playlist over several demos, the next clip's demo now waits in a
+second, hidden engine that has already booted and jumped to the clip, and
+the switch only swaps which one shows. Not on touch devices or ones
+reporting under 4 GB.
+
 ## unreleased (hub-warm) — new hub demos are ready before anyone opens them
 
 mvd-api's access log has a `src` field, the request's `?label=`: the web

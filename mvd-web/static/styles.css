@@ -2821,6 +2821,13 @@ th.sortable.sort-desc::after {
     border: 0;
 }
 
+/* The next demo's engine, booting and parked under the shown one's view
+   (src/player/engine.js, prepare). */
+.player-frame-host iframe.player-standby {
+    opacity: 0;
+    pointer-events: none;
+}
+
 .player-frame-error {
     position: absolute;
     inset: 0;

@@ -1549,14 +1549,29 @@ clock and stores; `light-demo.js` stands in for the data layer: a hub
 demo's bytes (`fetchGame` + `downloadDemo`) and a minimal handle whose
 result carries just the map (hub's game row) and the demo offset (from
 the clips). The page lists the clips (label, who, length, slow motion,
-demo), starts the run at once (with sound on, as the tab does; the sound
-setting stays from one demo's clips to the next), and has play /
+demo) and starts the run on the viewer's click — the play button over the
+game view, the view itself, or space: browsers play no sound before a
+gesture on the page, so a run that started by itself played silent.
+Until then the first clip's demo loads into the engine, opening at that
+clip's start, so the click plays at once (with sound on, as the tab does;
+the sound setting stays from one demo's clips to the next). It has play /
 pause, previous / next, sound, the keys menu and fullscreen (the game
 view and these controls; `f`); a click on a clip plays from it. The team
 info shows from the start. A list over several hub demos plays straight
 through: while an item plays, the next clip's demo downloads when it is
 another one (the runner's `prefetch`; the page keeps the downloads by
-gameId, and a pick shares one in flight). A click on the game view plays / pauses, and
+gameId, and a pick shares one in flight), and once the clip playing has
+its engine up, a **standby engine** boots on that next demo
+(`PlayerEngine.prepare`): in the same host as the shown one, transparent
+and taking no input, it parks paused at its clip's start with its frame
+loop stopped, and the step to that clip shows it (`promote`) instead of
+booting an engine then — the seconds of black between two demos. Only one
+waits, and a pick of a clip from another demo drops it, so two engines at
+most live; none on a touch device or one reporting under 4 GB
+(`navigator.deviceMemory`), each engine holding 256 MB of wasm memory at
+least. The engines' files come from one fetcher for the page
+(`mvd-fte-player/src/asset-fetch.js`), so the next engine boots from
+memory. A click on the game view plays / pauses, and
 the keys are the full page's (*Keys*), on this page and the full one
 alike. Clips
 of a local file are left out of the list, with a note counting them. A click while a demo downloads
