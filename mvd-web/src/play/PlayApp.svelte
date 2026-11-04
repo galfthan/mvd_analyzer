@@ -93,7 +93,7 @@
         // before a gesture on the page, so a run that started by itself
         // played silent. Meanwhile the first clip's demo loads into the
         // engine, opening at the clip's start from its POV, so the click
-        // plays at once — and the next demo's into the standby (below).
+        // plays at once.
         const first = firstClip;
         if (first) {
             clock.seek(Math.max(0, first.from - (first.demo.offset || 0)));
@@ -105,7 +105,7 @@
                 });
             }, () => {});
         }
-        return () => { off(); runner.stop(); engine.teardown(); engine.dropStandby(); };
+        return () => { off(); runner.stop(); engine.teardown(); };
     });
 
     // Only hub clips (and title cards) play here: a local file's clip needs
@@ -118,36 +118,9 @@
     let index = $derived(run && run.clips === playable ? run.index : -1);
     let current = $derived(index >= 0 ? playable[index] : null);
     const firstClip = $derived(playable.find((c) => !c.card));
-    // The clip shown: the one playing, or before the run the first.
-    let atClip = $derived(index >= 0 ? current : firstClip);
 
-    // The next clip from another demo waits in a standby engine
-    // (engine.prepare), parked at its start from its POV, so the step to it
-    // shows an engine already there; the two engines then take turns, each
-    // loading the next demo while the other plays — before the first click
-    // both are up. Not on a touch device or one that reports under 4 GB
-    // (navigator.deviceMemory, Chromium only) — each engine holds 256 MB of
-    // wasm memory at least.
-    const standbyOK = !window.matchMedia?.('(pointer: coarse)').matches
-        && !(/** @type {any} */ (navigator).deviceMemory < 4);
-    const standbyReady = engine.standbyReady;
-    // The next clip of another demo than the one shown.
-    let nextOther = $derived.by(() => {
-        const cur = atClip;
-        if (!standbyOK || !cur || cur.card) return null;
-        return playable.slice(playable.indexOf(cur) + 1).find((c) => !c.card && c.demo.gameId && c.demo.key !== cur.demo.key) || null;
-    });
-    $effect(() => {
-        const cur = atClip;
-        const next = nextOther;
-        if (!cur || !next || $demo?.ref.key !== cur.demo.key) return;
-        download(/** @type {number} */ (next.demo.gameId)).then((h) => {
-            if (atClip === cur) engine.prepare(/** @type {any} */ (h), next.from, next.track);
-        }, () => {});
-    });
-    // Before the run: both engines up and parked (or the standby's demo
-    // unavailable — the click plays regardless).
-    let warming = $derived(index < 0 && (!$status.ready || (!!nextOther && !$standbyReady)));
+    // Before the run: the engine not up yet (the click plays regardless).
+    let warming = $derived(index < 0 && !$status.ready);
 
     // The full analyzer opens this playlist as its own (`&open`: it
     // replaces the list there rather than adding to it) on the demo of the
@@ -280,7 +253,7 @@
             <div class="clips-screen">
                 <PlayerFrame {engine} />
                 {#if index < 0}
-                    <button class="clips-start" class:warming title={warming ? 'Loading the players — play now, or wait for them' : 'Play the clips (space)'} aria-label="Play the clips" onclick={() => playFrom(0)}>
+                    <button class="clips-start" class:warming title={warming ? 'Loading the player — play now, or wait for it' : 'Play the clips (space)'} aria-label="Play the clips" onclick={() => playFrom(0)}>
                         <Play size={44} fill="currentColor" />
                     </button>
                 {/if}
@@ -298,8 +271,6 @@
                         <span class="l">{current.label || current.who || 'Clip'}</span>
                     {:else if !warming}
                         <span class="l muted">Press play, or pick a clip</span>
-                    {:else if $status.ready}
-                        <span class="l muted">Loading the next demo…</span>
                     {:else}
                         <span class="l muted">Loading the player and the demo…</span>
                     {/if}

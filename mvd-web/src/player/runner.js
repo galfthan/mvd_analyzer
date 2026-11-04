@@ -17,6 +17,10 @@
 import { playlistStep, slowAt, isCard } from '../lib/playlist.js';
 import { playlist, setRun } from './playlist-store.js';
 import { toast } from './toast.js';
+import { SPEEDS } from '../lib/playback-bar.js';
+
+// The fastest the clock plays (× 1): how far it can move per second of a tick.
+const MAX_SPEED = Math.max(...SPEEDS);
 
 /**
  * @typedef {import('../lib/playlist.js').Clip} Clip
@@ -47,6 +51,7 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
     let loadingClip = null;  // the clip whose demo a run is loading
     let awaitingFrames = false;   // a clip waits for the shown engine to repaint
     let showTries = 0;            // two-frame waits for the engine to become active
+    let lastTick = 0;             // performance.now() at the previous tick
     const MAX_SHOW_TRIES = 30;
 
     const currentRef = () => demoRefOf(demo.get(), teams.get().order);
@@ -267,6 +272,9 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
     function tick(d, demoT) {
         const run = playlist.get().run;
         if (!run || d !== drv || !d.ready() || awaitingFrames) return;
+        const wall = performance.now();
+        const sinceTick = (wall - lastTick) / 1000;
+        lastTick = wall;
         if (d.seeking()) {
             run.prev = null;
             return;
@@ -282,7 +290,10 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
         /** @type {PlaylistStep} */
         const step = d.hasEnded()
             ? { type: 'end' }
-            : playlistStep(local.map((i) => run.clips[i]), li, run.prev, demoT, d.isPlaying());
+            // A frame that took long (the page busy, the engine loading)
+            // lets the clock move further than hub's 1.5 s in one tick;
+            // read as a seek, the clip would play on past its end.
+            : playlistStep(local.map((i) => run.clips[i]), li, run.prev, demoT, d.isPlaying(), 1.5 + sinceTick * MAX_SPEED);
         run.prev = demoT;
         // Paused, nothing is slowed: play resumes at the rate and the next
         // tick slows it again inside the window.

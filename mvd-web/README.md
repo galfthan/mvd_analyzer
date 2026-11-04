@@ -1205,7 +1205,7 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   followed by hand — by name, followed on the new engine only when its
   demo has that player, else autotrack. In a playlist the playlist says
   whom to watch: every clip — reached by playing on, a seek into it, or
-  in another demo's engine (its POV is set after the carried one) —
+  in another demo (its POV is set after the carried one) —
   starts from its own POV, autotrack when it names none, so a player
   picked by hand during one clip does not carry into the next. A clip's
   POV is not a hand pick and is not carried to a demo loaded by hand
@@ -1561,26 +1561,20 @@ view and these controls; `f`); a click on a clip plays from it. The team
 info shows from the start. A list over several hub demos plays straight
 through: while an item plays, the next clip's demo downloads when it is
 another one (the runner's `prefetch`; the page keeps the downloads by
-gameId, and a pick shares one in flight), and once the clip playing has
-its engine up, a **standby engine** gets that next demo
-(`PlayerEngine.prepare`): in the same host as the shown one, transparent
-and taking no input, it parks paused at its clip's start from its POV
-with its frame loop stopped, and the step to that clip shows it
-(`switchTo`) — no seconds of black between two demos. The engine shown
-before takes the standby's place, silent and stopped with its demo still
-in, and the demo after loads into it (`FteController.loadDemo`): the two
-engines take turns for the whole list, and none boots after the first
-two — the boot (the wasm, ~450 files, the heap) being what stuttered the
-shown engine, whose thread a same-origin iframe shares. The standby also
-runs on every fourth frame only (`throttle`) while it loads and seeks.
-Both are up before the first click: the play button pulses until the
-standby is parked (a click plays regardless). A pick of a clip from
-another demo is loaded into the engine not shown, so two engines at most
-live; none on a touch device or one reporting under 4 GB
-(`navigator.deviceMemory`), each engine holding 256 MB of wasm memory at
-least. The engines' files come from one fetcher for the page
-(`mvd-fte-player/src/asset-fetch.js`), so the second engine boots from
-memory. The Player tab plays the next demo it loads in its engine too. A
+gameId, and a pick shares one in flight). One engine plays the whole
+list: the step to another demo's clip loads that demo into it
+(`FteController.loadDemo`), no boot — the wasm, ~450 files and the heap
+are the first demo's — with the view faded to black from the step until
+the engine has jumped to the clip (`PlayerEngine.fadeOut`, `FADE_MS`):
+a moment of black instead of the new demo's start and its fast-forward.
+The play button pulses until the engine is up (a click plays
+regardless). A second engine holding the next demo, swapped in on the
+step, was tried and dropped: a same-origin iframe runs on its page's
+thread, so whatever the hidden one did took the shown one's frames and
+it stuttered. The engine's files come from one fetcher for the page
+(`mvd-fte-player/src/asset-fetch.js`): an engine booted again boots from
+memory, and a map it has not got is fetched from there. The Player tab
+plays the next demo it loads in its engine the same way. A
 click on the game view plays / pauses, and
 the keys are the full page's (*Keys*), on this page and the full one
 alike. Clips

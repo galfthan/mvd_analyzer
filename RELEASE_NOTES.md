@@ -5,7 +5,7 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (player-standby) — the light player: models that load, sound from the first clip, no black between demos
+## unreleased (player-standby) — the light player: models that load, sound from the first clip, one engine for every demo
 
 The Player's engine sometimes came up without some of its models — a
 backpack or a player that never drew. FTE requested all ~450 of its files
@@ -22,20 +22,20 @@ until a gesture. It waits on a play button over the game view, with the
 first clip's demo already loaded and at its start, so the click plays at
 once, with sound.
 
-In a playlist over several demos, the next clip's demo now waits in a
-second, hidden engine already at the clip, and the switch only swaps which
-one shows. The two engines then take turns: each next demo loads into the
-engine not shown instead of booting a fresh one — the boot was what made
-the playing engine stutter, both sharing the page's thread — and the
-hidden one runs at a quarter of the frames while it loads. Both are up
-before the first click (the play button pulses until then). Not on touch
-devices or ones reporting under 4 GB.
+In a playlist over several demos, the next demo now loads into the engine
+already running instead of a fresh one booting for it, with the view
+faded to black from the step until the engine is at the clip. The play
+button pulses until the engine is up.
+
+A clip could play on past its end: a frame that took long (the page busy)
+let the demo clock move more than 1.5 s in one step, which the runner
+read as a seek. The step allowed now grows with the time the frame took.
 
 The light player's first clip now shows from its own POV before play
 (it followed whoever autotrack picked until the click).
 
 The Player tab's engine also plays the next demo loaded instead of
-booting again.
+booting again, with the same fade.
 
 ## unreleased (hub-warm) — new hub demos are ready before anyone opens them
 

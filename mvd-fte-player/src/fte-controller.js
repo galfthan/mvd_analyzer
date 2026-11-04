@@ -200,30 +200,15 @@ export class FteController {
     _gateFrameLoop() {
         const ftec = this._win.FTEC;
         const step = ftec.step;
-        const g = { suspended: false, grace: 0, parked: false, every: 1, n: 0 };
+        const g = { suspended: false, grace: 0, parked: false };
         ftec.step = (ts) => {
             if (g.suspended && g.grace-- <= 0) {
                 g.parked = true;
                 return;
             }
-            // Throttled (throttle()): the frames between run nothing but
-            // the reschedule.
-            if (g.every > 1 && ++g.n % g.every) {
-                this._win.requestAnimationFrame(ftec.step);
-                return;
-            }
             step(ts);
         };
         return g;
-    }
-
-    // Not in hub: throttle(n) runs the engine on every n-th display frame
-    // only (1: all of them) — for a host's engine that is not shown but
-    // loading, whose frames run on the thread the shown one draws on (a
-    // same-origin iframe shares its page's). Its demo and map load, and a
-    // demo_jump fast-forwards, n times slower.
-    throttle(every) {
-        this._gate.every = Math.max(1, Math.floor(every) || 1);
     }
 
     suspend() {

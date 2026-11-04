@@ -9,9 +9,9 @@
 // Promise of the bytes per file (ftewebgl.js, Module.files), so the loader
 // hands it these instead of URLs: at most `concurrency` requests in flight,
 // a network failure or a 5xx retried, and the bytes kept by URL — a host
-// that shares one fetcher across engines (mvd-web's PlayerEngine, which
-// starts one per demo) boots the next engine from memory. Each engine gets
-// its own copy: FTE adopts the buffer it is given as the file's storage.
+// that shares one fetcher across engines (mvd-web's PlayerEngine) boots an
+// engine again from memory. Each engine gets its own copy: FTE adopts the
+// buffer it is given as the file's storage.
 //
 // Only http(s) URLs are kept and retried; a blob: URL (the demo) is one
 // engine's, and fails for good once its engine is gone (revoked).

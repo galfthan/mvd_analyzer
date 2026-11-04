@@ -256,23 +256,3 @@ test('loadDemo of a demo left at its start: the clock moving is the sign', async
     assert.ok(Date.now() - t0 >= 250, 'not on the first reading — that could be the demo before');
     assert.ok(!fte.hasFile('qw/match.mvd'));
 });
-
-test('throttle runs the engine on every n-th frame, rescheduling the others', () => {
-    const win = fakeWin();
-    let ran = 0;
-    let scheduled = 0;
-    win.FTEC.step = () => { ran++; };
-    win.requestAnimationFrame = () => { scheduled++; };
-    const fte = new FteController(win);
-    fte.throttle(4);
-    for (let i = 0; i < 8; i++) win.FTEC.step(i);
-    assert.equal(ran, 2);
-    assert.equal(scheduled, 6, 'the skipped frames keep the loop going');
-    fte.throttle(1);
-    for (let i = 0; i < 3; i++) win.FTEC.step(i);
-    assert.equal(ran, 5);
-    fte.suspend();
-    win.FTEC.step(0);
-    win.FTEC.step(0);
-    assert.equal(ran, 6, 'suspend still parks after one more frame');
-});
