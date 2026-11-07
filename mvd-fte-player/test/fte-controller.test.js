@@ -157,6 +157,17 @@ test('unmute resumes audio and picks an audible volume', () => {
     assert.deepEqual(win.commands, ['volume 0\n', 'volume 0.1\n']);
 });
 
+test('setLevel scales the unmuted volume and leaves a muted engine muted', () => {
+    const win = fakeWin();
+    const fte = new FteController(win);
+    fte.unmute();
+    fte.setLevel(0.3);
+    fte.mute();
+    fte.setLevel(0.5);
+    fte.unmute();
+    assert.deepEqual(win.commands, ['volume 0.1\n', 'volume 0.03\n', 'volume 0\n', 'volume 0.05\n']);
+});
+
 test('suspend parks the frame loop after one more frame; resume restarts it once', () => {
     // FTEC.step reschedules itself by name through requestAnimationFrame.
     const frames = [];

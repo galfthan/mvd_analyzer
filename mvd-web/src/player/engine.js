@@ -102,6 +102,9 @@ export class PlayerEngine {
         // (FteController.play resumes it).
         this.teamInfo = false;
         this.sound = true;
+        // The game's share of its volume (0..1): the light player turns it
+        // down under a playlist's music (setLevel).
+        this.level = 1;
         // The player last followed by hand, by name — userids differ from
         // demo to demo: followed on the next engine when it has them, else
         // the engine's autotrack. null: autotrack.
@@ -361,6 +364,7 @@ export class PlayerEngine {
     /** @param {FteController} fte */
     carrySettings(fte) {
         if (this.teamInfo) fte.command('hud_teaminfo_show 1');
+        fte.setLevel(this.level);
         if (this.sound) fte.unmute();
         const id = this.trackedName == null ? null : userIdIn(fte, this.trackedName);
         if (id != null) fte.track(id);
@@ -662,6 +666,13 @@ export class PlayerEngine {
         this.teamInfo = !this.teamInfo;
         this.fte?.command(`hud_teaminfo_show ${this.teamInfo ? 1 : 0}`);
         this.publish();
+    }
+
+    // setLevel(f): the game sound at f of its volume (music under it).
+    /** @param {number} f */
+    setLevel(f) {
+        this.level = f;
+        this.fte?.setLevel(f);
     }
 
     toggleMute() {

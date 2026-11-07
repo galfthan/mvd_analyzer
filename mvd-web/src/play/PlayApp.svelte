@@ -15,6 +15,7 @@
     import Volume2 from '@lucide/svelte/icons/volume-2';
     import VolumeX from '@lucide/svelte/icons/volume-x';
     import Snail from '@lucide/svelte/icons/snail';
+    import Music from '@lucide/svelte/icons/music';
     import ExternalLink from '@lucide/svelte/icons/external-link';
     import PlayerFrame from '../player/PlayerFrame.svelte';
     import Toast from '../player/Toast.svelte';
@@ -29,6 +30,7 @@
     import { formatDuration } from '../lib/result.js';
     import { encodePlaylist } from '../lib/playlist.js';
     import { loadLightDemo } from './light-demo.js';
+    import { createMusic } from './music.js';
     import { createPlayerKeys, nextName } from '../player/player-keys.js';
     import { playerMenuItems } from '../player/player-menu.js';
     import MapMenu from '../ui/MapMenu.svelte';
@@ -65,8 +67,30 @@
     // A shared clip is watched for the fight: both teams' health, armor and
     // weapons show from the start (`t` hides them).
     engine.teamInfo = true;
+    // The playlist's music (music.js): the runner cues it, the viewer's
+    // play / pause pauses it, and the game sound goes down under it.
+    // The viewer's music loudness (the slider: × the cue's own) is kept
+    // in this browser.
+    const SCALE_KEY = 'mvda.musicScale';
+    /** @type {number} */
+    let savedScale = 1;
+    try {
+        const v = Number(localStorage.getItem(SCALE_KEY));
+        if (v > 0 && v <= 2) savedScale = v;
+    } catch {}
+    const music = createMusic({ scale: savedScale });
+    const musicState = music.state;
+    const UNDER_MUSIC = 0.6;
+    $effect(() => engine.setLevel($musicState.sounding ? UNDER_MUSIC : 1));
+    /** @param {number} f */
+    function setMusicScale(f) {
+        music.setScale(f);
+        try {
+            localStorage.setItem(SCALE_KEY, String(f));
+        } catch {}
+    }
     const runner = createRunner({
-        engine, demo, teams, demoRefOf,
+        engine, demo, teams, demoRefOf, music,
         segment: store(/** @type {{ start: number, end: number } | null} */ (null)),
         selectTab: () => {},
         // A hub clip's demo: download it and hand it to the engine — unless
@@ -113,6 +137,7 @@
     const playable = $derived(clips.filter((c) => c.card || c.demo?.gameId));
     const skipped = $derived(clips.length - playable.length);
     const nClips = $derived(clips.filter((c) => !c.card).length);
+    const hasMusic = $derived(playable.some((c) => c.cue));
 
     let run = $derived($playlist.run);
     let index = $derived(run && run.clips === playable ? run.index : -1);
@@ -176,12 +201,15 @@
     /** @param {number} i */
     function playFrom(i) {
         if (i < 0 || i >= playable.length) return;
+        music.setPaused(false);
         runner.start(playable, i);
     }
 
     function togglePlay() {
         if (index < 0) return playFrom(0);
         engine.togglePlay();
+        // Between demos the engine has none to toggle: the music plays on.
+        if (engine.ready()) music.setPaused(!engine.isPlaying());
     }
     // A click on the game view plays / pauses; the keys are the analyzer's
     // (src/player/player-keys.js), typed on the page or in the game view.
@@ -275,6 +303,13 @@
                         <span class="l muted">Loading the player and the demo…</span>
                     {/if}
                 </span>
+                {#if hasMusic}
+                    <button class="clips-btn" class:off={!$musicState.on} title={$musicState.on ? 'Music on — click to turn it off' : 'Music off — click to turn it on'}
+                        aria-label="Music" aria-pressed={$musicState.on} onclick={() => music.toggle()}><Music size={16} /></button>
+                    <input class="clips-music-vol" type="range" min="0" max="2" step="0.05" value={$musicState.scale}
+                        title="Music loudness: {Math.round($musicState.scale * 100)} % of the playlist's" aria-label="Music loudness"
+                        disabled={!$musicState.on} oninput={(e) => setMusicScale(Number(e.currentTarget.value))} />
+                {/if}
                 <button class="clips-btn" title={$status.ready && !$status.muted ? 'Sound on — click to mute' : 'Sound off — click to unmute'} onclick={() => engine.toggleMute()}>
                     {#if $status.ready && !$status.muted}<Volume2 size={16} />{:else}<VolumeX size={16} />{/if}
                 </button>
@@ -289,6 +324,14 @@
                 </button>
             </div>
             <MapMenu bind:at={menu} items={menuItems} keep=".clips-menu-btn" />
+            {#if $musicState.track}
+                {@const m = $musicState.track}
+                <p class="clips-music">
+                    <Music size={12} />
+                    Music: <a href={m.page || null} target="_blank" rel="noopener">“{m.title}”</a> by {m.artist}{#if m.source === 'incompetech'} (incompetech.com){/if},
+                    licensed under <a href={m.licenseUrl || null} target="_blank" rel="noopener">{m.license}</a>
+                </p>
+            {/if}
         </div>
         <ol class="clips-list">
             {#each playable as c, i (i)}
@@ -298,6 +341,7 @@
                         <span class="l">{c.label || 'Clip'}</span>
                         <span class="w">{c.card ? 'title card' : c.who || 'Auto'}</span>
                         {#if c.slow}<span class="s" title="Slow motion at {c.slow.speed}×"><Snail size={12} /></span>{/if}
+                        {#if c.cue !== undefined}<span class="s" title={c.cue ? `Music from here: “${c.cue.title}” by ${c.cue.artist}` : 'No music from here'}><Music size={12} /></span>{/if}
                         <span class="d">{len(c)}</span>
                         <span class="g">{c.card ? '' : c.demo.title}</span>
                     </button>
@@ -440,6 +484,26 @@
     .clips-start:hover {
         background: var(--accent-cyan);
         color: var(--bg-deep);
+    }
+    .clips-music {
+        margin: 0;
+        padding: 0 0 6px;
+        font-size: 12px;
+        color: #9ab;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .clips-music a {
+        color: var(--accent-cyan);
+    }
+    .clips-btn.off {
+        opacity: 0.4;
+    }
+    .clips-music-vol {
+        width: 70px;
+        accent-color: var(--accent-cyan);
     }
     .clips-controls {
         display: flex;

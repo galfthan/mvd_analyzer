@@ -1574,7 +1574,22 @@ thread, so whatever the hidden one did took the shown one's frames and
 it stuttered. The engine's files come from one fetcher for the page
 (`mvd-fte-player/src/asset-fetch.js`): an engine booted again boots from
 memory, and a map it has not got is fetched from there. The Player tab
-plays the next demo it loads in its engine the same way. A
+plays the next demo it loads in its engine the same way. A playlist
+link with **music** (mvd-api's `music` items: the link's `m` table and
+`{u}` cues, read as the next item's `cue` — src/lib/playlist.js; only
+files on incompetech.com are played) plays it here: the runner cues the
+track in force at each item (`cueAt`), `src/play/music.js` plays it in one
+`<audio>` element from the run's first click — fading between tracks,
+looping one shorter than its section, paused with the viewer's pause but
+not by a title card; a jump to a clip picks the track up where playing
+through would have it (`cueTimeAt`) — and the game sound goes down to 60 %
+under it (`PlayerEngine.setLevel`, `FteController.setLevel`). The music
+plays at the cue's `volume` (the link's `v`; default 0.3) times the
+viewer's slider (kept in localStorage). A music button by the sound one
+turns it off, and the credit (title, artist, license, each
+linked) shows under the controls while a track plays. The Player tab keeps
+the cues of a playlist opened there (they go back into its share links)
+but plays no music; editing them comes later. A
 click on the game view plays / pauses, and
 the keys are the full page's (*Keys*), on this page and the full one
 alike. Clips

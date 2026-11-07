@@ -12,9 +12,11 @@
 // again. A title card (isCard) pauses the game for its time, the overlay
 // (PlaylistOverlay.svelte) drawing it, and the run moves on; meanwhile the
 // next clip's demo is fetched (deps.prefetch, the light page's) when it is
-// another one.
+// another one. A playlist's music (deps.music, the light page's,
+// src/play/music.js) follows the run: each item the run gets to plays the
+// cue in force there (cueAt), and the run's end stops it.
 
-import { playlistStep, slowAt, isCard } from '../lib/playlist.js';
+import { playlistStep, slowAt, isCard, cueAt, cueTimeAt } from '../lib/playlist.js';
 import { playlist, setRun } from './playlist-store.js';
 import { toast } from './toast.js';
 import { SPEEDS } from '../lib/playback-bar.js';
@@ -41,10 +43,11 @@ const MAX_SPEED = Math.max(...SPEEDS);
  * @property {typeof import('./demo-ref.js').demoRefOf} demoRefOf
  * @property {import('../state/store.js').Store<{ start: number, end: number } | null>} segment
  * @property {(c: Clip) => void} [prefetch]  start fetching a clip's demo ahead of it
+ * @property {{ cue: (m: import('../lib/playlist.js').Cue | null, at?: number) => void, stop: () => void }} [music]
  */
 
 /** @param {RunnerDeps} deps */
-export function createRunner({ engine, page, driverFor = () => engine, demo, teams, selectTab, loadDemo, demoRefOf, segment, prefetch }) {
+export function createRunner({ engine, page, driverFor = () => engine, demo, teams, selectTab, loadDemo, demoRefOf, segment, prefetch, music }) {
     /** @type {Driver} */
     let drv = engine;         // what the run plays in
     /** @type {Clip | null} */
@@ -74,6 +77,9 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
             drv = next;
         }
         setRun({ clips, index, prev: null, transient });
+        // A start is a jump: the music picks up where playing through
+        // would have it; the steps after only carry it on.
+        music?.cue(cueAt(clips, index), cueTimeAt(clips, index));
         playClip(index);
     }
 
@@ -104,6 +110,7 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
     // plays or clearing the list under it — the engine leaves slow motion
     // and the run's segment goes.
     playlist.subscribe((s) => {
+        if (!s.run) music?.stop();
         if (s.run || (slowing == null && !shownSpan)) return;
         slowTo(null);
         if (shownSpan && segment.get() === shownSpan) segment.set(null);
@@ -122,6 +129,7 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
         slowTo(null);
         setRun({ ...run, index, prev: null });
         clearTimeout(cardTimer);
+        music?.cue(cueAt(run.clips, index));
         warmNext(index);
         if (isCard(c)) return showCard(c);
 
@@ -302,6 +310,7 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
             // A seek into another clip: it is the active one, with its POV.
             const next = run.clips[local[step.index]];
             setRun({ ...run, index: local[step.index] });
+            music?.cue(cueAt(run.clips, local[step.index]));
             showSpan(next);
             clipPov(d, next);
         } else if (step.type === 'next' || step.type === 'end') {

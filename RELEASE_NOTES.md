@@ -5,6 +5,37 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (playlist-music) — music in playlist links; demos by hash
+
+- **Music in playlists.** `GET /v1/playlists/music` (MCP
+  `findPlaylistMusic`) searches Kevin MacLeod's incompetech.com library,
+  every track CC BY 4.0, by mood, title, instruments and length. A
+  `music` item in `POST /v1/playlist-links` (`{source, id}`, or `null` for
+  silence) plays its track under the items after it: one first scores the
+  whole reel, one before each section scores it by section. The API looks
+  the track up itself, so the credit comes from the source; the response
+  lists the tracks. The link carries a music table (`m`) and cue rows
+  (`{u: index}`), only when there is music.
+- **The light player plays it.** From the first click, the track in
+  force at each clip plays under the game, fading between tracks and
+  looping a short one; a jump to a clip picks the music up where it would
+  be. The game sound goes down under it, pausing pauses it, a music
+  button turns it off, and a slider sets its loudness. A cue's `volume`
+  (0.05–1, default 0.3) is the reel author's mix. The credit shows under the
+  controls. The full analyzer keeps a shared playlist's music but does
+  not play it yet.
+
+- `GET /v1/games/sha:<hex>` returns the hub game whose demo has that
+  sha256, its gameId included.
+- Any per-demo endpoint given a `sha:<hex>` the cache has not seen now
+  fetches the demo from the hub's CDN by that hash, instead of answering
+  404. Only a hash the CDN does not have is a 404.
+- `POST /v1/playlist-links` (and the MCP's `createPlaylistLink`) clips can
+  name their demo as `demo: "gameId:N" | "sha:<hex>"` next to `gameId`; a
+  demo named both ways is one demo. The response's `demos` carry each
+  demo's `sha`. A demo named by hash must still be a hub game: the light
+  player loads demos by gameId.
+
 ## unreleased (player-standby) — the light player: models that load, sound from the first clip, one engine for every demo
 
 The Player's engine sometimes came up without some of its models — a

@@ -7,7 +7,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"sync"
 	"testing"
@@ -63,11 +65,19 @@ func decodeLink(t *testing.T, link string) map[string]any {
 	return doc
 }
 
+// Two demos' shas, as the fake store resolves gameId:1 and gameId:2.
+var (
+	sha1 = strings.Repeat("1", 64)
+	sha2 = strings.Repeat("2", 64)
+)
+
+func twoDemoShas() map[string]string { return map[string]string{"gameId:1": sha1, "gameId:2": sha2} }
+
 func TestPlaylistLink(t *testing.T) {
 	store := &fakeStore{byID: map[string]*result.Result{
 		"gameId:1": playlistDemoResult("maps/dm3.bsp", 10250, map[string]int{"bps": 7, "milton": 9}, "red", "blue"),
 		"gameId:2": playlistDemoResult("e1m2", 4000, map[string]int{"valla": 3}),
-	}}
+	}, shaOf: twoDemoShas()}
 	srv := newTestServer(t, store)
 	defer srv.Close()
 
@@ -114,7 +124,7 @@ func TestPlaylistLinkRejects(t *testing.T) {
 		{`{"items": [{"card": {"ms": 3000}}]}`, "at least one clip"},
 		{`{"items": [{"clip": {"gameId": 1, "from": 5, "to": 1}}]}`, "items[0]: clip: from"},
 		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000, "watch": "nobody"}}]}`, `no player "nobody" in game 1 (players: bps)`},
-		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}, "card": {"ms": 1000}}]}`, "exactly one of clip or card"},
+		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}, "card": {"ms": 1000}}]}`, "exactly one of clip, card or music"},
 		{`{"items": [{"card": {"ms": 50}}, {"clip": {"gameId": 1, "from": 0, "to": 1000}}]}`, "card.ms"},
 		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000, "text": [{"text": "x", "at": "middle"}]}}]}`, "text[0].at"},
 		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}}], "extra": 1}`, "unknown field"},
@@ -154,7 +164,7 @@ func TestPlaylistLinkChecksBeforeLoading(t *testing.T) {
 	store := &countingStore{fakeStore: &fakeStore{byID: map[string]*result.Result{
 		"gameId:1": playlistDemoResult("dm3", 0, map[string]int{"bps": 7}),
 		"gameId:2": playlistDemoResult("dm2", 0, map[string]int{"valla": 3}),
-	}}}
+	}, shaOf: twoDemoShas()}}
 	srv := newTestServer(t, store)
 	defer srv.Close()
 	code, _ := postPlaylist(t, srv.URL, `{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}}, {"clip": {"gameId": 2, "from": 0, "to": 1000}}, {"card": {"ms": 1}}]}`)
@@ -164,5 +174,55 @@ func TestPlaylistLinkChecksBeforeLoading(t *testing.T) {
 	code, out := postPlaylist(t, srv.URL, `{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}}, {"clip": {"gameId": 2, "from": 0, "to": 1000}}, {"clip": {"gameId": 1, "from": 5000, "to": 6000}}]}`)
 	if code != http.StatusOK || store.loads != 2 || len(out["demos"].([]any)) != 2 {
 		t.Errorf("two games, three clips: %d, %d loads, %v", code, store.loads, out["demos"])
+	}
+}
+
+// A clip names its demo by gameId or by `demo` (gameId:N / sha:<hex>); a
+// demo named both ways is one demo, its gameId the link's. A demo named by
+// sha alone takes its gameId from the hub's catalog, and one the hub does
+// not list cannot be in a playlist yet.
+func TestPlaylistLinkDemoIDs(t *testing.T) {
+	store := &fakeStore{byID: map[string]*result.Result{
+		"gameId:1":                       playlistDemoResult("dm3", 1000, map[string]int{"bps": 7}),
+		"sha:" + sha1:                    playlistDemoResult("dm3", 1000, map[string]int{"bps": 7}),
+		"sha:" + sha2:                    playlistDemoResult("e1m2", 0, map[string]int{"valla": 3}),
+		"sha:" + strings.Repeat("9", 64): playlistDemoResult("dm4", 0, nil),
+	}, shaOf: twoDemoShas()}
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	srv := httptest.NewServer(newRouter(store, logger, "", testUploadConfig, nil, nil, &fakeSearcher{bySHA: map[string]int{sha2: 2}}))
+	defer srv.Close()
+
+	code, out := postPlaylist(t, srv.URL, `{"items": [
+		{"clip": {"gameId": 1, "from": 0, "to": 1000}},
+		{"clip": {"demo": "sha:`+strings.ToUpper(sha1)+`", "from": 2000, "to": 3000, "watch": "bps"}},
+		{"clip": {"demo": "sha:`+sha2+`", "from": 0, "to": 1000}},
+		{"clip": {"demo": "gameId:1", "from": 4000, "to": 5000}}
+	]}`)
+	if code != http.StatusOK {
+		t.Fatalf("status %d: %v", code, out)
+	}
+	demos, _ := json.Marshal(out["demos"])
+	if want := `[{"gameId":1,"sha":"` + sha1 + `","title":"dm3"},{"gameId":2,"sha":"` + sha2 + `","title":"e1m2"}]`; string(demos) != want {
+		t.Errorf("demos\n got %s\nwant %s", demos, want)
+	}
+	doc := decodeLink(t, out["url"].(string))
+	got, _ := json.Marshal(doc["d"])
+	if want := `[["hub:1",1,"dm3",1],["hub:2",2,"e1m2",0]]`; string(got) != want {
+		t.Errorf("link demos\n got %s\nwant %s", got, want)
+	}
+	rows, _ := json.Marshal(doc["c"])
+	if want := `[[1,2,"auto","","",0],[3,4,7,"bps","",0],[0,1,"auto","","",1],[5,6,"auto","","",0]]`; string(rows) != want {
+		t.Errorf("rows\n got %s\nwant %s", rows, want)
+	}
+
+	for name, body := range map[string]string{
+		"a demo the hub does not list": `{"items": [{"clip": {"demo": "sha:` + strings.Repeat("9", 64) + `", "from": 0, "to": 1000}}]}`,
+		"both gameId and demo":         `{"items": [{"clip": {"gameId": 1, "demo": "gameId:1", "from": 0, "to": 1000}}]}`,
+		"neither":                      `{"items": [{"clip": {"from": 0, "to": 1000}}]}`,
+		"a malformed demo":             `{"items": [{"clip": {"demo": "sha:xyz", "from": 0, "to": 1000}}]}`,
+	} {
+		if code, out := postPlaylist(t, srv.URL, body); code != http.StatusBadRequest {
+			t.Errorf("%s: %d %v; want 400", name, code, out)
+		}
 	}
 }

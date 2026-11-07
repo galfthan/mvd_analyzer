@@ -48,7 +48,12 @@
  * @property {number} opacity  0–1 (below 1 the paused game shows through)
  * @property {number} fadeIn   ms
  * @property {number} fadeOut  ms
- * @typedef {{ from: number, to: number, track: Track, who: string, label: string, demo: ClipDemo, slow?: Slow, text?: Text[], card?: Card }} Clip
+ * @typedef {{ source: string, id: string, url: string, title: string, artist: string, license: string, licenseUrl: string, page: string, durationSec: number }} Music
+ *   a track a playlist plays (mvd-api music.go: the credit is the source's)
+ * @typedef {Music & { volume?: number }} Cue  a track and how loud this cue plays it (0..1; absent, the player's default)
+ * @typedef {{ from: number, to: number, track: Track, who: string, label: string, demo: ClipDemo, slow?: Slow, text?: Text[], card?: Card, cue?: Cue | null }} Clip
+ *   `cue`: music from this item on — a track, or null for silence; absent,
+ *   the music before plays on (the link's {u} rows, see Share encoding)
  * @typedef {{ type: 'follow' | 'next', index: number } | { type: 'none' | 'end', index?: undefined }} PlaylistStep
  */
 
@@ -269,7 +274,13 @@ export function markdownLink(text, url) {
 // `#playlist=z<base64url(deflate-raw(JSON))>`, v2:
 //   { v: 2, d: [[key, gameId, title, offsetSec]…],
 //     c: [ [from, to, track, who, label, demoIndex, slow|0, texts?]  (a clip)
-//          | { k: [ms, bg, opacity, fadeIn, fadeOut], l: label, x: texts } ] }
+//          | { k: [ms, bg, opacity, fadeIn, fadeOut], l: label, x: texts }
+//          | { u: musicIndex | -1, v?: volume } ],                        (a music cue)
+//     m?: [[source, id, url, title, artist, license, licenseUrl, page, durationSec]…] }
+// A cue takes no time: its track (m[u]; -1 silence) plays from the item
+// after it on — read here as that item's `cue`. mvd-api resolves the
+// tracks at their source (music.go); a track this page would not play
+// (musicFrom) is read as no cue.
 // slow as [from, to, speed] (0 when only texts follow), texts in the short
 // keys t s c f a b e i o with defaults left out (packText). mvd-api's
 // POST /v1/playlist-links writes the same (mvd-api/playlist.go). Compact
@@ -308,7 +319,32 @@ export async function encodePlaylist(clips) {
         if (c.text?.length) row.push(packText(c.text));
         return row;
     });
-    const json = JSON.stringify({ v: PLAYLIST_VERSION, d: demos, c: rows });
+    // The cues go back in before their items, the tracks into m.
+    /** @type {unknown[][]} */
+    const music = [];
+    /** @type {Map<string, number>} */
+    const musicIndex = new Map();
+    const withCues = clips.flatMap((c, i) => {
+        if (c.cue === undefined) return [rows[i]];
+        let u = -1;
+        if (c.cue) {
+            const k = `${c.cue.source}:${c.cue.id}`;
+            if (!musicIndex.has(k)) {
+                musicIndex.set(k, music.length);
+                const m = c.cue;
+                music.push([m.source, m.id, m.url, m.title, m.artist, m.license, m.licenseUrl, m.page, m.durationSec]);
+            }
+            u = /** @type {number} */ (musicIndex.get(k));
+        }
+        /** @type {Record<string, number>} */
+        const cue = { u };
+        if (c.cue?.volume != null) cue.v = c.cue.volume;
+        return [cue, rows[i]];
+    });
+    /** @type {Record<string, unknown>} */
+    const doc = { v: PLAYLIST_VERSION, d: demos, c: withCues };
+    if (music.length) doc.m = music;
+    const json = JSON.stringify(doc);
     return `z${bytesToBase64Url(await pipeBytes(new TextEncoder().encode(json), new CompressionStream('deflate-raw')))}`;
 }
 
@@ -357,12 +393,26 @@ function decodeRows(doc) {
         }
         return { key, gameId: gameId || null, title: String(title || ''), offset: Number(offset) || 0 };
     });
+    const music = Array.isArray(doc.m) ? doc.m.map(musicFrom) : [];
     /** @type {Clip[]} */
     const clips = [];
+    /** @type {Cue | null | undefined} */
+    let cue;   // a cue read, for the next item
+    /** @param {Clip} c */
+    const push = (c) => {
+        if (cue !== undefined) c.cue = cue;
+        cue = undefined;
+        clips.push(c);
+    };
     for (const row of doc.c) {
+        if (row && typeof row === 'object' && !Array.isArray(row) && Number.isInteger(row.u)) {
+            const m = row.u < 0 ? null : music[row.u];
+            cue = m && typeof row.v === 'number' && row.v >= 0.05 && row.v <= 1 ? { ...m, volume: row.v } : m;
+            continue;
+        }
         if (row && typeof row === 'object' && !Array.isArray(row) && Array.isArray(row.k)) {
             const [ms, bg, opacity, fadeIn, fadeOut] = row.k;
-            clips.push(makeCard({ ms, bg, opacity, fadeIn, fadeOut, label: row.l, text: row.x }));
+            push(makeCard({ ms, bg, opacity, fadeIn, fadeOut, label: row.l, text: row.x }));
             continue;
         }
         if (!Array.isArray(row)) continue;
@@ -381,9 +431,68 @@ function decodeRows(doc) {
         if (sl) c.slow = sl;
         const tx = cleanText(text);
         if (tx.length) c.text = tx;
-        clips.push(c);
+        push(c);
     }
     return clips;
+}
+
+// The files a link's track may play from, by source: a link is untrusted,
+// and mvd-api only ever writes these (music.go).
+const MUSIC_FILES = /** @type {Record<string, string>} */ ({
+    incompetech: 'https://incompetech.com/music/royalty-free/',
+});
+
+// musicFrom reads one row of a link's music table; undefined when it is not
+// a track this page plays.
+/**
+ * @param {unknown} row
+ * @returns {Music | undefined}
+ */
+function musicFrom(row) {
+    if (!Array.isArray(row)) return undefined;
+    const [source, id, url, title, artist, license, licenseUrl, page, durationSec] = row;
+    const base = MUSIC_FILES[source];
+    if (!base || typeof url !== 'string' || !url.startsWith(base) || typeof id !== 'string' || !id) return undefined;
+    /** @param {unknown} u */
+    const https = (u) => (typeof u === 'string' && u.startsWith('https://') ? u : '');
+    return {
+        source, id, url,
+        title: String(title || ''), artist: String(artist || ''), license: String(license || ''),
+        licenseUrl: https(licenseUrl), page: https(page),
+        durationSec: Number.isFinite(durationSec) ? durationSec : 0,
+    };
+}
+
+// cueAt: the music in force at item `index` — the last cue at or before
+// it; null (none) before any.
+/**
+ * @param {Clip[]} clips
+ * @param {number} index
+ * @returns {Cue | null}
+ */
+export function cueAt(clips, index) {
+    for (let i = Math.min(index, clips.length - 1); i >= 0; i--) {
+        if (clips[i].cue !== undefined) return clips[i].cue ?? null;
+    }
+    return null;
+}
+
+// cueTimeAt: how far into its cue's music item `index` starts, in seconds
+// — the items from the cue up to it, played through (a jump into a
+// section picks the music up there, not at its start).
+/**
+ * @param {Clip[]} clips
+ * @param {number} index
+ */
+export function cueTimeAt(clips, index) {
+    let from = Math.min(index, clips.length - 1);
+    while (from > 0 && clips[from].cue === undefined) from--;
+    let t = 0;
+    for (let i = from; i < index; i++) {
+        const c = clips[i];
+        t += c.card ? c.card.ms / 1000 : Math.max(0, c.to - c.from);
+    }
+    return t;
 }
 
 // Slow-motion speeds a clip may carry (× 1).
