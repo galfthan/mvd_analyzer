@@ -1197,14 +1197,15 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   player starts with sound on; the browser holds the audio until the
   first play, which is a user gesture) and the hide / show toggle of the
   side pane column.
-- **Settings across engines.** Each demo gets a fresh engine (and one
-  dropped after 20 s unshown comes back fresh), at FTE's defaults. What
+- **Settings across engines.** Each demo starts at FTE's defaults —
+  a fresh engine, or the one up loading it (`FteController.loadDemo`;
+  one dropped after 20 s unshown comes back fresh). What
   the user picked carries over (`engine.carrySettings`): sound, team
   info, the speed (`engine.rate`, applied on play), and the player
   followed by hand — by name, followed on the new engine only when its
   demo has that player, else autotrack. In a playlist the playlist says
   whom to watch: every clip — reached by playing on, a seek into it, or
-  in another demo's engine (its POV is set after the carried one) —
+  in another demo (its POV is set after the carried one) —
   starts from its own POV, autotrack when it names none, so a player
   picked by hand during one clip does not carry into the next. A clip's
   POV is not a hand pick and is not carried to a demo loaded by hand
@@ -1549,14 +1550,32 @@ clock and stores; `light-demo.js` stands in for the data layer: a hub
 demo's bytes (`fetchGame` + `downloadDemo`) and a minimal handle whose
 result carries just the map (hub's game row) and the demo offset (from
 the clips). The page lists the clips (label, who, length, slow motion,
-demo), starts the run at once (with sound on, as the tab does; the sound
-setting stays from one demo's clips to the next), and has play /
+demo) and starts the run on the viewer's click — the play button over the
+game view, the view itself, or space: browsers play no sound before a
+gesture on the page, so a run that started by itself played silent.
+Until then the first clip's demo loads into the engine, opening at that
+clip's start from its POV, so the click plays at once (with sound on, as the tab does;
+the sound setting stays from one demo's clips to the next). It has play /
 pause, previous / next, sound, the keys menu and fullscreen (the game
 view and these controls; `f`); a click on a clip plays from it. The team
 info shows from the start. A list over several hub demos plays straight
 through: while an item plays, the next clip's demo downloads when it is
 another one (the runner's `prefetch`; the page keeps the downloads by
-gameId, and a pick shares one in flight). A click on the game view plays / pauses, and
+gameId, and a pick shares one in flight). One engine plays the whole
+list: the step to another demo's clip loads that demo into it
+(`FteController.loadDemo`), no boot — the wasm, ~450 files and the heap
+are the first demo's — with the view faded to black from the step until
+the engine has jumped to the clip (`PlayerEngine.fadeOut`, `FADE_MS`):
+a moment of black instead of the new demo's start and its fast-forward.
+The play button pulses until the engine is up (a click plays
+regardless). A second engine holding the next demo, swapped in on the
+step, was tried and dropped: a same-origin iframe runs on its page's
+thread, so whatever the hidden one did took the shown one's frames and
+it stuttered. The engine's files come from one fetcher for the page
+(`mvd-fte-player/src/asset-fetch.js`): an engine booted again boots from
+memory, and a map it has not got is fetched from there. The Player tab
+plays the next demo it loads in its engine the same way. A
+click on the game view plays / pauses, and
 the keys are the full page's (*Keys*), on this page and the full one
 alike. Clips
 of a local file are left out of the list, with a note counting them. A click while a demo downloads

@@ -28,6 +28,38 @@ detail.
   demo's `sha`. A demo named by hash must still be a hub game: the light
   player loads demos by gameId.
 
+## unreleased (player-standby) — the light player: models that load, sound from the first clip, one engine for every demo
+
+The Player's engine sometimes came up without some of its models — a
+backpack or a player that never drew. FTE requested all ~450 of its files
+at once and Chrome turned part of the burst down
+(`net::ERR_INSUFFICIENT_RESOURCES`); FTE does not retry, so a refused file
+was missing for that engine's life. The page now fetches them itself, 16 at a
+time with retries, and keeps them, so the next demo's engine boots from
+memory (`mvd-fte-player/src/asset-fetch.js`). This applies to the Player
+tab too.
+
+The light player (`play.html`) no longer starts by itself: a shared link
+opened with no click on the page played silent, browsers holding sound
+until a gesture. It waits on a play button over the game view, with the
+first clip's demo already loaded and at its start, so the click plays at
+once, with sound.
+
+In a playlist over several demos, the next demo now loads into the engine
+already running instead of a fresh one booting for it, with the view
+faded to black from the step until the engine is at the clip. The play
+button pulses until the engine is up.
+
+A clip could play on past its end: a frame that took long (the page busy)
+let the demo clock move more than 1.5 s in one step, which the runner
+read as a seek. The step allowed now grows with the time the frame took.
+
+The light player's first clip now shows from its own POV before play
+(it followed whoever autotrack picked until the click).
+
+The Player tab's engine also plays the next demo loaded instead of
+booting again, with the same fade.
+
 ## unreleased (hub-warm) — new hub demos are ready before anyone opens them
 
 mvd-api's access log has a `src` field, the request's `?label=`: the web

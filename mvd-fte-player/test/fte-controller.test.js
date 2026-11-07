@@ -188,3 +188,71 @@ test('suspend parks the frame loop after one more frame; resume restarts it once
     fte.resume();
     assert.equal(frames.length, 1, 'resume without a suspend does nothing');
 });
+
+// FTE 004's file table (ftewebgl.js): FTEH.h by handle, FTEH.f by path,
+// each buffer ref-counted — create holds one ref, release drops it.
+function withFiles(win, paths = []) {
+    win.FTEH = { h: [], f: {} };
+    win._emscriptenfte_buf_createfromarraybuf = (buf) => {
+        const b = { h: win.FTEH.h.length, r: 1, d: new Uint8Array(buf), n: null };
+        win.FTEH.h.push(b);
+        return b.h;
+    };
+    win._emscriptenfte_buf_release = (h) => {
+        const b = win.FTEH.h[h];
+        if (--b.r === 0) {
+            if (b.n != null) delete win.FTEH.f[b.n];
+            win.FTEH.h[h] = null;
+        }
+    };
+    for (const p of paths) {
+        const b = win.FTEH.h[win._emscriptenfte_buf_createfromarraybuf(new ArrayBuffer(1))];
+        b.n = p;
+        win.FTEH.f[p] = b;
+    }
+    return win;
+}
+
+test('loadDemo adds the demo and map to the running engine, plays it, then releases the demo before', async () => {
+    const win = withFiles(fakeWin({ demoTime: 312 }), ['qw/match.mvd.gz']);
+    const fte = new FteController(win, { demoName: 'match', demoFile: 'qw/match.mvd.gz' });
+    fte.track(7);
+    fte.pause();
+    win.commands.length = 0;
+    assert.ok(!fte.hasFile('id1/maps/dm3.bsp'));
+
+    let done = false;
+    const loaded = fte.loadDemo({ demo: new Uint8Array([1, 2]).buffer, gzipped: true, files: { 'id1/maps/dm3.bsp': new ArrayBuffer(4) }, demoDuration: 700 })
+        .then(() => { done = true; });
+    assert.ok(fte.hasFile('id1/maps/dm3.bsp'));
+    assert.deepEqual([...win.FTEH.f['qw/match1.mvd.gz'].d], [1, 2]);
+    assert.deepEqual(win.commands, ['cl_autotrack stats\n', 'playdemo match1\n', 'demo_setspeed 100\n'],
+        'a fresh engine\'s POV, the demo started and running');
+    assert.ok(fte.isUsingAutotrack());
+
+    await new Promise((r) => setTimeout(r, 80));
+    assert.ok(!done, 'the clock is still the demo before\'s');
+    assert.ok(fte.hasFile('qw/match.mvd.gz'), 'kept until the new demo runs');
+    win.demoTime = 0.4;
+    await loaded;
+    assert.ok(!fte.hasFile('qw/match.mvd.gz'), 'released once the new one runs');
+    assert.ok(fte.hasFile('qw/match1.mvd.gz'));
+
+    // Its end and restart are the new demo's.
+    fte.demoEnded();
+    win.commands.length = 0;
+    fte.demoJump(100);
+    assert.deepEqual(win.commands, ['playdemo match1\n']);
+    clearInterval(fte._restartTimer);
+});
+
+test('loadDemo of a demo left at its start: the clock moving is the sign', async () => {
+    const win = withFiles(fakeWin({ demoTime: 0 }), ['qw/match.mvd']);
+    const fte = new FteController(win, { demoFile: 'qw/match.mvd' });
+    const loaded = fte.loadDemo({ demo: new ArrayBuffer(1) });
+    win.demoTime = 0.2;
+    const t0 = Date.now();
+    await loaded;
+    assert.ok(Date.now() - t0 >= 250, 'not on the first reading — that could be the demo before');
+    assert.ok(!fte.hasFile('qw/match.mvd'));
+});

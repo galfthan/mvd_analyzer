@@ -449,8 +449,10 @@ function base64UrlToBytes(str) {
 // after hub's useClipListPlayback (src/features/demo-player/clips/
 // use-clip-playback.ts @ 5c96205c19c7):
 //   - playback crossing the active clip's `to` — not a seek past it, hence
-//     the < 1.5 s step — advances ({ type: 'next', index }) or, on the
-//     last clip, ends the run ({ type: 'end' });
+//     a step under `maxStep` (hub's 1.5 s; the runner widens it by the
+//     time the tick took, a hitch letting the clock move further) —
+//     advances ({ type: 'next', index }) or, on the last clip, ends the
+//     run ({ type: 'end' });
 //   - a manual seek into another clip makes that clip the active one
 //     ({ type: 'follow', index });
 //   - otherwise { type: 'none' }.
@@ -465,12 +467,13 @@ function base64UrlToBytes(str) {
  * @param {number | null} prev
  * @param {number} now
  * @param {boolean} playing
+ * @param {number} [maxStep]  seconds the clock can move between ticks while it plays
  * @returns {PlaylistStep}
  */
-export function playlistStep(clips, index, prev, now, playing) {
+export function playlistStep(clips, index, prev, now, playing, maxStep = 1.5) {
     const active = clips[index];
     if (!active) return { type: 'end' };
-    if (playing && prev != null && prev < active.to && now >= active.to && now - prev < 1.5) {
+    if (playing && prev != null && prev < active.to && now >= active.to && now - prev < maxStep) {
         return index + 1 < clips.length ? { type: 'next', index: index + 1 } : { type: 'end' };
     }
     if (now >= active.from && now < active.to) return { type: 'none' };
