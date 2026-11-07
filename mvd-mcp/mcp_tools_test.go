@@ -37,7 +37,7 @@ func TestInputSchemasHaveNoNullUnions(t *testing.T) {
 		// highlights carries kinds/players slices and the *int preMs.
 		"getHighlights": inputSchema[GetHighlightsInput](),
 		// nested items with pointer fields (opacity, fades, text sizes).
-		"createPlaylistLink": inputSchema[CreatePlaylistLinkInput](),
+		"createPlaylist": inputSchema[CreatePlaylistInput](),
 	} {
 		assertNoNullTypes(t, name, s)
 	}
@@ -137,7 +137,7 @@ func (f *fakeBackend) GetTopKills(_ context.Context, _ GetTopKillsInput) (any, e
 func (f *fakeBackend) GetHighlights(_ context.Context, _ GetHighlightsInput) (any, error) {
 	return map[string]any{"kinds": []any{"discharge", "quadbore", "telefrag", "airgib"}, "discharges": []any{}, "quadbores": []any{}, "telefrags": []any{}, "airgibs": []any{}}, nil
 }
-func (f *fakeBackend) CreatePlaylistLink(_ context.Context, in CreatePlaylistLinkInput) (any, error) {
+func (f *fakeBackend) CreatePlaylist(_ context.Context, in CreatePlaylistInput) (any, error) {
 	return map[string]any{"url": "https://mvdanalyzer.com/play.html#playlist=zx", "clips": len(in.Items)}, nil
 }
 func (f *fakeBackend) FindPlaylistMusic(_ context.Context, _ FindPlaylistMusicInput) (any, error) {
@@ -267,7 +267,7 @@ func TestMCP_ListTools(t *testing.T) {
 		"getBuckets", "getEvents", "getStreamSlice", "getPointEffects", "getStateAt",
 		"getLocTrails", "getLocTable", "getRegionControl",
 		"getTopWindows", "getTopKills", "getLives", "getHighlights",
-		"listArtifacts", "getArtifact", "createPlaylistLink", "findPlaylistMusic",
+		"listArtifacts", "getArtifact", "createPlaylist", "findPlaylistMusic",
 	}
 	got := map[string]bool{}
 	for _, tool := range res.Tools {

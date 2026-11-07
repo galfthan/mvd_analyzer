@@ -193,3 +193,40 @@ test('music cues decode onto the item after them, survive a round trip, and only
     // (item 3's cue refused) runs on, 10 s clips.
     assert.deepEqual([0, 1, 2, 3, 4].map((i) => cueTimeAt(clips, i)), [0, 2, 0, 10, 20]);
 });
+
+// v3 as mvd-api writes it (mvd-api/playlist_test.go TestPlaylistLink's
+// pinned playlist, plus a music cue): the page reads it into its clips.
+test('a v3 playlist from mvd-api decodes into the clips, music and texts it describes', async () => {
+    const sha = '1'.repeat(64);
+    const doc = {
+        version: 3, name: 'mvda · 2 demos · Airgib ×3',
+        demos: [{ gameId: 1, offset: 10.25, sha, title: 'dm3 · red vs blue' }, { gameId: 2, offset: 4, sha: '2'.repeat(64), title: 'e1m2' }],
+        items: [
+            { music: { ...TRACK, volume: 0.4 } },
+            { card: { bg: '#0b1020', fadeIn: 400, fadeOut: 400, label: 'Airgibs', ms: 3000, opacity: 1, text: [{ color: '#00d9ff', size: 12, text: 'Airgibs' }, { at: 'bottom', font: 'body', from: 500, text: 'week 3' }] } },
+            { clip: { demo: 0, from: 130, label: 'Airgib · bps → milton', slow: { from: 133.3, speed: 0.3, to: 134.3 }, text: [{ at: 'bottom-left', text: 'dm3 · 2:00', to: 3000 }], to: 137, track: 7, who: 'bps' } },
+            { music: null },
+            { clip: { demo: 1, from: 9, label: 'Airgib · valla', to: 13, track: 'auto' } },
+            { clip: { demo: 9, from: 1, to: 2, track: 'auto' } },
+        ],
+    };
+    const clips = /** @type {any[]} */ (await decodePlaylist(await zlink(doc)));
+    assert.equal(clips.length, 3, 'cues are not items; a clip of no demo is dropped');
+    assert.deepEqual(clips[0].cue, { ...TRACK, volume: 0.4 });
+    assert.deepEqual(clips[0].card, { ms: 3000, bg: '#0b1020', opacity: 1, fadeIn: 400, fadeOut: 400 });
+    assert.deepEqual(clips[0].text.map((/** @type {any} */ t) => [t.t, t.size, t.color, t.font, t.at, t.from]),
+        [['Airgibs', 12, '#00d9ff', 'title', 'center', 0], ['week 3', 6, '#ffffff', 'body', 'bottom', 500]]);
+    assert.deepEqual(clips[1].demo, { key: 'hub:1', gameId: 1, title: 'dm3 · red vs blue', offset: 10.25, sha });
+    assert.deepEqual([clips[1].from, clips[1].to, clips[1].track, clips[1].who, clips[1].slow], [130, 137, 7, 'bps', { from: 133.3, to: 134.3, speed: 0.3 }]);
+    assert.equal(clips[1].text[0].to, 3000);
+    assert.equal(clips[2].cue, null);
+    assert.equal(clips[2].demo.key, 'hub:2');
+
+    // The page writes v3 too, and what it writes reads back the same.
+    const code = await encodePlaylist(clips);
+    const again = await decodePlaylist(code);
+    assert.deepEqual(again, clips);
+    const json = JSON.parse(new TextDecoder().decode(new Uint8Array(await new Response(new Blob([Buffer.from(code.slice(1), 'base64url')]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer())));
+    assert.equal(json.version, 3);
+    assert.deepEqual(json.items[1].card, doc.items[1].card, 'a card as mvd-api writes it');
+});

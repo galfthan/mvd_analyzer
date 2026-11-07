@@ -5,6 +5,20 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (playlists-description) — POST /v1/playlists answers with the playlist
+
+- **`POST /v1/playlists`** (experimental) replaces `POST /v1/playlist-links`,
+  which is gone. It answers `{playlist, links: {web}, markdown, length}`:
+  the resolved playlist — demos by sha, clips in demo seconds with userids,
+  cards, texts, music cues with their credit (the OpenAPI `Playlist`
+  schema) — and the light player's link. The MCP's `createPlaylistLink` is
+  now `createPlaylist`. Experimental: playlists serve the web app more
+  than analysis and may move out of the API.
+- **Links carry the playlist itself** (format v3: deflate of that JSON),
+  written by the API and by the analyzer's Copy link alike, so the compact
+  rows once written twice (Go and JS) are gone. A 20-clip link is about
+  800 characters. v1 / v2 links, music included, still play.
+
 ## unreleased (playlist-music) — music in playlist links; demos by hash
 
 - **Music in playlists.** `GET /v1/playlists/music` (MCP

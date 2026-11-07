@@ -39,7 +39,7 @@ type MCPBackend interface {
 	GetHighlights(ctx context.Context, in GetHighlightsInput) (any, error)
 	ListArtifacts(ctx context.Context, in ListArtifactsInput) (any, error)
 	GetArtifact(ctx context.Context, in GetArtifactInput) (any, error)
-	CreatePlaylistLink(ctx context.Context, in CreatePlaylistLinkInput) (any, error)
+	CreatePlaylist(ctx context.Context, in CreatePlaylistInput) (any, error)
 	FindPlaylistMusic(ctx context.Context, in FindPlaylistMusicInput) (any, error)
 }
 
@@ -204,10 +204,10 @@ type GetHighlightsInput struct {
 	PreMs   *int     `json:"preMs,omitempty" jsonschema:"airgib pre-hit look-back in integer MILLISECONDS (0..1000; omit for the default 100, 0 = the pre-hit airborne gate off). Only the airgibs list is recomputed; the other three are stored. The knob the airgib detector has always taken"`
 }
 
-// CreatePlaylistLinkInput mirrors the POST /v1/playlist-links body; the
+// CreatePlaylistInput mirrors the POST /v1/playlists body; the
 // proxy forwards it as JSON (same field names), unset pointers left out so
 // the API's defaults apply.
-type CreatePlaylistLinkInput struct {
+type CreatePlaylistInput struct {
 	Items []PlaylistItem `json:"items" jsonschema:"the reel, played in order (1-100 items over at most 20 demos, at least one clip). Each item sets exactly one of clip, card or music"`
 	Name  string         `json:"name,omitempty" jsonschema:"the Markdown link's text; default generated: 'mvda · <demo title, or N demos> · <clip kinds with counts>' (a label's kind is its text before ' · ')"`
 }
@@ -225,7 +225,7 @@ type PlaylistMusic struct {
 	Volume  *float64 `json:"volume,omitempty" jsonschema:"how loud the track plays, 0.05-1; omit for the player's default 0.3 (a background level under the game sound). Raise it for a card-heavy or quiet section, lower it where the game sound matters"`
 }
 
-// MarshalJSON writes the item as POST /v1/playlist-links takes it, where
+// MarshalJSON writes the item as POST /v1/playlists takes it, where
 // silence is "music": null — a null the tool's own input cannot carry
 // (its schema has no null unions; see stripNullTypes).
 func (it PlaylistItem) MarshalJSON() ([]byte, error) {

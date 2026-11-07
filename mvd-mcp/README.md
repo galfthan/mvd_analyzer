@@ -96,7 +96,7 @@ description says so.
 | `getHighlights` | `mvd-api` `GET /v1/demos/{id}/highlights` |
 | `listArtifacts` | `mvd-api` `GET /v1/artifacts` |
 | `getArtifact` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` |
-| `createPlaylistLink` | `mvd-api` `POST /v1/playlist-links` |
+| `createPlaylist` | `mvd-api` `POST /v1/playlists` (experimental) |
 | `findPlaylistMusic` | `mvd-api` `GET /v1/playlists/music` |
 
 `demoId` is the string returned by `loadDemo` (`sha:HEX`) or any
@@ -1033,16 +1033,17 @@ carries the same fact on the responses that do get served, so it is only
 ever `false` on `getTopWindows`. A demo with no damage stream still
 yields lives.
 
-#### `createPlaylistLink({items, name?})`
+#### `createPlaylist({items, name?})` — experimental
 
-`POST /v1/playlist-links` — a link that **plays** a scripted reel in the
-web app's light player (`play.html`): clips from any number of hub games,
+`POST /v1/playlists` — a playlist, and a link that **plays** it in the
+MVD Analyzer's light player: clips from any number of hub games,
 title cards between them, text over either. Made for agents: find games
 with `searchGames`, moments with `getHighlights` / `getTopKills` /
 `getTopWindows` / `getEvents` / `getLives`, and hand their match-ms
 times and player names straight in. Nothing is stored — the whole reel
 rides in the link's fragment (deflate-compressed; a 20-clip reel is
-typically 500–1000 characters, Discord allows 2000).
+about 800 characters, Discord allows 2000). Experimental: it
+serves the web app more than analysis, and may move out of the API.
 
 | Item | Fields |
 |---|---|
@@ -1051,14 +1052,17 @@ typically 500–1000 characters, Discord allows 2000).
 | `card` | `ms` (300–30000; a minimum — it stays up until the next clip plays, covering its demo loading), `bg` (`#rrggbb`), `opacity` (0–1; below 1 the paused game shows through), `fadeIn` / `fadeOut`, `label`, `text?` |
 | `text[]` | `text` (≤ 200 chars), `size` (% of view height, 1–30, default 6), `color`, `font` (`title` / `body` / `mono`), `at` (`center`, `top`, `bottom`, `left`, `right`, corners), `from` / `to` (ms within its item), `fadeIn` / `fadeOut` |
 
-Output: `{url, markdown, name, length, clips, cards, demos[{gameId,
-sha, title}], music?}` (`music`: the tracks the cues play, with their credit) — `markdown` is `[name](url)` to paste into Discord. Each game
+Output: `{playlist, links: {web}, markdown, length}` — `playlist` is the
+resolved playlist (`{version, name, demos[{sha, gameId, title, offset}],
+items[{clip | card | music}]}`, demo seconds; the music items carry their
+credit), `links.web` the link to share, `markdown` `[name](links.web)` to
+paste into Discord. Each game
 is loaded through the cache on first use. 1–100 items, ≤ 20 games, at
 least one clip; `400 invalid_param` names the item and field.
 
 #### `findPlaylistMusic({q?, minSec?, maxSec?, limit?})`
 
-`GET /v1/playlists/music` — music for `createPlaylistLink`'s `music` items:
+`GET /v1/playlists/music` — music for `createPlaylist`'s `music` items:
 Kevin MacLeod's incompetech.com library (~1400 tracks, every one CC BY
 4.0), played by the light player straight from incompetech. `q` matches
 mood (`Action`, `Driving`, `Epic`, `Dark`, …), title, instruments and
