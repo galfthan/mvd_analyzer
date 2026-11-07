@@ -5,8 +5,9 @@
 // iframe.contentWindow (seek, POV, speed) instead of reloading a
 // cross-origin hub embed, which accepts no commands. The engine boots when
 // the Map or Player tab shows a Player pane (~6 MB of wasm plus assets) and
-// is dropped 20 s after none does, or on the next demo load
-// (src/player/index.js); one iframe page holds one engine for its lifetime.
+// is dropped 20 s after none does (src/player/index.js); the next demo
+// loads into the same engine (FteController.loadDemo) — one iframe page
+// holds one engine for its lifetime.
 //
 // Clock: FTE runs on demo-relative seconds, the page on match-relative
 // ones (demoOffsetSec). While it is active() the engine is the clock: a
@@ -18,6 +19,13 @@
 import { store } from '../state/store.js';
 import { WATCH_TABS } from '../state/ui.js';
 import { demoOffsetSec, mapFileKey, userIdOf, nameOfUserId } from '../lib/result.js';
+import { createAssetFetcher } from '../../../mvd-fte-player/src/asset-fetch.js';
+import { mapPath, mapUrl } from '../../../mvd-fte-player/src/assets.js';
+
+// The engine's files, fetched once for the page and kept: an engine booted
+// again (the Player pane closed and reopened) boots from memory, and a map
+// the engine has not got loads from there (asset-fetch.js).
+const fetchAsset = createAssetFetcher();
 
 /**
  * @typedef {import('../../../mvd-fte-player/src/fte-controller.js').FteController} FteController
@@ -47,7 +55,11 @@ const SEEK_SETTLE_MS = 2000;
 // has started the demo, and a demo_jump sent then is lost — seen as the
 // opening jump landing at 0:00. Wait for the demo clock to move.
 const CLOCK_WAIT_MS = 30000;
-
+// A demo loading into the engine, and its jump to where it opens, run with
+// the view faded to black — the frames meanwhile show the new demo's start
+// and the fast-forward. The fade-out (the .player-fade transition, styles.css)
+// ends before the load starts.
+const FADE_MS = 250;
 /** @type {EngineStatus} */
 const IDLE = { ready: false, playing: false, speed: 100, rate: 100, ended: false, track: null, autotrack: false, muted: true, teamInfo: false, error: '' };
 
@@ -85,8 +97,7 @@ export class PlayerEngine {
         this.consoleOpen = false;
         // FTE's team info table (hud_teaminfo, mvd-fte-player/config.cfg)
         // and sound on or off: kept across engines, set on each as it comes
-        // up (carrySettings) — each demo gets a fresh engine, which starts
-        // muted, so a run moving on to another demo's clip would mute again.
+        // up on a demo (carrySettings) — a fresh engine starts muted.
         // Sound starts on; the browser holds the audio until the first play
         // (FteController.play resumes it).
         this.teamInfo = false;
@@ -100,13 +111,14 @@ export class PlayerEngine {
         this.handle = null;
         /** @type {HTMLElement | null} */
         this.host = null;
-        /** @type {HTMLIFrameElement | null} */
-        this.iframe = null;
-        /** @type {string | null} */
-        this.blobUrl = null;
+        // The engine: its iframe and the demo it holds or loads.
+        /** @type {Slot | null} */
+        this.shown = null;
         /** @type {Promise<void> | null} */
         this.demoWait = null;      // the demo's bytes, while they download
         this.wakeHooked = false;   // the page's gestures wake the audio (attachHost)
+        this.fadedAt = 0;          // performance.now() of the fade-out, until the opening jump lands (0: shown)
+        // The engine, once it plays the current demo.
         /** @type {FteController | null} */
         this.fte = null;
         /** @type {number | null} */
@@ -122,11 +134,17 @@ export class PlayerEngine {
         this.onReady = null;       // run once when the engine is up
         /** @type {Set<(demoT: number) => void>} */
         this.tickListeners = new Set();
-
         demo.subscribe((handle) => {
             if (handle === this.handle) return;
-            this.teardown();
             this.handle = handle;
+            // The engine stays for the next demo (ensure loads it); none
+            // once no demo is.
+            if (handle) {
+                this.resetShown();
+                this.fadeOut();
+            } else {
+                this.teardown();
+            }
             if (this.active()) this.ensure();
         });
         activeTab.subscribe(() => this.syncActive());
@@ -188,8 +206,7 @@ export class PlayerEngine {
         this.host = el;
         // Sound starts on, but the browser holds the audio until a user
         // gesture: the first click or key anywhere on the page wakes it
-        // (one inside the game view, hookScreen). A light player run starts
-        // playing by itself, so it gets no play gesture to wait for.
+        // (one inside the game view, hookScreen).
         if (!this.wakeHooked) {
             this.wakeHooked = true;
             const wake = () => this.fte?.wakeAudio();
@@ -199,17 +216,26 @@ export class PlayerEngine {
         if (this.active()) this.ensure();
     }
 
-    // ensure starts the engine on the current demo once its bytes are in:
-    // at once for a local file, after the hub CDN download for a demo read
-    // from mvd-api, which fetches them only when something wants to play it
-    // (DemoHandle.demo()). A teardown or another demo meanwhile drops it.
+    // ensure has the engine play the current demo once its bytes are in: at
+    // once for a local file, after the hub CDN download for a demo read from
+    // mvd-api, which fetches them only when something wants to play it
+    // (DemoHandle.demo()). An engine that is up loads it (no boot); none,
+    // one starts. A teardown or another demo meanwhile drops it.
     ensure() {
-        if (this.iframe || this.demoWait || !this.handle?.result || !this.host) return;
+        const shown = this.shown;
+        if (this.demoWait || !this.handle?.result || !this.host) return;
+        // Playing it, or loading another: that load ends in booted(), which
+        // asks again.
+        if (shown && (shown.handle === this.handle || shown.loading)) return;
         const handle = this.handle;
-        const wait = handle.demo().then(({ blob, gzipped }) => {
+        const wait = handle.demo().then((file) => {
             if (this.demoWait !== wait) return;
             this.demoWait = null;
-            if (this.handle === handle && this.host && this.active()) this.start(handle, blob, gzipped);
+            if (this.handle !== handle || !this.host || !this.active()) return;
+            const s = this.shown;
+            if (s?.loading) return;
+            if (s?.ctl) this.loadInto(s, handle, file);
+            else this.spawn(handle, file);
         }, (/** @type {unknown} */ err) => {
             if (this.demoWait !== wait) return;
             this.demoWait = null;
@@ -222,12 +248,12 @@ export class PlayerEngine {
         if (this.status.get().error) this.status.set({ ...this.status.get(), error: '' });
     }
 
+    // spawn starts an engine (a new iframe) on a demo's bytes.
     /**
      * @param {DemoHandle} handle
-     * @param {Blob} blob
-     * @param {boolean} gzipped
+     * @param {{ blob: Blob, gzipped: boolean }} file
      */
-    start(handle, blob, gzipped) {
+    spawn(handle, { blob, gzipped }) {
         const host = /** @type {HTMLElement} */ (this.host);
         const demoUrl = URL.createObjectURL(blob);
         const demoPath = gzipped ? 'qw/match.mvd.gz' : 'qw/match.mvd';
@@ -235,23 +261,79 @@ export class PlayerEngine {
         iframe.src = 'fte-player/player.html';
         iframe.title = 'Demo player';
         iframe.allow = 'fullscreen; autoplay';
+        iframe.classList.add('player-fade');
+        this.fadedAt = performance.now();
+        /** @type {Slot} */
+        const slot = { iframe, blobUrl: demoUrl, ctl: null, handle, loading: true, seq: 0 };
+        const live = () => this.shown === slot;
         iframe.addEventListener('load', () => {
-            if (this.iframe !== iframe) return;
+            if (!live()) return;
             // player.html's window.mvdFte (mvd-fte-player/README.md).
             this.hookScreen(/** @type {Window} */ (iframe.contentWindow));
-            /** @type {any} */ (iframe.contentWindow).mvdFte.start({ demoUrl, demoPath, mapName: mapFileKey(handle.result) })
-                .then((/** @type {FteController} */ fte) => waitForDemoClock(fte, () => this.iframe === iframe).then(() => fte))
+            /** @type {any} */ (iframe.contentWindow).mvdFte.start({ demoUrl, demoPath, mapName: mapFileKey(handle.result), fetchAsset })
+                .then((/** @type {FteController} */ fte) => waitForDemoClock(fte, live).then(() => fte))
                 .then((/** @type {FteController} */ fte) => {
-                    if (this.iframe === iframe) this.adopt(fte);
+                    slot.ctl = fte;
+                    if (live()) this.booted(slot);
                 }, (/** @type {unknown} */ err) => console.error('player:', err));
         }, { once: true });
-        this.blobUrl = demoUrl;
-        this.iframe = iframe;
+        this.shown = slot;
         host.appendChild(iframe);
     }
 
-    // adopt takes a fresh engine once its demo runs: the settings carried
-    // from the engines before, then whatever waited for it (whenReady — a
+    // loadInto plays another demo in an engine that is up — the bytes in,
+    // the map fetched when the engine has not got it (FteController.loadDemo)
+    // — then hands it on as a boot would (booted), faded out meanwhile.
+    /**
+     * @param {Slot} slot  one with an engine (ctl), not loading
+     * @param {DemoHandle} handle
+     * @param {{ blob: Blob, gzipped: boolean }} file
+     */
+    loadInto(slot, handle, { blob, gzipped }) {
+        const ctl = /** @type {FteController} */ (slot.ctl);
+        slot.handle = handle;
+        slot.loading = true;
+        const seq = ++slot.seq;
+        const live = () => slot.seq === seq && this.shown === slot;
+        this.fadeOut();
+        ctl.resume();
+        const map = mapFileKey(handle.result);
+        const bsp = map && !ctl.hasFile(mapPath(map)) ? fetchAsset(mapUrl(map)).catch(() => null) : null;
+        const faded = new Promise((r) => setTimeout(r, FADE_MS - (performance.now() - this.fadedAt)));
+        Promise.all([blob.arrayBuffer(), bsp, faded]).then(([demo, mapBytes]) => {
+            if (!live()) return false;
+            // A map that could not be had is left to the engine
+            // (cl_download_mapsrc, config.cfg).
+            return ctl.loadDemo({ demo, gzipped, files: mapBytes ? { [mapPath(map)]: mapBytes } : {} }).then(() => true);
+        }).then((done) => {
+            if (done && live()) this.booted(slot);
+        }, (/** @type {unknown} */ err) => console.error('player:', err));
+    }
+
+    // fadeOut: another demo is to load — the demo before stops, silent
+    // (carrySettings turns the sound back on), and the view fades to black
+    // (FADE_MS); tick fades it in once no jump is in flight.
+    fadeOut() {
+        const s = this.shown;
+        if (!s) return;
+        s.ctl?.pause();
+        s.ctl?.mute();
+        if (this.fadedAt) return;
+        s.iframe.classList.add('player-fade');
+        this.fadedAt = performance.now();
+    }
+
+    // booted: the engine plays its demo. It is adopted — or, the demo store
+    // having moved on meanwhile, loads that one (ensure).
+    /** @param {Slot} slot */
+    booted(slot) {
+        slot.loading = false;
+        if (slot.handle === this.handle) this.adopt(/** @type {FteController} */ (slot.ctl));
+        else if (this.active()) this.ensure();
+    }
+
+    // adopt takes an engine once its demo runs: the settings carried from
+    // the engines before, then whatever waited for it (whenReady — a
     // playlist clip, which so sets its POV after the carried one).
     /** @param {FteController} fte */
     adopt(fte) {
@@ -261,16 +343,20 @@ export class PlayerEngine {
         // ?from= gives.
         if (this.clock.t > 0) this.jump(this.clock.t);
         fte.pause();
-        if (this.active()) this.startSync();
-        else fte.suspend();
+        if (this.active()) {
+            fte.resume();
+            this.startSync();
+        } else {
+            fte.suspend();
+        }
         this.publish();
         const onReady = this.onReady;
         this.onReady = null;
         if (onReady) onReady();
     }
 
-    // carrySettings sets a fresh engine to the settings the user picked on
-    // the ones before it (team info, sound, the followed player; the rate
+    // carrySettings sets an engine come up on a demo to the settings the
+    // user picked before (team info, sound, the followed player; the rate
     // applies on play).
     /** @param {FteController} fte */
     carrySettings(fte) {
@@ -324,18 +410,29 @@ export class PlayerEngine {
 
     }
 
-    // teardown drops the engine; removing the iframe frees it.
-    teardown() {
+    // The engine's iframe (PlayerLayer hooks its wheel).
+    get iframe() {
+        return this.shown?.iframe ?? null;
+    }
+
+    // resetShown: the engine no longer plays the current demo — the
+    // sync, the seek and whatever waited for it go; the engine stays.
+    resetShown() {
         this.stopSync();
         if (this.seekTimer) clearTimeout(this.seekTimer);
-        if (this.iframe) this.iframe.remove();
-        if (this.blobUrl) URL.revokeObjectURL(this.blobUrl);
         Object.assign(this, {
-            blobUrl: null, demoWait: null, iframe: null, fte: null, seekTimer: null,
+            demoWait: null, fte: null, seekTimer: null,
             pendingSeek: null, seekTarget: null, onReady: null,
             slow: null, consoleOpen: false,
         });
         this.status.set({ ...IDLE, rate: this.rate });
+    }
+
+    // teardown drops the engine; removing the iframe frees it.
+    teardown() {
+        this.resetShown();
+        if (this.shown) removeSlot(this.shown);
+        this.shown = null;
     }
 
     startSync() {
@@ -402,6 +499,10 @@ export class PlayerEngine {
             if (arrived || performance.now() - this.seekIssuedAt > SEEK_SETTLE_MS) this.seekTarget = null;
         }
         if (!this.seeking()) {
+            if (this.fadedAt) {
+                this.fadedAt = 0;
+                this.shown?.iframe.classList.remove('player-fade');
+            }
             const t = this.matchTime(demoT);
             if (Math.abs(t - this.clock.t) > 0.01) this.clock.seek(t, 'engine');
         }
@@ -579,6 +680,18 @@ export class PlayerEngine {
             if (this.active()) this.ensure();
         }
     }
+}
+
+/**
+ * The engine and the demo it holds: `ctl` once it is up, `loading` while it
+ * boots or loads a demo; `seq` drops a load overtaken by another.
+ * @typedef {{ iframe: HTMLIFrameElement, blobUrl: string, ctl: FteController | null, handle: DemoHandle, loading: boolean, seq: number }} Slot
+ */
+
+/** @param {Slot} slot */
+function removeSlot(slot) {
+    slot.iframe.remove();
+    URL.revokeObjectURL(slot.blobUrl);
 }
 
 // The engine's own player list, not the Result's: the light player's

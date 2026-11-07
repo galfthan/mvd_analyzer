@@ -19,9 +19,10 @@ the whole point — mvd-web calls the controller through
 
 | File | |
 |---|---|
-| `player.html` | The page FTE runs in. Exposes `window.mvdFte.start(opts)` → `Promise<FteController>`. One engine per page load. |
+| `player.html` | The page FTE runs in. Exposes `window.mvdFte.start(opts)` → `Promise<FteController>`. One engine per page load; it plays any number of demos in turn (`loadDemo`). |
 | `src/loader.js` | `startFte()` — builds the Emscripten `Module` config (canvas, manifest, virtual-FS file map), injects `ftewebgl.js`, resolves when `Module.getClientState` exists. |
-| `src/fte-controller.js` | `FteController` — console commands (`FTEC.cbufadd`), demo clock, `demoJump` (re-applies track + speed after a rewind; restarts the demo after it ended), speed / pause, autotrack / `track`, volume, and `suspend` / `resume` of the engine's own frame loop (`FTEC.step`, gated by wrapping it — emscripten's `pauseMainLoop` does not drive FTE) for a host that hides the page. |
+| `src/fte-controller.js` | `FteController` — console commands (`FTEC.cbufadd`), demo clock, `demoJump` (re-applies track + speed after a rewind; restarts the demo after it ended), speed / pause, autotrack / `track`, volume, `suspend` / `resume` of the engine's own frame loop (`FTEC.step`, gated by wrapping it — emscripten's `pauseMainLoop` does not drive FTE) for a host that hides the page, and `loadDemo` / `hasFile` — another demo (and its map) into the running engine. |
+| `src/asset-fetch.js` | `createAssetFetcher()` — the manifest's files as Promises of their bytes (FTE takes those in `Module.files`), 16 requests in flight at most, network failures and 5xx retried, kept by URL. A host passes one to `start({ fetchAsset })` to share it across its engines; without, each engine has its own. |
 | `src/assets.js` | The engine's asset manifest: 450 paths under `a.quake.world/fte/`, the map BSP from `assets.quake.world/maps/`, our `config.cfg`, and the demo. |
 | `config.cfg` | Hub's `config_v5.cfg`: HUD, rendering, and the closing `playdemo match` — plus hub's `config_v10.cfg` binds the engine serves itself (Tab scoreboard, `` ` `` / `~` console); the host page handles the other keys. Also the team info HUD element (`hud_teaminfo_*`, at the right edge), off — the host turns it on (`hud_teaminfo_show`). |
 | `test/` | Node tests (`make test`) against a fake engine window. |
@@ -69,8 +70,29 @@ link params. mvd-web converts from match time with
   `unmute()` and playing (`setDemoSpeed` above 0) resume them, so a click in the host page is
   enough — a host that unmutes before any gesture is heard from the
   first play.
+- **Asset bursts.** Handed URLs, FTE requests all ~450 files at once and
+  never retries; Chrome turns part of such a burst down
+  (`net::ERR_INSUFFICIENT_RESOURCES`), and each file that failed is
+  missing from that engine for good — a model that never draws (the
+  backpack, the player), only an `Unable to load progs/….mdl` line in its
+  console. The loader so hands FTE Promises from `asset-fetch.js` instead
+  (13 MB for the general files and one map).
+  The two `Unable to load` lines that remain, `s_bubble.spr` and
+  `s_explod.spr`, are hub's: its list has them commented out.
 - **One engine per window.** Emscripten publishes `Module` / `FTEC` as
-  globals and has no teardown. To play another demo, reload the iframe.
+  globals and has no teardown. Another demo plays in the same engine:
+  FTE 004 keeps its files in a table of its window (`FTEH.f`, path →
+  ref-counted buffer, `ftewebgl.js`) that its boot fills from
+  `Module.files` and its drag-and-drop adds to; `loadDemo` adds the demo
+  (and the map, when `hasFile` says it is missing) the same way under a
+  name of its own, runs `playdemo`, and releases the demo before once the
+  new clock runs. No second boot: the wasm, the ~450 files and the heap
+  are the first demo's. These are the build's internals, not an API —
+  check them on an engine update.
+- **One thread.** A same-origin iframe runs on its host page's thread, so
+  two engines share one: what one does — booting, loading a demo,
+  fast-forwarding a `demo_jump` — is frames the other does not draw. A
+  host wanting smooth playback runs one engine and loads each demo into it.
 - **External hosts.** The engine, its assets and map BSPs load from
   `a.quake.world` / `assets.quake.world` (all `access-control-allow-origin: *`,
   checked 2026-10-26). If those go away the player stops working; mirroring

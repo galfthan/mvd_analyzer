@@ -506,3 +506,59 @@ test('each playlist clip plays from its own POV, whatever was picked by hand bef
     runner.stop();
     engine.teardown();
 });
+
+// The next demo plays in the engine that is up (FteController.loadDemo): no
+// engine boots, the view faded out while it loads and jumps, the sound
+// carried.
+test('another demo loads into the running engine, faded out until its jump lands', async () => {
+    globalThis.document ??= /** @type {any} */ ({ activeElement: null });
+    globalThis.requestAnimationFrame ??= () => 1;
+    globalThis.cancelAnimationFrame ??= () => {};
+    const { PlayerEngine } = await import('../src/player/engine.js');
+    const { createClock } = await import('../src/state/clock.js');
+    /** @param {number} id */
+    const handle = (id) => ({
+        ref: { key: `hub:${id}`, gameId: id },
+        result: { demoInfo: { map: '' }, streams: { global: { demoOffset: 0 } } },
+        demo: async () => ({ blob: new Blob([new Uint8Array([id])]), gzipped: false }),
+    });
+    const [A, B] = [handle(1), handle(2)];
+    const demo = store(/** @type {any} */ (null));
+    const engine = new PlayerEngine({ clock: createClock(), demo, activeTab: store('player') });
+    engine.host = /** @type {any} */ ({ appendChild() {} });
+    const a = await freshFte({ alpha: 3 });
+    const w = /** @type {any} */ (a.win);
+    w.FTEH = { h: [], f: {} };
+    w._emscriptenfte_buf_createfromarraybuf = (/** @type {ArrayBuffer} */ buf) => w.FTEH.h.push({ r: 1, d: new Uint8Array(buf) }) - 1;
+    w._emscriptenfte_buf_release = () => {};
+    const cls = new Set();
+    const sa = /** @type {any} */ ({
+        iframe: { classList: { add: (/** @type {string} */ c) => cls.add(c), remove: (/** @type {string} */ c) => cls.delete(c) }, remove() {} },
+        blobUrl: '', ctl: a.fte, handle: A, loading: false, seq: 0,
+    });
+    demo.set(A);
+    engine.shown = sa;
+    engine.adopt(a.fte);
+    a.fte.unmute();
+
+    a.win.demoTime = 300;
+    demo.set(B);
+    assert.equal(engine.shown, sa, 'the same engine');
+    assert.equal(engine.fte, null, 'not adopted until B runs');
+    assert.ok(cls.has('player-fade'), 'faded out');
+    assert.ok(a.fte.isMuted(), 'silent while it loads');
+    await new Promise((r) => setTimeout(r, 300));
+    assert.ok(a.win.commands.includes('playdemo match1'), 'B plays in the engine that played A, once faded out');
+    a.win.demoTime = 0.5;
+    engine.clock.seek(42);
+    await new Promise((r) => setTimeout(r, 120));
+    assert.equal(engine.fte, a.fte, 'adopted once B runs');
+    assert.ok(!a.fte.isMuted(), 'with the sound carried');
+    assert.ok(a.win.commands.includes('demo_jump 42'), 'opening at the cursor');
+    engine.tick();
+    assert.ok(cls.has('player-fade'), 'still faded while the jump is in flight');
+    a.win.demoTime = 42.2;
+    engine.tick();
+    assert.ok(!cls.has('player-fade'), 'faded in once it landed');
+    engine.teardown();
+});
