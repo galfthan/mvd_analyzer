@@ -31,8 +31,8 @@ export class FteController {
         this._restoreTimer = null;
         this._restoreTarget = 0;
         this._volume = 0;
-        this._lastVolume = 0;
         this._maxVolume = 0.2;
+        this._level = 1;   // setLevel
         this._gate = this._gateFrameLoop();
     }
 
@@ -338,23 +338,33 @@ export class FteController {
     }
 
     setVolume(value) {
-        this._lastVolume = this._volume;
         this._volume = Number(value);
         this.command('volume', this._volume);
+    }
+
+    // Not in hub: setLevel(f) scales the unmuted volume (0..1) — a host
+    // playing music turns the game down under it. Muted stays muted.
+    setLevel(f) {
+        this._level = Math.min(1, Math.max(0, Number(f)));
+        if (!this.isMuted()) this.setVolume(this._unmutedVolume());
+    }
+
+    _unmutedVolume() {
+        return (this._maxVolume / 2) * this._level;
     }
 
     mute() {
         this.setVolume(0);
     }
 
-    // Hub unmutes to a tenth of its slider; we have no slider, so half.
+    // Hub unmutes to a tenth of its slider; we have no slider, so half
+    // (times the level, setLevel).
     // Browsers keep audio suspended until a user gesture in the engine's
     // window — resumeAudio (from the loader) resumes it from the host's
     // click, which counts for a same-origin child frame.
     unmute() {
         if (this._resumeAudio) this._resumeAudio();
-        if (this._lastVolume <= this._maxVolume / 100) this._lastVolume = this._maxVolume / 2;
-        this.setVolume(this._lastVolume);
+        this.setVolume(this._unmutedVolume());
     }
 
     // wakeAudio resumes the engine's audio when it should be sounding — the

@@ -5,7 +5,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import {
     parseHubReplayUrl, hubClipsUrl, singleHubGame, encodePlaylist, decodePlaylist,
     playlistStep, playerFragClips, MAX_HUB_CLIPS, cleanSlow, slowAt, playlistName, markdownLink,
-    makeCard, cleanText, isCard,
+    makeCard, cleanText, isCard, cueAt,
 } from '../src/lib/playlist.js';
 import { matchDay } from '../src/lib/wall-clock.js';
 
@@ -157,4 +157,36 @@ test('v2: title cards and text travel in the link, clamped; v1 links still read'
     assert.equal(singleHubGame([card, ...clips.slice(1, 2)]), 212260, 'cards do not make a list multi-demo');
     assert.doesNotMatch(hubClipsUrl(212260, [card, clips[1]]), /clip=0-/, 'nor go to hub');
     assert.equal(playlistName([card, clips[1]]), 'mvda · dm3 · a', 'nor count as clips in the name');
+});
+
+// A link as mvd-api writes it with music (mvd-api/music_test.go
+// TestPlaylistLinkMusic): the m table, {u} cues before their items.
+const TRACK_ROW = ['incompetech', 'USUAN1100301', 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Volatile%20Reaction.mp3',
+    'Volatile Reaction', 'Kevin MacLeod', 'CC BY 4.0', 'https://creativecommons.org/licenses/by/4.0/',
+    'https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100301', 154];
+const TRACK = { source: 'incompetech', id: 'USUAN1100301', url: TRACK_ROW[2], title: 'Volatile Reaction', artist: 'Kevin MacLeod',
+    license: 'CC BY 4.0', licenseUrl: TRACK_ROW[6], page: TRACK_ROW[7], durationSec: 154 };
+/** @param {unknown} doc */
+async function zlink(doc) {
+    const bytes = new Uint8Array(await new Response(new Blob([JSON.stringify(doc)]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());
+    return 'z' + Buffer.from(bytes).toString('base64url');
+}
+
+test('music cues decode onto the item after them, survive a round trip, and only play known files', async () => {
+    const doc = {
+        v: 2, d: [['hub:1', 1, 'dm3', 0]], m: [TRACK_ROW, [...TRACK_ROW.slice(0, 2), 'https://evil.example/x.mp3', ...TRACK_ROW.slice(3)]],
+        c: [{ u: 0 }, { k: [2000, '#000000', 1, 400, 400], l: 'Intro' }, [10, 20, 'auto', '', 'a', 0],
+            { u: -1 }, [30, 40, 'auto', '', 'b', 0], { u: 1 }, [50, 60, 'auto', '', 'c', 0], [70, 80, 'auto', '', 'd', 0]],
+    };
+    const clips = /** @type {any[]} */ (await decodePlaylist(await zlink(doc)));
+    assert.equal(clips.length, 5, 'cues are not items');
+    assert.deepEqual(clips[0].cue, TRACK, 'the cue before the card is the card\'s');
+    assert.equal(clips[1].cue, undefined);
+    assert.equal(clips[2].cue, null, 'silence');
+    assert.equal(clips[3].cue, undefined, 'a track on another host is no cue');
+    assert.deepEqual([0, 1, 2, 3, 4].map((i) => cueAt(clips, i)?.title ?? null), ['Volatile Reaction', 'Volatile Reaction', null, null, null]);
+
+    const again = /** @type {any[]} */ (await decodePlaylist(await encodePlaylist(clips)));
+    assert.deepEqual(again.map((c) => c.cue), clips.map((c) => c.cue), 'the cues round-trip');
+    assert.deepEqual(cueAt([], 0), null);
 });

@@ -562,3 +562,39 @@ test('another demo loads into the running engine, faded out until its jump lands
     assert.ok(!cls.has('player-fade'), 'faded in once it landed');
     engine.teardown();
 });
+
+// The run cues the playlist's music at every item it gets to — the cue in
+// force there — and stops it at the end.
+test('the runner cues the music in force at each item, and stops it with the run', async () => {
+    const demo = store(/** @type {any} */ ({ ref: { key: 'hub:1', gameId: 1 }, result: { streams: { global: { demoOffset: 0 } } } }));
+    const engine = await realEngine({ activeTab: 'player', demo });
+    const a = await freshFte({ alpha: 3 });
+    engine.adopt(a.fte);
+    /** @type {Array<string | null>} */
+    const cues = [];
+    let stops = 0;
+    const music = { cue: (/** @type {any} */ m) => cues.push(m ? m.title : null), stop: () => stops++ };
+    const runner = createRunner({ engine, page: fakeEngine(store('map')), driverFor: () => engine, demo, teams: store({ order: [] }),
+        selectTab: () => {}, loadDemo: async () => true, demoRefOf, segment: store(null), music });
+    const T = { title: 'T' };
+    runner.start([clip(100, 110, { cue: T }), clip(110, 120), clip(120, 130, { cue: null }), clip(130, 140)], 0);
+    /** @param {number} t */
+    const at = (t) => {
+        a.win.demoTime = t;
+        engine.tick();
+    };
+    at(100.1);
+    at(109.95);
+    at(110.05);
+    at(110.1);
+    at(119.95);
+    at(120.05);
+    assert.deepEqual(cues, ['T', 'T', null]);
+    runner.start([clip(100, 110, { cue: T }), clip(110, 120), clip(120, 130, { cue: null })], 1);
+    assert.deepEqual(cues.at(-1), 'T', 'started mid-list: the cue before it');
+    at(110.1);   // the jump back lands (the controller's POV restore waits for it)
+    const before = stops;
+    runner.stop();
+    assert.ok(stops > before, 'the end of the run stops the music');
+    engine.teardown();
+});

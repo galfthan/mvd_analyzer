@@ -127,7 +127,15 @@ list.
 
 ### Sources
 
-Checked from this machine 2026-11-07:
+**Shipped (owner, 2026-11-07): Incompetech only.** Its `pieces.json` turned
+out to be the whole list (1443 tracks: title, length, feel, instruments,
+bpm, ISRC), and its MP3s play from any page. ccMixter's files refuse any
+Referer but ccmixter.org (403), so they would need copies kept by
+mvd-api. Commons' audio is mostly speech and its music mixed, and it
+took filters (Lingua Libre, "Speaker:", a 30 s floor) to be usable at all.
+Pixabay has no music API and its terms want files downloaded, not
+hotlinked. `source` stays in the reference for a later one. With one
+CC BY source, ShareAlike handling is not needed yet. The survey before:
 
 - **ccMixter**, `https://ccmixter.org/api/query?f=json&lic=by&tags=…`:
   an open JSON API (no key). Filters by license, tags and tempo; results
