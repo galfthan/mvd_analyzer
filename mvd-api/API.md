@@ -922,6 +922,13 @@ actor). Nothing is stored: the reel rides in the link. The operation in
 `/openapi.yaml` (`createPlaylistLink`, also the MCP tool's name) has the
 item fields.
 
+A reel can have music: **`GET /v1/playlists/music?q=action`** finds
+Creative Commons tracks (Kevin MacLeod's incompetech.com library, every
+track CC BY 4.0), and an item `{"music": {"source", "id"}}` plays one under
+the items after it — first in the list for the whole reel, before each
+section to score it by section, `{"music": null}` for silence. The API looks
+the track up itself, so the credit the player shows comes from the source.
+
 ---
 
 ## 4. Endpoint reference — served by the API itself

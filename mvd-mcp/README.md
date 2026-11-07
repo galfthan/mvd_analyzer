@@ -97,6 +97,7 @@ description says so.
 | `listArtifacts` | `mvd-api` `GET /v1/artifacts` |
 | `getArtifact` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` |
 | `createPlaylistLink` | `mvd-api` `POST /v1/playlist-links` |
+| `findPlaylistMusic` | `mvd-api` `GET /v1/playlists/music` |
 
 `demoId` is the string returned by `loadDemo` (`sha:HEX`) or any
 `gameId:NNNN` reference.
@@ -1046,13 +1047,24 @@ typically 500–1000 characters, Discord allows 2000).
 | Item | Fields |
 |---|---|
 | `clip` | `gameId` (or `demo`: `gameId:N` / `sha:HEX`, a hub game), `from` / `to` (int ms since match start), `watch` (a player name in that game; omit = autotrack; unknown → 400 listing the players), `label` (`Kind · details` — the link's name counts kinds), `slow?` `{from, to, speed}` (same ms; speed 0.05–1), `text?` |
+| `music` | `{source, id}` from `findPlaylistMusic`, or `{silence: true}` — a cue taking no time: the track plays under the items after it, to the next cue or the end (first for the whole reel, before each section's card for one per section); the player shows its credit and turns the game sound down |
 | `card` | `ms` (300–30000; a minimum — it stays up until the next clip plays, covering its demo loading), `bg` (`#rrggbb`), `opacity` (0–1; below 1 the paused game shows through), `fadeIn` / `fadeOut`, `label`, `text?` |
 | `text[]` | `text` (≤ 200 chars), `size` (% of view height, 1–30, default 6), `color`, `font` (`title` / `body` / `mono`), `at` (`center`, `top`, `bottom`, `left`, `right`, corners), `from` / `to` (ms within its item), `fadeIn` / `fadeOut` |
 
 Output: `{url, markdown, name, length, clips, cards, demos[{gameId,
-sha, title}]}` — `markdown` is `[name](url)` to paste into Discord. Each game
+sha, title}], music?}` (`music`: the tracks the cues play, with their credit) — `markdown` is `[name](url)` to paste into Discord. Each game
 is loaded through the cache on first use. 1–100 items, ≤ 20 games, at
 least one clip; `400 invalid_param` names the item and field.
+
+#### `findPlaylistMusic({q?, minSec?, maxSec?, limit?})`
+
+`GET /v1/playlists/music` — music for `createPlaylistLink`'s `music` items:
+Kevin MacLeod's incompetech.com library (~1400 tracks, every one CC BY
+4.0), played by the light player straight from incompetech. `q` matches
+mood (`Action`, `Driving`, `Epic`, `Dark`, …), title, instruments and
+description, every word required; `minSec` / `maxSec` bound the length.
+Returns `{count, tracks[{source, id, title, artist, license, licenseUrl,
+page, url, durationSec, tags?}]}`; hand `{source, id}` on.
 
 #### `getHighlights({demoId, kinds?, players?, preMs?})`
 

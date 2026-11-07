@@ -124,7 +124,7 @@ func TestPlaylistLinkRejects(t *testing.T) {
 		{`{"items": [{"card": {"ms": 3000}}]}`, "at least one clip"},
 		{`{"items": [{"clip": {"gameId": 1, "from": 5, "to": 1}}]}`, "items[0]: clip: from"},
 		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000, "watch": "nobody"}}]}`, `no player "nobody" in game 1 (players: bps)`},
-		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}, "card": {"ms": 1000}}]}`, "exactly one of clip or card"},
+		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}, "card": {"ms": 1000}}]}`, "exactly one of clip, card or music"},
 		{`{"items": [{"card": {"ms": 50}}, {"clip": {"gameId": 1, "from": 0, "to": 1000}}]}`, "card.ms"},
 		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000, "text": [{"text": "x", "at": "middle"}]}}]}`, "text[0].at"},
 		{`{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}}], "extra": 1}`, "unknown field"},

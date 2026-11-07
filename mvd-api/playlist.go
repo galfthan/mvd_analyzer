@@ -12,9 +12,13 @@ package main
 //
 //	#playlist=z<base64url(deflate-raw(JSON))>
 //	{ v: 2, d: [[key, gameId, title, offsetSec]…],
+//	  m: [[source, id, url, title, artist, license, licenseUrl, page, durationSec]…],
 //	  c: [ [from, to, track, who, label, demoIndex, slow|0, texts?]   (a clip)
-//	       | { k: [ms, bg, opacity, fadeIn, fadeOut], l: label, x: texts } ] }
+//	       | { k: [ms, bg, opacity, fadeIn, fadeOut], l: label, x: texts }
+//	       | { u: musicIndex | -1 } ] }   (a music cue; -1: silence)
 //
+// `m` and the cues are there only when the playlist has music (music.go):
+// a cue takes no time, and its track plays from it on.
 // texts in the short keys t s c f a b e i o, defaults left out. The page
 // clamps whatever it reads again; the limits here are for a useful 400.
 
@@ -94,6 +98,14 @@ type playlistCard struct {
 type playlistItem struct {
 	Clip *playlistClip `json:"clip,omitempty"`
 	Card *playlistCard `json:"card,omitempty"`
+	// Music: {source, id} — a track from it on — or null, silence. Raw, so
+	// null and absent differ.
+	Music json.RawMessage `json:"music,omitempty"`
+}
+
+type playlistMusicRef struct {
+	Source string `json:"source"`
+	ID     string `json:"id"`
 }
 
 type playlistRequest struct {
@@ -115,6 +127,7 @@ type playlistResponse struct {
 	Clips    int            `json:"clips"`
 	Cards    int            `json:"cards"`
 	Demos    []playlistDemo `json:"demos"`
+	Music    []musicTrack   `json:"music,omitempty"`
 }
 
 var (
@@ -170,6 +183,17 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(ids) == 0 {
 		writeError(w, http.StatusBadRequest, "invalid_param", "items: at least one clip")
+		return
+	}
+	if last := items[len(items)-1]; last.cue {
+		writeError(w, http.StatusBadRequest, "invalid_param", fmt.Sprintf("items[%d]: a music cue plays under the items after it, and none follows", len(items)-1))
+		return
+	}
+
+	// 1b · The tracks, looked up at their sources: the credit and license
+	// the link carries are theirs.
+	tracks, trackIndex, ok := s.playlistTracks(w, r, items)
+	if !ok {
 		return
 	}
 
@@ -238,6 +262,14 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 	var labels []string
 	clips, cards := 0, 0
 	for i, ci := range items {
+		if ci.cue {
+			u := -1
+			if ci.music != nil {
+				u = trackIndex[*ci.music]
+			}
+			rows = append(rows, map[string]any{"u": u})
+			continue
+		}
 		if ci.card != nil {
 			rows = append(rows, ci.card)
 			cards++
@@ -280,7 +312,15 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 		clips++
 	}
 
-	doc, err := json.Marshal(map[string]any{"v": 2, "d": demoRows, "c": rows})
+	link := map[string]any{"v": 2, "d": demoRows, "c": rows}
+	if len(tracks) > 0 {
+		m := make([][]any, len(tracks))
+		for i, t := range tracks {
+			m[i] = []any{t.Source, t.ID, t.URL, t.Title, t.Artist, t.License, t.LicenseURL, t.Page, t.DurationSec}
+		}
+		link["m"] = m
+	}
+	doc, err := json.Marshal(link)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "internal", err.Error())
 		return
@@ -290,25 +330,28 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal", err.Error())
 		return
 	}
-	link := playPageURL + "#playlist=z" + code
+	url := playPageURL + "#playlist=z" + code
 	name := req.Name
 	if name == "" {
 		name = playlistName(demoList, labels)
 	}
 	writeJSON(w, http.StatusOK, playlistResponse{
-		URL:      link,
-		Markdown: "[" + strings.NewReplacer("[", "(", "]", ")").Replace(name) + "](" + link + ")",
+		URL:      url,
+		Markdown: "[" + strings.NewReplacer("[", "(", "]", ")").Replace(name) + "](" + url + ")",
 		Name:     name,
-		Length:   len(link),
+		Length:   len(url),
 		Clips:    clips,
 		Cards:    cards,
 		Demos:    demoList,
+		Music:    tracks,
 	})
 }
 
 // checkedItem is one item past checkItem: a clip (its demo still to be
 // read) or a card's finished row, with the label and texts packed.
 type checkedItem struct {
+	cue   bool // a music cue: music is its track, nil for silence
+	music *playlistMusicRef
 	clip  *playlistClip
 	demo  democache.DemoID // the clip's demo, as it names it
 	card  map[string]any
@@ -323,9 +366,29 @@ const playlistMaxMs = 4 * 3600 * 1000
 // checkItem validates one item without its demo; what needs the demo
 // (the watched player) is checked once it is loaded.
 func checkItem(it playlistItem) (checkedItem, error) {
+	set := 0
+	for _, b := range []bool{it.Clip != nil, it.Card != nil, it.Music != nil} {
+		if b {
+			set++
+		}
+	}
 	switch {
-	case (it.Clip == nil) == (it.Card == nil):
-		return checkedItem{}, fmt.Errorf("exactly one of clip or card")
+	case set != 1:
+		return checkedItem{}, fmt.Errorf("exactly one of clip, card or music")
+	case it.Music != nil:
+		if string(it.Music) == "null" {
+			return checkedItem{cue: true}, nil
+		}
+		var ref playlistMusicRef
+		dec := json.NewDecoder(bytes.NewReader(it.Music))
+		dec.DisallowUnknownFields()
+		if err := dec.Decode(&ref); err != nil || ref.ID == "" {
+			return checkedItem{}, fmt.Errorf("music: {source, id} from GET /v1/playlists/music, or null for silence")
+		}
+		if ref.Source != "incompetech" {
+			return checkedItem{}, fmt.Errorf("music.source: incompetech")
+		}
+		return checkedItem{cue: true, music: &ref}, nil
 	case it.Card != nil:
 		c := it.Card
 		if c.Ms < cardMsMin || c.Ms > cardMsMax {
@@ -433,6 +496,45 @@ func cleanLabel(l string) (string, error) {
 		return "", fmt.Errorf("label: at most %d characters", playlistMaxText)
 	}
 	return l, nil
+}
+
+// playlistMaxTracks bounds the distinct tracks of one playlist.
+const playlistMaxTracks = 20
+
+// playlistTracks looks up every track the cues name, once each, in
+// first-use order, and maps each to its index in the link's music table.
+// It writes the error and reports false when one cannot be had.
+func (s *server) playlistTracks(w http.ResponseWriter, r *http.Request, items []checkedItem) ([]musicTrack, map[playlistMusicRef]int, bool) {
+	var tracks []musicTrack
+	index := map[playlistMusicRef]int{}
+	for i, ci := range items {
+		if ci.music == nil {
+			continue
+		}
+		if _, ok := index[*ci.music]; ok {
+			continue
+		}
+		if len(tracks) == playlistMaxTracks {
+			writeError(w, http.StatusBadRequest, "invalid_param", fmt.Sprintf("items[%d]: at most %d tracks in one playlist", i, playlistMaxTracks))
+			return nil, nil, false
+		}
+		ctx, cancel := context.WithTimeout(r.Context(), gamesSearchTimeout)
+		t, err := s.music.Track(ctx, ci.music.Source, ci.music.ID)
+		cancel()
+		if errors.Is(err, errNoTrack) {
+			writeError(w, http.StatusBadRequest, "invalid_param",
+				fmt.Sprintf("items[%d]: music: %s has no track %q it may offer (GET /v1/playlists/music lists them)", i, ci.music.Source, ci.music.ID))
+			return nil, nil, false
+		}
+		if err != nil {
+			s.logger.Error("music upstream error", "request_id", requestID(r.Context()), "err", err.Error())
+			writeError(w, http.StatusBadGateway, "music_upstream", "the music source could not be reached")
+			return nil, nil, false
+		}
+		index[*ci.music] = len(tracks)
+		tracks = append(tracks, t)
+	}
+	return tracks, index, true
 }
 
 // playlistGameOf finds the hub game of a demo a clip names by sha (the

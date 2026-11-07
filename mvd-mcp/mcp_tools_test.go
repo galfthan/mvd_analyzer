@@ -140,6 +140,9 @@ func (f *fakeBackend) GetHighlights(_ context.Context, _ GetHighlightsInput) (an
 func (f *fakeBackend) CreatePlaylistLink(_ context.Context, in CreatePlaylistLinkInput) (any, error) {
 	return map[string]any{"url": "https://mvdanalyzer.com/play.html#playlist=zx", "clips": len(in.Items)}, nil
 }
+func (f *fakeBackend) FindPlaylistMusic(_ context.Context, _ FindPlaylistMusicInput) (any, error) {
+	return map[string]any{"count": 0, "tracks": []any{}}, nil
+}
 func (f *fakeBackend) GetLives(_ context.Context, _ GetLivesInput) (any, error) {
 	return map[string]any{"lives": []any{}}, nil
 }
@@ -264,7 +267,7 @@ func TestMCP_ListTools(t *testing.T) {
 		"getBuckets", "getEvents", "getStreamSlice", "getPointEffects", "getStateAt",
 		"getLocTrails", "getLocTable", "getRegionControl",
 		"getTopWindows", "getTopKills", "getLives", "getHighlights",
-		"listArtifacts", "getArtifact", "createPlaylistLink",
+		"listArtifacts", "getArtifact", "createPlaylistLink", "findPlaylistMusic",
 	}
 	got := map[string]bool{}
 	for _, tool := range res.Tools {

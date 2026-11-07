@@ -174,7 +174,7 @@ tags:
   - name: maps
     description: Per-map static data (no demo needed).
   - name: playlists
-    description: Links to the web app's light player for scripted reels.
+    description: Links to the web app's light player for scripted reels, and the music they can play.
 paths:
   /healthz:
     get:
@@ -2119,6 +2119,14 @@ paths:
         shows through), `fadeIn` / `fadeOut` (ms, default 400), `label`
         (the playlist row's name; default its first text).
 
+        **Music** (`music` items): a cue `{source, id}` from
+        `GET /v1/playlists/music`, or null for silence, plays its track
+        under the items after it — one first for the whole playlist, one per
+        section. The API looks each track up at its source, so the credit and
+        license the link carries are the source's; the light player shows
+        them under the game view and turns the game sound down under the
+        music.
+
         The answer is the URL, a Markdown link named like the web app's
         Copy link (`mvda · <demo or N demos> · <what the clips are>`, or
         `name`), its length (Discord messages hold 2000 characters; a
@@ -2145,6 +2153,44 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+  /v1/playlists/music:
+    get:
+      operationId: findPlaylistMusic
+      tags: [playlists]
+      summary: Creative Commons tracks a playlist link can play
+      description: |
+        Searches the music a playlist link can play under its clips, for a
+        `music` item of `POST /v1/playlist-links` (`{source, id}` from a row
+        here). The source is **incompetech** — Kevin MacLeod's library
+        (~1400 tracks), every track CC BY 4.0, played by the light player
+        straight from incompetech.com. `q` matches the title, mood
+        (`tags`: Action, Dark, Driving, Bouncy, Epic, Intense, …),
+        instruments and description; every word must match. Title matches
+        come first, then the newest. 502 `music_upstream` when the list
+        cannot be fetched.
+      parameters:
+        - { name: q, in: query, description: "Words to match (mood, genre, instrument, title).", schema: { type: string } }
+        - { name: minSec, in: query, description: "Shortest track, seconds.", schema: { type: integer, minimum: 0 } }
+        - { name: maxSec, in: query, description: "Longest track, seconds (0 or omitted: no bound).", schema: { type: integer, minimum: 0 } }
+        - { name: limit, in: query, description: "Tracks, 1-30 (default 10).", schema: { type: integer, minimum: 1, maximum: 30 } }
+        - $ref: "#/components/parameters/Label"
+      responses:
+        "200":
+          description: The tracks.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [count, tracks]
+                additionalProperties: false
+                properties:
+                  count: { type: integer }
+                  tracks: { type: array, items: { $ref: "#/components/schemas/MusicTrack" } }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "502": { $ref: "#/components/responses/MusicUpstream" }
   /v1/games/search:
     get:
       operationId: searchGames
@@ -3267,6 +3313,11 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    MusicUpstream:
+      description: The music source could not be reached (`music_upstream`).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
     Internal:
       description: >
         Unexpected server error (`internal`). The body is generic — a
@@ -3319,6 +3370,7 @@ components:
         - map_unavailable
         - metadata_unavailable
         - missing_param
+        - music_upstream
         - opening_unavailable
         - playerstats_unavailable
         - rate_limited
@@ -3384,7 +3436,7 @@ components:
           type: array
           minItems: 1
           maxItems: 100
-          description: Played in order. Each item is exactly one of `clip` or `card`.
+          description: Played in order. Each item is exactly one of `clip`, `card` or `music`.
           items:
             type: object
             additionalProperties: false
@@ -3424,6 +3476,22 @@ components:
                   fadeOut: { type: integer, minimum: 0, maximum: 5000, description: "ms (default 400)." }
                   label: { type: string, description: "The card's name in the list (default: its first text)." }
                   text: { type: array, maxItems: 8, description: "Text on the card (titles).", items: { $ref: "#/components/schemas/PlaylistText" } }
+              music:
+                description: >
+                  A music cue, taking no time: its track plays under the
+                  items after it, to the next cue (a fade between) or the
+                  end. `{source, id}` from GET /v1/playlists/music; null:
+                  silence from here. One first scores the whole playlist; one
+                  before each section scores it by section. At least one item
+                  must follow. At most 20 distinct tracks.
+                oneOf:
+                  - type: "null"
+                  - type: object
+                    required: [source, id]
+                    additionalProperties: false
+                    properties:
+                      source: { type: string, enum: [incompetech], description: "The track's source." }
+                      id: { type: string, description: "The track's id at that source (GET /v1/playlists/music)." }
     PlaylistLink:
       type: object
       required: [url, markdown, name, length, clips, cards, demos]
@@ -3446,6 +3514,25 @@ components:
               gameId: { type: integer, description: "hub.quakeworld.nu game id." }
               sha: { type: string, description: "The demo's sha256 (of the uncompressed .mvd)." }
               title: { type: string, description: "map · teams, as the player lists it." }
+        music:
+          type: array
+          description: The tracks the cues play, in first-use order — as looked up at their sources (the credit the player shows). Absent when the playlist has no music.
+          items: { $ref: "#/components/schemas/MusicTrack" }
+    MusicTrack:
+      type: object
+      required: [source, id, title, artist, license, licenseUrl, page, url, durationSec]
+      additionalProperties: false
+      properties:
+        source: { type: string, enum: [incompetech], description: "Where the track is from." }
+        id: { type: string, description: "The track at its source (incompetech: its ISRC)." }
+        title: { type: string, description: "The track's title." }
+        artist: { type: string, description: "Who made it, as the credit names them." }
+        license: { type: string, description: "Short name, e.g. CC BY 4.0." }
+        licenseUrl: { type: string, description: "The license's text." }
+        page: { type: string, description: "The track's page at its source." }
+        url: { type: string, description: "The file the player plays (MP3)." }
+        durationSec: { type: integer, description: "Length, seconds." }
+        tags: { type: array, items: { type: string }, description: "Moods." }
     LoadResult:
       type: object
       required: [demoId, sha256, fromCache, schemaVersion]

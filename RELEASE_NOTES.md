@@ -5,7 +5,17 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (playlist-music) — demos by hash in the API and in playlists
+## unreleased (playlist-music) — music in playlist links; demos by hash
+
+- **Music in playlists.** `GET /v1/playlists/music` (MCP
+  `findPlaylistMusic`) searches Kevin MacLeod's incompetech.com library,
+  every track CC BY 4.0, by mood, title, instruments and length. A
+  `music` item in `POST /v1/playlist-links` (`{source, id}`, or `null` for
+  silence) plays its track under the items after it: one first scores the
+  whole reel, one before each section scores it by section. The API looks
+  the track up itself, so the credit comes from the source; the response
+  lists the tracks. The link carries a music table (`m`) and cue rows
+  (`{u: index}`), only when there is music.
 
 - `GET /v1/games/sha:<hex>` returns the hub game whose demo has that
   sha256, its gameId included.
