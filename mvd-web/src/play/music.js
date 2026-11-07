@@ -93,13 +93,22 @@ export function createMusic({ audio = new Audio(), fadeMs = 800, scale = 1 } = {
         fadeTo(loudness());
     }
 
-    // seek: a jump's position, wrapped round a looping track. Set before
-    // the file has loaded, it is where playback starts.
+    // seek: a jump's position, wrapped round a looping track. A file just
+    // set has no metadata yet, and Chrome drops a seek made then (it plays
+    // from 0): the seek waits for it.
     function seek() {
         if (seekTo == null) return;
         const len = track?.durationSec || 0;
-        audio.currentTime = len > 0 ? seekTo % len : seekTo;
+        const t = len > 0 ? seekTo % len : seekTo;
         seekTo = null;
+        if (audio.readyState >= 1) {
+            audio.currentTime = t;
+            return;
+        }
+        const src = audio.src;
+        audio.addEventListener('loadedmetadata', () => {
+            if (audio.src === src) audio.currentTime = t;
+        }, { once: true });
     }
 
     return {
