@@ -1036,7 +1036,7 @@ yields lives.
 #### `createPlaylistLink({items, name?})`
 
 `POST /v1/playlist-links` — a link that **plays** a scripted reel in the
-web app's light player (`play.html`): clips from any number of hub games,
+MVD Analyzer's light player: clips from any number of hub games,
 title cards between them, text over either. Made for agents: find games
 with `searchGames`, moments with `getHighlights` / `getTopKills` /
 `getTopWindows` / `getEvents` / `getLives`, and hand their match-ms

@@ -2085,7 +2085,7 @@ paths:
       tags: [playlists]
       summary: A light-player link for a scripted reel (clips, title cards, text)
       description: |
-        Builds a link to the web app's light player (`play.html`) that plays
+        Builds a link to the MVD Analyzer's light player that plays
         the items in order: **clips** from any number of hub demos, **title
         cards** between them (a colour over the game view for `ms`, fading
         in and out), and **text** over either (a title on a card, a caption
@@ -2119,10 +2119,11 @@ paths:
         shows through), `fadeIn` / `fadeOut` (ms, default 400), `label`
         (the playlist row's name; default its first text).
 
-        **Music** (`music` items): a cue `{source, id}` from
+        **Music** (`music` items): a cue `{source, id, volume?}` from
         `GET /v1/playlists/music`, or null for silence, plays its track
         under the items after it — one first for the whole playlist, one per
-        section. The API looks each track up at its source, so the credit and
+        section; `volume` (0.05–1, default 0.3) is how loud, and the viewer
+        can scale it. The API looks each track up at its source, so the credit and
         license the link carries are the source's; the light player shows
         them under the game view and turns the game sound down under the
         music.

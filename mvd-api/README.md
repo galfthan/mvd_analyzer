@@ -44,7 +44,7 @@ mvd-api keys list   -auth-dir DIR
 | `-portal-base-url`  | _(empty)_                               | Public origin of the deployment, e.g. `https://qw.example.com`. Used to build the OAuth `redirect_uri` (`<base>/portal/callback`) and absolute links. Required with `-portal` |
 | `-warm-interval`    | `0` (off)                               | Prepare new hub demos before their first visitor: every interval, list the hub's games in `-warm-window`, newest first, and download, parse and pack each one not yet cached (one at a time, through the parse slots; never into the in-memory LRU). The first tick backfills the window, running back to back until done and re-listing every interval so new games go first. A demo whose download fails is retried with a doubling wait (5 min … 1 h), a demo that does not parse is not; five failures in a row end a tick (an outage). Needs the hub env vars. `journalctl -u mvd-api \| grep 'hub warm'` shows each tick |
 | `-warm-window`      | `168h`                                  | How far back `-warm-interval` prepares games (≈1300 hub games a week at 2026 rates — roughly 15-20 GB of cache; size `-cache-max-bytes` for it) |
-| `-play-url`         | `https://mvdanalyzer.com/play.html`     | The web app's light player that `POST /v1/playlist-links` links to — point it at a branch deploy's `play.html` until production has the player |
+| `-play-url`         | `https://mvdanalyzer.com/play.html`     | The web app's light player that `POST /v1/playlist-links` links to — a branch deploy's, to try one |
 
 The portal's secrets are supplied via **environment variables, never
 flags** (a flag value is visible in `ps`):
