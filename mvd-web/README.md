@@ -1495,10 +1495,12 @@ drops it).
   dropped rather than shown (`stillWanted`). A clip of another local file
   is skipped with a note.
 - **Copy link**, one button: the light player,
-  `play.html#playlist=z<base64url(deflate-raw(JSON))>` (below; the
-  browser's `CompressionStream` — a 20-clip list is about 480 characters
-  where the plain base64 JSON was 1 600; the older uncompressed links,
-  base64 JSON opening "eyJ", still decode). A click copies it as Markdown, `[name](url)`, which
+  `play.html#playlist=z<base64url(deflate-raw(JSON))>`, the JSON being the
+  playlist as mvd-api's `POST /v1/playlists` describes it (format v3, the
+  OpenAPI `Playlist` schema; `src/lib/playlist.js` Share encoding) through
+  the browser's `CompressionStream` — a 20-clip list is about 800
+  characters. v1 / v2 links (compact rows, music included) and the older
+  uncompressed ones (base64 JSON opening "eyJ") still decode. A click copies it as Markdown, `[name](url)`, which
   Discord shows as a named link; the name is `playlistName`
   (`src/lib/playlist.js`): "mvda", the demo's date (the loaded demo's, by
   the topbar's precedence — `matchDay`, `src/lib/wall-clock.js`), map and
@@ -1575,9 +1577,8 @@ it stuttered. The engine's files come from one fetcher for the page
 (`mvd-fte-player/src/asset-fetch.js`): an engine booted again boots from
 memory, and a map it has not got is fetched from there. The Player tab
 plays the next demo it loads in its engine the same way. A playlist
-link with **music** (mvd-api's `music` items: the link's `m` table and
-`{u}` cues, read as the next item's `cue` — src/lib/playlist.js; only
-files on incompetech.com are played) plays it here: the runner cues the
+link with **music** (mvd-api's `music` items, read as the next item's
+`cue` — src/lib/playlist.js; only files on incompetech.com are played) plays it here: the runner cues the
 track in force at each item (`cueAt`), `src/play/music.js` plays it in one
 `<audio>` element from the run's first click — fading between tracks,
 looping one shorter than its section, paused with the viewer's pause but

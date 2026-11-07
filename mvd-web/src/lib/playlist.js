@@ -28,7 +28,7 @@
 /**
  * @typedef {import('./result.js').Result} Result
  * @typedef {number | 'auto'} Track
- * @typedef {{ key: string, gameId: number | null, title: string, offset: number }} ClipDemo
+ * @typedef {{ key: string, gameId: number | null, title: string, offset: number, sha?: string }} ClipDemo
  * @typedef {{ from: number, to: number, speed: number }} Slow
  * @typedef {'title' | 'body' | 'mono'} TextFont
  * @typedef {'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'} TextAt
@@ -60,8 +60,9 @@
 const HUB_GAMES_URL = 'https://hub.quakeworld.nu/games/';
 // hub.quakeworld.nu src/utils/game-url.ts MAX_CLIPS @ 5c96205c19c7
 export const MAX_HUB_CLIPS = 20;
-// v2 adds title cards and text; v1 links still decode.
-const PLAYLIST_VERSION = 2;
+// v3 is the playlist as mvd-api describes it (see Share encoding); v1 and
+// v2 links (compact rows) still decode.
+const PLAYLIST_VERSION = 3;
 
 // A card's stand-in demo (see the header).
 /** @type {ClipDemo} */
@@ -103,7 +104,7 @@ export function cleanText(list) {
     for (const x of list.slice(0, MAX_TEXTS)) {
         if (!x || typeof x !== 'object') continue;
         const o = /** @type {Record<string, unknown>} */ (x);
-        const t = String(o.t ?? '').slice(0, MAX_TEXT_LEN).trim();
+        const t = String(o.t ?? o.text ?? '').slice(0, MAX_TEXT_LEN).trim();
         if (!t) continue;
         const font = /** @type {TextFont} */ (o.font ?? o.f);
         const at = /** @type {TextAt} */ (o.at ?? o.a);
@@ -146,24 +147,6 @@ export function makeCard(o) {
     if (text.length) c.text = text;
     if (!c.label) c.label = text[0]?.t || 'Title card';
     return c;
-}
-
-// The texts in the link's compact form (defaults left out).
-/** @param {Text[]} list */
-function packText(list) {
-    return list.map((x) => {
-        /** @type {Record<string, unknown>} */
-        const o = { t: x.t };
-        if (x.size !== 6) o.s = x.size;
-        if (x.color !== '#ffffff') o.c = x.color;
-        if (x.font !== 'title') o.f = x.font;
-        if (x.at !== 'center') o.a = x.at;
-        if (x.from) o.b = x.from;
-        if (x.to != null) o.e = x.to;
-        if (x.fadeIn !== 300) o.i = x.fadeIn;
-        if (x.fadeOut !== 300) o.o = x.fadeOut;
-        return o;
-    });
 }
 
 // parseHubReplayUrl reads a link built by hubReplayUrl() (src/lib/hub-url.js) — the only
@@ -271,81 +254,92 @@ export function markdownLink(text, url) {
 
 // ── Share encoding ──────────────────────────────────────────────────────────
 //
-// `#playlist=z<base64url(deflate-raw(JSON))>`, v2:
-//   { v: 2, d: [[key, gameId, title, offsetSec]…],
-//     c: [ [from, to, track, who, label, demoIndex, slow|0, texts?]  (a clip)
-//          | { k: [ms, bg, opacity, fadeIn, fadeOut], l: label, x: texts }
-//          | { u: musicIndex | -1, v?: volume } ],                        (a music cue)
-//     m?: [[source, id, url, title, artist, license, licenseUrl, page, durationSec]…] }
-// A cue takes no time: its track (m[u]; -1 silence) plays from the item
-// after it on — read here as that item's `cue`. mvd-api resolves the
-// tracks at their source (music.go); a track this page would not play
-// (musicFrom) is read as no cue.
-// slow as [from, to, speed] (0 when only texts follow), texts in the short
-// keys t s c f a b e i o with defaults left out (packText). mvd-api's
-// POST /v1/playlist-links writes the same (mvd-api/playlist.go). Compact
-// rows keep the URL short, and deflate then takes the labels' repeats (a
-// generated list's labels share their kind and players) — about half the
-// length. Links from before the compression, `#playlist=<base64url(JSON)>`,
-// still decode: their base64 opens with "eyJ" ('{"'), never with the "z".
-// Local-file demos travel by title only — the receiver has to load the
-// file.
+// `#playlist=z<base64url(deflate-raw(JSON))>`. v3 — written here and by
+// mvd-api's POST /v1/playlists (mvd-api/playlist.go playlistDoc; the OpenAPI
+// Playlist schema) — is the playlist itself:
+//   { version: 3, name, demos: [{ sha?, gameId?, file?, title, offset }],
+//     items: [ { clip: { demo, from, to, track, who?, label?, slow?, text? } }
+//            | { card: { ms, bg, opacity, fadeIn, fadeOut, label?, text? } }
+//            | { music: { source, id, url, title, artist, license, licenseUrl,
+//                         page, durationSec, volume? } | null } ] }
+// in demo seconds; texts as { text, size?, color?, font?, at?, from?, to?,
+// fadeIn?, fadeOut? }, defaults left out. A music item takes no time: its
+// track (null: silence) plays from the item after it on — read here as
+// that item's `cue`. A track this page would not play (musicFrom) is read
+// as no cue. A local file's demo travels by file name (`file`) and title —
+// the receiver has to load the file.
+// v1 / v2 (compact rows, decodeRows) and links from before the
+// compression, `#playlist=<base64url(JSON)>`, still decode: their base64
+// opens with "eyJ" ('{"'), never with the "z".
 
 /**
  * @param {Clip[]} clips
  * @returns {Promise<string>}
  */
 export async function encodePlaylist(clips) {
-    /** @type {Array<[string, number, string, number]>} */
+    /** @type {Array<Record<string, unknown>>} */
     const demos = [];
     /** @type {Map<string, number>} */
     const index = new Map();
-    const rows = clips.map((c) => {
+    /** @type {unknown[]} */
+    const items = [];
+    for (const c of clips) {
+        if (c.cue !== undefined) {
+            /** @type {Record<string, unknown> | null} */
+            let m = null;
+            if (c.cue) {
+                const { source, id, url, title, artist, license, licenseUrl, page, durationSec, volume } = c.cue;
+                m = { source, id, url, title, artist, license, licenseUrl, page, durationSec };
+                if (volume != null) m.volume = volume;
+            }
+            items.push({ music: m });
+        }
         if (c.card) {
-            const k = c.card;
             /** @type {Record<string, unknown>} */
-            const row = { k: [k.ms, k.bg, k.opacity, k.fadeIn, k.fadeOut], l: c.label || '' };
-            if (c.text?.length) row.x = packText(c.text);
-            return row;
+            const card = { ...c.card };
+            if (c.label) card.label = c.label;
+            if (c.text?.length) card.text = textOut(c.text);
+            items.push({ card });
+            continue;
         }
         const key = c.demo?.key || '';
         if (!index.has(key)) {
             index.set(key, demos.length);
-            demos.push([key, c.demo?.gameId || 0, c.demo?.title || '', c.demo?.offset || 0]);
+            /** @type {Record<string, unknown>} */
+            const d = { title: c.demo?.title || '', offset: c.demo?.offset || 0 };
+            if (c.demo?.sha) d.sha = c.demo.sha;
+            if (c.demo?.gameId) d.gameId = c.demo.gameId;
+            else d.file = key.replace(/^file:/, '');
+            demos.push(d);
         }
-        /** @type {unknown[]} */
-        const row = [c.from, c.to, c.track, c.who || '', c.label || '', index.get(key)];
-        if (c.slow || c.text?.length) row.push(c.slow ? [c.slow.from, c.slow.to, c.slow.speed] : 0);
-        if (c.text?.length) row.push(packText(c.text));
-        return row;
-    });
-    // The cues go back in before their items, the tracks into m.
-    /** @type {unknown[][]} */
-    const music = [];
-    /** @type {Map<string, number>} */
-    const musicIndex = new Map();
-    const withCues = clips.flatMap((c, i) => {
-        if (c.cue === undefined) return [rows[i]];
-        let u = -1;
-        if (c.cue) {
-            const k = `${c.cue.source}:${c.cue.id}`;
-            if (!musicIndex.has(k)) {
-                musicIndex.set(k, music.length);
-                const m = c.cue;
-                music.push([m.source, m.id, m.url, m.title, m.artist, m.license, m.licenseUrl, m.page, m.durationSec]);
-            }
-            u = /** @type {number} */ (musicIndex.get(k));
-        }
-        /** @type {Record<string, number>} */
-        const cue = { u };
-        if (c.cue?.volume != null) cue.v = c.cue.volume;
-        return [cue, rows[i]];
-    });
-    /** @type {Record<string, unknown>} */
-    const doc = { v: PLAYLIST_VERSION, d: demos, c: withCues };
-    if (music.length) doc.m = music;
-    const json = JSON.stringify(doc);
+        /** @type {Record<string, unknown>} */
+        const clip = { demo: index.get(key), from: c.from, to: c.to, track: c.track };
+        if (c.who) clip.who = c.who;
+        if (c.label) clip.label = c.label;
+        if (c.slow) clip.slow = { ...c.slow };
+        if (c.text?.length) clip.text = textOut(c.text);
+        items.push({ clip });
+    }
+    const json = JSON.stringify({ version: PLAYLIST_VERSION, name: playlistName(clips), demos, items });
     return `z${bytesToBase64Url(await pipeBytes(new TextEncoder().encode(json), new CompressionStream('deflate-raw')))}`;
+}
+
+// Texts as v3 carries them: the defaults (cleanText's) left out.
+/** @param {Text[]} list */
+function textOut(list) {
+    return list.map((x) => {
+        /** @type {Record<string, unknown>} */
+        const o = { text: x.t };
+        if (x.size !== 6) o.size = x.size;
+        if (x.color !== '#ffffff') o.color = x.color;
+        if (x.font !== 'title') o.font = x.font;
+        if (x.at !== 'center') o.at = x.at;
+        if (x.from) o.from = x.from;
+        if (x.to != null) o.to = x.to;
+        if (x.fadeIn !== 300) o.fadeIn = x.fadeIn;
+        if (x.fadeOut !== 300) o.fadeOut = x.fadeOut;
+        return o;
+    });
 }
 
 /**
@@ -357,7 +351,8 @@ export async function decodePlaylist(str) {
         const json = str.startsWith('z')
             ? new TextDecoder().decode(await pipeBytes(base64UrlToBytes(str.slice(1)), new DecompressionStream('deflate-raw')))
             : base64UrlDecode(str);
-        return decodeRows(JSON.parse(json));
+        const doc = JSON.parse(json);
+        return doc?.version === PLAYLIST_VERSION ? decodeItems(doc) : decodeRows(doc);
     } catch {
         return null;
     }
@@ -380,7 +375,7 @@ async function pipeBytes(bytes, through) {
  * @returns {Clip[] | null}
  */
 function decodeRows(doc) {
-    if (!doc || (doc.v !== 1 && doc.v !== PLAYLIST_VERSION) || !Array.isArray(doc.c) || !Array.isArray(doc.d)) return null;
+    if (!doc || (doc.v !== 1 && doc.v !== 2) || !Array.isArray(doc.c) || !Array.isArray(doc.d)) return null;
     /** @type {Array<ClipDemo | null>} */
     const demos = doc.d.map((/** @type {unknown} */ row) => {
         if (!Array.isArray(row)) return null;
@@ -436,14 +431,85 @@ function decodeRows(doc) {
     return clips;
 }
 
+// decodeItems reads a v3 link (untrusted): a demo without a gameId must
+// name a file, a clip must name a demo, anything malformed is dropped.
+/**
+ * @param {any} doc
+ * @returns {Clip[] | null}
+ */
+function decodeItems(doc) {
+    if (!Array.isArray(doc.demos) || !Array.isArray(doc.items)) return null;
+    /** @type {Array<ClipDemo | null>} */
+    const demos = doc.demos.map((/** @type {any} */ d) => {
+        if (!d || typeof d !== 'object') return null;
+        const gameId = Number.isInteger(d.gameId) && d.gameId > 0 ? d.gameId : null;
+        if (!gameId && (typeof d.file !== 'string' || !d.file)) return null;
+        /** @type {ClipDemo} */
+        const out = { key: gameId ? `hub:${gameId}` : `file:${d.file}`, gameId, title: String(d.title || ''), offset: Number(d.offset) || 0 };
+        if (typeof d.sha === 'string' && /^[0-9a-f]{64}$/.test(d.sha)) out.sha = d.sha;
+        return out;
+    });
+    /** @type {Clip[]} */
+    const clips = [];
+    /** @type {Cue | null | undefined} */
+    let cue;   // a music item read, for the next item
+    /** @param {Clip} c */
+    const push = (c) => {
+        if (cue !== undefined) c.cue = cue;
+        cue = undefined;
+        clips.push(c);
+    };
+    for (const it of doc.items) {
+        if (!it || typeof it !== 'object') continue;
+        if ('music' in it) {
+            cue = it.music === null ? null : cueFrom(it.music);
+            continue;
+        }
+        if (it.card && typeof it.card === 'object') {
+            push(makeCard(it.card));
+            continue;
+        }
+        const x = it.clip;
+        if (!x || typeof x !== 'object') continue;
+        const demo = demos[x.demo];
+        if (!demo || !Number.isFinite(x.from) || !Number.isFinite(x.to) || x.to <= x.from) continue;
+        /** @type {Clip} */
+        const c = {
+            from: x.from, to: x.to,
+            track: Number.isInteger(x.track) && x.track > 0 ? x.track : 'auto',
+            who: String(x.who || ''), label: String(x.label || ''),
+            demo: { ...demo },
+        };
+        const sl = x.slow && typeof x.slow === 'object' ? cleanSlow(c, x.slow.from, x.slow.to, x.slow.speed) : null;
+        if (sl) c.slow = sl;
+        const tx = cleanText(x.text);
+        if (tx.length) c.text = tx;
+        push(c);
+    }
+    return clips;
+}
+
 // The files a link's track may play from, by source: a link is untrusted,
 // and mvd-api only ever writes these (music.go).
 const MUSIC_FILES = /** @type {Record<string, string>} */ ({
     incompetech: 'https://incompetech.com/music/royalty-free/',
 });
 
-// musicFrom reads one row of a link's music table; undefined when it is not
-// a track this page plays.
+// cueFrom reads a v3 music item; undefined when it is not a track this
+// page plays.
+/**
+ * @param {any} m
+ * @returns {Cue | undefined}
+ */
+function cueFrom(m) {
+    if (!m || typeof m !== 'object') return undefined;
+    const t = musicFrom([m.source, m.id, m.url, m.title, m.artist, m.license, m.licenseUrl, m.page, m.durationSec]);
+    if (!t) return undefined;
+    return typeof m.volume === 'number' && m.volume >= 0.05 && m.volume <= 1 ? { ...t, volume: m.volume } : t;
+}
+
+// musicFrom reads one track (v2's music-table row); undefined when it is
+// not a track this page plays.
 /**
  * @param {unknown} row
  * @returns {Music | undefined}

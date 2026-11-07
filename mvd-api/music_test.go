@@ -170,33 +170,28 @@ func TestPlaylistLinkMusic(t *testing.T) {
 	if code != http.StatusOK {
 		t.Fatalf("status %d: %v", code, out)
 	}
-	if out["clips"] != float64(4) || out["cards"] != float64(1) {
-		t.Errorf("clips %v cards %v: cues are neither", out["clips"], out["cards"])
-	}
-	if mu := out["music"].([]any); len(mu) != 2 || mu[1].(map[string]any)["title"] != "The Britons" {
-		t.Errorf("music = %v", out["music"])
-	}
-	doc := decodeLink(t, out["url"].(string))
-	m, _ := json.Marshal(doc["m"])
-	want := `[["incompetech","USUAN1100301","https://incompetech.com/music/royalty-free/mp3-royaltyfree/Volatile%20Reaction.mp3","Volatile Reaction","Kevin MacLeod","CC BY 4.0","https://creativecommons.org/licenses/by/4.0/","https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100301",154],` +
-		`["incompetech","USUAN2600004","https://incompetech.com/music/royalty-free/mp3-royaltyfree/The%20Britons.mp3","The Britons","Kevin MacLeod","CC BY 4.0","https://creativecommons.org/licenses/by/4.0/","https://incompetech.com/music/royalty-free/index.html?isrc=USUAN2600004",307]]`
-	if string(m) != want {
-		t.Errorf("music table\n got %s\nwant %s", m, want)
-	}
+	doc := playlistOf(t, out)
 	var cues []any
-	for _, row := range doc["c"].([]any) {
-		if o, ok := row.(map[string]any); ok && o["u"] != nil {
-			cues = append(cues, o)
+	kinds := ""
+	for _, it := range doc["items"].([]any) {
+		o := it.(map[string]any)
+		for k := range o {
+			kinds += k[:2] + " "
+		}
+		if m, ok := o["music"]; ok {
+			cues = append(cues, m)
 		}
 	}
-	if c, _ := json.Marshal(cues); string(c) != `[{"u":0},{"u":1,"v":0.5},{"u":-1},{"u":0}]` {
-		t.Errorf("cues = %s", c)
+	if kinds != "mu ca cl mu cl mu cl mu cl " {
+		t.Errorf("items: %s", kinds)
 	}
-
-	// No music: no table, no cues — the link is as before.
-	_, plain := postPlaylist(t, srv.URL, `{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}}]}`)
-	if d := decodeLink(t, plain["url"].(string)); d["m"] != nil || plain["music"] != nil {
-		t.Errorf("a playlist without music: %v / %v", d["m"], plain["music"])
+	c, _ := json.Marshal(cues)
+	want := `[{"artist":"Kevin MacLeod","durationSec":154,"id":"USUAN1100301","license":"CC BY 4.0","licenseUrl":"https://creativecommons.org/licenses/by/4.0/","page":"https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100301","source":"incompetech","title":"Volatile Reaction","url":"https://incompetech.com/music/royalty-free/mp3-royaltyfree/Volatile%20Reaction.mp3"},` +
+		`{"artist":"Kevin MacLeod","durationSec":307,"id":"USUAN2600004","license":"CC BY 4.0","licenseUrl":"https://creativecommons.org/licenses/by/4.0/","page":"https://incompetech.com/music/royalty-free/index.html?isrc=USUAN2600004","source":"incompetech","title":"The Britons","url":"https://incompetech.com/music/royalty-free/mp3-royaltyfree/The%20Britons.mp3","volume":0.5},` +
+		`null,` +
+		`{"artist":"Kevin MacLeod","durationSec":154,"id":"USUAN1100301","license":"CC BY 4.0","licenseUrl":"https://creativecommons.org/licenses/by/4.0/","page":"https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100301","source":"incompetech","title":"Volatile Reaction","url":"https://incompetech.com/music/royalty-free/mp3-royaltyfree/Volatile%20Reaction.mp3"}]`
+	if string(c) != want {
+		t.Errorf("music items\n got %s\nwant %s", c, want)
 	}
 
 	for name, body := range map[string]string{

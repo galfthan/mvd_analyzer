@@ -703,11 +703,11 @@ func TestProxy_LocTrailsDwellDefault(t *testing.T) {
 	}
 }
 
-func TestProxy_CreatePlaylistLink_PostsJSON(t *testing.T) {
+func TestProxy_CreatePlaylist_PostsJSON(t *testing.T) {
 	var got map[string]any
 	var ctype string
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /v1/playlist-links", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /v1/playlists", func(w http.ResponseWriter, r *http.Request) {
 		ctype = r.Header.Get("Content-Type")
 		_ = json.NewDecoder(r.Body).Decode(&got)
 		w.Write([]byte(`{"url":"https://mvdanalyzer.com/play.html#playlist=zx","clips":1}`))
@@ -716,12 +716,12 @@ func TestProxy_CreatePlaylistLink_PostsJSON(t *testing.T) {
 	t.Cleanup(srv.Close)
 	b := newProxyBackend(srv.URL, "", 5*time.Second)
 	op := 0.7
-	out, err := b.CreatePlaylistLink(context.Background(), CreatePlaylistLinkInput{Items: []PlaylistItem{
+	out, err := b.CreatePlaylist(context.Background(), CreatePlaylistInput{Items: []PlaylistItem{
 		{Card: &PlaylistCard{Ms: 3000, Opacity: &op, Text: []PlaylistText{{Text: "Reel"}}}},
 		{Clip: &PlaylistClip{GameID: 7, From: 1000, To: 5000, Watch: "bps"}},
 	}})
 	if err != nil {
-		t.Fatalf("CreatePlaylistLink: %v", err)
+		t.Fatalf("CreatePlaylist: %v", err)
 	}
 	if ctype != "application/json" {
 		t.Errorf("Content-Type %q", ctype)
@@ -741,7 +741,7 @@ func TestProxy_PlaylistMusic(t *testing.T) {
 	var body map[string]any
 	var q url.Values
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /v1/playlist-links", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("POST /v1/playlists", func(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewDecoder(r.Body).Decode(&body)
 		w.Write([]byte(`{"url":"u"}`))
 	})
@@ -753,7 +753,7 @@ func TestProxy_PlaylistMusic(t *testing.T) {
 	t.Cleanup(srv.Close)
 	b := newProxyBackend(srv.URL, "", 5*time.Second)
 	vol := 0.4
-	if _, err := b.CreatePlaylistLink(context.Background(), CreatePlaylistLinkInput{Items: []PlaylistItem{
+	if _, err := b.CreatePlaylist(context.Background(), CreatePlaylistInput{Items: []PlaylistItem{
 		{Music: &PlaylistMusic{Source: "incompetech", ID: "USUAN1100301", Volume: &vol}},
 		{Clip: &PlaylistClip{GameID: 7, From: 1000, To: 5000}},
 		{Music: &PlaylistMusic{Silence: true}},

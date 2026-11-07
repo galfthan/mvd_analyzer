@@ -33,7 +33,7 @@ func playlistDemoResult(mapName string, offset int32, ids map[string]int, teams 
 
 func postPlaylist(t *testing.T, url, body string) (int, map[string]any) {
 	t.Helper()
-	resp, err := http.Post(url+"/v1/playlist-links", "application/json", strings.NewReader(body))
+	resp, err := http.Post(url+"/v1/playlists", "application/json", strings.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,6 +41,21 @@ func postPlaylist(t *testing.T, url, body string) (int, map[string]any) {
 	var out map[string]any
 	_ = json.NewDecoder(resp.Body).Decode(&out)
 	return resp.StatusCode, out
+}
+
+// playlistOf is the response's playlist, checked to be what its web link
+// carries.
+func playlistOf(t *testing.T, out map[string]any) map[string]any {
+	t.Helper()
+	links, _ := out["links"].(map[string]any)
+	web, _ := links["web"].(string)
+	inLink := decodeLink(t, web)
+	a, _ := json.Marshal(out["playlist"])
+	b, _ := json.Marshal(inLink)
+	if string(a) != string(b) {
+		t.Errorf("the link carries another playlist\n link %s\n resp %s", b, a)
+	}
+	return inLink
 }
 
 // decodeLink is the web app's decodePlaylist up to the JSON.
@@ -91,22 +106,20 @@ func TestPlaylistLink(t *testing.T) {
 	if code != http.StatusOK {
 		t.Fatalf("status %d: %v", code, out)
 	}
-	if out["name"] != "mvda · 2 demos · Airgib ×3" {
-		t.Errorf("name = %v", out["name"])
-	}
-	url, _ := out["url"].(string)
+	url := out["links"].(map[string]any)["web"].(string)
 	if !strings.HasPrefix(url, playPageURL+"#playlist=z") || int(out["length"].(float64)) != len(url) {
 		t.Errorf("url = %q, length %v", url, out["length"])
 	}
 	if md, _ := out["markdown"].(string); md != "[mvda · 2 demos · Airgib ×3]("+url+")" {
 		t.Errorf("markdown = %q", md)
 	}
-	doc := decodeLink(t, url)
-	want := `{"c":[{"k":[3000,"#0b1020",1,400,400],"l":"Airgibs","x":[{"c":"#00d9ff","s":12,"t":"Airgibs"},{"a":"bottom","b":500,"f":"body","t":"week 3"}]},` +
-		`[130,137,7,"bps","Airgib · bps → milton",0,[133.3,134.3,0.3],[{"a":"bottom-left","e":3000,"t":"dm3 · 2:00"}]],` +
-		`[9,13,"auto","","Airgib · valla",1],` +
-		`[310,315,"auto","","Airgib · milton",0]],` +
-		`"d":[["hub:1",1,"dm3 · red vs blue",10.25],["hub:2",2,"e1m2",4]],"v":2}`
+	doc := playlistOf(t, out)
+	want := `{"demos":[{"gameId":1,"offset":10.25,"sha":"` + sha1 + `","title":"dm3 · red vs blue"},{"gameId":2,"offset":4,"sha":"` + sha2 + `","title":"e1m2"}],` +
+		`"items":[{"card":{"bg":"#0b1020","fadeIn":400,"fadeOut":400,"label":"Airgibs","ms":3000,"opacity":1,"text":[{"color":"#00d9ff","size":12,"text":"Airgibs"},{"at":"bottom","font":"body","from":500,"text":"week 3"}]}},` +
+		`{"clip":{"demo":0,"from":130,"label":"Airgib · bps → milton","slow":{"from":133.3,"speed":0.3,"to":134.3},"text":[{"at":"bottom-left","text":"dm3 · 2:00","to":3000}],"to":137,"track":7,"who":"bps"}},` +
+		`{"clip":{"demo":1,"from":9,"label":"Airgib · valla","to":13,"track":"auto"}},` +
+		`{"clip":{"demo":0,"from":310,"label":"Airgib · milton","to":315,"track":"auto"}}],` +
+		`"name":"mvda · 2 demos · Airgib ×3","version":3}`
 	got, _ := json.Marshal(doc)
 	if string(got) != want {
 		t.Errorf("link doc\n got %s\nwant %s", got, want)
@@ -172,8 +185,8 @@ func TestPlaylistLinkChecksBeforeLoading(t *testing.T) {
 		t.Errorf("a bad last item: %d, %d demos loaded; want 400 and none", code, store.loads)
 	}
 	code, out := postPlaylist(t, srv.URL, `{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}}, {"clip": {"gameId": 2, "from": 0, "to": 1000}}, {"clip": {"gameId": 1, "from": 5000, "to": 6000}}]}`)
-	if code != http.StatusOK || store.loads != 2 || len(out["demos"].([]any)) != 2 {
-		t.Errorf("two games, three clips: %d, %d loads, %v", code, store.loads, out["demos"])
+	if code != http.StatusOK || store.loads != 2 || len(playlistOf(t, out)["demos"].([]any)) != 2 {
+		t.Errorf("two games, three clips: %d, %d loads, %v", code, store.loads, out["playlist"])
 	}
 }
 
@@ -201,18 +214,15 @@ func TestPlaylistLinkDemoIDs(t *testing.T) {
 	if code != http.StatusOK {
 		t.Fatalf("status %d: %v", code, out)
 	}
-	demos, _ := json.Marshal(out["demos"])
-	if want := `[{"gameId":1,"sha":"` + sha1 + `","title":"dm3"},{"gameId":2,"sha":"` + sha2 + `","title":"e1m2"}]`; string(demos) != want {
+	doc := playlistOf(t, out)
+	demos, _ := json.Marshal(doc["demos"])
+	if want := `[{"gameId":1,"offset":1,"sha":"` + sha1 + `","title":"dm3"},{"gameId":2,"offset":0,"sha":"` + sha2 + `","title":"e1m2"}]`; string(demos) != want {
 		t.Errorf("demos\n got %s\nwant %s", demos, want)
 	}
-	doc := decodeLink(t, out["url"].(string))
-	got, _ := json.Marshal(doc["d"])
-	if want := `[["hub:1",1,"dm3",1],["hub:2",2,"e1m2",0]]`; string(got) != want {
-		t.Errorf("link demos\n got %s\nwant %s", got, want)
-	}
-	rows, _ := json.Marshal(doc["c"])
-	if want := `[[1,2,"auto","","",0],[3,4,7,"bps","",0],[0,1,"auto","","",1],[5,6,"auto","","",0]]`; string(rows) != want {
-		t.Errorf("rows\n got %s\nwant %s", rows, want)
+	items, _ := json.Marshal(doc["items"])
+	if want := `[{"clip":{"demo":0,"from":1,"to":2,"track":"auto"}},{"clip":{"demo":0,"from":3,"to":4,"track":7,"who":"bps"}},` +
+		`{"clip":{"demo":1,"from":0,"to":1,"track":"auto"}},{"clip":{"demo":0,"from":5,"to":6,"track":"auto"}}]`; string(items) != want {
+		t.Errorf("items\n got %s\nwant %s", items, want)
 	}
 
 	for name, body := range map[string]string{

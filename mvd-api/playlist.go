@@ -1,26 +1,25 @@
 package main
 
-// POST /v1/playlist-links — a link to the web app's light player
-// (mvd-web/play.html) that plays a scripted reel: clips from any number of
-// hub demos, title cards between them, text over either. The body names
-// clips the way the rest of the API does (a gameId, match-relative ms, a
-// player name); this handler loads each demo through the cache to turn them
-// into what the player runs on — the demo's start offset (demo seconds =
-// match time + streams.global.demoOffset), the player's userid, the demo's
-// title — and packs the list exactly as the web app's share link does
-// (mvd-web/src/lib/playlist.js encodePlaylist, format v2):
+// POST /v1/playlists — experimental. A playlist: clips from any number of
+// hub demos, title cards between them, text over either, music under them.
+// The body names clips the way the rest of the API does (a gameId or demo
+// id, match-relative ms, a player name); this handler loads each demo
+// through the cache to resolve them into what a player runs on — the demo's
+// start offset (demo seconds = match time + streams.global.demoOffset), the
+// player's userid, the demo's title, each track's credit — and answers with
+// that resolved playlist (playlistDoc, the OpenAPI Playlist schema) and the
+// links that open it. The web app's light player is the one client: its
+// link carries the playlist itself,
 //
-//	#playlist=z<base64url(deflate-raw(JSON))>
-//	{ v: 2, d: [[key, gameId, title, offsetSec]…],
-//	  m: [[source, id, url, title, artist, license, licenseUrl, page, durationSec]…],
-//	  c: [ [from, to, track, who, label, demoIndex, slow|0, texts?]   (a clip)
-//	       | { k: [ms, bg, opacity, fadeIn, fadeOut], l: label, x: texts }
-//	       | { u: musicIndex | -1, v?: volume } ] }   (a music cue; -1: silence)
+//	#playlist=z<base64url(deflate-raw(JSON of the playlist))>
 //
-// `m` and the cues are there only when the playlist has music (music.go):
-// a cue takes no time, and its track plays from it on.
-// texts in the short keys t s c f a b e i o, defaults left out. The page
-// clamps whatever it reads again; the limits here are for a useful 400.
+// and mvd-web/src/lib/playlist.js reads and writes the same JSON (format
+// v3). The page clamps whatever it reads again; the limits here are for a
+// useful 400.
+//
+// Experimental (owner, 2026-11-07): it is borderline whether this belongs
+// in the API at all — it serves a web interface, and might move to an MCP
+// of the web app's own.
 
 import (
 	"bytes"
@@ -126,21 +125,95 @@ type playlistRequest struct {
 	Name  string         `json:"name,omitempty"`
 }
 
+// playlistVersion is the playlist format (the web's PLAYLIST_VERSION): 3,
+// the resolved playlist as JSON; 1 and 2 were the web's compact rows.
+const playlistVersion = 3
+
+// playlistDoc is the resolved playlist: what a player runs, in demo
+// seconds.
+type playlistDoc struct {
+	Version int            `json:"version"`
+	Name    string         `json:"name"`
+	Demos   []playlistDemo `json:"demos"`
+	Items   []playlistOut  `json:"items"`
+}
+
 type playlistDemo struct {
-	GameID int    `json:"gameId"`
-	SHA    string `json:"sha"`
-	Title  string `json:"title"`
+	SHA    string  `json:"sha"`
+	GameID int     `json:"gameId,omitempty"`
+	Title  string  `json:"title"`
+	Offset float64 `json:"offset"` // demo seconds at match start
+}
+
+type playlistOut struct {
+	Clip *playlistClipOut
+	Card *playlistCardOut
+	// Cue: a music item; Music is its track, nil for silence.
+	Cue   bool
+	Music *playlistMusicOut
+}
+
+// MarshalJSON writes the item as {clip}, {card} or {music} — a cue of
+// silence as "music": null.
+func (o playlistOut) MarshalJSON() ([]byte, error) {
+	switch {
+	case o.Cue:
+		return json.Marshal(map[string]any{"music": o.Music})
+	case o.Card != nil:
+		return json.Marshal(map[string]any{"card": o.Card})
+	}
+	return json.Marshal(map[string]any{"clip": o.Clip})
+}
+
+type playlistClipOut struct {
+	Demo  int              `json:"demo"` // index into demos
+	From  float64          `json:"from"` // demo seconds
+	To    float64          `json:"to"`
+	Track any              `json:"track"` // userid, or "auto"
+	Who   string           `json:"who,omitempty"`
+	Label string           `json:"label,omitempty"`
+	Slow  *playlistSlowOut `json:"slow,omitempty"`
+	Text  []playlistText   `json:"text,omitempty"`
+}
+
+type playlistSlowOut struct {
+	From  float64 `json:"from"` // demo seconds
+	To    float64 `json:"to"`
+	Speed float64 `json:"speed"`
+}
+
+type playlistCardOut struct {
+	Ms      int            `json:"ms"`
+	Bg      string         `json:"bg"`
+	Opacity float64        `json:"opacity"`
+	FadeIn  int            `json:"fadeIn"`
+	FadeOut int            `json:"fadeOut"`
+	Label   string         `json:"label,omitempty"`
+	Text    []playlistText `json:"text,omitempty"`
+}
+
+type playlistMusicOut struct {
+	Source      string   `json:"source"`
+	ID          string   `json:"id"`
+	URL         string   `json:"url"`
+	Title       string   `json:"title"`
+	Artist      string   `json:"artist"`
+	License     string   `json:"license"`
+	LicenseURL  string   `json:"licenseUrl"`
+	Page        string   `json:"page"`
+	DurationSec int      `json:"durationSec"`
+	Volume      *float64 `json:"volume,omitempty"`
 }
 
 type playlistResponse struct {
-	URL      string         `json:"url"`
-	Markdown string         `json:"markdown"`
-	Name     string         `json:"name"`
-	Length   int            `json:"length"`
-	Clips    int            `json:"clips"`
-	Cards    int            `json:"cards"`
-	Demos    []playlistDemo `json:"demos"`
-	Music    []musicTrack   `json:"music,omitempty"`
+	Playlist playlistDoc   `json:"playlist"`
+	Links    playlistLinks `json:"links"`
+	Markdown string        `json:"markdown"` // [name](links.web), for Discord
+	Length   int           `json:"length"`   // links.web's length
+}
+
+type playlistLinks struct {
+	Web string `json:"web"` // the light player, the playlist in its fragment
 }
 
 var (
@@ -160,7 +233,7 @@ type playlistDemoRef struct {
 	names    []string
 }
 
-func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
+func (s *server) handlePlaylist(w http.ResponseWriter, r *http.Request) {
 	var req playlistRequest
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 256<<10))
 	dec.DisallowUnknownFields()
@@ -255,41 +328,35 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 	}
 	demos := map[string]*playlistDemoRef{} // by the id a clip names
 	bySHA := map[string]*playlistDemoRef{}
-	var demoRows [][]any
 	var demoList []playlistDemo
 	for k, id := range ids {
 		d := bySHA[shas[k]]
 		if d == nil {
-			d = demoRefFor(results[k], len(demoRows))
+			d = demoRefFor(results[k], len(demoList))
 			gid := gameOf[shas[k]]
 			d.gameID = gid
 			bySHA[shas[k]] = d
-			demoRows = append(demoRows, []any{fmt.Sprintf("hub:%d", gid), gid, d.title, float64(d.offsetMs) / 1000})
-			demoList = append(demoList, playlistDemo{GameID: gid, SHA: shas[k], Title: d.title})
+			demoList = append(demoList, playlistDemo{SHA: shas[k], GameID: gid, Title: d.title, Offset: float64(d.offsetMs) / 1000})
 		}
 		demos[id.String()] = d
 	}
 
-	// 4 · The rows, in demo time.
-	rows := make([]any, 0, len(items))
+	// 4 · The items, in demo time.
+	out := make([]playlistOut, 0, len(items))
 	var labels []string
-	clips, cards := 0, 0
 	for i, ci := range items {
 		if ci.cue {
-			u := -1
+			o := playlistOut{Cue: true}
 			if ci.music != nil {
-				u = trackIndex[*ci.music]
+				t := tracks[trackIndex[*ci.music]]
+				o.Music = &playlistMusicOut{Source: t.Source, ID: t.ID, URL: t.URL, Title: t.Title, Artist: t.Artist,
+					License: t.License, LicenseURL: t.LicenseURL, Page: t.Page, DurationSec: t.DurationSec, Volume: ci.volume}
 			}
-			row := map[string]any{"u": u}
-			if ci.volume != nil {
-				row["v"] = *ci.volume
-			}
-			rows = append(rows, row)
+			out = append(out, o)
 			continue
 		}
 		if ci.card != nil {
-			rows = append(rows, ci.card)
-			cards++
+			out = append(out, playlistOut{Card: ci.card})
 			continue
 		}
 		c := ci.clip
@@ -310,71 +377,55 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 		}
 		// int64: a from / to near the int32 bound must not wrap.
 		off := int64(d.offsetMs)
-		from := math.Floor(float64(int64(c.From)+off) / 1000)
-		to := math.Ceil(float64(int64(c.To)+off) / 1000)
-		row := []any{from, to, track, who, ci.label, d.index}
-		if c.Slow != nil || len(ci.texts) > 0 {
-			var slow any = 0
-			if c.Slow != nil {
-				tenth := func(ms int32) float64 { return math.Round(float64(int64(ms)+off)/100) / 10 }
-				slow = []any{tenth(c.Slow.From), tenth(c.Slow.To), c.Slow.Speed}
-			}
-			row = append(row, slow)
+		clip := &playlistClipOut{
+			Demo:  d.index,
+			From:  math.Floor(float64(int64(c.From)+off) / 1000),
+			To:    math.Ceil(float64(int64(c.To)+off) / 1000),
+			Track: track, Who: who, Label: ci.label, Text: ci.texts,
 		}
-		if len(ci.texts) > 0 {
-			row = append(row, ci.texts)
+		if c.Slow != nil {
+			tenth := func(ms int32) float64 { return math.Round(float64(int64(ms)+off)/100) / 10 }
+			clip.Slow = &playlistSlowOut{From: tenth(c.Slow.From), To: tenth(c.Slow.To), Speed: c.Slow.Speed}
 		}
-		rows = append(rows, row)
+		out = append(out, playlistOut{Clip: clip})
 		labels = append(labels, ci.label)
-		clips++
 	}
 
-	link := map[string]any{"v": 2, "d": demoRows, "c": rows}
-	if len(tracks) > 0 {
-		m := make([][]any, len(tracks))
-		for i, t := range tracks {
-			m[i] = []any{t.Source, t.ID, t.URL, t.Title, t.Artist, t.License, t.LicenseURL, t.Page, t.DurationSec}
-		}
-		link["m"] = m
-	}
-	doc, err := json.Marshal(link)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "internal", err.Error())
-		return
-	}
-	code, err := deflateBase64URL(doc)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "internal", err.Error())
-		return
-	}
-	url := playPageURL + "#playlist=z" + code
 	name := req.Name
 	if name == "" {
 		name = playlistName(demoList, labels)
 	}
+	doc := playlistDoc{Version: playlistVersion, Name: name, Demos: demoList, Items: out}
+	b, err := json.Marshal(doc)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal", err.Error())
+		return
+	}
+	code, err := deflateBase64URL(b)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "internal", err.Error())
+		return
+	}
+	web := playPageURL + "#playlist=z" + code
 	writeJSON(w, http.StatusOK, playlistResponse{
-		URL:      url,
-		Markdown: "[" + strings.NewReplacer("[", "(", "]", ")").Replace(name) + "](" + url + ")",
-		Name:     name,
-		Length:   len(url),
-		Clips:    clips,
-		Cards:    cards,
-		Demos:    demoList,
-		Music:    tracks,
+		Playlist: doc,
+		Links:    playlistLinks{Web: web},
+		Markdown: "[" + strings.NewReplacer("[", "(", "]", ")").Replace(name) + "](" + web + ")",
+		Length:   len(web),
 	})
 }
 
 // checkedItem is one item past checkItem: a clip (its demo still to be
-// read) or a card's finished row, with the label and texts packed.
+// read), a finished card, or a music cue, with the label and texts clean.
 type checkedItem struct {
 	cue    bool // a music cue: music is its track, nil for silence
 	music  *playlistMusicRef
 	volume *float64 // the cue's loudness, when it sets one
 	clip   *playlistClip
 	demo   democache.DemoID // the clip's demo, as it names it
-	card   map[string]any
+	card   *playlistCardOut
 	label  string
-	texts  []map[string]any
+	texts  []playlistText
 }
 
 // playlistMaxMs bounds a clip's times: far past any match (four hours),
@@ -433,7 +484,7 @@ func checkItem(it playlistItem) (checkedItem, error) {
 		if err != nil {
 			return checkedItem{}, err
 		}
-		texts, err := packTexts(c.Text)
+		texts, err := cleanTexts(c.Text)
 		if err != nil {
 			return checkedItem{}, fmt.Errorf("card.%w", err)
 		}
@@ -442,13 +493,10 @@ func checkItem(it playlistItem) (checkedItem, error) {
 			return checkedItem{}, fmt.Errorf("card.%w", err)
 		}
 		if label == "" && len(texts) > 0 {
-			label = texts[0]["t"].(string)
+			label = texts[0].Text
 		}
-		row := map[string]any{"k": []any{c.Ms, bg, op, fi, fo}, "l": label}
-		if len(texts) > 0 {
-			row["x"] = texts
-		}
-		return checkedItem{card: row, label: label}, nil
+		card := &playlistCardOut{Ms: c.Ms, Bg: bg, Opacity: op, FadeIn: fi, FadeOut: fo, Label: label, Text: texts}
+		return checkedItem{card: card, label: label}, nil
 	default:
 		c := it.Clip
 		var demo democache.DemoID
@@ -475,7 +523,7 @@ func checkItem(it playlistItem) (checkedItem, error) {
 				return checkedItem{}, fmt.Errorf("clip.slow: from before to, inside the clip (match ms), speed 0.05 to 1")
 			}
 		}
-		texts, err := packTexts(c.Text)
+		texts, err := cleanTexts(c.Text)
 		if err != nil {
 			return checkedItem{}, fmt.Errorf("clip.%w", err)
 		}
@@ -640,25 +688,26 @@ func demoRefFor(res *result.Result, index int) *playlistDemoRef {
 	return d
 }
 
-// packTexts validates texts and writes them in the link's short keys,
-// defaults left out (the page's packText).
-func packTexts(list []playlistText) ([]map[string]any, error) {
+// cleanTexts validates texts and writes them as the playlist carries them:
+// colours lower-case, defaults left out (size 6, #ffffff, title, center,
+// from 0, fades 300 — the page's cleanText fills them in).
+func cleanTexts(list []playlistText) ([]playlistText, error) {
 	if len(list) > playlistMaxTexts {
 		return nil, fmt.Errorf("text: at most %d", playlistMaxTexts)
 	}
-	out := make([]map[string]any, 0, len(list))
+	out := make([]playlistText, 0, len(list))
 	for i, x := range list {
 		t := strings.TrimSpace(x.Text)
 		if t == "" || utf16Len(t) > playlistMaxText {
 			return nil, fmt.Errorf("text[%d].text: 1 to %d characters", i, playlistMaxText)
 		}
-		o := map[string]any{"t": t}
+		o := playlistText{Text: t}
 		if x.Size != nil {
 			if *x.Size < 1 || *x.Size > 30 {
 				return nil, fmt.Errorf("text[%d].size: 1 to 30 (%% of the view's height)", i)
 			}
 			if *x.Size != 6 {
-				o["s"] = *x.Size
+				o.Size = x.Size
 			}
 		}
 		if x.Color != "" {
@@ -666,7 +715,7 @@ func packTexts(list []playlistText) ([]map[string]any, error) {
 				return nil, fmt.Errorf("text[%d].color: #rrggbb", i)
 			}
 			if c := strings.ToLower(x.Color); c != "#ffffff" {
-				o["c"] = c
+				o.Color = c
 			}
 		}
 		if x.Font != "" {
@@ -674,7 +723,7 @@ func packTexts(list []playlistText) ([]map[string]any, error) {
 				return nil, fmt.Errorf("text[%d].font: title, body or mono", i)
 			}
 			if x.Font != "title" {
-				o["f"] = x.Font
+				o.Font = x.Font
 			}
 		}
 		if x.At != "" {
@@ -682,7 +731,7 @@ func packTexts(list []playlistText) ([]map[string]any, error) {
 				return nil, fmt.Errorf("text[%d].at: center, top, bottom, left, right, top-left, top-right, bottom-left or bottom-right", i)
 			}
 			if x.At != "center" {
-				o["a"] = x.At
+				o.At = x.At
 			}
 		}
 		from := 0
@@ -692,24 +741,27 @@ func packTexts(list []playlistText) ([]map[string]any, error) {
 			}
 			from = *x.From
 			if from > 0 {
-				o["b"] = from
+				o.From = x.From
 			}
 		}
 		if x.To != nil {
 			if *x.To <= from {
 				return nil, fmt.Errorf("text[%d].to: after from", i)
 			}
-			o["e"] = *x.To
+			o.To = x.To
 		}
-		for key, v := range map[string]*int{"i": x.FadeIn, "o": x.FadeOut} {
-			if v == nil {
+		for _, f := range []struct {
+			in  *int
+			out **int
+		}{{x.FadeIn, &o.FadeIn}, {x.FadeOut, &o.FadeOut}} {
+			if f.in == nil {
 				continue
 			}
-			if *v < 0 || *v > fadeMax {
+			if *f.in < 0 || *f.in > fadeMax {
 				return nil, fmt.Errorf("text[%d] fades: 0 to %d ms", i, fadeMax)
 			}
-			if *v != 300 {
-				o[key] = *v
+			if *f.in != 300 {
+				*f.out = f.in
 			}
 		}
 		out = append(out, o)
