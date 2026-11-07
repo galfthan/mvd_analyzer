@@ -3,36 +3,46 @@
 // run's first click — a user gesture, so the browser lets it sound — to its
 // end. One <audio> element: a new track fades the one before out, then in;
 // the same track carries on across cues. A track shorter than its section
-// loops. The viewer's play / pause pauses it too (a title card does not —
-// the music plays over it), and the toggle turns it off and on.
+// loops. A jump (the runner's start, at a clip picked) picks the music up
+// where playing through would have it (cueTimeAt). The viewer's play /
+// pause pauses it too (a title card does not — the music plays over it),
+// the toggle turns it off and on, and the viewer's scale (a slider)
+// multiplies the cue's own loudness.
+//
+// Loudness: a cue's `volume`, else DEFAULT_VOLUME — under the game sound,
+// which the page turns down to 60 % meanwhile.
 //
 // `state` is what the page shows: the track playing (its credit), whether
 // it sounds, whether the viewer has it on.
 
 import { store } from '../state/store.js';
 
-const VOLUME = 0.8;
+export const DEFAULT_VOLUME = 0.3;
 
 /**
- * @typedef {import('../lib/playlist.js').Music} Music
- * @typedef {{ track: Music | null, sounding: boolean, on: boolean }} MusicState
+ * @typedef {import('../lib/playlist.js').Cue} Cue
+ * @typedef {{ track: Cue | null, sounding: boolean, on: boolean, scale: number }} MusicState
  */
 
 /** @param {{ audio?: HTMLAudioElement, fadeMs?: number }} [opts]  the element and fade length (tests pass a fake and a short one) */
-export function createMusic({ audio = new Audio(), fadeMs = 800 } = {}) {
+/** @param {{ audio?: HTMLAudioElement, fadeMs?: number, scale?: number }} [opts] */
+export function createMusic({ audio = new Audio(), fadeMs = 800, scale = 1 } = {}) {
     audio.loop = true;
     audio.preload = 'auto';
     audio.volume = 0;
-    /** @type {Music | null} */
+    /** @type {Cue | null} */
     let track = null;     // the track wanted
+    /** @type {number | null} */
+    let seekTo = null;    // seconds into it, for a jump
     let paused = false;   // by the viewer
     let on = true;
     /** @type {ReturnType<typeof setInterval> | null} */
     let ramp = null;
     let seq = 0;          // drops a fade overtaken by another change
 
-    const state = store(/** @type {MusicState} */ ({ track: null, sounding: false, on: true }));
-    const publish = () => state.set({ track, sounding: !!track && on && !paused, on });
+    const state = store(/** @type {MusicState} */ ({ track: null, sounding: false, on: true, scale }));
+    const publish = () => state.set({ track, sounding: !!track && on && !paused, on, scale });
+    const loudness = () => Math.min(1, (track?.volume ?? DEFAULT_VOLUME) * scale);
 
     // fadeTo ramps the volume to v, then calls done (unless overtaken).
     /**
@@ -63,10 +73,14 @@ export function createMusic({ audio = new Audio(), fadeMs = 800 } = {}) {
             fadeTo(0, () => audio.pause());
             return;
         }
-        const url = /** @type {Music} */ (track).url;
-        if (audio.src === url) return start();
+        const url = /** @type {Cue} */ (track).url;
+        if (audio.src === url) {
+            seek();
+            return start();
+        }
         const swap = () => {
             audio.src = url;
+            seek();
             start();
         };
         // Another track: one that sounds fades out first.
@@ -76,18 +90,48 @@ export function createMusic({ audio = new Audio(), fadeMs = 800 } = {}) {
 
     function start() {
         audio.play()?.catch((/** @type {unknown} */ err) => console.warn('music:', err));
-        fadeTo(VOLUME);
+        fadeTo(loudness());
+    }
+
+    // seek: a jump's position, wrapped round a looping track. Set before
+    // the file has loaded, it is where playback starts.
+    function seek() {
+        if (seekTo == null) return;
+        const len = track?.durationSec || 0;
+        audio.currentTime = len > 0 ? seekTo % len : seekTo;
+        seekTo = null;
     }
 
     return {
         state,
-        // cue(track | null): the music wanted from here (the runner, on
-        // every step to an item).
-        /** @param {Music | null} next */
-        cue(next) {
-            if ((next?.url ?? null) === (track?.url ?? null)) return;
+        // cue(track | null, at?): the music wanted from here (the runner,
+        // on every step to an item). `at`: a jump — seconds into the
+        // section, where the track picks up, the same track included.
+        /**
+         * @param {Cue | null} next
+         * @param {number} [at]
+         */
+        cue(next, at) {
+            const same = (next?.url ?? null) === (track?.url ?? null);
+            if (same && at == null) {
+                // The same track, maybe at another cue's loudness.
+                if (next && next.volume !== track?.volume) {
+                    track = next;
+                    if (on && !paused) fadeTo(loudness());
+                    publish();
+                }
+                return;
+            }
             track = next;
+            seekTo = at ?? null;
             apply();
+        },
+        // The viewer's loudness scale (the slider), 0..2.
+        /** @param {number} f */
+        setScale(f) {
+            scale = Math.max(0, Math.min(2, f));
+            if (track && on && !paused) fadeTo(loudness());
+            publish();
         },
         // The viewer's play / pause.
         /** @param {boolean} p */

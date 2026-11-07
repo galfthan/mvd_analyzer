@@ -15,7 +15,7 @@ package main
 //	  m: [[source, id, url, title, artist, license, licenseUrl, page, durationSec]…],
 //	  c: [ [from, to, track, who, label, demoIndex, slow|0, texts?]   (a clip)
 //	       | { k: [ms, bg, opacity, fadeIn, fadeOut], l: label, x: texts }
-//	       | { u: musicIndex | -1 } ] }   (a music cue; -1: silence)
+//	       | { u: musicIndex | -1, v?: volume } ] }   (a music cue; -1: silence)
 //
 // `m` and the cues are there only when the playlist has music (music.go):
 // a cue takes no time, and its track plays from it on.
@@ -107,6 +107,19 @@ type playlistMusicRef struct {
 	Source string `json:"source"`
 	ID     string `json:"id"`
 }
+
+// playlistMusicCue is a music item's body: the track and how loud it
+// plays (the player's default when absent).
+type playlistMusicCue struct {
+	playlistMusicRef
+	Volume *float64 `json:"volume,omitempty"`
+}
+
+// The loudness a cue may ask for (the player's own default is 0.3).
+const (
+	musicVolumeMin = 0.05
+	musicVolumeMax = 1
+)
 
 type playlistRequest struct {
 	Items []playlistItem `json:"items"`
@@ -267,7 +280,11 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 			if ci.music != nil {
 				u = trackIndex[*ci.music]
 			}
-			rows = append(rows, map[string]any{"u": u})
+			row := map[string]any{"u": u}
+			if ci.volume != nil {
+				row["v"] = *ci.volume
+			}
+			rows = append(rows, row)
 			continue
 		}
 		if ci.card != nil {
@@ -350,13 +367,14 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 // checkedItem is one item past checkItem: a clip (its demo still to be
 // read) or a card's finished row, with the label and texts packed.
 type checkedItem struct {
-	cue   bool // a music cue: music is its track, nil for silence
-	music *playlistMusicRef
-	clip  *playlistClip
-	demo  democache.DemoID // the clip's demo, as it names it
-	card  map[string]any
-	label string
-	texts []map[string]any
+	cue    bool // a music cue: music is its track, nil for silence
+	music  *playlistMusicRef
+	volume *float64 // the cue's loudness, when it sets one
+	clip   *playlistClip
+	demo   democache.DemoID // the clip's demo, as it names it
+	card   map[string]any
+	label  string
+	texts  []map[string]any
 }
 
 // playlistMaxMs bounds a clip's times: far past any match (four hours),
@@ -379,16 +397,19 @@ func checkItem(it playlistItem) (checkedItem, error) {
 		if string(it.Music) == "null" {
 			return checkedItem{cue: true}, nil
 		}
-		var ref playlistMusicRef
+		var cue playlistMusicCue
 		dec := json.NewDecoder(bytes.NewReader(it.Music))
 		dec.DisallowUnknownFields()
-		if err := dec.Decode(&ref); err != nil || ref.ID == "" {
-			return checkedItem{}, fmt.Errorf("music: {source, id} from GET /v1/playlists/music, or null for silence")
+		if err := dec.Decode(&cue); err != nil || cue.ID == "" {
+			return checkedItem{}, fmt.Errorf("music: {source, id, volume?} from GET /v1/playlists/music, or null for silence")
 		}
-		if ref.Source != "incompetech" {
+		if cue.Source != "incompetech" {
 			return checkedItem{}, fmt.Errorf("music.source: incompetech")
 		}
-		return checkedItem{cue: true, music: &ref}, nil
+		if v := cue.Volume; v != nil && (*v < musicVolumeMin || *v > musicVolumeMax) {
+			return checkedItem{}, fmt.Errorf("music.volume: %g to %g (omit for the player's default, 0.3)", float64(musicVolumeMin), float64(musicVolumeMax))
+		}
+		return checkedItem{cue: true, music: &cue.playlistMusicRef, volume: cue.Volume}, nil
 	case it.Card != nil:
 		c := it.Card
 		if c.Ms < cardMsMin || c.Ms > cardMsMax {

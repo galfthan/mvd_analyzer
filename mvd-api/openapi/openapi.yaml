@@ -3492,6 +3492,7 @@ components:
                     properties:
                       source: { type: string, enum: [incompetech], description: "The track's source." }
                       id: { type: string, description: "The track's id at that source (GET /v1/playlists/music)." }
+                      volume: { type: number, minimum: 0.05, maximum: 1, description: "How loud the track plays, 0.05-1 (omitted: the player's default, 0.3 — under the game sound, which goes down to 60 % while music plays). The viewer can scale it." }
     PlaylistLink:
       type: object
       required: [url, markdown, name, length, clips, cards, demos]

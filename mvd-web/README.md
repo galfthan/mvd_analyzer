@@ -1581,9 +1581,12 @@ files on incompetech.com are played) plays it here: the runner cues the
 track in force at each item (`cueAt`), `src/play/music.js` plays it in one
 `<audio>` element from the run's first click — fading between tracks,
 looping one shorter than its section, paused with the viewer's pause but
-not by a title card — and the game sound goes down to 30 % under it
-(`PlayerEngine.setLevel`, `FteController.setLevel`). A music button by the
-sound one turns it off, and the credit (title, artist, license, each
+not by a title card; a jump to a clip picks the track up where playing
+through would have it (`cueTimeAt`) — and the game sound goes down to 60 %
+under it (`PlayerEngine.setLevel`, `FteController.setLevel`). The music
+plays at the cue's `volume` (the link's `v`; default 0.3) times the
+viewer's slider (kept in localStorage). A music button by the sound one
+turns it off, and the credit (title, artist, license, each
 linked) shows under the controls while a track plays. The Player tab keeps
 the cues of a playlist opened there (they go back into its share links)
 but plays no music; editing them comes later. A

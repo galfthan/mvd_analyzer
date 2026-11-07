@@ -219,9 +219,10 @@ type PlaylistItem struct {
 }
 
 type PlaylistMusic struct {
-	Source  string `json:"source,omitempty" jsonschema:"the track's source as findPlaylistMusic returned it (incompetech)"`
-	ID      string `json:"id,omitempty" jsonschema:"the track's id, as findPlaylistMusic returned it"`
-	Silence bool   `json:"silence,omitempty" jsonschema:"true instead of source/id: no music from here on"`
+	Source  string   `json:"source,omitempty" jsonschema:"the track's source as findPlaylistMusic returned it (incompetech)"`
+	ID      string   `json:"id,omitempty" jsonschema:"the track's id, as findPlaylistMusic returned it"`
+	Silence bool     `json:"silence,omitempty" jsonschema:"true instead of source/id: no music from here on"`
+	Volume  *float64 `json:"volume,omitempty" jsonschema:"how loud the track plays, 0.05-1; omit for the player's default 0.3 (a background level under the game sound). Raise it for a card-heavy or quiet section, lower it where the game sound matters"`
 }
 
 // MarshalJSON writes the item as POST /v1/playlist-links takes it, where
@@ -239,7 +240,11 @@ func (it PlaylistItem) MarshalJSON() ([]byte, error) {
 		if it.Music.Silence {
 			m["music"] = nil
 		} else {
-			m["music"] = map[string]string{"source": it.Music.Source, "id": it.Music.ID}
+			cue := map[string]any{"source": it.Music.Source, "id": it.Music.ID}
+			if it.Music.Volume != nil {
+				cue["volume"] = *it.Music.Volume
+			}
+			m["music"] = cue
 		}
 	}
 	return json.Marshal(m)

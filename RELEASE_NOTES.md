@@ -18,8 +18,10 @@ detail.
   (`{u: index}`), only when there is music.
 - **The light player plays it.** From the first click, the track in
   force at each clip plays under the game, fading between tracks and
-  looping a short one; the game sound goes down under it, pausing pauses
-  it, and a music button turns it off. The credit shows under the
+  looping a short one; a jump to a clip picks the music up where it would
+  be. The game sound goes down under it, pausing pauses it, a music
+  button turns it off, and a slider sets its loudness. A cue's `volume`
+  (0.05–1, default 0.3) is the reel author's mix. The credit shows under the
   controls. The full analyzer keeps a shared playlist's music but does
   not play it yet.
 

@@ -5,7 +5,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import {
     parseHubReplayUrl, hubClipsUrl, singleHubGame, encodePlaylist, decodePlaylist,
     playlistStep, playerFragClips, MAX_HUB_CLIPS, cleanSlow, slowAt, playlistName, markdownLink,
-    makeCard, cleanText, isCard, cueAt,
+    makeCard, cleanText, isCard, cueAt, cueTimeAt,
 } from '../src/lib/playlist.js';
 import { matchDay } from '../src/lib/wall-clock.js';
 
@@ -175,12 +175,12 @@ async function zlink(doc) {
 test('music cues decode onto the item after them, survive a round trip, and only play known files', async () => {
     const doc = {
         v: 2, d: [['hub:1', 1, 'dm3', 0]], m: [TRACK_ROW, [...TRACK_ROW.slice(0, 2), 'https://evil.example/x.mp3', ...TRACK_ROW.slice(3)]],
-        c: [{ u: 0 }, { k: [2000, '#000000', 1, 400, 400], l: 'Intro' }, [10, 20, 'auto', '', 'a', 0],
+        c: [{ u: 0, v: 0.5 }, { k: [2000, '#000000', 1, 400, 400], l: 'Intro' }, [10, 20, 'auto', '', 'a', 0],
             { u: -1 }, [30, 40, 'auto', '', 'b', 0], { u: 1 }, [50, 60, 'auto', '', 'c', 0], [70, 80, 'auto', '', 'd', 0]],
     };
     const clips = /** @type {any[]} */ (await decodePlaylist(await zlink(doc)));
     assert.equal(clips.length, 5, 'cues are not items');
-    assert.deepEqual(clips[0].cue, TRACK, 'the cue before the card is the card\'s');
+    assert.deepEqual(clips[0].cue, { ...TRACK, volume: 0.5 }, 'the cue before the card is the card\'s, with its loudness');
     assert.equal(clips[1].cue, undefined);
     assert.equal(clips[2].cue, null, 'silence');
     assert.equal(clips[3].cue, undefined, 'a track on another host is no cue');
@@ -189,4 +189,7 @@ test('music cues decode onto the item after them, survive a round trip, and only
     const again = /** @type {any[]} */ (await decodePlaylist(await encodePlaylist(clips)));
     assert.deepEqual(again.map((c) => c.cue), clips.map((c) => c.cue), 'the cues round-trip');
     assert.deepEqual(cueAt([], 0), null);
+    // Into its section: the card's 2 s; the silent section from item 2
+    // (item 3's cue refused) runs on, 10 s clips.
+    assert.deepEqual([0, 1, 2, 3, 4].map((i) => cueTimeAt(clips, i)), [0, 2, 0, 10, 20]);
 });

@@ -16,7 +16,7 @@
 // src/play/music.js) follows the run: each item the run gets to plays the
 // cue in force there (cueAt), and the run's end stops it.
 
-import { playlistStep, slowAt, isCard, cueAt } from '../lib/playlist.js';
+import { playlistStep, slowAt, isCard, cueAt, cueTimeAt } from '../lib/playlist.js';
 import { playlist, setRun } from './playlist-store.js';
 import { toast } from './toast.js';
 import { SPEEDS } from '../lib/playback-bar.js';
@@ -43,7 +43,7 @@ const MAX_SPEED = Math.max(...SPEEDS);
  * @property {typeof import('./demo-ref.js').demoRefOf} demoRefOf
  * @property {import('../state/store.js').Store<{ start: number, end: number } | null>} segment
  * @property {(c: Clip) => void} [prefetch]  start fetching a clip's demo ahead of it
- * @property {{ cue: (m: import('../lib/playlist.js').Music | null) => void, stop: () => void }} [music]
+ * @property {{ cue: (m: import('../lib/playlist.js').Cue | null, at?: number) => void, stop: () => void }} [music]
  */
 
 /** @param {RunnerDeps} deps */
@@ -77,6 +77,9 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
             drv = next;
         }
         setRun({ clips, index, prev: null, transient });
+        // A start is a jump: the music picks up where playing through
+        // would have it; the steps after only carry it on.
+        music?.cue(cueAt(clips, index), cueTimeAt(clips, index));
         playClip(index);
     }
 

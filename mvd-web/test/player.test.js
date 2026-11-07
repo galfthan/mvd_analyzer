@@ -573,7 +573,9 @@ test('the runner cues the music in force at each item, and stops it with the run
     /** @type {Array<string | null>} */
     const cues = [];
     let stops = 0;
-    const music = { cue: (/** @type {any} */ m) => cues.push(m ? m.title : null), stop: () => stops++ };
+    /** @type {Array<number | undefined>} */
+    const ats = [];
+    const music = { cue: (/** @type {any} */ m, /** @type {number | undefined} */ at) => { cues.push(m ? m.title : null); ats.push(at); }, stop: () => stops++ };
     const runner = createRunner({ engine, page: fakeEngine(store('map')), driverFor: () => engine, demo, teams: store({ order: [] }),
         selectTab: () => {}, loadDemo: async () => true, demoRefOf, segment: store(null), music });
     const T = { title: 'T' };
@@ -589,9 +591,11 @@ test('the runner cues the music in force at each item, and stops it with the run
     at(110.1);
     at(119.95);
     at(120.05);
-    assert.deepEqual(cues, ['T', 'T', null]);
+    assert.deepEqual(cues, ['T', 'T', 'T', null]);
+    assert.deepEqual(ats, [0, undefined, undefined, undefined], 'the start is a jump (to 0 s in); the steps after carry on');
     runner.start([clip(100, 110, { cue: T }), clip(110, 120), clip(120, 130, { cue: null })], 1);
     assert.deepEqual(cues.at(-1), 'T', 'started mid-list: the cue before it');
+    assert.equal(ats.at(-2), 10, '10 s into its section');
     at(110.1);   // the jump back lands (the controller's POV restore waits for it)
     const before = stops;
     runner.stop();

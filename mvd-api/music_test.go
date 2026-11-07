@@ -119,6 +119,9 @@ func TestIncompetech(t *testing.T) {
 	if got, err := m.Search(ctx, musicQuery{Q: "britons", Limit: 10}); err != nil || len(got) != 1 {
 		t.Errorf("stale list, upstream gone: %v %v", got, err)
 	}
+	if age := time.Since(m.piecesAt); age > incompetechTTL-incompetechRetry+time.Minute {
+		t.Errorf("after a failed refetch the list counts as %v old; want the next try in an hour", age)
+	}
 	// Never fetched and unreachable: an error.
 	m.pieces = nil
 	if _, err := m.Search(ctx, musicQuery{Limit: 10}); err == nil {
@@ -157,7 +160,7 @@ func TestPlaylistLinkMusic(t *testing.T) {
 		{"music": {"source": "incompetech", "id": "USUAN1100301"}},
 		{"card": {"ms": 2000, "label": "Intro"}},
 		{"clip": {"gameId": 1, "from": 0, "to": 1000}},
-		{"music": {"source": "incompetech", "id": "USUAN2600004"}},
+		{"music": {"source": "incompetech", "id": "USUAN2600004", "volume": 0.5}},
 		{"clip": {"gameId": 1, "from": 2000, "to": 3000}},
 		{"music": null},
 		{"clip": {"gameId": 1, "from": 4000, "to": 5000}},
@@ -183,10 +186,10 @@ func TestPlaylistLinkMusic(t *testing.T) {
 	var cues []any
 	for _, row := range doc["c"].([]any) {
 		if o, ok := row.(map[string]any); ok && o["u"] != nil {
-			cues = append(cues, o["u"])
+			cues = append(cues, o)
 		}
 	}
-	if c, _ := json.Marshal(cues); string(c) != `[0,1,-1,0]` {
+	if c, _ := json.Marshal(cues); string(c) != `[{"u":0},{"u":1,"v":0.5},{"u":-1},{"u":0}]` {
 		t.Errorf("cues = %s", c)
 	}
 
@@ -203,6 +206,8 @@ func TestPlaylistLinkMusic(t *testing.T) {
 		"a cue at the end":   `{"items": [{"clip": {"gameId": 1, "from": 0, "to": 1000}}, {"music": null}]}`,
 		"music and a clip":   `{"items": [{"music": null, "clip": {"gameId": 1, "from": 0, "to": 1000}}]}`,
 		"music with no clip": `{"items": [{"music": null}, {"card": {"ms": 1000}}]}`,
+		"too loud":           `{"items": [{"music": {"source": "incompetech", "id": "USUAN1100301", "volume": 1.5}}, {"clip": {"gameId": 1, "from": 0, "to": 1000}}]}`,
+		"too quiet":          `{"items": [{"music": {"source": "incompetech", "id": "USUAN1100301", "volume": 0}}, {"clip": {"gameId": 1, "from": 0, "to": 1000}}]}`,
 	} {
 		if code, out := postPlaylist(t, srv.URL, body); code != http.StatusBadRequest {
 			t.Errorf("%s: %d %v; want 400", name, code, out)

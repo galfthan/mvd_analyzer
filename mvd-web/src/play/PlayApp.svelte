@@ -69,10 +69,26 @@
     engine.teamInfo = true;
     // The playlist's music (music.js): the runner cues it, the viewer's
     // play / pause pauses it, and the game sound goes down under it.
-    const music = createMusic();
+    // The viewer's music loudness (the slider: × the cue's own) is kept
+    // in this browser.
+    const SCALE_KEY = 'mvda.musicScale';
+    /** @type {number} */
+    let savedScale = 1;
+    try {
+        const v = Number(localStorage.getItem(SCALE_KEY));
+        if (v > 0 && v <= 2) savedScale = v;
+    } catch {}
+    const music = createMusic({ scale: savedScale });
     const musicState = music.state;
-    const UNDER_MUSIC = 0.3;
+    const UNDER_MUSIC = 0.6;
     $effect(() => engine.setLevel($musicState.sounding ? UNDER_MUSIC : 1));
+    /** @param {number} f */
+    function setMusicScale(f) {
+        music.setScale(f);
+        try {
+            localStorage.setItem(SCALE_KEY, String(f));
+        } catch {}
+    }
     const runner = createRunner({
         engine, demo, teams, demoRefOf, music,
         segment: store(/** @type {{ start: number, end: number } | null} */ (null)),
@@ -192,7 +208,8 @@
     function togglePlay() {
         if (index < 0) return playFrom(0);
         engine.togglePlay();
-        music.setPaused(!engine.isPlaying());
+        // Between demos the engine has none to toggle: the music plays on.
+        if (engine.ready()) music.setPaused(!engine.isPlaying());
     }
     // A click on the game view plays / pauses; the keys are the analyzer's
     // (src/player/player-keys.js), typed on the page or in the game view.
@@ -289,6 +306,9 @@
                 {#if hasMusic}
                     <button class="clips-btn" class:off={!$musicState.on} title={$musicState.on ? 'Music on — click to turn it off' : 'Music off — click to turn it on'}
                         aria-label="Music" aria-pressed={$musicState.on} onclick={() => music.toggle()}><Music size={16} /></button>
+                    <input class="clips-music-vol" type="range" min="0" max="2" step="0.05" value={$musicState.scale}
+                        title="Music loudness: {Math.round($musicState.scale * 100)} % of the playlist's" aria-label="Music loudness"
+                        disabled={!$musicState.on} oninput={(e) => setMusicScale(Number(e.currentTarget.value))} />
                 {/if}
                 <button class="clips-btn" title={$status.ready && !$status.muted ? 'Sound on — click to mute' : 'Sound off — click to unmute'} onclick={() => engine.toggleMute()}>
                     {#if $status.ready && !$status.muted}<Volume2 size={16} />{:else}<VolumeX size={16} />{/if}
@@ -480,6 +500,10 @@
     }
     .clips-btn.off {
         opacity: 0.4;
+    }
+    .clips-music-vol {
+        width: 70px;
+        accent-color: var(--accent-cyan);
     }
     .clips-controls {
         display: flex;

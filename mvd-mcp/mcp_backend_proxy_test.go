@@ -752,8 +752,9 @@ func TestProxy_PlaylistMusic(t *testing.T) {
 	srv := httptest.NewServer(mux)
 	t.Cleanup(srv.Close)
 	b := newProxyBackend(srv.URL, "", 5*time.Second)
+	vol := 0.4
 	if _, err := b.CreatePlaylistLink(context.Background(), CreatePlaylistLinkInput{Items: []PlaylistItem{
-		{Music: &PlaylistMusic{Source: "incompetech", ID: "USUAN1100301"}},
+		{Music: &PlaylistMusic{Source: "incompetech", ID: "USUAN1100301", Volume: &vol}},
 		{Clip: &PlaylistClip{GameID: 7, From: 1000, To: 5000}},
 		{Music: &PlaylistMusic{Silence: true}},
 		{Clip: &PlaylistClip{Demo: "gameId:7", From: 6000, To: 8000}},
@@ -761,7 +762,7 @@ func TestProxy_PlaylistMusic(t *testing.T) {
 		t.Fatal(err)
 	}
 	got, _ := json.Marshal(body)
-	want := `{"items":[{"music":{"id":"USUAN1100301","source":"incompetech"}},{"clip":{"from":1000,"gameId":7,"to":5000}},{"music":null},{"clip":{"demo":"gameId:7","from":6000,"to":8000}}]}`
+	want := `{"items":[{"music":{"id":"USUAN1100301","source":"incompetech","volume":0.4}},{"clip":{"from":1000,"gameId":7,"to":5000}},{"music":null},{"clip":{"demo":"gameId:7","from":6000,"to":8000}}]}`
 	if string(got) != want {
 		t.Errorf("body\n got %s\nwant %s", got, want)
 	}

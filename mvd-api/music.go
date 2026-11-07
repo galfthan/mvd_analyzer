@@ -89,8 +89,9 @@ func newIncompetech() *incompetech {
 // The list's age before it is fetched again, and the cap on its size
 // (~0.9 MB in 2026).
 const (
-	incompetechTTL = 24 * time.Hour
-	musicMaxBytes  = 8 << 20
+	incompetechTTL   = 24 * time.Hour
+	incompetechRetry = time.Hour
+	musicMaxBytes    = 8 << 20
 )
 
 type incompetechPiece struct {
@@ -104,8 +105,9 @@ type incompetechPiece struct {
 }
 
 // list is the pieces, fetched again once a day old; a failed fetch keeps
-// serving the list before. A piece without an ISRC (its id here), file or
-// title is left out.
+// serving the list before and tries again in an hour (not on every request,
+// each waiting on a site that is down). A piece without an ISRC (its id
+// here), file or title is left out.
 func (m *incompetech) list(ctx context.Context) ([]incompetechPiece, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -115,6 +117,7 @@ func (m *incompetech) list(ctx context.Context) ([]incompetechPiece, error) {
 	pieces, err := m.fetch(ctx)
 	if err != nil {
 		if m.pieces != nil {
+			m.piecesAt = time.Now().Add(incompetechRetry - incompetechTTL)
 			return m.pieces, nil
 		}
 		return nil, err

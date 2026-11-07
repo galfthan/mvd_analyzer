@@ -1047,7 +1047,7 @@ typically 500–1000 characters, Discord allows 2000).
 | Item | Fields |
 |---|---|
 | `clip` | `gameId` (or `demo`: `gameId:N` / `sha:HEX`, a hub game), `from` / `to` (int ms since match start), `watch` (a player name in that game; omit = autotrack; unknown → 400 listing the players), `label` (`Kind · details` — the link's name counts kinds), `slow?` `{from, to, speed}` (same ms; speed 0.05–1), `text?` |
-| `music` | `{source, id}` from `findPlaylistMusic`, or `{silence: true}` — a cue taking no time: the track plays under the items after it, to the next cue or the end (first for the whole reel, before each section's card for one per section); the player shows its credit and turns the game sound down |
+| `music` | `{source, id, volume?}` from `findPlaylistMusic` (`volume` 0.05–1, default 0.3: the track's loudness under the game), or `{silence: true}` — a cue taking no time: the track plays under the items after it, to the next cue or the end (first for the whole reel, before each section's card for one per section); the player shows its credit and turns the game sound down |
 | `card` | `ms` (300–30000; a minimum — it stays up until the next clip plays, covering its demo loading), `bg` (`#rrggbb`), `opacity` (0–1; below 1 the paused game shows through), `fadeIn` / `fadeOut`, `label`, `text?` |
 | `text[]` | `text` (≤ 200 chars), `size` (% of view height, 1–30, default 6), `color`, `font` (`title` / `body` / `mono`), `at` (`center`, `top`, `bottom`, `left`, `right`, corners), `from` / `to` (ms within its item), `fadeIn` / `fadeOut` |
 
