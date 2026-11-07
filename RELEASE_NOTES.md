@@ -5,6 +5,19 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (playlist-music) — demos by hash in the API and in playlists
+
+- `GET /v1/games/sha:<hex>` returns the hub game whose demo has that
+  sha256, its gameId included.
+- Any per-demo endpoint given a `sha:<hex>` the cache has not seen now
+  fetches the demo from the hub's CDN by that hash, instead of answering
+  404. Only a hash the CDN does not have is a 404.
+- `POST /v1/playlist-links` (and the MCP's `createPlaylistLink`) clips can
+  name their demo as `demo: "gameId:N" | "sha:<hex>"` next to `gameId`; a
+  demo named both ways is one demo. The response's `demos` carry each
+  demo's `sha`. A demo named by hash must still be a hub game: the light
+  player loads demos by gameId.
+
 ## unreleased (hub-warm) — new hub demos are ready before anyone opens them
 
 mvd-api's access log has a `src` field, the request's `?label=`: the web

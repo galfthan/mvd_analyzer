@@ -41,7 +41,7 @@ Don't have a `gameId` yet? **`GET /v1/games/search`** discovers demos in
 the hub catalog by player / team / map / mode / matchtag / date, returns
 `{limit, offset, count, total?, games}`, and each row's `id` becomes the
 `gameId:<id>` you feed the flow below (**`GET /v1/games/{id}`** returns
-one game's row by that id). Each row also carries
+one game's row by that id, or by its demo's hash as `sha:<hex>`). Each row also carries
 `server_hostname` (the QW server the game was played on). The `players`
 filter is a **case-insensitive** full-text search (unlike the per-demo
 endpoints' exact, case-sensitive `players` filter). Its `from`/`to` are

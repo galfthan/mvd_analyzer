@@ -21,8 +21,10 @@ package main
 import (
 	"bytes"
 	"compress/flate"
+	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -32,6 +34,7 @@ import (
 	"sync"
 	"unicode/utf16"
 
+	"github.com/mvd-analyzer/mvd-analytics/hubfetch"
 	"github.com/mvd-analyzer/mvd-analytics/result"
 	"github.com/mvd-analyzer/mvd-api/internal/democache"
 )
@@ -68,7 +71,8 @@ type playlistSlow struct {
 }
 
 type playlistClip struct {
-	GameID int            `json:"gameId"`
+	GameID int            `json:"gameId,omitempty"`
+	Demo   string         `json:"demo,omitempty"`
 	From   int32          `json:"from"`
 	To     int32          `json:"to"`
 	Watch  string         `json:"watch,omitempty"`
@@ -99,6 +103,7 @@ type playlistRequest struct {
 
 type playlistDemo struct {
 	GameID int    `json:"gameId"`
+	SHA    string `json:"sha"`
 	Title  string `json:"title"`
 }
 
@@ -122,6 +127,7 @@ var (
 // The demo a clip plays in, resolved once per gameId.
 type playlistDemoRef struct {
 	index    int
+	gameID   int
 	title    string
 	offsetMs int32
 	userIDs  map[string]int
@@ -144,8 +150,8 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 	// 1 · Check every item before any demo is loaded (a load is a fetch
 	// and a parse; a bad item at the end must not cost twenty of them).
 	items := make([]checkedItem, len(req.Items))
-	var gameIDs []int
-	seen := map[int]bool{}
+	var ids []democache.DemoID
+	seen := map[string]bool{}
 	for i, it := range req.Items {
 		ci, err := checkItem(it)
 		if err != nil {
@@ -153,34 +159,33 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		items[i] = ci
-		if ci.clip != nil && !seen[ci.clip.GameID] {
-			if len(gameIDs) == playlistMaxDemos {
+		if ci.clip != nil && !seen[ci.demo.String()] {
+			if len(ids) == playlistMaxDemos {
 				writeError(w, http.StatusBadRequest, "invalid_param", fmt.Sprintf("items[%d]: at most %d demos in one playlist", i, playlistMaxDemos))
 				return
 			}
-			seen[ci.clip.GameID] = true
-			gameIDs = append(gameIDs, ci.clip.GameID)
+			seen[ci.demo.String()] = true
+			ids = append(ids, ci.demo)
 		}
 	}
-	if len(gameIDs) == 0 {
+	if len(ids) == 0 {
 		writeError(w, http.StatusBadRequest, "invalid_param", "items: at least one clip")
 		return
 	}
 
 	// 2 · Load the demos, side by side (the cache's parse limit still
 	// bounds the cold ones).
-	results := make([]*result.Result, len(gameIDs))
-	errs := make([]error, len(gameIDs))
+	results := make([]*result.Result, len(ids))
+	shas := make([]string, len(ids))
+	errs := make([]error, len(ids))
 	var wg sync.WaitGroup
-	for k, gid := range gameIDs {
+	for k, id := range ids {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			id, err := democache.ParseDemoID(fmt.Sprintf("gameId:%d", gid))
-			if err == nil {
-				results[k], _, err = s.store.GetResult(r.Context(), id)
-			}
-			errs[k] = err
+			var meta democache.CacheMeta
+			results[k], meta, errs[k] = s.store.GetResult(r.Context(), id)
+			shas[k] = meta.SHA256
 		}()
 	}
 	wg.Wait()
@@ -190,17 +195,45 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	demos := map[int]*playlistDemoRef{}
-	demoRows := make([][]any, len(gameIDs))
-	demoList := make([]playlistDemo, len(gameIDs))
-	for k, gid := range gameIDs {
-		d := demoRefFor(results[k], k)
-		demos[gid] = d
-		demoRows[k] = []any{fmt.Sprintf("hub:%d", gid), gid, d.title, float64(d.offsetMs) / 1000}
-		demoList[k] = playlistDemo{GameID: gid, Title: d.title}
+
+	// 3 · One demo per sha: a clip naming it by gameId and another by sha
+	// play the same demo. The link names a demo by its hub gameId (the
+	// light player loads it so), which a demo named by sha alone takes
+	// from the hub's catalog.
+	gameOf := map[string]int{}
+	for k, id := range ids {
+		if _, ok := gameOf[shas[k]]; !ok && id.Kind == "gameId" {
+			gameOf[shas[k]] = id.GameID
+		}
+	}
+	for k, id := range ids {
+		if _, ok := gameOf[shas[k]]; ok || id.Kind != "sha256" {
+			continue
+		}
+		gid, ok := s.playlistGameOf(w, r, id, shas[k])
+		if !ok {
+			return
+		}
+		gameOf[shas[k]] = gid
+	}
+	demos := map[string]*playlistDemoRef{} // by the id a clip names
+	bySHA := map[string]*playlistDemoRef{}
+	var demoRows [][]any
+	var demoList []playlistDemo
+	for k, id := range ids {
+		d := bySHA[shas[k]]
+		if d == nil {
+			d = demoRefFor(results[k], len(demoRows))
+			gid := gameOf[shas[k]]
+			d.gameID = gid
+			bySHA[shas[k]] = d
+			demoRows = append(demoRows, []any{fmt.Sprintf("hub:%d", gid), gid, d.title, float64(d.offsetMs) / 1000})
+			demoList = append(demoList, playlistDemo{GameID: gid, SHA: shas[k], Title: d.title})
+		}
+		demos[id.String()] = d
 	}
 
-	// 3 · The rows, in demo time.
+	// 4 · The rows, in demo time.
 	rows := make([]any, 0, len(items))
 	var labels []string
 	clips, cards := 0, 0
@@ -211,7 +244,7 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		c := ci.clip
-		d := demos[c.GameID]
+		d := demos[ci.demo.String()]
 		track, who := any("auto"), ""
 		if c.Watch != "" && c.Watch != "auto" {
 			uid, ok := d.userIDs[c.Watch]
@@ -221,7 +254,7 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 					players = strings.Join(d.names, ", ")
 				}
 				writeError(w, http.StatusBadRequest, "invalid_param",
-					fmt.Sprintf("items[%d]: clip.watch: no player %q in game %d (players: %s)", i, c.Watch, c.GameID, players))
+					fmt.Sprintf("items[%d]: clip.watch: no player %q in game %d (players: %s)", i, c.Watch, d.gameID, players))
 				return
 			}
 			track, who = uid, c.Watch
@@ -277,6 +310,7 @@ func (s *server) handlePlaylistLink(w http.ResponseWriter, r *http.Request) {
 // read) or a card's finished row, with the label and texts packed.
 type checkedItem struct {
 	clip  *playlistClip
+	demo  democache.DemoID // the clip's demo, as it names it
 	card  map[string]any
 	label string
 	texts []map[string]any
@@ -333,8 +367,20 @@ func checkItem(it playlistItem) (checkedItem, error) {
 		return checkedItem{card: row, label: label}, nil
 	default:
 		c := it.Clip
-		if c.GameID <= 0 {
+		var demo democache.DemoID
+		switch {
+		case (c.GameID != 0) == (c.Demo != ""):
+			return checkedItem{}, fmt.Errorf("clip: exactly one of gameId or demo")
+		case c.Demo != "":
+			id, err := democache.ParseDemoID(c.Demo)
+			if err != nil {
+				return checkedItem{}, fmt.Errorf("clip.demo: %q: gameId:N or sha:<64 hex>", c.Demo)
+			}
+			demo = id
+		case c.GameID < 0:
 			return checkedItem{}, fmt.Errorf("clip.gameId: a hub game id")
+		default:
+			demo = democache.DemoID{Kind: "gameId", GameID: c.GameID}
 		}
 		if c.From < 0 || c.To <= c.From || c.To > playlistMaxMs {
 			return checkedItem{}, fmt.Errorf("clip: from before to, in ms since match start (0 to %d)", playlistMaxMs)
@@ -353,7 +399,7 @@ func checkItem(it playlistItem) (checkedItem, error) {
 		if err != nil {
 			return checkedItem{}, fmt.Errorf("clip.%w", err)
 		}
-		return checkedItem{clip: c, label: label, texts: texts}, nil
+		return checkedItem{clip: c, demo: demo, label: label, texts: texts}, nil
 	}
 }
 
@@ -387,6 +433,36 @@ func cleanLabel(l string) (string, error) {
 		return "", fmt.Errorf("label: at most %d characters", playlistMaxText)
 	}
 	return l, nil
+}
+
+// playlistGameOf finds the hub game of a demo a clip names by sha (the
+// link's demo row needs its gameId). It writes the error and reports
+// false when there is none: a demo the hub does not have cannot be in a
+// playlist yet — the light player loads demos by gameId.
+func (s *server) playlistGameOf(w http.ResponseWriter, r *http.Request, id democache.DemoID, sha string) (int, bool) {
+	if s.searcher == nil {
+		writeError(w, http.StatusBadGateway, "hub_upstream", "the game catalog is not configured on this server")
+		return 0, false
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), gamesSearchTimeout)
+	defer cancel()
+	row, err := s.searcher.GameBySHA(ctx, sha)
+	if errors.Is(err, hubfetch.ErrNotFound) {
+		writeError(w, http.StatusBadRequest, "invalid_param",
+			fmt.Sprintf("clip.demo %s: the hub has no game for this demo, and a playlist plays hub games only", id))
+		return 0, false
+	}
+	if err != nil {
+		s.logger.Error("hub game upstream error", "request_id", requestID(r.Context()), "err", err.Error())
+		writeError(w, http.StatusBadGateway, "hub_upstream", "game catalog lookup failed upstream")
+		return 0, false
+	}
+	gid, _ := row["id"].(float64)
+	if gid <= 0 {
+		writeError(w, http.StatusBadGateway, "hub_upstream", "the hub's game row for this demo has no id")
+		return 0, false
+	}
+	return int(gid), true
 }
 
 // demoRefFor reads what a clip needs from its demo: the title the web app

@@ -2093,7 +2093,9 @@ paths:
         (`#playlist=z…`, deflate-compressed); nothing is stored. It is the
         backend of the MCP tool `createPlaylistLink`.
 
-        **Clips** name a hub `gameId`, a window in **match-relative ms**
+        **Clips** name their demo — a hub `gameId`, or `demo` as the
+        per-demo endpoints take it (`gameId:<id>` or `sha:<hex>`; a demo
+        named both ways is one demo) — a window in **match-relative ms**
         (`from` / `to`, as every other endpoint's times — e.g. a
         `/highlights` row's `time` minus 3000 to plus 2000) and whom to
         watch (`watch`: a player name in that game, or `auto` / omitted for
@@ -2121,9 +2123,11 @@ paths:
         Copy link (`mvda · <demo or N demos> · <what the clips are>`, or
         `name`), its length (Discord messages hold 2000 characters; a
         20-item reel is typically 500–1000) and the demos it plays. At
-        least one clip; at most 100 items over 20 demos. 400
-        `invalid_param` names the item and field at fault — an unknown
-        `watch` lists the game's players.
+        least one clip; at most 100 items over 20 demos. A demo named by
+        sha must be a hub game (the light player loads demos by gameId):
+        one the hub does not list is a 400. 400 `invalid_param` names the
+        item and field at fault — an unknown `watch` lists the game's
+        players.
       requestBody:
         required: true
         content:
@@ -2191,22 +2195,27 @@ paths:
     get:
       operationId: getGame
       tags: [demo]
-      summary: One hub game by id
+      summary: One hub game by id or by its demo's sha256
       description: >
         One game's row from hub.quakeworld.nu's public catalog, passed
         through verbatim with the columns a `/v1/games/search?roster=true`
         row carries (id, timestamp, mode, matchtag, map, teams, the full
         players roster, demo_sha256, demo_source_url, server_hostname) —
-        what a client holding a gameId shows before, or instead of,
-        analysing the demo. The id is the bare hub gameId; analyse it with
-        any per-demo endpoint as `gameId:<id>`. Discovery data, not cached
-        per demo: no long-lived cache headers.
+        what a client holding a gameId or a demo's sha shows before, or
+        instead of, analysing the demo. The id is the bare hub gameId, or
+        `sha:<hex>` — the game whose demo has that sha256 (the hash of the
+        uncompressed .mvd), its row giving the gameId. Analyse it with any
+        per-demo endpoint as `gameId:<id>` or `sha:<hex>`. Discovery data,
+        not cached per demo: no long-lived cache headers. 404 when the hub
+        has no such game (a demo the hub does not list).
       parameters:
         - name: id
           in: path
           required: true
-          description: The hub gameId, a positive 32-bit integer.
-          schema: { type: integer, minimum: 1, maximum: 2147483647 }
+          description: The hub gameId (a positive 32-bit integer), or sha:<64 hex>.
+          schema:
+            type: string
+            pattern: "^([1-9][0-9]{0,9}|sha:[0-9a-fA-F]{64})$"
         - $ref: "#/components/parameters/Label"
       responses:
         "200":
@@ -3382,11 +3391,12 @@ components:
             properties:
               clip:
                 type: object
-                description: A window of a hub demo, watched from one player's view.
-                required: [gameId, from, to]
+                description: A window of a hub demo, watched from one player's view. Names its demo by exactly one of gameId or demo.
+                required: [from, to]
                 additionalProperties: false
                 properties:
                   gameId: { type: integer, minimum: 1, description: "hub.quakeworld.nu game id." }
+                  demo: { type: string, pattern: "^(gameId:[1-9][0-9]*|sha:[0-9a-fA-F]{64})$", description: "The demo as the per-demo endpoints name it: gameId:<id> or sha:<hex>." }
                   from: { type: integer, minimum: 0, description: "Clip start, int32 ms since match start." }
                   to: { type: integer, description: "Clip end, int32 ms since match start (after from)." }
                   watch: { type: string, description: "The player whose view to watch (a name in that game); auto or omitted: the engine's autotrack." }
@@ -3430,10 +3440,11 @@ components:
           description: The demos the clips play in, in first-use order.
           items:
             type: object
-            required: [gameId, title]
+            required: [gameId, sha, title]
             additionalProperties: false
             properties:
               gameId: { type: integer, description: "hub.quakeworld.nu game id." }
+              sha: { type: string, description: "The demo's sha256 (of the uncompressed .mvd)." }
               title: { type: string, description: "map · teams, as the player lists it." }
     LoadResult:
       type: object

@@ -7,19 +7,22 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mvd-analyzer/mvd-analytics/hubfetch"
+	"github.com/mvd-analyzer/mvd-api/internal/democache"
 )
 
 // gameCatalog reads hub.quakeworld.nu's game catalog: a search, and one
-// game by id. *hubfetch.Client satisfies it; tests inject a fake. It is the
+// game by id or by its demo's sha256. *hubfetch.Client satisfies it; tests inject a fake. It is the
 // one live-upstream dependency the demo-analysis handlers do not have, so
 // it is isolated behind this seam and its failures map to the hub_upstream
 // 502 convention.
 type gameCatalog interface {
 	Search(ctx context.Context, params hubfetch.SearchParams) (any, error)
 	Game(ctx context.Context, gameID int) (map[string]any, error)
+	GameBySHA(ctx context.Context, sha string) (map[string]any, error)
 }
 
 // gamesSearchTimeout bounds a single upstream search so a slow/hung hub
@@ -144,18 +147,37 @@ func (s *server) handleGamesSearch(w http.ResponseWriter, r *http.Request) {
 
 // handleGame: GET /v1/games/{id} — one hub game's catalog row, verbatim,
 // with the columns a /v1/games/search?roster=1 row carries: what a page
-// that has a gameId (a link, a playlist clip) shows and fetches. 404
-// demo_not_found when the hub has no such game; 502 hub_upstream when the
-// hub fails or no hub is configured.
+// that has a gameId or a demo's sha (a link, a playlist clip) shows and
+// fetches. {id} is a gameId, or sha:<hex> — the game whose demo has that
+// sha256 (its row carries the gameId). 404 demo_not_found when the hub has
+// no such game; 502 hub_upstream when the hub fails or no hub is
+// configured.
 func (s *server) handleGame(w http.ResponseWriter, r *http.Request) {
 	if writeUnknownParam(w, newQP(r.URL.Query()).Unknown()) {
 		return
 	}
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id <= 0 || id > math.MaxInt32 {
-		writeError(w, http.StatusBadRequest, "invalid_param",
-			fmt.Sprintf("invalid game id %q (want a positive hub gameId)", r.PathValue("id")))
-		return
+	raw := r.PathValue("id")
+	var lookup func(ctx context.Context) (map[string]any, error)
+	var what string
+	if strings.HasPrefix(raw, "sha:") {
+		did, err := democache.ParseDemoID(raw)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid_param",
+				fmt.Sprintf("invalid game id %q (want sha: and 64 hex digits)", raw))
+			return
+		}
+		sha := did.SHA
+		lookup = func(ctx context.Context) (map[string]any, error) { return s.searcher.GameBySHA(ctx, sha) }
+		what = "a game for demo " + sha
+	} else {
+		id, err := strconv.Atoi(raw)
+		if err != nil || id <= 0 || id > math.MaxInt32 {
+			writeError(w, http.StatusBadRequest, "invalid_param",
+				fmt.Sprintf("invalid game id %q (want a positive hub gameId, or sha:<hex>)", raw))
+			return
+		}
+		lookup = func(ctx context.Context) (map[string]any, error) { return s.searcher.Game(ctx, id) }
+		what = fmt.Sprintf("game %d", id)
 	}
 	if s.searcher == nil {
 		writeError(w, http.StatusBadGateway, "hub_upstream", "the game catalog is not configured on this server")
@@ -163,9 +185,9 @@ func (s *server) handleGame(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), gamesSearchTimeout)
 	defer cancel()
-	row, err := s.searcher.Game(ctx, id)
+	row, err := lookup(ctx)
 	if errors.Is(err, hubfetch.ErrNotFound) {
-		writeError(w, http.StatusNotFound, "demo_not_found", fmt.Sprintf("the hub has no game %d", id))
+		writeError(w, http.StatusNotFound, "demo_not_found", "the hub has no "+what)
 		return
 	}
 	if err != nil {

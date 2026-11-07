@@ -214,7 +214,8 @@ type PlaylistItem struct {
 }
 
 type PlaylistClip struct {
-	GameID int            `json:"gameId" jsonschema:"hub.quakeworld.nu game id (searchGames); clips may come from any number of games"`
+	GameID int            `json:"gameId,omitempty" jsonschema:"hub.quakeworld.nu game id (searchGames); clips may come from any number of games. Set exactly one of gameId or demo"`
+	Demo   string         `json:"demo,omitempty" jsonschema:"the demo as the per-demo tools name it, gameId:<id> or sha:<64 hex> (a demo's sha256); instead of gameId. A sha must be a hub game"`
 	From   int32          `json:"from" jsonschema:"clip start, integer MILLISECONDS since match start (the same clock as every tool's times — e.g. a getHighlights row's time minus 3000)"`
 	To     int32          `json:"to" jsonschema:"clip end, integer MILLISECONDS since match start, after from (e.g. the event time plus 2000)"`
 	Watch  string         `json:"watch,omitempty" jsonschema:"whose view to watch: a player name exactly as that game's tools spell it; 'auto' or omitted = the engine's autotrack. An unknown name is a 400 listing the game's players"`
