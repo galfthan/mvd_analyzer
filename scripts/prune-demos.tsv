@@ -8,8 +8,12 @@
 # coverage. Maps whose local corpus was too thin for that (shifter,
 # stronghold, toxicity) keep their earlier 2026-06/07 prune and lines.
 # phantoma is no longer pruned: its geometry is now the qw-assets build's,
-# another version of the map than the one its three games were played on. Floors under a liquid surface are never
-# pruned (swimmers never touch the pool bottom).
+# another version of the map than the one its three games were played on.
+# zite and ultrav were added 2026-11-22 — the two most played maps of the
+# last year without a prune — against their newest 40 1on1 / 20 2on2 games,
+# from the BSPs of `fetch-bsps.sh all` (-bsp-dir of that directory).
+# Floors under a liquid surface are never pruned (swimmers never touch the
+# pool bottom).
 # Reproduce: download the gameIds (hubfetch CDN), then
 #   mapgen -bsp-dir bsps -map <map> -demos <dir> -out-dir mvd-web/static/maps
 # Format: <map>\t<mode>\t<comma-separated gameIds>
@@ -44,4 +48,6 @@ skull	1on1	211141,206594,200874,199854,187108,186023,185323,185201,184225,184092
 steam	4on4	220355,220057,220054,209870,208971,208065,207030,204276,202838,202833
 stronghold	4on4	220961,220185,220052,219263,217516,217313
 toxicity	1on1	224768,224767,224605,224600,224597,224595,224494,224492,224489,224486,224454,224317
+ultrav	2on2	256497,256485,254472,253460,251741,251733,249442,249441,249439,249430,248446,247480,247782,246769,245706,244896,243862,242536,242556,242415
+zite	1on1	250115,237096,237095,233158,231240,231419,231398,231420,231395,231204,231075,231021,231016,230881,230857,230682,230521,230493,230488,230207,230171,229983,229982,229778,229777,229615,229408,229262,229248,229245,229220,229060,229010,228800,228514,228100,228098,227984,227880,227840
 ztndm3	2on2	205145,203294,203029,200117,199059,198249,196719,192447,192432,191668,191434,191420,191240,191226,190420,190415,188570,188122,188114,187248

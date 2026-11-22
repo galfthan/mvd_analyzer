@@ -23,7 +23,8 @@ The map geometry and the map-entity corpus are regenerated from that set:
 248 maps gain a drawn map and 279 an entity file, and the 801 geometry
 files of an older generator version are now version 5, with lifts, doors
 and liquid volumes (liquid surfaces no longer count as floor). The 26
-usage-pruned maps keep their pruned floors. dust2, end and phantoma are
+usage-pruned maps keep their pruned floors, and zite and ultrav are now
+pruned too. dust2, end and phantoma are
 now the builds qw-assets and the quake.world CDN carry, which differ from
 the ones drawn before; phantoma loses its prune with that. Six qw-assets
 maps are in BSP formats mapgen does not read (arena, sewerctf, hj,

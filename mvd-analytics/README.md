@@ -145,8 +145,8 @@ that downstream consumers render, summarise, or feed to an agent.
   unpruned. The committed corpus is every map `scripts/fetch-bsps.sh all`
   fetches that mapgen can read (the curated competitive set and the rest
   of vikpe/qw-assets, 1079 maps) plus some 50 older files of maps
-  qw-assets lacks. Of these, 26 curated maps — the ones that see nearly
-  all the play — are pruned this way against recent competitive games —
+  qw-assets lacks. Of these, 28 maps — 26 of the curated set plus zite and
+  ultrav, together 98 % of a year's 1on1 / 2on2 / 4on4 games — are pruned this way against recent competitive games —
   [`scripts/prune-demos.tsv`](../scripts/prune-demos.tsv) records the
   exact map → mode → hub gameIds used, so the prune is reproducible.
 - `cmd/qw-recon-eval/` — damage-reconstruction accuracy harness: runs

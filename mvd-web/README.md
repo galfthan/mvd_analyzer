@@ -2360,8 +2360,9 @@ cells for the volume haze). The frontend is presence-based and accepts every ver
 missing `walls`/`liquids`/`submodels` simply render nothing). A
 usage-pruned file carries a `pruned` provenance block. The committed
 files are version 5, regenerated 2026-11 from the BSPs of
-`scripts/fetch-bsps.sh all` — except the 26 usage-pruned maps, which keep
-their prune (same BSP builds), and some 50 maps qw-assets does not carry,
+`scripts/fetch-bsps.sh all` — except the 26 usage-pruned curated maps, which keep
+their prune (same BSP builds; zite and ultrav are pruned from the
+regenerated files), and some 50 maps qw-assets does not carry,
 which stay as they were (version 2).
 See
 [mvd-analytics/README.md](../mvd-analytics/README.md) (the `cmd/mapgen`
