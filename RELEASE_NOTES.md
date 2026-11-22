@@ -26,7 +26,8 @@ detail.
   return (a map filter, a page's end) are fetched, so the score is for the
   whole match. The pager counts games ("100 of 250 games").
 - **Map tabs.** A demo that is one map of a match shows the match's maps as
-  tabs in the top bar; a click loads that map on the tab you are on.
+  tabs in the top bar; a click loads that map on the tab you are on. The
+  other maps are fetched ahead, so the switch waits for no download.
 - **Sidebar foot.** The build version, the "API & MCP" link and the GitHub
   link moved from the top bar to the foot of the sidebar.
 

@@ -78,6 +78,21 @@ export class PageSource {
     }
 
     /**
+     * preload: a hub demo fetched ahead of its load() (ApiSource.preload);
+     * nothing where every demo is analysed in the browser. keepPreloaded
+     * names the demos to go on holding — the rest are dropped.
+     * @param {import('./hub.js').HubGame} game
+     */
+    async preload(game) {
+        if (!this.wasmOnly) await this.api.preload(game);
+    }
+
+    /** @param {import('./hub.js').HubGame[]} games */
+    keepPreloaded(games) {
+        this.api.keep(games.map(g => g.id));
+    }
+
+    /**
      * @param {LoadInput} input
      * @param {LoadOptions} opts
      * @param {() => boolean} stale
