@@ -76,7 +76,7 @@
                     <span>Team</span>
                     <input type="text" id="search-team" placeholder="any" bind:value={$searchForm.team}>
                 </label>
-                <label class="search-field search-field-short">
+                <label class="search-field">
                     <span>Map</span>
                     <input type="text" id="search-map" placeholder="any" bind:value={$searchForm.map}>
                 </label>

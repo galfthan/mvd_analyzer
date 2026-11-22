@@ -7,7 +7,7 @@
 import { store } from '../../state/store.js';
 import { searchGames, fetchMatch, MATCH_SEARCH_LIMIT } from '../../data/hub.js';
 import {
-    EMPTY_FILTERS, SEARCH_MODE_LABELS, RECENT_MODES, RECENT_HOURS, searchFilters, formValues, nextPaging, hasMore,
+    EMPTY_FILTERS, RECENT_MODES, searchFilters, formValues, nextPaging, hasMore,
     recentFrom, recentGames,
 } from '../../lib/search.js';
 import { searchMatches, cutShort, mergeGames } from '../../lib/matches.js';
@@ -133,7 +133,6 @@ export async function runSearch(loadMore = false) {
 // search that answered meanwhile keeps the list.
 export async function runRecentSearch() {
     const now = Date.now();
-    const what = `${RECENT_MODES.map(m => SEARCH_MODE_LABELS[m]).join(', ')} games of the last ${RECENT_HOURS} hours`;
     searchStatus.set({ text: 'Loading the latest games…', cls: 'status loading' });
     try {
         const lists = await Promise.all(RECENT_MODES.map(mode =>
@@ -146,8 +145,8 @@ export async function runRecentSearch() {
         // No filters: nothing to page through or to complete — the older
         // games fetched alongside already hold the cut-off maps.
         searchPaging.set({ filters: null, shown: rows.length, total: rows.length });
-        searchResults.set({ rows, empty: false, pager: rows.length > 0 });
-        searchStatus.set({ text: rows.length ? `The ${what}.` : `No ${what}.`, cls: 'status' });
+        searchResults.set({ rows, empty: rows.length === 0, pager: rows.length > 0 });
+        searchStatus.set({ text: '', cls: 'status' });
     } catch (err) {
         if (lastExecutedSearch.get() || searchBusy.get()) return;
         searchStatus.set({ text: 'Error: ' + /** @type {Error} */ (err).message, cls: 'status error' });

@@ -660,12 +660,17 @@ body.no-demo #unified-timeline {
     grid-auto-flow: column;
     grid-template-rows: repeat(3, 1.45rem);
     grid-template-columns: 150px auto;
+    /* Cells no taller than their row. */
+    line-height: 1.2;
     grid-auto-columns: minmax(64px, auto);
     column-gap: 14px;
     justify-content: start;
     align-items: center;
     min-width: 0;
+    /* A long series scrolls sideways; never down, or the wheel over a
+     * scoreboard would stop scrolling the list. */
     overflow-x: auto;
+    overflow-y: hidden;
     scrollbar-width: none;
 }
 

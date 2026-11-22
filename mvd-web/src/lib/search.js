@@ -101,7 +101,7 @@ export function filtersFromParams(params, fields) {
 // The list a bare page opens with (search-model.js runRecentSearch): the
 // games of RECENT_MODES that started in the last RECENT_HOURS.
 export const RECENT_MODES = ['1on1', '2on2', '4on4'];
-export const RECENT_HOURS = 24;
+const RECENT_HOURS = 24;
 
 // recentFrom: the `from` day of the searches behind that list — the day
 // the window opens on, an hour early so a match that straddles the
