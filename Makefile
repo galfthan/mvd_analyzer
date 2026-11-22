@@ -22,6 +22,8 @@ FTEPLAYER_DIR := mvd-fte-player
 LOC_DATA   := mvd-analytics/loc/data
 MAPENTS_DATA := mvd-analytics/mapents/data
 BSP_DIR    := bsps
+# Which maps `make bsps` fetches: preview, curated or all (scripts/fetch-bsps.sh).
+BSP_SET    ?= curated
 GIT_HASH   := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 GIT_TAG    := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
 BUILD_DATE := $(shell date -u +%Y-%m-%d)
@@ -132,13 +134,16 @@ build-all-platforms: build-api-linux build-api-darwin build-api-windows \
                      build-mcp-linux build-mcp-darwin build-mcp-windows
 	@ls -lh $(DIST_DIR)/mvd-api-* $(DIST_DIR)/mvd-mcp-*
 
-# Download the curated set of QW competitive BSPs into $(BSP_DIR). These
-# files are NOT committed to git (see .gitignore). The locvis visibility
-# filter loads them at runtime when attributing player positions to loc
-# names; maps without a BSP fall back to the V1 Euclidean nearest-
-# neighbour. See scripts/fetch-bsps.sh for the URL/sha256 list.
+# Download BSPs into $(BSP_DIR): the curated competitive set, or with
+# BSP_SET=preview the few a branch preview needs, or with BSP_SET=all every
+# map of vikpe/qw-assets too (1.7 GB — for the production host, which keeps
+# them outside the web bundle: deploy/README.md). These files are NOT
+# committed to git (see .gitignore). The locvis visibility filter loads
+# them at runtime when attributing player positions to loc names; maps
+# without a BSP fall back to the V1 Euclidean nearest-neighbour. See
+# scripts/fetch-bsps.sh for the sets, URLs and pins.
 bsps:
-	@./scripts/fetch-bsps.sh $(BSP_DIR)
+	@./scripts/fetch-bsps.sh $(BSP_DIR) $(BSP_SET)
 
 # Serve the built web bundle on localhost.
 # The built page plus its /api path, forwarded to MVD_API (default the
@@ -221,7 +226,7 @@ help:
 	@echo "  build-mapgen        Build just mapgen into dist/"
 	@echo "                      NB: 'make build' clears dist/ first, so build the web"
 	@echo "                      bundle before the binaries if you want both."
-	@echo "  bsps                Download competitive QW BSPs into $(BSP_DIR)/ for locvis visibility filter"
+	@echo "  bsps                Download QW BSPs into $(BSP_DIR)/ (BSP_SET=preview|curated|all, default curated)"
 	@echo "  serve               make build, then python3 -m http.server 8080 in dist/"
 	@echo "  test                Run tests across every module"
 	@echo "  clean               Remove dist/"

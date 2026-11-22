@@ -40,8 +40,9 @@ EnvironmentFile=/etc/mvd/secrets.env
 # map's BSP; there is NO -bsp-dir flag, so this env var is how you point the
 # server at them (the only other lookup is a "bsps" dir relative to
 # WorkingDirectory, which is too implicit to rely on). Provision with
-#   ./scripts/fetch-bsps.sh /opt/mvd/bsps    (sha-pinned, idempotent)
-# and chown them to the service account.
+#   ./scripts/fetch-bsps.sh /opt/mvd/bsps all    (hash-pinned, idempotent)
+# and chown them to the service account. Caddy serves the same directory
+# to the web page as /bsps/* (deploy/README.md §2b).
 #
 # A map with no BSP does NOT error — it yields an EMPTY LOS, and that empty
 # result is cached to tier 3 like any other. So if /los was ever served before
