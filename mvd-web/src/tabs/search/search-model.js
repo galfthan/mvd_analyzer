@@ -1,11 +1,13 @@
 // search-model.js — the Search tab's state: the filter form, the status
 // line, the result rows and their paging, and the last search that ran
 // (the URL keeps its filters). SearchTab.svelte renders it; the boot
-// (src/app/boot.js) fills the form from a URL's filters and runs it.
+// (src/app/boot.js) fills the form from a URL's filters and runs it — with
+// none, the empty form's search: the newest games.
 
 import { store } from '../../state/store.js';
-import { searchGames } from '../../data/hub.js';
-import { EMPTY_FILTERS, searchFilters, formValues, nextPaging } from '../../lib/search.js';
+import { searchGames, fetchMatch } from '../../data/hub.js';
+import { EMPTY_FILTERS, searchFilters, formValues, nextPaging, hasMore } from '../../lib/search.js';
+import { searchMatches, cutShort, mergeGames, siblingFilters } from '../../lib/matches.js';
 import { updateUrlState } from '../../app/url.js';
 
 // The form's fields as typed (strings; the mode '' is "Any").
@@ -20,6 +22,75 @@ export const searchResults = store({ rows: /** @type {import('../../data/hub.js'
 export const searchPaging = store(/** @type {import('../../lib/search.js').Paging} */ ({ filters: null, shown: 0, total: null }));
 // The filters of the last search that answered, for the URL.
 export const lastExecutedSearch = store(/** @type {import('../../lib/search.js').Filters | null} */ (null));
+
+// Whether the list groups the found games into matches (src/lib/matches.js).
+// On unless the viewer turned it off; their choice is kept in the browser.
+const GROUPED_KEY = 'mvd.search.grouped';
+export const searchGrouped = store(readGrouped());
+// Games the search did not return that belong to a listed match, fetched
+// for the grouped list (completeMatches).
+export const searchExtraGames = store(/** @type {import('../../data/hub.js').HubGame[]} */ ([]));
+
+function readGrouped() {
+    try {
+        return localStorage.getItem(GROUPED_KEY) !== '0';
+    } catch {
+        return true;
+    }
+}
+
+/** @param {boolean} on */
+export function setSearchGrouped(on) {
+    searchGrouped.set(on);
+    try {
+        localStorage.setItem(GROUPED_KEY, on ? '1' : '0');
+    } catch {}
+    if (on) completeMatches();
+}
+
+// The lookups already made for the search shown, by their filters
+// (siblingFilters): two listed matches between the same sides on one day
+// are one lookup. `queue` is what is still to ask, shared by the few
+// workers running; `generation` drops the answers of an earlier search.
+/** @type {Set<string>} */
+let asked = new Set();
+/** @type {import('../../data/hub.js').HubGame[]} */
+let queue = [];
+let workers = 0;
+let generation = 0;
+const COMPLETE_CONCURRENCY = 4;
+
+// completeMatches fetches the maps the search cut off the listed matches
+// (src/lib/matches.js cutShort), a few at a time; the list regroups as they
+// arrive.
+function completeMatches() {
+    const filters = searchPaging.get().filters;
+    if (!searchGrouped.get() || !filters) return;
+    const matches = searchMatches(searchResults.get().rows, searchExtraGames.get());
+    for (const m of cutShort(matches, filters, hasMore(searchPaging.get()))) {
+        const lookup = siblingFilters(m.games[0]);
+        const key = JSON.stringify(lookup);
+        if (!lookup || asked.has(key)) continue;
+        asked.add(key);
+        queue.push(m.games[0]);
+    }
+    for (; workers < COMPLETE_CONCURRENCY && queue.length; workers++) {
+        completeQueued().finally(() => { workers--; });
+    }
+}
+
+async function completeQueued() {
+    for (let game = queue.shift(); game; game = queue.shift()) {
+        const gen = generation;
+        try {
+            const whole = await fetchMatch(game);
+            if (gen === generation) searchExtraGames.set(mergeGames(searchExtraGames.get(), whole.games));
+        } catch (err) {
+            // The match stays as the search returned it.
+            console.warn('match lookup failed:', /** @type {Error} */ (err).message);
+        }
+    }
+}
 
 // setSearchForm writes `filters` (only the fields given) into the form, as
 // the inputs hold them (src/lib/search.js formValues).
@@ -43,12 +114,19 @@ export async function runSearch(loadMore = false) {
         searchStatus.set({ text: '', cls: 'status' });
         const paging = nextPaging(searchPaging.get(), filters, offset, games.length, total);
         const shown = searchResults.get();
+        if (!loadMore) {
+            generation++;
+            asked = new Set();
+            queue = [];
+            searchExtraGames.set([]);
+        }
         searchPaging.set(paging);
         searchResults.set(loadMore
             ? { rows: [...shown.rows, ...games], empty: shown.empty, pager: paging.shown > 0 }
             : { rows: games, empty: games.length === 0, pager: paging.shown > 0 });
         lastExecutedSearch.set(filters);
         updateUrlState();
+        completeMatches();
     } catch (err) {
         searchStatus.set({ text: 'Error: ' + /** @type {Error} */ (err).message, cls: 'status error' });
         if (!loadMore) searchResults.set({ rows: [], empty: false, pager: false });

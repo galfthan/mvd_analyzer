@@ -25,6 +25,7 @@ import { decodeBucketPack } from '../lib/bucketpack.js';
  * @typedef {import('./hub.js').HubGame} HubGame
  * @typedef {import('./api.js').FetchImpl} FetchImpl
  * @typedef {{ gameInfoFetch?: number, resultFetch?: number }} ApiNet
+ * @typedef {{ text: string, pos: ArrayBuffer, served: number }} Answers  a demo's Result (JSON text) and positions pack, and the schema the server named
  */
 
 const BUCKET_PACK = 'application/vnd.mvd-analyzer.buckets';
@@ -95,6 +96,56 @@ export class ApiSource {
     constructor({ fetchImpl = (...a) => fetch(...a), schema = null } = {}) {
         this.fetchImpl = fetchImpl;
         this.schema = schema;
+        // The demos held ready (preload, keep), by game id.
+        /** @type {Map<string, Promise<Answers>>} */
+        this._held = new Map();
+    }
+
+    // The two answers a load is made of, read whole and not yet parsed.
+    /**
+     * @param {HubGame} game
+     * @returns {Promise<Answers>}
+     */
+    async _fetch(game) {
+        const id = `gameId:${game.id}`;
+        const [resp, posResp] = await Promise.all([
+            apiFetch(`demos/${id}/result`, {}, this.fetchImpl),
+            apiFetch(`demos/${id}/streams/positions`, {}, this.fetchImpl),
+        ]);
+        try {
+            const [text, pos] = await Promise.all([resp.text(), posResp.arrayBuffer()]);
+            return { text, pos, served: Number(resp.headers.get('X-Schema-Version')) };
+        } catch (err) {
+            throw new UnreadableError(err);
+        }
+    }
+
+    /**
+     * preload: fetch a demo ahead of its load() and hold it, so that load
+     * waits for no network. Held until keep() names another set.
+     * @param {HubGame} game
+     */
+    async preload(game) {
+        const id = String(game.id);
+        if (!this._held.has(id)) this._held.set(id, this._fetch(game));
+        try {
+            await this._held.get(id);
+        } catch (err) {
+            // Not held: its load() asks again and reports the failure.
+            this._held.delete(id);
+            throw err;
+        }
+    }
+
+    /**
+     * keep: hold the answers of these demos only — the ones loaded or
+     * preloaded among them stay, every other one is dropped. A demo's two
+     * answers are tens of megabytes; the page keeps one match's worth.
+     * @param {Array<number | string>} gameIds
+     */
+    keep(gameIds) {
+        const ids = new Set(gameIds.map(String));
+        for (const id of this._held.keys()) if (!ids.has(id)) this._held.delete(id);
     }
 
     /**
@@ -106,20 +157,21 @@ export class ApiSource {
      * @returns {Promise<ApiDemoHandle>}
      */
     async load(game, net) {
-        const id = `gameId:${game.id}`;
         const t = performance.now();
-        const [resp, posResp] = await Promise.all([
-            apiFetch(`demos/${id}/result`, {}, this.fetchImpl),
-            apiFetch(`demos/${id}/streams/positions`, {}, this.fetchImpl),
-        ]);
-        let result, pos;
+        const id = String(game.id);
+        // A preload under way is waited for; one that failed is asked again.
+        const answers = await (this._held.get(id) ?? Promise.reject()).catch(() => this._fetch(game));
+        // Held from here on, for a step back to this demo (keep() drops it).
+        this._held.set(id, Promise.resolve(answers));
+        const { pos } = answers;
+        let result;
         try {
-            [result, pos] = await Promise.all([resp.json(), posResp.arrayBuffer()]);
+            result = JSON.parse(answers.text);
         } catch (err) {
             throw new UnreadableError(err);
         }
         // The header, else the body's own (a proxy may drop the header).
-        const served = Number(resp.headers.get('X-Schema-Version')) || result?.schemaVersion;
+        const served = answers.served || result?.schemaVersion;
         if (this.schema != null && served && served !== this.schema) throw new SchemaMismatchError(served, this.schema);
         const tParse = performance.now();
         try {

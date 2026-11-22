@@ -24,6 +24,7 @@ import { startLoadTiming, recordLoadTimings, timeRender, finishLoadTiming } from
 import { hideLoadingOverlay } from './overlay.js';
 import { applyUrlState, updateUrlState } from './url.js';
 import { switchTab, activeTabName } from './tabs.js';
+import { syncMatch } from './match.js';
 import { urlTab } from '../lib/url-state.js';
 
 // The DemoHandle behind the page: its view queries, region recompute and
@@ -82,14 +83,16 @@ function setAnalysisStatus(result) {
 // learn mode; every other load starts on Summary at 0:00.
 /**
  * @param {import('../data/wasm-source.js').LoadInput} input
- * @param {{ deepLink?: boolean, keepTab?: boolean, stillWanted?: () => boolean }} [opts]
+ * @param {{ deepLink?: boolean, keepTab?: boolean, stillWanted?: () => boolean, match?: boolean }} [opts]
  *   keepTab: stay on the tab (a playlist run loading its next clip's
  *   demo); stillWanted: asked once the bytes are in, before the analyze —
  *   false drops the load (the run moved on to a clip of the demo shown, or
- *   stopped), the demo shown and its queries untouched
+ *   stopped), the demo shown and its queries untouched; match: false
+ *   leaves the top bar's match alone (a playlist run's demos are clips,
+ *   not maps to step through)
  * @returns {Promise<boolean>}
  */
-export async function loadDemo(input, { deepLink = false, keepTab = false, stillWanted } = {}) {
+export async function loadDemo(input, { deepLink = false, keepTab = false, stillWanted, match = true } = {}) {
     setStatus(loadStatus.get().text, 'status loading');
     const ids = /** @type {{ game?: import('../data/hub.js').HubGame, gameId?: number | string }} */ (input);
     const hubId = ids.game?.id ?? ids.gameId;
@@ -132,6 +135,7 @@ export async function loadDemo(input, { deepLink = false, keepTab = false, still
         (err) => console.warn('deferred buckets failed:', err.message));
 
     displayResults(result, deepLink, keepTab);
+    syncMatch(match ? handle.game : null);
     return true;
 }
 
@@ -187,6 +191,17 @@ export async function loadGameFromSearch(game) {
     try {
         await loadDemo({ game });
         // displayResults() switches to the Summary tab as part of finishing a load.
+    } catch (error) {
+        setLoadError(error);
+    }
+}
+
+// loadMatchGame shows another map of the current match (the map tabs,
+// src/shell/MatchTabs.svelte), on the tab the user is on.
+/** @param {import('../data/hub.js').HubGame} game */
+export async function loadMatchGame(game) {
+    try {
+        await loadDemo({ game }, { keepTab: true });
     } catch (error) {
         setLoadError(error);
     }

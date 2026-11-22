@@ -19,6 +19,32 @@ detail.
   rows once written twice (Go and JS) are gone. A 20-clip link is about
   800 characters. v1 / v2 links, music included, still play.
 
+## unreleased (match-support) — matches in the web page (proof of concept)
+
+- **Matches.** The page groups hub games into matches: the maps two sides
+  played against each other in a row — the same mode, the same team names
+  with at least three of the same players per team (a duel: the same two
+  players), and starts at most the mode's timelimit plus 15 minutes apart
+  (the hub lists a demo's start and no length). A game broken off and
+  restarted — the next one starts before the mode's timelimit has passed
+  (2on2, 4on4), or within 3 minutes (duels, played to 3, 5 or 10) —
+  stays in the match, dimmed, and counts as a map for neither side. Web only; the API, the MCP
+  server and the Result are unchanged.
+- **Newest games.** A page opened without a demo or search in its URL
+  lists the newest 100 games.
+- **Search.** "Group into matches" (on by default) lists a match as one row with its score
+  in maps and each map's frags, as a small scoreboard; a click on a map's
+  name loads that map, a click on the row the first one. The Team field
+  finds a team however its name is cased (the hub's filter wants lower
+  case). Maps the search did not
+  return (a map filter, a page's end) are fetched, so the score is for the
+  whole match. The pager counts games ("100 of 250 games").
+- **Map tabs.** A demo that is one map of a match shows the match's maps as
+  tabs in the top bar; a click loads that map on the tab you are on. The
+  other maps are fetched ahead, so the switch waits for no download.
+- **Sidebar foot.** The build version, the "API & MCP" link and the GitHub
+  link moved from the top bar to the foot of the sidebar.
+
 ## unreleased (playlist-music) — music in playlist links; demos by hash
 
 - **Music in playlists.** `GET /v1/playlists/music` (MCP
