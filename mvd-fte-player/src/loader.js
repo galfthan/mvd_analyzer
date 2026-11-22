@@ -2,8 +2,8 @@
 // the engine is up. Emscripten builds publish themselves through globals
 // (`Module`, `FTEC`), read their configuration from `win.Module` at script
 // load, and cannot be torn down — so one window hosts at most one engine
-// for its lifetime. player.html is that window; to play another demo the
-// host reloads the iframe.
+// for its lifetime. player.html is that window; another demo plays in the
+// same engine (FteController.loadDemo).
 //
 // Mirrors hub.quakeworld.nu src/lib/fte/hooks.ts useFteLoader @ 5c96205c19c7
 // (MIT, see ../LICENSE): same Module shape, same "engine is ready once
@@ -11,15 +11,30 @@
 
 import { FteController } from './fte-controller.js';
 import { demoAssets, FTE_MANIFEST_URL, FTE_SCRIPT_URL } from './assets.js';
+import { createAssetFetcher } from './asset-fetch.js';
 
 const READY_POLL_MS = 100;
 
-export function startFte({ win, canvas, demoUrl, demoPath, mapName, configUrl, demoDuration = null, onProgress = null }) {
+// `fetchAsset` (url → Promise<ArrayBuffer>, asset-fetch.js): a host's
+// fetcher, shared across its engines so the next one boots from memory;
+// without, this engine gets one of its own.
+export function startFte({ win, canvas, demoUrl, demoPath, mapName, configUrl, demoDuration = null, onProgress = null, fetchAsset = createAssetFetcher() }) {
     if (win.Module) return Promise.reject(new Error('FTE already started in this window'));
 
-    const files = demoAssets({ demoUrl, demoPath, mapName, configUrl });
-    const total = Object.keys(files).length;
+    // Every file as a Promise of its bytes, not a URL: FTE would fetch the
+    // URLs all at once (asset-fetch.js). A file that cannot be had is left
+    // out, as a failed fetch of FTE's own leaves it; FTE logs why.
+    const urls = demoAssets({ demoUrl, demoPath, mapName, configUrl });
+    const total = Object.keys(urls).length;
     let loaded = 0;
+    const files = {};
+    for (const [path, url] of Object.entries(urls)) {
+        files[path] = fetchAsset(url).then((buf) => {
+            loaded++;
+            if (onProgress) onProgress(loaded, total);
+            return buf;
+        });
+    }
     let fte = null;
 
     // Collect the engine's AudioContexts so the host can resume them from
@@ -53,14 +68,6 @@ export function startFte({ win, canvas, demoUrl, demoPath, mapName, configUrl, d
         manifest: FTE_MANIFEST_URL,
         arguments: ['-manifest', FTE_MANIFEST_URL],
         files,
-        // FTE reports each finished file as "<what> (n/n)".
-        setStatus: (value) => {
-            const m = String(value).match(/.+ \((\d+)\/(\d+)\)/);
-            if (m && m[1] === m[2]) {
-                loaded++;
-                if (onProgress) onProgress(loaded, total);
-            }
-        },
     };
 
     return new Promise((resolve, reject) => {
@@ -73,7 +80,7 @@ export function startFte({ win, canvas, demoUrl, demoPath, mapName, configUrl, d
             if (!win.Module.getClientState) return;
             clearInterval(poll);
             const name = demoPath.split('/').pop().replace(/\.mvd(\.gz)?$/, '');
-            fte = new FteController(win, { demoDuration, demoName: name, resumeAudio });
+            fte = new FteController(win, { demoDuration, demoName: name, demoFile: demoPath, resumeAudio });
             // Hub starts muted (config.cfg also sets volume 0); keep that.
             fte.mute();
             resolve(fte);

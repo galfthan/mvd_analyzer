@@ -10,7 +10,7 @@ Paired with the `backpack-recon` post-processor
 (`backpack_recon.go`), which fills the SAME section from
 `DropBackpack`'s own rule on demos older than the hint. Its
 validation numbers and stand-down conditions are in
-[BACKPACKS.md](BACKPACKS.md).
+[BACKPACK_RECON.md](BACKPACK_RECON.md).
 
 ## What it does
 

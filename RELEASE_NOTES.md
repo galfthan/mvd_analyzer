@@ -15,6 +15,95 @@ demos get `demoStartSource` `mvdhidden` and `demoStartAccuracyMs` 1. In
 the 1500 newest archive demos, 18 of the 24 with the block use the
 `uint64` form. No schema change.
 
+## unreleased (match-support) — matches in the web page (proof of concept)
+
+- **Matches.** The page groups hub games into matches: the maps two sides
+  played against each other in a row — the same mode, the same team names
+  with at least three of the same players per team (a duel: the same two
+  players), and starts at most the mode's timelimit plus 15 minutes apart
+  (the hub lists a demo's start and no length). A game broken off and
+  restarted — the next one starts before the mode's timelimit has passed
+  (2on2, 4on4), or within 3 minutes (duels, played to 3, 5 or 10) —
+  stays in the match, dimmed, and counts as a map for neither side. Web only; the API, the MCP
+  server and the Result are unchanged.
+- **Newest games.** A page opened without a demo or search in its URL
+  lists the newest 100 games.
+- **Search.** "Group into matches" (on by default) lists a match as one row with its score
+  in maps and each map's frags, as a small scoreboard; a click on a map's
+  name loads that map, a click on the row the first one. The Team field
+  finds a team however its name is cased (the hub's filter wants lower
+  case). Maps the search did not
+  return (a map filter, a page's end) are fetched, so the score is for the
+  whole match. The pager counts games ("100 of 250 games").
+- **Map tabs.** A demo that is one map of a match shows the match's maps as
+  tabs in the top bar; a click loads that map on the tab you are on. The
+  other maps are fetched ahead, so the switch waits for no download.
+- **Sidebar foot.** The build version, the "API & MCP" link and the GitHub
+  link moved from the top bar to the foot of the sidebar.
+
+## unreleased (playlist-music) — music in playlist links; demos by hash
+
+- **Music in playlists.** `GET /v1/playlists/music` (MCP
+  `findPlaylistMusic`) searches Kevin MacLeod's incompetech.com library,
+  every track CC BY 4.0, by mood, title, instruments and length. A
+  `music` item in `POST /v1/playlist-links` (`{source, id}`, or `null` for
+  silence) plays its track under the items after it: one first scores the
+  whole reel, one before each section scores it by section. The API looks
+  the track up itself, so the credit comes from the source; the response
+  lists the tracks. The link carries a music table (`m`) and cue rows
+  (`{u: index}`), only when there is music.
+- **The light player plays it.** From the first click, the track in
+  force at each clip plays under the game, fading between tracks and
+  looping a short one; a jump to a clip picks the music up where it would
+  be. The game sound goes down under it, pausing pauses it, a music
+  button turns it off, and a slider sets its loudness. A cue's `volume`
+  (0.05–1, default 0.3) is the reel author's mix. The credit shows under the
+  controls. The full analyzer keeps a shared playlist's music but does
+  not play it yet.
+
+- `GET /v1/games/sha:<hex>` returns the hub game whose demo has that
+  sha256, its gameId included.
+- Any per-demo endpoint given a `sha:<hex>` the cache has not seen now
+  fetches the demo from the hub's CDN by that hash, instead of answering
+  404. Only a hash the CDN does not have is a 404.
+- `POST /v1/playlist-links` (and the MCP's `createPlaylistLink`) clips can
+  name their demo as `demo: "gameId:N" | "sha:<hex>"` next to `gameId`; a
+  demo named both ways is one demo. The response's `demos` carry each
+  demo's `sha`. A demo named by hash must still be a hub game: the light
+  player loads demos by gameId.
+
+## unreleased (player-standby) — the light player: models that load, sound from the first clip, one engine for every demo
+
+The Player's engine sometimes came up without some of its models — a
+backpack or a player that never drew. FTE requested all ~450 of its files
+at once and Chrome turned part of the burst down
+(`net::ERR_INSUFFICIENT_RESOURCES`); FTE does not retry, so a refused file
+was missing for that engine's life. The page now fetches them itself, 16 at a
+time with retries, and keeps them, so the next demo's engine boots from
+memory (`mvd-fte-player/src/asset-fetch.js`). This applies to the Player
+tab too.
+
+The light player (`play.html`) no longer starts by itself: a shared link
+opened with no click on the page played silent, browsers holding sound
+until a gesture. It waits on a play button over the game view, with the
+first clip's demo already loaded and at its start, so the click plays at
+once, with sound.
+
+In a playlist over several demos, the next demo now loads into the engine
+already running instead of a fresh one booting for it, with the view
+faded to black from the step until the engine is at the clip. The play
+button pulses until the engine is up.
+
+A clip could play on past its end: a frame that took long (the page busy)
+let the demo clock move more than 1.5 s in one step, which the runner
+read as a seek. The step allowed now grows with the time the frame took.
+
+The light player's first clip now shows from its own POV before play
+(it followed whoever autotrack picked until the click).
+
+The Player tab's engine also plays the next demo loaded instead of
+booting again, with the same fade.
+
 ## unreleased (hub-warm) — new hub demos are ready before anyone opens them
 
 mvd-api's access log has a `src` field, the request's `?label=`: the web
@@ -2133,7 +2222,7 @@ versions the volume lands at 0.254 drops/death against the hinted
 population's 0.272, and an oracle independent of `STAT_ACTIVEWEAPON` —
 does the victim's `STAT_ITEMS` inventory agree they held that weapon? —
 agrees on **13 488 of 13 488** drops. Method, splits and residuals:
-[`mvd-analytics/analyzer/BACKPACKS.md`](mvd-analytics/analyzer/BACKPACKS.md).
+[`mvd-analytics/analyzer/BACKPACK_RECON.md`](mvd-analytics/analyzer/BACKPACK_RECON.md).
 
 It refuses rather than guesses. The section is left **absent** — not
 half-filled — when there is no frag log (the only record of which deaths
@@ -2292,7 +2381,7 @@ last broadcast — the obvious fix for that 167 — was implemented and
 measured: it costs 249 real pickups (recall 96.13% → 93.64%) for no
 precision gain, because the pack's last origin is a sample taken in the
 frame it left the wire while its earlier ones are samples of where it no
-longer was. Reverted, with the measurement recorded in `BACKPACKS.md` so it
+longer was. Reverted, with the measurement recorded in `BACKPACK_RECON.md` so it
 is not re-proposed.
 
 ### The third backpack directive: `//ktx expire`
@@ -2317,7 +2406,7 @@ carry all three directives, 10 384 drops split **10 006 `bp` + 190 `expire`
 + 188 claimed by neither hint**, with **zero** rows claiming both. The 188
 are packs the recording ended on top of — none of them has a bound pack
 entity that ever left the wire — and they now read `unobserved`, which is
-what the wire supports. The invariant note in `BACKPACKS.md` that said
+what the wire supports. The invariant note in `BACKPACK_RECON.md` that said
 "drop ≈ bp + expire holds row by row" was measured and corrected: the
 residual is 1.8% of drops, on 102 of the 223 demos.
 

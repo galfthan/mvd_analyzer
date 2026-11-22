@@ -734,3 +734,43 @@ func TestProxy_CreatePlaylistLink_PostsJSON(t *testing.T) {
 		t.Errorf("out %v", out)
 	}
 }
+
+// A music item goes to the API as {"music": {source, id}}, silence as
+// {"music": null}; the music search is a GET with its params.
+func TestProxy_PlaylistMusic(t *testing.T) {
+	var body map[string]any
+	var q url.Values
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /v1/playlist-links", func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		w.Write([]byte(`{"url":"u"}`))
+	})
+	mux.HandleFunc("GET /v1/playlists/music", func(w http.ResponseWriter, r *http.Request) {
+		q = r.URL.Query()
+		w.Write([]byte(`{"count":0,"tracks":[]}`))
+	})
+	srv := httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
+	b := newProxyBackend(srv.URL, "", 5*time.Second)
+	vol := 0.4
+	if _, err := b.CreatePlaylistLink(context.Background(), CreatePlaylistLinkInput{Items: []PlaylistItem{
+		{Music: &PlaylistMusic{Source: "incompetech", ID: "USUAN1100301", Volume: &vol}},
+		{Clip: &PlaylistClip{GameID: 7, From: 1000, To: 5000}},
+		{Music: &PlaylistMusic{Silence: true}},
+		{Clip: &PlaylistClip{Demo: "gameId:7", From: 6000, To: 8000}},
+	}}); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := json.Marshal(body)
+	want := `{"items":[{"music":{"id":"USUAN1100301","source":"incompetech","volume":0.4}},{"clip":{"from":1000,"gameId":7,"to":5000}},{"music":null},{"clip":{"demo":"gameId:7","from":6000,"to":8000}}]}`
+	if string(got) != want {
+		t.Errorf("body\n got %s\nwant %s", got, want)
+	}
+	limit := 5
+	if _, err := b.FindPlaylistMusic(context.Background(), FindPlaylistMusicInput{Q: "action", MaxSec: 200, Limit: &limit}); err != nil {
+		t.Fatal(err)
+	}
+	if q.Get("q") != "action" || q.Get("maxSec") != "200" || q.Get("limit") != "5" || q.Has("minSec") {
+		t.Errorf("query = %v", q)
+	}
+}

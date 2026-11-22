@@ -32,7 +32,7 @@ package result
 //     deliberately NOT written into weaponPickups: that section documents
 //     itself as authoritative KTX hints, and its rows feed kill credit and
 //     pack-transfer stats that stay wire-measured. See
-//     analyzer/backpack_linkage.go and analyzer/BACKPACKS.md.
+//     analyzer/backpack_linkage.go and analyzer/BACKPACK_RECON.md.
 //
 // Non-RL/LG drops (SSG/NG/SNG/GL/empty) are not surfaced — KTX only emits
 // the hint for heavy weapons, the QW protocol does not transmit backpack
@@ -105,7 +105,7 @@ const (
 	BackpackSourceKTX = "ktx"
 	// BackpackSourceReconstructed: replayed from DropBackpack's rules on a
 	// demo that carried no hint. See analyzer/backpack_recon.go for the
-	// stand-down conditions and BACKPACKS.md for the measured accuracy.
+	// stand-down conditions and BACKPACK_RECON.md for the measured accuracy.
 	BackpackSourceReconstructed = "reconstructed"
 )
 

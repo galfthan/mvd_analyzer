@@ -349,7 +349,8 @@ func TestGetResult_SHA_LocalHit(t *testing.T) {
 	}
 }
 
-func TestGetResult_SHA_MissNoSource(t *testing.T) {
+// A sha the cache has not seen and the hub's CDN has not got: not found.
+func TestGetResult_SHA_MissNotOnCDN(t *testing.T) {
 	hub := newFakeHub()
 	defer hub.Close()
 
@@ -359,6 +360,44 @@ func TestGetResult_SHA_MissNoSource(t *testing.T) {
 	_, _, err := c.GetResult(context.Background(), DemoID{Kind: "sha256", SHA: testSHA})
 	if !errors.Is(err, ErrDemoNotFound) {
 		t.Errorf("expected ErrDemoNotFound, got %v", err)
+	}
+	if hub.cdnCalls.Load() != 1 || hub.resolveCalls.Load() != 0 {
+		t.Errorf("cdnCalls = %d, resolveCalls = %d; want the CDN asked once, the catalog never", hub.cdnCalls.Load(), hub.resolveCalls.Load())
+	}
+}
+
+// A sha the cache has not seen is fetched from the hub's CDN by that sha —
+// no gameId, no catalog lookup — and kept.
+func TestGetResult_SHA_MissFetchedFromCDN(t *testing.T) {
+	hub := newFakeHub()
+	defer hub.Close()
+	hub.mvdBlobs[testSHA] = []byte(testMVD)
+
+	parser := &stubParser{}
+	c, root := newTestCache(t, hub.hubClient(), parser)
+
+	if _, _, err := c.GetResult(context.Background(), DemoID{Kind: "sha256", SHA: testSHA}); err != nil {
+		t.Fatalf("GetResult: %v", err)
+	}
+	if hub.cdnCalls.Load() != 1 || hub.resolveCalls.Load() != 0 {
+		t.Errorf("cdnCalls = %d, resolveCalls = %d", hub.cdnCalls.Load(), hub.resolveCalls.Load())
+	}
+	if _, err := os.Stat(mvdPath(root, testSHA)); err != nil {
+		t.Errorf("tier-1 not written: %v", err)
+	}
+}
+
+// With no CDN configured, an unseen sha cannot be fetched: not found.
+func TestGetResult_SHA_MissNoCDN(t *testing.T) {
+	hub := newFakeHub()
+	defer hub.Close()
+	client := hub.hubClient()
+	client.CDNBase = ""
+
+	c, _ := newTestCache(t, client, &stubParser{})
+	_, _, err := c.GetResult(context.Background(), DemoID{Kind: "sha256", SHA: testSHA})
+	if !errors.Is(err, ErrDemoNotFound) || hub.cdnCalls.Load() != 0 {
+		t.Errorf("err = %v, cdnCalls = %d", err, hub.cdnCalls.Load())
 	}
 }
 

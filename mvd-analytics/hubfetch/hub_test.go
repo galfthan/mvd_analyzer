@@ -272,3 +272,55 @@ func TestGame_RowAndNotFound(t *testing.T) {
 		t.Errorf("unknown id: err = %v, want ErrNotFound", err)
 	}
 }
+
+func TestGameBySHA_RowAndNotFound(t *testing.T) {
+	sha := strings.Repeat("ab", 32)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		if q.Get("select") != SearchSelect || q.Get("limit") != "1" {
+			t.Errorf("select = %q, limit = %q", q.Get("select"), q.Get("limit"))
+		}
+		if q.Get("demo_sha256") != "eq."+sha {
+			w.Write([]byte(`[]`))
+			return
+		}
+		w.Write([]byte(`[{"id":212111,"map":"dm2","demo_sha256":"` + sha + `"}]`))
+	}))
+	defer srv.Close()
+	c := NewClient()
+	c.SupabaseURL = srv.URL
+	c.APIKey = "test-anon-key"
+
+	row, err := c.GameBySHA(context.Background(), sha)
+	if err != nil {
+		t.Fatalf("GameBySHA: %v", err)
+	}
+	if row["id"] != float64(212111) {
+		t.Errorf("row = %v", row)
+	}
+	if _, err := c.GameBySHA(context.Background(), strings.Repeat("0", 64)); !errors.Is(err, ErrNotFound) {
+		t.Errorf("unknown sha: err = %v, want ErrNotFound", err)
+	}
+}
+
+// A demo the CDN does not have, with no source to fall back on: not found,
+// which a caller that knows the demo by its sha alone reports as such.
+func TestDownload_CDN404IsNotFound(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer srv.Close()
+	c := NewClient()
+	c.CDNBase = srv.URL
+	if _, err := c.Download(&GameInfo{DemoSHA256: strings.Repeat("c", 64)}); !errors.Is(err, ErrNotFound) {
+		t.Errorf("err = %v, want ErrNotFound", err)
+	}
+	srv500 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer srv500.Close()
+	c.CDNBase = srv500.URL
+	if _, err := c.Download(&GameInfo{DemoSHA256: strings.Repeat("c", 64)}); err == nil || errors.Is(err, ErrNotFound) {
+		t.Errorf("a 5xx: err = %v, want a failure that is not ErrNotFound", err)
+	}
+}

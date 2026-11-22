@@ -37,3 +37,14 @@ func (p *proxyBackend) Search(ctx context.Context, in SearchGamesInput) (any, er
 }
 
 var _ searcher = (*proxyBackend)(nil)
+
+// FindPlaylistMusic proxies to mvd-api's GET /v1/playlists/music, the
+// answer passed through.
+func (p *proxyBackend) FindPlaylistMusic(ctx context.Context, in FindPlaylistMusicInput) (any, error) {
+	q := query{}
+	q.str("q", in.Q)
+	q.intv("minSec", in.MinSec)
+	q.intv("maxSec", in.MaxSec)
+	q.intp("limit", in.Limit)
+	return p.fetchOpaque(ctx, "GET", "/v1/playlists/music", url.Values(q))
+}

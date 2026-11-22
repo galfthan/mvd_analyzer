@@ -184,12 +184,13 @@ change is intended.
 
 ## Layout
 
-A slim top bar (wordmark + commit-hash version + an "API & MCP" link
-to the portal at mvdanalyzer.com/portal — API docs, keys, MCP setup,
-admin contact — + GitHub link) sits
+A slim top bar (wordmark + the loaded demo's line, or its match's maps
+as tabs) sits
 above a Grafana-style frame: a fixed left **sidebar** with one button
-per analysis tab, and a **main pane** that fills the rest of the
-viewport (no width cap). Sidebar order is `Search`, `Summary`,
+per analysis tab — and at its foot an "API & MCP" link to the portal at
+mvdanalyzer.com/portal (API docs, keys, MCP setup, admin contact), the
+GitHub link and the commit-hash version — and a **main pane** that
+fills the rest of the viewport (no width cap). Sidebar order is `Search`, `Summary`,
 `Timeline`, `Chat`, `Player`, `Map`, `Locs & Regions`, `Key Moments`,
 `Pack Drops`, `Pickups`, `Aim Stats`.
 
@@ -406,6 +407,30 @@ demo is loaded they show a short "Load or search a demo to begin"
 placeholder (CSS-driven via a `body.no-demo` class). After a successful
 load the placeholder is hidden, the Summary tab activates, and the
 real content renders.
+
+**Matches (proof of concept).** The hub lists single games; the page
+groups them into matches — the maps two sides played in a row
+(`src/lib/matches.js` has the rule: same mode, same team names with at
+least three shared players per team or the same two duel players, starts
+at most the mode's timelimit + 15 min apart; a game the next one follows
+sooner than a game of the mode can end — the timelimit in 2on2 and 4on4,
+3 minutes in a duel, which is also played short — was broken off and
+restarted: listed, dimmed, and a map for neither side). The Search tab's "Group
+into matches" checkbox (on by default; turning it off is kept in
+`localStorage`) lists a match as one row
+as a small scoreboard — the maps each side won, then a column a map
+with its frags; a click on a map's name loads that map, a click elsewhere the
+first one; maps the search cut off
+are fetched (`fetchMatch` in `src/data/hub.js`, one more search for both
+sides around the game's day). After every hub load `src/app/match.js`
+looks the demo's match up into the `currentMatch` store
+(`src/state/match.js`), and `src/shell/MatchTabs.svelte` shows its maps as
+tabs in the top bar, in place of the single demo's line (keys 1–9 open
+that map, p / n the one before / after); the other maps are fetched ahead and
+held in memory (`preloadMaps` in `src/app/match.js`; not for a browser
+set to save data), so a tab loads that map without a download, with `keepTab`, so the
+same view is compared map by map. A local file has no match. All of it is
+in the page: the API and the Result know nothing of matches.
 
 On viewports below 800 px the sidebar reflows into a horizontal scroll
 strip above the main pane.
@@ -1197,14 +1222,15 @@ pane draws with the Timeline's renderer (`src/ui/timeline-canvas.js`).
   player starts with sound on; the browser holds the audio until the
   first play, which is a user gesture) and the hide / show toggle of the
   side pane column.
-- **Settings across engines.** Each demo gets a fresh engine (and one
-  dropped after 20 s unshown comes back fresh), at FTE's defaults. What
+- **Settings across engines.** Each demo starts at FTE's defaults —
+  a fresh engine, or the one up loading it (`FteController.loadDemo`;
+  one dropped after 20 s unshown comes back fresh). What
   the user picked carries over (`engine.carrySettings`): sound, team
   info, the speed (`engine.rate`, applied on play), and the player
   followed by hand — by name, followed on the new engine only when its
   demo has that player, else autotrack. In a playlist the playlist says
   whom to watch: every clip — reached by playing on, a seek into it, or
-  in another demo's engine (its POV is set after the carried one) —
+  in another demo (its POV is set after the carried one) —
   starts from its own POV, autotrack when it names none, so a player
   picked by hand during one clip does not carry into the next. A clip's
   POV is not a hand pick and is not carried to a demo loaded by hand
@@ -1549,14 +1575,47 @@ clock and stores; `light-demo.js` stands in for the data layer: a hub
 demo's bytes (`fetchGame` + `downloadDemo`) and a minimal handle whose
 result carries just the map (hub's game row) and the demo offset (from
 the clips). The page lists the clips (label, who, length, slow motion,
-demo), starts the run at once (with sound on, as the tab does; the sound
-setting stays from one demo's clips to the next), and has play /
+demo) and starts the run on the viewer's click — the play button over the
+game view, the view itself, or space: browsers play no sound before a
+gesture on the page, so a run that started by itself played silent.
+Until then the first clip's demo loads into the engine, opening at that
+clip's start from its POV, so the click plays at once (with sound on, as the tab does;
+the sound setting stays from one demo's clips to the next). It has play /
 pause, previous / next, sound, the keys menu and fullscreen (the game
 view and these controls; `f`); a click on a clip plays from it. The team
 info shows from the start. A list over several hub demos plays straight
 through: while an item plays, the next clip's demo downloads when it is
 another one (the runner's `prefetch`; the page keeps the downloads by
-gameId, and a pick shares one in flight). A click on the game view plays / pauses, and
+gameId, and a pick shares one in flight). One engine plays the whole
+list: the step to another demo's clip loads that demo into it
+(`FteController.loadDemo`), no boot — the wasm, ~450 files and the heap
+are the first demo's — with the view faded to black from the step until
+the engine has jumped to the clip (`PlayerEngine.fadeOut`, `FADE_MS`):
+a moment of black instead of the new demo's start and its fast-forward.
+The play button pulses until the engine is up (a click plays
+regardless). A second engine holding the next demo, swapped in on the
+step, was tried and dropped: a same-origin iframe runs on its page's
+thread, so whatever the hidden one did took the shown one's frames and
+it stuttered. The engine's files come from one fetcher for the page
+(`mvd-fte-player/src/asset-fetch.js`): an engine booted again boots from
+memory, and a map it has not got is fetched from there. The Player tab
+plays the next demo it loads in its engine the same way. A playlist
+link with **music** (mvd-api's `music` items: the link's `m` table and
+`{u}` cues, read as the next item's `cue` — src/lib/playlist.js; only
+files on incompetech.com are played) plays it here: the runner cues the
+track in force at each item (`cueAt`), `src/play/music.js` plays it in one
+`<audio>` element from the run's first click — fading between tracks,
+looping one shorter than its section, paused with the viewer's pause but
+not by a title card; a jump to a clip picks the track up where playing
+through would have it (`cueTimeAt`) — and the game sound goes down to 60 %
+under it (`PlayerEngine.setLevel`, `FteController.setLevel`). The music
+plays at the cue's `volume` (the link's `v`; default 0.3) times the
+viewer's slider (kept in localStorage). A music button by the sound one
+turns it off, and the credit (title, artist, license, each
+linked) shows under the controls while a track plays. The Player tab keeps
+the cues of a playlist opened there (they go back into its share links)
+but plays no music; editing them comes later. A
+click on the game view plays / pauses, and
 the keys are the full page's (*Keys*), on this page and the full one
 alike. Clips
 of a local file are left out of the list, with a note counting them. A click while a demo downloads
@@ -1594,16 +1653,19 @@ Map tab into this one as preset views in
 
 ## Demo search
 
+A page opened without a demo or a search in its URL runs the empty
+form's search: the newest 100 games.
+
 The Search tab queries the hub's `v1_games` catalog through mvd-api's
 `GET /v1/games/search` (as the game lookup does `/v1/games/{id}`) —
 or, when the API cannot answer or there is none, the hub's Supabase
 directly with its public anon key — and lets the user filter by
 player, team, map, mode (1v1 / 2v2 / 4v4 / FFA / CTF), game tag, and
 date range. All filters are AND-combined, empty fields act as
-wildcards, and matches are listed sorted by date descending in pages
-of 100. A footer under the list shows "N of M matches" (M is the exact
+wildcards, and games are listed sorted by date descending in pages
+of 100. A footer under the list shows "N of M games" (M is the exact
 total, the hub's exact count as the API reports it) with a **Load
-more** button that appends the next offset page until every match is
+more** button that appends the next offset page until every game is
 shown. Clicking a row downloads the demo and runs the normal analysis
 pipeline; the user lands on the Summary tab.
 

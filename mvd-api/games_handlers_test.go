@@ -38,6 +38,10 @@ func (c *capturingSearcher) Game(context.Context, int) (map[string]any, error) {
 	return nil, errors.New("capturingSearcher only searches")
 }
 
+func (c *capturingSearcher) GameBySHA(context.Context, string) (map[string]any, error) {
+	return nil, errors.New("capturingSearcher only searches")
+}
+
 func newSearchServer(t *testing.T, sr gameCatalog) *httptest.Server {
 	t.Helper()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
@@ -314,10 +318,31 @@ func TestGame(t *testing.T) {
 	}
 	getJSON(t, srv.URL+"/v1/games/12345?x=1", 400)
 
+	// By the demo's sha: the hub's row for it, the gameId included; any
+	// case of hex, looked up lower-case.
+	sha := strings.Repeat("ab", 32)
+	bySHA := newSearchServer(t, &fakeSearcher{bySHA: map[string]int{sha: 212111}})
+	defer bySHA.Close()
+	if m := getJSON(t, bySHA.URL+"/v1/games/sha:"+strings.ToUpper(sha), 200); m["id"] != float64(212111) || m["demo_sha256"] != sha {
+		t.Errorf("by sha: %v", m)
+	}
+	if m := getJSON(t, bySHA.URL+"/v1/games/sha:"+strings.Repeat("0", 64), 404); code(m) != "demo_not_found" {
+		t.Errorf("unknown sha: %v", m)
+	}
+	for _, bad := range []string{"sha:abc", "sha:" + strings.Repeat("g", 64), "sha:"} {
+		if m := getJSON(t, bySHA.URL+"/v1/games/"+bad, 400); code(m) != "invalid_param" {
+			t.Errorf("%s: %v", bad, m)
+		}
+	}
+
 	failing := newSearchServer(t, &fakeSearcher{err: errors.New("hub game: status 500: secret upstream body")})
 	defer failing.Close()
 	m = getJSON(t, failing.URL+"/v1/games/12345", 502)
 	if code(m) != "hub_upstream" || strings.Contains(fmt.Sprint(m), "secret") {
 		t.Errorf("upstream failure: %v", m)
+	}
+	m = getJSON(t, failing.URL+"/v1/games/sha:"+sha, 502)
+	if code(m) != "hub_upstream" || strings.Contains(fmt.Sprint(m), "secret") {
+		t.Errorf("upstream failure by sha: %v", m)
 	}
 }

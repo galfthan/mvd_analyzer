@@ -237,7 +237,7 @@ the server deletes untaken — which, for a dropped pack, is
 its course on the wire therefore accounts for itself in exactly one of
 `//ktx bp` or `//ktx expire` — but a pack the recording ends on top of
 emits neither (measured: 1.8% of drops across a 223-demo archive
-sample, see `mvd-analytics/analyzer/BACKPACKS.md`). `//ktx expire` is
+sample, see `mvd-analytics/analyzer/BACKPACK_RECON.md`). `//ktx expire` is
 still the only signal on the wire that positively says a pack was
 *not* taken: a demo can carry `//ktx drop` and no `//ktx bp` at all
 (measured: 107 of 330 archive demos), so the absence of a pickup hint

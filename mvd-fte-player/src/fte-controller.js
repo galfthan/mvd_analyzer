@@ -15,10 +15,12 @@ export const AUTOTRACK_ON = 'stats';
 export const AUTOTRACK_OFF = 'user';
 
 export class FteController {
-    constructor(win, { demoDuration = null, demoName = 'match', resumeAudio = null } = {}) {
+    constructor(win, { demoDuration = null, demoName = 'match', demoFile = null, resumeAudio = null } = {}) {
         this._win = win;
         this._demoDuration = demoDuration;
         this._demoName = demoName;
+        this._demoFile = demoFile;   // its path in FTE's files (loadDemo releases it)
+        this._loads = 0;
         this._resumeAudio = resumeAudio;
         this._ended = false;
         this._restartTimer = null;
@@ -29,8 +31,8 @@ export class FteController {
         this._restoreTimer = null;
         this._restoreTarget = 0;
         this._volume = 0;
-        this._lastVolume = 0;
         this._maxVolume = 0.2;
+        this._level = 1;   // setLevel
         this._gate = this._gateFrameLoop();
     }
 
@@ -224,6 +226,72 @@ export class FteController {
         }
     }
 
+    // Not in hub: loadDemo plays another demo in this engine instead of a
+    // fresh one per demo — whose boot (the wasm, the ~450 files, the heap)
+    // costs seconds of the page's thread. FTE 004 keeps its files in a
+    // table of its window (FTEH.f: path → buffer, ref-counted; ftewebgl.js),
+    // which its boot fills from Module.files and its drag-and-drop adds to:
+    // the demo goes in the same way under a name of its own, with `files`
+    // (path → ArrayBuffer: the map, when hasFile says the engine has not
+    // got it), `playdemo` starts it, and the demo before is released — FTE
+    // frees it once it has closed it. Resolves once the new demo's clock
+    // runs (a jump sent before is lost, as after a boot) or after `waitMs`.
+    loadDemo({ demo, gzipped = false, files = {}, demoDuration = null, waitMs = 30000 }) {
+        const win = this._win;
+        const name = `match${++this._loads}`;
+        const path = `qw/${name}.mvd${gzipped ? '.gz' : ''}`;
+        for (const [p, buf] of Object.entries(files)) this._addFile(p, buf);
+        this._addFile(path, demo);
+        for (const t of [this._restoreTimer, this._restartTimer]) if (t) clearInterval(t);
+        this._restoreTimer = null;
+        this._restartTimer = null;
+        const old = this._demoFile;
+        this._demoFile = path;
+        this._demoName = name;
+        this._demoDuration = demoDuration;
+        this._ended = false;
+        // A fresh engine's POV: autotrack (the host sets its own after).
+        this._lastTrackUserId = null;
+        this.enableAutotrack();
+        const from = this.getDemoElapsedTime();
+        this.command('playdemo', name);
+        // Running, so its clock moves: the host had it paused, and a speed
+        // of 0 would hold the new demo's clock at its start.
+        this.setDemoSpeed(100);
+        const started = performance.now();
+        return new Promise((resolve) => {
+            const poll = setInterval(() => {
+                const t = this.getDemoElapsedTime();
+                const waited = performance.now() - started;
+                // The new clock: below where the demo before stood. One that
+                // stood at the very start (or was gone, after its end) gives
+                // no such sign; a clock moving after the command is it then.
+                const fresh = t > 0 && (t < from - 0.5 || (from < 1 && waited > 300));
+                if (!fresh && waited < waitMs) return;
+                clearInterval(poll);
+                if (old && old !== path) this._releaseFile(old);
+                resolve();
+            }, 50);
+        });
+    }
+
+    hasFile(path) {
+        return !!this._win.FTEH?.f[path];
+    }
+
+    _addFile(path, buf) {
+        const win = this._win;
+        if (win.FTEH.f[path]) return;
+        const b = win.FTEH.h[win._emscriptenfte_buf_createfromarraybuf(buf)];
+        b.n = path;
+        win.FTEH.f[path] = b;
+    }
+
+    _releaseFile(path) {
+        const b = this._win.FTEH.f[path];
+        if (b) this._win._emscriptenfte_buf_release(b.h);
+    }
+
     // Speed in percent: 100 = normal, 0 = paused.
     getDemoSpeed() {
         return this._demoSpeed;
@@ -270,23 +338,33 @@ export class FteController {
     }
 
     setVolume(value) {
-        this._lastVolume = this._volume;
         this._volume = Number(value);
         this.command('volume', this._volume);
+    }
+
+    // Not in hub: setLevel(f) scales the unmuted volume (0..1) — a host
+    // playing music turns the game down under it. Muted stays muted.
+    setLevel(f) {
+        this._level = Math.min(1, Math.max(0, Number(f)));
+        if (!this.isMuted()) this.setVolume(this._unmutedVolume());
+    }
+
+    _unmutedVolume() {
+        return (this._maxVolume / 2) * this._level;
     }
 
     mute() {
         this.setVolume(0);
     }
 
-    // Hub unmutes to a tenth of its slider; we have no slider, so half.
+    // Hub unmutes to a tenth of its slider; we have no slider, so half
+    // (times the level, setLevel).
     // Browsers keep audio suspended until a user gesture in the engine's
     // window — resumeAudio (from the loader) resumes it from the host's
     // click, which counts for a same-origin child frame.
     unmute() {
         if (this._resumeAudio) this._resumeAudio();
-        if (this._lastVolume <= this._maxVolume / 100) this._lastVolume = this._maxVolume / 2;
-        this.setVolume(this._lastVolume);
+        this.setVolume(this._unmutedVolume());
     }
 
     // wakeAudio resumes the engine's audio when it should be sounding — the

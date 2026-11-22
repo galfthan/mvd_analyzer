@@ -78,7 +78,7 @@ const (
 // pass down whenever the mod is new enough to have hinted; on a pre-1.38
 // demo it is unfalsifiable, and a `dp 0` server would make this pass report
 // drops that never happened. No archive demo in the validation sample
-// showed the signature (see BACKPACKS.md).
+// showed the signature (see BACKPACK_RECON.md).
 func backpackReconPost(res *Result, co *CoreOutputs) {
 	if len(res.Backpacks) > 0 {
 		return
@@ -142,7 +142,7 @@ func BackpackReconStandDown(res *Result) string {
 	// StatItems bits still cycle there (armor, ammo, powerups), which is what
 	// separates such a demo from a recorder that froze everything. Requiring
 	// both would stand those rulesets down; measured, that costs real packs
-	// the KTX hints confirm on every death (BACKPACKS.md).
+	// the KTX hints confirm on every death (BACKPACK_RECON.md).
 	if !activeWeaponLive(res.Streams.Players) && !damagerecon.WeaponBitsLive(res.Streams.Players) {
 		return "frozen weapon state"
 	}
@@ -205,7 +205,7 @@ func ReconstructBackpackDrops(res *Result) []result.BackpackDrop {
 		// (`[{0,64}]` or `[{0,32}]`) and the KTX hints credit them with a pack
 		// on EVERY death, hint count equal to death count. Refusing them cost
 		// 58 of 13 749 ground-truth drops and prevented no fabrication
-		// (precision unchanged at 99.97% either way). See BACKPACKS.md.
+		// (precision unchanged at 99.97% either way). See BACKPACK_RECON.md.
 		for di, td := range p.Deaths {
 			if killed[i][di] {
 				continue

@@ -185,7 +185,20 @@ func (c *Client) Resolve(gameID int) (*GameInfo, error) {
 // a game by id needs to show and fetch it. ErrNotFound when the hub has no
 // such game.
 func (c *Client) Game(ctx context.Context, gameID int) (map[string]any, error) {
-	q := "select=" + url.QueryEscape(SearchSelect) + "&id=eq." + strconv.Itoa(gameID)
+	return c.gameWhere(ctx, "id=eq."+strconv.Itoa(gameID), fmt.Sprintf("game %d", gameID))
+}
+
+// GameBySHA is Game for the game whose demo has this sha256 (lower-case
+// hex, the hash of the uncompressed .mvd): the row, its gameId included.
+// ErrNotFound when the hub has no game for that demo.
+func (c *Client) GameBySHA(ctx context.Context, sha string) (map[string]any, error) {
+	return c.gameWhere(ctx, "demo_sha256=eq."+url.QueryEscape(sha), "game for demo "+sha)
+}
+
+// gameWhere reads the one catalog row a PostgREST filter selects; `what`
+// names it in errors.
+func (c *Client) gameWhere(ctx context.Context, filter, what string) (map[string]any, error) {
+	q := "select=" + url.QueryEscape(SearchSelect) + "&" + filter + "&limit=1"
 	resp, body, err := c.catalogGet(ctx, "hub game", q)
 	if err != nil {
 		return nil, err
@@ -198,7 +211,7 @@ func (c *Client) Game(ctx context.Context, gameID int) (map[string]any, error) {
 		return nil, fmt.Errorf("hub game: decode: %w", err)
 	}
 	if len(rows) == 0 {
-		return nil, fmt.Errorf("game %d %w", gameID, ErrNotFound)
+		return nil, fmt.Errorf("%s %w", what, ErrNotFound)
 	}
 	return rows[0], nil
 }
@@ -234,9 +247,10 @@ func (c *Client) Download(info *GameInfo) ([]byte, error) {
 
 	// No source URL to fall back on. When a sha was present, the CDN
 	// attempt is the real failure — report it rather than the misleading
-	// "no sha256" message.
+	// "no sha256" message. A 404 there wraps ErrNotFound: for a demo known
+	// by its sha alone, the CDN not having it is the answer, not a failure.
 	if cdnErr != nil {
-		return nil, fmt.Errorf("cdn: %v; no demo_source_url fallback", cdnErr)
+		return nil, fmt.Errorf("cdn: %w; no demo_source_url fallback", cdnErr)
 	}
 	return nil, errors.New("no download URL available (no sha256 and no demo_source_url)")
 }
@@ -247,6 +261,9 @@ func (c *Client) fetch(u string) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("status 404: %w", ErrNotFound)
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("status %d", resp.StatusCode)
 	}

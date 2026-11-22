@@ -15,8 +15,9 @@ import (
 type server struct {
 	store    demoStore
 	logger   *slog.Logger
-	mapsDir  string      // directory of per-map geometry JSON; "" disables /geometry
-	searcher gameCatalog // hub catalog backing GET /v1/games/search and /v1/games/{id}; nil disables both
+	mapsDir  string       // directory of per-map geometry JSON; "" disables /geometry
+	searcher gameCatalog  // hub catalog backing GET /v1/games/search and /v1/games/{id}; nil disables both
+	music    musicLibrary // playlist music (music.go)
 
 	// upload holds the POST /v1/demos limits; uploadLedger is the per-key
 	// daily quota (skipped in no-auth mode). Both are inert when uploads are
@@ -41,7 +42,7 @@ type uploadConfig struct {
 // its /portal routes are registered on the mux (and are auth-exempt, so they
 // are reachable without an API key even in auth mode — see authExempt).
 func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uploadConfig, auth *authenticator, p *portal.Portal, searcher gameCatalog) http.Handler {
-	s := &server{store: store, logger: logger, mapsDir: mapsDir, searcher: searcher, upload: upload, uploadLedger: newUploadLedger()}
+	s := &server{store: store, logger: logger, mapsDir: mapsDir, searcher: searcher, music: defaultMusic, upload: upload, uploadLedger: newUploadLedger()}
 	mux := http.NewServeMux()
 
 	// Portal routes are registered ONLY when -portal is set (p != nil). When
@@ -110,6 +111,7 @@ func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uplo
 
 	// A light-player link for a scripted reel (loads the demos it names).
 	mux.HandleFunc("POST /v1/playlist-links", s.handlePlaylistLink)
+	mux.HandleFunc("GET /v1/playlists/music", s.handlePlaylistMusic)
 
 	// Hub game discovery (no demo needed; hits a live upstream).
 	mux.HandleFunc("GET /v1/games/search", s.handleGamesSearch)

@@ -15,6 +15,7 @@
     import Volume2 from '@lucide/svelte/icons/volume-2';
     import VolumeX from '@lucide/svelte/icons/volume-x';
     import Snail from '@lucide/svelte/icons/snail';
+    import Music from '@lucide/svelte/icons/music';
     import ExternalLink from '@lucide/svelte/icons/external-link';
     import PlayerFrame from '../player/PlayerFrame.svelte';
     import Toast from '../player/Toast.svelte';
@@ -29,6 +30,7 @@
     import { formatDuration } from '../lib/result.js';
     import { encodePlaylist } from '../lib/playlist.js';
     import { loadLightDemo } from './light-demo.js';
+    import { createMusic } from './music.js';
     import { createPlayerKeys, nextName } from '../player/player-keys.js';
     import { playerMenuItems } from '../player/player-menu.js';
     import MapMenu from '../ui/MapMenu.svelte';
@@ -65,8 +67,30 @@
     // A shared clip is watched for the fight: both teams' health, armor and
     // weapons show from the start (`t` hides them).
     engine.teamInfo = true;
+    // The playlist's music (music.js): the runner cues it, the viewer's
+    // play / pause pauses it, and the game sound goes down under it.
+    // The viewer's music loudness (the slider: × the cue's own) is kept
+    // in this browser.
+    const SCALE_KEY = 'mvda.musicScale';
+    /** @type {number} */
+    let savedScale = 1;
+    try {
+        const v = Number(localStorage.getItem(SCALE_KEY));
+        if (v > 0 && v <= 2) savedScale = v;
+    } catch {}
+    const music = createMusic({ scale: savedScale });
+    const musicState = music.state;
+    const UNDER_MUSIC = 0.6;
+    $effect(() => engine.setLevel($musicState.sounding ? UNDER_MUSIC : 1));
+    /** @param {number} f */
+    function setMusicScale(f) {
+        music.setScale(f);
+        try {
+            localStorage.setItem(SCALE_KEY, String(f));
+        } catch {}
+    }
     const runner = createRunner({
-        engine, demo, teams, demoRefOf,
+        engine, demo, teams, demoRefOf, music,
         segment: store(/** @type {{ start: number, end: number } | null} */ (null)),
         selectTab: () => {},
         // A hub clip's demo: download it and hand it to the engine — unless
@@ -88,7 +112,23 @@
     let now = $state(0);   // demo seconds
     onMount(() => {
         const off = engine.onTick((t) => { now = t; });
-        if (playable.length) runner.start(playable, 0);
+        // The run starts with the viewer's click — the play button over the
+        // game view, the view itself, space: the browser plays no sound
+        // before a gesture on the page, so a run that started by itself
+        // played silent. Meanwhile the first clip's demo loads into the
+        // engine, opening at the clip's start from its POV, so the click
+        // plays at once.
+        const first = firstClip;
+        if (first) {
+            clock.seek(Math.max(0, first.from - (first.demo.offset || 0)));
+            download(/** @type {number} */ (first.demo.gameId)).then((h) => {
+                if (playlist.get().run) return;
+                demo.set(h);
+                engine.whenReady(() => {
+                    if (!playlist.get().run) engine.track(first.track, { pick: false });
+                });
+            }, () => {});
+        }
         return () => { off(); runner.stop(); engine.teardown(); };
     });
 
@@ -97,10 +137,15 @@
     const playable = $derived(clips.filter((c) => c.card || c.demo?.gameId));
     const skipped = $derived(clips.length - playable.length);
     const nClips = $derived(clips.filter((c) => !c.card).length);
+    const hasMusic = $derived(playable.some((c) => c.cue));
 
     let run = $derived($playlist.run);
     let index = $derived(run && run.clips === playable ? run.index : -1);
     let current = $derived(index >= 0 ? playable[index] : null);
+    const firstClip = $derived(playable.find((c) => !c.card));
+
+    // Before the run: the engine not up yet (the click plays regardless).
+    let warming = $derived(index < 0 && !$status.ready);
 
     // The full analyzer opens this playlist as its own (`&open`: it
     // replaces the list there rather than adding to it) on the demo of the
@@ -156,12 +201,15 @@
     /** @param {number} i */
     function playFrom(i) {
         if (i < 0 || i >= playable.length) return;
+        music.setPaused(false);
         runner.start(playable, i);
     }
 
     function togglePlay() {
         if (index < 0) return playFrom(0);
         engine.togglePlay();
+        // Between demos the engine has none to toggle: the music plays on.
+        if (engine.ready()) music.setPaused(!engine.isPlaying());
     }
     // A click on the game view plays / pauses; the keys are the analyzer's
     // (src/player/player-keys.js), typed on the page or in the game view.
@@ -230,7 +278,14 @@
         <p class="clips-empty">{clips.length ? 'These clips are from local files — open them in the full analyzer and load the files there.' : 'No clips in this link.'}</p>
     {:else}
         <div class="clips-stage" bind:this={stage}>
-            <div class="clips-screen"><PlayerFrame {engine} /></div>
+            <div class="clips-screen">
+                <PlayerFrame {engine} />
+                {#if index < 0}
+                    <button class="clips-start" class:warming title={warming ? 'Loading the player — play now, or wait for it' : 'Play the clips (space)'} aria-label="Play the clips" onclick={() => playFrom(0)}>
+                        <Play size={44} fill="currentColor" />
+                    </button>
+                {/if}
+            </div>
             <div class="clips-controls">
                 <button class="clips-btn" title="Previous clip" disabled={index <= 0} onclick={() => playFrom(index - 1)}><SkipBack size={16} /></button>
                 <button class="clips-btn clips-play" title={$status.playing ? 'Pause (space)' : 'Play (space)'} onclick={togglePlay}>
@@ -242,12 +297,19 @@
                         <span class="n">{index + 1} / {playable.length}</span>
                         {#if !current.card}<span class="t">{formatDuration(Math.max(0, Math.min(now, current.to) - current.from))} / {len(current)}</span>{/if}
                         <span class="l">{current.label || current.who || 'Clip'}</span>
-                    {:else if $status.ready}
-                        <span class="l muted">Pick a clip</span>
+                    {:else if !warming}
+                        <span class="l muted">Press play, or pick a clip</span>
                     {:else}
                         <span class="l muted">Loading the player and the demo…</span>
                     {/if}
                 </span>
+                {#if hasMusic}
+                    <button class="clips-btn" class:off={!$musicState.on} title={$musicState.on ? 'Music on — click to turn it off' : 'Music off — click to turn it on'}
+                        aria-label="Music" aria-pressed={$musicState.on} onclick={() => music.toggle()}><Music size={16} /></button>
+                    <input class="clips-music-vol" type="range" min="0" max="2" step="0.05" value={$musicState.scale}
+                        title="Music loudness: {Math.round($musicState.scale * 100)} % of the playlist's" aria-label="Music loudness"
+                        disabled={!$musicState.on} oninput={(e) => setMusicScale(Number(e.currentTarget.value))} />
+                {/if}
                 <button class="clips-btn" title={$status.ready && !$status.muted ? 'Sound on — click to mute' : 'Sound off — click to unmute'} onclick={() => engine.toggleMute()}>
                     {#if $status.ready && !$status.muted}<Volume2 size={16} />{:else}<VolumeX size={16} />{/if}
                 </button>
@@ -262,6 +324,14 @@
                 </button>
             </div>
             <MapMenu bind:at={menu} items={menuItems} keep=".clips-menu-btn" />
+            {#if $musicState.track}
+                {@const m = $musicState.track}
+                <p class="clips-music">
+                    <Music size={12} />
+                    Music: <a href={m.page || null} target="_blank" rel="noopener">“{m.title}”</a> by {m.artist}{#if m.source === 'incompetech'} (incompetech.com){/if},
+                    licensed under <a href={m.licenseUrl || null} target="_blank" rel="noopener">{m.license}</a>
+                </p>
+            {/if}
         </div>
         <ol class="clips-list">
             {#each playable as c, i (i)}
@@ -271,6 +341,7 @@
                         <span class="l">{c.label || 'Clip'}</span>
                         <span class="w">{c.card ? 'title card' : c.who || 'Auto'}</span>
                         {#if c.slow}<span class="s" title="Slow motion at {c.slow.speed}×"><Snail size={12} /></span>{/if}
+                        {#if c.cue !== undefined}<span class="s" title={c.cue ? `Music from here: “${c.cue.title}” by ${c.cue.artist}` : 'No music from here'}><Music size={12} /></span>{/if}
                         <span class="d">{len(c)}</span>
                         <span class="g">{c.card ? '' : c.demo.title}</span>
                     </button>
@@ -367,6 +438,7 @@
         position: relative;
     }
     .clips-screen {
+        position: relative;
         width: 100%;
         aspect-ratio: 16 / 9;
         max-height: 75vh;
@@ -383,6 +455,55 @@
         min-height: 0;
         aspect-ratio: auto;
         max-height: none;
+    }
+    .clips-start {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 84px;
+        height: 84px;
+        padding: 0 0 0 6px;
+        background: rgba(10, 14, 30, 0.75);
+        border: 2px solid rgba(0, 217, 255, 0.6);
+        border-radius: 50%;
+        color: var(--accent-cyan);
+        cursor: pointer;
+    }
+    .clips-start.warming {
+        opacity: 0.45;
+        animation: clips-warm 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes clips-warm {
+        to { opacity: 0.8; }
+    }
+    .clips-start:hover {
+        background: var(--accent-cyan);
+        color: var(--bg-deep);
+    }
+    .clips-music {
+        margin: 0;
+        padding: 0 0 6px;
+        font-size: 12px;
+        color: #9ab;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .clips-music a {
+        color: var(--accent-cyan);
+    }
+    .clips-btn.off {
+        opacity: 0.4;
+    }
+    .clips-music-vol {
+        width: 70px;
+        accent-color: var(--accent-cyan);
     }
     .clips-controls {
         display: flex;

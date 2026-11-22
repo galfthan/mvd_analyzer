@@ -453,6 +453,12 @@ func (c *Cache) loadResult(ctx context.Context, sha string, id DemoID, visit boo
 		}
 		data, err := c.Hub.Download(info)
 		if err != nil {
+			// A demo known by its sha alone that the CDN has not got: the
+			// hub does not have it (a gameId the hub resolved but whose
+			// file is missing stays an upstream failure).
+			if id.Kind == "sha256" && errors.Is(err, hubfetch.ErrNotFound) {
+				return nil, CacheMeta{}, fmt.Errorf("%w: sha %s is not in this cache nor on the hub's CDN", ErrDemoNotFound, sha)
+			}
 			return nil, CacheMeta{}, fmt.Errorf("%w: %v", ErrHubUpstream, err)
 		}
 		// Authenticate the download against the SHA that keys everything: the
@@ -704,8 +710,14 @@ func (c *Cache) resolveDownloadInfo(id DemoID, stashed *hubfetch.GameInfo) (*hub
 	if stashed != nil {
 		return stashed, nil
 	}
+	// A sha the cache has not seen: the hub's CDN names its demos by sha
+	// (<cdn>/<sha[:3]>/<sha>.mvd.gz), so it is fetched from there — and
+	// authenticated against that sha like every download.
 	if id.Kind == "sha256" {
-		return nil, fmt.Errorf("%w: sha not in local cache and no gameId to resolve source", ErrDemoNotFound)
+		if c.Hub == nil || c.Hub.CDNBase == "" {
+			return nil, fmt.Errorf("%w: sha not in local cache and no hub CDN configured to fetch it from", ErrDemoNotFound)
+		}
+		return &hubfetch.GameInfo{DemoSHA256: strings.ToLower(id.SHA)}, nil
 	}
 	info, err := c.Hub.Resolve(id.GameID)
 	if err != nil {

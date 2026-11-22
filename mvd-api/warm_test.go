@@ -30,6 +30,8 @@ func (c *warmCatalog) Search(_ context.Context, p hubfetch.SearchParams) (any, e
 
 func (c *warmCatalog) Game(context.Context, int) (map[string]any, error) { return nil, nil }
 
+func (c *warmCatalog) GameBySHA(context.Context, string) (map[string]any, error) { return nil, nil }
+
 // warmFake records Warm calls; ready games report nothing done, failing
 // ones return their error, and each call advances the clock by cost.
 type warmFake struct {

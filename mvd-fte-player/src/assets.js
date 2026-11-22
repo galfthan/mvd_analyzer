@@ -1,3 +1,4 @@
+// @ts-nocheck — mvd-fte-player is its own package; mvd-web's checkJs does not cover it.
 // FTE asset manifest for demo playback.
 //
 // Ported from hub.quakeworld.nu src/lib/fte/assets.ts @ 5c96205c19c7
@@ -495,6 +496,10 @@ export function demoAssets({ demoUrl, demoPath, mapName, configUrl }) {
     for (const path of GENERAL_FILE_PATHS) assets[path] = assetUrl(`fte/${path}`);
     assets['id1/config.cfg'] = configUrl;
     assets[demoPath] = demoUrl;
-    assets[`id1/maps/${mapName}.bsp`] = `${MAPS_BASE}/${mapName}.bsp`;
+    assets[mapPath(mapName)] = mapUrl(mapName);
     return assets;
 }
+
+// A map's BSP: its path in FTE's files, and where it is fetched from.
+export const mapPath = (mapName) => `id1/maps/${mapName}.bsp`;
+export const mapUrl = (mapName) => `${MAPS_BASE}/${mapName}.bsp`;

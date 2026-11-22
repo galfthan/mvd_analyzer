@@ -31,6 +31,8 @@ import (
 type fakeStore struct {
 	byID map[string]*result.Result
 	err  error
+	// shaOf: the sha a gameId id resolves to (by id.String()); default 64 a's.
+	shaOf map[string]string
 
 	// Upload knobs (POST /v1/demos).
 	putErr    error          // PutDemo returns this (e.g. ErrDemoTooLarge)
@@ -53,6 +55,9 @@ func (f *fakeStore) GetResult(_ context.Context, id democache.DemoID) (*result.R
 		return nil, democache.CacheMeta{}, democache.ErrDemoNotFound
 	}
 	sha := strings.Repeat("a", 64)
+	if s, ok := f.shaOf[id.String()]; ok {
+		sha = s
+	}
 	if id.Kind == "sha256" {
 		sha = id.SHA
 	}
@@ -1146,8 +1151,9 @@ func newTestServerMaps(t *testing.T, store demoStore, mapsDir string) *httptest.
 // /v1/games/12345 (any other id is not found); err simulates an upstream
 // failure.
 type fakeSearcher struct {
-	out any
-	err error
+	out   any
+	err   error
+	bySHA map[string]int // GameBySHA: the gameId of a demo's sha (others not found)
 }
 
 func (f *fakeSearcher) Search(_ context.Context, _ hubfetch.SearchParams) (any, error) {
@@ -1186,6 +1192,18 @@ func (f *fakeSearcher) Game(ctx context.Context, gameID int) (map[string]any, er
 	}
 	out, _ := f.Search(ctx, hubfetch.SearchParams{})
 	return out.(map[string]any)["games"].([]any)[0].(map[string]any), nil
+}
+
+// GameBySHA answers bySHA's games with a row carrying the id (a float, as
+// JSON from the hub decodes); any other sha is not found.
+func (f *fakeSearcher) GameBySHA(_ context.Context, sha string) (map[string]any, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	if gid, ok := f.bySHA[sha]; ok {
+		return map[string]any{"id": float64(gid), "map": "dm3", "demo_sha256": sha}, nil
+	}
+	return nil, fmt.Errorf("game for demo %s %w", sha, hubfetch.ErrNotFound)
 }
 
 // testUploadConfig is the default upload config for handler tests: the

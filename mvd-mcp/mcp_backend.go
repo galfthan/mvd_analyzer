@@ -1,6 +1,9 @@
 package main
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+)
 
 // MCPBackend is the contract every MCP tool handler depends on. The
 // proxy backend below implements it by forwarding HTTP calls to a
@@ -37,6 +40,7 @@ type MCPBackend interface {
 	ListArtifacts(ctx context.Context, in ListArtifactsInput) (any, error)
 	GetArtifact(ctx context.Context, in GetArtifactInput) (any, error)
 	CreatePlaylistLink(ctx context.Context, in CreatePlaylistLinkInput) (any, error)
+	FindPlaylistMusic(ctx context.Context, in FindPlaylistMusicInput) (any, error)
 }
 
 // --- Tool input/output structs ---
@@ -204,17 +208,59 @@ type GetHighlightsInput struct {
 // proxy forwards it as JSON (same field names), unset pointers left out so
 // the API's defaults apply.
 type CreatePlaylistLinkInput struct {
-	Items []PlaylistItem `json:"items" jsonschema:"the reel, played in order (1-100 items over at most 20 demos, at least one clip). Each item sets exactly one of clip or card"`
+	Items []PlaylistItem `json:"items" jsonschema:"the reel, played in order (1-100 items over at most 20 demos, at least one clip). Each item sets exactly one of clip, card or music"`
 	Name  string         `json:"name,omitempty" jsonschema:"the Markdown link's text; default generated: 'mvda · <demo title, or N demos> · <clip kinds with counts>' (a label's kind is its text before ' · ')"`
 }
 
 type PlaylistItem struct {
-	Clip *PlaylistClip `json:"clip,omitempty" jsonschema:"a window of a hub demo, watched from one player's view"`
-	Card *PlaylistCard `json:"card,omitempty" jsonschema:"a title card: a colour over the game view (the game paused behind it), with text — a title or intermission screen"`
+	Clip  *PlaylistClip  `json:"clip,omitempty" jsonschema:"a window of a hub demo, watched from one player's view"`
+	Card  *PlaylistCard  `json:"card,omitempty" jsonschema:"a title card: a colour over the game view (the game paused behind it), with text — a title or intermission screen"`
+	Music *PlaylistMusic `json:"music,omitempty" jsonschema:"a music cue, taking no time: its track plays under the items after it, to the next cue or the end. One first scores the whole reel; one before each section scores it by section. At least one item must follow"`
+}
+
+type PlaylistMusic struct {
+	Source  string   `json:"source,omitempty" jsonschema:"the track's source as findPlaylistMusic returned it (incompetech)"`
+	ID      string   `json:"id,omitempty" jsonschema:"the track's id, as findPlaylistMusic returned it"`
+	Silence bool     `json:"silence,omitempty" jsonschema:"true instead of source/id: no music from here on"`
+	Volume  *float64 `json:"volume,omitempty" jsonschema:"how loud the track plays, 0.05-1; omit for the player's default 0.3 (a background level under the game sound). Raise it for a card-heavy or quiet section, lower it where the game sound matters"`
+}
+
+// MarshalJSON writes the item as POST /v1/playlist-links takes it, where
+// silence is "music": null — a null the tool's own input cannot carry
+// (its schema has no null unions; see stripNullTypes).
+func (it PlaylistItem) MarshalJSON() ([]byte, error) {
+	m := map[string]any{}
+	if it.Clip != nil {
+		m["clip"] = it.Clip
+	}
+	if it.Card != nil {
+		m["card"] = it.Card
+	}
+	if it.Music != nil {
+		if it.Music.Silence {
+			m["music"] = nil
+		} else {
+			cue := map[string]any{"source": it.Music.Source, "id": it.Music.ID}
+			if it.Music.Volume != nil {
+				cue["volume"] = *it.Music.Volume
+			}
+			m["music"] = cue
+		}
+	}
+	return json.Marshal(m)
+}
+
+// FindPlaylistMusicInput mirrors GET /v1/playlists/music.
+type FindPlaylistMusicInput struct {
+	Q      string `json:"q,omitempty" jsonschema:"words to match: a mood (Action, Dark, Driving, Epic, Bouncy, Intense…), genre, instrument or title; every word must match"`
+	MinSec int    `json:"minSec,omitempty" jsonschema:"shortest track, seconds"`
+	MaxSec int    `json:"maxSec,omitempty" jsonschema:"longest track, seconds (omit for no bound)"`
+	Limit  *int   `json:"limit,omitempty" jsonschema:"tracks, 1-30 (default 10)"`
 }
 
 type PlaylistClip struct {
-	GameID int            `json:"gameId" jsonschema:"hub.quakeworld.nu game id (searchGames); clips may come from any number of games"`
+	GameID int            `json:"gameId,omitempty" jsonschema:"hub.quakeworld.nu game id (searchGames); clips may come from any number of games. Set exactly one of gameId or demo"`
+	Demo   string         `json:"demo,omitempty" jsonschema:"the demo as the per-demo tools name it, gameId:<id> or sha:<64 hex> (a demo's sha256); instead of gameId. A sha must be a hub game"`
 	From   int32          `json:"from" jsonschema:"clip start, integer MILLISECONDS since match start (the same clock as every tool's times — e.g. a getHighlights row's time minus 3000)"`
 	To     int32          `json:"to" jsonschema:"clip end, integer MILLISECONDS since match start, after from (e.g. the event time plus 2000)"`
 	Watch  string         `json:"watch,omitempty" jsonschema:"whose view to watch: a player name exactly as that game's tools spell it; 'auto' or omitted = the engine's autotrack. An unknown name is a 400 listing the game's players"`

@@ -66,6 +66,25 @@ test('the API source reads the Result and positions for a hub game', async () =>
     assert.ok(calls.every((c) => c.url.pathname.startsWith('/api/')), 'every call through the page\'s /api');
 });
 
+test('the API source holds a preloaded demo: its load asks nothing, until it is let go', async () => {
+    const { fetchImpl, calls } = fakeApi(resultRoutes());
+    const api = new ApiSource({ fetchImpl });
+    await api.preload(GAME);
+    assert.equal(calls.length, 2);
+    const a = await api.load(GAME, {});
+    const b = await api.load(GAME, {});
+    assert.equal(calls.length, 2, 'both loads from the answers held');
+    assert.notEqual(a.result, b.result, 'each load its own Result');
+    assert.deepEqual(await b.section('match'), { map: 'dm2' });
+    api.keep([8]);
+    await api.load(GAME, {});
+    assert.equal(calls.length, 4, 'let go: fetched again');
+    // A preload that fails is not held: the load asks again and reports.
+    const down = new ApiSource({ fetchImpl: fakeApi({}).fetchImpl });
+    await assert.rejects(down.preload(GAME));
+    await assert.rejects(down.load(GAME, {}), /no route/);
+});
+
 test('another schema version than the page\'s is a mismatch the page can fall back from', async () => {
     const { fetchImpl } = fakeApi(resultRoutes());
     await assert.rejects(new ApiSource({ fetchImpl, schema: 77 }).load(GAME, {}),

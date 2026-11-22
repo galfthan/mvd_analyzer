@@ -12,11 +12,17 @@
 // again. A title card (isCard) pauses the game for its time, the overlay
 // (PlaylistOverlay.svelte) drawing it, and the run moves on; meanwhile the
 // next clip's demo is fetched (deps.prefetch, the light page's) when it is
-// another one.
+// another one. A playlist's music (deps.music, the light page's,
+// src/play/music.js) follows the run: each item the run gets to plays the
+// cue in force there (cueAt), and the run's end stops it.
 
-import { playlistStep, slowAt, isCard } from '../lib/playlist.js';
+import { playlistStep, slowAt, isCard, cueAt, cueTimeAt } from '../lib/playlist.js';
 import { playlist, setRun } from './playlist-store.js';
 import { toast } from './toast.js';
+import { SPEEDS } from '../lib/playback-bar.js';
+
+// The fastest the clock plays (× 1): how far it can move per second of a tick.
+const MAX_SPEED = Math.max(...SPEEDS);
 
 /**
  * @typedef {import('../lib/playlist.js').Clip} Clip
@@ -37,16 +43,18 @@ import { toast } from './toast.js';
  * @property {typeof import('./demo-ref.js').demoRefOf} demoRefOf
  * @property {import('../state/store.js').Store<{ start: number, end: number } | null>} segment
  * @property {(c: Clip) => void} [prefetch]  start fetching a clip's demo ahead of it
+ * @property {{ cue: (m: import('../lib/playlist.js').Cue | null, at?: number) => void, stop: () => void }} [music]
  */
 
 /** @param {RunnerDeps} deps */
-export function createRunner({ engine, page, driverFor = () => engine, demo, teams, selectTab, loadDemo, demoRefOf, segment, prefetch }) {
+export function createRunner({ engine, page, driverFor = () => engine, demo, teams, selectTab, loadDemo, demoRefOf, segment, prefetch, music }) {
     /** @type {Driver} */
     let drv = engine;         // what the run plays in
     /** @type {Clip | null} */
     let loadingClip = null;  // the clip whose demo a run is loading
     let awaitingFrames = false;   // a clip waits for the shown engine to repaint
     let showTries = 0;            // two-frame waits for the engine to become active
+    let lastTick = 0;             // performance.now() at the previous tick
     const MAX_SHOW_TRIES = 30;
 
     const currentRef = () => demoRefOf(demo.get(), teams.get().order);
@@ -69,6 +77,9 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
             drv = next;
         }
         setRun({ clips, index, prev: null, transient });
+        // A start is a jump: the music picks up where playing through
+        // would have it; the steps after only carry it on.
+        music?.cue(cueAt(clips, index), cueTimeAt(clips, index));
         playClip(index);
     }
 
@@ -99,6 +110,7 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
     // plays or clearing the list under it — the engine leaves slow motion
     // and the run's segment goes.
     playlist.subscribe((s) => {
+        if (!s.run) music?.stop();
         if (s.run || (slowing == null && !shownSpan)) return;
         slowTo(null);
         if (shownSpan && segment.get() === shownSpan) segment.set(null);
@@ -117,6 +129,7 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
         slowTo(null);
         setRun({ ...run, index, prev: null });
         clearTimeout(cardTimer);
+        music?.cue(cueAt(run.clips, index));
         warmNext(index);
         if (isCard(c)) return showCard(c);
 
@@ -220,6 +233,7 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
             // the demo already shown.
             shown = await loadDemo({ gameId: /** @type {number} */ (c.demo.gameId) }, {
                 keepTab: true,
+                match: false,
                 stillWanted: () => playingClip() === c,
             });
         } catch (err) {
@@ -267,6 +281,9 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
     function tick(d, demoT) {
         const run = playlist.get().run;
         if (!run || d !== drv || !d.ready() || awaitingFrames) return;
+        const wall = performance.now();
+        const sinceTick = (wall - lastTick) / 1000;
+        lastTick = wall;
         if (d.seeking()) {
             run.prev = null;
             return;
@@ -282,7 +299,10 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
         /** @type {PlaylistStep} */
         const step = d.hasEnded()
             ? { type: 'end' }
-            : playlistStep(local.map((i) => run.clips[i]), li, run.prev, demoT, d.isPlaying());
+            // A frame that took long (the page busy, the engine loading)
+            // lets the clock move further than hub's 1.5 s in one tick;
+            // read as a seek, the clip would play on past its end.
+            : playlistStep(local.map((i) => run.clips[i]), li, run.prev, demoT, d.isPlaying(), 1.5 + sinceTick * MAX_SPEED);
         run.prev = demoT;
         // Paused, nothing is slowed: play resumes at the rate and the next
         // tick slows it again inside the window.
@@ -291,6 +311,7 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
             // A seek into another clip: it is the active one, with its POV.
             const next = run.clips[local[step.index]];
             setRun({ ...run, index: local[step.index] });
+            music?.cue(cueAt(run.clips, local[step.index]));
             showSpan(next);
             clipPov(d, next);
         } else if (step.type === 'next' || step.type === 'end') {

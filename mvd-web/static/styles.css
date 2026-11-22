@@ -68,7 +68,7 @@ body.light-player {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Top bar — slim wordmark + version + GitHub link. Body is the
+/* Top bar — slim wordmark + what is loaded. Body is the
  * scroll-anchor (overflow: hidden, flex column), so this just needs to
  * sit at the top and not shrink. */
 /* The Svelte shell's mount point (src/shell/App.svelte) must not add a box:
@@ -104,8 +104,6 @@ body.light-player {
     color: var(--accent-cyan-dim);
 }
 
-.topbar-spacer { flex: 1; }
-
 .topbar-demo-info {
     display: flex;
     align-items: baseline;
@@ -134,49 +132,6 @@ body.no-demo .topbar-demo-info { display: none; }
     color: #4a5a6e;
     font-weight: 400;
     margin: 0 2px;
-}
-
-.topbar-version {
-    color: #4a5a6e;
-    font-family: monospace;
-    font-size: 0.75rem;
-    text-decoration: none;
-    transition: color 0.15s ease;
-}
-
-.topbar-version:hover {
-    color: var(--accent-cyan);
-}
-
-/* Inner <a> the top bar (src/shell/Topbar.svelte) renders for the commit hash */
-.topbar-version a {
-    color: inherit;
-    text-decoration: none;
-    border-bottom: 1px dotted currentColor;
-}
-
-/* Text link to the portal (API docs, keys, MCP setup, contact). */
-.topbar-link {
-    color: #7a8ba8;
-    font-size: 0.8rem;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: color 0.15s ease;
-}
-
-.topbar-link:hover {
-    color: var(--accent-cyan);
-}
-
-.topbar-github {
-    color: #7a8ba8;
-    display: inline-flex;
-    align-items: center;
-    transition: color 0.15s ease;
-}
-
-.topbar-github:hover {
-    color: var(--accent-cyan);
 }
 
 /* Layout — sidebar + main pane fill the rest of the viewport. The
@@ -237,6 +192,60 @@ body.no-demo .topbar-demo-info { display: none; }
     width: 3px;
     background: var(--accent-cyan);
     border-radius: 2px;
+}
+
+/* The sidebar's foot: the links out and the build version. */
+.sidebar-foot {
+    margin-top: auto;
+    padding: 14px 14px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sidebar-links {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-link {
+    color: #7a8ba8;
+    font-size: 0.8rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.15s ease;
+}
+
+.sidebar-link:hover {
+    color: var(--accent-cyan);
+}
+
+.sidebar-version {
+    color: #4a5a6e;
+    font-family: monospace;
+    font-size: 0.72rem;
+    line-height: 1.5;
+}
+
+.sidebar-version a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px dotted currentColor;
+}
+
+.sidebar-version a:hover {
+    color: var(--accent-cyan);
+}
+
+.sidebar-version-date,
+.sidebar-version-stale {
+    display: block;
+}
+
+.sidebar-version-stale {
+    color: #ffc107;
 }
 
 /* Two-row main pane: unified-timeline sits in the fixed top row,
@@ -305,6 +314,18 @@ body.no-demo #unified-timeline {
         flex-shrink: 0;
         padding: 6px 12px;
     }
+    .sidebar-foot {
+        margin: 0 0 0 auto;
+        padding: 0 8px;
+        flex-shrink: 0;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        white-space: nowrap;
+    }
+    .sidebar-links { gap: 12px; }
+    .sidebar-version-date,
+    .sidebar-version-stale { display: inline; }
     .sidebar-btn.active::before {
         left: 6px;
         right: 6px;
@@ -446,12 +467,16 @@ body.no-demo #unified-timeline {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    flex: 1 1 140px;
-    min-width: 120px;
+    flex: 0 1 116px;
+    min-width: 0;
+}
+
+.search-field-short {
+    flex-basis: 84px;
 }
 
 .search-field-date {
-    flex: 0 1 160px;
+    flex-basis: 142px;
 }
 
 .search-field > span {
@@ -466,10 +491,12 @@ body.no-demo #unified-timeline {
     background: var(--bg-deep);
     border: 1px solid var(--bg-panel);
     border-radius: 6px;
-    padding: 8px 12px;
+    padding: 8px 10px;
     color: var(--fg-default);
     font-size: 0.95rem;
     font-family: inherit;
+    width: 100%;
+    min-width: 0;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -591,6 +618,255 @@ body.no-demo #unified-timeline {
 .search-pager-count {
     color: #7a8ba8;
     font-size: 0.85rem;
+}
+
+.search-group-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* On the form's row, level with its inputs. */
+    padding: 9px 0;
+    color: #c8d4e3;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* A match in the grouped search list: a small scoreboard — a row a side,
+ * the maps won, then a column a map — between a game row's mode and date. */
+.search-match {
+    display: grid;
+    grid-template-columns: 56px 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    background: var(--bg-deep);
+    border: 1px solid rgba(42, 63, 95, 0.5);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 6px;
+    padding: 6px 14px 8px 12px;
+    font-size: 0.92rem;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.search-match:hover {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 217, 255, 0.06);
+}
+
+.search-board {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(3, 1.45rem);
+    grid-template-columns: 150px auto;
+    /* Cells no taller than their row. */
+    line-height: 1.2;
+    grid-auto-columns: minmax(64px, auto);
+    column-gap: 14px;
+    justify-content: start;
+    align-items: center;
+    min-width: 0;
+    /* A long series scrolls sideways; never down, or the wheel over a
+     * scoreboard would stop scrolling the list. */
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+}
+
+/* The two sides' names are the button that opens the match, stretched over
+ * the row. */
+.search-board-sides {
+    grid-row: 2 / span 2;
+    display: grid;
+    grid-template-rows: repeat(2, 1.45rem);
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.search-board-sides span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-board-sides::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+}
+
+.search-board-map,
+.search-board-head {
+    color: #7a8ba8;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.search-board-map {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    /* Above the row's own click target. */
+    position: relative;
+    z-index: 1;
+}
+
+.search-board-map:hover {
+    color: var(--accent-cyan);
+    text-decoration: underline;
+}
+
+.search-board-frags {
+    color: #7a8ba8;
+    font-family: monospace;
+    font-size: 0.86rem;
+}
+
+.search-board-frags.won {
+    color: #fff;
+    font-weight: 700;
+}
+
+/* The maps-won column: set off from the maps after it by a rule. */
+.search-board-total {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    padding-right: 18px;
+    margin-right: 4px;
+    border-right: 1px solid rgba(42, 63, 95, 0.9);
+}
+
+/* A game broken off and restarted: there, and no map for either side. */
+.search-board-map.restarted,
+.search-board-frags.restarted,
+.match-tab.restarted:not(.active) {
+    opacity: 0.45;
+}
+
+.search-board-wins {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+/* The maps of the current match, in the top bar. */
+.match-tabs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 18px;
+    min-width: 0;
+}
+
+.match-tabs-score {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding-right: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.match-tabs-score b {
+    color: #e8eef7;
+    font-size: 1.1rem;
+}
+
+.match-tabs-list {
+    display: flex;
+    gap: 4px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.match-tab,
+.match-tabs-step {
+    background: var(--bg-deep);
+    border: 1px solid rgba(42, 63, 95, 0.7);
+    border-radius: 6px;
+    color: #c8d4e3;
+    font-family: inherit;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.match-tabs-step {
+    padding: 2px 9px;
+    font-size: 1rem;
+}
+
+.match-tab {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 3px 11px;
+    white-space: nowrap;
+}
+
+.match-tab:hover:not(:disabled),
+.match-tabs-step:hover:not(:disabled) {
+    border-color: var(--accent-cyan);
+}
+
+.match-tab:disabled,
+.match-tabs-step:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.match-tab.active {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 217, 255, 0.1);
+    color: #fff;
+}
+
+.match-tab.loading {
+    border-style: dashed;
+    border-color: var(--accent-cyan);
+}
+
+.match-tab-n {
+    color: #7a8ba8;
+    font-size: 0.75rem;
+}
+
+.match-tab-map {
+    font-weight: 600;
+}
+
+.match-tab-score {
+    color: #7a8ba8;
+    font-family: monospace;
+    font-size: 0.82rem;
+}
+
+.match-tab-score .won {
+    font-weight: 700;
+}
+
+.match-tabs-date {
+    margin-left: 8px;
+    color: #7a8ba8;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
 .tab-content {
@@ -2819,6 +3095,13 @@ th.sortable.sort-desc::after {
     width: 100%;
     height: 100%;
     border: 0;
+    transition: opacity 0.25s ease;
+}
+
+/* The engine while it loads a demo and jumps to where it opens: faded to
+   the host's black (src/player/engine.js, FADE_MS). */
+.player-frame-host iframe.player-fade {
+    opacity: 0;
 }
 
 .player-frame-error {
