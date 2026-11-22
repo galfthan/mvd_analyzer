@@ -1,7 +1,7 @@
 // shell.js — the page chrome's state: the top bar's demo line and build
 // version, and the load panel's status line, hub box and its button. The
-// load orchestration (src/app/) sets them; src/shell/Topbar.svelte and the
-// Search tab show them.
+// load orchestration (src/app/) sets them; src/shell/Topbar.svelte, the
+// sidebar's foot (Sidebar.svelte) and the Search tab show them.
 import { store } from './store.js';
 
 // The top bar's demo line (markup, src/lib/topbar.js), '' with no demo.

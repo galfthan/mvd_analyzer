@@ -136,11 +136,11 @@ export function nextPaging(prev, filters, offset, count, total) {
     return { filters, shown: offset + count, total: total !== null ? total : prev.total };
 }
 
-// pagerLabel / hasMore: the footer under the list — "N of M matches", and a
+// pagerLabel / hasMore: the footer under the list — "N of M games", and a
 // Load-more button while the hub reports more.
 /** @param {Paging} paging */
 export function pagerLabel({ shown, total }) {
-    return total !== null ? `${shown} of ${total} matches` : `${shown} matches`;
+    return total !== null ? `${shown} of ${total} games` : `${shown} games`;
 }
 
 /** @param {Paging} paging */

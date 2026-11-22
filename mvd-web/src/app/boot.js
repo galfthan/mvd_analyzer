@@ -64,5 +64,8 @@ export function boot() {
             if (!requestedTab) switchTab('search');
             runSearch();
         }
+    } else if (!hubId) {
+        // A bare page opens on the newest games.
+        runSearch();
     }
 }

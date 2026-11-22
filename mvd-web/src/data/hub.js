@@ -7,6 +7,7 @@
 // No DOM; `fetchImpl` is injectable for tests.
 
 import { apiJSON } from './api.js';
+import { siblingFilters, groupMatches, matchWith, mergeGames } from '../lib/matches.js';
 
 const SUPABASE_URL = 'https://ncsphkjfominimxztjip.supabase.co/rest/v1/v1_games';
 const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc3Boa2pmb21pbmlteHp0amlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY5Mzg1NjMsImV4cCI6MjAxMjUxNDU2M30.NN6hjlEW-qB4Og9hWAVlgvUdwrbBO13s8OkAJuBGVbo';
@@ -31,8 +32,11 @@ export const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 't
 
 // Page size for the search tab. The hub itself pages at 1000 (PostgREST
 // max-rows); 100 keeps a single response light (~90 KB) while "Load more"
-// walks offset pages until every match is shown.
+// walks offset pages until every game is shown.
 const SEARCH_PAGE_SIZE = 100;
+// Both sides' games of one mode over two or three days: the hub's page
+// ceiling, so a pair of generic names ("red" v "blue") is not cut short.
+const MATCH_SEARCH_LIMIT = 1000;
 
 /**
  * @param {string} input
@@ -70,22 +74,25 @@ export async function fetchGame(gameId, fetchImpl = fetch) {
     return games[0];
 }
 
-// searchGames: one page of the newest matches. mvd-api's search filters as
+// searchGames: one page of the newest games. mvd-api's search filters as
 // the hub does (player full-text, team contains, map / mode exact, tag
 // substring, dates inclusive of the end day); its `players` and `teams`
 // are comma-separated lists, AND'd, where the direct query takes each as
-// one term.
+// one term. A team goes in lower case: the hub's team filter is an exact
+// match on its lower-cased team names ("D2s" finds nothing, "d2s" the
+// team), where the player one folds case.
 /**
  * @param {SearchFilters} filters
  * @param {number} [offset]
  * @param {FetchImpl} [fetchImpl]
+ * @param {number} [limit]
  * @returns {Promise<{ games: HubGame[], total: number | null }>}
  */
-export async function searchGames(filters, offset = 0, fetchImpl = fetch) {
-    const q = new URLSearchParams({ limit: String(SEARCH_PAGE_SIZE), roster: '1' });
+export async function searchGames(filters, offset = 0, fetchImpl = fetch, limit = SEARCH_PAGE_SIZE) {
+    const q = new URLSearchParams({ limit: String(limit), roster: '1' });
     if (offset > 0) q.set('offset', String(offset));
     if (filters.player) q.set('players', filters.player);
-    if (filters.team) q.set('teams', filters.team);
+    if (filters.team) q.set('teams', filters.team.toLowerCase());
     if (filters.map) q.set('map', filters.map);
     if (filters.mode) q.set('mode', filters.mode);
     if (filters.tag) q.set('matchtag', filters.tag);
@@ -97,7 +104,7 @@ export async function searchGames(filters, offset = 0, fetchImpl = fetch) {
     } catch (err) {
         if (!(/** @type {{ canFallBack?: boolean }} */ (err).canFallBack)) throw err;
     }
-    return searchHub(filters, offset, fetchImpl);
+    return searchHub(filters, offset, fetchImpl, limit);
 }
 
 // searchHub: the same search against the hub's catalog directly.
@@ -105,17 +112,18 @@ export async function searchGames(filters, offset = 0, fetchImpl = fetch) {
  * @param {SearchFilters} filters
  * @param {number} offset
  * @param {FetchImpl} fetchImpl
+ * @param {number} limit
  * @returns {Promise<{ games: HubGame[], total: number | null }>}
  */
-async function searchHub(filters, offset, fetchImpl) {
+async function searchHub(filters, offset, fetchImpl, limit) {
     const parts = [
         `select=${encodeURIComponent(SEARCH_SELECT)}`,
         `order=timestamp.desc`,
-        `limit=${SEARCH_PAGE_SIZE}`,
+        `limit=${limit}`,
     ];
     if (offset > 0) parts.push(`offset=${offset}`);
     if (filters.player) parts.push(`players_fts=fts.'${encodeURIComponent(filters.player)}'`);
-    if (filters.team)   parts.push(`team_names=cs.{${encodeURIComponent(filters.team)}}`);
+    if (filters.team)   parts.push(`team_names=cs.{${encodeURIComponent(filters.team.toLowerCase())}}`);
     if (filters.map)    parts.push(`map=eq.${encodeURIComponent(filters.map)}`);
     if (filters.mode)   parts.push(`mode=eq.${encodeURIComponent(filters.mode)}`);
     if (filters.tag)    parts.push(`matchtag=ilike.%25${encodeURIComponent(filters.tag)}%25`);
@@ -124,7 +132,7 @@ async function searchHub(filters, offset, fetchImpl) {
 
     const resp = await fetchImpl(`${SUPABASE_URL}?${parts.join('&')}`, {
         // Ask PostgREST for the exact total (Content-Range: 0-99/1234) so
-        // the UI can say "N of M" and know when every match is shown. With
+        // the UI can say "N of M" and know when every game is shown. With
         // a count preference a partial page answers 206 — still resp.ok.
         headers: { ...HEADERS, 'Prefer': 'count=exact' },
     });
@@ -138,6 +146,25 @@ async function searchHub(filters, offset, fetchImpl) {
         if (!isNaN(n)) total = n;
     }
     return { games, total };
+}
+
+// fetchMatch: the match (src/lib/matches.js) a game belongs to, with every
+// map of it the hub has — one search for the games of both sides around the
+// game's day. A game on its own, or one the search cannot find again, is a
+// match of one.
+/**
+ * @param {HubGame} game
+ * @param {FetchImpl} [fetchImpl]
+ * @returns {Promise<import('../lib/matches.js').Match>}
+ */
+export async function fetchMatch(game, fetchImpl = fetch) {
+    const filters = siblingFilters(game);
+    /** @type {HubGame[]} */
+    let around = [];
+    if (filters) ({ games: around } = await searchGames(filters, 0, fetchImpl, MATCH_SEARCH_LIMIT));
+    // The game itself first: the row in hand wins over the search's copy.
+    const match = matchWith(groupMatches(mergeGames([game], around)), game.id);
+    return /** @type {import('../lib/matches.js').Match} */ (match);
 }
 
 // downloadDemo tries the hub CDN by sha256, then the server's own URL.
