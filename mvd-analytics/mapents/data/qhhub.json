@@ -1,0 +1,265 @@
+{
+ "map": "qhhub",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -2,
+   "y": -21.857,
+   "z": -242
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 195.842,
+   "y": -164.646,
+   "z": -224
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 628.393,
+   "y": -100.536,
+   "z": -232
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 758.073,
+   "y": 78.2682,
+   "z": -232
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": 400,
+   "y": -242,
+   "z": -108,
+   "targetName": "start"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 56,
+   "y": 376,
+   "z": -700,
+   "target": "start",
+   "bounds": {
+    "min": [
+     -7,
+     313,
+     -711
+    ],
+    "max": [
+     119,
+     439,
+     -689
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-10",
+   "x": 879,
+   "y": 373,
+   "z": -211.5,
+   "target": "start",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     868,
+     362,
+     -298
+    ],
+    "max": [
+     890,
+     384,
+     -125
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 398,
+   "y": 467,
+   "z": -386,
+   "target": "start",
+   "bounds": {
+    "min": [
+     304,
+     391,
+     -469
+    ],
+    "max": [
+     492,
+     543,
+     -303
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 767,
+   "y": 485,
+   "z": -211.5,
+   "target": "start",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     756,
+     474,
+     -298
+    ],
+    "max": [
+     778,
+     496,
+     -125
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 783,
+   "y": 469,
+   "z": -211.5,
+   "target": "start",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     772,
+     458,
+     -298
+    ],
+    "max": [
+     794,
+     480,
+     -125
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 799,
+   "y": 453,
+   "z": -211.5,
+   "target": "start",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     788,
+     442,
+     -298
+    ],
+    "max": [
+     810,
+     464,
+     -125
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 815,
+   "y": 437,
+   "z": -211.5,
+   "target": "start",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     804,
+     426,
+     -298
+    ],
+    "max": [
+     826,
+     448,
+     -125
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-7",
+   "x": 831,
+   "y": 421,
+   "z": -211.5,
+   "target": "start",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     820,
+     410,
+     -298
+    ],
+    "max": [
+     842,
+     432,
+     -125
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-8",
+   "x": 847,
+   "y": 405,
+   "z": -211.5,
+   "target": "start",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     836,
+     394,
+     -298
+    ],
+    "max": [
+     858,
+     416,
+     -125
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-9",
+   "x": 863,
+   "y": 389,
+   "z": -211.5,
+   "target": "start",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     852,
+     378,
+     -298
+    ],
+    "max": [
+     874,
+     400,
+     -125
+    ]
+   }
+  }
+ ]
+}

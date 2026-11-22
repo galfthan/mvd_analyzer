@@ -1,0 +1,100 @@
+{
+ "map": "dmm4chamber",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 256,
+   "y": -606,
+   "z": -96,
+   "bounds": {
+    "min": [
+     241,
+     -607,
+     -111
+    ],
+    "max": [
+     271,
+     -605,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 64,
+   "y": -384,
+   "z": 144
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 64,
+   "y": -304,
+   "z": 144
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 64,
+   "y": -224,
+   "z": 144
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 64,
+   "y": -144,
+   "z": 144
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 816,
+   "y": -272,
+   "z": 144
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 816,
+   "y": -192,
+   "z": 144
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 816,
+   "y": -112,
+   "z": 144
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 400,
+   "y": 1280,
+   "z": 96,
+   "targetName": "tele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 496,
+   "y": 1280,
+   "z": 96,
+   "targetName": "tele2"
+  }
+ ]
+}

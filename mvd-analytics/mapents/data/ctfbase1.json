@@ -1,0 +1,1343 @@
+{
+ "map": "ctfbase1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "Quad AREA",
+   "x": -964,
+   "y": -576,
+   "z": -64,
+   "loc": "Quad AREA",
+   "bounds": {
+    "min": [
+     -967,
+     -607,
+     -95
+    ],
+    "max": [
+     -961,
+     -545,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "666 ROOM",
+   "x": -1248,
+   "y": -280,
+   "z": -240,
+   "loc": "666 ROOM",
+   "bounds": {
+    "min": [
+     -1279,
+     -287,
+     -287
+    ],
+    "max": [
+     -1217,
+     -273,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE RL ROOM-1",
+   "x": -2316,
+   "y": -1120,
+   "z": -224,
+   "loc": "BLUE RL ROOM",
+   "bounds": {
+    "min": [
+     -2367,
+     -1135,
+     -287
+    ],
+    "max": [
+     -2265,
+     -1105,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE RL ROOM-2",
+   "x": -2292,
+   "y": -1120,
+   "z": -224,
+   "loc": "BLUE RL ROOM",
+   "bounds": {
+    "min": [
+     -2343,
+     -1135,
+     -287
+    ],
+    "max": [
+     -2241,
+     -1105,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ROOF OF RED RL ROOM-1",
+   "x": -204,
+   "y": -32,
+   "z": -224,
+   "loc": "ROOF OF RED RL ROOM",
+   "bounds": {
+    "min": [
+     -255,
+     -47,
+     -287
+    ],
+    "max": [
+     -153,
+     -17,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ROOF OF RED RL ROOM-2",
+   "x": -180,
+   "y": -32,
+   "z": -224,
+   "loc": "ROOF OF RED RL ROOM",
+   "bounds": {
+    "min": [
+     -231,
+     -47,
+     -287
+    ],
+    "max": [
+     -129,
+     -17,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "BLUE BRIDGE AREA",
+   "x": -2516,
+   "y": -180,
+   "z": -280,
+   "loc": "BLUE BRIDGE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "BLUE RL ROOM",
+   "x": -2496,
+   "y": -1216,
+   "z": -256,
+   "loc": "BLUE RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "RED BRIDGE AREA",
+   "x": 16,
+   "y": -964,
+   "z": -280,
+   "loc": "RED BRIDGE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "RED RL ROOM",
+   "x": 0,
+   "y": 64,
+   "z": -256,
+   "loc": "RED RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE CORRIDOR LEADING TO BLUE FLAG",
+   "x": -2240,
+   "y": -2112,
+   "z": -100,
+   "loc": "BLUE CORRIDOR LEADING TO BLUE FLAG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED BASE",
+   "x": -256,
+   "y": 960,
+   "z": -100,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-1",
+   "x": -2856,
+   "y": -2444,
+   "z": -240,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE BASE-2",
+   "x": -2152,
+   "y": -2440,
+   "z": -240,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE CORRIDOR LEADING TO Quad / RA ROOM",
+   "x": -1524,
+   "y": -808,
+   "z": -428,
+   "loc": "BLUE CORRIDOR LEADING TO Quad / RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE RL ROOM-1",
+   "x": -2108,
+   "y": -1512,
+   "z": -264,
+   "loc": "BLUE RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE RL ROOM-2",
+   "x": -2068,
+   "y": -1512,
+   "z": -264,
+   "loc": "BLUE RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GROUND FLOOR OF Quad / RA ROOM",
+   "x": -1008,
+   "y": -372,
+   "z": -428,
+   "loc": "GROUND FLOOR OF Quad / RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-1",
+   "x": -368,
+   "y": 1280,
+   "z": -240,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED BASE-2",
+   "x": 336,
+   "y": 1280,
+   "z": -240,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED RL ROOM-1",
+   "x": -456,
+   "y": 336,
+   "z": -264,
+   "loc": "RED RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED RL ROOM-2",
+   "x": -416,
+   "y": 336,
+   "z": -264,
+   "loc": "RED RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "BLUE BASE",
+   "x": -2400,
+   "y": -2720,
+   "z": -232,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "RED BASE",
+   "x": -96,
+   "y": 1568,
+   "z": -232,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "BLUE 100 HEALTH ROOM",
+   "x": -2512,
+   "y": -2288,
+   "z": -344,
+   "loc": "BLUE 100 HEALTH ROOM",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RED 100 HEALTH ROOM",
+   "x": -16,
+   "y": 1112,
+   "z": -344,
+   "loc": "RED 100 HEALTH ROOM",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE-1",
+   "x": -2640,
+   "y": -2296,
+   "z": -248,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE BASE-2",
+   "x": -2144,
+   "y": -2380,
+   "z": -112,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE CORRIDOR LEADING TO BLUE FLAG",
+   "x": -2496,
+   "y": -1584,
+   "z": -176,
+   "loc": "BLUE CORRIDOR LEADING TO BLUE FLAG"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE CORRIDOR LEADING TO Quad / RA ROOM",
+   "x": -1496,
+   "y": -360,
+   "z": -428,
+   "loc": "BLUE CORRIDOR LEADING TO Quad / RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "CORRIDOR LEADING TO RED FLAG",
+   "x": 16,
+   "y": 448,
+   "z": -176,
+   "loc": "CORRIDOR LEADING TO RED FLAG"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "GROUND FLOOR OF Quad / RA ROOM",
+   "x": -1036,
+   "y": -812,
+   "z": -428,
+   "loc": "GROUND FLOOR OF Quad / RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE-1",
+   "x": -384,
+   "y": 1200,
+   "z": -112,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED BASE-2",
+   "x": 112,
+   "y": 1112,
+   "z": -248,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "BLUE BRIDGE AREA",
+   "x": -1996,
+   "y": -172,
+   "z": -312,
+   "loc": "BLUE BRIDGE AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "RED BRIDGE AREA",
+   "x": -504,
+   "y": -988,
+   "z": -312,
+   "loc": "RED BRIDGE AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "666 ROOM",
+   "x": -1248,
+   "y": -208,
+   "z": -240,
+   "loc": "666 ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad AREA",
+   "x": -1040,
+   "y": -576,
+   "z": -72,
+   "loc": "Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RED ARMOUR AREA",
+   "x": -1456,
+   "y": -576,
+   "z": -96,
+   "loc": "RED ARMOUR AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "BLUE RL ROOM",
+   "x": -1984,
+   "y": -1056,
+   "z": -248,
+   "loc": "BLUE RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RED RL ROOM",
+   "x": -512,
+   "y": -96,
+   "z": -248,
+   "loc": "RED RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE-1",
+   "x": -2772,
+   "y": -2116,
+   "z": -100,
+   "loc": "BLUE BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE BASE-2",
+   "x": -2640,
+   "y": -2472,
+   "z": -248,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE CORRIDOR LEADING TO Quad / RA ROOM",
+   "x": -1540,
+   "y": -360,
+   "z": -428,
+   "loc": "BLUE CORRIDOR LEADING TO Quad / RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE FLAG SPOT",
+   "x": -2384,
+   "y": -2296,
+   "z": -248,
+   "loc": "BLUE FLAG SPOT"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE RL ROOM-1",
+   "x": -2548,
+   "y": -1496,
+   "z": -280,
+   "loc": "BLUE RL ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE RL ROOM-2",
+   "x": -1832,
+   "y": -1188,
+   "z": -288,
+   "loc": "BLUE RL ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "CORRIDOR LEADING TO RED FLAG",
+   "x": 240,
+   "y": 944,
+   "z": -100,
+   "loc": "CORRIDOR LEADING TO RED FLAG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "CORRIDOR LEADING TO RED RL ROOM FROM BRIDGE",
+   "x": 16,
+   "y": 312,
+   "z": -280,
+   "loc": "CORRIDOR LEADING TO RED RL ROOM FROM BRIDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GROUND FLOOR OF Quad / RA ROOM",
+   "x": -992,
+   "y": -812,
+   "z": -428,
+   "loc": "GROUND FLOOR OF Quad / RA ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE-1",
+   "x": -144,
+   "y": 1112,
+   "z": -248,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED BASE-2",
+   "x": 112,
+   "y": 1288,
+   "z": -248,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED RL ROOM",
+   "x": -696,
+   "y": 8,
+   "z": -288,
+   "loc": "RED RL ROOM",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE BASE",
+   "x": -2884,
+   "y": -2380,
+   "z": -112,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE FLAG SPOT",
+   "x": -2384,
+   "y": -2472,
+   "z": -248,
+   "loc": "BLUE FLAG SPOT"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "CORRIDOR LEADING TO BLUE RL ROOM FROM BRIDGE-1",
+   "x": -2832,
+   "y": -856,
+   "z": -432,
+   "loc": "CORRIDOR LEADING TO BLUE RL ROOM FROM BRIDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "CORRIDOR LEADING TO BLUE RL ROOM FROM BRIDGE-2",
+   "x": -2832,
+   "y": -808,
+   "z": -432,
+   "loc": "CORRIDOR LEADING TO BLUE RL ROOM FROM BRIDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "CORRIDOR LEADING TO RED RL ROOM FROM BRIDGE-1",
+   "x": 304,
+   "y": -384,
+   "z": -432,
+   "loc": "CORRIDOR LEADING TO RED RL ROOM FROM BRIDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "CORRIDOR LEADING TO RED RL ROOM FROM BRIDGE-2",
+   "x": 304,
+   "y": -336,
+   "z": -432,
+   "loc": "CORRIDOR LEADING TO RED RL ROOM FROM BRIDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE-1",
+   "x": -144,
+   "y": 1288,
+   "z": -248,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED BASE-2",
+   "x": 352,
+   "y": 1200,
+   "z": -112,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "BLUE CORRIDOR LEADING TO BLUE FLAG",
+   "x": -2528,
+   "y": -1568,
+   "z": -168,
+   "loc": "BLUE CORRIDOR LEADING TO BLUE FLAG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "CORRIDOR LEADING TO RED FLAG",
+   "x": 32,
+   "y": 416,
+   "z": -168,
+   "loc": "CORRIDOR LEADING TO RED FLAG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "CORRIDOR LEADING TO BLUE RL ROOM FROM BRIDGE",
+   "x": -2816,
+   "y": -880,
+   "z": -432,
+   "loc": "CORRIDOR LEADING TO BLUE RL ROOM FROM BRIDGE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "CORRIDOR LEADING TO RED RL ROOM FROM BRIDGE",
+   "x": 320,
+   "y": -272,
+   "z": -432,
+   "loc": "CORRIDOR LEADING TO RED RL ROOM FROM BRIDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "BLUE BASE",
+   "x": -2600,
+   "y": -2728,
+   "z": -216,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "RED BASE",
+   "x": 96,
+   "y": 1568,
+   "z": -200,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "BLUE BASE",
+   "x": -2488,
+   "y": -2720,
+   "z": -112,
+   "loc": "BLUE BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "RED BASE",
+   "x": -8,
+   "y": 1568,
+   "z": -112,
+   "loc": "RED BASE",
+   "spawnflags": 1
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "BLUE BASE-1",
+   "x": -2696,
+   "y": -2368,
+   "z": -224,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE BASE-2",
+   "x": -2496,
+   "y": -2144,
+   "z": -224,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "BLUE BASE-3",
+   "x": -2296,
+   "y": -2368,
+   "z": -224,
+   "loc": "BLUE BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE BRIDGE AREA-1",
+   "x": -2480,
+   "y": -960,
+   "z": -288,
+   "loc": "BLUE BRIDGE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "BLUE BRIDGE AREA-2",
+   "x": -1984,
+   "y": -872,
+   "z": -288,
+   "loc": "BLUE BRIDGE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE CORRIDOR LEADING TO BLUE FLAG",
+   "x": -2496,
+   "y": -1776,
+   "z": -144,
+   "loc": "BLUE CORRIDOR LEADING TO BLUE FLAG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE RL ROOM-1",
+   "x": -2496,
+   "y": -1400,
+   "z": -240,
+   "loc": "BLUE RL ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE RL ROOM-2",
+   "x": -2340,
+   "y": -1376,
+   "z": -224,
+   "loc": "BLUE RL ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE RL ROOM-3",
+   "x": -2032,
+   "y": -1376,
+   "z": -224,
+   "loc": "BLUE RL ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "CORRIDOR LEADING TO BLUE RL ROOM FROM BRIDGE",
+   "x": -2824,
+   "y": -1016,
+   "z": -384,
+   "loc": "CORRIDOR LEADING TO BLUE RL ROOM FROM BRIDGE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "CORRIDOR LEADING TO RED FLAG",
+   "x": 0,
+   "y": 624,
+   "z": -144,
+   "loc": "CORRIDOR LEADING TO RED FLAG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "CORRIDOR LEADING TO RED RL ROOM FROM BRIDGE",
+   "x": 328,
+   "y": -136,
+   "z": -384,
+   "loc": "CORRIDOR LEADING TO RED RL ROOM FROM BRIDGE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GROUND FLOOR OF Quad / RA ROOM",
+   "x": -1248,
+   "y": -800,
+   "z": -416,
+   "loc": "GROUND FLOOR OF Quad / RA ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-1",
+   "x": -200,
+   "y": 1216,
+   "z": -224,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-2",
+   "x": 0,
+   "y": 992,
+   "z": -224,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BASE-3",
+   "x": 200,
+   "y": 1216,
+   "z": -224,
+   "loc": "RED BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED BRIDGE AREA-1",
+   "x": -512,
+   "y": -280,
+   "z": -288,
+   "loc": "RED BRIDGE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED BRIDGE AREA-2",
+   "x": -16,
+   "y": -192,
+   "z": -288,
+   "loc": "RED BRIDGE AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED RL ROOM-1",
+   "x": -464,
+   "y": 224,
+   "z": -224,
+   "loc": "RED RL ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED RL ROOM-2",
+   "x": -64,
+   "y": 224,
+   "z": -224,
+   "loc": "RED RL ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED RL ROOM-3",
+   "x": 0,
+   "y": 248,
+   "z": -240,
+   "loc": "RED RL ROOM"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE CORRIDOR LEADING TO BLUE FLAG-1",
+   "x": -2624,
+   "y": -2024,
+   "z": -84,
+   "loc": "BLUE CORRIDOR LEADING TO BLUE FLAG",
+   "targetName": "blu_right"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE CORRIDOR LEADING TO BLUE FLAG-2",
+   "x": -2364,
+   "y": -2024,
+   "z": -84,
+   "loc": "BLUE CORRIDOR LEADING TO BLUE FLAG",
+   "targetName": "blu_left"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "CORRIDOR LEADING TO RED FLAG-1",
+   "x": -132,
+   "y": 872,
+   "z": -84,
+   "loc": "CORRIDOR LEADING TO RED FLAG",
+   "targetName": "red_left"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "CORRIDOR LEADING TO RED FLAG-2",
+   "x": 128,
+   "y": 872,
+   "z": -84,
+   "loc": "CORRIDOR LEADING TO RED FLAG",
+   "targetName": "red_right"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "MAIN BLUE TELEPORT TO RED BASE-1",
+   "x": -1888,
+   "y": 128,
+   "z": -272,
+   "loc": "MAIN BLUE TELEPORT TO RED BASE",
+   "targetName": "red3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "MAIN BLUE TELEPORT TO RED BASE-2",
+   "x": -1888,
+   "y": 192,
+   "z": -272,
+   "loc": "MAIN BLUE TELEPORT TO RED BASE",
+   "targetName": "red2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "MAIN BLUE TELEPORT TO RED BASE-3",
+   "x": -1888,
+   "y": 256,
+   "z": -272,
+   "loc": "MAIN BLUE TELEPORT TO RED BASE",
+   "targetName": "red1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "UNDER BLUE BRIDGE",
+   "x": -2264,
+   "y": -576,
+   "z": -392,
+   "loc": "UNDER BLUE BRIDGE",
+   "targetName": "blu_slime"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "UNDER THE RED BRIDGE-1",
+   "x": -592,
+   "y": -1408,
+   "z": -272,
+   "loc": "UNDER THE RED BRIDGE",
+   "targetName": "blue1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "UNDER THE RED BRIDGE-2",
+   "x": -592,
+   "y": -1344,
+   "z": -272,
+   "loc": "UNDER THE RED BRIDGE",
+   "targetName": "blue2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "UNDER THE RED BRIDGE-3",
+   "x": -592,
+   "y": -1280,
+   "z": -272,
+   "loc": "UNDER THE RED BRIDGE",
+   "targetName": "blue3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "UNDER THE RED BRIDGE-4",
+   "x": -232,
+   "y": -576,
+   "z": -392,
+   "loc": "UNDER THE RED BRIDGE",
+   "targetName": "red_slime"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE 100 HEALTH ROOM",
+   "x": -2496,
+   "y": -2218,
+   "z": -320,
+   "loc": "BLUE 100 HEALTH ROOM",
+   "target": "blu_slime",
+   "bounds": {
+    "min": [
+     -2519,
+     -2223,
+     -359
+    ],
+    "max": [
+     -2473,
+     -2213,
+     -281
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE-1",
+   "x": -2860,
+   "y": -2382,
+   "z": -204,
+   "loc": "BLUE BASE",
+   "target": "blu_right",
+   "bounds": {
+    "min": [
+     -2875,
+     -2391,
+     -239
+    ],
+    "max": [
+     -2845,
+     -2373,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE BASE-2",
+   "x": -2136,
+   "y": -2380,
+   "z": -204,
+   "loc": "BLUE BASE",
+   "target": "blu_left",
+   "bounds": {
+    "min": [
+     -2155,
+     -2391,
+     -239
+    ],
+    "max": [
+     -2117,
+     -2369,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MAIN BLUE TELEPORT TO RED BASE-1",
+   "x": -1824,
+   "y": 128,
+   "z": -272,
+   "loc": "MAIN BLUE TELEPORT TO RED BASE",
+   "target": "blue3",
+   "bounds": {
+    "min": [
+     -1839,
+     113,
+     -303
+    ],
+    "max": [
+     -1809,
+     143,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MAIN BLUE TELEPORT TO RED BASE-2",
+   "x": -1824,
+   "y": 192,
+   "z": -272,
+   "loc": "MAIN BLUE TELEPORT TO RED BASE",
+   "target": "blue2",
+   "bounds": {
+    "min": [
+     -1839,
+     177,
+     -303
+    ],
+    "max": [
+     -1809,
+     207,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "MAIN BLUE TELEPORT TO RED BASE-3",
+   "x": -1824,
+   "y": 256,
+   "z": -272,
+   "loc": "MAIN BLUE TELEPORT TO RED BASE",
+   "target": "blue1",
+   "bounds": {
+    "min": [
+     -1839,
+     241,
+     -303
+    ],
+    "max": [
+     -1809,
+     271,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED 100 HEALTH ROOM",
+   "x": 0,
+   "y": 1066,
+   "z": -320,
+   "loc": "RED 100 HEALTH ROOM",
+   "target": "red_slime",
+   "bounds": {
+    "min": [
+     -23,
+     1061,
+     -359
+    ],
+    "max": [
+     23,
+     1071,
+     -281
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE-1",
+   "x": -360,
+   "y": 1228,
+   "z": -204,
+   "loc": "RED BASE",
+   "target": "red_left",
+   "bounds": {
+    "min": [
+     -379,
+     1217,
+     -239
+    ],
+    "max": [
+     -341,
+     1239,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED BASE-2",
+   "x": 364,
+   "y": 1230,
+   "z": -204,
+   "loc": "RED BASE",
+   "target": "red_right",
+   "bounds": {
+    "min": [
+     349,
+     1221,
+     -239
+    ],
+    "max": [
+     379,
+     1239,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "UNDER THE RED BRIDGE-1",
+   "x": -672,
+   "y": -1408,
+   "z": -272,
+   "loc": "UNDER THE RED BRIDGE",
+   "target": "red1",
+   "bounds": {
+    "min": [
+     -687,
+     -1423,
+     -303
+    ],
+    "max": [
+     -657,
+     -1393,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "UNDER THE RED BRIDGE-2",
+   "x": -672,
+   "y": -1344,
+   "z": -272,
+   "loc": "UNDER THE RED BRIDGE",
+   "target": "red2",
+   "bounds": {
+    "min": [
+     -687,
+     -1359,
+     -303
+    ],
+    "max": [
+     -657,
+     -1329,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "UNDER THE RED BRIDGE-3",
+   "x": -672,
+   "y": -1280,
+   "z": -272,
+   "loc": "UNDER THE RED BRIDGE",
+   "target": "red3",
+   "bounds": {
+    "min": [
+     -687,
+     -1295,
+     -303
+    ],
+    "max": [
+     -657,
+     -1265,
+     -241
+    ]
+   }
+  }
+ ]
+}

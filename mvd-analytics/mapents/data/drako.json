@@ -1,0 +1,286 @@
+{
+ "map": "drako",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-1",
+   "x": -32,
+   "y": 920,
+   "z": 360
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-2",
+   "x": 16,
+   "y": 920,
+   "z": 360
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "ga-1",
+   "x": 16,
+   "y": -368,
+   "z": 342
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "ga-2",
+   "x": 208,
+   "y": -368,
+   "z": 342
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "gl",
+   "x": -352,
+   "y": 688,
+   "z": 232
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "lg",
+   "x": 0,
+   "y": 0,
+   "z": 88
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "mh-1",
+   "x": 560,
+   "y": -16,
+   "z": 204,
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "mh-2",
+   "x": 576,
+   "y": 640,
+   "z": 344,
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "ng",
+   "x": -384,
+   "y": 384,
+   "z": 360
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent",
+   "x": -8,
+   "y": -800,
+   "z": 96
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra",
+   "x": 216,
+   "y": 704,
+   "z": 368
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "ring-1",
+   "x": -456,
+   "y": -352,
+   "z": 368
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "ring-2",
+   "x": -360,
+   "y": 356,
+   "z": 280
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-1",
+   "x": -16,
+   "y": 688,
+   "z": 84
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-2",
+   "x": 112,
+   "y": -368,
+   "z": 364
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-1",
+   "x": -176,
+   "y": 768,
+   "z": 104
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-2",
+   "x": -176,
+   "y": 864,
+   "z": 232
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "sng",
+   "x": -576,
+   "y": -576,
+   "z": 104
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "ssg",
+   "x": 680,
+   "y": 208,
+   "z": 90
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya",
+   "x": 592,
+   "y": 432,
+   "z": 328
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": 752,
+   "y": -224,
+   "z": 416
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 216,
+   "y": 1160,
+   "z": 360,
+   "targetName": "RA"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 300,
+   "y": -78,
+   "z": 88,
+   "targetName": "QUAD"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 776,
+   "y": 976,
+   "z": 264,
+   "targetName": "MEGA"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -264,
+   "y": -352,
+   "z": 152,
+   "target": "MEGA",
+   "bounds": {
+    "min": [
+     -271,
+     -415,
+     73
+    ],
+    "max": [
+     -257,
+     -289,
+     231
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 216,
+   "y": 975,
+   "z": 152,
+   "target": "RA",
+   "bounds": {
+    "min": [
+     177,
+     975,
+     81
+    ],
+    "max": [
+     255,
+     975,
+     223
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 592,
+   "y": 479,
+   "z": 408,
+   "target": "QUAD",
+   "bounds": {
+    "min": [
+     537,
+     479,
+     337
+    ],
+    "max": [
+     647,
+     479,
+     479
+    ]
+   }
+  }
+ ]
+}

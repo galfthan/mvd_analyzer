@@ -142,9 +142,11 @@ that downstream consumers render, summarise, or feed to an agent.
   dropped — except floors lying under a liquid surface, which swimmers
   never touch, so pruning would leave every pool bottomless. Pruned files
   carry a `pruned` provenance block; maps with no matching demos emit
-  unpruned. The committed 3D corpus (the maps with provisioned BSPs, bar
-  dad2 / spinev2 / zeal, which stay unpruned) is pruned this way against
-  recent competitive games —
+  unpruned. The committed corpus is every map `scripts/fetch-bsps.sh all`
+  fetches that mapgen can read (the curated competitive set and the rest
+  of vikpe/qw-assets, 1079 maps) plus some 50 older files of maps
+  qw-assets lacks. Of these, 26 curated maps — the ones that see nearly
+  all the play — are pruned this way against recent competitive games —
   [`scripts/prune-demos.tsv`](../scripts/prune-demos.tsv) records the
   exact map → mode → hub gameIds used, so the prune is reproducible.
 - `cmd/qw-recon-eval/` — damage-reconstruction accuracy harness: runs

@@ -1,0 +1,49 @@
+{
+ "map": "dmm4skybox",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -80,
+   "y": 0,
+   "z": 368
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 80,
+   "y": 0,
+   "z": 368
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -232,
+   "y": 104,
+   "z": 80,
+   "targetName": "respawn"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 0,
+   "y": 0,
+   "z": 80,
+   "targetName": "respawn"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 252,
+   "y": -136,
+   "z": 80,
+   "targetName": "respawn"
+  }
+ ]
+}

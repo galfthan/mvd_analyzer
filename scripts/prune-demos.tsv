@@ -5,9 +5,10 @@
 # may list several modes (one line each); all its lines' games feed one prune.
 # Selection (regenerated 2026-10-27): the newest games on the local corpus,
 # 4on4 first, then 2on2, then 1on1, up to ~10 4on4 / 20 2on2 / 40 1on1 of
-# coverage. Maps whose local corpus was too thin for that (phantoma, which
-# has no provisioned BSP, plus shifter, stronghold, toxicity) keep their
-# earlier 2026-06/07 prune and lines. Floors under a liquid surface are never
+# coverage. Maps whose local corpus was too thin for that (shifter,
+# stronghold, toxicity) keep their earlier 2026-06/07 prune and lines.
+# phantoma is no longer pruned: its geometry is now the qw-assets build's,
+# another version of the map than the one its three games were played on. Floors under a liquid surface are never
 # pruned (swimmers never touch the pool bottom).
 # Reproduce: download the gameIds (hubfetch CDN), then
 #   mapgen -bsp-dir bsps -map <map> -demos <dir> -out-dir mvd-web/static/maps
@@ -32,7 +33,6 @@ nova	1on1	180442,103997,103066
 nova	2on2	185550,182544,179226,178980,163614,102528,102520
 obsidian	2on2	204322
 obsidian	4on4	220063,217508,209843,208268,208118
-phantoma	4on4	82950,13950,13922
 phantombase	4on4	220520,219886,219869,219729,219697,219453,219115,218776,218750,218602
 pocket	1on1	207890,206836,206723,205769,201737,200881,200609,200300,200092,196984,196639,196621,196445,195663,195471,194466,187107,185204,179449,178694,176439,175489,175364,173316,171042,170684,164509,161086,159071,155402
 pocket	2on2	125676

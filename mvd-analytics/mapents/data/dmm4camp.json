@@ -1,0 +1,171 @@
+{
+ "map": "dmm4camp",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 291,
+   "y": 864,
+   "z": -88,
+   "bounds": {
+    "min": [
+     289,
+     849,
+     -103
+    ],
+    "max": [
+     293,
+     879,
+     -73
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -384,
+   "y": 1232,
+   "z": 64,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -479,
+     1185,
+     1
+    ],
+    "max": [
+     -289,
+     1279,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": -256,
+   "y": 422,
+   "z": 0,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -319,
+     385,
+     -127
+    ],
+    "max": [
+     -193,
+     459,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 208,
+   "y": 976,
+   "z": 64,
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     161,
+     929,
+     1
+    ],
+    "max": [
+     255,
+     1023,
+     127
+    ]
+   }
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 428,
+   "y": 188,
+   "z": 28
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 700,
+   "y": 288,
+   "z": 108
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 720,
+   "y": 0,
+   "z": 104
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 720,
+   "y": 48,
+   "z": 104
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 720,
+   "y": 96,
+   "z": 104
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 720,
+   "y": 144,
+   "z": 104
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 720,
+   "y": 192,
+   "z": 112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 720,
+   "y": 240,
+   "z": 112
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -384,
+   "y": 1008,
+   "z": 160,
+   "targetName": "tele2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -352,
+   "y": 832,
+   "z": 160,
+   "targetName": "tele1"
+  }
+ ]
+}

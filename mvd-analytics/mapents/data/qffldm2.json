@@ -1,0 +1,839 @@
+{
+ "map": "qffldm2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "supernail gun room",
+   "x": -704,
+   "y": -1232,
+   "z": -192,
+   "loc": "supernail gun room",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "tazer near pool-1",
+   "x": -816,
+   "y": -640,
+   "z": -528,
+   "loc": "tazer near pool"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "tazer near pool-2",
+   "x": -688,
+   "y": -640,
+   "z": -528,
+   "loc": "tazer near pool"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "under the sea-1",
+   "x": 432,
+   "y": -336,
+   "z": -432,
+   "loc": "under the sea"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "under the sea-2",
+   "x": 432,
+   "y": -272,
+   "z": -432,
+   "loc": "under the sea"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "water",
+   "x": 176,
+   "y": -944,
+   "z": -192,
+   "loc": "water"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL behind bars",
+   "x": -352,
+   "y": -368,
+   "z": -192,
+   "loc": "GL behind bars"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL below Quad",
+   "x": 208,
+   "y": -1520,
+   "z": 80,
+   "loc": "GL below Quad"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL in lava pool room",
+   "x": 1440,
+   "y": -672,
+   "z": -144,
+   "loc": "GL in lava pool room"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Pent",
+   "x": 1440,
+   "y": -720,
+   "z": -544,
+   "loc": "Pent",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "lava pool room",
+   "x": 1360,
+   "y": -1328,
+   "z": -160,
+   "loc": "lava pool room",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Pent",
+   "x": 1376,
+   "y": -720,
+   "z": -544,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL with lave moat room-1",
+   "x": 672,
+   "y": -2304,
+   "z": -128,
+   "loc": "RL with lave moat room"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL with lave moat room-2",
+   "x": 672,
+   "y": -2208,
+   "z": -128,
+   "loc": "RL with lave moat room"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "lava pool room",
+   "x": 1296,
+   "y": -1328,
+   "z": -160,
+   "loc": "lava pool room"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long dark tunnel-1",
+   "x": -304,
+   "y": 352,
+   "z": -192,
+   "loc": "long dark tunnel"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "long dark tunnel-2",
+   "x": -240,
+   "y": 352,
+   "z": -192,
+   "loc": "long dark tunnel"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "nr RL over water-1",
+   "x": -352,
+   "y": -800,
+   "z": 16,
+   "loc": "nr RL over water"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "nr RL over water-2",
+   "x": -272,
+   "y": -800,
+   "z": 16,
+   "loc": "nr RL over water"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "supernail gun room-1",
+   "x": -752,
+   "y": -944,
+   "z": -192,
+   "loc": "supernail gun room"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "supernail gun room-2",
+   "x": -672,
+   "y": -944,
+   "z": -192,
+   "loc": "supernail gun room"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tazer near pool-1",
+   "x": -816,
+   "y": -320,
+   "z": -512,
+   "loc": "tazer near pool"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tazer near pool-2",
+   "x": -688,
+   "y": -320,
+   "z": -512,
+   "loc": "tazer near pool"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "under the sea-1",
+   "x": 176,
+   "y": -128,
+   "z": -480,
+   "loc": "under the sea"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "under the sea-2",
+   "x": 240,
+   "y": -128,
+   "z": -480,
+   "loc": "under the sea"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "yellow armour-1",
+   "x": 848,
+   "y": -880,
+   "z": 0,
+   "loc": "yellow armour"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "yellow armour-2",
+   "x": 1072,
+   "y": -880,
+   "z": 0,
+   "loc": "yellow armour"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "tazer near pool",
+   "x": -624,
+   "y": -480,
+   "z": -512,
+   "loc": "tazer near pool"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "megahealth below Quad",
+   "x": 216,
+   "y": -1488,
+   "z": -176,
+   "loc": "megahealth below Quad",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "under the sea / megahealth",
+   "x": 224,
+   "y": -496,
+   "z": -432,
+   "loc": "under the sea / megahealth",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad / nailgun-1",
+   "x": -192,
+   "y": -1456,
+   "z": 304,
+   "loc": "Quad / nailgun"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad / nailgun-2",
+   "x": -144,
+   "y": -1504,
+   "z": 304,
+   "loc": "Quad / nailgun"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RL over water",
+   "x": -128,
+   "y": -464,
+   "z": 32,
+   "loc": "RL over water"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "ledge below Quad",
+   "x": -576,
+   "y": -1408,
+   "z": 64,
+   "loc": "ledge below Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "supernail gun room",
+   "x": -1088,
+   "y": -1024,
+   "z": -48,
+   "loc": "supernail gun room"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water",
+   "x": 336,
+   "y": -944,
+   "z": -192,
+   "loc": "water"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "Quad / nailgun",
+   "x": -256,
+   "y": -1408,
+   "z": 288,
+   "loc": "Quad / nailgun"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Pent",
+   "x": 1504,
+   "y": -784,
+   "z": -544,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 224,
+   "y": -1360,
+   "z": 288,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "red armour",
+   "x": 208,
+   "y": -2112,
+   "z": 80,
+   "loc": "red armour"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL over water",
+   "x": -128,
+   "y": -384,
+   "z": 16,
+   "loc": "RL over water"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL with lave moat room",
+   "x": 208,
+   "y": -2608,
+   "z": -128,
+   "loc": "RL with lave moat room"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL behind bars",
+   "x": -416,
+   "y": -448,
+   "z": -176,
+   "loc": "GL behind bars"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad platform-1",
+   "x": 672,
+   "y": -1392,
+   "z": 304,
+   "loc": "Quad platform"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad platform-2",
+   "x": 736,
+   "y": -1328,
+   "z": 304,
+   "loc": "Quad platform"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RL over water",
+   "x": -128,
+   "y": -512,
+   "z": 32,
+   "loc": "RL over water"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RL with lave moat room-1",
+   "x": -256,
+   "y": -2480,
+   "z": -112,
+   "loc": "RL with lave moat room"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RL with lave moat room-2",
+   "x": -256,
+   "y": -2400,
+   "z": -112,
+   "loc": "RL with lave moat room"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "lava pool room",
+   "x": 1696,
+   "y": -784,
+   "z": -192,
+   "loc": "lava pool room"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "ledge below Quad",
+   "x": 576,
+   "y": -1504,
+   "z": 48,
+   "loc": "ledge below Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "megahealth below Quad-1",
+   "x": -304,
+   "y": -1312,
+   "z": -192,
+   "loc": "megahealth below Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "megahealth below Quad-2",
+   "x": -304,
+   "y": -1232,
+   "z": -192,
+   "loc": "megahealth below Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "supernail gun room",
+   "x": -768,
+   "y": -1232,
+   "z": -192,
+   "loc": "supernail gun room",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "under the sea-1",
+   "x": 224,
+   "y": -832,
+   "z": -480,
+   "loc": "under the sea",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "under the sea-2",
+   "x": 288,
+   "y": -832,
+   "z": -480,
+   "loc": "under the sea"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "GL behind bars",
+   "x": -352,
+   "y": -448,
+   "z": -176,
+   "loc": "GL behind bars"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "ledge below Quad / supershotgun",
+   "x": 304,
+   "y": -1088,
+   "z": 80,
+   "loc": "ledge below Quad / supershotgun"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "supernail gun room",
+   "x": -1024,
+   "y": -1024,
+   "z": -64,
+   "loc": "supernail gun room"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "ledge below Quad / supershotgun",
+   "x": 224,
+   "y": -1088,
+   "z": 64,
+   "loc": "ledge below Quad / supershotgun"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "yellow armour",
+   "x": 680,
+   "y": -360,
+   "z": 16,
+   "loc": "yellow armour"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL behind bars",
+   "x": -560,
+   "y": -304,
+   "z": -192,
+   "loc": "GL behind bars"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "lava pool room-1",
+   "x": 832,
+   "y": -1104,
+   "z": -176,
+   "loc": "lava pool room"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "lava pool room-2",
+   "x": 1696,
+   "y": -944,
+   "z": -192,
+   "loc": "lava pool room"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "ledge below Quad",
+   "x": 656,
+   "y": -1280,
+   "z": 64,
+   "loc": "ledge below Quad"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "megahealth below Quad",
+   "x": -240,
+   "y": -1264,
+   "z": -192,
+   "loc": "megahealth below Quad"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "outside RL with lava moat-1",
+   "x": -656,
+   "y": -2128,
+   "z": -128,
+   "loc": "outside RL with lava moat"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "outside RL with lava moat-2",
+   "x": 208,
+   "y": -1792,
+   "z": -128,
+   "loc": "outside RL with lava moat"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "outside RL with lava moat-3",
+   "x": 1088,
+   "y": -1792,
+   "z": -128,
+   "loc": "outside RL with lava moat"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "overlooking water",
+   "x": 240,
+   "y": -752,
+   "z": 64,
+   "loc": "overlooking water"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "supernail gun room",
+   "x": -576,
+   "y": -1232,
+   "z": -176,
+   "loc": "supernail gun room"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "water",
+   "x": 256,
+   "y": -976,
+   "z": -192,
+   "loc": "water"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "yellow armour",
+   "x": 640,
+   "y": -144,
+   "z": 16,
+   "loc": "yellow armour"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad",
+   "x": 224,
+   "y": -1488,
+   "z": 288,
+   "loc": "Quad",
+   "targetName": "2quad"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "lava pool room",
+   "x": 1456,
+   "y": -1368,
+   "z": -180,
+   "loc": "lava pool room",
+   "targetName": "pent"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "ledge below Quad",
+   "x": -224,
+   "y": -1504,
+   "z": 48,
+   "loc": "ledge below Quad",
+   "targetName": "port2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent",
+   "x": 1664,
+   "y": -784,
+   "z": -512,
+   "loc": "Pent",
+   "target": "pent",
+   "bounds": {
+    "min": [
+     1649,
+     -831,
+     -575
+    ],
+    "max": [
+     1679,
+     -737,
+     -449
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "outside RL with lava moat",
+   "x": 896,
+   "y": -1624,
+   "z": -80,
+   "loc": "outside RL with lava moat",
+   "target": "2quad",
+   "bounds": {
+    "min": [
+     849,
+     -1647,
+     -159
+    ],
+    "max": [
+     943,
+     -1601,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tazer near pool",
+   "x": -912,
+   "y": -480,
+   "z": -512,
+   "loc": "tazer near pool",
+   "target": "port2",
+   "bounds": {
+    "min": [
+     -927,
+     -527,
+     -559
+    ],
+    "max": [
+     -897,
+     -433,
+     -465
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "yellow armour",
+   "x": 960,
+   "y": -912,
+   "z": 24,
+   "loc": "yellow armour",
+   "target": "2quad",
+   "bounds": {
+    "min": [
+     929,
+     -927,
+     -31
+    ],
+    "max": [
+     991,
+     -897,
+     79
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,30 @@
+{
+ "map": "speedway",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -352,
+   "y": -1056,
+   "z": -320
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 2048,
+   "y": 128,
+   "z": -320
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 2148,
+   "y": -976,
+   "z": -320
+  }
+ ]
+}

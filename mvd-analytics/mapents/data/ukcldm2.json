@@ -1,0 +1,1048 @@
+{
+ "map": "ukcldm2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "high-1",
+   "x": 1184,
+   "y": -824,
+   "z": 48,
+   "loc": "high",
+   "bounds": {
+    "min": [
+     1169,
+     -831,
+     33
+    ],
+    "max": [
+     1199,
+     -817,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "high-2",
+   "x": 1368,
+   "y": -72,
+   "z": 48,
+   "loc": "high",
+   "bounds": {
+    "min": [
+     1361,
+     -79,
+     41
+    ],
+    "max": [
+     1375,
+     -65,
+     55
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "high.Quad",
+   "x": 1336,
+   "y": 392,
+   "z": 48,
+   "loc": "high.Quad",
+   "bounds": {
+    "min": [
+     1329,
+     385,
+     41
+    ],
+    "max": [
+     1343,
+     399,
+     55
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "water.lift",
+   "x": 1664,
+   "y": -72,
+   "z": -280,
+   "loc": "water.lift",
+   "bounds": {
+    "min": [
+     1657,
+     -79,
+     -287
+    ],
+    "max": [
+     1671,
+     -65,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "Pent.gate",
+   "x": 280,
+   "y": -1264,
+   "z": -112,
+   "loc": "Pent.gate",
+   "bounds": {
+    "min": [
+     241,
+     -1279,
+     -159
+    ],
+    "max": [
+     319,
+     -1249,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "high.Quad",
+   "x": 1284,
+   "y": 200,
+   "z": -24,
+   "loc": "high.Quad",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     1265,
+     97,
+     -31
+    ],
+    "max": [
+     1303,
+     303,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "high.stairs",
+   "x": 1040,
+   "y": -736,
+   "z": -272,
+   "loc": "high.stairs",
+   "bounds": {
+    "min": [
+     1025,
+     -767,
+     -319
+    ],
+    "max": [
+     1055,
+     -705,
+     -225
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.lift-1",
+   "x": 1504,
+   "y": -112,
+   "z": -160,
+   "loc": "water.lift",
+   "bounds": {
+    "min": [
+     1441,
+     -159,
+     -319
+    ],
+    "max": [
+     1567,
+     -65,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "water.lift-2",
+   "x": 1584,
+   "y": -672,
+   "z": -272,
+   "loc": "water.lift",
+   "bounds": {
+    "min": [
+     1569,
+     -703,
+     -319
+    ],
+    "max": [
+     1599,
+     -641,
+     -225
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Pent.gate-1",
+   "x": 32,
+   "y": -1248,
+   "z": -112,
+   "loc": "Pent.gate"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Pent.gate-2",
+   "x": 32,
+   "y": -1200,
+   "z": -112,
+   "loc": "Pent.gate"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "YA.low",
+   "x": -928,
+   "y": -1840,
+   "z": -282,
+   "loc": "YA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "water.LG-1",
+   "x": 1133,
+   "y": -1339,
+   "z": -470,
+   "loc": "water.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "water.LG-2",
+   "x": 1210,
+   "y": -1303,
+   "z": -480,
+   "loc": "water.LG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "Pent.GL",
+   "x": 256,
+   "y": -402,
+   "z": -120,
+   "loc": "Pent.GL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "YA.GL",
+   "x": -496,
+   "y": -2024,
+   "z": -69,
+   "loc": "YA.GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Pent.gate-1",
+   "x": 56,
+   "y": -1480,
+   "z": -110,
+   "loc": "Pent.gate"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Pent.gate-2",
+   "x": 125,
+   "y": -1439,
+   "z": -121,
+   "loc": "Pent.gate"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Pent.gate-3",
+   "x": 136,
+   "y": -1480,
+   "z": -127,
+   "loc": "Pent.gate"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA.jesus-1",
+   "x": -766,
+   "y": -1795,
+   "z": -286,
+   "loc": "YA.jesus"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA.jesus-2",
+   "x": -724,
+   "y": -1796,
+   "z": -288,
+   "loc": "YA.jesus"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA.low-1",
+   "x": -944,
+   "y": -1000,
+   "z": -280,
+   "loc": "YA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA.low-2",
+   "x": -904,
+   "y": -1000,
+   "z": -280,
+   "loc": "YA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high-1",
+   "x": 1232,
+   "y": -684,
+   "z": 56,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high-2",
+   "x": 1234,
+   "y": -106,
+   "z": 46,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high-3",
+   "x": 1312,
+   "y": -680,
+   "z": 56,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.roof",
+   "x": 856,
+   "y": -704,
+   "z": 160,
+   "loc": "high.roof"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.stairs-1",
+   "x": 974,
+   "y": -729,
+   "z": -289,
+   "loc": "high.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.stairs-2",
+   "x": 984,
+   "y": -312,
+   "z": -264,
+   "loc": "high.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.stairs-3",
+   "x": 984,
+   "y": -244,
+   "z": -264,
+   "loc": "high.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "slime.floor-1",
+   "x": 56,
+   "y": -344,
+   "z": -296,
+   "loc": "slime.floor"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "slime.floor-2",
+   "x": 72,
+   "y": -392,
+   "z": -296,
+   "loc": "slime.floor"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "slime.floor-3",
+   "x": 472,
+   "y": -56,
+   "z": -280,
+   "loc": "slime.floor"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "slime.floor-4",
+   "x": 520,
+   "y": -104,
+   "z": -280,
+   "loc": "slime.floor"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tunnel-1",
+   "x": -760,
+   "y": -616,
+   "z": -287,
+   "loc": "tunnel"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tunnel-2",
+   "x": -696,
+   "y": -616,
+   "z": -280,
+   "loc": "tunnel"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tunnel-3",
+   "x": 248,
+   "y": -816,
+   "z": -296,
+   "loc": "tunnel"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tunnel-4",
+   "x": 264,
+   "y": -776,
+   "z": -296,
+   "loc": "tunnel"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tunnel.tele-1",
+   "x": -41,
+   "y": 219,
+   "z": -293,
+   "loc": "tunnel.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tunnel.tele-2",
+   "x": -35,
+   "y": 186,
+   "z": -293,
+   "loc": "tunnel.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water.LG-1",
+   "x": 925,
+   "y": -1307,
+   "z": -486,
+   "loc": "water.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water.LG-2",
+   "x": 1068,
+   "y": -1730,
+   "z": -481,
+   "loc": "water.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water.way-1",
+   "x": 392,
+   "y": -1880,
+   "z": -286,
+   "loc": "water.way"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water.way-2",
+   "x": 408,
+   "y": -1912,
+   "z": -286,
+   "loc": "water.way"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "water.LG",
+   "x": 1424,
+   "y": -1744,
+   "z": -493,
+   "loc": "water.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RA.secret",
+   "x": 1321,
+   "y": -694,
+   "z": -268,
+   "loc": "RA.secret",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "water.MH",
+   "x": 1656,
+   "y": -1736,
+   "z": -344,
+   "loc": "water.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "YA.jesus-1",
+   "x": -768,
+   "y": -1856,
+   "z": -304,
+   "loc": "YA.jesus"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "YA.jesus-2",
+   "x": -684,
+   "y": -1808,
+   "z": -304,
+   "loc": "YA.jesus"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "high-1",
+   "x": 656,
+   "y": -752,
+   "z": 48,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "high-2",
+   "x": 663,
+   "y": -694,
+   "z": 67,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "tunnel.tele-1",
+   "x": -272,
+   "y": 160,
+   "z": -292,
+   "loc": "tunnel.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "tunnel.tele-2",
+   "x": -272,
+   "y": 208,
+   "z": -293,
+   "loc": "tunnel.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water.bridge",
+   "x": 960,
+   "y": -2080,
+   "z": -291,
+   "loc": "water.bridge"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water.way",
+   "x": 64,
+   "y": -2080,
+   "z": -295,
+   "loc": "water.way"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "slime.floor",
+   "x": 496,
+   "y": -464,
+   "z": -288,
+   "loc": "slime.floor"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Pent",
+   "x": 312,
+   "y": -1416,
+   "z": -90,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "high.Quad",
+   "x": 1280,
+   "y": 384,
+   "z": 112,
+   "loc": "high.Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA.secret",
+   "x": 1446,
+   "y": -727,
+   "z": -268,
+   "loc": "RA.secret"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "slime.RA",
+   "x": 48,
+   "y": -112,
+   "z": -112,
+   "loc": "slime.RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "YA",
+   "x": -928,
+   "y": -1440,
+   "z": -208,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "slime.RL",
+   "x": 288,
+   "y": -250,
+   "z": -256,
+   "loc": "slime.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA-1",
+   "x": -972,
+   "y": -1712,
+   "z": -208,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA-2",
+   "x": -928,
+   "y": -1712,
+   "z": -201,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA.GL",
+   "x": -608,
+   "y": -2040,
+   "z": -72,
+   "loc": "YA.GL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "high",
+   "x": 643,
+   "y": -98,
+   "z": 39,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "high.roof",
+   "x": 828,
+   "y": -662,
+   "z": 165,
+   "loc": "high.roof"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "slime.floor-1",
+   "x": 64,
+   "y": -480,
+   "z": -315,
+   "loc": "slime.floor"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "slime.floor-2",
+   "x": 112,
+   "y": -480,
+   "z": -318,
+   "loc": "slime.floor"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "tunnel.lift",
+   "x": -112,
+   "y": -1200,
+   "z": -288,
+   "loc": "tunnel.lift"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "water.bridge",
+   "x": 1424,
+   "y": -1568,
+   "z": -266,
+   "loc": "water.bridge"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "YA.low-1",
+   "x": -1104,
+   "y": -1056,
+   "z": -272,
+   "loc": "YA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "YA.low-2",
+   "x": -1104,
+   "y": -1008,
+   "z": -272,
+   "loc": "YA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "YA.low-3",
+   "x": -876,
+   "y": -1836,
+   "z": -286,
+   "loc": "YA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "high",
+   "x": 1287,
+   "y": -449,
+   "z": 50,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "high",
+   "x": 663,
+   "y": -626,
+   "z": 50,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "high",
+   "x": 1232,
+   "y": -192,
+   "z": 57,
+   "loc": "high"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "high.stairs",
+   "x": 880,
+   "y": -212,
+   "z": -288,
+   "loc": "high.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": -900,
+   "y": -1744,
+   "z": -184,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Pent.gate",
+   "x": 48,
+   "y": -1089,
+   "z": -120,
+   "loc": "Pent.gate"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA",
+   "x": -926,
+   "y": -1536,
+   "z": -170,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "high",
+   "x": 1296,
+   "y": -720,
+   "z": 72,
+   "loc": "high"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "high.stairs",
+   "x": 944,
+   "y": -240,
+   "z": -248,
+   "loc": "high.stairs"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "tunnel",
+   "x": 64,
+   "y": -256,
+   "z": -280,
+   "loc": "tunnel"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "tunnel.tele",
+   "x": -136,
+   "y": 80,
+   "z": -264,
+   "loc": "tunnel.tele"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "YA.GL",
+   "x": -728,
+   "y": -2150,
+   "z": -64,
+   "loc": "YA.GL",
+   "targetName": "teleport2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "YA.low-1",
+   "x": -1072,
+   "y": -2000,
+   "z": -288,
+   "loc": "YA.low",
+   "targetName": "teleport1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "YA.low-2",
+   "x": -1072,
+   "y": -618,
+   "z": -288,
+   "loc": "YA.low",
+   "targetName": "teleport3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "high.Quad",
+   "x": 1032,
+   "y": 412,
+   "z": 52,
+   "loc": "high.Quad",
+   "target": "teleport3",
+   "bounds": {
+    "min": [
+     1029,
+     388,
+     17
+    ],
+    "max": [
+     1035,
+     436,
+     87
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tunnel.tele",
+   "x": -128,
+   "y": 212,
+   "z": -260,
+   "loc": "tunnel.tele",
+   "target": "teleport2",
+   "bounds": {
+    "min": [
+     -167,
+     209,
+     -303
+    ],
+    "max": [
+     -89,
+     215,
+     -217
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water.MH",
+   "x": 1596,
+   "y": -1744,
+   "z": -336,
+   "loc": "water.MH",
+   "target": "teleport1",
+   "bounds": {
+    "min": [
+     1593,
+     -1775,
+     -371
+    ],
+    "max": [
+     1599,
+     -1713,
+     -301
+    ]
+   }
+  }
+ ]
+}

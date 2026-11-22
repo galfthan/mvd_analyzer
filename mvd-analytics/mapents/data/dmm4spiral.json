@@ -1,0 +1,231 @@
+{
+ "map": "dmm4spiral",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -608,
+   "y": -576,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-10",
+   "x": 304,
+   "y": 640,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-11",
+   "x": 608,
+   "y": -576,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-12",
+   "x": 608,
+   "y": -272,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-13",
+   "x": 608,
+   "y": 32,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-14",
+   "x": 608,
+   "y": 336,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-15",
+   "x": 608,
+   "y": 640,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -608,
+   "y": -272,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -608,
+   "y": 336,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -608,
+   "y": 640,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": -304,
+   "y": -576,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": -304,
+   "y": 640,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 0,
+   "y": -576,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 0,
+   "y": 640,
+   "z": -112
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": 304,
+   "y": -576,
+   "z": -112
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -448,
+   "y": 32,
+   "z": -352,
+   "targetName": "t4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -448,
+   "y": 32,
+   "z": 48,
+   "targetName": "t7"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -304,
+   "y": 336,
+   "z": 32,
+   "targetName": "t3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": 0,
+   "y": -416,
+   "z": -336,
+   "targetName": "t5"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": 0,
+   "y": 480,
+   "z": 48,
+   "targetName": "t6"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": 416,
+   "y": 32,
+   "z": -336,
+   "targetName": "t2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-7",
+   "x": 416,
+   "y": 32,
+   "z": 48,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 488,
+   "y": 32,
+   "z": -320,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     481,
+     -31,
+     -367
+    ],
+    "max": [
+     495,
+     95,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 488,
+   "y": 32,
+   "z": 64,
+   "target": "t2",
+   "bounds": {
+    "min": [
+     481,
+     -15,
+     17
+    ],
+    "max": [
+     495,
+     79,
+     111
+    ]
+   }
+  }
+ ]
+}

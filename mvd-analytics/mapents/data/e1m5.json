@@ -1,0 +1,2010 @@
+{
+ "map": "e1m5",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RL.low",
+   "x": -544,
+   "y": 1070,
+   "z": -8,
+   "loc": "RL.low",
+   "bounds": {
+    "min": [
+     -567,
+     1065,
+     -31
+    ],
+    "max": [
+     -521,
+     1075,
+     15
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "SNG",
+   "x": 368,
+   "y": 2264,
+   "z": 330,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     361,
+     2257,
+     321
+    ],
+    "max": [
+     375,
+     2271,
+     339
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "SNG.YA",
+   "x": 624,
+   "y": 2336,
+   "z": 240,
+   "loc": "SNG.YA",
+   "bounds": {
+    "min": [
+     593,
+     2305,
+     237
+    ],
+    "max": [
+     655,
+     2367,
+     243
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "SSG",
+   "x": -752,
+   "y": 2176,
+   "z": 298,
+   "loc": "SSG",
+   "bounds": {
+    "min": [
+     -783,
+     2145,
+     293
+    ],
+    "max": [
+     -721,
+     2207,
+     303
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "bridge.YA",
+   "x": -1536,
+   "y": 2176,
+   "z": 127,
+   "loc": "bridge.YA",
+   "bounds": {
+    "min": [
+     -1567,
+     2145,
+     121
+    ],
+    "max": [
+     -1505,
+     2207,
+     133
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "square",
+   "x": 704,
+   "y": 1680,
+   "z": -10,
+   "loc": "square",
+   "bounds": {
+    "min": [
+     673,
+     1649,
+     -15
+    ],
+    "max": [
+     735,
+     1711,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.entry-1",
+   "x": -74,
+   "y": 952,
+   "z": 139,
+   "loc": "GL.entry",
+   "bounds": {
+    "min": [
+     -111,
+     945,
+     87
+    ],
+    "max": [
+     -37,
+     959,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.entry-2",
+   "x": 120,
+   "y": 1104,
+   "z": 145.5,
+   "loc": "GL.entry",
+   "bounds": {
+    "min": [
+     65,
+     1097,
+     65
+    ],
+    "max": [
+     175,
+     1111,
+     226
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL-1",
+   "x": -576,
+   "y": 1216,
+   "z": 24,
+   "loc": "RL",
+   "spawnflags": 2064,
+   "bounds": {
+    "min": [
+     -607,
+     1209,
+     -47
+    ],
+    "max": [
+     -545,
+     1223,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL-2",
+   "x": -512,
+   "y": 1216,
+   "z": 24,
+   "loc": "RL",
+   "spawnflags": 2064,
+   "bounds": {
+    "min": [
+     -543,
+     1209,
+     -47
+    ],
+    "max": [
+     -481,
+     1223,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.block-1",
+   "x": -1056,
+   "y": 1792,
+   "z": 212,
+   "loc": "RL.block",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1067,
+     1781,
+     161
+    ],
+    "max": [
+     -1045,
+     1803,
+     263
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.block-2",
+   "x": -960,
+   "y": 1864,
+   "z": 192,
+   "loc": "RL.block",
+   "bounds": {
+    "min": [
+     -1023,
+     1857,
+     129
+    ],
+    "max": [
+     -897,
+     1871,
+     255
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.high/hole-1",
+   "x": -576,
+   "y": 1776,
+   "z": 416,
+   "loc": "RL.high/hole",
+   "spawnflags": 2056,
+   "bounds": {
+    "min": [
+     -607,
+     1769,
+     321
+    ],
+    "max": [
+     -545,
+     1783,
+     511
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.high/hole-2",
+   "x": -512,
+   "y": 1776,
+   "z": 416,
+   "loc": "RL.high/hole",
+   "spawnflags": 2056,
+   "bounds": {
+    "min": [
+     -543,
+     1769,
+     321
+    ],
+    "max": [
+     -481,
+     1783,
+     511
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "SNG",
+   "x": 552,
+   "y": 2264,
+   "z": 292,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     545,
+     2225,
+     241
+    ],
+    "max": [
+     559,
+     2303,
+     343
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG.stairs",
+   "x": -232,
+   "y": 2548,
+   "z": 480,
+   "loc": "SNG.stairs",
+   "bounds": {
+    "min": [
+     -239,
+     2473,
+     401
+    ],
+    "max": [
+     -225,
+     2623,
+     559
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SSG-1",
+   "x": -800,
+   "y": 2032,
+   "z": 374,
+   "loc": "SSG",
+   "bounds": {
+    "min": [
+     -831,
+     2025,
+     301
+    ],
+    "max": [
+     -769,
+     2039,
+     447
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SSG-2",
+   "x": -736,
+   "y": 2032,
+   "z": 374,
+   "loc": "SSG",
+   "bounds": {
+    "min": [
+     -767,
+     2025,
+     301
+    ],
+    "max": [
+     -705,
+     2039,
+     447
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "bridge.lift",
+   "x": -1400,
+   "y": 1792,
+   "z": 119,
+   "loc": "bridge.lift",
+   "bounds": {
+    "min": [
+     -1407,
+     1761,
+     -1
+    ],
+    "max": [
+     -1393,
+     1823,
+     239
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "exit",
+   "x": -544,
+   "y": 1776,
+   "z": -204,
+   "loc": "exit",
+   "bounds": {
+    "min": [
+     -583,
+     1769,
+     -263
+    ],
+    "max": [
+     -505,
+     1783,
+     -145
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "square-1",
+   "x": 556,
+   "y": 1616,
+   "z": 160,
+   "loc": "square",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     401,
+     1489,
+     121
+    ],
+    "max": [
+     711,
+     1743,
+     199
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "square-2",
+   "x": 576,
+   "y": 1616,
+   "z": 56,
+   "loc": "square",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     569,
+     1489,
+     -7
+    ],
+    "max": [
+     583,
+     1743,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "square-3",
+   "x": 712,
+   "y": 1432,
+   "z": 160,
+   "loc": "square",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     585,
+     1249,
+     121
+    ],
+    "max": [
+     839,
+     1615,
+     199
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "square-4",
+   "x": 712,
+   "y": 1480,
+   "z": 56,
+   "loc": "square",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     569,
+     1473,
+     -7
+    ],
+    "max": [
+     855,
+     1487,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "square-5",
+   "x": 712,
+   "y": 1752,
+   "z": 56,
+   "loc": "square",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     569,
+     1745,
+     -7
+    ],
+    "max": [
+     855,
+     1759,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "square-6",
+   "x": 712,
+   "y": 1800,
+   "z": 160,
+   "loc": "square",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     585,
+     1617,
+     121
+    ],
+    "max": [
+     839,
+     1983,
+     199
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "square-7",
+   "x": 848,
+   "y": 1616,
+   "z": 56,
+   "loc": "square",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     841,
+     1489,
+     -7
+    ],
+    "max": [
+     855,
+     1743,
+     119
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "square-8",
+   "x": 864,
+   "y": 1616,
+   "z": 160,
+   "loc": "square",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     713,
+     1489,
+     121
+    ],
+    "max": [
+     1015,
+     1743,
+     199
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "square.entry",
+   "x": 184,
+   "y": 1648,
+   "z": 17,
+   "loc": "square.entry",
+   "bounds": {
+    "min": [
+     177,
+     1593,
+     -93
+    ],
+    "max": [
+     191,
+     1703,
+     127
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "exit",
+   "x": -544,
+   "y": 1736,
+   "z": -264,
+   "loc": "exit"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": -112,
+   "y": 1656,
+   "z": -48,
+   "loc": "GL",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL-1",
+   "x": -808,
+   "y": 1548,
+   "z": 132,
+   "loc": "RL",
+   "spawnflags": 2049
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL-2",
+   "x": -808,
+   "y": 1592,
+   "z": 132,
+   "loc": "RL",
+   "spawnflags": 2049
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL.block",
+   "x": -936,
+   "y": 1904,
+   "z": 128,
+   "loc": "RL.block",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL.low-1",
+   "x": -800,
+   "y": 1240,
+   "z": -44,
+   "loc": "RL.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL.low-2",
+   "x": -800,
+   "y": 1284,
+   "z": -44,
+   "loc": "RL.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "SNG-1",
+   "x": -224,
+   "y": 2080,
+   "z": 244,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "SNG-2",
+   "x": -224,
+   "y": 2120,
+   "z": 244,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "SNG-3",
+   "x": -224,
+   "y": 2160,
+   "z": 244,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "bridge",
+   "x": -944,
+   "y": 2056,
+   "z": 132,
+   "loc": "bridge",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "exit",
+   "x": -384,
+   "y": 1840,
+   "z": -256,
+   "loc": "exit",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "square",
+   "x": 896,
+   "y": 1384,
+   "z": -4,
+   "loc": "square",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "water.stairs",
+   "x": 68,
+   "y": 1000,
+   "z": 72,
+   "loc": "water.stairs",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL-1",
+   "x": 72,
+   "y": 1824,
+   "z": -44,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL-2",
+   "x": 112,
+   "y": 1824,
+   "z": -44,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "NG-1",
+   "x": -1224,
+   "y": 1328,
+   "z": 144,
+   "loc": "NG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "NG-2",
+   "x": -1144,
+   "y": 1328,
+   "z": 144,
+   "loc": "NG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL",
+   "x": -528,
+   "y": 1088,
+   "z": 132,
+   "loc": "RL",
+   "spawnflags": 3584
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL.high",
+   "x": -808,
+   "y": 1648,
+   "z": 324,
+   "loc": "RL.high",
+   "spawnflags": 2048
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SNG",
+   "x": 224,
+   "y": 2408,
+   "z": 244,
+   "loc": "SNG",
+   "spawnflags": 2048
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SSG",
+   "x": -824,
+   "y": 2232,
+   "z": 300,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "bridge-1",
+   "x": -1656,
+   "y": 1472,
+   "z": 132,
+   "loc": "bridge"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "bridge-2",
+   "x": -1656,
+   "y": 1520,
+   "z": 132,
+   "loc": "bridge"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "bridge.lift-1",
+   "x": -1272,
+   "y": 1912,
+   "z": 12,
+   "loc": "bridge.lift"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "bridge.lift-2",
+   "x": -1216,
+   "y": 1912,
+   "z": 12,
+   "loc": "bridge.lift"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "spikes",
+   "x": -488,
+   "y": 712,
+   "z": 128,
+   "loc": "spikes"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "square-1",
+   "x": 256,
+   "y": 1904,
+   "z": -4,
+   "loc": "square",
+   "spawnflags": 3584
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "square-2",
+   "x": 256,
+   "y": 1944,
+   "z": -4,
+   "loc": "square",
+   "spawnflags": 3584
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "square-3",
+   "x": 432,
+   "y": 1256,
+   "z": -4,
+   "loc": "square",
+   "spawnflags": 3584
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "square-4",
+   "x": 632,
+   "y": 1528,
+   "z": -4,
+   "loc": "square"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "square-5",
+   "x": 632,
+   "y": 1568,
+   "z": -4,
+   "loc": "square"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "square-6",
+   "x": 872,
+   "y": 1944,
+   "z": -4,
+   "loc": "square",
+   "spawnflags": 3584
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "square-7",
+   "x": 920,
+   "y": 1944,
+   "z": -4,
+   "loc": "square",
+   "spawnflags": 3584
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "square-8",
+   "x": 968,
+   "y": 1944,
+   "z": -4,
+   "loc": "square",
+   "spawnflags": 3584
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "square.entry-1",
+   "x": 324,
+   "y": 1720,
+   "z": -4,
+   "loc": "square.entry",
+   "spawnflags": 2304
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "square.entry-2",
+   "x": 324,
+   "y": 1760,
+   "z": -4,
+   "loc": "square.entry",
+   "spawnflags": 2304
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "start-1",
+   "x": -496,
+   "y": 216,
+   "z": 152,
+   "loc": "start"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "start-2",
+   "x": -464,
+   "y": 176,
+   "z": 152,
+   "loc": "start"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "water.MH",
+   "x": -200,
+   "y": 56,
+   "z": 56,
+   "loc": "water.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad",
+   "x": -640,
+   "y": 784,
+   "z": 320,
+   "loc": "Quad",
+   "spawnflags": 768
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RL.low",
+   "x": -296,
+   "y": 1648,
+   "z": -44,
+   "loc": "RL.low"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SNG",
+   "x": 424,
+   "y": 2248,
+   "z": 244,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SSG",
+   "x": -776,
+   "y": 2232,
+   "z": 300,
+   "loc": "SSG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "bridge",
+   "x": -944,
+   "y": 2160,
+   "z": 132,
+   "loc": "bridge",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "square-1",
+   "x": 416,
+   "y": 1760,
+   "z": 12,
+   "loc": "square",
+   "spawnflags": 2048
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "square-2",
+   "x": 416,
+   "y": 1808,
+   "z": 12,
+   "loc": "square",
+   "spawnflags": 2048
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "square-3",
+   "x": 896,
+   "y": 1296,
+   "z": 12,
+   "loc": "square",
+   "spawnflags": 3585
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "square-4",
+   "x": 944,
+   "y": 1296,
+   "z": 12,
+   "loc": "square",
+   "spawnflags": 2049
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water.MH",
+   "x": -136,
+   "y": 56,
+   "z": 56,
+   "loc": "water.MH",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "NG",
+   "x": -1304,
+   "y": 1360,
+   "z": 144,
+   "loc": "NG",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": -224,
+   "y": 936,
+   "z": 344,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL",
+   "x": -544,
+   "y": 1368,
+   "z": 128,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL",
+   "x": -120,
+   "y": 1280,
+   "z": -44,
+   "loc": "GL",
+   "spawnflags": 2048
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RL",
+   "x": -560,
+   "y": 1424,
+   "z": 128,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "SNG.tele",
+   "x": 280,
+   "y": 2664,
+   "z": 404,
+   "loc": "SNG.tele",
+   "spawnflags": 2048
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "SSG",
+   "x": -488,
+   "y": 2120,
+   "z": 288,
+   "loc": "SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "GL.YA",
+   "x": -220,
+   "y": 1828,
+   "z": 88,
+   "loc": "GL.YA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "GL.entry",
+   "x": -136,
+   "y": 1200,
+   "z": 76,
+   "loc": "GL.entry"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad",
+   "x": -680,
+   "y": 784,
+   "z": 320,
+   "loc": "Quad",
+   "spawnflags": 768
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RL",
+   "x": -808,
+   "y": 1640,
+   "z": 132,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RL.block",
+   "x": -1120,
+   "y": 1776,
+   "z": 132,
+   "loc": "RL.block"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RL.high",
+   "x": -808,
+   "y": 1608,
+   "z": 324,
+   "loc": "RL.high",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RL.low-1",
+   "x": -808,
+   "y": 1608,
+   "z": -48,
+   "loc": "RL.low",
+   "spawnflags": 2816
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RL.low-2",
+   "x": -296,
+   "y": 1600,
+   "z": -48,
+   "loc": "RL.low",
+   "spawnflags": 2048
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "bridge",
+   "x": -944,
+   "y": 2120,
+   "z": 128,
+   "loc": "bridge",
+   "spawnflags": 768
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "bridge.below",
+   "x": -1248,
+   "y": 2256,
+   "z": 0,
+   "loc": "bridge.below",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "spikes",
+   "x": -824,
+   "y": 668,
+   "z": 132,
+   "loc": "spikes",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "square-1",
+   "x": 480,
+   "y": 1328,
+   "z": -4,
+   "loc": "square",
+   "spawnflags": 2817
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "square-2",
+   "x": 520,
+   "y": 1328,
+   "z": -4,
+   "loc": "square",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "square.entry",
+   "x": 240,
+   "y": 1608,
+   "z": -4,
+   "loc": "square.entry"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "start",
+   "x": -1064,
+   "y": 568,
+   "z": 92,
+   "loc": "start",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "SNG",
+   "x": 336,
+   "y": 2264,
+   "z": 240,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "SSG",
+   "x": -820,
+   "y": 2160,
+   "z": 300,
+   "loc": "SSG",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "GL.YA",
+   "x": -164,
+   "y": 1844,
+   "z": 88,
+   "loc": "GL.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "SNG.YA",
+   "x": 624,
+   "y": 2216,
+   "z": 248,
+   "loc": "SNG.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "bridge.YA",
+   "x": -1536,
+   "y": 2072,
+   "z": 128,
+   "loc": "bridge.YA",
+   "spawnflags": 1792
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": -40,
+   "y": 1836,
+   "z": -24,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL.block",
+   "x": -1212,
+   "y": 1792,
+   "z": 152,
+   "loc": "RL.block"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL.low",
+   "x": -780,
+   "y": 1348,
+   "z": -24,
+   "loc": "RL.low"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL.stairs",
+   "x": -352,
+   "y": 1996,
+   "z": 220,
+   "loc": "RL.stairs"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SNG",
+   "x": -212,
+   "y": 2312,
+   "z": 264,
+   "loc": "SNG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "SSG",
+   "x": -676,
+   "y": 2156,
+   "z": 324,
+   "loc": "SSG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "bridge",
+   "x": -1532,
+   "y": 1600,
+   "z": 152,
+   "loc": "bridge"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "square",
+   "x": 776,
+   "y": 1568,
+   "z": 20,
+   "loc": "square"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "start",
+   "x": -576,
+   "y": 376,
+   "z": 176,
+   "loc": "start"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL.ledge",
+   "x": -96,
+   "y": 1456,
+   "z": 168,
+   "loc": "GL.ledge",
+   "targetName": "t136",
+   "spawnflags": 768
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL.stairs",
+   "x": 104,
+   "y": 1624,
+   "z": 232,
+   "loc": "GL.stairs",
+   "targetName": "t138",
+   "spawnflags": 768
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad-1",
+   "x": -888,
+   "y": 448,
+   "z": 360,
+   "loc": "Quad",
+   "targetName": "t133",
+   "spawnflags": 768
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad-2",
+   "x": -224,
+   "y": 696,
+   "z": 552,
+   "loc": "Quad",
+   "targetName": "t132",
+   "spawnflags": 256
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad.tele",
+   "x": -984,
+   "y": 852,
+   "z": 328,
+   "loc": "Quad.tele",
+   "targetName": "t46"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RL.low",
+   "x": -544,
+   "y": 1348,
+   "z": -32,
+   "loc": "RL.low",
+   "targetName": "t115"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "bridge",
+   "x": -1536,
+   "y": 1460,
+   "z": 138,
+   "loc": "bridge",
+   "targetName": "t30"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "square-1",
+   "x": 496,
+   "y": 1672,
+   "z": 0,
+   "loc": "square",
+   "targetName": "t143",
+   "spawnflags": 768
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "square-2",
+   "x": 704,
+   "y": 1520,
+   "z": 4,
+   "loc": "square",
+   "targetName": "t45"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "square-3",
+   "x": 712,
+   "y": 1376,
+   "z": 0,
+   "loc": "square",
+   "targetName": "t141",
+   "spawnflags": 768
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "square-4",
+   "x": 936,
+   "y": 1576,
+   "z": 0,
+   "loc": "square",
+   "targetName": "t142",
+   "spawnflags": 768
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "start-1",
+   "x": -792,
+   "y": 296,
+   "z": 400,
+   "loc": "start",
+   "targetName": "t130",
+   "spawnflags": 768
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "start-2",
+   "x": -272,
+   "y": 288,
+   "z": 400,
+   "loc": "start",
+   "targetName": "t129",
+   "spawnflags": 768
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL.entry-1",
+   "x": 356,
+   "y": 760,
+   "z": 401.5,
+   "loc": "GL.entry",
+   "target": "t132",
+   "spawnflags": 258,
+   "bounds": {
+    "min": [
+     337,
+     729,
+     353
+    ],
+    "max": [
+     375,
+     791,
+     450
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL.entry-2",
+   "x": 356,
+   "y": 848,
+   "z": 401.5,
+   "loc": "GL.entry",
+   "target": "t133",
+   "spawnflags": 770,
+   "bounds": {
+    "min": [
+     337,
+     817,
+     353
+    ],
+    "max": [
+     375,
+     879,
+     450
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Quad.tele",
+   "x": -984,
+   "y": 884,
+   "z": 366,
+   "loc": "Quad.tele",
+   "target": "t45",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1007,
+     881,
+     333
+    ],
+    "max": [
+     -961,
+     887,
+     399
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG.tele-1",
+   "x": 418,
+   "y": 2560,
+   "z": 460,
+   "loc": "SNG.tele",
+   "target": "t45",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     417,
+     2537,
+     425
+    ],
+    "max": [
+     419,
+     2583,
+     495
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG.tele-2",
+   "x": 434,
+   "y": 2560,
+   "z": 460,
+   "loc": "SNG.tele",
+   "target": "t46",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     433,
+     2537,
+     425
+    ],
+    "max": [
+     435,
+     2583,
+     495
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "bridge.below",
+   "x": -1536,
+   "y": 1318,
+   "z": 50,
+   "loc": "bridge.below",
+   "target": "t30",
+   "bounds": {
+    "min": [
+     -1567,
+     1317,
+     7
+    ],
+    "max": [
+     -1505,
+     1319,
+     93
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "exit-1",
+   "x": -552,
+   "y": 2044,
+   "z": -84,
+   "loc": "exit",
+   "target": "t115",
+   "bounds": {
+    "min": [
+     -567,
+     2033,
+     -87
+    ],
+    "max": [
+     -537,
+     2055,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "exit-2",
+   "x": -544,
+   "y": 1702,
+   "z": -208,
+   "loc": "exit",
+   "target": "t115",
+   "bounds": {
+    "min": [
+     -567,
+     1701,
+     -243
+    ],
+    "max": [
+     -521,
+     1703,
+     -173
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "square-1",
+   "x": 596,
+   "y": 1116,
+   "z": 48,
+   "loc": "square",
+   "target": "t143",
+   "spawnflags": 770,
+   "bounds": {
+    "min": [
+     561,
+     1089,
+     -3
+    ],
+    "max": [
+     631,
+     1143,
+     99
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "square-2",
+   "x": 696,
+   "y": 1116,
+   "z": 48,
+   "loc": "square",
+   "target": "t141",
+   "spawnflags": 770,
+   "bounds": {
+    "min": [
+     661,
+     1089,
+     -3
+    ],
+    "max": [
+     731,
+     1143,
+     99
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "square-3",
+   "x": 792,
+   "y": 1116,
+   "z": 48,
+   "loc": "square",
+   "target": "t142",
+   "spawnflags": 770,
+   "bounds": {
+    "min": [
+     757,
+     1089,
+     -3
+    ],
+    "max": [
+     827,
+     1143,
+     99
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "start-1",
+   "x": -600,
+   "y": -28,
+   "z": 201.5,
+   "loc": "start",
+   "target": "t130",
+   "spawnflags": 770,
+   "bounds": {
+    "min": [
+     -631,
+     -47,
+     153
+    ],
+    "max": [
+     -569,
+     -9,
+     250
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "start-2",
+   "x": -512,
+   "y": -28,
+   "z": 201.5,
+   "loc": "start",
+   "target": "t129",
+   "spawnflags": 770,
+   "bounds": {
+    "min": [
+     -543,
+     -47,
+     153
+    ],
+    "max": [
+     -481,
+     -9,
+     250
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water.MH-1",
+   "x": 0,
+   "y": -52,
+   "z": 161.5,
+   "loc": "water.MH",
+   "target": "t136",
+   "spawnflags": 770,
+   "bounds": {
+    "min": [
+     -31,
+     -71,
+     113
+    ],
+    "max": [
+     31,
+     -33,
+     210
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "water.MH-2",
+   "x": 88,
+   "y": -52,
+   "z": 161.5,
+   "loc": "water.MH",
+   "target": "t138",
+   "spawnflags": 770,
+   "bounds": {
+    "min": [
+     57,
+     -71,
+     113
+    ],
+    "max": [
+     119,
+     -33,
+     210
+    ]
+   }
+  }
+ ]
+}

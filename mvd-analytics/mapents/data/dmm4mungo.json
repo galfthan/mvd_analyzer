@@ -1,0 +1,153 @@
+{
+ "map": "dmm4mungo",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -704,
+   "y": -64,
+   "z": 192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -704,
+   "y": 64,
+   "z": 192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -640,
+   "y": -64,
+   "z": 192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -640,
+   "y": 64,
+   "z": 192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": -576,
+   "y": -64,
+   "z": 192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": -576,
+   "y": 64,
+   "z": 192
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -128,
+   "y": -192,
+   "z": -224,
+   "targetName": "mungo"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -88,
+   "y": 208,
+   "z": 40,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 88,
+   "y": -208,
+   "z": 40,
+   "targetName": "t2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": 128,
+   "y": 192,
+   "z": -224,
+   "targetName": "jerry"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -776,
+   "y": 0,
+   "z": 216,
+   "target": "mungo",
+   "bounds": {
+    "min": [
+     -783,
+     -39,
+     161
+    ],
+    "max": [
+     -769,
+     39,
+     271
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -384,
+   "y": 24,
+   "z": -208,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -431,
+     17,
+     -255
+    ],
+    "max": [
+     -337,
+     31,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 384,
+   "y": -24,
+   "z": -208,
+   "target": "t2",
+   "bounds": {
+    "min": [
+     337,
+     -31,
+     -255
+    ],
+    "max": [
+     431,
+     -17,
+     -161
+    ]
+   }
+  }
+ ]
+}

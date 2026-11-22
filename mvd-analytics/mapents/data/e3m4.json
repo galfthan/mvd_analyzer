@@ -1,0 +1,2265 @@
+{
+ "map": "e3m4",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "GL.button",
+   "x": -112,
+   "y": -836,
+   "z": -208,
+   "loc": "GL.button",
+   "bounds": {
+    "min": [
+     -135,
+     -839,
+     -231
+    ],
+    "max": [
+     -89,
+     -833,
+     -185
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "GL.lift",
+   "x": 224,
+   "y": -1794,
+   "z": -192,
+   "loc": "GL.lift",
+   "bounds": {
+    "min": [
+     201,
+     -1799,
+     -215
+    ],
+    "max": [
+     247,
+     -1789,
+     -169
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "LG.Pent",
+   "x": 224,
+   "y": -1888,
+   "z": 172,
+   "loc": "LG.Pent",
+   "bounds": {
+    "min": [
+     201,
+     -1911,
+     169
+    ],
+    "max": [
+     247,
+     -1865,
+     175
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RL.lift",
+   "x": 992,
+   "y": -626,
+   "z": -16,
+   "loc": "RL.lift",
+   "bounds": {
+    "min": [
+     977,
+     -631,
+     -31
+    ],
+    "max": [
+     1007,
+     -621,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RL.tele",
+   "x": 1540,
+   "y": -40,
+   "z": -24,
+   "loc": "RL.tele",
+   "bounds": {
+    "min": [
+     1537,
+     -55,
+     -39
+    ],
+    "max": [
+     1543,
+     -25,
+     -9
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "ammo",
+   "x": 2240,
+   "y": -1116,
+   "z": -40,
+   "loc": "ammo",
+   "bounds": {
+    "min": [
+     2225,
+     -1119,
+     -55
+    ],
+    "max": [
+     2255,
+     -1113,
+     -25
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "ammo.below",
+   "x": 2340,
+   "y": -1511.5,
+   "z": -128,
+   "loc": "ammo.below",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     2305,
+     -1542,
+     -159
+    ],
+    "max": [
+     2375,
+     -1481,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "floating.room-1",
+   "x": -352,
+   "y": -1252,
+   "z": -34,
+   "loc": "floating.room",
+   "bounds": {
+    "min": [
+     -371,
+     -1255,
+     -51
+    ],
+    "max": [
+     -333,
+     -1249,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "floating.room-2",
+   "x": -192,
+   "y": -1152,
+   "z": -268,
+   "loc": "floating.room",
+   "bounds": {
+    "min": [
+     -215,
+     -1175,
+     -271
+    ],
+    "max": [
+     -169,
+     -1129,
+     -265
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL-1",
+   "x": 192,
+   "y": -1616,
+   "z": -192,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     161,
+     -1623,
+     -255
+    ],
+    "max": [
+     223,
+     -1609,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL-2",
+   "x": 256,
+   "y": -1616,
+   "z": -192,
+   "loc": "GL",
+   "bounds": {
+    "min": [
+     225,
+     -1623,
+     -255
+    ],
+    "max": [
+     287,
+     -1609,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.lift",
+   "x": 224,
+   "y": -1712,
+   "z": -264,
+   "loc": "GL.lift",
+   "bounds": {
+    "min": [
+     129,
+     -1791,
+     -271
+    ],
+    "max": [
+     319,
+     -1633,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.tele",
+   "x": 256,
+   "y": -432,
+   "z": -192,
+   "loc": "GL.tele",
+   "bounds": {
+    "min": [
+     209,
+     -447,
+     -255
+    ],
+    "max": [
+     303,
+     -417,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.water",
+   "x": 256,
+   "y": -992,
+   "z": -468,
+   "loc": "GL.water",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     193,
+     -1087,
+     -679
+    ],
+    "max": [
+     319,
+     -897,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "LG.Pent-1",
+   "x": -144,
+   "y": -1984,
+   "z": 248,
+   "loc": "LG.Pent",
+   "bounds": {
+    "min": [
+     -159,
+     -2047,
+     177
+    ],
+    "max": [
+     -129,
+     -1921,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.Pent-2",
+   "x": 176,
+   "y": -1808,
+   "z": 240,
+   "loc": "LG.Pent",
+   "bounds": {
+    "min": [
+     129,
+     -1815,
+     177
+    ],
+    "max": [
+     223,
+     -1801,
+     303
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.Pent-3",
+   "x": 272,
+   "y": -1808,
+   "z": 240,
+   "loc": "LG.Pent",
+   "bounds": {
+    "min": [
+     225,
+     -1815,
+     177
+    ],
+    "max": [
+     319,
+     -1801,
+     303
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.lift",
+   "x": 672,
+   "y": -1072,
+   "z": -264,
+   "loc": "LG.lift",
+   "bounds": {
+    "min": [
+     577,
+     -1119,
+     -271
+    ],
+    "max": [
+     767,
+     -1025,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.rox-1",
+   "x": 640,
+   "y": -1744,
+   "z": 240,
+   "loc": "LG.rox",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     609,
+     -1751,
+     177
+    ],
+    "max": [
+     671,
+     -1737,
+     303
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.rox-2",
+   "x": 704,
+   "y": -1744,
+   "z": 240,
+   "loc": "LG.rox",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     673,
+     -1751,
+     177
+    ],
+    "max": [
+     735,
+     -1737,
+     303
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad",
+   "x": -844,
+   "y": -304,
+   "z": -168,
+   "loc": "Quad",
+   "bounds": {
+    "min": [
+     -895,
+     -319,
+     -223
+    ],
+    "max": [
+     -793,
+     -289,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.ledge",
+   "x": -620,
+   "y": -916,
+   "z": -128,
+   "loc": "Quad.ledge",
+   "bounds": {
+    "min": [
+     -663,
+     -959,
+     -191
+    ],
+    "max": [
+     -577,
+     -873,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.lift",
+   "x": -672,
+   "y": -512,
+   "z": -216,
+   "loc": "Quad.lift",
+   "bounds": {
+    "min": [
+     -735,
+     -607,
+     -223
+    ],
+    "max": [
+     -609,
+     -417,
+     -209
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.way-1",
+   "x": -592,
+   "y": -512,
+   "z": -32,
+   "loc": "Quad.way",
+   "bounds": {
+    "min": [
+     -607,
+     -575,
+     -63
+    ],
+    "max": [
+     -577,
+     -449,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.way-2",
+   "x": -592,
+   "y": -512,
+   "z": 48,
+   "loc": "Quad.way",
+   "bounds": {
+    "min": [
+     -607,
+     -575,
+     1
+    ],
+    "max": [
+     -577,
+     -449,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.way-3",
+   "x": -432,
+   "y": -560,
+   "z": 0,
+   "loc": "Quad.way",
+   "bounds": {
+    "min": [
+     -439,
+     -607,
+     -63
+    ],
+    "max": [
+     -425,
+     -513,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.way-4",
+   "x": -336,
+   "y": -464,
+   "z": 0,
+   "loc": "Quad.way",
+   "bounds": {
+    "min": [
+     -383,
+     -471,
+     -63
+    ],
+    "max": [
+     -289,
+     -457,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Quad.way/lift",
+   "x": 256,
+   "y": -352,
+   "z": -72,
+   "loc": "Quad.way/lift",
+   "bounds": {
+    "min": [
+     209,
+     -415,
+     -79
+    ],
+    "max": [
+     303,
+     -289,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.high",
+   "x": 672,
+   "y": -368,
+   "z": 64,
+   "loc": "RA.high",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     577,
+     -375,
+     1
+    ],
+    "max": [
+     767,
+     -361,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.lift",
+   "x": 464,
+   "y": -576,
+   "z": -248,
+   "loc": "RA.lift",
+   "bounds": {
+    "min": [
+     417,
+     -671,
+     -255
+    ],
+    "max": [
+     511,
+     -481,
+     -241
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.water",
+   "x": 864,
+   "y": -576,
+   "z": -272,
+   "loc": "RA.water",
+   "spawnflags": 32,
+   "bounds": {
+    "min": [
+     801,
+     -639,
+     -279
+    ],
+    "max": [
+     927,
+     -513,
+     -265
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.box-1",
+   "x": 1312,
+   "y": -608,
+   "z": 0,
+   "loc": "RL.box",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1305,
+     -639,
+     -63
+    ],
+    "max": [
+     1319,
+     -577,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.box-2",
+   "x": 1312,
+   "y": -544,
+   "z": 0,
+   "loc": "RL.box",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1305,
+     -575,
+     -63
+    ],
+    "max": [
+     1319,
+     -513,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.box-3",
+   "x": 1440,
+   "y": -736,
+   "z": 0,
+   "loc": "RL.box",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1409,
+     -743,
+     -63
+    ],
+    "max": [
+     1471,
+     -729,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.box-4",
+   "x": 1440,
+   "y": -376,
+   "z": 0,
+   "loc": "RL.box",
+   "bounds": {
+    "min": [
+     1409,
+     -383,
+     -63
+    ],
+    "max": [
+     1471,
+     -369,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.box-5",
+   "x": 1504,
+   "y": -736,
+   "z": 0,
+   "loc": "RL.box",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1473,
+     -743,
+     -63
+    ],
+    "max": [
+     1535,
+     -729,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.box-6",
+   "x": 1504,
+   "y": -376,
+   "z": 0,
+   "loc": "RL.box",
+   "bounds": {
+    "min": [
+     1473,
+     -383,
+     -63
+    ],
+    "max": [
+     1535,
+     -369,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.box-7",
+   "x": 1632,
+   "y": -608,
+   "z": 0,
+   "loc": "RL.box",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1625,
+     -639,
+     -63
+    ],
+    "max": [
+     1639,
+     -577,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.box-8",
+   "x": 1632,
+   "y": -544,
+   "z": 0,
+   "loc": "RL.box",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1625,
+     -575,
+     -63
+    ],
+    "max": [
+     1639,
+     -513,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.bridge-1",
+   "x": 1440,
+   "y": -1072,
+   "z": 0,
+   "loc": "RL.bridge",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1409,
+     -1079,
+     -63
+    ],
+    "max": [
+     1471,
+     -1065,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.bridge-2",
+   "x": 1472,
+   "y": -224,
+   "z": -80,
+   "loc": "RL.bridge",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     1409,
+     -351,
+     -83
+    ],
+    "max": [
+     1535,
+     -97,
+     -77
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.bridge-3",
+   "x": 1504,
+   "y": -1072,
+   "z": 0,
+   "loc": "RL.bridge",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1473,
+     -1079,
+     -63
+    ],
+    "max": [
+     1535,
+     -1065,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.bridge-4",
+   "x": 1968,
+   "y": -608,
+   "z": 0,
+   "loc": "RL.bridge",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1961,
+     -639,
+     -63
+    ],
+    "max": [
+     1975,
+     -577,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.bridge-5",
+   "x": 1968,
+   "y": -544,
+   "z": 0,
+   "loc": "RL.bridge",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1961,
+     -575,
+     -63
+    ],
+    "max": [
+     1975,
+     -513,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.lift",
+   "x": 992,
+   "y": -576,
+   "z": -68,
+   "loc": "RL.lift",
+   "bounds": {
+    "min": [
+     937,
+     -615,
+     -71
+    ],
+    "max": [
+     1047,
+     -537,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.water",
+   "x": 1088,
+   "y": -576,
+   "z": -272,
+   "loc": "RL.water",
+   "bounds": {
+    "min": [
+     1025,
+     -639,
+     -279
+    ],
+    "max": [
+     1151,
+     -513,
+     -265
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.water/lift-1",
+   "x": 1152,
+   "y": -240,
+   "z": -160,
+   "loc": "RL.water/lift",
+   "bounds": {
+    "min": [
+     1089,
+     -303,
+     -255
+    ],
+    "max": [
+     1215,
+     -177,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL.water/lift-2",
+   "x": 1232,
+   "y": -240,
+   "z": -192,
+   "loc": "RL.water/lift",
+   "bounds": {
+    "min": [
+     1225,
+     -287,
+     -255
+    ],
+    "max": [
+     1239,
+     -193,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo",
+   "x": 2246,
+   "y": -1004,
+   "z": -24,
+   "loc": "ammo",
+   "spawnflags": 5,
+   "bounds": {
+    "min": [
+     2183,
+     -1023,
+     -31
+    ],
+    "max": [
+     2309,
+     -985,
+     -17
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo.below-1",
+   "x": 1872,
+   "y": -1344,
+   "z": -128,
+   "loc": "ammo.below",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     1865,
+     -1407,
+     -191
+    ],
+    "max": [
+     1879,
+     -1281,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo.below-2",
+   "x": 2240,
+   "y": -1168,
+   "z": -128,
+   "loc": "ammo.below",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     2177,
+     -1175,
+     -191
+    ],
+    "max": [
+     2303,
+     -1161,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo.below-3",
+   "x": 2246,
+   "y": -960,
+   "z": -40,
+   "loc": "ammo.below",
+   "spawnflags": 5,
+   "bounds": {
+    "min": [
+     2183,
+     -983,
+     -47
+    ],
+    "max": [
+     2309,
+     -937,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "ammo.below-4",
+   "x": 2246,
+   "y": -916,
+   "z": -56,
+   "loc": "ammo.below",
+   "spawnflags": 5,
+   "bounds": {
+    "min": [
+     2183,
+     -935,
+     -63
+    ],
+    "max": [
+     2309,
+     -897,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "floating.room-1",
+   "x": -352,
+   "y": -1360,
+   "z": -44,
+   "loc": "floating.room",
+   "bounds": {
+    "min": [
+     -399,
+     -1423,
+     -135
+    ],
+    "max": [
+     -305,
+     -1297,
+     47
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "floating.room-2",
+   "x": -272,
+   "y": -1360,
+   "z": -192,
+   "loc": "floating.room",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -279,
+     -1407,
+     -255
+    ],
+    "max": [
+     -265,
+     -1313,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Quad",
+   "x": -800,
+   "y": -416,
+   "z": -224,
+   "loc": "Quad",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RL.bridge-1",
+   "x": 1456,
+   "y": -1352,
+   "z": -64,
+   "loc": "RL.bridge"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RL.bridge-2",
+   "x": 2224,
+   "y": -592,
+   "z": -64,
+   "loc": "RL.bridge",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": 240,
+   "y": -1568,
+   "z": -256,
+   "loc": "GL",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "GL",
+   "x": 128,
+   "y": -1584,
+   "z": -256,
+   "loc": "GL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Quad.ledge",
+   "x": -624,
+   "y": -1000,
+   "z": -192,
+   "loc": "Quad.ledge",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RA.low-1",
+   "x": 528,
+   "y": -792,
+   "z": -256,
+   "loc": "RA.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RA.low-2",
+   "x": 784,
+   "y": -792,
+   "z": -256,
+   "loc": "RA.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL.box-1",
+   "x": 1400,
+   "y": -576,
+   "z": -64,
+   "loc": "RL.box",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL.box-2",
+   "x": 1520,
+   "y": -576,
+   "z": -64,
+   "loc": "RL.box",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL.water-1",
+   "x": 1976,
+   "y": -848,
+   "z": -208,
+   "loc": "RL.water",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL.water-2",
+   "x": 1976,
+   "y": -688,
+   "z": -208,
+   "loc": "RL.water",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL.water-3",
+   "x": 1976,
+   "y": -528,
+   "z": -208,
+   "loc": "RL.water",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RL.water-4",
+   "x": 1976,
+   "y": -368,
+   "z": -208,
+   "loc": "RL.water",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL",
+   "x": 288,
+   "y": -1584,
+   "z": -256,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL.tele-1",
+   "x": 224,
+   "y": -704,
+   "z": -256,
+   "loc": "GL.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GL.tele-2",
+   "x": 288,
+   "y": -704,
+   "z": -256,
+   "loc": "GL.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG-1",
+   "x": 464,
+   "y": -1088,
+   "z": 0,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG-2",
+   "x": 464,
+   "y": -992,
+   "z": 0,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG-3",
+   "x": 848,
+   "y": -1088,
+   "z": 0,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG-4",
+   "x": 848,
+   "y": -992,
+   "z": 0,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.Pent-1",
+   "x": -72,
+   "y": -1912,
+   "z": 176,
+   "loc": "LG.Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.Pent-2",
+   "x": -64,
+   "y": -2112,
+   "z": 176,
+   "loc": "LG.Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.Pent-3",
+   "x": 352,
+   "y": -2112,
+   "z": 176,
+   "loc": "LG.Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad",
+   "x": -928,
+   "y": -768,
+   "z": -224,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.ledge",
+   "x": -624,
+   "y": -952,
+   "z": -192,
+   "loc": "Quad.ledge"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.way-1",
+   "x": -224,
+   "y": -368,
+   "z": -64,
+   "loc": "Quad.way"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.way-2",
+   "x": -96,
+   "y": -368,
+   "z": -64,
+   "loc": "Quad.way"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.mid-1",
+   "x": 448,
+   "y": -320,
+   "z": -128,
+   "loc": "RA.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.mid-2",
+   "x": 864,
+   "y": -320,
+   "z": -128,
+   "loc": "RA.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL.box",
+   "x": 1456,
+   "y": -632,
+   "z": -64,
+   "loc": "RL.box"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL.tele",
+   "x": 1752,
+   "y": 80,
+   "z": -64,
+   "loc": "RL.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "ammo-1",
+   "x": 1904,
+   "y": -1480,
+   "z": 0,
+   "loc": "ammo"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "ammo-2",
+   "x": 2096,
+   "y": -1232,
+   "z": 0,
+   "loc": "ammo"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "path",
+   "x": 456,
+   "y": -592,
+   "z": 208,
+   "loc": "path"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": 672,
+   "y": -1216,
+   "z": 48,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "Quad",
+   "x": -928,
+   "y": -416,
+   "z": -224,
+   "loc": "Quad",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "GL",
+   "x": 48,
+   "y": -1488,
+   "z": -256,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad",
+   "x": -800,
+   "y": -544,
+   "z": -224,
+   "loc": "Quad",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad.way/lift",
+   "x": 152,
+   "y": -368,
+   "z": -64,
+   "loc": "Quad.way/lift",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RA.low",
+   "x": 544,
+   "y": -592,
+   "z": -256,
+   "loc": "RA.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RL.tele",
+   "x": 1104,
+   "y": 72,
+   "z": -64,
+   "loc": "RL.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RL.water",
+   "x": 992,
+   "y": -928,
+   "z": -208,
+   "loc": "RL.water"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "ammo",
+   "x": 1984,
+   "y": -1248,
+   "z": 0,
+   "loc": "ammo",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "ammo.below",
+   "x": 2112,
+   "y": -1512,
+   "z": -192,
+   "loc": "ammo.below",
+   "spawnflags": 3585
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "path",
+   "x": 712,
+   "y": -592,
+   "z": 208,
+   "loc": "path",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "LG.Pent",
+   "x": -256,
+   "y": -1984,
+   "z": 216,
+   "loc": "LG.Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Quad",
+   "x": -840,
+   "y": -224,
+   "z": -192,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "LG.rox",
+   "x": 672,
+   "y": -1856,
+   "z": 200,
+   "loc": "LG.rox",
+   "spawnflags": 3584
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": -912,
+   "y": -656,
+   "z": -200,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA.low",
+   "x": 672,
+   "y": -600,
+   "z": -256,
+   "loc": "RA.low",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL.box",
+   "x": 1424,
+   "y": -624,
+   "z": -64,
+   "loc": "RL.box"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "LG.rox",
+   "x": 640,
+   "y": -2016,
+   "z": 176,
+   "loc": "LG.rox"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RL.water",
+   "x": 1632,
+   "y": -592,
+   "z": -200,
+   "loc": "RL.water"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "ammo",
+   "x": 1920,
+   "y": -1280,
+   "z": 0,
+   "loc": "ammo",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RL.shells",
+   "x": 1864,
+   "y": -984,
+   "z": -48,
+   "loc": "RL.shells"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "floating.room",
+   "x": -168,
+   "y": -1424,
+   "z": -264,
+   "loc": "floating.room"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "path",
+   "x": 384,
+   "y": -592,
+   "z": 208,
+   "loc": "path",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "ammo",
+   "x": 1920,
+   "y": -1336,
+   "z": 0,
+   "loc": "ammo",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "path",
+   "x": 672,
+   "y": -576,
+   "z": 208,
+   "loc": "path"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RA.mid-1",
+   "x": 480,
+   "y": -344,
+   "z": -128,
+   "loc": "RA.mid",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RA.mid-2",
+   "x": 872,
+   "y": -336,
+   "z": -128,
+   "loc": "RA.mid",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "Quad",
+   "x": -912,
+   "y": -528,
+   "z": -224,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "RL.YA",
+   "x": 1136,
+   "y": -976,
+   "z": -48,
+   "loc": "RL.YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL.tele",
+   "x": 256,
+   "y": -576,
+   "z": -232,
+   "loc": "GL.tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LG.rox",
+   "x": 656,
+   "y": -1936,
+   "z": 200,
+   "loc": "LG.rox"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.mid",
+   "x": 880,
+   "y": -136,
+   "z": -104,
+   "loc": "RA.mid"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.mid/tele",
+   "x": 464,
+   "y": -144,
+   "z": -104,
+   "loc": "RA.mid/tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL.tele",
+   "x": 1432,
+   "y": 80,
+   "z": -40,
+   "loc": "RL.tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "floating.room",
+   "x": -192,
+   "y": -1416,
+   "z": -240,
+   "loc": "floating.room"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "GL.tele",
+   "x": 344,
+   "y": -576,
+   "z": -240,
+   "loc": "GL.tele",
+   "targetName": "t190"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "LG-1",
+   "x": 472,
+   "y": -904,
+   "z": 8,
+   "loc": "LG",
+   "targetName": "t189"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "LG-2",
+   "x": 672,
+   "y": -1224,
+   "z": 8,
+   "loc": "LG",
+   "targetName": "t177"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RA.high",
+   "x": 672,
+   "y": -864,
+   "z": 16,
+   "loc": "RA.high",
+   "targetName": "t180"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RA.mid",
+   "x": 672,
+   "y": -32,
+   "z": -112,
+   "loc": "RA.mid",
+   "targetName": "t191"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "ammo-1",
+   "x": 1920,
+   "y": -1408,
+   "z": 8,
+   "loc": "ammo",
+   "targetName": "t108"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "ammo-2",
+   "x": 1920,
+   "y": -1216,
+   "z": 8,
+   "loc": "ammo",
+   "targetName": "t107"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "ammo-3",
+   "x": 2176,
+   "y": -1216,
+   "z": 8,
+   "loc": "ammo",
+   "targetName": "t106"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "exit",
+   "x": 824,
+   "y": 504,
+   "z": -928,
+   "loc": "exit",
+   "targetName": "t174"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL.tele",
+   "x": 44,
+   "y": -736,
+   "z": -192,
+   "loc": "GL.tele",
+   "target": "t191",
+   "bounds": {
+    "min": [
+     33,
+     -767,
+     -255
+    ],
+    "max": [
+     55,
+     -705,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "GL.water/tele",
+   "x": 336,
+   "y": -592,
+   "z": -496,
+   "loc": "GL.water/tele",
+   "target": "t190",
+   "bounds": {
+    "min": [
+     321,
+     -623,
+     -543
+    ],
+    "max": [
+     351,
+     -561,
+     -449
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG",
+   "x": 984,
+   "y": -1248,
+   "z": 72,
+   "loc": "LG",
+   "target": "t177",
+   "bounds": {
+    "min": [
+     961,
+     -1311,
+     1
+    ],
+    "max": [
+     1007,
+     -1185,
+     143
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "LG.low/tele",
+   "x": 576,
+   "y": -848,
+   "z": -208,
+   "loc": "LG.low/tele",
+   "target": "t180",
+   "bounds": {
+    "min": [
+     545,
+     -863,
+     -255
+    ],
+    "max": [
+     607,
+     -833,
+     -161
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.high/tele",
+   "x": 676,
+   "y": 248,
+   "z": 192,
+   "loc": "RA.high/tele",
+   "target": "t191",
+   "bounds": {
+    "min": [
+     649,
+     241,
+     185
+    ],
+    "max": [
+     703,
+     255,
+     199
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.mid/tele",
+   "x": 448,
+   "y": 52,
+   "z": -64,
+   "loc": "RA.mid/tele",
+   "target": "t189",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     417,
+     41,
+     -127
+    ],
+    "max": [
+     479,
+     63,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RL.tele",
+   "x": 1068,
+   "y": 32,
+   "z": 0,
+   "loc": "RL.tele",
+   "target": "t191",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     1057,
+     1,
+     -63
+    ],
+    "max": [
+     1079,
+     63,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "ammo",
+   "x": 2480,
+   "y": -1376,
+   "z": -128,
+   "loc": "ammo",
+   "target": "t107",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     2465,
+     -1415,
+     -191
+    ],
+    "max": [
+     2495,
+     -1337,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "ammo.below-1",
+   "x": 2480,
+   "y": -1464,
+   "z": -128,
+   "loc": "ammo.below",
+   "target": "t108",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     2465,
+     -1503,
+     -191
+    ],
+    "max": [
+     2495,
+     -1425,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "ammo.below-2",
+   "x": 2480,
+   "y": -1288,
+   "z": -128,
+   "loc": "ammo.below",
+   "target": "t106",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     2465,
+     -1327,
+     -191
+    ],
+    "max": [
+     2495,
+     -1249,
+     -65
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "exit",
+   "x": 858,
+   "y": 288,
+   "z": -976,
+   "loc": "exit",
+   "target": "t191",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     855,
+     257,
+     -1023
+    ],
+    "max": [
+     861,
+     319,
+     -929
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "exit.behind",
+   "x": 668,
+   "y": 468,
+   "z": -928,
+   "loc": "exit.behind",
+   "target": "t174",
+   "bounds": {
+    "min": [
+     665,
+     465,
+     -935
+    ],
+    "max": [
+     671,
+     471,
+     -921
+    ]
+   }
+  }
+ ]
+}

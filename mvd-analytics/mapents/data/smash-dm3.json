@@ -1,0 +1,114 @@
+{
+ "map": "smash-dm3",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -880,
+   "y": -232,
+   "z": -16
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -632,
+   "y": -680,
+   "z": -16
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 192,
+   "y": -208,
+   "z": -176
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 512,
+   "y": 768,
+   "z": 216
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 1472,
+   "y": -928,
+   "z": -24
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 1520,
+   "y": 432,
+   "z": -88
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 224,
+   "y": -320,
+   "z": 48,
+   "targetName": "t2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 1328,
+   "y": 544,
+   "z": 44,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -508,
+   "y": -448,
+   "z": 24,
+   "target": "t2",
+   "bounds": {
+    "min": [
+     -519,
+     -471,
+     1
+    ],
+    "max": [
+     -497,
+     -425,
+     47
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 1180,
+   "y": -904,
+   "z": 0,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     1169,
+     -927,
+     -15
+    ],
+    "max": [
+     1191,
+     -881,
+     15
+    ]
+   }
+  }
+ ]
+}

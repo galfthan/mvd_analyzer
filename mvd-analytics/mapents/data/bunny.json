@@ -1,0 +1,22 @@
+{
+ "map": "bunny",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -1848,
+   "y": 608,
+   "z": -122
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 1864,
+   "y": 554,
+   "z": -112
+  }
+ ]
+}

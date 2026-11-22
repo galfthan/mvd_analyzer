@@ -30,19 +30,19 @@
    "name": "path-2",
    "x": -720,
    "y": 1436,
-   "z": 87.999916,
+   "z": 88,
    "loc": "path",
    "spawnflags": 1,
    "bounds": {
     "min": [
-     -734.2728,
+     -734.2727,
      1353,
-     73.72705
+     73.72727
     ],
     "max": [
-     -705.72723,
+     -705.7273,
      1519,
-     102.27278
+     102.27273
     ]
    }
   },
@@ -722,6 +722,16 @@
   {
    "type": "teleportDst",
    "class": "info_teleport_destination",
+   "name": "path.top-6",
+   "x": -1048,
+   "y": 2936,
+   "z": 400,
+   "loc": "path.top",
+   "targetName": "t71"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
    "name": "water-1",
    "x": 0,
    "y": 8,
@@ -765,21 +775,21 @@
    "type": "teleportSrc",
    "class": "trigger_teleport",
    "name": "RL",
-   "x": -856,
-   "y": 1920,
-   "z": 376,
+   "x": -832,
+   "y": 2064,
+   "z": 160,
    "loc": "RL",
    "target": "t63",
    "bounds": {
     "min": [
-     -863,
-     1913,
-     369
+     -1631,
+     1249,
+     1
     ],
     "max": [
-     -849,
-     1927,
-     383
+     -33,
+     2879,
+     319
     ]
    }
   },
@@ -1117,6 +1127,28 @@
    "type": "teleportSrc",
    "class": "trigger_teleport",
    "name": "path.top-1",
+   "x": -1048,
+   "y": 3056,
+   "z": 404,
+   "loc": "path.top",
+   "target": "t71",
+   "bounds": {
+    "min": [
+     -1055,
+     3049,
+     393
+    ],
+    "max": [
+     -1041,
+     3063,
+     415
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "path.top-2",
    "x": -960,
    "y": 2672,
    "z": 268,
@@ -1139,7 +1171,7 @@
   {
    "type": "teleportSrc",
    "class": "trigger_teleport",
-   "name": "path.top-2",
+   "name": "path.top-3",
    "x": -960,
    "y": 2672,
    "z": 268,

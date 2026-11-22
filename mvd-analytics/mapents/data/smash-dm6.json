@@ -1,0 +1,152 @@
+{
+ "map": "smash-dm6",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 0,
+   "y": -1088,
+   "z": 264
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 232,
+   "y": -1512,
+   "z": 40
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 408,
+   "y": -1088,
+   "z": 256
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 456,
+   "y": -1504,
+   "z": 256
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 896,
+   "y": -1464,
+   "z": 256
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 1016,
+   "y": -416,
+   "z": 40
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 1892,
+   "y": -160,
+   "z": 168
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 200,
+   "y": -892,
+   "z": 119,
+   "targetName": "t2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 308,
+   "y": -1788,
+   "z": 44,
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 1072,
+   "y": -1096,
+   "z": -32,
+   "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": 200,
+   "y": -848,
+   "z": 170,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     177,
+     -867,
+     113
+    ],
+    "max": [
+     223,
+     -829,
+     227
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 248,
+   "y": -1784,
+   "z": 83,
+   "target": "t2",
+   "bounds": {
+    "min": [
+     229,
+     -1807,
+     24
+    ],
+    "max": [
+     267,
+     -1761,
+     142
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 1024,
+   "y": -1096,
+   "z": 14,
+   "target": "t1",
+   "bounds": {
+    "min": [
+     1005,
+     -1119,
+     -35
+    ],
+    "max": [
+     1043,
+     -1073,
+     63
+    ]
+   }
+  }
+ ]
+}
