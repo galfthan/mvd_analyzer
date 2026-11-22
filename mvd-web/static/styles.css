@@ -748,6 +748,13 @@ body.no-demo #unified-timeline {
     border-right: 1px solid rgba(42, 63, 95, 0.9);
 }
 
+/* A game broken off and restarted: there, and no map for either side. */
+.search-board-map.restarted,
+.search-board-frags.restarted,
+.match-tab.restarted:not(.active) {
+    opacity: 0.45;
+}
+
 .search-board-wins {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;

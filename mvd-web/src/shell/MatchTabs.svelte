@@ -9,13 +9,15 @@
     // tab list.
     import { tick } from 'svelte';
     import { teams, colorOf } from '../state/teams.js';
-    import { mapScore } from '../lib/matches.js';
+    import { mapScore, restartedGames } from '../lib/matches.js';
     import { loadMatchGame } from '../app/load.js';
 
     /** @type {{ match: import('../lib/matches.js').Match, index: number }} */
     const { match, index } = $props();
     // The top bar shows only a match that has two sides.
     const [a, b] = $derived(/** @type {[import('../lib/matches.js').MatchSide, import('../lib/matches.js').MatchSide]} */ (match.sides));
+    // The games broken off and restarted: shown, dimmed, no map for either side.
+    const restarted = $derived(restartedGames(match.games));
     // The id of the map being loaded, '' when none is.
     let loading = $state('');
 
@@ -66,7 +68,8 @@
     <div class="match-tabs-list" bind:this={list} onkeydown={onKey}>
         {#each match.games as game, i (game.id)}
             {@const score = mapScore(game, a.name)}
-            <button type="button" class="match-tab" class:active={i === index} class:loading={loading === String(game.id)}
+            {@const off = restarted.has(String(game.id))}
+            <button type="button" class="match-tab" class:restarted={off} title={off ? 'Broken off and restarted: not counted' : undefined} class:active={i === index} class:loading={loading === String(game.id)}
                 aria-current={i === index ? 'page' : undefined} disabled={!!loading && loading !== String(game.id)}
                 data-game-id={game.id}
                 onclick={(e) => { if (e.detail) e.currentTarget.blur(); open(game); }}>
@@ -74,7 +77,7 @@
                 <span class="match-tab-map">{game.map}</span>
                 {#if score}
                     <span class="match-tab-score">
-                        <span class:won={score.own > score.other} style:color={score.own > score.other ? sideColor(a.name) : undefined}>{score.own}</span>–<span class:won={score.other > score.own} style:color={score.other > score.own ? sideColor(b.name) : undefined}>{score.other}</span>
+                        <span class:won={!off && score.own > score.other} style:color={!off && score.own > score.other ? sideColor(a.name) : undefined}>{score.own}</span>–<span class:won={!off && score.other > score.own} style:color={!off && score.other > score.own ? sideColor(b.name) : undefined}>{score.other}</span>
                     </span>
                 {/if}
             </button>

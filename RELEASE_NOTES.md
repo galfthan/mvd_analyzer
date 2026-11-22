@@ -11,7 +11,10 @@ detail.
   played against each other in a row — the same mode, the same team names
   with at least three of the same players per team (a duel: the same two
   players), and starts at most the mode's timelimit plus 15 minutes apart
-  (the hub lists a demo's start and no length). Web only; the API, the MCP
+  (the hub lists a demo's start and no length). A game broken off and
+  restarted — the next one starts before the mode's timelimit has passed
+  (2on2, 4on4), or within 3 minutes (duels, played to 3, 5 or 10) —
+  stays in the match, dimmed, and counts as a map for neither side. Web only; the API, the MCP
   server and the Result are unchanged.
 - **Newest games.** A page opened without a demo or search in its URL
   lists the newest 100 games.

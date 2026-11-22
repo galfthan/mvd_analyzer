@@ -14,7 +14,7 @@
  * @property {number | string} id       its first game's id
  * @property {string} mode
  * @property {HubGame[]} games          in the order played
- * @property {[MatchSide, MatchSide] | null} sides  the leader first, each with the maps it won (a drawn map is neither's); null for a game that has no two sides
+ * @property {[MatchSide, MatchSide] | null} sides  the leader first, each with the maps it won (a drawn or restarted map is neither's); null for a game that has no two sides
  */
 
 // A hub row's timestamp is the demo's START and the row has no duration, so
@@ -137,13 +137,40 @@ function matchOfChain({ games, sides }) {
     if (!sides) return { id: first.id, mode: first.mode, games, sides: null };
     /** @type {[MatchSide, MatchSide]} */
     const score = [{ name: sides[0].name, wins: 0 }, { name: sides[1].name, wins: 0 }];
+    const restarted = restartedGames(games);
     for (const game of games) {
         const w = mapWinner(game);
-        if (w !== null) score[fold(w) === sides[0].key ? 0 : 1].wins++;
+        if (w !== null && !restarted.has(String(game.id))) score[fold(w) === sides[0].key ? 0 : 1].wins++;
     }
     // The leader first; a level score keeps the name order.
     if (score[1].wins > score[0].wins) score.reverse();
     return { id: first.id, mode: first.mode, games, sides: score };
+}
+
+// restartedGames: the ids of the games of a match (in the order played) that
+// were broken off and started again — the next game began sooner than a
+// game of the mode can end. The hub lists such a game like any other (a 2–0
+// "map" two minutes before the real one), and counting it would hand a map
+// to whoever led when it broke; it stays in the match, shown, and wins
+// nobody a map.
+// (Measured on 3000 hub games, 2026-11: no 4on4 pair starts 5–19 min apart
+// and no 2on2 pair 7–9, so the team modes use their timelimit. Duels are
+// played to 3, 5 and 10 minutes — 70 of 640 pairs start 5–6 min apart with
+// a full game's frags — so only a start under 3 minutes later is a restart
+// there, and in a mode not listed.)
+/** @type {Record<string, number>} */
+const RESTART_WITHIN_MINUTES = { '2on2': 10, '4on4': 20 };
+const DEFAULT_RESTART_WITHIN_MINUTES = 3;
+
+/** @param {HubGame[]} games */
+export function restartedGames(games) {
+    /** @type {Set<string>} */
+    const ids = new Set();
+    for (let i = 0; i + 1 < games.length; i++) {
+        const within = (RESTART_WITHIN_MINUTES[games[i].mode] ?? DEFAULT_RESTART_WITHIN_MINUTES) * 60000;
+        if (startMs(games[i + 1]) - startMs(games[i]) < within) ids.add(String(games[i].id));
+    }
+    return ids;
 }
 
 // mapWinner: the name of the side that won a game, null for a draw or a

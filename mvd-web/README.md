@@ -412,7 +412,10 @@ real content renders.
 groups them into matches — the maps two sides played in a row
 (`src/lib/matches.js` has the rule: same mode, same team names with at
 least three shared players per team or the same two duel players, starts
-at most the mode's timelimit + 15 min apart). The Search tab's "Group
+at most the mode's timelimit + 15 min apart; a game the next one follows
+sooner than a game of the mode can end — the timelimit in 2on2 and 4on4,
+3 minutes in a duel, which is also played short — was broken off and
+restarted: listed, dimmed, and a map for neither side). The Search tab's "Group
 into matches" checkbox (on by default; turning it off is kept in
 `localStorage`) lists a match as one row
 as a small scoreboard — the maps each side won, then a column a map

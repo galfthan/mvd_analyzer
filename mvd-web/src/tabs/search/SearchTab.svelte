@@ -13,7 +13,7 @@
     import { SEARCH_MODE_LABELS, searchRow, pagerLabel, hasMore } from '../../lib/search.js';
     import { loadStatus, hubInput, hubBusy } from '../../state/shell.js';
     import { uploadFile, loadFromHub, loadGameFromSearch } from '../../app/load.js';
-    import { searchMatches, matchRow, mapScore } from '../../lib/matches.js';
+    import { searchMatches, matchRow, mapScore, restartedGames } from '../../lib/matches.js';
     import { assignTeamColors } from '../../state/teams.js';
     import {
         searchForm, searchStatus, searchBusy, searchResults, searchPaging, runSearch,
@@ -129,6 +129,7 @@
                         {@const [a, b] = match.sides}
                         <!-- The colours the demo itself will give these two names (src/state/teams.js). -->
                         {@const [colorA, colorB] = assignTeamColors([a.name, b.name])}
+                        {@const restarted = restartedGames(match.games)}
                         <div class="search-match" data-match-id={match.id}>
                             <span class="search-result-mode">{SEARCH_MODE_LABELS[match.mode] || match.mode}</span>
                             <div class="search-board">
@@ -141,10 +142,12 @@
                                 <span class="search-board-wins search-board-total">{b.wins}</span>
                                 {#each match.games as game (game.id)}
                                     {@const score = mapScore(game, a.name)}
-                                    <button type="button" class="search-board-map" data-game-id={game.id} title="Open this map"
+                                    {@const off = restarted.has(String(game.id))}
+                                    <button type="button" class="search-board-map" class:restarted={off} data-game-id={game.id}
+                                        title={off ? 'Broken off and restarted: not counted. Open this game' : 'Open this map'}
                                         onclick={() => loadGameFromSearch(game)}>{game.map || '-'}</button>
-                                    <span class="search-board-frags" class:won={score && score.own > score.other}>{score?.own}</span>
-                                    <span class="search-board-frags" class:won={score && score.other > score.own}>{score?.other}</span>
+                                    <span class="search-board-frags" class:restarted={off} class:won={!off && score && score.own > score.other}>{score?.own}</span>
+                                    <span class="search-board-frags" class:restarted={off} class:won={!off && score && score.other > score.own}>{score?.other}</span>
                                 {/each}
                             </div>
                             <span class="search-result-tag">{row.tag}</span>

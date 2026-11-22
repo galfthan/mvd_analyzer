@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-    groupMatches, gameSides, mapWinner, mapScore, matchWith, siblingFilters, mergeGames, matchRow,
+    groupMatches, gameSides, mapWinner, mapScore, matchWith, siblingFilters, mergeGames, matchRow, restartedGames,
     searchMatches, cutShort,
 } from '../src/lib/matches.js';
 
@@ -110,4 +110,18 @@ test('matches: the grouped search list', () => {
     const late = groupMatches([game(220, 'dm2', 1, 2)]);
     assert.deepEqual(cutShort(late, { to: '2026-11-21' }, false), late);
     assert.deepEqual(cutShort(late, { from: '2026-11-21' }, false), []);
+});
+
+test('matches: a game broken off and restarted is in the match and wins nobody a map', () => {
+    // dm2 breaks at 2–0 for sr and starts again two minutes later; fu wins the real one.
+    const games = [game(0, 'dm2', 2, 0), game(2, 'dm2', 150, 200), game(27, 'dm3', 180, 120)];
+    const [m] = groupMatches(games);
+    assert.equal(m.games.length, 3);
+    assert.deepEqual([...restartedGames(m.games)], [String(games[0].id)]);
+    assert.deepEqual(m.sides, [{ name: 'fu', wins: 1 }, { name: 'sr', wins: 1 }], 'the name order of a level score');
+    // A full map apart is no restart.
+    assert.equal(restartedGames([game(0, 'dm2', 1, 2), game(20, 'dm3', 1, 2)]).size, 0);
+    // Duels are also played to 5 minutes: only a start within 3 is a restart.
+    assert.equal(restartedGames([duel(0, 'dm4', 12, 9), duel(6, 'dm4', 10, 11)]).size, 0);
+    assert.equal(restartedGames([duel(0, 'dm4', 1, 0), duel(2, 'dm4', 10, 11)]).size, 1);
 });
