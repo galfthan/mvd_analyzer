@@ -4,8 +4,8 @@
     // the hub search (filters, the result rows, Load more). Its state is
     // search-model.js and src/state/shell.js; a click on a row loads that
     // game. With "Group into matches" on, the games two sides played in one
-    // sitting list as one small scoreboard (src/lib/matches.js): a column a
-    // map with each side's frags, and the maps won. A click on it opens the
+    // sitting list as one small scoreboard (src/lib/matches.js): the maps
+    // each side won, then a column a map with its frags. A click on it opens the
     // match at its first map, a map's name at that map; the map tabs in the
     // top bar (src/shell/MatchTabs.svelte) reach the others from there.
     // The `active` class is toggled by src/app/tabs.js like on every
@@ -76,11 +76,11 @@
                     <span>Team</span>
                     <input type="text" id="search-team" placeholder="any" bind:value={$searchForm.team}>
                 </label>
-                <label class="search-field">
+                <label class="search-field search-field-short">
                     <span>Map</span>
                     <input type="text" id="search-map" placeholder="any" bind:value={$searchForm.map}>
                 </label>
-                <label class="search-field">
+                <label class="search-field search-field-short">
                     <span>Mode</span>
                     <!-- The facets are SEARCH_MODE_LABELS (src/lib/search.js),
                          which also labels the rows below. -->
@@ -104,13 +104,13 @@
                     <input type="date" id="search-to" bind:value={$searchForm.to}>
                 </label>
                 <button type="submit" class="search-submit" id="search-submit" disabled={$searchBusy}>Search</button>
+                <label class="search-group-toggle" title="List the maps two sides played in a row as one match">
+                    <input type="checkbox" id="search-grouped" checked={$searchGrouped}
+                        onchange={(e) => setSearchGrouped(/** @type {HTMLInputElement} */ (e.target).checked)}>
+                    Group into matches
+                </label>
             </div>
         </form>
-        <label class="search-group-toggle">
-            <input type="checkbox" id="search-grouped" checked={$searchGrouped}
-                onchange={(e) => setSearchGrouped(/** @type {HTMLInputElement} */ (e.target).checked)}>
-            Group into matches <span class="search-group-hint">— the maps two sides played in a row, as one row</span>
-        </label>
         <div id="search-status" class={$searchStatus.cls}>{$searchStatus.text}</div>
         <div id="search-results" class="search-results">
             {#if $searchResults.empty}
@@ -136,6 +136,9 @@
                                 <!-- Its ::after covers the row: a click anywhere but a map's name opens the match. -->
                                 <button type="button" class="search-board-sides" title="Open the match at its first map"
                                     onclick={() => loadGameFromSearch(match.games[0])}><span style:color={colorA}>{a.name}</span><span style:color={colorB}>{b.name}</span></button>
+                                <span class="search-board-head search-board-total">maps</span>
+                                <span class="search-board-wins search-board-total">{a.wins}</span>
+                                <span class="search-board-wins search-board-total">{b.wins}</span>
                                 {#each match.games as game (game.id)}
                                     {@const score = mapScore(game, a.name)}
                                     <button type="button" class="search-board-map" data-game-id={game.id} title="Open this map"
@@ -143,9 +146,6 @@
                                     <span class="search-board-frags" class:won={score && score.own > score.other}>{score?.own}</span>
                                     <span class="search-board-frags" class:won={score && score.other > score.own}>{score?.other}</span>
                                 {/each}
-                                <span class="search-board-head">maps</span>
-                                <span class="search-board-wins">{a.wins}</span>
-                                <span class="search-board-wins">{b.wins}</span>
                             </div>
                             <span class="search-result-tag">{row.tag}</span>
                             <span class="search-result-date">{row.date}</span>

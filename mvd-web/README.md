@@ -415,8 +415,8 @@ least three shared players per team or the same two duel players, starts
 at most the mode's timelimit + 15 min apart). The Search tab's "Group
 into matches" checkbox (on by default; turning it off is kept in
 `localStorage`) lists a match as one row
-as a small scoreboard — a column a map with each side's frags, then the
-maps won; a click on a map's name loads that map, a click elsewhere the
+as a small scoreboard — the maps each side won, then a column a map
+with its frags; a click on a map's name loads that map, a click elsewhere the
 first one; maps the search cut off
 are fetched (`fetchMatch` in `src/data/hub.js`, one more search for both
 sides around the game's day). After every hub load `src/app/match.js`

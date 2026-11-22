@@ -467,12 +467,16 @@ body.no-demo #unified-timeline {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    flex: 1 1 140px;
-    min-width: 120px;
+    flex: 0 1 116px;
+    min-width: 0;
+}
+
+.search-field-short {
+    flex-basis: 84px;
 }
 
 .search-field-date {
-    flex: 0 1 160px;
+    flex-basis: 142px;
 }
 
 .search-field > span {
@@ -487,10 +491,12 @@ body.no-demo #unified-timeline {
     background: var(--bg-deep);
     border: 1px solid var(--bg-panel);
     border-radius: 6px;
-    padding: 8px 12px;
+    padding: 8px 10px;
     color: var(--fg-default);
     font-size: 0.95rem;
     font-family: inherit;
+    width: 100%;
+    min-width: 0;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -618,19 +624,16 @@ body.no-demo #unified-timeline {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 10px;
+    /* On the form's row, level with its inputs. */
+    padding: 9px 0;
     color: #c8d4e3;
     font-size: 0.88rem;
+    white-space: nowrap;
     cursor: pointer;
-    width: fit-content;
-}
-
-.search-group-hint {
-    color: #7a8ba8;
 }
 
 /* A match in the grouped search list: a small scoreboard — a row a side,
- * a column a map, the maps won last — between a game row's mode and date. */
+ * the maps won, then a column a map — between a game row's mode and date. */
 .search-match {
     display: grid;
     grid-template-columns: 56px 1fr auto auto;
@@ -656,7 +659,7 @@ body.no-demo #unified-timeline {
     display: grid;
     grid-auto-flow: column;
     grid-template-rows: repeat(3, 1.45rem);
-    grid-template-columns: 150px;
+    grid-template-columns: 150px auto;
     grid-auto-columns: minmax(64px, auto);
     column-gap: 14px;
     justify-content: start;
@@ -728,6 +731,16 @@ body.no-demo #unified-timeline {
 .search-board-frags.won {
     color: #fff;
     font-weight: 700;
+}
+
+/* The maps-won column: set off from the maps after it by a rule. */
+.search-board-total {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    padding-right: 18px;
+    margin-right: 4px;
+    border-right: 1px solid rgba(42, 63, 95, 0.9);
 }
 
 .search-board-wins {
