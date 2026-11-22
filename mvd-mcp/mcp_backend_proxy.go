@@ -753,14 +753,14 @@ func (p *proxyBackend) GetTopKills(ctx context.Context, in GetTopKillsInput) (an
 	return p.fetchOpaque(ctx, "GET", path, url.Values(q))
 }
 
-// CreatePlaylistLink forwards the reel to POST /v1/playlist-links as JSON.
-func (p *proxyBackend) CreatePlaylistLink(ctx context.Context, in CreatePlaylistLinkInput) (any, error) {
+// CreatePlaylist forwards the reel to POST /v1/playlists as JSON.
+func (p *proxyBackend) CreatePlaylist(ctx context.Context, in CreatePlaylistInput) (any, error) {
 	body, err := json.Marshal(in)
 	if err != nil {
 		return nil, err
 	}
 	var out any
-	if err := p.doBody(ctx, "POST", "/v1/playlist-links", nil, body, &out); err != nil {
+	if err := p.doBody(ctx, "POST", "/v1/playlists", nil, body, &out); err != nil {
 		return nil, err
 	}
 	return out, nil

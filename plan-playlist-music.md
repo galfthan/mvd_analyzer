@@ -6,6 +6,17 @@ demos, and the *web link*, which is one client's rendering of it. **Part
 2** adds Creative Commons music to the description: one track for the
 whole playlist, or one per section.
 
+## Status (2026-11-07)
+
+Both parts shipped: step 0 and the music in PR #152, then Part 1 —
+`POST /v1/playlists` answering the resolved playlist, v3 links — after.
+`POST /v1/playlist-links` is gone, with no alias (owner: API and MCP deploy
+together). The MCP tool is `createPlaylist`.
+
+**Experimental** (owner, 2026-11-07): it is borderline whether playlists
+belong in the API at all — they serve a web interface, and really belong
+in an MCP of the web app's own. The docs say so; it may move.
+
 ## Order (owner, 2026-11-07)
 
 Step 0 (demos by hash) is done. Music comes next, for the API, the MCP
@@ -78,11 +89,9 @@ two must be kept in step by hand.
   response: a small, labelled adapter (`webLink(playlist)`).
 - **The page** decodes v3 into its `Clip[]`, and keeps decoding v1/v2
   links (already shared). The full analyzer's share button writes v3.
-- **`POST /v1/playlist-links`**: kept as an alias answering the old
-  response shape (`url`, `markdown`, …) built from the new one, so the
-  deployed MCP keeps working during the lockstep release; removed
-  after. The MCP's `createPlaylistLink` then calls `POST /v1/playlists`
-  and returns the link (and the description, for clients that want it).
+- **`POST /v1/playlist-links`**: removed, no alias (owner: the API and
+  the MCP deploy together). The MCP's tool is `createPlaylist`, returning
+  the playlist and its link.
 
 Measured (2026-11-07, deflate + base64url): the readable payload is
 20–30 % longer than v2's compact rows — 10 clips 417 → 543 chars,

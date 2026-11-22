@@ -193,8 +193,9 @@ items, map entities, weapon-pickups, loc-table), eight for the view
 query layer,
 two generic
 DAG-artifact tools (`listArtifacts` + `getArtifact`) that reach any
-servable artifact by name, and `createPlaylistLink`, which turns clips
-from any number of games into a link that plays them:
+servable artifact by name, and `createPlaylist` (experimental), which
+turns clips from any number of games into a playlist and a link that
+plays it:
 
 | Tool | Backing |
 |---|---|
@@ -232,7 +233,7 @@ from any number of games into a link that plays them:
 | **Generic DAG artifacts** | |
 | `listArtifacts()` | `mvd-api` `GET /v1/artifacts` (the DAG manifest) |
 | `getArtifact(demoId, name)` | `mvd-api` `GET /v1/demos/{id}/artifacts/{name}` (any servable artifact by name) |
-| `createPlaylistLink(items, name)` | `mvd-api` `POST /v1/playlist-links` (a light-player link playing clips from many games, title cards and text) |
+| `createPlaylist(items, name)` | `mvd-api` `POST /v1/playlists` (experimental: a playlist of clips from many games, title cards, text and music, and the light-player link that plays it) |
 
 **Full schemas live in three places:**
 

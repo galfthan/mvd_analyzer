@@ -2079,19 +2079,25 @@ paths:
         "429": { $ref: "#/components/responses/RateLimited" }
         "500": { $ref: "#/components/responses/Internal" }
         "502": { $ref: "#/components/responses/HubUpstream" }
-  /v1/playlist-links:
+  /v1/playlists:
     post:
-      operationId: createPlaylistLink
+      operationId: createPlaylist
       tags: [playlists]
-      summary: A light-player link for a scripted reel (clips, title cards, text)
+      summary: "Experimental: a playlist (clips, title cards, text, music), resolved, and a link to play it"
       description: |
-        Builds a link to the web app's light player (`play.html`) that plays
-        the items in order: **clips** from any number of hub demos, **title
-        cards** between them (a colour over the game view for `ms`, fading
-        in and out), and **text** over either (a title on a card, a caption
-        on a clip). The link carries the whole list in its fragment
-        (`#playlist=z…`, deflate-compressed); nothing is stored. It is the
-        backend of the MCP tool `createPlaylistLink`.
+        **Experimental.** This serves the web app's light player more than
+        it does demo analysis, and may change or move out of the API (to an
+        MCP of the web app's own, say).
+
+        Resolves a playlist — **clips** from any number of hub demos,
+        **title cards** between them (a colour over the game view for `ms`,
+        fading in and out), **text** over either (a title on a card, a
+        caption on a clip), **music** under them — into what a player runs
+        (the `Playlist` schema: demo seconds, userids, each track's credit),
+        and links to play it: `links.web` opens the MVD Analyzer's light
+        player with the playlist in the link's fragment
+        (`#playlist=z…`, the playlist's JSON deflate-compressed); nothing
+        is stored. It is the backend of the MCP tool `createPlaylist`.
 
         **Clips** name their demo — a hub `gameId`, or `demo` as the
         per-demo endpoints take it (`gameId:<id>` or `sha:<hex>`; a demo
@@ -2119,18 +2125,19 @@ paths:
         shows through), `fadeIn` / `fadeOut` (ms, default 400), `label`
         (the playlist row's name; default its first text).
 
-        **Music** (`music` items): a cue `{source, id}` from
+        **Music** (`music` items): a cue `{source, id, volume?}` from
         `GET /v1/playlists/music`, or null for silence, plays its track
         under the items after it — one first for the whole playlist, one per
-        section. The API looks each track up at its source, so the credit and
-        license the link carries are the source's; the light player shows
-        them under the game view and turns the game sound down under the
-        music.
+        section; `volume` (0.05–1, default 0.3) is how loud, and the viewer
+        can scale it. The API looks each track up at its source, so the
+        credit and license the playlist carries are the source's; the light
+        player shows them under the game view and turns the game sound down
+        under the music.
 
-        The answer is the URL, a Markdown link named like the web app's
-        Copy link (`mvda · <demo or N demos> · <what the clips are>`, or
-        `name`), its length (Discord messages hold 2000 characters; a
-        20-item reel is typically 500–1000) and the demos it plays. At
+        The answer is the `playlist`, `links.web`, a Markdown link named
+        like the web app's Copy link (`mvda · <demo or N demos> · <what the
+        clips are>`, or `name`) and the link's length (Discord messages hold
+        2000 characters; a 20-clip playlist is about 800). At
         least one clip; at most 100 items over 20 demos. A demo named by
         sha must be a hub game (the light player loads demos by gameId):
         one the hub does not list is a 400. 400 `invalid_param` names the
@@ -2140,13 +2147,13 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/PlaylistLinkRequest" }
+            schema: { $ref: "#/components/schemas/PlaylistRequest" }
       responses:
         "200":
-          description: The link.
+          description: The playlist and its links.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/PlaylistLink" }
+              schema: { $ref: "#/components/schemas/PlaylistResponse" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/DemoNotFound" }
@@ -2160,7 +2167,7 @@ paths:
       summary: Creative Commons tracks a playlist link can play
       description: |
         Searches the music a playlist link can play under its clips, for a
-        `music` item of `POST /v1/playlist-links` (`{source, id}` from a row
+        `music` item of `POST /v1/playlists` (`{source, id}` from a row
         here). The source is **incompetech** — Kevin MacLeod's library
         (~1400 tracks), every track CC BY 4.0, played by the light player
         straight from incompetech.com. `q` matches the title, mood
@@ -3426,7 +3433,7 @@ components:
         to: { type: integer, description: "ms from the item's start it goes at (default: the item's end)." }
         fadeIn: { type: integer, minimum: 0, maximum: 5000, description: "ms (default 300)." }
         fadeOut: { type: integer, minimum: 0, maximum: 5000, description: "ms (default 300)." }
-    PlaylistLinkRequest:
+    PlaylistRequest:
       type: object
       required: [items]
       additionalProperties: false
@@ -3493,32 +3500,106 @@ components:
                       source: { type: string, enum: [incompetech], description: "The track's source." }
                       id: { type: string, description: "The track's id at that source (GET /v1/playlists/music)." }
                       volume: { type: number, minimum: 0.05, maximum: 1, description: "How loud the track plays, 0.05-1 (omitted: the player's default, 0.3 — under the game sound, which goes down to 60 % while music plays). The viewer can scale it." }
-    PlaylistLink:
+    PlaylistResponse:
       type: object
-      required: [url, markdown, name, length, clips, cards, demos]
+      required: [playlist, links, markdown, length]
       additionalProperties: false
       properties:
-        url: { type: string, description: "The light player with the playlist in its fragment." }
-        markdown: { type: string, description: "[name](url), for Discord." }
-        name: { type: string, description: "The link's name." }
-        length: { type: integer, description: "The URL's length in characters." }
-        clips: { type: integer, description: "Clips in the list." }
-        cards: { type: integer, description: "Title cards in the list." }
+        playlist: { $ref: "#/components/schemas/Playlist" }
+        links:
+          type: object
+          required: [web]
+          additionalProperties: false
+          description: Ways to open the playlist.
+          properties:
+            web: { type: string, description: "The MVD Analyzer's light player, with the playlist in the fragment (#playlist=z…)." }
+        markdown: { type: string, description: "[name](links.web), for Discord." }
+        length: { type: integer, description: "links.web's length in characters." }
+    Playlist:
+      type: object
+      description: >
+        A resolved playlist, as a player runs it (format version 3; the light
+        player's links carry exactly this). Times are demo seconds (match
+        time + the demo's offset); defaults are left out of texts.
+      required: [version, name, demos, items]
+      additionalProperties: false
+      properties:
+        version: { type: integer, enum: [3], description: "The format." }
+        name: { type: string, description: "The playlist's name (the request's, or generated)." }
         demos:
           type: array
           description: The demos the clips play in, in first-use order.
           items:
             type: object
-            required: [gameId, sha, title]
+            required: [sha, title, offset]
             additionalProperties: false
             properties:
-              gameId: { type: integer, description: "hub.quakeworld.nu game id." }
               sha: { type: string, description: "The demo's sha256 (of the uncompressed .mvd)." }
+              gameId: { type: integer, description: "hub.quakeworld.nu game id." }
               title: { type: string, description: "map · teams, as the player lists it." }
-        music:
+              offset: { type: number, description: "Demo seconds at match start (streams.global.demoOffset)." }
+        items:
           type: array
-          description: The tracks the cues play, in first-use order — as looked up at their sources (the credit the player shows). Absent when the playlist has no music.
-          items: { $ref: "#/components/schemas/MusicTrack" }
+          description: In play order; each is exactly one of clip, card or music.
+          items:
+            type: object
+            additionalProperties: false
+            minProperties: 1
+            maxProperties: 1
+            properties:
+              clip:
+                type: object
+                required: [demo, from, to, track]
+                additionalProperties: false
+                description: A window of a demo, from one player's view.
+                properties:
+                  demo: { type: integer, description: "Index into demos." }
+                  from: { type: number, description: "Demo seconds." }
+                  to: { type: number, description: "Demo seconds." }
+                  track: { description: "The userid watched, or \"auto\" (the engine's autotrack).", oneOf: [{ type: integer }, { type: string, enum: [auto] }] }
+                  who: { type: string, description: "The watched player's name." }
+                  label: { type: string, description: "The clip's name in the list." }
+                  slow:
+                    type: object
+                    required: [from, to, speed]
+                    additionalProperties: false
+                    description: A slow-motion window, demo seconds.
+                    properties:
+                      from: { type: number, description: "Demo seconds." }
+                      to: { type: number, description: "Demo seconds." }
+                      speed: { type: number, description: "× real time." }
+                  text: { type: array, description: "Captions.", items: { $ref: "#/components/schemas/PlaylistText" } }
+              card:
+                type: object
+                required: [ms, bg, opacity, fadeIn, fadeOut]
+                additionalProperties: false
+                description: A title card.
+                properties:
+                  ms: { type: integer, description: "How long it shows at least." }
+                  bg: { type: string, description: "#rrggbb." }
+                  opacity: { type: number, description: "0-1." }
+                  fadeIn: { type: integer, description: "ms." }
+                  fadeOut: { type: integer, description: "ms." }
+                  label: { type: string, description: "The card's name in the list." }
+                  text: { type: array, description: "Text on the card.", items: { $ref: "#/components/schemas/PlaylistText" } }
+              music:
+                description: A music cue (no time of its own) — its track from here on, or null for silence.
+                oneOf:
+                  - type: "null"
+                  - type: object
+                    required: [source, id, url, title, artist, license, licenseUrl, page, durationSec]
+                    additionalProperties: false
+                    properties:
+                      source: { type: string, description: "Where the track is from." }
+                      id: { type: string, description: "The track at its source." }
+                      url: { type: string, description: "The file the player plays." }
+                      title: { type: string, description: "The credit: title." }
+                      artist: { type: string, description: "The credit: artist." }
+                      license: { type: string, description: "The credit: license short name." }
+                      licenseUrl: { type: string, description: "The license's text." }
+                      page: { type: string, description: "The track's page at its source." }
+                      durationSec: { type: integer, description: "Length, seconds." }
+                      volume: { type: number, description: "How loud this cue plays it (absent: the player's default, 0.3)." }
     MusicTrack:
       type: object
       required: [source, id, title, artist, license, licenseUrl, page, url, durationSec]

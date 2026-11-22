@@ -110,7 +110,7 @@ func newRouter(store demoStore, logger *slog.Logger, mapsDir string, upload uplo
 	mux.HandleFunc("GET /v1/demos/{id}/highlights", s.handleHighlights)
 
 	// A light-player link for a scripted reel (loads the demos it names).
-	mux.HandleFunc("POST /v1/playlist-links", s.handlePlaylistLink)
+	mux.HandleFunc("POST /v1/playlists", s.handlePlaylist)
 	mux.HandleFunc("GET /v1/playlists/music", s.handlePlaylistMusic)
 
 	// Hub game discovery (no demo needed; hits a live upstream).

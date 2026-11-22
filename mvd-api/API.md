@@ -913,14 +913,14 @@ Concrete consequences:
 ### Turning moments into something to watch
 
 The moment endpoints (`/highlights`, `/top-kills`, `/top-windows`,
-`/events`, `/lives`) answer *what happened*; **`POST /v1/playlist-links`**
-turns their rows into a link that *plays* them in the web app's light
-player — clips from any number of games, title cards between them, text
+`/events`, `/lives`) answer *what happened*; **`POST /v1/playlists`**
+(experimental) turns their rows into a playlist and a link that *plays* it
+in the MVD Analyzer's light player — clips from any number of games, title cards between them, text
 over either. Hand their match-ms times and player names straight in (a
 moment is typically `time − 3000` to `time + 2000`, watched from its
 actor). Nothing is stored: the reel rides in the link. The operation in
-`/openapi.yaml` (`createPlaylistLink`, also the MCP tool's name) has the
-item fields.
+`/openapi.yaml` (`createPlaylist`, also the MCP tool's name) has the
+item fields, and the `Playlist` schema the answer's `playlist` follows.
 
 A reel can have music: **`GET /v1/playlists/music?q=action`** finds
 Creative Commons tracks (Kevin MacLeod's incompetech.com library, every

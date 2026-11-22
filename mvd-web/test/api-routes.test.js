@@ -37,7 +37,7 @@ test('every endpoint the page calls is on the allowlist', () => {
 });
 
 test('the allowlist admits the page\'s routes and nothing else', () => {
-    for (const p of ['/api/demos', '/api/demos/x/overview', '/api/demos/x/artifacts/los', '/api/playlist-links',
+    for (const p of ['/api/demos', '/api/demos/x/overview', '/api/demos/x/artifacts/los', '/api/playlists',
         '/api/games/12a', '/api/demos/x/result/extra', '/api/../v1/demos']) {
         assert.ok(!GET_ROUTES.test(p) && !POST_ROUTES.test(p), p);
     }

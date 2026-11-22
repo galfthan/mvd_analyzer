@@ -2,7 +2,7 @@ package main
 
 // Music for playlists (plan-playlist-music.md): Creative Commons tracks a
 // playlist link can play under its clips. GET /v1/playlists/music searches
-// them; POST /v1/playlist-links takes a track by {source, id} and looks it
+// them; POST /v1/playlists takes a track by {source, id} and looks it
 // up here itself, so the credit a link carries comes from the source, not
 // from the request.
 //

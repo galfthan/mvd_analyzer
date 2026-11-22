@@ -534,10 +534,10 @@ func validationCases(t *testing.T) []validationCase {
 		{name: "load", method: "POST", url: "/v1/demos/gameId:42", path: "/v1/demos/{id}", status: 200},
 		{name: "upload", method: "POST", url: "/v1/demos", path: "/v1/demos", body: gzipDemoBody(t), status: 200},
 		{name: "playlist-music", url: "/v1/playlists/music?q=action", path: "/v1/playlists/music", status: 200, mustContain: []string{`"licenseUrl":`}},
-		{name: "playlist-link-music", method: "POST", url: "/v1/playlist-links", path: "/v1/playlist-links", status: 200,
+		{name: "playlist-music-items", method: "POST", url: "/v1/playlists", path: "/v1/playlists", status: 200,
 			body:        []byte(`{"items": [{"music": {"source": "incompetech", "id": "USUAN1100301"}}, {"clip": {"gameId": 42, "from": 60000, "to": 65000}}]}`),
-			mustContain: []string{`"music":[{"source":"incompetech"`}},
-		{name: "playlist-link", method: "POST", url: "/v1/playlist-links", path: "/v1/playlist-links", status: 200,
+			mustContain: []string{`{"music":{"source":"incompetech"`}},
+		{name: "playlist", method: "POST", url: "/v1/playlists", path: "/v1/playlists", status: 200,
 			body: []byte(`{"items": [{"card": {"ms": 2000, "text": [{"text": "Reel"}]}}, {"clip": {"gameId": 42, "from": 60000, "to": 65000, "label": "Airgib · x", "text": [{"text": "cap", "at": "bottom"}]}}]}`)},
 
 		// mustContain pins the v70 capability manifest. It replaced the
