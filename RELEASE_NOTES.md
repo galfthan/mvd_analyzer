@@ -5,6 +5,16 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (fix-demostart-u64) — millisecond wall clock on more demos
+
+Earlier mvdsv builds wrote the demo-start timestamp (mvdhidden `0x000B`)
+as an 8-byte `uint64`, not the varint current builds write. The parser
+read only the varint, got a tiny bogus value, and the wall clock fell back
+to the whole-second serverinfo `epoch`. It now reads both forms, so those
+demos get `demoStartSource` `mvdhidden` and `demoStartAccuracyMs` 1. In
+the 1500 newest archive demos, 18 of the 24 with the block use the
+`uint64` form. No schema change.
+
 ## unreleased (match-support) — matches in the web page (proof of concept)
 
 - **Matches.** The page groups hub games into matches: the maps two sides

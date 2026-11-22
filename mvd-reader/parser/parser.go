@@ -2,6 +2,7 @@
 package parser
 
 import (
+	"encoding/binary"
 	"errors"
 	"io"
 
@@ -812,10 +813,12 @@ func (p *Parser) parseHiddenPausedDuration(r *mvd.BufferReader, timeMs int32, da
 // parseHiddenDemoStart parses mvdhidden_demo_start_timestamp_ms (0x000B).
 //
 // The payload is the wall-clock time the server opened the MVD file, as Unix
-// epoch milliseconds, ULEB128 varint-encoded (7 data bits per byte, high bit =
-// continuation) — NOT a fixed-width uint64. mvdsv writes it once after the
-// initial gamestate flush via Sys_TimestampMilliseconds(); a ~2026 value is 6
-// bytes. Ref: QW-Group/mvdsv SV_MVDEmbedStartTimestamp (src/sv_demo_misc.c).
+// epoch milliseconds. Current mvdsv ULEB128 varint-encodes it (7 data bits
+// per byte, high bit = continuation; a ~2026 value is 6 bytes); earlier
+// builds wrote a fixed 8-byte little-endian uint64, still common in the
+// archive — decodeDemoStart reads both. mvdsv writes it once after the
+// initial gamestate flush via Sys_TimestampMilliseconds(). Ref:
+// QW-Group/mvdsv SV_MVDEmbedStartTimestamp (src/sv_demo_misc.c).
 //
 // This is the only sub-second-accurate demo-start anchor; the serverinfo
 // `epoch` cvar carries the same instant truncated to whole seconds. Absent on
@@ -831,7 +834,33 @@ func (p *Parser) parseHiddenDemoStart(r *mvd.BufferReader, timeMs int32, dataLen
 		return err
 	}
 
-	return p.emit(&DemoStartTimestampEvent{UnixMs: int64(decodeULEB128(body)), TimeMs: timeMs})
+	return p.emit(&DemoStartTimestampEvent{UnixMs: int64(decodeDemoStart(body)), TimeMs: timeMs})
+}
+
+// decodeDemoStart decodes a 0x000B body in either of the two forms mvdsv
+// builds have written: the ULEB128 varint (6 bytes for a current value), or
+// an 8-byte little-endian uint64 from earlier builds. The fixed form is
+// recognised by length: an 8-byte body the varint doesn't consume exactly
+// (a uint64 ms value has a low byte under 0x80 a varint stops at, or zero
+// high bytes). Read as a varint, such a body gave the small bogus values
+// (61, 11701, ...) that plausibleDemoStartUnixMs used to reject, losing the
+// millisecond anchor to the 1 s `epoch`.
+func decodeDemoStart(b []byte) uint64 {
+	if len(b) == 8 && ulebLen(b) != 8 {
+		return binary.LittleEndian.Uint64(b)
+	}
+	return decodeULEB128(b)
+}
+
+// ulebLen is the number of bytes the varint at the start of b occupies,
+// or len(b) if it is truncated.
+func ulebLen(b []byte) int {
+	for i, x := range b {
+		if x&0x80 == 0 {
+			return i + 1
+		}
+	}
+	return len(b)
 }
 
 // decodeULEB128 decodes an unsigned LEB128 varint: low-order group first, 7

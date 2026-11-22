@@ -28,3 +28,26 @@ func TestDecodeULEB128DemoStart(t *testing.T) {
 		})
 	}
 }
+
+// TestDecodeDemoStartU64 pins the fixed-width form earlier mvdsv builds
+// wrote: an 8-byte little-endian uint64. Read as a varint these bodies stop
+// after a few bytes and give small bogus values; 18 of the 24 0x000B blocks
+// in the 1500 newest archive demos (2026-11) are of this form.
+func TestDecodeDemoStartU64(t *testing.T) {
+	cases := []struct {
+		name string
+		body []byte
+		want uint64
+	}{
+		{"archive-49db3868", []byte{0x8a, 0xdd, 0x59, 0x21, 0x9e, 0x01, 0x00, 0x00}, 1778675998090},
+		{"archive-69176434", []byte{0xd3, 0xaa, 0xe8, 0x41, 0x9e, 0x01, 0x00, 0x00}, 0x019e41e8aad3},
+		{"varint-6", []byte{0xac, 0x93, 0xb7, 0xfe, 0xe7, 0x33}, 1780260653484},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := decodeDemoStart(c.body); got != c.want {
+				t.Fatalf("decodeDemoStart(%x) = %d, want %d", c.body, got, c.want)
+			}
+		})
+	}
+}
