@@ -425,8 +425,8 @@ are fetched (`fetchMatch` in `src/data/hub.js`, one more search for both
 sides around the game's day). After every hub load `src/app/match.js`
 looks the demo's match up into the `currentMatch` store
 (`src/state/match.js`), and `src/shell/MatchTabs.svelte` shows its maps as
-tabs in the top bar, in place of the single demo's line (← and → step
-between them while the keyboard has put the focus on one); a tab loads that map with `keepTab`, so the
+tabs in the top bar, in place of the single demo's line (keys 1–9 open
+that map, p / n the one before / after); a tab loads that map with `keepTab`, so the
 same view is compared map by map. A local file has no match. All of it is
 in the page: the API and the Result know nothing of matches.
 

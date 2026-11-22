@@ -4,10 +4,9 @@
     // in maps, then one tab a map in the order played, each with its frags,
     // and the day. A click loads that map's demo on the tab the user is on
     // (src/app/load.js loadMatchGame), so the same view — the Summary, the
-    // Timeline, the Aim stats — is compared map by map. With a tab focused
-    // by the keyboard (a mouse click does not keep the focus), ← and → step to the map before and after, as in a
-    // tab list.
-    import { tick } from 'svelte';
+    // Timeline, the Aim stats — is compared map by map. From anywhere on
+    // the page, 1–9 open that map and p / n the one before / after (the
+    // arrows are the playback's, src/player/player-keys.js).
     import { teams, colorOf } from '../state/teams.js';
     import { mapScore, restartedGames } from '../lib/matches.js';
     import { loadMatchGame } from '../app/load.js';
@@ -38,23 +37,19 @@
         }
     }
 
-    /** @type {HTMLElement} */
-    let list;
-
-    // The arrows stop here: on the window they seek the playback
-    // (src/ui/PlaybackBar.svelte) — which they still do after a mouse click
-    // on a tab: that click gives its focus up (below).
+    // Keys typed into a field, or with a modifier, are left alone.
     /** @param {KeyboardEvent} e */
-    async function onKey(e) {
-        const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-        if (!step) return;
+    function onKey(e) {
+        if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+        if (/** @type {Element} */ (e.target)?.closest?.('input, textarea, select, [contenteditable]')) return;
+        const to = e.key === 'n' ? index + 1 : e.key === 'p' ? index - 1 : /^[1-9]$/.test(e.key) ? +e.key - 1 : -1;
+        if (!match.games[to]) return;
         e.preventDefault();
-        e.stopPropagation();
-        await open(match.games[index + step]);
-        await tick();
-        /** @type {HTMLElement | null} */ (list.querySelector('.match-tab.active'))?.focus();
+        open(match.games[to]);
     }
 </script>
+
+<svelte:window onkeydown={onKey} />
 
 <nav class="match-tabs" id="match-tabs" aria-label="Maps of this match">
     <span class="match-tabs-score" title="Maps won">
@@ -62,17 +57,15 @@
         <b>{a.wins} : {b.wins}</b>
         <span style:color={sideColor(b.name)}>{b.name}</span>
     </span>
-    <button type="button" class="match-tabs-step" title="Previous map" disabled={index === 0 || !!loading}
+    <button type="button" class="match-tabs-step" title="Previous map (p)" disabled={index === 0 || !!loading}
         onclick={() => open(match.games[index - 1])}>‹</button>
-    <!-- svelte-ignore a11y_no_static_element_interactions: the tabs inside are the controls; this only hears their arrow keys -->
-    <div class="match-tabs-list" bind:this={list} onkeydown={onKey}>
+    <div class="match-tabs-list">
         {#each match.games as game, i (game.id)}
             {@const score = mapScore(game, a.name)}
             {@const off = restarted.has(String(game.id))}
-            <button type="button" class="match-tab" class:restarted={off} title={off ? 'Broken off and restarted: not counted' : undefined} class:active={i === index} class:loading={loading === String(game.id)}
+            <button type="button" class="match-tab" class:restarted={off} title={off ? `Broken off and restarted: not counted (key ${i + 1})` : `Key ${i + 1}`} class:active={i === index} class:loading={loading === String(game.id)}
                 aria-current={i === index ? 'page' : undefined} disabled={!!loading && loading !== String(game.id)}
-                data-game-id={game.id}
-                onclick={(e) => { if (e.detail) e.currentTarget.blur(); open(game); }}>
+                data-game-id={game.id} onclick={() => open(game)}>
                 <span class="match-tab-n">{i + 1}</span>
                 <span class="match-tab-map">{game.map}</span>
                 {#if score}
@@ -83,7 +76,7 @@
             </button>
         {/each}
     </div>
-    <button type="button" class="match-tabs-step" title="Next map" disabled={index === match.games.length - 1 || !!loading}
+    <button type="button" class="match-tabs-step" title="Next map (n)" disabled={index === match.games.length - 1 || !!loading}
         onclick={() => open(match.games[index + 1])}>›</button>
     <span class="match-tabs-date">{(match.games[index].timestamp || '').slice(0, 10)}</span>
 </nav>
