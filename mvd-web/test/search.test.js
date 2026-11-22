@@ -51,12 +51,12 @@ test('search: paging counts rows across pages and keeps a known total', () => {
     const f = { map: 'dm2' };
     let p = nextPaging({ filters: null, shown: 0, total: null }, f, 0, 100, 250);
     assert.deepEqual(p, { filters: f, shown: 100, total: 250 });
-    assert.equal(pagerLabel(p), '100 of 250 matches');
+    assert.equal(pagerLabel(p), '100 of 250 games');
     assert.equal(hasMore(p), true);
     p = nextPaging(p, f, 100, 100, null);
     assert.deepEqual(p, { filters: f, shown: 200, total: 250 }, 'a page without a total keeps the last one');
     p = nextPaging(p, f, 200, 50, 250);
     assert.equal(hasMore(p), false);
-    assert.equal(pagerLabel({ shown: 3, total: null }), '3 matches');
+    assert.equal(pagerLabel({ shown: 3, total: null }), '3 games');
     assert.equal(hasMore({ shown: 3, total: null }), false);
 });

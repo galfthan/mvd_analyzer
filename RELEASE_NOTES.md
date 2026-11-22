@@ -5,6 +5,24 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (match-support) — matches in the web page (proof of concept)
+
+- **Matches.** The page groups hub games into matches: the maps two sides
+  played against each other in a row — the same mode, the same team names
+  with at least three of the same players per team (a duel: the same two
+  players), and starts at most the mode's timelimit plus 15 minutes apart
+  (the hub lists a demo's start and no length). Web only; the API, the MCP
+  server and the Result are unchanged.
+- **Search.** "Group into matches" lists a match as one row with its score
+  in maps (`sr 2 : 1 fu`) and a chip a map, with its frags and the winner's
+  colour; a click on a chip loads that map. Maps the search did not
+  return (a map filter, a page's end) are fetched, so the score is for the
+  whole match. The pager counts games ("100 of 250 games").
+- **Map tabs.** A demo that is one map of a match shows the match's maps as
+  tabs in the top bar; a click loads that map on the tab you are on.
+- **Sidebar foot.** The build version, the "API & MCP" link and the GitHub
+  link moved from the top bar to the foot of the sidebar.
+
 ## unreleased (playlist-music) — music in playlist links; demos by hash
 
 - **Music in playlists.** `GET /v1/playlists/music` (MCP

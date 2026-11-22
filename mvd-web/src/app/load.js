@@ -24,6 +24,7 @@ import { startLoadTiming, recordLoadTimings, timeRender, finishLoadTiming } from
 import { hideLoadingOverlay } from './overlay.js';
 import { applyUrlState, updateUrlState } from './url.js';
 import { switchTab, activeTabName } from './tabs.js';
+import { syncMatch } from './match.js';
 import { urlTab } from '../lib/url-state.js';
 
 // The DemoHandle behind the page: its view queries, region recompute and
@@ -132,6 +133,7 @@ export async function loadDemo(input, { deepLink = false, keepTab = false, still
         (err) => console.warn('deferred buckets failed:', err.message));
 
     displayResults(result, deepLink, keepTab);
+    syncMatch(handle.game);
     return true;
 }
 
@@ -187,6 +189,17 @@ export async function loadGameFromSearch(game) {
     try {
         await loadDemo({ game });
         // displayResults() switches to the Summary tab as part of finishing a load.
+    } catch (error) {
+        setLoadError(error);
+    }
+}
+
+// loadMatchGame shows another map of the current match (the map tabs,
+// src/shell/MatchTabs.svelte), on the tab the user is on.
+/** @param {import('../data/hub.js').HubGame} game */
+export async function loadMatchGame(game) {
+    try {
+        await loadDemo({ game }, { keepTab: true });
     } catch (error) {
         setLoadError(error);
     }

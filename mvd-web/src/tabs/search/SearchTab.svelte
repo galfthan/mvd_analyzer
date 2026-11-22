@@ -3,12 +3,24 @@
     // the load panel (a file by button or drop, a hub game id or URL) and
     // the hub search (filters, the result rows, Load more). Its state is
     // search-model.js and src/state/shell.js; a click on a row loads that
-    // game. The `active` class is toggled by src/app/tabs.js like on every
+    // game. With "Group into matches" on, the games two sides played in one
+    // sitting list as one row (src/lib/matches.js): maps won, then a chip a
+    // map with its frags, underlined in the colour of the side that won it.
+    // A chip loads that map; the map tabs in the top bar
+    // (src/shell/MatchTabs.svelte) reach the others from there.
+    // The `active` class is toggled by src/app/tabs.js like on every
     // other tab, so the class attribute stays static here.
     import { SEARCH_MODE_LABELS, searchRow, pagerLabel, hasMore } from '../../lib/search.js';
     import { loadStatus, hubInput, hubBusy } from '../../state/shell.js';
     import { uploadFile, loadFromHub, loadGameFromSearch } from '../../app/load.js';
-    import { searchForm, searchStatus, searchBusy, searchResults, searchPaging, runSearch } from './search-model.js';
+    import { searchMatches, matchRow, mapScore } from '../../lib/matches.js';
+    import { assignTeamColors } from '../../state/teams.js';
+    import {
+        searchForm, searchStatus, searchBusy, searchResults, searchPaging, runSearch,
+        searchGrouped, searchExtraGames, setSearchGrouped,
+    } from './search-model.js';
+
+    const matches = $derived($searchGrouped ? searchMatches($searchResults.rows, $searchExtraGames) : []);
 
     /** @type {HTMLInputElement} */
     let fileInput;
@@ -94,18 +106,53 @@
                 <button type="submit" class="search-submit" id="search-submit" disabled={$searchBusy}>Search</button>
             </div>
         </form>
+        <label class="search-group-toggle">
+            <input type="checkbox" id="search-grouped" checked={$searchGrouped}
+                onchange={(e) => setSearchGrouped(/** @type {HTMLInputElement} */ (e.target).checked)}>
+            Group into matches <span class="search-group-hint">— the maps two sides played in a row, as one row</span>
+        </label>
         <div id="search-status" class={$searchStatus.cls}>{$searchStatus.text}</div>
         <div id="search-results" class="search-results">
             {#if $searchResults.empty}
                 <div class="search-empty">No demos match these filters.</div>
             {/if}
-            {#each $searchResults.rows as game}
+            {#snippet gameRow(/** @type {import('../../data/hub.js').HubGame} */ game)}
                 {@const row = searchRow(game)}
                 <button type="button" class="search-result" data-game-id={game.id} onclick={() => loadGameFromSearch(game)}><span class="search-result-mode">{row.mode}</span><span class="search-result-map">{row.map}</span><span class="search-result-contest">{row.contest}</span><span class="search-result-tag">{row.tag}</span><span class="search-result-date">{row.date}</span></button>
-            {/each}
+            {/snippet}
+            {#if $searchGrouped}
+                {#each matches as match (match.id)}
+                    {#if match.games.length === 1}
+                        {@render gameRow(match.games[0])}
+                    {:else if match.sides}
+                        {@const row = matchRow(match)}
+                        {@const [a, b] = match.sides}
+                        <!-- The colours the demo itself will give these two names (src/state/teams.js). -->
+                        {@const [colorA, colorB] = assignTeamColors([a.name, b.name])}
+                        <div class="search-match" data-match-id={match.id}>
+                            <span class="search-result-mode">{SEARCH_MODE_LABELS[match.mode] || match.mode}</span>
+                            <span class="search-match-score" title="Maps won"><span style:color={colorA}>{a.name}</span> <b>{a.wins} : {b.wins}</b> <span style:color={colorB}>{b.name}</span></span>
+                            <span class="search-match-maps">
+                                {#each match.games as game (game.id)}
+                                    {@const score = mapScore(game, a.name)}
+                                    <button type="button" class="search-chip" data-game-id={game.id}
+                                        style:border-bottom-color={score && score.own !== score.other ? (score.own > score.other ? colorA : colorB) : undefined}
+                                        onclick={() => loadGameFromSearch(game)}>{game.map || '-'}{#if score}<small>{score.own}–{score.other}</small>{/if}</button>
+                                {/each}
+                            </span>
+                            <span class="search-result-tag">{row.tag}</span>
+                            <span class="search-result-date">{row.date}</span>
+                        </div>
+                    {/if}
+                {/each}
+            {:else}
+                {#each $searchResults.rows as game}
+                    {@render gameRow(game)}
+                {/each}
+            {/if}
             {#if $searchResults.pager}
                 <div class="search-pager">
-                    <span class="search-pager-count">{pagerLabel($searchPaging)}</span>
+                    <span class="search-pager-count">{pagerLabel($searchPaging)}{#if $searchGrouped}{` in ${matches.length} matches`}{/if}</span>
                     {#if hasMore($searchPaging)}
                         <button type="button" class="search-submit search-pager-more" disabled={$searchBusy} onclick={() => runSearch(true)}>Load more</button>
                     {/if}

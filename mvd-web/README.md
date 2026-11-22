@@ -184,12 +184,13 @@ change is intended.
 
 ## Layout
 
-A slim top bar (wordmark + commit-hash version + an "API & MCP" link
-to the portal at mvdanalyzer.com/portal — API docs, keys, MCP setup,
-admin contact — + GitHub link) sits
+A slim top bar (wordmark + the loaded demo's line, or its match's maps
+as tabs) sits
 above a Grafana-style frame: a fixed left **sidebar** with one button
-per analysis tab, and a **main pane** that fills the rest of the
-viewport (no width cap). Sidebar order is `Search`, `Summary`,
+per analysis tab — and at its foot an "API & MCP" link to the portal at
+mvdanalyzer.com/portal (API docs, keys, MCP setup, admin contact), the
+GitHub link and the commit-hash version — and a **main pane** that
+fills the rest of the viewport (no width cap). Sidebar order is `Search`, `Summary`,
 `Timeline`, `Chat`, `Player`, `Map`, `Locs & Regions`, `Key Moments`,
 `Pack Drops`, `Pickups`, `Aim Stats`.
 
@@ -406,6 +407,22 @@ demo is loaded they show a short "Load or search a demo to begin"
 placeholder (CSS-driven via a `body.no-demo` class). After a successful
 load the placeholder is hidden, the Summary tab activates, and the
 real content renders.
+
+**Matches (proof of concept).** The hub lists single games; the page
+groups them into matches — the maps two sides played in a row
+(`src/lib/matches.js` has the rule: same mode, same team names with at
+least three shared players per team or the same two duel players, starts
+at most the mode's timelimit + 15 min apart). The Search tab's "Group
+into matches" checkbox (kept in `localStorage`) lists a match as one row
+with its score in maps and a chip a map (its frags, underlined in the
+colour of the side that won it; a click loads that map); maps the search cut off
+are fetched (`fetchMatch` in `src/data/hub.js`, one more search for both
+sides around the game's day). After every hub load `src/app/match.js`
+looks the demo's match up into the `currentMatch` store
+(`src/state/match.js`), and `src/shell/MatchTabs.svelte` shows its maps as
+tabs in the top bar, in place of the single demo's line; a tab loads that map with `keepTab`, so the
+same view is compared map by map. A local file has no match. All of it is
+in the page: the API and the Result know nothing of matches.
 
 On viewports below 800 px the sidebar reflows into a horizontal scroll
 strip above the main pane.
