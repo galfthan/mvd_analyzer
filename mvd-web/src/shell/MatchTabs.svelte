@@ -4,7 +4,9 @@
     // in maps, then one tab a map in the order played, each with its frags,
     // and the day. A click loads that map's demo on the tab the user is on
     // (src/app/load.js loadMatchGame), so the same view — the Summary, the
-    // Timeline, the Aim stats — is compared map by map.
+    // Timeline, the Aim stats — is compared map by map. With a tab focused,
+    // ← and → step to the map before and after, as in a tab list.
+    import { tick } from 'svelte';
     import { teams, colorOf } from '../state/teams.js';
     import { mapScore } from '../lib/matches.js';
     import { loadMatchGame } from '../app/load.js';
@@ -32,6 +34,22 @@
             loading = '';
         }
     }
+
+    /** @type {HTMLElement} */
+    let list;
+
+    // The arrows stop here: on the window they seek the playback
+    // (src/ui/PlaybackBar.svelte).
+    /** @param {KeyboardEvent} e */
+    async function onKey(e) {
+        const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+        if (!step) return;
+        e.preventDefault();
+        e.stopPropagation();
+        await open(match.games[index + step]);
+        await tick();
+        /** @type {HTMLElement | null} */ (list.querySelector('.match-tab.active'))?.focus();
+    }
 </script>
 
 <nav class="match-tabs" id="match-tabs" aria-label="Maps of this match">
@@ -42,7 +60,8 @@
     </span>
     <button type="button" class="match-tabs-step" title="Previous map" disabled={index === 0 || !!loading}
         onclick={() => open(match.games[index - 1])}>‹</button>
-    <div class="match-tabs-list">
+    <!-- svelte-ignore a11y_no_static_element_interactions: the tabs inside are the controls; this only hears their arrow keys -->
+    <div class="match-tabs-list" bind:this={list} onkeydown={onKey}>
         {#each match.games as game, i (game.id)}
             {@const score = mapScore(game, a.name)}
             <button type="button" class="match-tab" class:active={i === index} class:loading={loading === String(game.id)}

@@ -4,11 +4,10 @@
     // the hub search (filters, the result rows, Load more). Its state is
     // search-model.js and src/state/shell.js; a click on a row loads that
     // game. With "Group into matches" on, the games two sides played in one
-    // sitting list as one row (src/lib/matches.js): maps won, then a chip a
-    // map with its frags, underlined in the colour of the side that won it.
-    // A click on the row opens the match at its first map, a chip at that
-    // map; the map tabs in the top bar (src/shell/MatchTabs.svelte) reach
-    // the others from there.
+    // sitting list as one small scoreboard (src/lib/matches.js): a column a
+    // map with each side's frags, and the maps won. A click on it opens the
+    // match at its first map, a map's name at that map; the map tabs in the
+    // top bar (src/shell/MatchTabs.svelte) reach the others from there.
     // The `active` class is toggled by src/app/tabs.js like on every
     // other tab, so the class attribute stays static here.
     import { SEARCH_MODE_LABELS, searchRow, pagerLabel, hasMore } from '../../lib/search.js';
@@ -132,17 +131,22 @@
                         {@const [colorA, colorB] = assignTeamColors([a.name, b.name])}
                         <div class="search-match" data-match-id={match.id}>
                             <span class="search-result-mode">{SEARCH_MODE_LABELS[match.mode] || match.mode}</span>
-                            <!-- Its ::after covers the row: a click anywhere but a chip opens the match. -->
-                            <button type="button" class="search-match-score" title="Open the match at its first map"
-                                onclick={() => loadGameFromSearch(match.games[0])}><span style:color={colorA}>{a.name}</span> <b>{a.wins} : {b.wins}</b> <span style:color={colorB}>{b.name}</span></button>
-                            <span class="search-match-maps">
+                            <div class="search-board">
+                                <span></span>
+                                <!-- Its ::after covers the row: a click anywhere but a map's name opens the match. -->
+                                <button type="button" class="search-board-sides" title="Open the match at its first map"
+                                    onclick={() => loadGameFromSearch(match.games[0])}><span style:color={colorA}>{a.name}</span><span style:color={colorB}>{b.name}</span></button>
                                 {#each match.games as game (game.id)}
                                     {@const score = mapScore(game, a.name)}
-                                    <button type="button" class="search-chip" data-game-id={game.id}
-                                        style:border-bottom-color={score && score.own !== score.other ? (score.own > score.other ? colorA : colorB) : undefined}
-                                        onclick={() => loadGameFromSearch(game)}>{game.map || '-'}{#if score}<small>{score.own}–{score.other}</small>{/if}</button>
+                                    <button type="button" class="search-board-map" data-game-id={game.id} title="Open this map"
+                                        onclick={() => loadGameFromSearch(game)}>{game.map || '-'}</button>
+                                    <span class="search-board-frags" class:won={score && score.own > score.other}>{score?.own}</span>
+                                    <span class="search-board-frags" class:won={score && score.other > score.own}>{score?.other}</span>
                                 {/each}
-                            </span>
+                                <span class="search-board-head">maps</span>
+                                <span class="search-board-wins">{a.wins}</span>
+                                <span class="search-board-wins">{b.wins}</span>
+                            </div>
                             <span class="search-result-tag">{row.tag}</span>
                             <span class="search-result-date">{row.date}</span>
                         </div>

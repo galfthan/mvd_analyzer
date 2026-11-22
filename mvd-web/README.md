@@ -415,13 +415,15 @@ least three shared players per team or the same two duel players, starts
 at most the mode's timelimit + 15 min apart). The Search tab's "Group
 into matches" checkbox (on by default; turning it off is kept in
 `localStorage`) lists a match as one row
-with its score in maps and a chip a map (its frags, underlined in the
-colour of the side that won it; a click loads that map, a click elsewhere on the row the first one); maps the search cut off
+as a small scoreboard — a column a map with each side's frags, then the
+maps won; a click on a map's name loads that map, a click elsewhere the
+first one; maps the search cut off
 are fetched (`fetchMatch` in `src/data/hub.js`, one more search for both
 sides around the game's day). After every hub load `src/app/match.js`
 looks the demo's match up into the `currentMatch` store
 (`src/state/match.js`), and `src/shell/MatchTabs.svelte` shows its maps as
-tabs in the top bar, in place of the single demo's line; a tab loads that map with `keepTab`, so the
+tabs in the top bar, in place of the single demo's line (← and → step
+between them while one has the focus); a tab loads that map with `keepTab`, so the
 same view is compared map by map. A local file has no match. All of it is
 in the page: the API and the Result know nothing of matches.
 

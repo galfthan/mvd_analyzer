@@ -629,18 +629,18 @@ body.no-demo #unified-timeline {
     color: #7a8ba8;
 }
 
-/* A match in the grouped search list: a row shaped like a game's, with a
- * chip a map where the game has its map and contest. */
+/* A match in the grouped search list: a small scoreboard — a row a side,
+ * a column a map, the maps won last — between a game row's mode and date. */
 .search-match {
     display: grid;
-    grid-template-columns: 56px minmax(0, 240px) 1fr auto auto;
+    grid-template-columns: 56px 1fr auto auto;
     gap: 16px;
     align-items: center;
     background: var(--bg-deep);
     border: 1px solid rgba(42, 63, 95, 0.5);
     border-left: 3px solid var(--accent-cyan);
     border-radius: 6px;
-    padding: 6px 14px 6px 12px;
+    padding: 6px 14px 8px 12px;
     font-size: 0.92rem;
     position: relative;
     cursor: pointer;
@@ -652,69 +652,88 @@ body.no-demo #unified-timeline {
     background: rgba(0, 217, 255, 0.06);
 }
 
-/* The match's score is the button that opens it, stretched over the row. */
-.search-match-score {
+.search-board {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(3, 1.45rem);
+    grid-template-columns: 150px;
+    grid-auto-columns: minmax(64px, auto);
+    column-gap: 14px;
+    justify-content: start;
+    align-items: center;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+/* The two sides' names are the button that opens the match, stretched over
+ * the row. */
+.search-board-sides {
+    grid-row: 2 / span 2;
+    display: grid;
+    grid-template-rows: repeat(2, 1.45rem);
+    align-items: center;
     background: none;
     border: none;
     padding: 0;
-    color: inherit;
     font: inherit;
+    font-weight: 600;
     text-align: left;
     cursor: pointer;
-    font-weight: 600;
+    min-width: 0;
+}
+
+.search-board-sides span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.search-match-score::after {
+.search-board-sides::after {
     content: '';
     position: absolute;
     inset: 0;
 }
 
-.search-match-score b {
-    font-variant-numeric: tabular-nums;
-    margin: 0 4px;
+.search-board-map,
+.search-board-head {
+    color: #7a8ba8;
+    font-size: 0.78rem;
+    white-space: nowrap;
 }
 
-.search-match-maps {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    min-width: 0;
-}
-
-/* One map of a match; the bottom border is the colour of the side that won it. */
-.search-chip {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 8px;
-    background: rgba(42, 63, 95, 0.35);
-    border: 1px solid rgba(42, 63, 95, 0.7);
-    border-bottom: 2px solid #4a5a6e;
-    border-radius: 5px;
-    padding: 3px 10px;
-    color: #e8eef7;
+.search-board-map {
+    background: none;
+    border: none;
+    padding: 0;
     font-family: inherit;
-    font-size: 0.88rem;
-    font-weight: 600;
+    text-align: left;
     cursor: pointer;
-    transition: background 0.15s ease;
     /* Above the row's own click target. */
     position: relative;
     z-index: 1;
 }
 
-.search-chip:hover {
-    background: rgba(0, 217, 255, 0.14);
+.search-board-map:hover {
+    color: var(--accent-cyan);
+    text-decoration: underline;
 }
 
-.search-chip small {
+.search-board-frags {
     color: #7a8ba8;
     font-family: monospace;
-    font-size: 0.78rem;
-    font-weight: 400;
+    font-size: 0.86rem;
+}
+
+.search-board-frags.won {
+    color: #fff;
+    font-weight: 700;
+}
+
+.search-board-wins {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
 }
 
 /* The maps of the current match, in the top bar. */

@@ -78,7 +78,9 @@ export async function fetchGame(gameId, fetchImpl = fetch) {
 // the hub does (player full-text, team contains, map / mode exact, tag
 // substring, dates inclusive of the end day); its `players` and `teams`
 // are comma-separated lists, AND'd, where the direct query takes each as
-// one term.
+// one term. A team goes in lower case: the hub's team filter is an exact
+// match on its lower-cased team names ("D2s" finds nothing, "d2s" the
+// team), where the player one folds case.
 /**
  * @param {SearchFilters} filters
  * @param {number} [offset]
@@ -90,7 +92,7 @@ export async function searchGames(filters, offset = 0, fetchImpl = fetch, limit 
     const q = new URLSearchParams({ limit: String(limit), roster: '1' });
     if (offset > 0) q.set('offset', String(offset));
     if (filters.player) q.set('players', filters.player);
-    if (filters.team) q.set('teams', filters.team);
+    if (filters.team) q.set('teams', filters.team.toLowerCase());
     if (filters.map) q.set('map', filters.map);
     if (filters.mode) q.set('mode', filters.mode);
     if (filters.tag) q.set('matchtag', filters.tag);
@@ -121,7 +123,7 @@ async function searchHub(filters, offset, fetchImpl, limit) {
     ];
     if (offset > 0) parts.push(`offset=${offset}`);
     if (filters.player) parts.push(`players_fts=fts.'${encodeURIComponent(filters.player)}'`);
-    if (filters.team)   parts.push(`team_names=cs.{${encodeURIComponent(filters.team)}}`);
+    if (filters.team)   parts.push(`team_names=cs.{${encodeURIComponent(filters.team.toLowerCase())}}`);
     if (filters.map)    parts.push(`map=eq.${encodeURIComponent(filters.map)}`);
     if (filters.mode)   parts.push(`mode=eq.${encodeURIComponent(filters.mode)}`);
     if (filters.tag)    parts.push(`matchtag=ilike.%25${encodeURIComponent(filters.tag)}%25`);

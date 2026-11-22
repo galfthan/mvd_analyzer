@@ -180,9 +180,7 @@ export function matchWith(matches, gameId) {
 // siblingFilters: the search (src/data/hub.js searchGames) that finds the
 // other maps of a game's match — its mode, both sides by name, and the days
 // around it. null when the game has no two sides, or a side's name cannot
-// go in the search's comma-separated list. A team goes in lower case: the
-// hub's team filter is an exact match on its lower-cased team names
-// ("D2s" finds nothing, "d2s" the team), where the player one folds case.
+// go in the search's comma-separated list.
 /**
  * @param {HubGame} game
  * @returns {import('../data/hub.js').SearchFilters | null}
@@ -191,14 +189,13 @@ export function siblingFilters(game) {
     const sides = gameSides(game);
     const t = startMs(game);
     if (!sides || isNaN(t)) return null;
-    const duel = game.mode === '1on1';
-    const names = sides.map(s => (duel ? s.name : s.key));
+    const names = [sides[0].name, sides[1].name];
     if (names.some(n => n.includes(','))) return null;
     const day = (/** @type {number} */ ms) => new Date(ms).toISOString().slice(0, 10);
     const span = 6 * 3600000;
     return {
         mode: game.mode,
-        [duel ? 'player' : 'team']: names.join(','),
+        [game.mode === '1on1' ? 'player' : 'team']: names.join(','),
         from: day(t - span),
         to: day(t + span),
     };
