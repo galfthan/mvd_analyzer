@@ -642,13 +642,35 @@ body.no-demo #unified-timeline {
     border-radius: 6px;
     padding: 6px 14px 6px 12px;
     font-size: 0.92rem;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.15s ease;
 }
 
+.search-match:hover {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 217, 255, 0.06);
+}
+
+/* The match's score is the button that opens it, stretched over the row. */
 .search-match-score {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.search-match-score::after {
+    content: '';
+    position: absolute;
+    inset: 0;
 }
 
 .search-match-score b {
@@ -679,6 +701,9 @@ body.no-demo #unified-timeline {
     font-weight: 600;
     cursor: pointer;
     transition: background 0.15s ease;
+    /* Above the row's own click target. */
+    position: relative;
+    z-index: 1;
 }
 
 .search-chip:hover {

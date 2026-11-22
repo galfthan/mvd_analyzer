@@ -98,6 +98,37 @@ export function filtersFromParams(params, fields) {
     return { filters, any };
 }
 
+// The list a bare page opens with (search-model.js runRecentSearch): the
+// games of RECENT_MODES that started in the last RECENT_HOURS.
+export const RECENT_MODES = ['1on1', '2on2', '4on4'];
+export const RECENT_HOURS = 24;
+
+// recentFrom: the `from` day of the searches behind that list — the day
+// the window opens on, an hour early so a match that straddles the
+// window's start is fetched whole even across midnight.
+/** @param {number} now  ms */
+export function recentFrom(now) {
+    return new Date(now - (RECENT_HOURS + 1) * 3600000).toISOString().slice(0, 10);
+}
+
+// recentGames: what those searches found (one list a mode), as the list's
+// rows — inside the window, newest first — and the older games fetched
+// with them, which complete a match that began before the window
+// (src/lib/matches.js searchMatches takes them as its `extra`).
+/**
+ * @param {HubGame[][]} lists
+ * @param {number} now  ms
+ * @returns {{ rows: HubGame[], extra: HubGame[] }}
+ */
+export function recentGames(lists, now) {
+    const start = now - RECENT_HOURS * 3600000;
+    const all = lists.flat().sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
+    return {
+        rows: all.filter(g => Date.parse(g.timestamp) >= start),
+        extra: all.filter(g => !(Date.parse(g.timestamp) >= start)),
+    };
+}
+
 // searchRow: one hub game's result-row cells. Contestants are the top two
 // teams for a team mode, the top two players otherwise.
 /** @param {HubGame} game */

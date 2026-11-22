@@ -85,6 +85,7 @@ test('matches: the search for a game\'s other maps names its mode, sides and day
     assert.deepEqual(siblingFilters(game(0, 'dm2', 1, 2)), { mode: '4on4', team: 'fu,sr', from: '2026-11-21', to: '2026-11-22' });
     assert.deepEqual(siblingFilters(duel(-900, 'dm2', 1, 2)), { mode: '1on1', player: 'bps,milton', from: '2026-11-20', to: '2026-11-21' });
     assert.equal(siblingFilters(game(0, 'dm2', 1, 2, { ta: 'a,b' })), null, 'a comma cannot go in the list');
+    assert.equal(siblingFilters(game(0, 'dm2', 1, 2, { ta: 'D2s', tb: 'fir' })).team, 'd2s,fir', 'the hub matches team names in lower case');
 });
 
 test('matches: the grouped search list', () => {

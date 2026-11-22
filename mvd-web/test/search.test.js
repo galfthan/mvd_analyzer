@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
     SEARCH_MODE_LABELS, EMPTY_FILTERS, searchFilters, validDateString, formValues, filtersFromParams,
-    searchRow, nextPaging, pagerLabel, hasMore,
+    searchRow, nextPaging, pagerLabel, hasMore, recentFrom, recentGames,
 } from '../src/lib/search.js';
 import { SEARCH_FIELDS } from '../src/data/hub.js';
 
@@ -59,4 +59,18 @@ test('search: paging counts rows across pages and keeps a known total', () => {
     assert.equal(hasMore(p), false);
     assert.equal(pagerLabel({ shown: 3, total: null }), '3 games');
     assert.equal(hasMore({ shown: 3, total: null }), false);
+});
+
+test('search: the recent list is the last 24 hours newest first, older games kept aside', () => {
+    const now = Date.parse('2026-11-22T00:30:00Z');
+    // An hour before the window opens is still the 20th.
+    assert.equal(recentFrom(now), '2026-11-20');
+    assert.equal(recentFrom(Date.parse('2026-11-22T12:00:00Z')), '2026-11-21');
+    const g = (/** @type {number} */ id, /** @type {string} */ timestamp) => /** @type {any} */ ({ id, timestamp });
+    const { rows, extra } = recentGames([
+        [g(1, '2026-11-21T20:00:00+00:00'), g(2, '2026-11-20T23:50:00+00:00')],
+        [g(3, '2026-11-22T00:10:00+00:00'), g(4, '2026-11-21T00:30:00+00:00')],
+    ], now);
+    assert.deepEqual(rows.map(r => r.id), [3, 1, 4]);
+    assert.deepEqual(extra.map(r => r.id), [2]);
 });

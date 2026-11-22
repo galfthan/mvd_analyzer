@@ -13,9 +13,11 @@ detail.
   players), and starts at most the mode's timelimit plus 15 minutes apart
   (the hub lists a demo's start and no length). Web only; the API, the MCP
   server and the Result are unchanged.
-- **Search.** "Group into matches" lists a match as one row with its score
+- **Recent games.** A page opened without a demo or search in its URL
+  lists the 1v1, 2v2 and 4v4 games of the last 24 hours.
+- **Search.** "Group into matches" (on by default) lists a match as one row with its score
   in maps (`sr 2 : 1 fu`) and a chip a map, with its frags and the winner's
-  colour; a click on a chip loads that map. Maps the search did not
+  colour; a click on a chip loads that map, a click on the row the first one. Maps the search did not
   return (a map filter, a page's end) are fetched, so the score is for the
   whole match. The pager counts games ("100 of 250 games").
 - **Map tabs.** A demo that is one map of a match shows the match's maps as

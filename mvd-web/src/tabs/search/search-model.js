@@ -1,11 +1,15 @@
 // search-model.js — the Search tab's state: the filter form, the status
 // line, the result rows and their paging, and the last search that ran
 // (the URL keeps its filters). SearchTab.svelte renders it; the boot
-// (src/app/boot.js) fills the form from a URL's filters and runs it.
+// (src/app/boot.js) fills the form from a URL's filters and runs it, or
+// lists the recent games (runRecentSearch) when the URL has none.
 
 import { store } from '../../state/store.js';
-import { searchGames, fetchMatch } from '../../data/hub.js';
-import { EMPTY_FILTERS, searchFilters, formValues, nextPaging, hasMore } from '../../lib/search.js';
+import { searchGames, fetchMatch, MATCH_SEARCH_LIMIT } from '../../data/hub.js';
+import {
+    EMPTY_FILTERS, SEARCH_MODE_LABELS, RECENT_MODES, RECENT_HOURS, searchFilters, formValues, nextPaging, hasMore,
+    recentFrom, recentGames,
+} from '../../lib/search.js';
 import { searchMatches, cutShort, mergeGames } from '../../lib/matches.js';
 import { updateUrlState } from '../../app/url.js';
 
@@ -23,7 +27,7 @@ export const searchPaging = store(/** @type {import('../../lib/search.js').Pagin
 export const lastExecutedSearch = store(/** @type {import('../../lib/search.js').Filters | null} */ (null));
 
 // Whether the list groups the found games into matches (src/lib/matches.js).
-// The viewer's own preference, kept in the browser.
+// On unless the viewer turned it off; their choice is kept in the browser.
 const GROUPED_KEY = 'mvd.search.grouped';
 export const searchGrouped = store(readGrouped());
 // Games the search did not return that belong to a listed match, fetched
@@ -32,9 +36,9 @@ export const searchExtraGames = store(/** @type {import('../../data/hub.js').Hub
 
 function readGrouped() {
     try {
-        return localStorage.getItem(GROUPED_KEY) === '1';
+        return localStorage.getItem(GROUPED_KEY) !== '0';
     } catch {
-        return false;
+        return true;
     }
 }
 
@@ -119,5 +123,33 @@ export async function runSearch(loadMore = false) {
         if (!loadMore) searchResults.set({ rows: [], empty: false, pager: false });
     } finally {
         searchBusy.set(false);
+    }
+}
+
+// runRecentSearch fills the list a bare page opens with: the games of the
+// main modes from the last day (src/lib/search.js recentGames), one search
+// a mode since the search takes one. It is not a search of the form's — the
+// form stays empty, the URL clean, and there is no next page — and a form
+// search that answered meanwhile keeps the list.
+export async function runRecentSearch() {
+    const now = Date.now();
+    const what = `${RECENT_MODES.map(m => SEARCH_MODE_LABELS[m]).join(', ')} games of the last ${RECENT_HOURS} hours`;
+    searchStatus.set({ text: 'Loading the latest games…', cls: 'status loading' });
+    try {
+        const lists = await Promise.all(RECENT_MODES.map(mode =>
+            searchGames({ mode, from: recentFrom(now) }, 0, fetch, MATCH_SEARCH_LIMIT)));
+        if (lastExecutedSearch.get() || searchBusy.get()) return;
+        const { rows, extra } = recentGames(lists.map(l => l.games), now);
+        generation++;
+        asked = new Set();
+        searchExtraGames.set(extra);
+        // No filters: nothing to page through or to complete — the older
+        // games fetched alongside already hold the cut-off maps.
+        searchPaging.set({ filters: null, shown: rows.length, total: rows.length });
+        searchResults.set({ rows, empty: false, pager: rows.length > 0 });
+        searchStatus.set({ text: rows.length ? `The ${what}.` : `No ${what}.`, cls: 'status' });
+    } catch (err) {
+        if (lastExecutedSearch.get() || searchBusy.get()) return;
+        searchStatus.set({ text: 'Error: ' + /** @type {Error} */ (err).message, cls: 'status error' });
     }
 }

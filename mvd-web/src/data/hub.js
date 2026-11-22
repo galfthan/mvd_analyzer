@@ -36,7 +36,7 @@ export const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 't
 const SEARCH_PAGE_SIZE = 100;
 // Both sides' games of one mode over two or three days: the hub's page
 // ceiling, so a pair of generic names ("red" v "blue") is not cut short.
-const MATCH_SEARCH_LIMIT = 1000;
+export const MATCH_SEARCH_LIMIT = 1000;
 
 /**
  * @param {string} input

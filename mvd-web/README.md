@@ -413,9 +413,10 @@ groups them into matches — the maps two sides played in a row
 (`src/lib/matches.js` has the rule: same mode, same team names with at
 least three shared players per team or the same two duel players, starts
 at most the mode's timelimit + 15 min apart). The Search tab's "Group
-into matches" checkbox (kept in `localStorage`) lists a match as one row
+into matches" checkbox (on by default; turning it off is kept in
+`localStorage`) lists a match as one row
 with its score in maps and a chip a map (its frags, underlined in the
-colour of the side that won it; a click loads that map); maps the search cut off
+colour of the side that won it; a click loads that map, a click elsewhere on the row the first one); maps the search cut off
 are fetched (`fetchMatch` in `src/data/hub.js`, one more search for both
 sides around the game's day). After every hub load `src/app/match.js`
 looks the demo's match up into the `currentMatch` store
@@ -1644,6 +1645,11 @@ Map tab into this one as preset views in
 [`plan-map-player-merge.md`](../plan-map-player-merge.md).
 
 ## Demo search
+
+A page opened without a demo or a search in its URL lists the 1v1, 2v2
+and 4v4 games of the last 24 hours (`runRecentSearch` in
+`src/tabs/search/search-model.js`: one search a mode, merged; the form
+stays empty and the URL clean).
 
 The Search tab queries the hub's `v1_games` catalog through mvd-api's
 `GET /v1/games/search` (as the game lookup does `/v1/games/{id}`) —
