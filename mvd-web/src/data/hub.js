@@ -32,11 +32,11 @@ export const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 't
 
 // Page size for the search tab. The hub itself pages at 1000 (PostgREST
 // max-rows); 100 keeps a single response light (~90 KB) while "Load more"
-// walks offset pages until every match is shown.
+// walks offset pages until every game is shown.
 const SEARCH_PAGE_SIZE = 100;
 // Both sides' games of one mode over two or three days: the hub's page
 // ceiling, so a pair of generic names ("red" v "blue") is not cut short.
-export const MATCH_SEARCH_LIMIT = 1000;
+const MATCH_SEARCH_LIMIT = 1000;
 
 /**
  * @param {string} input
@@ -74,7 +74,7 @@ export async function fetchGame(gameId, fetchImpl = fetch) {
     return games[0];
 }
 
-// searchGames: one page of the newest matches. mvd-api's search filters as
+// searchGames: one page of the newest games. mvd-api's search filters as
 // the hub does (player full-text, team contains, map / mode exact, tag
 // substring, dates inclusive of the end day); its `players` and `teams`
 // are comma-separated lists, AND'd, where the direct query takes each as
@@ -132,7 +132,7 @@ async function searchHub(filters, offset, fetchImpl, limit) {
 
     const resp = await fetchImpl(`${SUPABASE_URL}?${parts.join('&')}`, {
         // Ask PostgREST for the exact total (Content-Range: 0-99/1234) so
-        // the UI can say "N of M" and know when every match is shown. With
+        // the UI can say "N of M" and know when every game is shown. With
         // a count preference a partial page answers 206 — still resp.ok.
         headers: { ...HEADERS, 'Prefer': 'count=exact' },
     });

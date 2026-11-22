@@ -9,7 +9,7 @@ import { hubInput } from '../state/shell.js';
 import { learnMode } from '../tabs/map/map-model.js';
 import { SEARCH_FIELDS } from '../data/hub.js';
 import { filtersFromParams } from '../lib/search.js';
-import { setSearchForm, runSearch, runRecentSearch } from '../tabs/search/search-model.js';
+import { setSearchForm, runSearch } from '../tabs/search/search-model.js';
 import { showBuildVersion, prepareLoadingOverlay } from './overlay.js';
 import { updateUrlState, onClockTick } from './url.js';
 import { switchTab, setupTabs } from './tabs.js';
@@ -65,6 +65,7 @@ export function boot() {
             runSearch();
         }
     } else if (!hubId) {
-        runRecentSearch();
+        // A bare page opens on the newest games.
+        runSearch();
     }
 }

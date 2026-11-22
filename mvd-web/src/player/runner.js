@@ -233,6 +233,7 @@ export function createRunner({ engine, page, driverFor = () => engine, demo, tea
             // the demo already shown.
             shown = await loadDemo({ gameId: /** @type {number} */ (c.demo.gameId) }, {
                 keepTab: true,
+                match: false,
                 stillWanted: () => playingClip() === c,
             });
         } catch (err) {

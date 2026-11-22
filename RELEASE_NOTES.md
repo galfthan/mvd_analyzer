@@ -13,8 +13,8 @@ detail.
   players), and starts at most the mode's timelimit plus 15 minutes apart
   (the hub lists a demo's start and no length). Web only; the API, the MCP
   server and the Result are unchanged.
-- **Recent games.** A page opened without a demo or search in its URL
-  lists the 1v1, 2v2 and 4v4 games of the last 24 hours.
+- **Newest games.** A page opened without a demo or search in its URL
+  lists the newest 100 games.
 - **Search.** "Group into matches" (on by default) lists a match as one row with its score
   in maps and each map's frags, as a small scoreboard; a click on a map's
   name loads that map, a click on the row the first one. The Team field

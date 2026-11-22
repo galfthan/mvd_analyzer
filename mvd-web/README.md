@@ -423,7 +423,7 @@ sides around the game's day). After every hub load `src/app/match.js`
 looks the demo's match up into the `currentMatch` store
 (`src/state/match.js`), and `src/shell/MatchTabs.svelte` shows its maps as
 tabs in the top bar, in place of the single demo's line (← and → step
-between them while one has the focus); a tab loads that map with `keepTab`, so the
+between them while the keyboard has put the focus on one); a tab loads that map with `keepTab`, so the
 same view is compared map by map. A local file has no match. All of it is
 in the page: the API and the Result know nothing of matches.
 
@@ -1648,10 +1648,8 @@ Map tab into this one as preset views in
 
 ## Demo search
 
-A page opened without a demo or a search in its URL lists the 1v1, 2v2
-and 4v4 games of the last 24 hours (`runRecentSearch` in
-`src/tabs/search/search-model.js`: one search a mode, merged; the form
-stays empty and the URL clean).
+A page opened without a demo or a search in its URL runs the empty
+form's search: the newest 100 games.
 
 The Search tab queries the hub's `v1_games` catalog through mvd-api's
 `GET /v1/games/search` (as the game lookup does `/v1/games/{id}`) —
@@ -1659,10 +1657,10 @@ or, when the API cannot answer or there is none, the hub's Supabase
 directly with its public anon key — and lets the user filter by
 player, team, map, mode (1v1 / 2v2 / 4v4 / FFA / CTF), game tag, and
 date range. All filters are AND-combined, empty fields act as
-wildcards, and matches are listed sorted by date descending in pages
-of 100. A footer under the list shows "N of M matches" (M is the exact
+wildcards, and games are listed sorted by date descending in pages
+of 100. A footer under the list shows "N of M games" (M is the exact
 total, the hub's exact count as the API reports it) with a **Load
-more** button that appends the next offset page until every match is
+more** button that appends the next offset page until every game is
 shown. Clicking a row downloads the demo and runs the normal analysis
 pipeline; the user lands on the Summary tab.
 

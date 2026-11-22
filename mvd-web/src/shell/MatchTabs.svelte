@@ -4,8 +4,9 @@
     // in maps, then one tab a map in the order played, each with its frags,
     // and the day. A click loads that map's demo on the tab the user is on
     // (src/app/load.js loadMatchGame), so the same view — the Summary, the
-    // Timeline, the Aim stats — is compared map by map. With a tab focused,
-    // ← and → step to the map before and after, as in a tab list.
+    // Timeline, the Aim stats — is compared map by map. With a tab focused
+    // by the keyboard (a mouse click does not keep the focus), ← and → step to the map before and after, as in a
+    // tab list.
     import { tick } from 'svelte';
     import { teams, colorOf } from '../state/teams.js';
     import { mapScore } from '../lib/matches.js';
@@ -39,7 +40,8 @@
     let list;
 
     // The arrows stop here: on the window they seek the playback
-    // (src/ui/PlaybackBar.svelte).
+    // (src/ui/PlaybackBar.svelte) — which they still do after a mouse click
+    // on a tab: that click gives its focus up (below).
     /** @param {KeyboardEvent} e */
     async function onKey(e) {
         const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
@@ -66,7 +68,8 @@
             {@const score = mapScore(game, a.name)}
             <button type="button" class="match-tab" class:active={i === index} class:loading={loading === String(game.id)}
                 aria-current={i === index ? 'page' : undefined} disabled={!!loading && loading !== String(game.id)}
-                data-game-id={game.id} onclick={() => open(game)}>
+                data-game-id={game.id}
+                onclick={(e) => { if (e.detail) e.currentTarget.blur(); open(game); }}>
                 <span class="match-tab-n">{i + 1}</span>
                 <span class="match-tab-map">{game.map}</span>
                 {#if score}

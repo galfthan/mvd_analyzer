@@ -35,7 +35,6 @@ test('matches: maps played in a row by the same two sides are one match, scored 
 test('matches: the leader is named first, a draw is counted for neither', () => {
     const [m] = groupMatches([game(0, 'dm2', 100, 150), game(25, 'dm3', 100, 100), game(50, 'e1m2', 90, 210)]);
     assert.deepEqual(m.sides, [{ name: 'fu', wins: 2 }, { name: 'sr', wins: 0 }]);
-    assert.equal(m.draws, 1);
     assert.equal(mapWinner(m.games[1]), null);
     assert.deepEqual(mapScore(m.games[0], 'fu'), { own: 150, other: 100 });
 });
@@ -54,6 +53,11 @@ test('matches: two matches at once on different servers stay apart, newest first
     const other = { a: ['c1', 'c2', 'c3', 'c4'], b: ['d1', 'd2', 'd3', 'd4'], ta: 'red', tb: 'blue' };
     const ms = groupMatches([game(0, 'dm2', 1, 2), game(5, 'dm2', 3, 1, other), game(25, 'dm3', 1, 2), game(30, 'dm3', 3, 1, other)]);
     assert.deepEqual(ms.map(m => [m.sides[0].name, m.games.length]), [['red', 2], ['fu', 2]]);
+    // The same two names on both servers: pickups called red and blue.
+    const here = { ta: 'red', tb: 'blue' };
+    const pickups = groupMatches([game(0, 'dm2', 1, 2, here), game(5, 'dm2', 3, 1, other), game(25, 'dm3', 1, 2, here), game(30, 'dm3', 3, 1, other)]);
+    assert.deepEqual(pickups.map(m => m.games.length), [2, 2]);
+    assert.deepEqual(pickups.map(m => m.games.map(g => g.map)), [['dm2', 'dm3'], ['dm2', 'dm3']]);
 });
 
 test('matches: a duel is its two players; a team of two needs both', () => {
@@ -100,5 +104,10 @@ test('matches: the grouped search list', () => {
     assert.deepEqual(cutShort(list, {}, false), []);
     assert.deepEqual(cutShort(list, {}, true), [list[1]], 'the oldest may continue on the next page');
     assert.deepEqual(cutShort(list, { map: 'dm3' }, false), list);
-    assert.deepEqual(cutShort(list, { from: '2026-11-21' }, false), list);
+    // g1 starts 20:00 on the 21st: within a map's reach of neither bound of that day…
+    assert.deepEqual(cutShort(groupMatches([g1, g2]), { from: '2026-11-21', to: '2026-11-21' }, false), []);
+    // …and well inside it of a `to` that ends at midnight after a 23:40 start.
+    const late = groupMatches([game(220, 'dm2', 1, 2)]);
+    assert.deepEqual(cutShort(late, { to: '2026-11-21' }, false), late);
+    assert.deepEqual(cutShort(late, { from: '2026-11-21' }, false), []);
 });

@@ -14,8 +14,7 @@
  * @property {number | string} id       its first game's id
  * @property {string} mode
  * @property {HubGame[]} games          in the order played
- * @property {[MatchSide, MatchSide] | null} sides  the leader first; null for a game that has no two sides
- * @property {number} draws             maps neither side won
+ * @property {[MatchSide, MatchSide] | null} sides  the leader first, each with the maps it won (a drawn map is neither's); null for a game that has no two sides
  */
 
 // A hub row's timestamp is the demo's START and the row has no duration, so
@@ -26,9 +25,9 @@
 /** @type {Record<string, number>} */
 const NOMINAL_MINUTES = { '1on1': 10, '2on2': 10, '4on4': 20, 'ctf': 20 };
 const DEFAULT_NOMINAL_MINUTES = 20;
-export const MAX_BREAK_MINUTES = 15;
+const MAX_BREAK_MINUTES = 15;
 // How many of a team's players must be the same on the next map.
-export const MIN_SHARED_PLAYERS = 3;
+const MIN_SHARED_PLAYERS = 3;
 
 /** @param {string | undefined} s */
 const fold = (s) => (s || '').trim().toLowerCase();
@@ -100,8 +99,9 @@ export function groupMatches(games) {
     const sorted = [...games].sort((a, b) => startMs(a) - startMs(b));
     /** @type {Array<{ games: HubGame[], sides: [Side, Side] | null }>} */
     const chains = [];
-    // The chain each (mode, sides) pair last played in.
-    /** @type {Map<string, { games: HubGame[], sides: [Side, Side] | null }>} */
+    // The chains each (mode, side names) pair has played: two pickups named
+    // red v blue run at once on two servers, each its own match.
+    /** @type {Map<string, Array<{ games: HubGame[], sides: [Side, Side] }>>} */
     const open = new Map();
     for (const game of sorted) {
         const sides = gameSides(game);
@@ -110,10 +110,12 @@ export function groupMatches(games) {
             continue;
         }
         const key = `${game.mode}\n${sides[0].key}\n${sides[1].key}`;
-        const chain = open.get(key);
-        const last = chain && chain.games[chain.games.length - 1];
-        if (chain && chain.sides && last &&
-            startMs(game) - startMs(last) <= maxStartGapMs(game.mode) && sameContest(chain.sides, sides)) {
+        let named = open.get(key);
+        if (!named) open.set(key, named = []);
+        // The latest chain this game follows: soon enough, the same rosters.
+        const chain = [...named].reverse().find(c =>
+            startMs(game) - startMs(c.games[c.games.length - 1]) <= maxStartGapMs(game.mode) && sameContest(c.sides, sides));
+        if (chain) {
             chain.games.push(game);
             // The roster the next map is compared with is the last map's.
             chain.sides = sides;
@@ -121,7 +123,7 @@ export function groupMatches(games) {
         }
         const fresh = { games: [game], sides };
         chains.push(fresh);
-        open.set(key, fresh);
+        named.push(fresh);
     }
     return chains.map(matchOfChain).sort((a, b) => startMs(b.games[0]) - startMs(a.games[0]));
 }
@@ -132,18 +134,16 @@ export function groupMatches(games) {
  */
 function matchOfChain({ games, sides }) {
     const first = games[0];
-    if (!sides) return { id: first.id, mode: first.mode, games, sides: null, draws: 0 };
+    if (!sides) return { id: first.id, mode: first.mode, games, sides: null };
     /** @type {[MatchSide, MatchSide]} */
     const score = [{ name: sides[0].name, wins: 0 }, { name: sides[1].name, wins: 0 }];
-    let draws = 0;
     for (const game of games) {
         const w = mapWinner(game);
-        if (w === null) draws++;
-        else score[fold(w) === sides[0].key ? 0 : 1].wins++;
+        if (w !== null) score[fold(w) === sides[0].key ? 0 : 1].wins++;
     }
     // The leader first; a level score keeps the name order.
     if (score[1].wins > score[0].wins) score.reverse();
-    return { id: first.id, mode: first.mode, games, sides: score, draws };
+    return { id: first.id, mode: first.mode, games, sides: score };
 }
 
 // mapWinner: the name of the side that won a game, null for a draw or a
@@ -236,19 +236,24 @@ export function searchMatches(rows, extra) {
 }
 
 // cutShort: the listed matches the search may have returned only part of,
-// each to be asked for whole (fetchMatch): all of them under a filter that
-// drops single maps of a match (the map, a date bound), and otherwise the
-// oldest one when the list has more pages, the next of which may continue
-// it. A game without two sides has no other maps.
+// each to be asked for whole (fetchMatch). A map filter drops the other
+// maps of every match; a date bound those of a match that starts or ends
+// within a map's reach of it; and the list's end, when it has more pages,
+// may cut the oldest one. A game without two sides has no other maps.
 /**
  * @param {Match[]} matches  newest first (searchMatches)
- * @param {{ map?: string, from?: string, to?: string }} filters
+ * @param {{ map?: string, from?: string, to?: string }} filters  the dates as UTC days, `to` inclusive
  * @param {boolean} more  the search has rows not yet shown
  * @returns {Match[]}
  */
 export function cutShort(matches, filters, more) {
-    const sided = matches.filter(m => m.sides);
-    if (filters.map || filters.from || filters.to) return sided;
+    const from = filters.from ? Date.parse(filters.from) : NaN;
+    const to = filters.to ? Date.parse(filters.to) + 86400000 : NaN;
     const last = matches[matches.length - 1];
-    return more && last?.sides ? [last] : [];
+    return matches.filter(m => {
+        if (!m.sides) return false;
+        if (filters.map || (more && m === last)) return true;
+        const reach = maxStartGapMs(m.mode);
+        return startMs(m.games[0]) - from <= reach || to - startMs(m.games[m.games.length - 1]) <= reach;
+    });
 }

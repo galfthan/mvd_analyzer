@@ -1,16 +1,13 @@
 // search-model.js — the Search tab's state: the filter form, the status
 // line, the result rows and their paging, and the last search that ran
 // (the URL keeps its filters). SearchTab.svelte renders it; the boot
-// (src/app/boot.js) fills the form from a URL's filters and runs it, or
-// lists the recent games (runRecentSearch) when the URL has none.
+// (src/app/boot.js) fills the form from a URL's filters and runs it — with
+// none, the empty form's search: the newest games.
 
 import { store } from '../../state/store.js';
-import { searchGames, fetchMatch, MATCH_SEARCH_LIMIT } from '../../data/hub.js';
-import {
-    EMPTY_FILTERS, RECENT_MODES, searchFilters, formValues, nextPaging, hasMore,
-    recentFrom, recentGames,
-} from '../../lib/search.js';
-import { searchMatches, cutShort, mergeGames } from '../../lib/matches.js';
+import { searchGames, fetchMatch } from '../../data/hub.js';
+import { EMPTY_FILTERS, searchFilters, formValues, nextPaging, hasMore } from '../../lib/search.js';
+import { searchMatches, cutShort, mergeGames, siblingFilters } from '../../lib/matches.js';
 import { updateUrlState } from '../../app/url.js';
 
 // The form's fields as typed (strings; the mode '' is "Any").
@@ -51,37 +48,48 @@ export function setSearchGrouped(on) {
     if (on) completeMatches();
 }
 
-// The matches already asked for whole, by the id of the game asked with,
-// for the search shown; `generation` drops the answers of an earlier one.
+// The lookups already made for the search shown, by their filters
+// (siblingFilters): two listed matches between the same sides on one day
+// are one lookup. `queue` is what is still to ask, shared by the few
+// workers running; `generation` drops the answers of an earlier search.
 /** @type {Set<string>} */
 let asked = new Set();
+/** @type {import('../../data/hub.js').HubGame[]} */
+let queue = [];
+let workers = 0;
 let generation = 0;
 const COMPLETE_CONCURRENCY = 4;
 
 // completeMatches fetches the maps the search cut off the listed matches
 // (src/lib/matches.js cutShort), a few at a time; the list regroups as they
 // arrive.
-async function completeMatches() {
+function completeMatches() {
     const filters = searchPaging.get().filters;
     if (!searchGrouped.get() || !filters) return;
-    const gen = generation;
     const matches = searchMatches(searchResults.get().rows, searchExtraGames.get());
-    const todo = cutShort(matches, filters, hasMore(searchPaging.get()))
-        .filter(m => !m.games.some(g => asked.has(String(g.id))));
-    for (const m of todo) asked.add(String(m.games[0].id));
-    const worker = async () => {
-        for (let m = todo.shift(); m && gen === generation; m = todo.shift()) {
-            try {
-                const whole = await fetchMatch(m.games[0]);
-                if (gen !== generation) return;
-                searchExtraGames.set(mergeGames(searchExtraGames.get(), whole.games));
-            } catch (err) {
-                // The match stays as the search returned it.
-                console.warn('match lookup failed:', /** @type {Error} */ (err).message);
-            }
+    for (const m of cutShort(matches, filters, hasMore(searchPaging.get()))) {
+        const lookup = siblingFilters(m.games[0]);
+        const key = JSON.stringify(lookup);
+        if (!lookup || asked.has(key)) continue;
+        asked.add(key);
+        queue.push(m.games[0]);
+    }
+    for (; workers < COMPLETE_CONCURRENCY && queue.length; workers++) {
+        completeQueued().finally(() => { workers--; });
+    }
+}
+
+async function completeQueued() {
+    for (let game = queue.shift(); game; game = queue.shift()) {
+        const gen = generation;
+        try {
+            const whole = await fetchMatch(game);
+            if (gen === generation) searchExtraGames.set(mergeGames(searchExtraGames.get(), whole.games));
+        } catch (err) {
+            // The match stays as the search returned it.
+            console.warn('match lookup failed:', /** @type {Error} */ (err).message);
         }
-    };
-    await Promise.all(Array.from({ length: COMPLETE_CONCURRENCY }, worker));
+    }
 }
 
 // setSearchForm writes `filters` (only the fields given) into the form, as
@@ -109,6 +117,7 @@ export async function runSearch(loadMore = false) {
         if (!loadMore) {
             generation++;
             asked = new Set();
+            queue = [];
             searchExtraGames.set([]);
         }
         searchPaging.set(paging);
@@ -123,32 +132,5 @@ export async function runSearch(loadMore = false) {
         if (!loadMore) searchResults.set({ rows: [], empty: false, pager: false });
     } finally {
         searchBusy.set(false);
-    }
-}
-
-// runRecentSearch fills the list a bare page opens with: the games of the
-// main modes from the last day (src/lib/search.js recentGames), one search
-// a mode since the search takes one. It is not a search of the form's — the
-// form stays empty, the URL clean, and there is no next page — and a form
-// search that answered meanwhile keeps the list.
-export async function runRecentSearch() {
-    const now = Date.now();
-    searchStatus.set({ text: 'Loading the latest games…', cls: 'status loading' });
-    try {
-        const lists = await Promise.all(RECENT_MODES.map(mode =>
-            searchGames({ mode, from: recentFrom(now) }, 0, fetch, MATCH_SEARCH_LIMIT)));
-        if (lastExecutedSearch.get() || searchBusy.get()) return;
-        const { rows, extra } = recentGames(lists.map(l => l.games), now);
-        generation++;
-        asked = new Set();
-        searchExtraGames.set(extra);
-        // No filters: nothing to page through or to complete — the older
-        // games fetched alongside already hold the cut-off maps.
-        searchPaging.set({ filters: null, shown: rows.length, total: rows.length });
-        searchResults.set({ rows, empty: rows.length === 0, pager: rows.length > 0 });
-        searchStatus.set({ text: '', cls: 'status' });
-    } catch (err) {
-        if (lastExecutedSearch.get() || searchBusy.get()) return;
-        searchStatus.set({ text: 'Error: ' + /** @type {Error} */ (err).message, cls: 'status error' });
     }
 }
