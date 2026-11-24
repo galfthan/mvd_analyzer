@@ -31,6 +31,7 @@ type SearchParams struct {
 	Map      string   // map name, exact match
 	Mode     string   // game mode, exact match
 	Matchtag string   // tournament/event tag, case-insensitive substring
+	Server   string   // server hostname (host:port), case-insensitive substring
 	From     string   // ISO date lower bound, inclusive (YYYY-MM-DD)
 	To       string   // ISO date upper bound, inclusive (YYYY-MM-DD)
 	Limit    int      // max rows (default 20, capped at MaxSearchLimit)
@@ -90,6 +91,9 @@ func (c *Client) Search(ctx context.Context, params SearchParams) (any, error) {
 	}
 	if params.Matchtag != "" {
 		parts = append(parts, "matchtag=ilike.%25"+url.QueryEscape(params.Matchtag)+"%25")
+	}
+	if params.Server != "" {
+		parts = append(parts, "server_hostname=ilike.%25"+url.QueryEscape(params.Server)+"%25")
 	}
 	if params.From != "" {
 		parts = append(parts, "timestamp=gte."+url.QueryEscape(params.From))

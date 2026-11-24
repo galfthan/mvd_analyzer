@@ -43,6 +43,7 @@ mvd-api keys list   -auth-dir DIR
 | `-portal`           | `false`                                 | Enable the Discord key portal at `/portal` (users self-service their own key). **Off = no `/portal` routes at all.** Requires `-auth-dir` **and** the three env vars below; see "The Discord key portal" |
 | `-portal-base-url`  | _(empty)_                               | Public origin of the deployment, e.g. `https://qw.example.com`. Used to build the OAuth `redirect_uri` (`<base>/portal/callback`) and absolute links. Required with `-portal` |
 | `-warm-interval`    | `0` (off)                               | Prepare new hub demos before their first visitor: every interval, list the hub's games in `-warm-window`, newest first, and download, parse and pack each one not yet cached (one at a time, through the parse slots; never into the in-memory LRU). The first tick backfills the window, running back to back until done and re-listing every interval so new games go first. A demo whose download fails is retried with a doubling wait (5 min … 1 h), a demo that does not parse is not; five failures in a row end a tick (an outage). Needs the hub env vars. `journalctl -u mvd-api \| grep 'hub warm'` shows each tick |
+| `-qwleague-interval` | `5m`                                   | How often the QWLeague index is brought up to date (needs the `QWLEAGUE_TOKEN` env var; see below). |
 | `-warm-window`      | `168h`                                  | How far back `-warm-interval` prepares games (≈1300 hub games a week at 2026 rates — roughly 15-20 GB of cache; size `-cache-max-bytes` for it) |
 | `-play-url`         | `https://mvdanalyzer.com/play.html`     | The web app's light player that `POST /v1/playlists` links to — a branch deploy's, to try one |
 
@@ -73,6 +74,18 @@ These back on-demand demo fetch (cache miss), `GET /v1/games/search` and
 requirement — the server starts and serves the local cache without them,
 but a cache miss and any `/games/...` call return `502 hub_upstream` with
 a "hub not configured" message.
+
+**QWLeague** is the same: `QWLEAGUE_TOKEN` (an API token made at
+qwleague.com/developer; a secret) turns on the QWLeague index behind
+`GET /v1/qwleague/series`. A background sync reads QWLeague's match list
+every `-qwleague-interval` and each new series once, at one request every
+two seconds (QWLeague allows 60 a minute), into
+`<cache-dir>/qwleague/series.json` — outside the tiers the cache GC
+evicts. The first run reads the whole history, a few thousand series, in
+an hour or two; a restart continues from the file. A series seen before
+its demos reached the hub is read again hourly for three days. Without
+the token there is no sync and the endpoint returns `502
+qwleague_upstream`.
 
 Running the server is the default action — bare flags (or an explicit
 `serve`) start it. A positional first argument that isn't a known
@@ -269,8 +282,9 @@ key their ETag on the schema version alone (`"artifacts-v<n>"` /
 | GET | `/v1/demos/{id}/lives` | `players`, `from`, `to`, `minMs`, `dmg`, `summary` | `view.LivesView` — one row per spawn-to-death life (segmented by `streams.players[].alive`), with `endReason`, `spawnLoc`/`deathLoc`, `killedBy`, `itemsTaken`, `weaponsHeld` and the same per-interval stats block `/top-windows` uses; lives partition the match, so unfiltered per-life sums reconcile with the per-event LOGS (`/frags` `frags[]`, `/damage` `events[]`) — not necessarily with the KTX-sourced `byPlayer` scoreboards; `summary=1` keeps every row and drops the per-row collections |
 | POST | `/v1/playlists` | JSON body `{items, name?}` | **Experimental** (it serves the web app's light player; it may move out of the API). `{playlist, links: {web}, markdown, length}` — the resolved playlist (the OpenAPI `Playlist` schema: demo seconds, userids, each track's credit) and the light player's link (`-play-url`), which carries that playlist itself. Items: clips (`gameId`, or `demo` as `gameId:N` / `sha:HEX` — one demo however it is named; match-ms `from`/`to`, `watch` player name, `label`, `slow`, `text`) from up to 20 hub games, title cards (`ms`, `bg`, `opacity`, fades, `text`), music cues (`music`: `{source, id, volume?}` from `/v1/playlists/music`, or `null` for silence — the track plays under the items after it) and text (size, colour, font, place, timing). Nothing stored. Loads each game through the cache. 400 `invalid_param` names the item at fault. Backs the MCP `createPlaylist` tool ([plan-playlist-music.md](../plan-playlist-music.md)) |
 | GET | `/v1/playlists/music` | `q`, `minSec`, `maxSec`, `limit` | `{count, tracks}` — Creative Commons music a playlist link can play: Kevin MacLeod's incompetech.com library (CC BY 4.0; its list fetched once a day and searched here — `q` matches mood, title, instruments, description). A track goes into `POST /v1/playlists` as a `music` item `{source, id}`; 502 `music_upstream` when the list cannot be had |
-| GET | `/v1/games/search` | `players`, `teams`, `map`, `mode`, `matchtag`, `from`, `to`, `limit`, `offset`, `roster` | `{limit, offset, count, total?, games}` — hub.quakeworld.nu game discovery (no demo; live upstream, 502 `hub_upstream`). REST twin of the MCP `searchGames` tool (shared `hubfetch` impl) |
+| GET | `/v1/games/search` | `players`, `teams`, `map`, `mode`, `matchtag`, `server`, `from`, `to`, `limit`, `offset`, `roster` | `{limit, offset, count, total?, games}` — hub.quakeworld.nu game discovery (no demo; live upstream, 502 `hub_upstream`). REST twin of the MCP `searchGames` tool (shared `hubfetch` impl) |
 | GET | `/v1/games/{id}` | — | one hub game's catalog row, verbatim, with a `roster=1` search row's columns; `{id}` is the gameId or `sha:HEX` (the game whose demo has that sha256); `404 demo_not_found` for an unknown one |
+| GET | `/v1/qwleague/series` | `sha` (1–200 demo sha256, CSV) | `{series, complete, syncedAt?}` — the QWLeague series the demos are maps of (kind, best-of, score, maps with their demos' sha, tournament and clans), each once, newest first; answered from the server's own index, never a live call; `502 qwleague_upstream` without `QWLEAGUE_TOKEN` |
 | GET | `/v1/maps/{map}/entities` | `types`, `kinds` | `result.MapEntitiesResult` (static layout by map name, no demo needed) |
 | GET | `/v1/maps/{map}/geometry` | — | `mapgeom.MapRegions` floor-polygon JSON (needs `-maps-dir`; REST-only) |
 | GET | `/v1/artifacts` | — | `{schemaVersion, artifacts:[…]}` — the DAG manifest (name, cost, lazy, requires/provides, resultKey, servable); static, ETag `"artifacts-v<n>"` |

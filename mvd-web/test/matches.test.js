@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
     groupMatches, gameSides, mapWinner, mapScore, matchWith, siblingFilters, mergeGames, matchRow, restartedGames,
-    searchMatches, cutShort,
+    searchMatches, cutShort, matchRestarted, missingMaps,
 } from '../src/lib/matches.js';
+import { isQwlGame, seriesBySha, mergeSeries, seriesLabel } from '../src/lib/qwl.js';
 
 // A 4on4 hub row: `a` and `b` are the two teams' four players, `at` minutes
 // after 20:00.
@@ -124,4 +125,74 @@ test('matches: a game broken off and restarted is in the match and wins nobody a
     // Duels are also played to 5 minutes: only a start within 3 is a restart.
     assert.equal(restartedGames([duel(0, 'dm4', 12, 9), duel(6, 'dm4', 10, 11)]).size, 0);
     assert.equal(restartedGames([duel(0, 'dm4', 1, 0), duel(2, 'dm4', 10, 11)]).size, 1);
+});
+
+// A QWLeague series over the given games (each given a demo sha), team 1
+// being the games' first team.
+function seriesOver(games, extra = {}) {
+    games.forEach((g, i) => { g.demo_sha256 = `sha${g.id}`; g.server_hostname = 'hamburg.qwleague.com:28501'; });
+    return {
+        id: 6000 + games[0].id, url: 'https://qwleague.com/match/1', mode: '4on4', kind: 'ladder', bestOf: 3, format: 'bestof',
+        endedAt: games[games.length - 1].timestamp,
+        maps: games.map((g, i) => ({ map: g.map, matchId: 100 + g.id, sha: g.demo_sha256, frags: [g.teams[0].frags, g.teams[1].frags] })),
+        ...extra,
+    };
+}
+
+test('matches: the maps of a QWLeague series are one match, whatever the rosters and the clock say', () => {
+    // Two series between "red" and "blue" back to back, the same players in
+    // red: by rosters and times alone they are one match of four maps.
+    const o = { ta: 'red', tb: 'blue' };
+    const one = [game(0, 'dm2', 200, 150, o), game(25, 'dm3', 210, 100, o)];
+    const two = [game(48, 'e1m2', 100, 180, { ...o, b: ['b1', 'b2', 'b3', 'z9'] }), game(72, 'dm2', 90, 150, { ...o, b: ['b1', 'b2', 'b3', 'z9'] })];
+    assert.deepEqual(groupMatches([...one, ...two]).map(m => m.games.length), [4]);
+
+    const s1 = seriesOver(one, { score: [2, 0] });
+    const s2 = seriesOver(two, { score: [0, 2] });
+    const ms = groupMatches([...one, ...two], [s1, s2]);
+    assert.deepEqual(ms.map(m => m.games.map(g => g.map)), [['e1m2', 'dm2'], ['dm2', 'dm3']], 'two matches, the newest first');
+    assert.equal(ms[0].qwl, s2);
+    assert.deepEqual(ms[0].sides, [{ name: 'blue', wins: 2 }, { name: 'red', wins: 0 }]);
+    assert.deepEqual(ms[1].sides, [{ name: 'red', wins: 2 }, { name: 'blue', wins: 0 }]);
+    assert.deepEqual(cutShort(ms, { map: 'dm2' }, true), [], 'a series names its own maps: no search for more');
+});
+
+test('matches: a series\' score and clan names are QWLeague\'s; a quick restart on its servers is still a map', () => {
+    // Map two was forfeited (no demo): the hub has map one only, QWLeague
+    // scores the series 2-0. The clans are named behind the hub's tags.
+    const g1 = game(0, 'dm2', 120, 150, { ta: 'book', tb: '-s-' });
+    const s = seriesOver([g1], { kind: 'tournament', forfeit: true, score: [0, 2], teams: [{ name: 'Black Book' }, { name: 'Suddendeath' }],
+        tournament: { name: '4on4 · Season 1', division: 'Division 2', stage: 'group', round: 1 } });
+    s.maps.push({ map: 'dm3', matchId: 999 });
+    const [m] = groupMatches([g1], [s]);
+    assert.deepEqual(m.sides, [{ name: '-s-', wins: 2, label: 'Suddendeath' }, { name: 'book', wins: 0, label: 'Black Book' }]);
+    assert.deepEqual(missingMaps(m), [], 'a map without a demo is not asked for');
+    assert.equal(seriesLabel(s), '4on4 · Season 1 · Division 2 · group, round 1 · Bo3 · forfeit');
+    assert.equal(seriesLabel({ ...s, kind: 'ladder', forfeit: false, format: 'fixed', tournament: undefined }), 'ladder · 3 maps');
+
+    // Two maps three minutes apart: a restart by the clock, two maps by the series.
+    const quick = [game(100, 'dm2', 150, 100), game(103, 'dm3', 150, 100), game(130, 'e1m2', 1, 2)];
+    assert.equal(matchRestarted(groupMatches(quick)[0]).size, 1);
+    const qs = seriesOver(quick.slice(0, 2));
+    const [other, series] = groupMatches(quick, [qs]);
+    assert.equal(matchRestarted(series).size, 0);
+    assert.deepEqual(series.sides, [{ name: 'sr', wins: 2 }, { name: 'fu', wins: 0 }], 'both counted');
+    assert.equal(other.qwl, undefined);
+
+    // The search returned one map of the series: the other is named by its sha.
+    const [part] = searchMatches([quick[1]], [], [qs]);
+    assert.deepEqual(missingMaps(part), [quick[0].demo_sha256]);
+    assert.deepEqual(searchMatches([quick[1]], [quick[0]], [qs])[0].games.map(g => g.map), ['dm2', 'dm3'], 'in the series\' order');
+});
+
+test('qwl: a game on a QWLeague server, and series by demo', () => {
+    assert.equal(isQwlGame({ server_hostname: 'Stockholm.QWLeague.com:28501' }), true);
+    assert.equal(isQwlGame({ server_hostname: 'qwleague.com' }), true);
+    assert.equal(isQwlGame({ server_hostname: 'notqwleague.com:28501' }), false);
+    assert.equal(isQwlGame({ server_hostname: 'qwleague.com.example.org:1' }), false);
+    assert.equal(isQwlGame({}), false);
+    const a = { id: 2, maps: [{ matchId: 1, sha: 'x' }, { matchId: 2 }] };
+    const grown = { id: 3, maps: [{ matchId: 1, sha: 'x' }, { matchId: 2, sha: 'y' }, { matchId: 3, sha: 'z' }] };
+    assert.deepEqual([...seriesBySha([a]).keys()], ['x']);
+    assert.deepEqual(mergeSeries([a], [grown]), [grown], 'a series read again replaces its earlier copy');
 });

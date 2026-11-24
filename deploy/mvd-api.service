@@ -16,6 +16,8 @@
 # fetch demos on cache miss and to serve GET /v1/games/search. Without them
 # the server still starts and serves the local cache, but a cache miss and
 # any /games/search return 502 hub_upstream ("hub not configured").
+# QWLEAGUE_TOKEN (optional, a secret) arrives the same way: it turns on the
+# QWLeague series index (GET /v1/qwleague/series), kept under the cache dir.
 #
 # Install: copy to /etc/systemd/system/mvd-api.service, then
 #   systemctl daemon-reload && systemctl enable --now mvd-api

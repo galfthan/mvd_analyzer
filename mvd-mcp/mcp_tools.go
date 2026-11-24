@@ -22,7 +22,7 @@ import (
 func registerTools(s *mcp.Server, b MCPBackend, sr searcher) {
 	addTool(s, &mcp.Tool{
 		Name:        "searchGames",
-		Description: "Search hub.quakeworld.nu for matches by player names, teams, map, mode, matchtag, or date range. Returns {limit, offset, count, total?, games}: count = rows in THIS page, total = all matching rows (when the hub reports it) — page with limit/offset until offset+count >= total. Rows are compact by default (players projected to {name, team, frags}); roster:true returns the verbatim hub rows (ping, colors). Analysis tools accept gameId:N directly and auto-load on first use — loadDemo is an optional warm-up, not a required step.",
+		Description: "Search hub.quakeworld.nu for matches by player names, teams, map, mode, matchtag, server, or date range. Returns {limit, offset, count, total?, games}: count = rows in THIS page, total = all matching rows (when the hub reports it) — page with limit/offset until offset+count >= total. Rows are compact by default (players projected to {name, team, frags}); roster:true returns the verbatim hub rows (ping, colors). Analysis tools accept gameId:N directly and auto-load on first use — loadDemo is an optional warm-up, not a required step.",
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, in SearchGamesInput) (*mcp.CallToolResult, any, error) {
 		out, err := sr.Search(ctx, in)
 		return toolResult(out, err)

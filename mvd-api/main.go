@@ -35,6 +35,10 @@
 // starts and serves the local cache, but cache misses and /games/search
 // return 502 hub_upstream ("hub not configured").
 //
+// QWLEAGUE_TOKEN (a qwleague.com API token) turns on the QWLeague index
+// behind GET /v1/qwleague/series; unset, that endpoint returns 502
+// qwleague_upstream.
+//
 // See mvd-api/README.md for the endpoint surface.
 package main
 

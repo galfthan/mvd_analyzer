@@ -5,9 +5,10 @@
 // none, the empty form's search: the newest games.
 
 import { store } from '../../state/store.js';
-import { searchGames, fetchMatch } from '../../data/hub.js';
+import { searchGames, fetchMatch, fetchGame, fetchQwlSeries } from '../../data/hub.js';
 import { EMPTY_FILTERS, searchFilters, formValues, nextPaging, hasMore } from '../../lib/search.js';
-import { searchMatches, cutShort, mergeGames, siblingFilters } from '../../lib/matches.js';
+import { searchMatches, cutShort, missingMaps, mergeGames, siblingFilters } from '../../lib/matches.js';
+import { mergeSeries } from '../../lib/qwl.js';
 import { updateUrlState } from '../../app/url.js';
 
 // The form's fields as typed (strings; the mode '' is "Any").
@@ -30,6 +31,10 @@ export const searchGrouped = store(readGrouped());
 // Games the search did not return that belong to a listed match, fetched
 // for the grouped list (completeMatches).
 export const searchExtraGames = store(/** @type {import('../../data/hub.js').HubGame[]} */ ([]));
+// The QWLeague series the listed games are maps of (src/lib/qwl.js): they
+// group those games exactly and label them. Empty without an API that
+// knows them.
+export const searchSeries = store(/** @type {import('../../lib/qwl.js').QwlSeries[]} */ ([]));
 
 function readGrouped() {
     try {
@@ -48,13 +53,15 @@ export function setSearchGrouped(on) {
     if (on) completeMatches();
 }
 
-// The lookups already made for the search shown, by their filters
-// (siblingFilters): two listed matches between the same sides on one day
-// are one lookup. `queue` is what is still to ask, shared by the few
-// workers running; `generation` drops the answers of an earlier search.
+// The lookups already made for the search shown: a match's other maps by
+// its filters (siblingFilters; two listed matches between the same sides on
+// one day are one lookup), a QWLeague series' missing map by its demo's
+// sha. `queue` is what is still to ask — a game whose match to fetch, or
+// such a sha — shared by the few workers running; `generation` drops the
+// answers of an earlier search.
 /** @type {Set<string>} */
 let asked = new Set();
-/** @type {import('../../data/hub.js').HubGame[]} */
+/** @type {Array<import('../../data/hub.js').HubGame | string>} */
 let queue = [];
 let workers = 0;
 let generation = 0;
@@ -66,7 +73,14 @@ const COMPLETE_CONCURRENCY = 4;
 function completeMatches() {
     const filters = searchPaging.get().filters;
     if (!searchGrouped.get() || !filters) return;
-    const matches = searchMatches(searchResults.get().rows, searchExtraGames.get());
+    const matches = searchMatches(searchResults.get().rows, searchExtraGames.get(), searchSeries.get());
+    for (const m of matches) {
+        for (const sha of missingMaps(m)) {
+            if (asked.has(sha)) continue;
+            asked.add(sha);
+            queue.push(sha);
+        }
+    }
     for (const m of cutShort(matches, filters, hasMore(searchPaging.get()))) {
         const lookup = siblingFilters(m.games[0]);
         const key = JSON.stringify(lookup);
@@ -80,11 +94,11 @@ function completeMatches() {
 }
 
 async function completeQueued() {
-    for (let game = queue.shift(); game; game = queue.shift()) {
+    for (let next = queue.shift(); next; next = queue.shift()) {
         const gen = generation;
         try {
-            const whole = await fetchMatch(game);
-            if (gen === generation) searchExtraGames.set(mergeGames(searchExtraGames.get(), whole.games));
+            const games = typeof next === 'string' ? [await fetchGame(`sha:${next}`)] : (await fetchMatch(next)).games;
+            if (gen === generation) searchExtraGames.set(mergeGames(searchExtraGames.get(), games));
         } catch (err) {
             // The match stays as the search returned it.
             console.warn('match lookup failed:', /** @type {Error} */ (err).message);
@@ -119,6 +133,7 @@ export async function runSearch(loadMore = false) {
             asked = new Set();
             queue = [];
             searchExtraGames.set([]);
+            searchSeries.set([]);
         }
         searchPaging.set(paging);
         searchResults.set(loadMore
@@ -126,6 +141,12 @@ export async function runSearch(loadMore = false) {
             : { rows: games, empty: games.length === 0, pager: paging.shown > 0 });
         lastExecutedSearch.set(filters);
         updateUrlState();
+        // The page's QWLeague series first, so their games are grouped by
+        // series and not looked up as an ordinary match's.
+        const gen = generation;
+        const series = await fetchQwlSeries(games);
+        if (gen !== generation) return;
+        if (series.length) searchSeries.set(mergeSeries(searchSeries.get(), series));
         completeMatches();
     } catch (err) {
         searchStatus.set({ text: 'Error: ' + /** @type {Error} */ (err).message, cls: 'status error' });

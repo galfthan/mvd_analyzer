@@ -429,8 +429,19 @@ tabs in the top bar, in place of the single demo's line (keys 1–9 open
 that map, p / n the one before / after); the other maps are fetched ahead and
 held in memory (`preloadMaps` in `src/app/match.js`; not for a browser
 set to save data), so a tab loads that map without a download, with `keepTab`, so the
-same view is compared map by map. A local file has no match. All of it is
-in the page: the API and the Result know nothing of matches.
+same view is compared map by map. A game played on QWLeague's servers
+(`src/lib/qwl.js`: a `*.qwleague.com` hostname) is not guessed at where
+`mvd-api` knows its series (`GET /v1/qwleague/series`, asked by the demos'
+sha256 — `fetchQwlSeries`): the series' maps are the match, in its order,
+with QWLeague's score and, in a tournament, the clans' names; a map the
+search did not return is fetched by its sha. Such a row carries a "QWL"
+badge and what the series was (ladder, the tournament and its stage, best
+of how many), the map tabs the same as a link to qwleague.com, and the
+Search tab's "QWL only" checkbox (`?qwl=1`) searches those games alone
+(the search's `server=qwleague.com`). Without an API that knows the
+series, the badge stays and the games group like any others. A local file has no match. The
+grouping itself is in the page: the API serves QWLeague's series, and the
+Result knows nothing of matches.
 
 On viewports below 800 px the sidebar reflows into a horizontal scroll
 strip above the main pane.

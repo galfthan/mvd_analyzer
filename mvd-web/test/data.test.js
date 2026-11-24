@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 import { WasmSource } from '../src/data/wasm-source.js';
-import { parseGameId, demoFilename, searchGames, fetchGame, downloadDemo } from '../src/data/hub.js';
+import { parseGameId, demoFilename, searchGames, fetchGame, fetchQwlSeries, fetchMatch, downloadDemo } from '../src/data/hub.js';
 
 // A stand-in for static/worker.js speaking its message protocol.
 class FakeWorker {
@@ -246,12 +246,12 @@ test('hub helpers', async () => {
         seen = new URL(url, 'http://page/');
         return { ok: true, json: async () => ({ limit: 100, offset: 100, count: 0, total: 1234, games: [] }) };
     };
-    const { games, total } = await searchGames({ player: 'milton', tag: 'qwsl', to: '2026-01-01' }, 100, fetchImpl);
+    const { games, total } = await searchGames({ player: 'milton', tag: 'qwsl', to: '2026-01-01', qwl: '1' }, 100, fetchImpl);
     assert.equal(total, 1234);
     assert.deepEqual(games, []);
     assert.equal(seen.pathname, '/api/games/search', 'through mvd-api, not the hub directly');
     assert.deepEqual(Object.fromEntries(seen.searchParams),
-        { limit: '100', roster: '1', offset: '100', players: 'milton', matchtag: 'qwsl', to: '2026-01-01' });
+        { limit: '100', roster: '1', offset: '100', players: 'milton', matchtag: 'qwsl', to: '2026-01-01', server: 'qwleague.com' });
 
     const missing = async () => ({ ok: false, status: 404, json: async () => ({ error: { code: 'demo_not_found', message: 'the hub has no game 9' } }) });
     await assert.rejects(fetchGame(9, missing), (e) => e.status === 404 && /no game 9/.test(e.message) && !e.canFallBack);
@@ -264,17 +264,22 @@ test('hub helpers', async () => {
         const direct = async (url, init) => {
             urls.push({ url, init });
             if (url.startsWith('api/')) return apiDown;
-            return url.includes('id=eq.')
+            return /(id|demo_sha256)=eq\./.test(url)
                 ? { ok: true, json: async () => [{ id: 9 }] }
                 : { ok: true, json: async () => [], headers: new Map([['content-range', '0-99/1234']]) };
         };
         assert.deepEqual(await fetchGame(9, direct), { id: 9 });
-        const page = await searchGames({ player: 'milton', to: '2026-01-01' }, 100, direct);
+        assert.deepEqual(await fetchGame('sha:ab12', direct), { id: 9 });
+        assert.match(urls[urls.length - 1].url, /demo_sha256=eq\.ab12/);
+        urls.length = 0;
+        assert.deepEqual(await fetchGame(9, direct), { id: 9 });
+        const page = await searchGames({ player: 'milton', to: '2026-01-01', qwl: '1' }, 100, direct);
         assert.equal(page.total, 1234);
         const hub = urls.filter((u) => u.url.includes('supabase.co'));
         assert.equal(hub.length, 2);
         assert.match(hub[1].url, /players_fts=fts\.'milton'/);
         assert.match(hub[1].url, /timestamp=lte\.2026-01-01T23%3A59%3A59/);
+        assert.match(hub[1].url, /server_hostname=ilike\.%25qwleague\.com%25/);
         assert.equal(hub[1].init.headers.Prefer, 'count=exact');
         assert.ok(hub[0].init.headers.apikey);
     }
@@ -283,4 +288,42 @@ test('hub helpers', async () => {
         ? { ok: false } : { ok: true, arrayBuffer: async () => new Uint8Array([4]).buffer });
     assert.deepEqual([...await downloadDemo({ demo_sha256: 'xyz1', demo_source_url: 'http://srv/x' }, fallback)], [4]);
     await assert.rejects(downloadDemo({}, fallback), /No download URL/);
+});
+
+test('QWLeague series: asked for the games on its servers only, and a map\'s match is its series', async () => {
+    const row = (id, sha, host = 'stockholm.qwleague.com:28501') => ({
+        id, demo_sha256: sha, server_hostname: host, mode: '2on2', map: 'm' + id, timestamp: `2026-11-22T15:0${id}:00Z`,
+        teams: [{ name: 'red', frags: 100 + id }, { name: 'blue', frags: 50 }],
+        players: ['a', 'b'].map(name => ({ name, team: 'red', frags: 1 })).concat(['c', 'd'].map(name => ({ name, team: 'blue', frags: 1 }))),
+    });
+    const S1 = '1'.repeat(64), S2 = '2'.repeat(64);
+    const series = {
+        id: 60, url: 'https://qwleague.com/match/60', mode: '2on2', kind: 'ladder', bestOf: 3, format: 'bestof', score: [2, 0],
+        endedAt: '2026-11-22T15:27:47Z', maps: [{ map: 'm1', matchId: 59, sha: S1, frags: [101, 50] }, { map: 'm2', matchId: 60, sha: S2, frags: [102, 50] }],
+    };
+    const asked = [];
+    const api = async (url) => {
+        asked.push(url);
+        if (url.startsWith('api/qwleague/series')) return { ok: true, json: async () => ({ series: [series], complete: true }) };
+        if (url === 'api/games/sha:' + S2) return { ok: true, json: async () => row(2, S2) };
+        throw new Error('unexpected ' + url);
+    };
+    assert.deepEqual(await fetchQwlSeries([row(7, 's7', 'qw.foppa.dk:28501'), { id: 8 }], api), []);
+    assert.deepEqual(asked, [], 'no game on a QWLeague server: nothing asked');
+    assert.deepEqual(await fetchQwlSeries([row(1, S1), row(7, 's7', 'qw.foppa.dk:28501'), row(1, S1)], api), [series]);
+    assert.deepEqual(asked, ['api/qwleague/series?sha=' + S1]);
+
+    asked.length = 0;
+    const match = await fetchMatch(row(1, S1), api);
+    assert.deepEqual(asked, ['api/qwleague/series?sha=' + S1, 'api/games/sha:' + S2], 'the other map by its sha, no search');
+    assert.deepEqual(match.games.map(g => g.id), [1, 2]);
+    assert.equal(match.qwl, series);
+    assert.deepEqual(match.sides, [{ name: 'red', wins: 2 }, { name: 'blue', wins: 0 }]);
+
+    // An API without QWLeague: no series, and the match is searched for as before.
+    const none = async (url) => (url.startsWith('api/qwleague')
+        ? { ok: false, status: 502, json: async () => ({ error: { code: 'qwleague_upstream', message: 'x' } }) }
+        : { ok: true, json: async () => ({ games: [row(1, S1)] }) });
+    assert.deepEqual(await fetchQwlSeries([row(1, S1)], none), []);
+    assert.equal((await fetchMatch(row(1, S1), none)).qwl, undefined);
 });

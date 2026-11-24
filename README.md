@@ -200,7 +200,7 @@ plays it:
 | Tool | Backing |
 |---|---|
 | **Discovery** | |
-| `searchGames(players, teams, map, mode, matchtag, from, to, limit, offset)` | `mvd-api` `GET /v1/games/search` (the hub's catalog) |
+| `searchGames(players, teams, map, mode, matchtag, server, from, to, limit, offset)` | `mvd-api` `GET /v1/games/search` (the hub's catalog) |
 | **Cache + summary** | |
 | `loadDemo({gameId or sha256})` | `mvd-api` `POST /v1/demos/{id}` |
 | `getOverview(demoId)` | `mvd-api` `GET /v1/demos/{id}/overview` |
@@ -304,6 +304,10 @@ score?", "who played?"), the agent should stop there — no
 
 - **`searchGames`** goes through `mvd-api`'s `GET /v1/games/search`,
   which holds the hub's catalog credentials.
+- `mvd-api` also keeps an index of QWLeague (qwleague.com) series, read
+  from QWLeague's API with a token only the server holds, and serves it as
+  `GET /v1/qwleague/series`: the web page groups and labels QWLeague games
+  by it (see [mvd-api/README.md](mvd-api/README.md)).
 - **`loadDemo` / `get*`** go through `mvd-api`, which talks to the
   hub only to download `.mvd.gz` bytes (the rest comes from its
   three-tier on-disk cache: raw bytes, parsed Result, lazy artifacts).

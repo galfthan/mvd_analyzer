@@ -202,7 +202,7 @@ func TestPlaylistLinkDemoIDs(t *testing.T) {
 		"sha:" + strings.Repeat("9", 64): playlistDemoResult("dm4", 0, nil),
 	}, shaOf: twoDemoShas()}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	srv := httptest.NewServer(newRouter(store, logger, "", testUploadConfig, nil, nil, &fakeSearcher{bySHA: map[string]int{sha2: 2}}))
+	srv := httptest.NewServer(newRouter(store, logger, "", testUploadConfig, nil, nil, &fakeSearcher{bySHA: map[string]int{sha2: 2}}, nil))
 	defer srv.Close()
 
 	code, out := postPlaylist(t, srv.URL, `{"items": [

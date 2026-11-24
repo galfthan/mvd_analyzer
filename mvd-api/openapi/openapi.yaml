@@ -2205,8 +2205,8 @@ paths:
       summary: Search the hub game catalog
       description: |
         Discovery over hub.quakeworld.nu's public game catalog — no demo is
-        involved. Filter by player names, teams, map, mode, matchtag, or date
-        range; the newest matches come back when no filter is given. Feed a
+        involved. Filter by player names, teams, map, mode, matchtag, server, or
+        date range; the newest matches come back when no filter is given. Feed a
         result's `gameId:<id>` to any per-demo endpoint to analyse it.
 
         **Paging.** `count` is rows in THIS page, `total` (when the hub
@@ -2225,6 +2225,7 @@ paths:
         - $ref: "#/components/parameters/SearchMap"
         - $ref: "#/components/parameters/SearchMode"
         - $ref: "#/components/parameters/SearchMatchtag"
+        - $ref: "#/components/parameters/SearchServer"
         - $ref: "#/components/parameters/SearchFrom"
         - $ref: "#/components/parameters/SearchTo"
         - $ref: "#/components/parameters/SearchLimit"
@@ -2283,6 +2284,49 @@ paths:
         "404": { $ref: "#/components/responses/DemoNotFound" }
         "429": { $ref: "#/components/responses/RateLimited" }
         "502": { $ref: "#/components/responses/HubUpstream" }
+        "500": { $ref: "#/components/responses/Internal" }
+  /v1/qwleague/series:
+    get:
+      operationId: getQWLeagueSeries
+      tags: [demo]
+      summary: The QWLeague series hub demos are maps of
+      description: |
+        QWLeague (qwleague.com) runs matchmade ladders and tournaments on
+        its own servers. Its games reach the hub as single games between
+        "red" and "blue"; QWLeague knows which of them are the maps of one
+        series, the series' format and score, and for a tournament game the
+        event, its stage and the two clans. This endpoint returns that, for
+        the demos named by sha256 (a hub row's `demo_sha256`).
+
+        Each series the demos belong to comes back once, newest first; a
+        demo that is not a QWLeague game is in none of them. Tell which of
+        a series' maps a demo is by `maps[].sha`.
+
+        **Source.** The answer comes from an index this server keeps up to
+        date in the background (QWLeague's own API has no lookup by demo),
+        so a request never waits on QWLeague. A series played in the last
+        few minutes may not be in it yet, and `complete` is false while the
+        server is still reading QWLeague's history for the first time. 502
+        `qwleague_upstream` when the server has no QWLeague token.
+      parameters:
+        - name: sha
+          in: query
+          required: true
+          description: The demos, as comma-separated sha256 (64 hex digits each), 1 to 200 of them.
+          schema: { type: string }
+        - $ref: "#/components/parameters/Label"
+      responses:
+        "200":
+          description: The series.
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QWLeagueSeriesResult" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/QWLeagueUpstream" }
         "500": { $ref: "#/components/responses/Internal" }
   /v1/maps/{map}/entities:
     get:
@@ -3183,6 +3227,14 @@ components:
         word `matchtag` (mirroring the KTX serverinfo key), not camelCase like
         the other multi-word query params.
       schema: { type: string }
+    SearchServer:
+      name: server
+      in: query
+      description: >
+        Case-insensitive substring of the hostname (host:port) of the server
+        the game was played on, a row's `server_hostname` — e.g.
+        `qwleague.com` for the games played on QWLeague's servers.
+      schema: { type: string }
     SearchFrom:
       name: from
       in: query
@@ -3325,6 +3377,11 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+    QWLeagueUpstream:
+      description: The server has no QWLeague token configured (`qwleague_upstream`).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
     Internal:
       description: >
         Unexpected server error (`internal`). The body is generic — a
@@ -3380,6 +3437,7 @@ components:
         - music_upstream
         - opening_unavailable
         - playerstats_unavailable
+        - qwleague_upstream
         - rate_limited
         - region_control_unavailable
         - shots_unavailable
@@ -3673,6 +3731,92 @@ components:
       additionalProperties: true
       properties:
         id: { type: integer, description: "The hub gameId." }
+    QWLeagueSeriesResult:
+      type: object
+      description: The QWLeague series a set of demos belong to (GET /v1/qwleague/series).
+      required: [series, complete]
+      additionalProperties: false
+      properties:
+        series:
+          type: array
+          description: Each series holding one of the named demos, once, newest first.
+          items: { $ref: "#/components/schemas/QWLeagueSeries" }
+        complete:
+          type: boolean
+          description: >
+            False while the server is still reading QWLeague's history for
+            the first time: an older game may be in a series not read yet.
+        syncedAt:
+          type: string
+          format: date-time
+          description: When the index was last brought up to date; absent before the first sync has finished.
+    QWLeagueSeries:
+      type: object
+      description: >
+        One QWLeague series: the maps two sides played against each other,
+        as QWLeague records them. "Team 1" and "team 2" are QWLeague's own
+        numbering of the two sides, the same across every map of a series;
+        match them to a hub game's teams by a map's `frags`.
+      required: [id, url, mode, kind, endedAt, maps]
+      additionalProperties: false
+      properties:
+        id: { type: integer, description: "QWLeague's match id of the series' last map." }
+        url: { type: string, description: "The series' page on qwleague.com." }
+        mode: { type: string, description: "QWLeague's name for the mode: 1on1, 2on2, 2on2at, 4on4, 4on4x, aim, …" }
+        kind:
+          type: string
+          enum: [ladder, tournament, prac, quickplay, custom]
+          description: What the series was played as — a ranked ladder game, a tournament fixture, a prac between clans, Quick Play, or a custom lobby.
+        bestOf: { type: integer, description: "Maps the series is played over (3 = best of three). Absent for a single game without a series." }
+        format: { type: string, description: "`bestof` (played until one side has won the majority) or `fixed` (every map is played)." }
+        score:
+          type: array
+          description: Maps won by team 1 and by team 2.
+          items: { type: integer }
+        winnerTeam: { type: integer, enum: [1, 2], description: "The side that won the series; absent when neither did." }
+        forfeit: { type: boolean, description: "True when the series was decided by a forfeit; absent otherwise." }
+        endedAt: { type: string, format: date-time, description: "When QWLeague received the last map's result." }
+        maps:
+          type: array
+          description: The series' maps in the order played, a forfeited map included.
+          items:
+            type: object
+            required: [map, matchId]
+            additionalProperties: false
+            properties:
+              map: { type: string, description: "The map's name." }
+              matchId: { type: integer, description: "QWLeague's match id of this map." }
+              sha: { type: string, description: "sha256 of the map's demo on the hub (a hub row's `demo_sha256`). Absent for a map that was not played, or whose demo the hub does not have." }
+              frags:
+                type: array
+                description: Frags of team 1 and of team 2; absent for a map that was not played.
+                items: { type: integer }
+              winnerTeam: { type: integer, enum: [1, 2], description: "The side that won the map; absent for a draw or a map not played." }
+        unplayed:
+          type: array
+          description: Maps picked for the series and not needed.
+          items: { type: string }
+        tournament:
+          type: object
+          description: The tournament fixture the series is; present when `kind` is `tournament`.
+          required: [name]
+          additionalProperties: false
+          properties:
+            name: { type: string, description: "The tournament's name." }
+            slug: { type: string, description: "Its slug on qwleague.com (`/tournaments/<slug>`)." }
+            division: { type: string, description: "The division the fixture is in." }
+            stage: { type: string, description: "`group` or `playoff`." }
+            round: { type: integer, description: "The round within the stage." }
+        teams:
+          type: array
+          description: The clans that are team 1 and team 2, where QWLeague knows them (a tournament fixture, a prac). Absent for a ladder game, whose sides are that game's players.
+          items:
+            type: object
+            required: [name]
+            additionalProperties: false
+            properties:
+              name: { type: string, description: "The clan's name." }
+              tag: { type: string, description: "The clan's in-game team name, in Quake's character set as QWLeague stores it." }
     RegionLayout:
       type: object
       description: >

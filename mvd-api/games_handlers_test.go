@@ -45,7 +45,7 @@ func (c *capturingSearcher) GameBySHA(context.Context, string) (map[string]any, 
 func newSearchServer(t *testing.T, sr gameCatalog) *httptest.Server {
 	t.Helper()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return httptest.NewServer(newRouter(&fakeStore{}, logger, "", testUploadConfig, nil, nil, sr))
+	return httptest.NewServer(newRouter(&fakeStore{}, logger, "", testUploadConfig, nil, nil, sr, nil))
 }
 
 func TestGamesSearch_ParamMapping(t *testing.T) {
@@ -53,7 +53,7 @@ func TestGamesSearch_ParamMapping(t *testing.T) {
 	srv := newSearchServer(t, sr)
 	defer srv.Close()
 
-	m := getJSON(t, srv.URL+"/v1/games/search?players=bps,valla&teams=Die&map=dm6&mode=4on4&matchtag=qwsl&from=2025-01-01&to=2025-12-31&limit=50&offset=100&roster=1", 200)
+	m := getJSON(t, srv.URL+"/v1/games/search?players=bps,valla&teams=Die&map=dm6&mode=4on4&matchtag=qwsl&server=qwleague.com&from=2025-01-01&to=2025-12-31&limit=50&offset=100&roster=1", 200)
 	if m["count"] == nil {
 		t.Errorf("response missing count: %v", m)
 	}
@@ -67,8 +67,8 @@ func TestGamesSearch_ParamMapping(t *testing.T) {
 	if len(g.Teams) != 1 || g.Teams[0] != "Die" {
 		t.Errorf("teams = %v; want [Die]", g.Teams)
 	}
-	if g.Map != "dm6" || g.Mode != "4on4" || g.Matchtag != "qwsl" {
-		t.Errorf("map/mode/matchtag = %q/%q/%q", g.Map, g.Mode, g.Matchtag)
+	if g.Map != "dm6" || g.Mode != "4on4" || g.Matchtag != "qwsl" || g.Server != "qwleague.com" {
+		t.Errorf("map/mode/matchtag/server = %q/%q/%q/%q", g.Map, g.Mode, g.Matchtag, g.Server)
 	}
 	if g.From != "2025-01-01" || g.To != "2025-12-31" {
 		t.Errorf("from/to = %q/%q", g.From, g.To)

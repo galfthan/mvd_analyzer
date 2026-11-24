@@ -22,7 +22,7 @@ func noRedirect() *http.Client {
 // registered route and returns 404 — today's behaviour is unchanged.
 func TestPortalOffByDefault(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	srv := httptest.NewServer(newRouter(&fakeStore{}, logger, "", testUploadConfig, nil, nil, &fakeSearcher{}))
+	srv := httptest.NewServer(newRouter(&fakeStore{}, logger, "", testUploadConfig, nil, nil, &fakeSearcher{}, nil))
 	defer srv.Close()
 
 	resp, err := noRedirect().Get(srv.URL + "/portal")
@@ -64,7 +64,7 @@ func TestPortalExemptFromAPIKey(t *testing.T) {
 	}
 	p := portal.New(cfg)
 
-	srv := httptest.NewServer(newRouter(&fakeStore{}, logger, "", testUploadConfig, auth, p, &fakeSearcher{}))
+	srv := httptest.NewServer(newRouter(&fakeStore{}, logger, "", testUploadConfig, auth, p, &fakeSearcher{}, nil))
 	defer srv.Close()
 
 	// /portal: 200 without any key.

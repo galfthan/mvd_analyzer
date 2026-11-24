@@ -593,6 +593,21 @@ body.no-demo #unified-timeline {
     text-align: right;
 }
 
+/* A game played on QWLeague's servers (src/lib/qwl.js), in the search list
+   and the match bar. */
+.qwl-badge {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 0 5px;
+    border: 1px solid #4a6a8f;
+    border-radius: 3px;
+    color: #9fc3ee;
+    font-size: 0.72rem;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
 .search-result-date {
     color: #7a8ba8;
     font-family: monospace;
@@ -867,6 +882,18 @@ body.no-demo #unified-timeline {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 500;
     white-space: nowrap;
+}
+
+.match-tabs-qwl {
+    margin-left: 10px;
+    color: #7a8ba8;
+    font-size: 0.82rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.match-tabs-qwl:hover {
+    color: #c8d4e3;
 }
 
 .tab-content {

@@ -1143,7 +1143,7 @@ func newTestServer(t *testing.T, store demoStore) *httptest.Server {
 func newTestServerMaps(t *testing.T, store demoStore, mapsDir string) *httptest.Server {
 	t.Helper()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return httptest.NewServer(newRouter(store, logger, mapsDir, testUploadConfig, nil, nil, &fakeSearcher{}))
+	return httptest.NewServer(newRouter(store, logger, mapsDir, testUploadConfig, nil, nil, &fakeSearcher{}, testQWLIndex()))
 }
 
 // fakeSearcher stands in for the hub game catalog in handler tests. The

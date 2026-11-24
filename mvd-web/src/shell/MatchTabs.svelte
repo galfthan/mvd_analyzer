@@ -6,9 +6,12 @@
     // (src/app/load.js loadMatchGame), so the same view — the Summary, the
     // Timeline, the Aim stats — is compared map by map. From anywhere on
     // the page, 1–9 open that map and p / n the one before / after (the
-    // arrows are the playback's, src/player/player-keys.js).
+    // arrows are the playback's, src/player/player-keys.js). A match that is
+    // a QWLeague series (src/lib/qwl.js) says so after the day, with what it
+    // was, linking to its page there.
     import { teams, colorOf } from '../state/teams.js';
-    import { mapScore, restartedGames } from '../lib/matches.js';
+    import { mapScore, matchRestarted } from '../lib/matches.js';
+    import { seriesLabel } from '../lib/qwl.js';
     import { loadMatchGame } from '../app/load.js';
 
     /** @type {{ match: import('../lib/matches.js').Match, index: number }} */
@@ -16,7 +19,7 @@
     // The top bar shows only a match that has two sides.
     const [a, b] = $derived(/** @type {[import('../lib/matches.js').MatchSide, import('../lib/matches.js').MatchSide]} */ (match.sides));
     // The games broken off and restarted: shown, dimmed, no map for either side.
-    const restarted = $derived(restartedGames(match.games));
+    const restarted = $derived(matchRestarted(match));
     // The id of the map being loaded, '' when none is.
     let loading = $state('');
 
@@ -53,9 +56,9 @@
 
 <nav class="match-tabs" id="match-tabs" aria-label="Maps of this match">
     <span class="match-tabs-score" title="Maps won">
-        <span style:color={sideColor(a.name)}>{a.name}</span>
+        <span style:color={sideColor(a.name)} title={a.label}>{a.name}</span>
         <b>{a.wins} : {b.wins}</b>
-        <span style:color={sideColor(b.name)}>{b.name}</span>
+        <span style:color={sideColor(b.name)} title={b.label}>{b.name}</span>
     </span>
     <button type="button" class="match-tabs-step" title="Previous map (p)" disabled={index === 0 || !!loading}
         onclick={() => open(match.games[index - 1])}>‹</button>
@@ -79,4 +82,7 @@
     <button type="button" class="match-tabs-step" title="Next map (n)" disabled={index === match.games.length - 1 || !!loading}
         onclick={() => open(match.games[index + 1])}>›</button>
     <span class="match-tabs-date">{(match.games[index].timestamp || '').slice(0, 10)}</span>
+    {#if match.qwl}
+        <a class="match-tabs-qwl" href={match.qwl.url} target="_blank" rel="noopener" title="This series on qwleague.com"><span class="qwl-badge">QWL</span>{seriesLabel(match.qwl)}</a>
+    {/if}
 </nav>

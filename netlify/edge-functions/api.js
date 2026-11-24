@@ -18,7 +18,7 @@
 
 export const UPSTREAM = 'https://mvdanalyzer.com/v1/';
 
-export const GET_ROUTES = /^\/api\/(demos\/[^/]+\/(result|streams\/positions|buckets|region-control|los|top-windows|top-kills|lives|highlights|events|backpacks|frags|weapon-pickups)|games\/(search|[0-9]+))$/;
+export const GET_ROUTES = /^\/api\/(demos\/[^/]+\/(result|streams\/positions|buckets|region-control|los|top-windows|top-kills|lives|highlights|events|backpacks|frags|weapon-pickups)|games\/(search|[0-9]+|sha:[0-9a-f]{64})|qwleague\/series)$/;
 export const POST_ROUTES = /^\/api\/demos\/[^/]+\/region-control$/;
 
 // Request headers that reach mvd-api; everything else (cookies included)
