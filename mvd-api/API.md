@@ -37,11 +37,8 @@ Base URL defaults to `http://localhost:8080`. A demo is addressed by an
   good for bookmarking a warm entry) or one you uploaded with
   `uploadDemo` (`POST /v1/demos`).
 
-Games played on QWLeague's servers: **`GET /v1/qwleague/series?sha=…`**
-tells which hub demos are the maps of one series, and what the series was.
-
 Don't have a `gameId` yet? **`GET /v1/games/search`** discovers demos in
-the hub catalog by player / team / map / mode / matchtag / server / date, returns
+the hub catalog by player / team / map / mode / matchtag / date, returns
 `{limit, offset, count, total?, games}`, and each row's `id` becomes the
 `gameId:<id>` you feed the flow below (**`GET /v1/games/{id}`** returns
 one game's row by that id, or by its demo's hash as `sha:<hex>`). Each row also carries

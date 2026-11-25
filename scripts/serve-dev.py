@@ -27,7 +27,7 @@ import sys
 import urllib.error
 import urllib.request
 
-GET_ROUTES = re.compile(r"^/api/(demos/[^/]+/(result|streams/positions|buckets|region-control|los|top-windows|top-kills|lives|highlights|events|backpacks|frags|weapon-pickups)|games/(search|[0-9]+|sha:[0-9a-f]{64})|qwleague/series)$")
+GET_ROUTES = re.compile(r"^/api/(demos/[^/]+/(result|streams/positions|buckets|region-control|los|top-windows|top-kills|lives|highlights|events|backpacks|frags|weapon-pickups)|games/(search|[0-9]+))$")
 POST_ROUTES = re.compile(r"^/api/demos/[^/]+/region-control$")
 FORWARD = ("Accept", "Accept-Encoding", "Content-Type", "If-None-Match")
 

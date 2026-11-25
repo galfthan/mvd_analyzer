@@ -108,7 +108,7 @@
 	handle /api/* {
 		@webapi {
 			method GET
-			path_regexp ^/api/(demos/[^/]+/(result|streams/positions|buckets|region-control|los|top-windows|top-kills|lives|highlights|events|backpacks|frags|weapon-pickups)|games/(search|[0-9]+|sha:[0-9a-f]{64})|qwleague/series)$
+			path_regexp ^/api/(demos/[^/]+/(result|streams/positions|buckets|region-control|los|top-windows|top-kills|lives|highlights|events|backpacks|frags|weapon-pickups)|games/(search|[0-9]+))$
 		}
 		@webapiPost {
 			method POST

@@ -42,7 +42,6 @@ const gamesSearchTimeout = 15 * time.Second
 //	map       exact map name
 //	mode      exact game mode (1on1, 2on2, 4on4, FFA, …)
 //	matchtag  case-insensitive substring of the tournament/event tag
-//	server    case-insensitive substring of the server's hostname (host:port)
 //	from,to   ISO date bounds, inclusive (YYYY-MM-DD)
 //	limit     max rows (omit for the default 20; explicit 0, above
 //	          hubfetch.MaxSearchLimit, or negative → 400 invalid_param)
@@ -69,7 +68,6 @@ func (s *server) handleGamesSearch(w http.ResponseWriter, r *http.Request) {
 		Map:      p.Str("map"),
 		Mode:     p.Str("mode"),
 		Matchtag: p.Str("matchtag"),
-		Server:   p.Str("server"),
 		From:     p.Str("from"),
 		To:       p.Str("to"),
 		Limit:    p.Int("limit", 0),

@@ -8,7 +8,7 @@
 
 import { apiJSON } from './api.js';
 import { siblingFilters, groupMatches, matchWith, mergeGames } from '../lib/matches.js';
-import { QWL_SERVER, isQwlGame, seriesBySha } from '../lib/qwl.js';
+import { QWL_SERVER } from '../lib/qwl.js';
 
 const SUPABASE_URL = 'https://ncsphkjfominimxztjip.supabase.co/rest/v1/v1_games';
 const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc3Boa2pmb21pbmlteHp0amlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY5Mzg1NjMsImV4cCI6MjAxMjUxNDU2M30.NN6hjlEW-qB4Og9hWAVlgvUdwrbBO13s8OkAJuBGVbo';
@@ -57,23 +57,18 @@ export function parseGameId(input) {
     throw new Error('Could not parse game ID from: ' + input);
 }
 
-// fetchGame: one game's hub row, by its gameId or — as `sha:<hex>` — by
-// its demo's sha256.
 /**
  * @param {number | string} gameId
  * @param {FetchImpl} [fetchImpl]
  * @returns {Promise<HubGame>}
  */
 export async function fetchGame(gameId, fetchImpl = fetch) {
-    const id = String(gameId);
     try {
-        // A sha: id goes as it is: the /api allowlists match it unescaped.
-        return await apiJSON(`games/${/^sha:[0-9a-f]{64}$/.test(id) ? id : encodeURIComponent(id)}`, {}, fetchImpl);
+        return await apiJSON(`games/${encodeURIComponent(String(gameId))}`, {}, fetchImpl);
     } catch (err) {
         if (!(/** @type {{ canFallBack?: boolean }} */ (err).canFallBack)) throw err;
     }
-    const by = id.startsWith('sha:') ? `demo_sha256=eq.${encodeURIComponent(id.slice(4))}` : `id=eq.${encodeURIComponent(id)}`;
-    const resp = await fetchImpl(`${SUPABASE_URL}?select=${encodeURIComponent(SEARCH_SELECT)}&${by}`, { headers: HEADERS });
+    const resp = await fetchImpl(`${SUPABASE_URL}?select=${encodeURIComponent(SEARCH_SELECT)}&id=eq.${encodeURIComponent(String(gameId))}`, { headers: HEADERS });
     if (!resp.ok) throw new Error(`Hub API error: ${resp.status}`);
     const games = await resp.json();
     if (games.length === 0) throw new Error(`Game ID ${gameId} not found`);
@@ -86,7 +81,9 @@ export async function fetchGame(gameId, fetchImpl = fetch) {
 // are comma-separated lists, AND'd, where the direct query takes each as
 // one term. A team goes in lower case: the hub's team filter is an exact
 // match on its lower-cased team names ("D2s" finds nothing, "d2s" the
-// team), where the player one folds case.
+// team), where the player one folds case. A search for QWLeague's games
+// alone (`qwl`) filters on the server's hostname, which mvd-api's search
+// does not offer: it asks the hub directly.
 /**
  * @param {SearchFilters} filters
  * @param {number} [offset]
@@ -104,7 +101,7 @@ export async function searchGames(filters, offset = 0, fetchImpl = fetch, limit 
     if (filters.tag) q.set('matchtag', filters.tag);
     if (filters.from) q.set('from', filters.from);
     if (filters.to) q.set('to', filters.to);
-    if (filters.qwl) q.set('server', QWL_SERVER);
+    if (filters.qwl) return searchHub(filters, offset, fetchImpl, limit);
     try {
         const body = await apiJSON(`games/search?${q}`, {}, fetchImpl);
         return { games: body.games || [], total: typeof body.total === 'number' ? body.total : null };
@@ -156,53 +153,16 @@ async function searchHub(filters, offset, fetchImpl, limit) {
     return { games, total };
 }
 
-// The most demos one GET /v1/qwleague/series names.
-const QWL_SERIES_CHUNK = 200;
-
-// fetchQwlSeries: the QWLeague series (src/lib/qwl.js) the games are maps
-// of — only the games played on QWLeague's servers are asked about, by
-// their demos' sha256. mvd-api alone knows them: with no API, or one
-// without a QWLeague token, the answer is none and the games group as any
-// others do.
-/**
- * @param {HubGame[]} games
- * @param {FetchImpl} [fetchImpl]
- * @returns {Promise<import('../lib/qwl.js').QwlSeries[]>}
- */
-export async function fetchQwlSeries(games, fetchImpl = fetch) {
-    const shas = [...new Set(games.filter(g => isQwlGame(g) && g.demo_sha256).map(g => g.demo_sha256))];
-    /** @type {import('../lib/qwl.js').QwlSeries[]} */
-    const out = [];
-    for (let i = 0; i < shas.length; i += QWL_SERIES_CHUNK) {
-        try {
-            const body = await apiJSON(`qwleague/series?sha=${shas.slice(i, i + QWL_SERIES_CHUNK).join(',')}`, {}, fetchImpl);
-            out.push(...(body.series || []));
-        } catch {
-            break;
-        }
-    }
-    return out;
-}
-
 // fetchMatch: the match (src/lib/matches.js) a game belongs to, with every
-// map of it the hub has. A map of a QWLeague series is that series' match:
-// its other maps are fetched by their demos' sha. Any other game: one
-// search for the games of both sides around the game's day. A game on its
-// own, or one the search cannot find again, is a match of one.
+// map of it the hub has — one search for the games of both sides around the
+// game's day. A game on its own, or one the search cannot find again, is a
+// match of one.
 /**
  * @param {HubGame} game
  * @param {FetchImpl} [fetchImpl]
  * @returns {Promise<import('../lib/matches.js').Match>}
  */
 export async function fetchMatch(game, fetchImpl = fetch) {
-    const series = await fetchQwlSeries([game], fetchImpl);
-    if (seriesBySha(series).has(game.demo_sha256)) {
-        const others = series[0].maps.filter(m => m.sha && m.sha !== game.demo_sha256);
-        // A map the hub cannot give is left out of the match.
-        const games = await Promise.all(others.map(m => fetchGame(`sha:${m.sha}`, fetchImpl).catch(() => null)));
-        const all = mergeGames([game], /** @type {HubGame[]} */ (games.filter(Boolean)));
-        return /** @type {import('../lib/matches.js').Match} */ (matchWith(groupMatches(all, series), game.id));
-    }
     const filters = siblingFilters(game);
     /** @type {HubGame[]} */
     let around = [];

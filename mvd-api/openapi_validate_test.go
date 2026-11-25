@@ -766,8 +766,6 @@ func validationCases(t *testing.T) []validationCase {
 
 		{name: "games-search", url: "/v1/games/search?map=dm3&mode=4on4", path: "/v1/games/search", status: 200},
 		{name: "game", url: "/v1/games/12345", path: "/v1/games/{id}", status: 200, mustContain: []string{`"demo_sha256":`}},
-		{name: "qwleague-series", url: "/v1/qwleague/series?sha=" + qwlSHA(1), path: "/v1/qwleague/series", status: 200,
-			mustContain: []string{`"kind":"tournament"`, `"division":"Division 2"`, `"teams":[`, `"frags":[93,278]`, `"forfeit":true`, `"unplayed":[`, `"syncedAt":`}},
 		{name: "err-game-not-found", url: "/v1/games/7", path: "/v1/games/{id}", status: 404},
 		// The timeUnit echo (schema v56) is asserted by the schema-validated
 		// cases above: overview / events / state-at / stream-slice / loc-trails /

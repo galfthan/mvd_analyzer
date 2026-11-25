@@ -888,12 +888,7 @@ body.no-demo #unified-timeline {
     margin-left: 10px;
     color: #7a8ba8;
     font-size: 0.82rem;
-    text-decoration: none;
     white-space: nowrap;
-}
-
-.match-tabs-qwl:hover {
-    color: #c8d4e3;
 }
 
 .tab-content {

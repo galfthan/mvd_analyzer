@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
@@ -45,7 +44,6 @@ func runServe(args []string) error {
 		portalBaseURL = fs.String("portal-base-url", "", "public origin for the portal, e.g. https://qw.example.com; used to build the OAuth redirect_uri and links (required with -portal)")
 		playURL       = fs.String("play-url", playPageURL, "the web app's light player that POST /v1/playlists links to (a branch deploy's, to try one)")
 		warmInterval  = fs.Duration("warm-interval", 0, "prepare new hub demos ahead of their first visitor: list the hub's games every interval and download, parse and pack each new one (needs the hub env vars); 0 disables")
-		qwlInterval   = fs.Duration("qwleague-interval", 5*time.Minute, "how often the QWLeague index is brought up to date (needs the QWLEAGUE_TOKEN env var; without it there is no index and /v1/qwleague/series answers 502)")
 		warmWindow    = fs.Duration("warm-window", 7*24*time.Hour, "how far back -warm-interval prepares games: the first tick backfills this window")
 	)
 	if err := fs.Parse(args); err != nil {
@@ -117,17 +115,7 @@ func runServe(args []string) error {
 		dailyBytes: *uploadBytes,
 		dailyCount: *uploadCount,
 	}
-	// QWLeague is off unless its token is in the environment (a secret:
-	// never a flag). The index is loaded before the server answers, and
-	// kept up to date by a background sync that stops with the server.
-	var qwl *qwlIndex
-	if token := os.Getenv("QWLEAGUE_TOKEN"); token != "" {
-		qwl = newQWLIndex(filepath.Join(*cacheDir, "qwleague", "series.json"))
-		if err := qwl.load(); err != nil {
-			logger.Warn("qwleague: the saved index could not be read; reading QWLeague again", "err", err.Error())
-		}
-	}
-	handler := newRouter(cache, logger, *mapsDir, upload, auth, portalHandler, hub, qwl)
+	handler := newRouter(cache, logger, *mapsDir, upload, auth, portalHandler, hub)
 
 	srv := &http.Server{
 		Addr:         *addr,
@@ -144,26 +132,12 @@ func runServe(args []string) error {
 		"maxUploadBytes", *maxUpload, "uploadDailyBytes", *uploadBytes, "uploadDailyCount", *uploadCount,
 		"schemaVersion", result.CurrentSchemaVersion)
 
-	// The background work (hub warmer, QWLeague sync) stops with the server.
-	bgCtx, stopBg := context.WithCancel(context.Background())
-	defer stopBg()
+	// The hub warmer stops with the server.
+	warmCtx, stopWarm := context.WithCancel(context.Background())
+	defer stopWarm()
 	if *warmInterval > 0 {
 		logger.Info("hub warm enabled", "interval", warmInterval.String(), "window", warmWindow.String())
-		go newWarmer(hub, cache, logger, *warmInterval, *warmWindow).run(bgCtx)
-	}
-
-	if qwl != nil {
-		n, complete, _ := qwl.state()
-		logger.Info("qwleague sync enabled", "interval", qwlInterval.String(), "series", n, "complete", complete)
-		sync := &qwlSync{
-			client:   &qwlClient{base: qwlDefaultBase, token: os.Getenv("QWLEAGUE_TOKEN"), http: &http.Client{Timeout: 30 * time.Second}},
-			index:    qwl,
-			logger:   logger,
-			interval: *qwlInterval,
-			pace:     qwlPace,
-			now:      time.Now,
-		}
-		go sync.run(bgCtx)
+		go newWarmer(hub, cache, logger, *warmInterval, *warmWindow).run(warmCtx)
 	}
 
 	errCh := make(chan error, 1)

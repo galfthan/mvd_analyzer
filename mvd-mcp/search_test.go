@@ -74,7 +74,6 @@ func TestSearch_ParamMapping(t *testing.T) {
 		Map:      "dm6",
 		Mode:     "4on4",
 		Matchtag: "qwsl",
-		Server:   "qwleague.com",
 		From:     "2025-01-01",
 		To:       "2025-12-31",
 		Limit:    &limit,
@@ -91,7 +90,6 @@ func TestSearch_ParamMapping(t *testing.T) {
 		"map":      "dm6",
 		"mode":     "4on4",
 		"matchtag": "qwsl",
-		"server":   "qwleague.com",
 		"from":     "2025-01-01",
 		"to":       "2025-12-31",
 		"limit":    "50",
@@ -116,7 +114,7 @@ func TestSearch_OmitsUnsetParams(t *testing.T) {
 		t.Fatalf("Search: %v", err)
 	}
 	q := f.lastURL.Query()
-	for _, k := range []string{"players", "teams", "mode", "matchtag", "server", "from", "to", "limit", "offset", "roster"} {
+	for _, k := range []string{"players", "teams", "mode", "matchtag", "from", "to", "limit", "offset", "roster"} {
 		if _, ok := q[k]; ok {
 			t.Errorf("unset field leaked into query as %q=%q", k, q.Get(k))
 		}

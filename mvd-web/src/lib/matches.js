@@ -3,24 +3,18 @@
 // games and knows no such thing, so the page derives it: consecutive games of
 // one mode between the same two sides — the same team names with enough of
 // the same players, or the same two players in a duel — with a short break
-// between them. A game QWLeague knows as a map of one of its series
-// (src/lib/qwl.js) is not guessed at: the series' maps are the match.
-// DOM-free; the Search tab (the grouped list) and the map tabs above a
-// loaded demo (src/shell/MatchTabs.svelte) both read it.
-
-import { seriesBySha } from './qwl.js';
+// between them. DOM-free; the Search tab (the grouped list) and the map tabs
+// above a loaded demo (src/shell/MatchTabs.svelte) both read it.
 
 /**
  * @typedef {import('../data/hub.js').HubGame} HubGame
  * @typedef {{ key: string, name: string, players: Set<string>, frags: number }} Side
- * @typedef {import('./qwl.js').QwlSeries} QwlSeries
- * @typedef {{ name: string, wins: number, label?: string }} MatchSide  `label`: the clan's name where QWLeague gives one for the hub's team tag
+ * @typedef {{ name: string, wins: number }} MatchSide
  * @typedef {object} Match
  * @property {number | string} id       its first game's id
  * @property {string} mode
  * @property {HubGame[]} games          in the order played
  * @property {[MatchSide, MatchSide] | null} sides  the leader first, each with the maps it won (a drawn or restarted map is neither's); null for a game that has no two sides
- * @property {QwlSeries} [qwl]          the QWLeague series the games are maps of
  */
 
 // A hub row's timestamp is the demo's START and the row has no duration, so
@@ -96,27 +90,13 @@ function maxStartGapMs(mode) {
 }
 
 // groupMatches: `games` (any order, each id once) as matches, the newest
-// match first. A game without two sides is a match of its own. The games
-// that are maps of one of `series` (by demo sha) are that series' match,
-// whatever their rosters and times; the rest are chained as described above.
+// match first. A game without two sides is a match of its own.
 /**
  * @param {HubGame[]} games
- * @param {QwlSeries[]} [series]
  * @returns {Match[]}
  */
-export function groupMatches(games, series = []) {
-    const bySha = seriesBySha(series);
-    /** @type {Map<QwlSeries, HubGame[]>} */
-    const inSeries = new Map();
-    /** @type {HubGame[]} */
-    const loose = [];
-    for (const game of games) {
-        const s = bySha.get(game.demo_sha256);
-        if (!s) loose.push(game);
-        else if (inSeries.has(s)) /** @type {HubGame[]} */ (inSeries.get(s)).push(game);
-        else inSeries.set(s, [game]);
-    }
-    const sorted = loose.sort((a, b) => startMs(a) - startMs(b));
+export function groupMatches(games) {
+    const sorted = [...games].sort((a, b) => startMs(a) - startMs(b));
     /** @type {Array<{ games: HubGame[], sides: [Side, Side] | null }>} */
     const chains = [];
     // The chains each (mode, side names) pair has played: two pickups named
@@ -145,63 +125,19 @@ export function groupMatches(games, series = []) {
         chains.push(fresh);
         named.push(fresh);
     }
-    const matches = [...chains.map(c => matchOfChain(c)), ...[...inSeries].map(([s, gs]) => matchOfSeries(s, gs))];
-    return matches.sort((a, b) => startMs(b.games[0]) - startMs(a.games[0]));
+    return chains.map(matchOfChain).sort((a, b) => startMs(b.games[0]) - startMs(a.games[0]));
 }
 
-// matchOfSeries: the match of a QWLeague series, from those of its maps'
-// games in hand, in the series' order. The score is QWLeague's (it counts a
-// forfeited map, and a map whose demo the hub lacks) where its team 1 and
-// team 2 can be told apart on a map by their frags; else the maps counted
-// here, as for any match.
-/**
- * @param {QwlSeries} series
- * @param {HubGame[]} games
- * @returns {Match}
- */
-function matchOfSeries(series, games) {
-    const order = new Map(series.maps.map((m, i) => [m.sha, i]));
-    games.sort((a, b) => /** @type {number} */ (order.get(a.demo_sha256)) - /** @type {number} */ (order.get(b.demo_sha256)));
-    const first = games[0];
-    const match = matchOfChain({ games, sides: gameSides(first) }, false);
-    match.qwl = series;
-    if (!match.sides) return match;
-    // The hub side that is QWLeague's team 1: the one with team 1's frags
-    // on a map the two did not draw.
-    let team1 = '';
-    for (const game of games) {
-        const frags = series.maps[/** @type {number} */ (order.get(game.demo_sha256))].frags;
-        const sides = gameSides(game);
-        if (!frags || !sides || frags[0] === frags[1]) continue;
-        const i = sides.findIndex(s => s.frags === frags[0]);
-        if (i >= 0 && sides[1 - i].frags === frags[1]) {
-            team1 = sides[i].key;
-            break;
-        }
-    }
-    if (!team1) return match;
-    for (const side of match.sides) {
-        const team = fold(side.name) === team1 ? 0 : 1;
-        if (series.score?.length === 2) side.wins = series.score[team];
-        if (series.teams?.[team]?.name) side.label = series.teams[team].name;
-    }
-    match.sides.sort((a, b) => b.wins - a.wins);
-    return match;
-}
-
-// matchOfChain: `restarts` off counts every game as a map (a series' maps
-// are known to be maps).
 /**
  * @param {{ games: HubGame[], sides: [Side, Side] | null }} chain
- * @param {boolean} [restarts]
  * @returns {Match}
  */
-function matchOfChain({ games, sides }, restarts = true) {
+function matchOfChain({ games, sides }) {
     const first = games[0];
     if (!sides) return { id: first.id, mode: first.mode, games, sides: null };
     /** @type {[MatchSide, MatchSide]} */
     const score = [{ name: sides[0].name, wins: 0 }, { name: sides[1].name, wins: 0 }];
-    const restarted = restarts ? restartedGames(games) : new Set();
+    const restarted = restartedGames(games);
     for (const game of games) {
         const w = mapWinner(game);
         if (w !== null && !restarted.has(String(game.id))) score[fold(w) === sides[0].key ? 0 : 1].wins++;
@@ -235,23 +171,6 @@ export function restartedGames(games) {
         if (startMs(games[i + 1]) - startMs(games[i]) < within) ids.add(String(games[i].id));
     }
     return ids;
-}
-
-// matchRestarted: the restarted games of a match (restartedGames) — none in
-// a QWLeague series, whose maps are known to be maps.
-/** @param {Match} match */
-export function matchRestarted(match) {
-    return match.qwl ? new Set() : restartedGames(match.games);
-}
-
-// missingMaps: the demo shas of a QWLeague series' maps that the match has
-// no game for yet — maps the search did not return, each to be asked for
-// by its sha.
-/** @param {Match} match */
-export function missingMaps(match) {
-    if (!match.qwl) return [];
-    const have = new Set(match.games.map(g => g.demo_sha256));
-    return match.qwl.maps.flatMap(m => (m.sha && !have.has(m.sha) ? [m.sha] : []));
 }
 
 // mapWinner: the name of the side that won a game, null for a draw or a
@@ -336,20 +255,18 @@ export function matchRow(match) {
 /**
  * @param {HubGame[]} rows
  * @param {HubGame[]} extra
- * @param {QwlSeries[]} [series]
  * @returns {Match[]}
  */
-export function searchMatches(rows, extra, series = []) {
+export function searchMatches(rows, extra) {
     const found = new Set(rows.map(g => String(g.id)));
-    return groupMatches(mergeGames(rows, extra), series).filter(m => m.games.some(g => found.has(String(g.id))));
+    return groupMatches(mergeGames(rows, extra)).filter(m => m.games.some(g => found.has(String(g.id))));
 }
 
 // cutShort: the listed matches the search may have returned only part of,
 // each to be asked for whole (fetchMatch). A map filter drops the other
 // maps of every match; a date bound those of a match that starts or ends
 // within a map's reach of it; and the list's end, when it has more pages,
-// may cut the oldest one. A game without two sides has no other maps, and
-// a QWLeague series names its own (missingMaps).
+// may cut the oldest one. A game without two sides has no other maps.
 /**
  * @param {Match[]} matches  newest first (searchMatches)
  * @param {{ map?: string, from?: string, to?: string }} filters  the dates as UTC days, `to` inclusive
@@ -361,7 +278,7 @@ export function cutShort(matches, filters, more) {
     const to = filters.to ? Date.parse(filters.to) + 86400000 : NaN;
     const last = matches[matches.length - 1];
     return matches.filter(m => {
-        if (!m.sides || m.qwl) return false;
+        if (!m.sides) return false;
         if (filters.map || (more && m === last)) return true;
         const reach = maxStartGapMs(m.mode);
         return startMs(m.games[0]) - from <= reach || to - startMs(m.games[m.games.length - 1]) <= reach;

@@ -249,7 +249,6 @@ All fields optional; an empty filter returns the most recent matches.
 | `map`      | `string`   | — | Map name, exact match (e.g. `dm6`) |
 | `mode`     | `string`   | — | Game mode, exact match (`1on1`, `2on2`, `4on4`, `FFA`) |
 | `matchtag` | `string`   | — | Tournament/event tag, case-insensitive substring (e.g. `qwsl`) |
-| `server`   | `string`   | — | Hostname (host:port) of the server the game was played on, case-insensitive substring (e.g. `qwleague.com`) |
 | `from`     | `string`   | — | ISO date lower bound, inclusive (YYYY-MM-DD) |
 | `to`       | `string`   | — | ISO date upper bound, inclusive (YYYY-MM-DD) |
 | `limit`    | `int`      | 20 | Max rows per page; capped at 1000 (the hub's own page ceiling). Omit for the default; an explicit `0` is rejected `400 invalid_param` |

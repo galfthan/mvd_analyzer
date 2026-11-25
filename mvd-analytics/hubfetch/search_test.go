@@ -39,28 +39,6 @@ func TestSearchSelectListIncludesHostname(t *testing.T) {
 	}
 }
 
-// TestSearchServerFilter: Server goes out as a case-insensitive substring
-// match on the hostname column.
-func TestSearchServerFilter(t *testing.T) {
-	var got string
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		got = r.URL.Query().Get("server_hostname")
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`[]`))
-	}))
-	defer srv.Close()
-
-	c := NewClient()
-	c.SupabaseURL = srv.URL
-	c.APIKey = "test-anon-key"
-	if _, err := c.Search(context.Background(), SearchParams{Server: "qwleague.com"}); err != nil {
-		t.Fatalf("Search: %v", err)
-	}
-	if got != "ilike.%qwleague.com%" {
-		t.Errorf("server_hostname filter = %q, want ilike.%%qwleague.com%%", got)
-	}
-}
-
 // TestCompactRostersPassesTopLevelKeys covers that compactRosters rewrites
 // only `players` and passes every other top-level key through verbatim —
 // so the new server_hostname column (and the demo_sha256 passthrough

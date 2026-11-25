@@ -28,7 +28,6 @@ func (p *proxyBackend) Search(ctx context.Context, in SearchGamesInput) (any, er
 	q.str("map", in.Map)
 	q.str("mode", in.Mode)
 	q.str("matchtag", in.Matchtag)
-	q.str("server", in.Server)
 	q.str("from", in.From)
 	q.str("to", in.To)
 	q.intp("limit", in.Limit)

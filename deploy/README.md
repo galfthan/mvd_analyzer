@@ -139,11 +139,6 @@ PORTAL_COOKIE_SECRET=replace-with-a-long-random-string
 HUB_SUPABASE_URL=https://<project>.supabase.co/rest/v1/v1_games
 HUB_SUPABASE_KEY=your-supabase-anon-key
 HUB_CDN_URL=https://d.quake.world
-# Optional: a qwleague.com API token (made at qwleague.com/developer). With
-# it the API keeps an index of QWLeague series and serves
-# GET /v1/qwleague/series, which the page uses to group and label QWLeague
-# games; without it that endpoint returns 502 and the page does without.
-QWLEAGUE_TOKEN=qwl_your-token
 EOF
 sudo chmod 600 /etc/mvd/secrets.env
 ```

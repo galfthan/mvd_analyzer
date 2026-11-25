@@ -33,13 +33,12 @@ test('every endpoint the page calls is on the allowlist', () => {
     const gets = ['result', 'streams/positions', 'buckets', 'region-control', 'los', ...Object.values(VIEW_ENDPOINTS)];
     for (const p of gets) assert.ok(GET_ROUTES.test(id + p), p);
     assert.ok(GET_ROUTES.test('/api/games/search') && GET_ROUTES.test('/api/games/12345'));
-    assert.ok(GET_ROUTES.test('/api/games/sha:' + 'a1'.repeat(32)) && GET_ROUTES.test('/api/qwleague/series'));
     assert.ok(POST_ROUTES.test(id + 'region-control'));
 });
 
 test('the allowlist admits the page\'s routes and nothing else', () => {
     for (const p of ['/api/demos', '/api/demos/x/overview', '/api/demos/x/artifacts/los', '/api/playlists',
-        '/api/games/12a', '/api/games/sha:12', '/api/qwleague/matches', '/api/demos/x/result/extra', '/api/../v1/demos']) {
+        '/api/games/12a', '/api/demos/x/result/extra', '/api/../v1/demos']) {
         assert.ok(!GET_ROUTES.test(p) && !POST_ROUTES.test(p), p);
     }
     assert.ok(!POST_ROUTES.test('/api/demos/gameId:1/result'));

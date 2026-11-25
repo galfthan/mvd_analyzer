@@ -8,24 +8,22 @@
     // each side won, then a column a map with its frags. A click on it opens the
     // match at its first map, a map's name at that map; the map tabs in the
     // top bar (src/shell/MatchTabs.svelte) reach the others from there.
-    // A game played on QWLeague's servers carries a "QWL" badge, and where
-    // mvd-api knows its series (src/lib/qwl.js) what it was — ladder or
-    // tournament, best of how many; "QWL only" searches those games alone.
+    // A game played on QWLeague's servers (src/lib/qwl.js) carries a "QWL"
+    // badge before its tag; "QWL only" searches those games alone.
     // The `active` class is toggled by src/app/tabs.js like on every
     // other tab, so the class attribute stays static here.
     import { SEARCH_MODE_LABELS, searchRow, pagerLabel, hasMore } from '../../lib/search.js';
     import { loadStatus, hubInput, hubBusy } from '../../state/shell.js';
     import { uploadFile, loadFromHub, loadGameFromSearch } from '../../app/load.js';
-    import { searchMatches, matchRow, mapScore, matchRestarted } from '../../lib/matches.js';
-    import { isQwlGame, seriesBySha, seriesLabel } from '../../lib/qwl.js';
+    import { searchMatches, matchRow, mapScore, restartedGames } from '../../lib/matches.js';
+    import { isQwlGame } from '../../lib/qwl.js';
     import { assignTeamColors } from '../../state/teams.js';
     import {
         searchForm, searchStatus, searchBusy, searchResults, searchPaging, runSearch,
-        searchGrouped, searchExtraGames, searchSeries, setSearchGrouped,
+        searchGrouped, searchExtraGames, setSearchGrouped,
     } from './search-model.js';
 
-    const matches = $derived($searchGrouped ? searchMatches($searchResults.rows, $searchExtraGames, $searchSeries) : []);
-    const seriesOf = $derived(seriesBySha($searchSeries));
+    const matches = $derived($searchGrouped ? searchMatches($searchResults.rows, $searchExtraGames) : []);
 
     /** @type {HTMLInputElement} */
     let fileInput;
@@ -120,7 +118,7 @@
                         onchange={(e) => setSearchGrouped(/** @type {HTMLInputElement} */ (e.target).checked)}>
                     Group into matches
                 </label>
-                <label class="search-group-toggle" title="Only games played on QWLeague's servers (qwleague.com): its ladders, tournaments and pracs">
+                <label class="search-group-toggle" title="Only games played on QWLeague's servers (qwleague.com)">
                     <input type="checkbox" id="search-qwl" checked={$searchForm.qwl === '1'} disabled={$searchBusy} onchange={onQwlOnly}>
                     QWL only
                 </label>
@@ -131,14 +129,12 @@
             {#if $searchResults.empty}
                 <div class="search-empty">No demos match these filters.</div>
             {/if}
-            <!-- A row's tag: for a game on QWLeague's servers the badge, then
-                 what its series was where that is known, else the hub's tag. -->
-            {#snippet tagCell(/** @type {import('../../data/hub.js').HubGame} */ game, /** @type {import('../../lib/qwl.js').QwlSeries | undefined} */ series, /** @type {string} */ tag)}
-                <span class="search-result-tag">{#if series || isQwlGame(game)}<span class="qwl-badge">QWL</span>{/if}{series ? seriesLabel(series) : tag}</span>
+            {#snippet tagCell(/** @type {import('../../data/hub.js').HubGame} */ game, /** @type {string} */ tag)}
+                <span class="search-result-tag">{#if isQwlGame(game)}<span class="qwl-badge">QWL</span>{/if}{tag}</span>
             {/snippet}
             {#snippet gameRow(/** @type {import('../../data/hub.js').HubGame} */ game)}
                 {@const row = searchRow(game)}
-                <button type="button" class="search-result" data-game-id={game.id} onclick={() => loadGameFromSearch(game)}><span class="search-result-mode">{row.mode}</span><span class="search-result-map">{row.map}</span><span class="search-result-contest">{row.contest}</span>{@render tagCell(game, seriesOf.get(game.demo_sha256), row.tag)}<span class="search-result-date">{row.date}</span></button>
+                <button type="button" class="search-result" data-game-id={game.id} onclick={() => loadGameFromSearch(game)}><span class="search-result-mode">{row.mode}</span><span class="search-result-map">{row.map}</span><span class="search-result-contest">{row.contest}</span>{@render tagCell(game, row.tag)}<span class="search-result-date">{row.date}</span></button>
             {/snippet}
             {#if $searchGrouped}
                 {#each matches as match (match.id)}
@@ -149,14 +145,14 @@
                         {@const [a, b] = match.sides}
                         <!-- The colours the demo itself will give these two names (src/state/teams.js). -->
                         {@const [colorA, colorB] = assignTeamColors([a.name, b.name])}
-                        {@const restarted = matchRestarted(match)}
+                        {@const restarted = restartedGames(match.games)}
                         <div class="search-match" data-match-id={match.id}>
                             <span class="search-result-mode">{SEARCH_MODE_LABELS[match.mode] || match.mode}</span>
                             <div class="search-board">
                                 <span></span>
                                 <!-- Its ::after covers the row: a click anywhere but a map's name opens the match. -->
                                 <button type="button" class="search-board-sides" title="Open the match at its first map"
-                                    onclick={() => loadGameFromSearch(match.games[0])}><span style:color={colorA}>{a.label || a.name}</span><span style:color={colorB}>{b.label || b.name}</span></button>
+                                    onclick={() => loadGameFromSearch(match.games[0])}><span style:color={colorA}>{a.name}</span><span style:color={colorB}>{b.name}</span></button>
                                 <span class="search-board-head search-board-total">maps</span>
                                 <span class="search-board-wins search-board-total">{a.wins}</span>
                                 <span class="search-board-wins search-board-total">{b.wins}</span>
@@ -170,7 +166,7 @@
                                     <span class="search-board-frags" class:restarted={off} class:won={!off && score && score.other > score.own}>{score?.other}</span>
                                 {/each}
                             </div>
-                            {@render tagCell(match.games[0], match.qwl, row.tag)}
+                            {@render tagCell(match.games[0], row.tag)}
                             <span class="search-result-date">{row.date}</span>
                         </div>
                     {/if}

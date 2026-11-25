@@ -5,36 +5,13 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
-## unreleased (qwleague) — QWLeague series: exact matches, a QWL label, "QWL only"
+## unreleased (qwleague) — a QWL badge and "QWL only" on the Search tab
 
-- **`GET /v1/qwleague/series?sha=…`** (new) returns the QWLeague
-  (qwleague.com) series a set of hub demos are maps of: ladder,
-  tournament, prac, Quick Play or custom lobby; best of how many; the
-  score; every map with its demo's sha256; for a tournament the event,
-  division, stage and round, and the two clans' names. QWLeague's own API
-  needs a token and has no lookup by demo, so `mvd-api` keeps an index: a
-  background sync (`-qwleague-interval`, default 5 min) reads each series
-  once into `<cache-dir>/qwleague/series.json`, at half QWLeague's rate
-  limit; the first run reads its whole history (an hour or two), during
-  which answers carry `complete: false`. The token is the
-  `QWLEAGUE_TOKEN` environment variable; without it there is no sync and
-  the endpoint answers 502 `qwleague_upstream`.
-- **`GET /v1/games/search`** takes `server` (new): a case-insensitive
-  substring of the server's hostname, e.g. `qwleague.com`. The MCP's
-  `searchGames` takes it too.
-- **Search tab.** A game played on QWLeague's servers carries a "QWL"
-  badge with what its series was ("ladder · Bo3", "4on4 · Season 1 ·
-  Division 1 · group, round 11 · Bo3"). The maps of one series list as
-  one match whatever their rosters and start times — two ladder series
-  between "red" and "blue" in a row are two matches — with QWLeague's
-  score (a forfeited map counts) and, in a tournament, the clans' names.
-  A new "QWL only" checkbox searches those games alone (`?qwl=1`). The
-  map tabs above a loaded demo show the same label, linking to the
-  series on qwleague.com.
-- The page's `/api` path forwards two more routes (Caddyfile, the Netlify
-  edge function, `serve-dev.py`): `qwleague/series` and `games/sha:<hex>`.
-
-No schema change.
+- A game played on QWLeague's servers (a `*.qwleague.com` hostname on its
+  hub row) carries a "QWL" badge before its tag in the search list and in
+  the map tabs above a loaded demo. A new "QWL only" checkbox (`?qwl=1`)
+  searches those games alone; that search asks the hub directly, as
+  mvd-api's search has no server filter. Web only: no API change.
 
 ## unreleased (playlists-description) — POST /v1/playlists answers with the playlist
 

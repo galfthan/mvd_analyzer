@@ -453,7 +453,6 @@ type SearchGamesInput struct {
 	Map      string   `json:"map,omitempty"      jsonschema:"map name, exact match (e.g. dm6)"`
 	Mode     string   `json:"mode,omitempty"     jsonschema:"game mode, exact match (e.g. 1on1, 2on2, 4on4, FFA)"`
 	Matchtag string   `json:"matchtag,omitempty" jsonschema:"tournament/event tag, case-insensitive substring (e.g. qwsl)"`
-	Server   string   `json:"server,omitempty"   jsonschema:"hostname (host:port) of the server the game was played on, case-insensitive substring (e.g. qwleague.com for games on QWLeague's servers)"`
 	From     string   `json:"from,omitempty"     jsonschema:"calendar date lower bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
 	To       string   `json:"to,omitempty"       jsonschema:"calendar date upper bound, inclusive; strict YYYY-MM-DD (malformed values are rejected 400 invalid_param)"`
 	Limit    *int     `json:"limit,omitempty"    jsonschema:"max rows per page. Omitted = server default 20; an explicit 0 is forwarded and rejected 400 invalid_param (omit it for the default instead); max 1000 (the hub's own page ceiling — page with offset against total for more), larger values rejected 400 invalid_param"`
