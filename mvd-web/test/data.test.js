@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 
 import { WasmSource } from '../src/data/wasm-source.js';
 import { parseGameId, demoFilename, searchGames, fetchGame, downloadDemo } from '../src/data/hub.js';
+import { isQwlGame } from '../src/lib/qwl.js';
 
 // A stand-in for static/worker.js speaking its message protocol.
 class FakeWorker {
@@ -283,4 +284,22 @@ test('hub helpers', async () => {
         ? { ok: false } : { ok: true, arrayBuffer: async () => new Uint8Array([4]).buffer });
     assert.deepEqual([...await downloadDemo({ demo_sha256: 'xyz1', demo_source_url: 'http://srv/x' }, fallback)], [4]);
     await assert.rejects(downloadDemo({}, fallback), /No download URL/);
+});
+
+test('QWLeague: a game is known by its server, and "QWL only" asks the hub directly', async () => {
+    assert.equal(isQwlGame({ server_hostname: 'Stockholm.QWLeague.com:28501' }), true);
+    assert.equal(isQwlGame({ server_hostname: 'qwleague.com' }), true);
+    assert.equal(isQwlGame({ server_hostname: 'notqwleague.com:28501' }), false);
+    assert.equal(isQwlGame({ server_hostname: 'qwleague.com.example.org:1' }), false);
+    assert.equal(isQwlGame({}), false);
+
+    const urls = [];
+    const fetchImpl = async (url) => {
+        urls.push(url);
+        return { ok: true, json: async () => [], headers: new Map([['content-range', '0-99/4984']]) };
+    };
+    const page = await searchGames({ mode: '4on4', qwl: '1' }, 0, fetchImpl);
+    assert.equal(page.total, 4984);
+    assert.equal(urls.length, 1, 'mvd-api is not asked');
+    assert.match(urls[0], /supabase\.co.*mode=eq\.4on4.*server_hostname=ilike\.%25qwleague\.com%25/);
 });

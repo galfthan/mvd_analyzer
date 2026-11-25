@@ -8,8 +8,10 @@ import {
 import { SEARCH_FIELDS } from '../src/data/hub.js';
 
 test('search: the form reads with the text fields trimmed, mode and dates as typed', () => {
+    assert.equal(searchFilters({ qwl: '1' }).qwl, '1');
+    assert.equal(searchFilters({ qwl: 'yes' }).qwl, '', 'the QWLeague box is on or off');
     assert.deepEqual(searchFilters({ player: '  nexus ', team: ' ]sr[', map: 'dm2 ', mode: '4on4', tag: ' qwsl ', from: '2024-05-01', to: '' }),
-        { player: 'nexus', team: ']sr[', map: 'dm2', mode: '4on4', tag: 'qwsl', from: '2024-05-01', to: '' });
+        { player: 'nexus', team: ']sr[', map: 'dm2', mode: '4on4', tag: 'qwsl', from: '2024-05-01', to: '', qwl: '' });
     assert.deepEqual(searchFilters({}), { ...EMPTY_FILTERS });
     assert.deepEqual(Object.keys(searchFilters({})), SEARCH_FIELDS, 'the hub client and the form name the same fields');
 });

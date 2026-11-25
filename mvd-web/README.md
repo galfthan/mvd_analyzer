@@ -433,7 +433,11 @@ tabs in the top bar, in place of the single demo's line (keys 1–9 open
 that map, p / n the one before / after); the other maps are fetched ahead and
 held in memory (`preloadMaps` in `src/app/match.js`; not for a browser
 set to save data), so a tab loads that map without a download, with `keepTab`, so the
-same view is compared map by map. A local file has no match. All of it is
+same view is compared map by map. A local file has no match. A game played
+on QWLeague's servers (`src/lib/qwl.js`: a `*.qwleague.com` hostname on the
+hub row) carries a "QWL" badge before its tag, in the list and in the map
+tabs, and the Search tab's "QWL only" checkbox (`?qwl=1`) searches those
+games alone — directly on the hub, mvd-api's search having no server filter. All of it is
 in the page: the API and the Result know nothing of matches.
 
 On viewports below 800 px the sidebar reflows into a horizontal scroll

@@ -8,12 +8,15 @@
     // each side won, then a column a map with its frags. A click on it opens the
     // match at its first map, a map's name at that map; the map tabs in the
     // top bar (src/shell/MatchTabs.svelte) reach the others from there.
+    // A game played on QWLeague's servers (src/lib/qwl.js) carries a "QWL"
+    // badge before its tag; "QWL only" searches those games alone.
     // The `active` class is toggled by src/app/tabs.js like on every
     // other tab, so the class attribute stays static here.
     import { SEARCH_MODE_LABELS, searchRow, pagerLabel, hasMore } from '../../lib/search.js';
     import { loadStatus, hubInput, hubBusy } from '../../state/shell.js';
     import { uploadFile, loadFromHub, loadGameFromSearch } from '../../app/load.js';
     import { searchMatches, matchRow, mapScore, restartedGames } from '../../lib/matches.js';
+    import { isQwlGame } from '../../lib/qwl.js';
     import { assignTeamColors } from '../../state/teams.js';
     import {
         searchForm, searchStatus, searchBusy, searchResults, searchPaging, runSearch,
@@ -48,6 +51,12 @@
     /** @param {SubmitEvent} e */
     function onSubmit(e) {
         e.preventDefault();
+        runSearch();
+    }
+    // The box is a filter like the fields beside it, and searches at once.
+    /** @param {Event} e */
+    function onQwlOnly(e) {
+        $searchForm.qwl = /** @type {HTMLInputElement} */ (e.target).checked ? '1' : '';
         runSearch();
     }
 </script>
@@ -109,6 +118,10 @@
                         onchange={(e) => setSearchGrouped(/** @type {HTMLInputElement} */ (e.target).checked)}>
                     Group into matches
                 </label>
+                <label class="search-group-toggle" title="Only games played on QWLeague's servers (qwleague.com)">
+                    <input type="checkbox" id="search-qwl" checked={$searchForm.qwl === '1'} disabled={$searchBusy} onchange={onQwlOnly}>
+                    QWL only
+                </label>
             </div>
         </form>
         <div id="search-status" class={$searchStatus.cls}>{$searchStatus.text}</div>
@@ -116,9 +129,12 @@
             {#if $searchResults.empty}
                 <div class="search-empty">No demos match these filters.</div>
             {/if}
+            {#snippet tagCell(/** @type {import('../../data/hub.js').HubGame} */ game, /** @type {string} */ tag)}
+                <span class="search-result-tag">{#if isQwlGame(game)}<span class="qwl-badge">QWL</span>{/if}{tag}</span>
+            {/snippet}
             {#snippet gameRow(/** @type {import('../../data/hub.js').HubGame} */ game)}
                 {@const row = searchRow(game)}
-                <button type="button" class="search-result" data-game-id={game.id} onclick={() => loadGameFromSearch(game)}><span class="search-result-mode">{row.mode}</span><span class="search-result-map">{row.map}</span><span class="search-result-contest">{row.contest}</span><span class="search-result-tag">{row.tag}</span><span class="search-result-date">{row.date}</span></button>
+                <button type="button" class="search-result" data-game-id={game.id} onclick={() => loadGameFromSearch(game)}><span class="search-result-mode">{row.mode}</span><span class="search-result-map">{row.map}</span><span class="search-result-contest">{row.contest}</span>{@render tagCell(game, row.tag)}<span class="search-result-date">{row.date}</span></button>
             {/snippet}
             {#if $searchGrouped}
                 {#each matches as match (match.id)}
@@ -150,7 +166,7 @@
                                     <span class="search-board-frags" class:restarted={off} class:won={!off && score && score.other > score.own}>{score?.other}</span>
                                 {/each}
                             </div>
-                            <span class="search-result-tag">{row.tag}</span>
+                            {@render tagCell(match.games[0], row.tag)}
                             <span class="search-result-date">{row.date}</span>
                         </div>
                     {/if}
