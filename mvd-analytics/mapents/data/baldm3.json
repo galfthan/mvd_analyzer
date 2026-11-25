@@ -1,0 +1,1330 @@
+{
+ "map": "baldm3",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "LG.stairs-1",
+   "x": -560,
+   "y": -132,
+   "z": -464,
+   "loc": "LG.stairs",
+   "bounds": {
+    "min": [
+     -575,
+     -135,
+     -479
+    ],
+    "max": [
+     -545,
+     -129,
+     -449
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "LG.stairs-2",
+   "x": -368,
+   "y": -156,
+   "z": -288,
+   "loc": "LG.stairs",
+   "bounds": {
+    "min": [
+     -383,
+     -159,
+     -303
+    ],
+    "max": [
+     -353,
+     -153,
+     -273
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "MH.lift",
+   "x": 1872,
+   "y": -1564,
+   "z": -352,
+   "loc": "MH.lift",
+   "bounds": {
+    "min": [
+     1857,
+     -1567,
+     -367
+    ],
+    "max": [
+     1887,
+     -1561,
+     -337
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "high.SNG",
+   "x": 1632,
+   "y": 636,
+   "z": -208,
+   "loc": "high.SNG",
+   "bounds": {
+    "min": [
+     1617,
+     633,
+     -223
+    ],
+    "max": [
+     1647,
+     639,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "tunnel-1",
+   "x": 720,
+   "y": 284,
+   "z": -320,
+   "loc": "tunnel",
+   "bounds": {
+    "min": [
+     705,
+     281,
+     -335
+    ],
+    "max": [
+     735,
+     287,
+     -305
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "tunnel-2",
+   "x": 1296,
+   "y": -100,
+   "z": -320,
+   "loc": "tunnel",
+   "bounds": {
+    "min": [
+     1281,
+     -103,
+     -335
+    ],
+    "max": [
+     1311,
+     -97,
+     -305
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.stairs-1",
+   "x": -560,
+   "y": -192,
+   "z": -576,
+   "loc": "LG.stairs",
+   "bounds": {
+    "min": [
+     -639,
+     -255,
+     -639
+    ],
+    "max": [
+     -481,
+     -129,
+     -513
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.stairs-2",
+   "x": -368,
+   "y": -96,
+   "z": -456,
+   "loc": "LG.stairs",
+   "bounds": {
+    "min": [
+     -447,
+     -159,
+     -575
+    ],
+    "max": [
+     -289,
+     -33,
+     -337
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "MH.lift",
+   "x": 1872,
+   "y": -1504,
+   "z": -504,
+   "loc": "MH.lift",
+   "bounds": {
+    "min": [
+     1793,
+     -1567,
+     -607
+    ],
+    "max": [
+     1951,
+     -1441,
+     -401
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "high.SNG",
+   "x": 1632,
+   "y": 592,
+   "z": -344,
+   "loc": "high.SNG",
+   "bounds": {
+    "min": [
+     1569,
+     545,
+     -431
+    ],
+    "max": [
+     1695,
+     639,
+     -257
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "tunnel-1",
+   "x": 720,
+   "y": 208,
+   "z": -536,
+   "loc": "tunnel",
+   "bounds": {
+    "min": [
+     641,
+     129,
+     -703
+    ],
+    "max": [
+     799,
+     287,
+     -369
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "tunnel-2",
+   "x": 1296,
+   "y": -160,
+   "z": -472,
+   "loc": "tunnel",
+   "bounds": {
+    "min": [
+     1217,
+     -223,
+     -575
+    ],
+    "max": [
+     1375,
+     -97,
+     -369
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG.stairs-1",
+   "x": -768,
+   "y": -592,
+   "z": -256,
+   "loc": "LG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG.stairs-2",
+   "x": -672,
+   "y": -592,
+   "z": -256,
+   "loc": "LG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "MH.high-1",
+   "x": 1344,
+   "y": -1024,
+   "z": -192,
+   "loc": "MH.high"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "MH.high-2",
+   "x": 1344,
+   "y": -992,
+   "z": -192,
+   "loc": "MH.high"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Quad.mid-1",
+   "x": 128,
+   "y": -368,
+   "z": -112,
+   "loc": "Quad.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Quad.mid-2",
+   "x": 224,
+   "y": -368,
+   "z": -112,
+   "loc": "Quad.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "high.RL-1",
+   "x": 816,
+   "y": 400,
+   "z": -80,
+   "loc": "high.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "high.RL-2",
+   "x": 816,
+   "y": 432,
+   "z": -80,
+   "loc": "high.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "low.LG-1",
+   "x": 784,
+   "y": -1008,
+   "z": -464,
+   "loc": "low.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "low.LG-2",
+   "x": 880,
+   "y": -1008,
+   "z": -464,
+   "loc": "low.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "low.way-1",
+   "x": 320,
+   "y": -224,
+   "z": -480,
+   "loc": "low.way"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "low.way-2",
+   "x": 320,
+   "y": -192,
+   "z": -480,
+   "loc": "low.way"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "MH.high",
+   "x": 1984,
+   "y": -1280,
+   "z": -176,
+   "loc": "MH.high"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "MH.mid",
+   "x": 1280,
+   "y": -1056,
+   "z": -416,
+   "loc": "MH.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "Quad.below/GA",
+   "x": 32,
+   "y": -656,
+   "z": -448,
+   "loc": "Quad.below/GA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "Quad.mid",
+   "x": 192,
+   "y": -352,
+   "z": -96,
+   "loc": "Quad.mid"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "YA.room",
+   "x": 128,
+   "y": -1264,
+   "z": -272,
+   "loc": "YA.room"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "high.way",
+   "x": 1760,
+   "y": -480,
+   "z": -128,
+   "loc": "high.way"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "tunnel.GL",
+   "x": 1712,
+   "y": -352,
+   "z": -368,
+   "loc": "tunnel.GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.stairs-1",
+   "x": -720,
+   "y": -272,
+   "z": -528,
+   "loc": "LG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.stairs-2",
+   "x": -720,
+   "y": -240,
+   "z": -528,
+   "loc": "LG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.stairs-3",
+   "x": -448,
+   "y": 48,
+   "z": -336,
+   "loc": "LG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.stairs-4",
+   "x": -448,
+   "y": 80,
+   "z": -336,
+   "loc": "LG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.mid-1",
+   "x": 2208,
+   "y": -1088,
+   "z": -400,
+   "loc": "MH.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.mid-2",
+   "x": 2208,
+   "y": -1056,
+   "z": -400,
+   "loc": "MH.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.top-1",
+   "x": 1888,
+   "y": -784,
+   "z": -96,
+   "loc": "MH.top"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.top-2",
+   "x": 1888,
+   "y": -752,
+   "z": -96,
+   "loc": "MH.top"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.below-1",
+   "x": 16,
+   "y": 240,
+   "z": -368,
+   "loc": "Quad.below"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.below-2",
+   "x": 48,
+   "y": 240,
+   "z": -368,
+   "loc": "Quad.below"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.mid-1",
+   "x": 640,
+   "y": -576,
+   "z": -80,
+   "loc": "Quad.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.mid-2",
+   "x": 672,
+   "y": -576,
+   "z": -80,
+   "loc": "Quad.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.mid-3",
+   "x": 784,
+   "y": 0,
+   "z": -64,
+   "loc": "Quad.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad.mid-4",
+   "x": 784,
+   "y": 32,
+   "z": -64,
+   "loc": "Quad.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.RL-1",
+   "x": 816,
+   "y": 944,
+   "z": -96,
+   "loc": "high.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.RL-2",
+   "x": 816,
+   "y": 976,
+   "z": -96,
+   "loc": "high.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.YA-1",
+   "x": 1488,
+   "y": 768,
+   "z": -272,
+   "loc": "high.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.YA-2",
+   "x": 1488,
+   "y": 800,
+   "z": -272,
+   "loc": "high.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.way-1",
+   "x": 1856,
+   "y": -384,
+   "z": -176,
+   "loc": "high.way"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.way-2",
+   "x": 1888,
+   "y": -384,
+   "z": -176,
+   "loc": "high.way"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "low.LG-1",
+   "x": 992,
+   "y": -1008,
+   "z": -480,
+   "loc": "low.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "low.LG-2",
+   "x": 1040,
+   "y": -1008,
+   "z": -480,
+   "loc": "low.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "low.lg/balcony-1",
+   "x": 784,
+   "y": -1040,
+   "z": -320,
+   "loc": "low.lg/balcony"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "low.lg/balcony-2",
+   "x": 816,
+   "y": -1040,
+   "z": -320,
+   "loc": "low.lg/balcony"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tunnel-1",
+   "x": 672,
+   "y": -576,
+   "z": -368,
+   "loc": "tunnel"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tunnel-2",
+   "x": 672,
+   "y": -544,
+   "z": -368,
+   "loc": "tunnel"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tunnel.stairs-1",
+   "x": 880,
+   "y": 448,
+   "z": -256,
+   "loc": "tunnel.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "tunnel.stairs-2",
+   "x": 912,
+   "y": 448,
+   "z": -256,
+   "loc": "tunnel.stairs"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG.stairs",
+   "x": -704,
+   "y": -576,
+   "z": -272,
+   "loc": "LG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "low.LG",
+   "x": 848,
+   "y": -992,
+   "z": -480,
+   "loc": "low.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH.low",
+   "x": 2160,
+   "y": -784,
+   "z": -480,
+   "loc": "MH.low",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "MH.high-1",
+   "x": 1344,
+   "y": -1296,
+   "z": -192,
+   "loc": "MH.high"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "MH.high-2",
+   "x": 1440,
+   "y": -1296,
+   "z": -192,
+   "loc": "MH.high"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "high.SNG-1",
+   "x": 1600,
+   "y": 400,
+   "z": -240,
+   "loc": "high.SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "high.SNG-2",
+   "x": 1648,
+   "y": 448,
+   "z": -240,
+   "loc": "high.SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad.top",
+   "x": 448,
+   "y": -368,
+   "z": 64,
+   "loc": "Quad.top"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "high.way",
+   "x": 1632,
+   "y": 0,
+   "z": -144,
+   "loc": "high.way"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "tunnel.RA",
+   "x": 928,
+   "y": -192,
+   "z": -304,
+   "loc": "tunnel.RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "MH.mid",
+   "x": 1856,
+   "y": -1024,
+   "z": -384,
+   "loc": "MH.mid"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "Quad.below",
+   "x": 96,
+   "y": -96,
+   "z": -352,
+   "loc": "Quad.below"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "high.RL",
+   "x": 1280,
+   "y": 480,
+   "z": 16,
+   "loc": "high.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "LG.stairs-1",
+   "x": -280,
+   "y": -408,
+   "z": -256,
+   "loc": "LG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "LG.stairs-2",
+   "x": -248,
+   "y": -408,
+   "z": -256,
+   "loc": "LG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MH.mid-1",
+   "x": 1736,
+   "y": -1032,
+   "z": -384,
+   "loc": "MH.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "MH.mid-2",
+   "x": 1960,
+   "y": -1032,
+   "z": -384,
+   "loc": "MH.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad.below-1",
+   "x": 88,
+   "y": -216,
+   "z": -352,
+   "loc": "Quad.below"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Quad.below-2",
+   "x": 88,
+   "y": 8,
+   "z": -352,
+   "loc": "Quad.below"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA.room-1",
+   "x": 136,
+   "y": -1320,
+   "z": -256,
+   "loc": "YA.room"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA.room-2",
+   "x": 136,
+   "y": -1224,
+   "z": -256,
+   "loc": "YA.room"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "high.RL-1",
+   "x": 1224,
+   "y": 472,
+   "z": 32,
+   "loc": "high.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "high.RL-2",
+   "x": 1320,
+   "y": 472,
+   "z": 32,
+   "loc": "high.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "high.way-1",
+   "x": 1240,
+   "y": 8,
+   "z": -160,
+   "loc": "high.way"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "high.way-2",
+   "x": 1256,
+   "y": 456,
+   "z": -224,
+   "loc": "high.way"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "high.way-3",
+   "x": 1288,
+   "y": 456,
+   "z": -224,
+   "loc": "high.way"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "high.way-4",
+   "x": 1752,
+   "y": -456,
+   "z": -112,
+   "loc": "high.way"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "high.way-5",
+   "x": 1784,
+   "y": -488,
+   "z": -112,
+   "loc": "high.way"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "tunnel.GL-1",
+   "x": 1656,
+   "y": -360,
+   "z": -352,
+   "loc": "tunnel.GL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "tunnel.GL-2",
+   "x": 1752,
+   "y": -360,
+   "z": -352,
+   "loc": "tunnel.GL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "tunnel.rox-1",
+   "x": 1192,
+   "y": -568,
+   "z": -352,
+   "loc": "tunnel.rox"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "tunnel.rox-2",
+   "x": 1192,
+   "y": -536,
+   "z": -352,
+   "loc": "tunnel.rox"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "MH.top-1",
+   "x": 1440,
+   "y": -656,
+   "z": -80,
+   "loc": "MH.top"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "MH.top-2",
+   "x": 1536,
+   "y": -656,
+   "z": -80,
+   "loc": "MH.top"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad.below/GA-1",
+   "x": 160,
+   "y": -608,
+   "z": -464,
+   "loc": "Quad.below/GA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad.below/GA-2",
+   "x": 256,
+   "y": -608,
+   "z": -464,
+   "loc": "Quad.below/GA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad.mid-1",
+   "x": 288,
+   "y": 208,
+   "z": -48,
+   "loc": "Quad.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Quad.mid-2",
+   "x": 384,
+   "y": 208,
+   "z": -48,
+   "loc": "Quad.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "high.way",
+   "x": 1232,
+   "y": 32,
+   "z": -160,
+   "loc": "high.way"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "low.lg/balcony-1",
+   "x": 928,
+   "y": -1312,
+   "z": -256,
+   "loc": "low.lg/balcony"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "low.lg/balcony-2",
+   "x": 960,
+   "y": -1312,
+   "z": -256,
+   "loc": "low.lg/balcony"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "tunnel.RA-1",
+   "x": 1024,
+   "y": 0,
+   "z": -320,
+   "loc": "tunnel.RA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "tunnel.RA-2",
+   "x": 1056,
+   "y": 0,
+   "z": -320,
+   "loc": "tunnel.RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "MH.high",
+   "x": 1408,
+   "y": -1280,
+   "z": -208,
+   "loc": "MH.high"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "high.SNG",
+   "x": 1664,
+   "y": 416,
+   "z": -256,
+   "loc": "high.SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "MH.top",
+   "x": 1504,
+   "y": -640,
+   "z": -96,
+   "loc": "MH.top"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Quad.below/GA",
+   "x": 224,
+   "y": -592,
+   "z": -480,
+   "loc": "Quad.below/GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "Quad.mid",
+   "x": 352,
+   "y": 224,
+   "z": -64,
+   "loc": "Quad.mid"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "LG.stairs",
+   "x": -736,
+   "y": 256,
+   "z": -304,
+   "loc": "LG.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA.room",
+   "x": 320,
+   "y": -1472,
+   "z": -240,
+   "loc": "YA.room"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "high.YA",
+   "x": 1216,
+   "y": 736,
+   "z": -240,
+   "loc": "high.YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "tunnel.YA",
+   "x": 1984,
+   "y": -576,
+   "z": -336,
+   "loc": "tunnel.YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LG.stairs",
+   "x": -672,
+   "y": -544,
+   "z": -480,
+   "loc": "LG.stairs"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "MH.top",
+   "x": 2048,
+   "y": -768,
+   "z": -64,
+   "loc": "MH.top"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad.below",
+   "x": -32,
+   "y": 256,
+   "z": -336,
+   "loc": "Quad.below"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad.mid",
+   "x": 768,
+   "y": -224,
+   "z": -32,
+   "loc": "Quad.mid"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA.room",
+   "x": 192,
+   "y": -1472,
+   "z": -240,
+   "loc": "YA.room"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "high.RL",
+   "x": 1664,
+   "y": 992,
+   "z": -64,
+   "loc": "high.RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "high.way",
+   "x": 1984,
+   "y": -352,
+   "z": -144,
+   "loc": "high.way"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "low.LG",
+   "x": 608,
+   "y": -992,
+   "z": -448,
+   "loc": "low.LG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "tunnel",
+   "x": 1440,
+   "y": -576,
+   "z": -336,
+   "loc": "tunnel"
+  }
+ ]
+}

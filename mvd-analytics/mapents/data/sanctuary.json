@@ -1,0 +1,716 @@
+{
+ "map": "sanctuary",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "crypt",
+   "x": 233,
+   "y": -80,
+   "z": -130.47362,
+   "loc": "crypt",
+   "bounds": {
+    "min": [
+     172,
+     -126,
+     -184
+    ],
+    "max": [
+     294,
+     -34,
+     -76.94723
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "secret",
+   "x": 659.5,
+   "y": -320,
+   "z": 67,
+   "loc": "secret",
+   "bounds": {
+    "min": [
+     604,
+     -327,
+     2
+    ],
+    "max": [
+     715,
+     -313,
+     132
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "YA",
+   "x": 1013,
+   "y": -392,
+   "z": -20,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "crypt",
+   "x": 509,
+   "y": 92,
+   "z": -230,
+   "loc": "crypt",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": -628,
+   "y": -395,
+   "z": 71,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": -767.25,
+   "y": 34,
+   "z": -78.5,
+   "loc": "GL",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RA.stairs",
+   "x": -328,
+   "y": 250,
+   "z": 30,
+   "loc": "RA.stairs",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "SNG",
+   "x": -314,
+   "y": -261,
+   "z": 257,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "secret",
+   "x": 446,
+   "y": -40,
+   "z": 0,
+   "loc": "secret",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GA",
+   "x": -375,
+   "y": -486,
+   "z": 17,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GA.RL",
+   "x": 381,
+   "y": -792,
+   "z": -15,
+   "loc": "GA.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.roof",
+   "x": -615,
+   "y": 335,
+   "z": 358,
+   "loc": "LG.roof"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.stairs",
+   "x": -255,
+   "y": 322,
+   "z": 24,
+   "loc": "RA.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SNG",
+   "x": 275,
+   "y": -398,
+   "z": 276,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "secret",
+   "x": 446,
+   "y": 76,
+   "z": 0,
+   "loc": "secret"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "statue.RL",
+   "x": -218,
+   "y": 960,
+   "z": 125,
+   "loc": "statue.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": -141,
+   "y": 209,
+   "z": 553,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "crypt",
+   "x": 508,
+   "y": -78,
+   "z": -230,
+   "loc": "crypt",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "GL",
+   "x": -755,
+   "y": 258,
+   "z": -72,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SNG",
+   "x": -340,
+   "y": 15,
+   "z": 313,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "YA.tele",
+   "x": 738,
+   "y": -588,
+   "z": 0,
+   "loc": "YA.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "secret",
+   "x": 743,
+   "y": -153,
+   "z": 2,
+   "loc": "secret"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "statue.tele",
+   "x": -894,
+   "y": 509,
+   "z": 178,
+   "loc": "statue.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": 30,
+   "y": 34,
+   "z": 1095,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": 32,
+   "y": 32,
+   "z": 37,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "GA.RL",
+   "x": -214,
+   "y": -891,
+   "z": -2,
+   "loc": "GA.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "statue.RL",
+   "x": -68,
+   "y": 1023,
+   "z": 95,
+   "loc": "statue.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA.tele",
+   "x": 392,
+   "y": -503,
+   "z": 129,
+   "loc": "YA.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "crypt",
+   "x": 508,
+   "y": -281,
+   "z": -230,
+   "loc": "crypt",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "GL",
+   "x": -684,
+   "y": 258,
+   "z": -72,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "SNG",
+   "x": 372,
+   "y": 15,
+   "z": 313,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "YA.tele",
+   "x": 679,
+   "y": -587,
+   "z": -1,
+   "loc": "YA.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "secret",
+   "x": 743,
+   "y": -75,
+   "z": 2,
+   "loc": "secret"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "statue",
+   "x": -842,
+   "y": 610,
+   "z": 173,
+   "loc": "statue"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "statue.RL",
+   "x": 49,
+   "y": 967,
+   "z": 72,
+   "loc": "statue.RL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "SNG",
+   "x": 320,
+   "y": -278,
+   "z": 279,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RA.stairs",
+   "x": -734,
+   "y": -243,
+   "z": 163,
+   "loc": "RA.stairs"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": 1119,
+   "y": -92,
+   "z": -5,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "GL",
+   "x": -545.5,
+   "y": -136.5,
+   "z": -44.5,
+   "loc": "GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA.backside",
+   "x": 606,
+   "y": 419,
+   "z": -12,
+   "loc": "YA.backside"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA.tele",
+   "x": 620,
+   "y": -577,
+   "z": 30,
+   "loc": "YA.tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "front.gate",
+   "x": -151,
+   "y": -1636.5,
+   "z": -180.5,
+   "loc": "front.gate"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "secret",
+   "x": 722,
+   "y": 253,
+   "z": 32,
+   "loc": "secret"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "statue",
+   "x": -200.5,
+   "y": 605,
+   "z": 163,
+   "loc": "statue"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad",
+   "x": -51,
+   "y": 37,
+   "z": 1108,
+   "loc": "Quad",
+   "targetName": "dest_crystal"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "YA.backside",
+   "x": -68,
+   "y": 692,
+   "z": 195,
+   "loc": "YA.backside",
+   "targetName": "dest_top"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "YA.tele",
+   "x": 596,
+   "y": -869,
+   "z": 32,
+   "loc": "YA.tele",
+   "targetName": "dest_cliff"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "statue.tele",
+   "x": -1005,
+   "y": 199,
+   "z": 214,
+   "loc": "statue.tele",
+   "targetName": "dest_statue"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.tele",
+   "x": 596.5,
+   "y": -900,
+   "z": 31,
+   "loc": "YA.tele",
+   "target": "dest_statue",
+   "bounds": {
+    "min": [
+     551,
+     -903,
+     -13
+    ],
+    "max": [
+     642,
+     -897,
+     75
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "crypt-1",
+   "x": 350,
+   "y": -272,
+   "z": -146,
+   "loc": "crypt",
+   "target": "dest_crystal",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     277,
+     -319,
+     -198
+    ],
+    "max": [
+     423,
+     -225,
+     -94
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "crypt-2",
+   "x": 350,
+   "y": -80,
+   "z": -146,
+   "loc": "crypt",
+   "target": "dest_crystal",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     277,
+     -127,
+     -198
+    ],
+    "max": [
+     423,
+     -33,
+     -94
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "crypt-3",
+   "x": 350,
+   "y": 112,
+   "z": -146,
+   "loc": "crypt",
+   "target": "dest_crystal",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     277,
+     65,
+     -198
+    ],
+    "max": [
+     423,
+     159,
+     -94
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "crypt-4",
+   "x": 524,
+   "y": 211,
+   "z": -164,
+   "loc": "crypt",
+   "target": "dest_top",
+   "bounds": {
+    "min": [
+     466,
+     209,
+     -233
+    ],
+    "max": [
+     582,
+     213,
+     -95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "crypt-5",
+   "x": 714,
+   "y": -272,
+   "z": -146,
+   "loc": "crypt",
+   "target": "dest_crystal",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     641,
+     -319,
+     -198
+    ],
+    "max": [
+     787,
+     -225,
+     -94
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "crypt-6",
+   "x": 714,
+   "y": -80,
+   "z": -146,
+   "loc": "crypt",
+   "target": "dest_crystal",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     641,
+     -127,
+     -198
+    ],
+    "max": [
+     787,
+     -33,
+     -94
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "crypt-7",
+   "x": 714,
+   "y": 112,
+   "z": -146,
+   "loc": "crypt",
+   "target": "dest_crystal",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     641,
+     65,
+     -198
+    ],
+    "max": [
+     787,
+     159,
+     -94
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "statue.tele",
+   "x": -999,
+   "y": 158.5,
+   "z": 222,
+   "loc": "statue.tele",
+   "target": "dest_cliff",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     -1054,
+     150,
+     155
+    ],
+    "max": [
+     -944,
+     167,
+     289
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,1486 @@
+{
+ "map": "twctf9",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "button",
+   "x": 1184,
+   "y": -3680,
+   "z": -160,
+   "bounds": {
+    "min": [
+     1153,
+     -3687,
+     -191
+    ],
+    "max": [
+     1215,
+     -3673,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": 288,
+   "y": -3280,
+   "z": -264,
+   "bounds": {
+    "min": [
+     273,
+     -3311,
+     -267
+    ],
+    "max": [
+     303,
+     -3249,
+     -261
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-10",
+   "x": 976,
+   "y": -2592,
+   "z": -264,
+   "bounds": {
+    "min": [
+     945,
+     -2607,
+     -267
+    ],
+    "max": [
+     1007,
+     -2577,
+     -261
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-11",
+   "x": 1312,
+   "y": -3616,
+   "z": 22,
+   "bounds": {
+    "min": [
+     1249,
+     -3670,
+     -207
+    ],
+    "max": [
+     1375,
+     -3562,
+     251
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-12",
+   "x": 1376,
+   "y": -1552,
+   "z": 320,
+   "spawnflags": 2064,
+   "bounds": {
+    "min": [
+     1345,
+     -1555,
+     257
+    ],
+    "max": [
+     1407,
+     -1549,
+     383
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-13",
+   "x": 1440,
+   "y": -1552,
+   "z": 320,
+   "spawnflags": 2064,
+   "bounds": {
+    "min": [
+     1409,
+     -1555,
+     257
+    ],
+    "max": [
+     1471,
+     -1549,
+     383
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-14",
+   "x": 2160,
+   "y": -1224,
+   "z": -8,
+   "bounds": {
+    "min": [
+     2097,
+     -1263,
+     -11
+    ],
+    "max": [
+     2223,
+     -1185,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-15",
+   "x": 2160,
+   "y": -1144,
+   "z": -8,
+   "bounds": {
+    "min": [
+     2097,
+     -1183,
+     -11
+    ],
+    "max": [
+     2223,
+     -1105,
+     -5
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 296,
+   "y": -2944,
+   "z": -520,
+   "bounds": {
+    "min": [
+     273,
+     -2991,
+     -523
+    ],
+    "max": [
+     319,
+     -2897,
+     -517
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 320,
+   "y": -3280,
+   "z": -264,
+   "bounds": {
+    "min": [
+     305,
+     -3311,
+     -267
+    ],
+    "max": [
+     335,
+     -3249,
+     -261
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 344,
+   "y": -2944,
+   "z": -520,
+   "bounds": {
+    "min": [
+     321,
+     -2991,
+     -523
+    ],
+    "max": [
+     367,
+     -2897,
+     -517
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 640,
+   "y": -2648,
+   "z": -520,
+   "bounds": {
+    "min": [
+     593,
+     -2671,
+     -523
+    ],
+    "max": [
+     687,
+     -2625,
+     -517
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": 640,
+   "y": -2600,
+   "z": -520,
+   "bounds": {
+    "min": [
+     593,
+     -2623,
+     -523
+    ],
+    "max": [
+     687,
+     -2577,
+     -517
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": 928,
+   "y": -1216,
+   "z": -240,
+   "bounds": {
+    "min": [
+     353,
+     -1391,
+     -337
+    ],
+    "max": [
+     1503,
+     -1041,
+     -143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": 960,
+   "y": -3280,
+   "z": -192,
+   "bounds": {
+    "min": [
+     877,
+     -3359,
+     -255
+    ],
+    "max": [
+     1043,
+     -3201,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-9",
+   "x": 976,
+   "y": -2624,
+   "z": -264,
+   "bounds": {
+    "min": [
+     945,
+     -2639,
+     -267
+    ],
+    "max": [
+     1007,
+     -2609,
+     -261
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-1",
+   "x": -0,
+   "y": -210,
+   "z": -100,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-2",
+   "x": 311,
+   "y": -3201,
+   "z": -870
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-3",
+   "x": 907,
+   "y": -3201,
+   "z": -870
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "gl-1",
+   "x": -382,
+   "y": 72,
+   "z": 156
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "gl-2",
+   "x": 455,
+   "y": -2775,
+   "z": -630
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "gl-3",
+   "x": 1400,
+   "y": -1475,
+   "z": 282,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-1",
+   "x": -320,
+   "y": -350,
+   "z": 156,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-10",
+   "x": 820,
+   "y": -3285,
+   "z": -230,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-11",
+   "x": 861,
+   "y": -3077,
+   "z": -870,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-12",
+   "x": 861,
+   "y": -2926,
+   "z": -870,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-13",
+   "x": 861,
+   "y": -2798,
+   "z": -870,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-14",
+   "x": 975,
+   "y": -3130,
+   "z": -230,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-15",
+   "x": 1450,
+   "y": -1220,
+   "z": 26,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-16",
+   "x": 2465,
+   "y": -1925,
+   "z": -508,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-2",
+   "x": -320,
+   "y": -220,
+   "z": 156,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-3",
+   "x": -320,
+   "y": -90,
+   "z": 156,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-4",
+   "x": 284,
+   "y": -350,
+   "z": 156,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-5",
+   "x": 284,
+   "y": -220,
+   "z": 156,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-6",
+   "x": 284,
+   "y": -90,
+   "z": 156,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-7",
+   "x": 318,
+   "y": -3077,
+   "z": -870,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-8",
+   "x": 318,
+   "y": -2926,
+   "z": -870,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "h15-9",
+   "x": 318,
+   "y": -2798,
+   "z": -870,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-1",
+   "x": 320,
+   "y": -2625,
+   "z": -486
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-10",
+   "x": 2000,
+   "y": -1500,
+   "z": 282
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-11",
+   "x": 2000,
+   "y": -1450,
+   "z": 282
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-12",
+   "x": 2150,
+   "y": -1645,
+   "z": -872
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-13",
+   "x": 2180,
+   "y": -1300,
+   "z": 26
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-14",
+   "x": 2450,
+   "y": -1645,
+   "z": -874
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-15",
+   "x": 2450,
+   "y": -1360,
+   "z": -226
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-2",
+   "x": 590,
+   "y": -2500,
+   "z": 280
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-3",
+   "x": 670,
+   "y": -2200,
+   "z": 280
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-4",
+   "x": 695,
+   "y": -1220,
+   "z": 26
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-5",
+   "x": 940,
+   "y": -2500,
+   "z": -870
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-6",
+   "x": 1025,
+   "y": -2380,
+   "z": 280
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-7",
+   "x": 1270,
+   "y": -2835,
+   "z": 280
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-8",
+   "x": 1270,
+   "y": -2575,
+   "z": 280
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-9",
+   "x": 1690,
+   "y": -2110,
+   "z": -870
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "lg-1",
+   "x": 0,
+   "y": -760,
+   "z": 282
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "lg-2",
+   "x": 635,
+   "y": -2940,
+   "z": -742
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "lg-3",
+   "x": 2510,
+   "y": -1655,
+   "z": -314
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "mh",
+   "x": 1000,
+   "y": -3650,
+   "z": 280,
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-1",
+   "x": -382,
+   "y": -588,
+   "z": 156,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-10",
+   "x": 1300,
+   "y": -3375,
+   "z": -230
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-11",
+   "x": 1450,
+   "y": -1220,
+   "z": -102,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-2",
+   "x": -40,
+   "y": -1150,
+   "z": 282
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-3",
+   "x": 100,
+   "y": -930,
+   "z": 282,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-4",
+   "x": 290,
+   "y": -2790,
+   "z": -486
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-5",
+   "x": 430,
+   "y": -3285,
+   "z": -230,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-6",
+   "x": 432,
+   "y": -164,
+   "z": 316,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-7",
+   "x": 530,
+   "y": -3210,
+   "z": -870
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-8",
+   "x": 972,
+   "y": -2700,
+   "z": -230,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-9",
+   "x": 1250,
+   "y": -3375,
+   "z": -230
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "ng-1",
+   "x": -0,
+   "y": -355,
+   "z": -108
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "ng-2",
+   "x": 760,
+   "y": -2950,
+   "z": -870
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent",
+   "x": 1395,
+   "y": -1775,
+   "z": 282,
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad",
+   "x": 1270,
+   "y": -2375,
+   "z": 280
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "ring-1",
+   "x": 925,
+   "y": -1200,
+   "z": -230
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "ring-2",
+   "x": 2118,
+   "y": -2210,
+   "z": -730
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl",
+   "x": 2300,
+   "y": -1645,
+   "z": -874
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-1",
+   "x": -432,
+   "y": -282,
+   "z": 316,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-10",
+   "x": 861,
+   "y": -2616,
+   "z": -870
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-11",
+   "x": 1025,
+   "y": -3635,
+   "z": -230
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-12",
+   "x": 1075,
+   "y": -3635,
+   "z": -230
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-13",
+   "x": 1090,
+   "y": -1200,
+   "z": 26,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-14",
+   "x": 1200,
+   "y": -2300,
+   "z": -870,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-2",
+   "x": -0,
+   "y": -830,
+   "z": -108,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-3",
+   "x": 318,
+   "y": -2616,
+   "z": -870
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-4",
+   "x": 320,
+   "y": -3100,
+   "z": -486
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-5",
+   "x": 382,
+   "y": 72,
+   "z": 156,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-6",
+   "x": 590,
+   "y": -3230,
+   "z": 280
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-7",
+   "x": 670,
+   "y": -3000,
+   "z": 280
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-8",
+   "x": 695,
+   "y": -1220,
+   "z": -102,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-9",
+   "x": 830,
+   "y": -2625,
+   "z": -486
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-1",
+   "x": -80,
+   "y": 54,
+   "z": 154
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-10",
+   "x": 760,
+   "y": -3210,
+   "z": -870
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-2",
+   "x": -40,
+   "y": -1200,
+   "z": 282
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-3",
+   "x": -40,
+   "y": -1100,
+   "z": 282
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-4",
+   "x": 55,
+   "y": 54,
+   "z": 154
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-5",
+   "x": 150,
+   "y": -930,
+   "z": 282,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-6",
+   "x": 200,
+   "y": -930,
+   "z": 282,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-7",
+   "x": 520,
+   "y": -2625,
+   "z": -486,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-8",
+   "x": 645,
+   "y": -3115,
+   "z": -742,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-9",
+   "x": 645,
+   "y": -2770,
+   "z": -742,
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "sng-1",
+   "x": 382,
+   "y": -588,
+   "z": 156
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "sng-2",
+   "x": 815,
+   "y": -3120,
+   "z": -630
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "ssg-1",
+   "x": -14,
+   "y": -1488,
+   "z": 282
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "ssg-2",
+   "x": 530,
+   "y": -2950,
+   "z": -870
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya-1",
+   "x": -432,
+   "y": -164,
+   "z": 312
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya-2",
+   "x": 432,
+   "y": -282,
+   "z": 312
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya-3",
+   "x": 455,
+   "y": -3120,
+   "z": -630
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "ya-4",
+   "x": 815,
+   "y": -2775,
+   "z": -630
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "spawn-1",
+   "x": -324,
+   "y": -14,
+   "z": 154
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "spawn-10",
+   "x": 324,
+   "y": -422,
+   "z": 154
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "spawn-11",
+   "x": 324,
+   "y": -14,
+   "z": 154
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-12",
+   "x": 352,
+   "y": 0,
+   "z": 192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-13",
+   "x": 384,
+   "y": -3072,
+   "z": -832
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-14",
+   "x": 448,
+   "y": -2624,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-15",
+   "x": 448,
+   "y": -1216,
+   "z": 64
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "spawn-16",
+   "x": 450,
+   "y": -2944,
+   "z": -870
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "spawn-17",
+   "x": 456,
+   "y": -2944,
+   "z": -742
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "spawn-18",
+   "x": 510,
+   "y": -2663,
+   "z": -486
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-19",
+   "x": 640,
+   "y": -3648,
+   "z": 320
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -320,
+   "y": -64,
+   "z": 192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-20",
+   "x": 640,
+   "y": -2368,
+   "z": 320
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "spawn-21",
+   "x": 645,
+   "y": -2800,
+   "z": -870
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "spawn-22",
+   "x": 645,
+   "y": -2675,
+   "z": -870
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-23",
+   "x": 768,
+   "y": -3264,
+   "z": -192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "spawn-24",
+   "x": 820,
+   "y": -2944,
+   "z": -870
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-25",
+   "x": 832,
+   "y": -2624,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "spawn-26",
+   "x": 855,
+   "y": -2944,
+   "z": -742
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-27",
+   "x": 896,
+   "y": -2624,
+   "z": -832
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "spawn-28",
+   "x": 934,
+   "y": -3236,
+   "z": -230
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-29",
+   "x": 960,
+   "y": -3072,
+   "z": -192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -304,
+   "y": -208,
+   "z": 600
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-30",
+   "x": 1024,
+   "y": -2464,
+   "z": -832
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-31",
+   "x": 1088,
+   "y": -3392,
+   "z": -192
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-32",
+   "x": 1216,
+   "y": -2112,
+   "z": -832
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-33",
+   "x": 1280,
+   "y": -3328,
+   "z": 320
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-34",
+   "x": 2496,
+   "y": -1664,
+   "z": -288
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "spawn-4",
+   "x": -140,
+   "y": 65,
+   "z": 154
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "spawn-5",
+   "x": 0,
+   "y": -600,
+   "z": 154
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "spawn-6",
+   "x": 0,
+   "y": -565,
+   "z": 282
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "spawn-7",
+   "x": 0,
+   "y": 0,
+   "z": 0
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "spawn-8",
+   "x": 140,
+   "y": 65,
+   "z": 154
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": 320,
+   "y": -3072,
+   "z": -448
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst",
+   "x": -5,
+   "y": -212,
+   "z": 150,
+   "targetName": "waterport"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src",
+   "x": 384,
+   "y": 96,
+   "z": 48,
+   "target": "waterport",
+   "bounds": {
+    "min": [
+     353,
+     93,
+     17
+    ],
+    "max": [
+     415,
+     99,
+     79
+    ]
+   }
+  }
+ ]
+}

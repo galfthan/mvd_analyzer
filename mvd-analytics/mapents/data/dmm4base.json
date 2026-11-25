@@ -1,0 +1,116 @@
+{
+ "map": "dmm4base",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -260,
+   "y": 630,
+   "z": -700
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -201,
+   "y": 629,
+   "z": -701
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -145,
+   "y": 629,
+   "z": -703
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -94,
+   "y": 628,
+   "z": -701
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": -38,
+   "y": 629,
+   "z": -703
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 19,
+   "y": 629,
+   "z": -703
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 76,
+   "y": 629,
+   "z": -703
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -697,
+   "y": -794,
+   "z": -857,
+   "targetName": "1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -458,
+   "y": -510,
+   "z": -894,
+   "targetName": "1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": -367,
+   "y": -1138,
+   "z": -1017,
+   "targetName": "1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": 48,
+   "y": -1002,
+   "z": -921,
+   "targetName": "1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-5",
+   "x": 229,
+   "y": -370,
+   "z": -955,
+   "targetName": "1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-6",
+   "x": 491,
+   "y": -882,
+   "z": -854,
+   "targetName": "1"
+  }
+ ]
+}

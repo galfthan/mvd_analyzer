@@ -1,0 +1,130 @@
+{
+ "map": "dmm4crandome",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -397,
+   "y": 708,
+   "z": 109
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -397,
+   "y": 983,
+   "z": 227
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -397,
+   "y": 1103,
+   "z": 227
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -277,
+   "y": 1133,
+   "z": 172
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": -257,
+   "y": 707,
+   "z": 109
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": -117,
+   "y": 703,
+   "z": 109
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": -117,
+   "y": 1038,
+   "z": 227
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": -117,
+   "y": 1203,
+   "z": 227
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -305,
+   "y": 498,
+   "z": 149,
+   "targetName": "tele2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": -300,
+   "y": -718,
+   "z": 149,
+   "targetName": "tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -300,
+   "y": -745,
+   "z": 50,
+   "target": "tele2",
+   "bounds": {
+    "min": [
+     -304,
+     -779,
+     11
+    ],
+    "max": [
+     -296,
+     -711,
+     89
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": -290,
+   "y": -745,
+   "z": 50,
+   "target": "tele1",
+   "bounds": {
+    "min": [
+     -294,
+     -779,
+     11
+    ],
+    "max": [
+     -286,
+     -711,
+     89
+    ]
+   }
+  }
+ ]
+}

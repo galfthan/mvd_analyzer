@@ -76,7 +76,6 @@ the built `dist/` and runs nothing of it.
 
 
 ```sh
-make bsps           # fetch BSPs into bsps/ (sha-pinned; web locvis filter)
 make build          # web bundle -> dist/ (index.html, analyzer.wasm, …)
 # publish the web bundle NOW (step 2a) — then:
 make build-bin      # adds dist/mvd-api and dist/mvd-mcp
@@ -85,8 +84,8 @@ make build-bin      # adds dist/mvd-api and dist/mvd-mcp
 Order matters twice: `make build` starts by wiping `dist/`, and
 `make build-bin` drops the server binaries into the same `dist/` — so
 publish the web bundle between the two, or the binaries end up in the
-web root. `make bsps` is optional but recommended — without it the web
-app's visibility filter falls back to V1. To cross-compile Linux
+web root. The maps are not part of the bundle here: they live on the
+host, fetched once (step 2b). To cross-compile Linux
 binaries on another OS, use `make build-api-linux build-mcp-linux` (or
 `make build-all-platforms`), which emit `dist/mvd-api-linux-amd64` and
 `dist/mvd-mcp-linux-amd64`.
@@ -111,8 +110,39 @@ server binaries out of the web root.
 ```sh
 sudo mkdir -p /opt/mvd/web
 sudo rsync -a --delete --exclude 'mvd-api*' --exclude 'mvd-mcp*' \
-    dist/ /opt/mvd/web/
+    --exclude 'bsps/' dist/ /opt/mvd/web/
 ```
+
+`--exclude 'bsps/'` keeps a build host's own `dist/bsps/` (there when
+`make bsps` was run on it) out of the web root: the page's `/bsps/*`
+is served from `/opt/mvd/bsps` (step 2b).
+
+### 2b. Fetch the maps
+
+The BSPs — what the visibility filter, floor heights, line of sight and
+airgibs read — live in `/opt/mvd/bsps`, outside the web bundle, and one
+copy serves both readers: mvd-api (`MVDA_BSP_DIR` in `mvd-api.service`)
+and the page's in-browser analysis of a local file (Caddy's `/bsps/*`).
+A publish of the web bundle does not touch them.
+
+```sh
+sudo ./scripts/fetch-bsps.sh /opt/mvd/bsps all
+sudo chown -R mvd:mvd /opt/mvd/bsps
+```
+
+`all` is the curated competitive set plus every other map of
+[vikpe/qw-assets](https://github.com/vikpe/qw-assets) at the commit
+`scripts/qw-assets-bsps.txt` names: about 1080 maps, 1.8 GB, each checked
+against its pinned hash. The first run downloads everything; a later one
+keeps every file whose hash still matches and downloads only what the
+list has gained, so run it again whenever the list changes
+(`scripts/list-qw-assets-bsps.py` rewrites it). It needs no service
+restart.
+
+A demo analysed before its map's BSP was there keeps its BSP-less
+artifacts (an empty line of sight is cached like any other result): to
+have them recomputed, stop mvd-api, `rm -rf /opt/mvd/cache/artifacts`,
+and start it again (see the note in `mvd-api.service`).
 
 Caddy serves these as root-owned static files; the `mvd` service user
 never touches them. No service restart is needed — the next request

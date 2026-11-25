@@ -8,7 +8,7 @@
 // dropdown and render as a raw token in the rows below it.
 /**
  * @typedef {import('../data/hub.js').HubGame} HubGame
- * @typedef {{ player: string, team: string, map: string, mode: string, tag: string, from: string, to: string }} Filters
+ * @typedef {{ player: string, team: string, map: string, mode: string, tag: string, from: string, to: string, qwl: string }} Filters  `qwl`: '1' = only games played on QWLeague's servers
  * @typedef {{ filters: Filters | null, shown: number, total: number | null }} Paging
  */
 
@@ -29,13 +29,13 @@ export const SEARCH_MODE_LABELS = {
 const SEARCH_INDIVIDUAL_MODES = new Set(['1on1', 'ffa']);
 
 /** @type {Readonly<Filters>} */
-export const EMPTY_FILTERS = Object.freeze({ player: '', team: '', map: '', mode: '', tag: '', from: '', to: '' });
+export const EMPTY_FILTERS = Object.freeze({ player: '', team: '', map: '', mode: '', tag: '', from: '', to: '', qwl: '' });
 
 /** @type {Array<'player' | 'team' | 'map' | 'tag'>} */
 const TEXT_FIELDS = ['player', 'team', 'map', 'tag'];
 
 // searchFilters: the query the form asks for — the text fields trimmed, the
-// dates as they are, a mode the dropdown does not offer (a deep link's
+// dates as they are, the QWLeague box as '1' or '', a mode the dropdown does not offer (a deep link's
 // ?mode=bogus selects no option) read as '' like the <select> reads it.
 /**
  * @param {Partial<Record<keyof Filters, unknown>>} form
@@ -45,7 +45,7 @@ export function searchFilters(form) {
     const f = /** @type {Filters} */ ({ ...EMPTY_FILTERS, ...form });
     for (const k of TEXT_FIELDS) f[k] = String(f[k] ?? '').trim();
     if (f.mode !== '' && !(f.mode in SEARCH_MODE_LABELS)) f.mode = '';
-    return { player: f.player, team: f.team, map: f.map, mode: f.mode, tag: f.tag, from: f.from, to: f.to };
+    return { player: f.player, team: f.team, map: f.map, mode: f.mode, tag: f.tag, from: f.from, to: f.to, qwl: f.qwl === '1' ? '1' : '' };
 }
 
 // validDateString: what an <input type="date"> keeps when its value is set

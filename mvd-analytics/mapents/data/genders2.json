@@ -1,0 +1,1172 @@
+{
+ "map": "genders2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-1",
+   "x": -400,
+   "y": -928,
+   "z": -82,
+   "bounds": {
+    "min": [
+     -455,
+     -1031,
+     -85
+    ],
+    "max": [
+     -345,
+     -825,
+     -79
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-10",
+   "x": 1728,
+   "y": 1856,
+   "z": 44,
+   "bounds": {
+    "min": [
+     1641,
+     1849,
+     1
+    ],
+    "max": [
+     1815,
+     1863,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-11",
+   "x": 1728,
+   "y": 2176,
+   "z": 44,
+   "bounds": {
+    "min": [
+     1641,
+     2169,
+     1
+    ],
+    "max": [
+     1815,
+     2183,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-12",
+   "x": 2128,
+   "y": 2592,
+   "z": -82,
+   "bounds": {
+    "min": [
+     2073,
+     2489,
+     -85
+    ],
+    "max": [
+     2183,
+     2695,
+     -79
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-2",
+   "x": 0,
+   "y": -512,
+   "z": 44,
+   "bounds": {
+    "min": [
+     -87,
+     -519,
+     1
+    ],
+    "max": [
+     87,
+     -505,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-3",
+   "x": 0,
+   "y": -192,
+   "z": 44,
+   "bounds": {
+    "min": [
+     -87,
+     -199,
+     1
+    ],
+    "max": [
+     87,
+     -185,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-4",
+   "x": 286,
+   "y": 2114,
+   "z": 41,
+   "bounds": {
+    "min": [
+     285,
+     2031,
+     1
+    ],
+    "max": [
+     287,
+     2197,
+     81
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-5",
+   "x": 296,
+   "y": 2576,
+   "z": 112,
+   "bounds": {
+    "min": [
+     289,
+     2545,
+     81
+    ],
+    "max": [
+     303,
+     2607,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-6",
+   "x": 356,
+   "y": -120,
+   "z": 424,
+   "bounds": {
+    "min": [
+     353,
+     -159,
+     381
+    ],
+    "max": [
+     359,
+     -81,
+     467
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-7",
+   "x": 1372,
+   "y": 1784,
+   "z": 424,
+   "bounds": {
+    "min": [
+     1369,
+     1745,
+     381
+    ],
+    "max": [
+     1375,
+     1823,
+     467
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-8",
+   "x": 1432,
+   "y": -912,
+   "z": 112,
+   "bounds": {
+    "min": [
+     1425,
+     -943,
+     81
+    ],
+    "max": [
+     1439,
+     -881,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "door-9",
+   "x": 1442,
+   "y": -450,
+   "z": 41,
+   "bounds": {
+    "min": [
+     1441,
+     -533,
+     1
+    ],
+    "max": [
+     1443,
+     -367,
+     81
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-1",
+   "x": -232,
+   "y": -1780,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-2",
+   "x": -232,
+   "y": -1756,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-3",
+   "x": -232,
+   "y": -1732,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-4",
+   "x": -232,
+   "y": -1708,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-5",
+   "x": 1936,
+   "y": 3348,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-6",
+   "x": 1936,
+   "y": 3372,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-7",
+   "x": 1936,
+   "y": 3396,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "cells-8",
+   "x": 1936,
+   "y": 3420,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-1",
+   "x": -240,
+   "y": -2156,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-10",
+   "x": 1940,
+   "y": 3724,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-11",
+   "x": 1940,
+   "y": 3756,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-12",
+   "x": 1940,
+   "y": 3788,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-2",
+   "x": -240,
+   "y": -2124,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-3",
+   "x": -240,
+   "y": -2092,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-4",
+   "x": -184,
+   "y": -1772,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-5",
+   "x": -184,
+   "y": -1740,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-6",
+   "x": -184,
+   "y": -1708,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-7",
+   "x": 1880,
+   "y": 3348,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-8",
+   "x": 1880,
+   "y": 3380,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "h25-9",
+   "x": 1880,
+   "y": 3412,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-1",
+   "x": -328,
+   "y": -1780,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-2",
+   "x": -328,
+   "y": -1756,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-3",
+   "x": -328,
+   "y": -1732,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-4",
+   "x": -328,
+   "y": -1708,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-5",
+   "x": 2032,
+   "y": 3348,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-6",
+   "x": 2032,
+   "y": 3372,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-7",
+   "x": 2032,
+   "y": 3396,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "nails-8",
+   "x": 2032,
+   "y": 3420,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-1",
+   "x": -168,
+   "y": -2150,
+   "z": 436
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-2",
+   "x": -168,
+   "y": -2104,
+   "z": 436
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-3",
+   "x": -168,
+   "y": -2058,
+   "z": 436
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-4",
+   "x": 1896,
+   "y": 3722,
+   "z": 436
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-5",
+   "x": 1896,
+   "y": 3768,
+   "z": 436
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-6",
+   "x": 1896,
+   "y": 3814,
+   "z": 436
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-1",
+   "x": -312,
+   "y": -2156,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-10",
+   "x": -292,
+   "y": -2076,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-11",
+   "x": 2006,
+   "y": 3724,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-12",
+   "x": 2006,
+   "y": 3744,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-13",
+   "x": 2006,
+   "y": 3764,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-14",
+   "x": 2006,
+   "y": 3784,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-15",
+   "x": 2006,
+   "y": 3804,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-16",
+   "x": 2026,
+   "y": 3724,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-17",
+   "x": 2026,
+   "y": 3744,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-18",
+   "x": 2026,
+   "y": 3764,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-19",
+   "x": 2026,
+   "y": 3784,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-2",
+   "x": -312,
+   "y": -2136,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-20",
+   "x": 2026,
+   "y": 3804,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-3",
+   "x": -312,
+   "y": -2116,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-4",
+   "x": -312,
+   "y": -2096,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-5",
+   "x": -312,
+   "y": -2076,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-6",
+   "x": -292,
+   "y": -2156,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-7",
+   "x": -292,
+   "y": -2136,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-8",
+   "x": -292,
+   "y": -2116,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-9",
+   "x": -292,
+   "y": -2096,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-1",
+   "x": -280,
+   "y": -1780,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-2",
+   "x": -280,
+   "y": -1756,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-3",
+   "x": -280,
+   "y": -1732,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-4",
+   "x": -280,
+   "y": -1708,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-5",
+   "x": 1984,
+   "y": 3348,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-6",
+   "x": 1984,
+   "y": 3372,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-7",
+   "x": 1984,
+   "y": 3396,
+   "z": 416
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "shells-8",
+   "x": 1984,
+   "y": 3420,
+   "z": 416
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-1",
+   "x": -88,
+   "y": -408,
+   "z": 80
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-10",
+   "x": 88,
+   "y": -408,
+   "z": 80
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-11",
+   "x": 88,
+   "y": -296,
+   "z": 80
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-12",
+   "x": 128,
+   "y": -2008,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-13",
+   "x": 128,
+   "y": -1920,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-14",
+   "x": 128,
+   "y": -1832,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-15",
+   "x": 1600,
+   "y": 3496,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-16",
+   "x": 1600,
+   "y": 3584,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-17",
+   "x": 1600,
+   "y": 3672,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-18",
+   "x": 1640,
+   "y": 1960,
+   "z": 80
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-19",
+   "x": 1640,
+   "y": 2072,
+   "z": 80
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-2",
+   "x": -88,
+   "y": -296,
+   "z": 80
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-20",
+   "x": 1696,
+   "y": 3496,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-21",
+   "x": 1696,
+   "y": 3584,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-22",
+   "x": 1696,
+   "y": 3672,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-23",
+   "x": 1728,
+   "y": 2016,
+   "z": 80
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-24",
+   "x": 1792,
+   "y": 3496,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-25",
+   "x": 1792,
+   "y": 3584,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-26",
+   "x": 1792,
+   "y": 3672,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-27",
+   "x": 1816,
+   "y": 1960,
+   "z": 80
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-28",
+   "x": 1816,
+   "y": 2072,
+   "z": 80
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-3",
+   "x": -64,
+   "y": -2008,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-4",
+   "x": -64,
+   "y": -1920,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-5",
+   "x": -64,
+   "y": -1832,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-6",
+   "x": 0,
+   "y": -352,
+   "z": 80
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-7",
+   "x": 32,
+   "y": -2008,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-8",
+   "x": 32,
+   "y": -1920,
+   "z": 488
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_teamspawn",
+   "name": "spawn-9",
+   "x": 32,
+   "y": -1832,
+   "z": 488
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 104,
+   "y": -2120,
+   "z": -128,
+   "targetName": "_2_tele1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 1624,
+   "y": 3784,
+   "z": -128,
+   "targetName": "_1_tele1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -270,
+   "y": -1544,
+   "z": 346,
+   "target": "_2_tele1",
+   "bounds": {
+    "min": [
+     -275,
+     -1597,
+     341
+    ],
+    "max": [
+     -265,
+     -1491,
+     351
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 0,
+   "y": -526,
+   "z": 42,
+   "target": "_2_tele1",
+   "bounds": {
+    "min": [
+     -83,
+     -531,
+     37
+    ],
+    "max": [
+     83,
+     -521,
+     47
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-3",
+   "x": 0,
+   "y": -178,
+   "z": 42,
+   "target": "_2_tele1",
+   "bounds": {
+    "min": [
+     -83,
+     -183,
+     37
+    ],
+    "max": [
+     83,
+     -173,
+     47
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-4",
+   "x": 1728,
+   "y": 1842,
+   "z": 42,
+   "target": "_1_tele1",
+   "bounds": {
+    "min": [
+     1645,
+     1837,
+     37
+    ],
+    "max": [
+     1811,
+     1847,
+     47
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-5",
+   "x": 1728,
+   "y": 2190,
+   "z": 42,
+   "target": "_1_tele1",
+   "bounds": {
+    "min": [
+     1645,
+     2185,
+     37
+    ],
+    "max": [
+     1811,
+     2195,
+     47
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-6",
+   "x": 1998,
+   "y": 3208,
+   "z": 346,
+   "target": "_1_tele1",
+   "bounds": {
+    "min": [
+     1993,
+     3155,
+     341
+    ],
+    "max": [
+     2003,
+     3261,
+     351
+    ]
+   }
+  }
+ ]
+}

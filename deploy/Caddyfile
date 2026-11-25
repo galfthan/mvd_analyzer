@@ -125,10 +125,24 @@
 		}
 	}
 
+	# --- Maps (BSPs) -----------------------------------------------------
+	# The page's in-browser analysis of a local file reads bsps/<map>.bsp.
+	# They are served from /opt/mvd/bsps — the directory mvd-api reads
+	# (MVDA_BSP_DIR), filled once by scripts/fetch-bsps.sh (deploy/README.md
+	# §2b) — not from the web bundle, so publishing the bundle neither
+	# carries nor removes 1.8 GB of maps. A map that is not there is a 404,
+	# which the page takes as "no BSP".
+	handle /bsps/* {
+		root * /opt/mvd
+		header Cache-Control no-cache
+		encode zstd gzip
+		file_server
+	}
+
 	# --- Web app (static mvd-web bundle) --------------------------------
 	# Everything else serves the `make build` output published to
-	# /opt/mvd/web (index.html, assets/, analyzer.wasm, maps/, locs/,
-	# bsps/, …). The app routes via query params (?gameId=…), not paths,
+	# /opt/mvd/web (index.html, assets/, analyzer.wasm, maps/, locs/, …).
+	# The app routes via query params (?gameId=…), not paths,
 	# so a plain file server is enough — no SPA index.html fallback.
 	# encode is scoped here (not site-wide): analyzer.wasm and the map
 	# geometry are multi-MB and compress well; /mcp* stays uncompressed

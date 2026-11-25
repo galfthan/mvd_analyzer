@@ -123,9 +123,15 @@ maps from [maps.quakeworld.nu/core](https://maps.quakeworld.nu/core/)
 with fallbacks to [vikpe/qw-assets](https://github.com/vikpe/qw-assets)
 and this repo's `bsp-mirror-1` release, every source held to the same
 sha256 pin). `make build` then copies them into `dist/bsps/` for
-the WASM worker to lazy-fetch per map. The script hard-fails when no
+the WASM worker to lazy-fetch per map. The script fails when no
 mirror yields a map matching its pin, so an outage produces a red build
 rather than a silent V1-everywhere deploy.
+
+`BSP_SET=preview` fetches only the few maps a Netlify branch preview
+carries, and `BSP_SET=all` adds every other map of vikpe/qw-assets
+(about 1080 maps, 1.8 GB, pinned by `scripts/qw-assets-bsps.txt`). The
+production host uses `all`, kept outside the web bundle so a publish does
+not carry the maps: [`deploy/README.md`](deploy/README.md) §2b.
 
 For local dev the step is skippable — maps without a BSP fall back to
 the V1 Euclidean nearest-neighbour attribution (i.e. the pre-v9

@@ -1,0 +1,948 @@
+{
+ "map": "bulka",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-1",
+   "x": 16,
+   "y": -887,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-10",
+   "x": 416,
+   "y": 224,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-11",
+   "x": 492,
+   "y": -842,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-12",
+   "x": 492,
+   "y": 432,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-2",
+   "x": 16,
+   "y": 432,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-3",
+   "x": 96,
+   "y": -704,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-4",
+   "x": 96,
+   "y": 224,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-5",
+   "x": 163,
+   "y": -432,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-6",
+   "x": 163,
+   "y": 48,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-7",
+   "x": 347,
+   "y": -415,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-8",
+   "x": 347,
+   "y": 48,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "pent-9",
+   "x": 416,
+   "y": -672,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-1",
+   "x": -365,
+   "y": -205,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-10",
+   "x": 440,
+   "y": -415,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-11",
+   "x": 440,
+   "y": 48,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-12",
+   "x": 498,
+   "y": -183,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-13",
+   "x": 576,
+   "y": -672,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-14",
+   "x": 576,
+   "y": 224,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-15",
+   "x": 672,
+   "y": -224,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-16",
+   "x": 730,
+   "y": -842,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-17",
+   "x": 730,
+   "y": 432,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-18",
+   "x": 873,
+   "y": -205,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-2",
+   "x": -222,
+   "y": -842,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-3",
+   "x": -222,
+   "y": 432,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-4",
+   "x": -160,
+   "y": -224,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-5",
+   "x": -64,
+   "y": -672,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-6",
+   "x": -64,
+   "y": 224,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-7",
+   "x": 12,
+   "y": -183,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-8",
+   "x": 70,
+   "y": -415,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "quad-9",
+   "x": 70,
+   "y": 48,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-1",
+   "x": -365,
+   "y": -477,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-2",
+   "x": -160,
+   "y": -416,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-3",
+   "x": 12,
+   "y": -283,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-4",
+   "x": 498,
+   "y": -68,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-5",
+   "x": 672,
+   "y": 0,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "ra-6",
+   "x": 873,
+   "y": 114,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "ring-1",
+   "x": -365,
+   "y": 68,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "ring-2",
+   "x": -160,
+   "y": -32,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "ring-3",
+   "x": 12,
+   "y": -85,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "ring-4",
+   "x": 498,
+   "y": -299,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "ring-5",
+   "x": 672,
+   "y": -448,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "ring-6",
+   "x": 873,
+   "y": -523,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-1",
+   "x": -365,
+   "y": -660,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-10",
+   "x": 12,
+   "y": -233,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-11",
+   "x": 12,
+   "y": -134,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-12",
+   "x": 12,
+   "y": -19,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-13",
+   "x": 254,
+   "y": -887,
+   "z": -480
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-14",
+   "x": 255,
+   "y": -432,
+   "z": -480
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-15",
+   "x": 256,
+   "y": -704,
+   "z": -64
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-16",
+   "x": 498,
+   "y": -350,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-17",
+   "x": 498,
+   "y": -233,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-18",
+   "x": 498,
+   "y": -116,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-19",
+   "x": 498,
+   "y": -34,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-2",
+   "x": -365,
+   "y": -341,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-20",
+   "x": 672,
+   "y": -544,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-21",
+   "x": 672,
+   "y": -320,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-22",
+   "x": 672,
+   "y": -96,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-23",
+   "x": 672,
+   "y": 64,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-24",
+   "x": 873,
+   "y": -660,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-25",
+   "x": 873,
+   "y": -341,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-26",
+   "x": 873,
+   "y": -23,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-27",
+   "x": 873,
+   "y": 205,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-3",
+   "x": -365,
+   "y": -69,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-4",
+   "x": -365,
+   "y": 250,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-5",
+   "x": -160,
+   "y": -544,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-6",
+   "x": -160,
+   "y": -320,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-7",
+   "x": -160,
+   "y": -128,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-8",
+   "x": -160,
+   "y": 96,
+   "z": -32
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "rl-9",
+   "x": 12,
+   "y": -350,
+   "z": -448
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-1",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-10",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-11",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-12",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-13",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-14",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-15",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-16",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-17",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-18",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-19",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-2",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-20",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-21",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-22",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-23",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-24",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-25",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-3",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-4",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-5",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-6",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-7",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-8",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "rockets-9",
+   "x": 256,
+   "y": -224,
+   "z": -464
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -365,
+   "y": -842,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-10",
+   "x": 672,
+   "y": 224,
+   "z": -32
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-11",
+   "x": 873,
+   "y": -842,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-12",
+   "x": 873,
+   "y": 432,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -365,
+   "y": 432,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": -160,
+   "y": -672,
+   "z": -32
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": -160,
+   "y": 224,
+   "z": -32
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 12,
+   "y": -415,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 12,
+   "y": 48,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-7",
+   "x": 498,
+   "y": -415,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-8",
+   "x": 498,
+   "y": 48,
+   "z": -448
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-9",
+   "x": 672,
+   "y": -672,
+   "z": -32
+  }
+ ]
+}

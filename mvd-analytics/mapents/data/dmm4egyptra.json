@@ -1,0 +1,116 @@
+{
+ "map": "dmm4egyptra",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": -64,
+   "y": -864,
+   "z": -320
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": -64,
+   "y": -736,
+   "z": -320
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 64,
+   "y": -864,
+   "z": -320
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 64,
+   "y": -736,
+   "z": -320
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -96,
+   "y": -16,
+   "z": 308,
+   "targetName": "up1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 0,
+   "y": -48,
+   "z": 52,
+   "targetName": "0"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 0,
+   "y": 48,
+   "z": 52,
+   "targetName": "0"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-4",
+   "x": 96,
+   "y": -16,
+   "z": 308,
+   "targetName": "up2"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-1",
+   "x": -478.12717,
+   "y": -283.99408,
+   "z": 64,
+   "target": "up2",
+   "bounds": {
+    "min": [
+     -519.6333,
+     -325.5,
+     33
+    ],
+    "max": [
+     -436.62103,
+     -242.48819,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "tele-src-2",
+   "x": 477.9946,
+   "y": -284.0383,
+   "z": 64,
+   "target": "up1",
+   "bounds": {
+    "min": [
+     436.53265,
+     -325.5,
+     1
+    ],
+    "max": [
+     519.45654,
+     -242.57658,
+     127
+    ]
+   }
+  }
+ ]
+}

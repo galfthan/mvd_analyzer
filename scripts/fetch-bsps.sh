@@ -1,11 +1,26 @@
 #!/usr/bin/env bash
-# fetch-bsps.sh — download the curated set of Quake 1 BSP files used by
-# the locvis visibility filter. Populates the directory passed as $1
-# (default ./bsps). Idempotent: existing files with a matching SHA-256
-# are kept; mismatches are re-fetched.
+# fetch-bsps.sh — download the Quake 1 BSP files the analysis reads (the
+# locvis visibility filter, floor heights, line of sight, airgibs).
 #
-# These BSPs are NOT committed to the repository. They are downloaded
-# from two public mirrors:
+#   fetch-bsps.sh [dir] [set]      dir: default ./bsps; set: default curated
+#
+# Idempotent: a file already there with the pinned hash is kept, so a run
+# against a populated directory downloads only what is new or changed.
+#
+# The sets, each holding the one before it:
+#
+#   preview  the few maps a branch preview needs (PREVIEW below) — the
+#            Netlify build, where every map is downloaded on every deploy.
+#   curated  the competitive maps of ENTRIES below, each from the build
+#            our geometry and locs were made from. The default.
+#   all      curated, plus every other map of github.com/vikpe/qw-assets
+#            (about 1050 more, 1.7 GB) from the commit scripts/qw-assets-bsps.txt
+#            names, each checked against the git blob hash listed there.
+#            The production host: see deploy/README.md. A curated map
+#            keeps its curated build, where qw-assets carries another.
+#
+# These BSPs are NOT committed to the repository. The curated ones are
+# downloaded from two public mirrors:
 #
 #   - id-stock and registered maps (dm2, dm3, e1m2) from
 #     https://github.com/quakeworld/id-maps-gpl (gzipped, GPL-licensed).
@@ -31,12 +46,14 @@
 #
 # Local filenames use the LOC-CORPUS form (loc.NormalizeMapName) so the
 # locvis loader finds them by the same name `loc.LoadForMap` resolves
-# to. Only "phantombase" (the current, dominant version) is provisioned;
-# its older predecessors "phantom"/"phantoma" are distinct map versions
-# but see little play, so their BSPs are deliberately not fetched.
+# to. Of the phantom family only "phantombase" (the current, dominant
+# version) is curated; its older predecessors "phantom"/"phantoma" are
+# distinct map versions that see little play, and come with the "all"
+# set in whatever build qw-assets carries.
 #
-# The script HARD FAILS on any download or sha mismatch. The Netlify
-# build chains `make bsps && make build` and any missing BSP should
+# The script FAILS on any download or hash mismatch — after trying every
+# map, so one run reports all of them and keeps what did arrive. The
+# Netlify build chains `make bsps && make build` and any missing BSP should
 # fail the deploy rather than silently degrade to V1 in production.
 #
 # Format of each entry: "<localname> <url> <sha256-or-empty>".
@@ -46,7 +63,17 @@
 set -euo pipefail
 
 BSP_DIR="${1:-bsps}"
+SET="${2:-curated}"
+case "$SET" in
+  preview|curated|all) ;;
+  *) echo "fetch-bsps.sh: unknown set '$SET' (preview, curated or all)" >&2; exit 2 ;;
+esac
 mkdir -p "$BSP_DIR"
+
+# The preview set: names from ENTRIES.
+PREVIEW=" dm2 dm3 e1m2 schloss "
+
+QW_ASSETS_LIST="$(dirname "$0")/qw-assets-bsps.txt"
 
 ENTRIES=(
   # localname    url                                                                              sha256
@@ -83,12 +110,22 @@ ENTRIES=(
   "zeal         https://maps.quakeworld.nu/core/zeal.bsp                                          3ed443ed00facf1ffe5ba6df35a36387406236394b039ca768ce574d53646aee"
 )
 
+# file_hash prints the file's hash in the form of the pin it is held to:
+# sha256 for a 64-digit pin, the git blob sha1 (qw-assets-bsps.txt) for a
+# 40-digit one.
+file_hash() {
+  local file="$1" expected="$2"
+  if (( ${#expected} == 40 )); then
+    { printf 'blob %d\0' "$(wc -c < "$file")"; cat "$file"; } | sha1sum | awk '{print $1}'
+  else
+    sha256sum "$file" | awk '{print $1}'
+  fi
+}
+
 check_sha() {
   local file="$1" expected="$2"
   [[ -z "$expected" ]] && return 0
-  local actual
-  actual="$(sha256sum "$file" | awk '{print $1}')"
-  [[ "$actual" == "$expected" ]]
+  [[ "$(file_hash "$file" "$expected")" == "$expected" ]]
 }
 
 QW_ASSETS="https://raw.githubusercontent.com/vikpe/qw-assets/main/maps"
@@ -156,7 +193,7 @@ fetch_one() {
 
   if [[ -n "$expected_sha" ]] && ! check_sha "$out" "$expected_sha"; then
     local actual
-    actual="$(sha256sum "$out" | awk '{print $1}')"
+    actual="$(file_hash "$out" "$expected_sha")"
     printf "  FAIL  %-12s sha mismatch from %s: got %s want %s\n" "$localname" "$url" "$actual" "$expected_sha"
     rm -f "$out"
     return 1
@@ -186,12 +223,31 @@ download_one() {
   return 1
 }
 
-echo "Fetching BSPs into $BSP_DIR/ ..."
+FAILED=()
+CURATED=" "
+
+echo "Fetching BSPs ($SET) into $BSP_DIR/ ..."
 for entry in "${ENTRIES[@]}"; do
   # shellcheck disable=SC2086
   set -- $entry
   localname="$1"; url="$2"; sha="${3:-}"
-  download_one "$localname" "$url" "$sha"
+  CURATED+="$localname "
+  [[ "$SET" == preview && "$PREVIEW" != *" $localname "* ]] && continue
+  download_one "$localname" "$url" "$sha" || FAILED+=("$localname")
 done
 
-echo "All BSPs ready in $BSP_DIR/"
+if [[ "$SET" == all ]]; then
+  commit="$(awk '$1 == "commit" {print $2}' "$QW_ASSETS_LIST")"
+  [[ -n "$commit" ]] || { echo "fetch-bsps.sh: no commit line in $QW_ASSETS_LIST" >&2; exit 1; }
+  while read -r localname sha _; do
+    [[ -z "$localname" || "$localname" == "#"* || "$localname" == commit ]] && continue
+    [[ "$CURATED" == *" $localname "* ]] && continue
+    download_one "$localname" "https://raw.githubusercontent.com/vikpe/qw-assets/$commit/maps/$localname/$localname.bsp" "$sha" || FAILED+=("$localname")
+  done < "$QW_ASSETS_LIST"
+fi
+
+if (( ${#FAILED[@]} )); then
+  echo "fetch-bsps.sh: ${#FAILED[@]} BSP(s) not fetched: ${FAILED[*]}" >&2
+  exit 1
+fi
+echo "All BSPs ($SET) ready in $BSP_DIR/"

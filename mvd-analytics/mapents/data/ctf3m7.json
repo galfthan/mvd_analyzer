@@ -1,0 +1,1295 @@
+{
+ "map": "ctf3m7",
+ "version": 1,
+ "entities": [
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE GL",
+   "x": 928,
+   "y": 672,
+   "z": 80,
+   "loc": "BLUE GL",
+   "bounds": {
+    "min": [
+     913,
+     657,
+     17
+    ],
+    "max": [
+     943,
+     687,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE LAVA WALKWAY",
+   "x": 1504,
+   "y": -272,
+   "z": 88,
+   "loc": "BLUE LAVA WALKWAY",
+   "bounds": {
+    "min": [
+     1489,
+     -319,
+     17
+    ],
+    "max": [
+     1519,
+     -225,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE NG ENTRANCE",
+   "x": 1976,
+   "y": -16,
+   "z": -176,
+   "loc": "BLUE NG ENTRANCE",
+   "bounds": {
+    "min": [
+     1961,
+     -23,
+     -223
+    ],
+    "max": [
+     1991,
+     -9,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE Quad AREA-1",
+   "x": 892,
+   "y": 1424,
+   "z": -20,
+   "loc": "BLUE Quad AREA",
+   "bounds": {
+    "min": [
+     857,
+     1417,
+     -127
+    ],
+    "max": [
+     927,
+     1431,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE Quad AREA-2",
+   "x": 964,
+   "y": 1424,
+   "z": -20,
+   "loc": "BLUE Quad AREA",
+   "bounds": {
+    "min": [
+     929,
+     1417,
+     -127
+    ],
+    "max": [
+     999,
+     1431,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE RL LOWER ENTRANCE",
+   "x": 248,
+   "y": -16,
+   "z": -176,
+   "loc": "BLUE RL LOWER ENTRANCE",
+   "bounds": {
+    "min": [
+     233,
+     -23,
+     -223
+    ],
+    "max": [
+     263,
+     -9,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE SNG ENTRANCE",
+   "x": -224,
+   "y": -272,
+   "z": 80,
+   "loc": "BLUE SNG ENTRANCE",
+   "bounds": {
+    "min": [
+     -239,
+     -287,
+     17
+    ],
+    "max": [
+     -209,
+     -257,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED FLAG AREA-1",
+   "x": 892,
+   "y": -2192,
+   "z": -20,
+   "loc": "RED FLAG AREA",
+   "bounds": {
+    "min": [
+     857,
+     -2199,
+     -127
+    ],
+    "max": [
+     927,
+     -2185,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED FLAG AREA-2",
+   "x": 964,
+   "y": -2192,
+   "z": -20,
+   "loc": "RED FLAG AREA",
+   "bounds": {
+    "min": [
+     929,
+     -2199,
+     -127
+    ],
+    "max": [
+     999,
+     -2185,
+     87
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED GL CORRIDOR",
+   "x": 928,
+   "y": -1440,
+   "z": 80,
+   "loc": "RED GL CORRIDOR",
+   "bounds": {
+    "min": [
+     913,
+     -1455,
+     17
+    ],
+    "max": [
+     943,
+     -1425,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED LAVA WALKWAY",
+   "x": 352,
+   "y": -496,
+   "z": 88,
+   "loc": "RED LAVA WALKWAY",
+   "bounds": {
+    "min": [
+     337,
+     -543,
+     17
+    ],
+    "max": [
+     367,
+     -449,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED NG ENTRANCE",
+   "x": -120,
+   "y": -752,
+   "z": -176,
+   "loc": "RED NG ENTRANCE",
+   "bounds": {
+    "min": [
+     -135,
+     -759,
+     -223
+    ],
+    "max": [
+     -105,
+     -745,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED RL LOWER ENTRANCE",
+   "x": 1608,
+   "y": -752,
+   "z": -176,
+   "loc": "RED RL LOWER ENTRANCE",
+   "bounds": {
+    "min": [
+     1593,
+     -759,
+     -223
+    ],
+    "max": [
+     1623,
+     -745,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED SNG UPPER ENTRANCE",
+   "x": 2080,
+   "y": -496,
+   "z": 80,
+   "loc": "RED SNG UPPER ENTRANCE",
+   "bounds": {
+    "min": [
+     2065,
+     -511,
+     17
+    ],
+    "max": [
+     2095,
+     -481,
+     143
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "WATER AT CENTRE-1",
+   "x": 1152,
+   "y": -160,
+   "z": 1424,
+   "loc": "WATER AT CENTRE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "WATER AT CENTRE-2",
+   "x": 1160,
+   "y": -576,
+   "z": 1408,
+   "loc": "WATER AT CENTRE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GREEN ARMOUR CORRIDOR-1",
+   "x": 64,
+   "y": -376,
+   "z": -200,
+   "loc": "GREEN ARMOUR CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GREEN ARMOUR CORRIDOR-2",
+   "x": 1792,
+   "y": -376,
+   "z": -200,
+   "loc": "GREEN ARMOUR CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE GL",
+   "x": 928,
+   "y": 792,
+   "z": 16,
+   "loc": "BLUE GL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED GL",
+   "x": 928,
+   "y": -1552,
+   "z": 16,
+   "loc": "RED GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE CASTLE WALL AREA",
+   "x": 152,
+   "y": -184,
+   "z": 32,
+   "loc": "BLUE CASTLE WALL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "BLUE Quad AREA",
+   "x": 832,
+   "y": 736,
+   "z": -208,
+   "loc": "BLUE Quad AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED CASTLE WALL AREA",
+   "x": 1704,
+   "y": -584,
+   "z": 32,
+   "loc": "RED CASTLE WALL AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "RED Quad AREA",
+   "x": 832,
+   "y": -1520,
+   "z": -208,
+   "loc": "RED Quad AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE CASTLE WALL AREA-1",
+   "x": 48,
+   "y": -184,
+   "z": 32,
+   "loc": "BLUE CASTLE WALL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE CASTLE WALL AREA-2",
+   "x": 256,
+   "y": -184,
+   "z": 32,
+   "loc": "BLUE CASTLE WALL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE Quad AREA-1",
+   "x": 704,
+   "y": 1368,
+   "z": -112,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE Quad AREA-2",
+   "x": 992,
+   "y": 736,
+   "z": -208,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE Quad AREA-3",
+   "x": 1104,
+   "y": 1368,
+   "z": -112,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED CASTLE WALL AREA-1",
+   "x": 1600,
+   "y": -584,
+   "z": 32,
+   "loc": "RED CASTLE WALL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED CASTLE WALL AREA-2",
+   "x": 1808,
+   "y": -584,
+   "z": 32,
+   "loc": "RED CASTLE WALL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED FLAG AREA",
+   "x": 696,
+   "y": -2152,
+   "z": -112,
+   "loc": "RED FLAG AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED Quad AREA-1",
+   "x": 992,
+   "y": -1520,
+   "z": -208,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED Quad AREA-2",
+   "x": 1104,
+   "y": -2152,
+   "z": -112,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "WATER AT CENTRE-1",
+   "x": 928,
+   "y": -360,
+   "z": 1424,
+   "loc": "WATER AT CENTRE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "WATER AT CENTRE-2",
+   "x": 1336,
+   "y": -360,
+   "z": 1424,
+   "loc": "WATER AT CENTRE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "CENTRAL LG",
+   "x": 1152,
+   "y": -608,
+   "z": 1776,
+   "loc": "CENTRAL LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "BLUE 100 HEALTH ROOM",
+   "x": 488,
+   "y": -280,
+   "z": 48,
+   "loc": "BLUE 100 HEALTH ROOM",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RED 100 HEALTH ROOM",
+   "x": 1336,
+   "y": -512,
+   "z": 48,
+   "loc": "RED 100 HEALTH ROOM",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE NG ENTRANCE",
+   "x": 1680,
+   "y": 328,
+   "z": -208,
+   "loc": "BLUE NG ENTRANCE",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE SNG AREA-1",
+   "x": -624,
+   "y": -480,
+   "z": 32,
+   "loc": "BLUE SNG AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE SNG AREA-2",
+   "x": -624,
+   "y": -288,
+   "z": 32,
+   "loc": "BLUE SNG AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED NG ENTRANCE",
+   "x": 160,
+   "y": -1064,
+   "z": -208,
+   "loc": "RED NG ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED SNG AREA-1",
+   "x": 2480,
+   "y": -480,
+   "z": 32,
+   "loc": "RED SNG AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED SNG AREA-2",
+   "x": 2480,
+   "y": -288,
+   "z": 32,
+   "loc": "RED SNG AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "BLUE NG ENTRANCE",
+   "x": 1696,
+   "y": 192,
+   "z": -224,
+   "loc": "BLUE NG ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "RED NG ENTRANCE",
+   "x": 128,
+   "y": -896,
+   "z": -224,
+   "loc": "RED NG ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "BLUE Quad AREA",
+   "x": 928,
+   "y": 976,
+   "z": 312,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "RED Quad AREA",
+   "x": 928,
+   "y": -1744,
+   "z": 312,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "CENTRAL RA",
+   "x": 1152,
+   "y": -104,
+   "z": 1992,
+   "loc": "CENTRAL RA"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "CENTRAL EYES",
+   "x": 1152,
+   "y": -352,
+   "z": 1696,
+   "loc": "CENTRAL EYES"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "BLUE RL AREA",
+   "x": 200,
+   "y": 344,
+   "z": 0,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RED RL AREA",
+   "x": 1656,
+   "y": -1112,
+   "z": -8,
+   "loc": "RED RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE Quad AREA",
+   "x": 1296,
+   "y": 560,
+   "z": -208,
+   "loc": "BLUE Quad AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE RL AREA",
+   "x": 376,
+   "y": 704,
+   "z": -208,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED Quad AREA",
+   "x": 520,
+   "y": -1336,
+   "z": -208,
+   "loc": "RED Quad AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED RL AREA",
+   "x": 1512,
+   "y": -1496,
+   "z": -208,
+   "loc": "RED RL AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE Quad AREA",
+   "x": 1416,
+   "y": 832,
+   "z": -208,
+   "loc": "BLUE Quad AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED Quad AREA",
+   "x": 344,
+   "y": -1536,
+   "z": -208,
+   "loc": "RED Quad AREA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "BLUE SNG AREA",
+   "x": -608,
+   "y": -384,
+   "z": 16,
+   "loc": "BLUE SNG AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "RED SNG AREA",
+   "x": 2464,
+   "y": -384,
+   "z": 16,
+   "loc": "RED SNG AREA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE RL LOWER ENTRANCE",
+   "x": 64,
+   "y": 80,
+   "z": -224,
+   "loc": "BLUE RL LOWER ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED RL LOWER ENTRANCE",
+   "x": 1800,
+   "y": -864,
+   "z": -224,
+   "loc": "RED RL LOWER ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "BLUE Quad AREA",
+   "x": 928,
+   "y": 928,
+   "z": -200,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "RED Quad AREA",
+   "x": 928,
+   "y": -1704,
+   "z": -200,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE CASTLE WALL AREA",
+   "x": 296,
+   "y": -296,
+   "z": 40,
+   "loc": "BLUE CASTLE WALL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE NG ENTRANCE",
+   "x": 1744,
+   "y": 608,
+   "z": -200,
+   "loc": "BLUE NG ENTRANCE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE Quad AREA-1",
+   "x": 792,
+   "y": 1168,
+   "z": -136,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE Quad AREA-2",
+   "x": 872,
+   "y": 1312,
+   "z": -104,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE Quad AREA-3",
+   "x": 920,
+   "y": 736,
+   "z": -200,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE Quad AREA-4",
+   "x": 928,
+   "y": 1040,
+   "z": -200,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE Quad AREA-5",
+   "x": 928,
+   "y": 1104,
+   "z": -168,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE Quad AREA-6",
+   "x": 928,
+   "y": 1200,
+   "z": -120,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE Quad AREA-7",
+   "x": 928,
+   "y": 1312,
+   "z": -104,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE Quad AREA-8",
+   "x": 984,
+   "y": 1312,
+   "z": -104,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE Quad AREA-9",
+   "x": 1064,
+   "y": 1168,
+   "z": -136,
+   "loc": "BLUE Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE RL AREA",
+   "x": 184,
+   "y": 712,
+   "z": -200,
+   "loc": "BLUE RL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED CASTLE WALL AREA",
+   "x": 1560,
+   "y": -472,
+   "z": 40,
+   "loc": "RED CASTLE WALL AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED NG ENTRANCE",
+   "x": 168,
+   "y": -1464,
+   "z": -200,
+   "loc": "RED NG ENTRANCE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED Quad AREA-1",
+   "x": 824,
+   "y": -1904,
+   "z": -152,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED Quad AREA-2",
+   "x": 872,
+   "y": -2072,
+   "z": -104,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED Quad AREA-3",
+   "x": 920,
+   "y": -1520,
+   "z": -200,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED Quad AREA-4",
+   "x": 928,
+   "y": -2072,
+   "z": -104,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED Quad AREA-5",
+   "x": 928,
+   "y": -1968,
+   "z": -120,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED Quad AREA-6",
+   "x": 928,
+   "y": -1904,
+   "z": -152,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED Quad AREA-7",
+   "x": 928,
+   "y": -1808,
+   "z": -200,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED Quad AREA-8",
+   "x": 984,
+   "y": -2072,
+   "z": -104,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED Quad AREA-9",
+   "x": 1024,
+   "y": -1904,
+   "z": -152,
+   "loc": "RED Quad AREA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED RL AREA",
+   "x": 1688,
+   "y": -1472,
+   "z": -200,
+   "loc": "RED RL AREA"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE NG ENTRANCE",
+   "x": 1576,
+   "y": 56,
+   "z": -136,
+   "loc": "BLUE NG ENTRANCE",
+   "targetName": "bluearea"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE Quad AREA-1",
+   "x": 704,
+   "y": 1200,
+   "z": -120,
+   "loc": "BLUE Quad AREA",
+   "targetName": "outside3"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "BLUE Quad AREA-2",
+   "x": 1152,
+   "y": 1200,
+   "z": -120,
+   "loc": "BLUE Quad AREA",
+   "targetName": "outside4"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED NG ENTRANCE",
+   "x": 272,
+   "y": -816,
+   "z": -136,
+   "loc": "RED NG ENTRANCE",
+   "targetName": "redarea"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED Quad AREA-1",
+   "x": 704,
+   "y": -1968,
+   "z": -120,
+   "loc": "RED Quad AREA",
+   "targetName": "outside"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RED Quad AREA-2",
+   "x": 1152,
+   "y": -1968,
+   "z": -120,
+   "loc": "RED Quad AREA",
+   "targetName": "outside2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "WATER AT CENTRE-1",
+   "x": 1152,
+   "y": -888,
+   "z": 1440,
+   "loc": "WATER AT CENTRE",
+   "targetName": "2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "WATER AT CENTRE-2",
+   "x": 1152,
+   "y": 184,
+   "z": 1440,
+   "loc": "WATER AT CENTRE",
+   "targetName": "1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE FLAG AREA-1",
+   "x": 624,
+   "y": 1772,
+   "z": -20,
+   "loc": "BLUE FLAG AREA",
+   "target": "outside4",
+   "bounds": {
+    "min": [
+     617,
+     1729,
+     -103
+    ],
+    "max": [
+     631,
+     1815,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE FLAG AREA-2",
+   "x": 1232,
+   "y": 1772,
+   "z": -20,
+   "loc": "BLUE FLAG AREA",
+   "target": "outside3",
+   "bounds": {
+    "min": [
+     1225,
+     1729,
+     -103
+    ],
+    "max": [
+     1239,
+     1815,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "BLUE GL CORRIDOR",
+   "x": 928,
+   "y": -364,
+   "z": 104,
+   "loc": "BLUE GL CORRIDOR",
+   "target": "1",
+   "bounds": {
+    "min": [
+     881,
+     -367,
+     33
+    ],
+    "max": [
+     975,
+     -361,
+     175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "CENTRAL EYES",
+   "x": 1488,
+   "y": -352,
+   "z": 1712,
+   "loc": "CENTRAL EYES",
+   "target": "bluearea",
+   "bounds": {
+    "min": [
+     1485,
+     -383,
+     1665
+    ],
+    "max": [
+     1491,
+     -321,
+     1759
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED FLAG AREA-1",
+   "x": 624,
+   "y": -2540,
+   "z": -20,
+   "loc": "RED FLAG AREA",
+   "target": "outside2",
+   "bounds": {
+    "min": [
+     617,
+     -2583,
+     -103
+    ],
+    "max": [
+     631,
+     -2497,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED FLAG AREA-2",
+   "x": 1232,
+   "y": -2540,
+   "z": -20,
+   "loc": "RED FLAG AREA",
+   "target": "outside",
+   "bounds": {
+    "min": [
+     1225,
+     -2583,
+     -103
+    ],
+    "max": [
+     1239,
+     -2497,
+     63
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RED GL CORRIDOR",
+   "x": 928,
+   "y": -404,
+   "z": 104,
+   "loc": "RED GL CORRIDOR",
+   "target": "2",
+   "bounds": {
+    "min": [
+     881,
+     -407,
+     33
+    ],
+    "max": [
+     975,
+     -401,
+     175
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "WATER AT CENTRE",
+   "x": 814,
+   "y": -352,
+   "z": 1712,
+   "loc": "WATER AT CENTRE",
+   "target": "redarea",
+   "bounds": {
+    "min": [
+     811,
+     -383,
+     1665
+    ],
+    "max": [
+     817,
+     -321,
+     1759
+    ]
+   }
+  }
+ ]
+}

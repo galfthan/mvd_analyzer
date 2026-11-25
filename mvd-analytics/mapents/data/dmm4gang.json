@@ -1,0 +1,41 @@
+{
+ "map": "dmm4gang",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn",
+   "x": 112,
+   "y": 656,
+   "z": 328
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": -656,
+   "y": 144,
+   "z": 40,
+   "targetName": "ra1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 64,
+   "y": -736,
+   "z": -24,
+   "targetName": "ra"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-3",
+   "x": 784,
+   "y": 152,
+   "z": 40,
+   "targetName": "ra2"
+  }
+ ]
+}

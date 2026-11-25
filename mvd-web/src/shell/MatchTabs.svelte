@@ -9,6 +9,7 @@
     // arrows are the playback's, src/player/player-keys.js).
     import { teams, colorOf } from '../state/teams.js';
     import { mapScore, restartedGames } from '../lib/matches.js';
+    import { isQwlGame } from '../lib/qwl.js';
     import { loadMatchGame } from '../app/load.js';
 
     /** @type {{ match: import('../lib/matches.js').Match, index: number }} */
@@ -79,4 +80,7 @@
     <button type="button" class="match-tabs-step" title="Next map (n)" disabled={index === match.games.length - 1 || !!loading}
         onclick={() => open(match.games[index + 1])}>›</button>
     <span class="match-tabs-date">{(match.games[index].timestamp || '').slice(0, 10)}</span>
+    {#if isQwlGame(match.games[index])}
+        <span class="match-tabs-qwl" title="Played on QWLeague's servers"><span class="qwl-badge">QWL</span>{match.games[index].matchtag || ''}</span>
+    {/if}
 </nav>

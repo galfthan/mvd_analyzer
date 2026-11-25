@@ -1,0 +1,1627 @@
+{
+ "map": "e2m5",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "GL.slime-1",
+   "x": -1020,
+   "y": 1192,
+   "z": -72,
+   "loc": "GL.slime",
+   "bounds": {
+    "min": [
+     -1023,
+     1169,
+     -95
+    ],
+    "max": [
+     -1017,
+     1215,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "GL.slime-2",
+   "x": -484,
+   "y": 1192,
+   "z": -72,
+   "loc": "GL.slime",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -487,
+     1169,
+     -95
+    ],
+    "max": [
+     -481,
+     1215,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "LG",
+   "x": 0,
+   "y": 324,
+   "z": 232,
+   "loc": "LG",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -23,
+     321,
+     209
+    ],
+    "max": [
+     23,
+     327,
+     255
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "RA.SNG",
+   "x": 580,
+   "y": 704,
+   "z": 0,
+   "loc": "RA.SNG",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     577,
+     681,
+     -23
+    ],
+    "max": [
+     583,
+     727,
+     23
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "SSG.ledge",
+   "x": -128,
+   "y": 940,
+   "z": -24,
+   "loc": "SSG.ledge",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -151,
+     937,
+     -47
+    ],
+    "max": [
+     -105,
+     943,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GA",
+   "x": 504,
+   "y": 1120,
+   "z": 168,
+   "loc": "GA",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     497,
+     1009,
+     1
+    ],
+    "max": [
+     511,
+     1231,
+     335
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GA.ledge",
+   "x": 252,
+   "y": 640,
+   "z": -120,
+   "loc": "GA.ledge",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     193,
+     321,
+     -127
+    ],
+    "max": [
+     311,
+     959,
+     -113
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.slime-1",
+   "x": -992,
+   "y": 1044,
+   "z": -160,
+   "loc": "GL.slime",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -1023,
+     865,
+     -167
+    ],
+    "max": [
+     -961,
+     1223,
+     -153
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.slime-2",
+   "x": -928,
+   "y": 880,
+   "z": -136,
+   "loc": "GL.slime",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -959,
+     865,
+     -143
+    ],
+    "max": [
+     -897,
+     895,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.slime-3",
+   "x": -864,
+   "y": 880,
+   "z": -112,
+   "loc": "GL.slime",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -895,
+     865,
+     -119
+    ],
+    "max": [
+     -833,
+     895,
+     -105
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "GL.slime-4",
+   "x": -800,
+   "y": 880,
+   "z": -88,
+   "loc": "GL.slime",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -831,
+     865,
+     -95
+    ],
+    "max": [
+     -769,
+     895,
+     -81
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG",
+   "x": 0,
+   "y": 456,
+   "z": 232,
+   "loc": "LG",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     -47,
+     453,
+     193
+    ],
+    "max": [
+     47,
+     459,
+     271
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.below-1",
+   "x": -736,
+   "y": 880,
+   "z": -64,
+   "loc": "LG.below",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -767,
+     865,
+     -71
+    ],
+    "max": [
+     -705,
+     895,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.below-2",
+   "x": -656,
+   "y": 880,
+   "z": -40,
+   "loc": "LG.below",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     -703,
+     865,
+     -47
+    ],
+    "max": [
+     -609,
+     895,
+     -33
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "Pent.stairs",
+   "x": -244,
+   "y": 1952,
+   "z": -96,
+   "loc": "Pent.stairs",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -279,
+     1945,
+     -135
+    ],
+    "max": [
+     -209,
+     1959,
+     -57
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.SNG-1",
+   "x": 568,
+   "y": 896,
+   "z": 60,
+   "loc": "RA.SNG",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     561,
+     801,
+     -47
+    ],
+    "max": [
+     575,
+     991,
+     167
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RA.SNG-2",
+   "x": 592,
+   "y": 1408,
+   "z": -4,
+   "loc": "RA.SNG",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     585,
+     1345,
+     -47
+    ],
+    "max": [
+     599,
+     1471,
+     39
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RA.secret",
+   "x": -176,
+   "y": 2432,
+   "z": 244,
+   "loc": "RA.secret",
+   "bounds": {
+    "min": [
+     -191,
+     2401,
+     201
+    ],
+    "max": [
+     -161,
+     2463,
+     287
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RL",
+   "x": -4,
+   "y": -480,
+   "z": -160,
+   "loc": "RL",
+   "bounds": {
+    "min": [
+     -47,
+     -487,
+     -191
+    ],
+    "max": [
+     39,
+     -473,
+     -129
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "exit-1",
+   "x": -1312,
+   "y": 2898,
+   "z": -24,
+   "loc": "exit",
+   "bounds": {
+    "min": [
+     -1319,
+     2853,
+     -119
+    ],
+    "max": [
+     -1305,
+     2943,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "exit-2",
+   "x": -1312,
+   "y": 2990,
+   "z": -24,
+   "loc": "exit",
+   "bounds": {
+    "min": [
+     -1319,
+     2945,
+     -119
+    ],
+    "max": [
+     -1305,
+     3035,
+     71
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "exit-3",
+   "x": -726,
+   "y": 2824,
+   "z": 44,
+   "loc": "exit",
+   "spawnflags": 2056,
+   "bounds": {
+    "min": [
+     -735,
+     2705,
+     -71
+    ],
+    "max": [
+     -717,
+     2943,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "exit-4",
+   "x": -726,
+   "y": 3064,
+   "z": 44,
+   "loc": "exit",
+   "spawnflags": 2056,
+   "bounds": {
+    "min": [
+     -735,
+     2945,
+     -71
+    ],
+    "max": [
+     -717,
+     3183,
+     159
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "exit-5",
+   "x": -372,
+   "y": 2944,
+   "z": 32,
+   "loc": "exit",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     -383,
+     2833,
+     -255
+    ],
+    "max": [
+     -361,
+     3055,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "exit.stairs",
+   "x": -200,
+   "y": 3000,
+   "z": -176,
+   "loc": "exit.stairs",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     -271,
+     2929,
+     -255
+    ],
+    "max": [
+     -129,
+     3071,
+     -97
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "water.Pent-1",
+   "x": -88,
+   "y": 920,
+   "z": -576,
+   "loc": "water.Pent",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     -95,
+     881,
+     -623
+    ],
+    "max": [
+     -81,
+     959,
+     -529
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.Pent-2",
+   "x": 72,
+   "y": 384,
+   "z": -284,
+   "loc": "water.Pent",
+   "bounds": {
+    "min": [
+     65,
+     337,
+     -319
+    ],
+    "max": [
+     79,
+     431,
+     -249
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "water.cross",
+   "x": -176,
+   "y": 2296,
+   "z": -148,
+   "loc": "water.cross",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     -183,
+     2257,
+     -247
+    ],
+    "max": [
+     -169,
+     2335,
+     -49
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "GL",
+   "x": -816,
+   "y": 1432,
+   "z": -104,
+   "loc": "GL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG-1",
+   "x": -56,
+   "y": 688,
+   "z": 192,
+   "loc": "LG",
+   "spawnflags": 1793
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "LG-2",
+   "x": 24,
+   "y": 688,
+   "z": 192,
+   "loc": "LG",
+   "spawnflags": 1793
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "start-1",
+   "x": -768,
+   "y": -1008,
+   "z": -208,
+   "loc": "start",
+   "spawnflags": 1793
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "start-2",
+   "x": -696,
+   "y": -1008,
+   "z": -208,
+   "loc": "start",
+   "spawnflags": 1793
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "GA",
+   "x": 296,
+   "y": 1128,
+   "z": -96,
+   "loc": "GA",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "GL",
+   "x": -688,
+   "y": 1392,
+   "z": -104,
+   "loc": "GL",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Pent",
+   "x": -344,
+   "y": 1000,
+   "z": -448,
+   "loc": "Pent",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "GA",
+   "x": 528,
+   "y": 1096,
+   "z": 0,
+   "loc": "GA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG-1",
+   "x": -16,
+   "y": 512,
+   "z": 400,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG-2",
+   "x": -16,
+   "y": 848,
+   "z": 400,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.balcony-1",
+   "x": -864,
+   "y": 1616,
+   "z": 64,
+   "loc": "MH.balcony"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "MH.balcony-2",
+   "x": -800,
+   "y": 1616,
+   "z": 64,
+   "loc": "MH.balcony"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Pent",
+   "x": -368,
+   "y": 1160,
+   "z": -448,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.SNG-1",
+   "x": 480,
+   "y": 952,
+   "z": -48,
+   "loc": "RA.SNG",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.SNG-2",
+   "x": 976,
+   "y": 720,
+   "z": -48,
+   "loc": "RA.SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SNG-1",
+   "x": 880,
+   "y": 1368,
+   "z": 88,
+   "loc": "SNG",
+   "spawnflags": 1536
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SNG-2",
+   "x": 888,
+   "y": 696,
+   "z": 88,
+   "loc": "SNG",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SNG-3",
+   "x": 1008,
+   "y": 976,
+   "z": 88,
+   "loc": "SNG",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "SSG.ledge",
+   "x": -448,
+   "y": 400,
+   "z": -48,
+   "loc": "SSG.ledge"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "cross",
+   "x": 464,
+   "y": 64,
+   "z": -48,
+   "loc": "cross"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "exit-1",
+   "x": -1048,
+   "y": 2736,
+   "z": -72,
+   "loc": "exit"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "exit-2",
+   "x": -1040,
+   "y": 3136,
+   "z": -72,
+   "loc": "exit"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "exit-3",
+   "x": -664,
+   "y": 3144,
+   "z": -136,
+   "loc": "exit",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "exit-4",
+   "x": -536,
+   "y": 3144,
+   "z": -136,
+   "loc": "exit",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "exit-5",
+   "x": -512,
+   "y": 2720,
+   "z": -136,
+   "loc": "exit",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "main.LG",
+   "x": -144,
+   "y": 1136,
+   "z": 168,
+   "loc": "main.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "main.rox",
+   "x": 40,
+   "y": 2288,
+   "z": 200,
+   "loc": "main.rox"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "start-1",
+   "x": -1080,
+   "y": -1320,
+   "z": -256,
+   "loc": "start"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "start-2",
+   "x": -680,
+   "y": -1320,
+   "z": -256,
+   "loc": "start"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water.LG-1",
+   "x": -160,
+   "y": 528,
+   "z": -320,
+   "loc": "water.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water.LG-2",
+   "x": 120,
+   "y": 848,
+   "z": -320,
+   "loc": "water.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water.LG-3",
+   "x": 160,
+   "y": 384,
+   "z": -320,
+   "loc": "water.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water.main-1",
+   "x": 432,
+   "y": 1784,
+   "z": -248,
+   "loc": "water.main",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "water.main-2",
+   "x": 440,
+   "y": 1640,
+   "z": -248,
+   "loc": "water.main",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "GL",
+   "x": -672,
+   "y": 1392,
+   "z": -104,
+   "loc": "GL",
+   "spawnflags": 2048
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": 0,
+   "y": 512,
+   "z": 192,
+   "loc": "LG",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH",
+   "x": -584,
+   "y": 2016,
+   "z": -128,
+   "loc": "MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "MH.balcony",
+   "x": -744,
+   "y": 1616,
+   "z": 64,
+   "loc": "MH.balcony"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RA.SNG",
+   "x": 1000,
+   "y": 1384,
+   "z": -48,
+   "loc": "RA.SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RL.up/Quad",
+   "x": -16,
+   "y": -312,
+   "z": -32,
+   "loc": "RL.up/Quad",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RL.water",
+   "x": -368,
+   "y": -112,
+   "z": -400,
+   "loc": "RL.water"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SNG-1",
+   "x": 688,
+   "y": 1400,
+   "z": 88,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SNG-2",
+   "x": 1024,
+   "y": 1152,
+   "z": 88,
+   "loc": "SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "SSG.ledge",
+   "x": -256,
+   "y": 864,
+   "z": -80,
+   "loc": "SSG.ledge",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "cross.NG",
+   "x": 400,
+   "y": 432,
+   "z": -96,
+   "loc": "cross.NG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "exit.water",
+   "x": -56,
+   "y": 2800,
+   "z": -248,
+   "loc": "exit.water",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "main.RA",
+   "x": 464,
+   "y": 1392,
+   "z": -48,
+   "loc": "main.RA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "main.SNG",
+   "x": 472,
+   "y": 1408,
+   "z": 88,
+   "loc": "main.SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "water.LG",
+   "x": 256,
+   "y": 472,
+   "z": -320,
+   "loc": "water.LG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "cross.NG",
+   "x": 448,
+   "y": 384,
+   "z": -96,
+   "loc": "cross.NG",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Pent",
+   "x": -320,
+   "y": 1088,
+   "z": -416,
+   "loc": "Pent",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad.secret",
+   "x": -32,
+   "y": 2432,
+   "z": 88,
+   "loc": "Quad.secret"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "RL.up/Quad",
+   "x": 8,
+   "y": -416,
+   "z": -16,
+   "loc": "RL.up/Quad",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "exit.water",
+   "x": -40,
+   "y": 2728,
+   "z": -224,
+   "loc": "exit.water",
+   "spawnflags": 2048
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA.SNG",
+   "x": 480,
+   "y": 840,
+   "z": -48,
+   "loc": "RA.SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA.secret",
+   "x": -88,
+   "y": 2432,
+   "z": 200,
+   "loc": "RA.secret"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invisibility",
+   "kind": "ring",
+   "name": "exit",
+   "x": -928,
+   "y": 2944,
+   "z": -48,
+   "loc": "exit",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL",
+   "x": 0,
+   "y": -552,
+   "z": -192,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "GL",
+   "x": -816,
+   "y": 1488,
+   "z": -104,
+   "loc": "GL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "exit",
+   "x": -1256,
+   "y": 3136,
+   "z": -120,
+   "loc": "exit"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "exit.water",
+   "x": -56,
+   "y": 2888,
+   "z": -248,
+   "loc": "exit.water",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "main.rox",
+   "x": 128,
+   "y": 2288,
+   "z": 200,
+   "loc": "main.rox",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "LG.below-1",
+   "x": -704,
+   "y": 664,
+   "z": -8,
+   "loc": "LG.below"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "LG.below-2",
+   "x": -16,
+   "y": 688,
+   "z": 64,
+   "loc": "LG.below"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RA.SNG",
+   "x": 688,
+   "y": 688,
+   "z": -48,
+   "loc": "RA.SNG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RL",
+   "x": -24,
+   "y": -464,
+   "z": -192,
+   "loc": "RL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RL.up",
+   "x": 648,
+   "y": -392,
+   "z": -48,
+   "loc": "RL.up"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "SNG",
+   "x": 664,
+   "y": 720,
+   "z": 88,
+   "loc": "SNG"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "SSG.ledge",
+   "x": -256,
+   "y": 576,
+   "z": -96,
+   "loc": "SSG.ledge",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "main.GL",
+   "x": -424,
+   "y": 2000,
+   "z": -8,
+   "loc": "main.GL"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "main.LG",
+   "x": -280,
+   "y": 1152,
+   "z": 168,
+   "loc": "main.LG"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "main.low",
+   "x": 96,
+   "y": 1392,
+   "z": 0,
+   "loc": "main.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "start",
+   "x": -1056,
+   "y": -1024,
+   "z": -256,
+   "loc": "start",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "water.LG",
+   "x": -208,
+   "y": 288,
+   "z": -320,
+   "loc": "water.LG"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "SNG",
+   "x": 1024,
+   "y": 1048,
+   "z": 88,
+   "loc": "SNG",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "SSG.ledge",
+   "x": -240,
+   "y": 808,
+   "z": -96,
+   "loc": "SSG.ledge",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "MH",
+   "x": -600,
+   "y": 1648,
+   "z": -80,
+   "loc": "MH"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LG",
+   "x": 0,
+   "y": 816,
+   "z": 216,
+   "loc": "LG",
+   "spawnflags": 1792
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LG.below",
+   "x": -648,
+   "y": 712,
+   "z": 16,
+   "loc": "LG.below"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RL",
+   "x": -400,
+   "y": -552,
+   "z": -168,
+   "loc": "RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "main.GL",
+   "x": -352,
+   "y": 2048,
+   "z": 24,
+   "loc": "main.GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "main.high",
+   "x": 320,
+   "y": 1912,
+   "z": 184,
+   "loc": "main.high",
+   "spawnflags": 1792
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "main.rox",
+   "x": 312,
+   "y": 2304,
+   "z": 224,
+   "loc": "main.rox"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "RA.SNG",
+   "x": 696,
+   "y": 1128,
+   "z": 264,
+   "loc": "RA.SNG",
+   "targetName": "t60"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "SNG-1",
+   "x": 760,
+   "y": 1208,
+   "z": 264,
+   "loc": "SNG",
+   "targetName": "t54"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "SNG-2",
+   "x": 1008,
+   "y": 1216,
+   "z": 264,
+   "loc": "SNG",
+   "targetName": "t59"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "SNG-3",
+   "x": 1008,
+   "y": 1360,
+   "z": 264,
+   "loc": "SNG",
+   "targetName": "t58"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG-1",
+   "x": 752,
+   "y": 1584,
+   "z": 240,
+   "loc": "SNG",
+   "target": "t54",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     729,
+     1561,
+     233
+    ],
+    "max": [
+     775,
+     1607,
+     247
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG-2",
+   "x": 808,
+   "y": 1568,
+   "z": 240,
+   "loc": "SNG",
+   "target": "t59",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     785,
+     1545,
+     233
+    ],
+    "max": [
+     831,
+     1591,
+     247
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "SNG-3",
+   "x": 864,
+   "y": 1584,
+   "z": 240,
+   "loc": "SNG",
+   "target": "t60",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     841,
+     1561,
+     233
+    ],
+    "max": [
+     887,
+     1607,
+     247
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "main.RA",
+   "x": 808,
+   "y": 1632,
+   "z": 240,
+   "loc": "main.RA",
+   "target": "t58",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     785,
+     1609,
+     233
+    ],
+    "max": [
+     831,
+     1655,
+     247
+    ]
+   }
+  }
+ ]
+}

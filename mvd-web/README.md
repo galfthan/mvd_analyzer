@@ -121,14 +121,18 @@ prefix; new API paths must extend the Caddy matcher).
 
 ### Netlify deploy (branch previews)
 
-`netlify.toml` at the repo root chains `make bsps && make build` and
+`netlify.toml` at the repo root chains `make bsps BSP_SET=preview && make build` and
 publishes `dist/`. Every push to a branch with Netlify connected
 rebuilds and deploys — kept as the branch-preview mechanism now that
-production lives on the API host. `make bsps` runs on Netlify's build
-container (it has `curl` and `bash`), fetches the ~14 competitive-map
-BSPs from the public mirrors documented in `scripts/fetch-bsps.sh`, and
-verifies each sha256 — a missing or corrupt BSP hard-fails the deploy,
-which is preferred to a silent V1-everywhere regression.
+production lives on the API host. `make bsps` runs on
+Netlify's build container (it has `curl` and `bash`), fetches the preview
+set's BSPs (dm2, dm3, e1m2, schloss — a preview downloads and uploads its
+maps on every deploy, so it carries few) from the public mirrors
+documented in `scripts/fetch-bsps.sh`, and verifies each sha256 — a
+missing or corrupt BSP hard-fails the deploy, which is preferred to a
+silent V1-everywhere regression. A hub demo on a preview is analysed by
+the production API, which has every map; only a local file of a map
+outside the set goes without its BSP there.
 
 The page's `/api` path is the edge function
 `netlify/edge-functions/api.js` there: it forwards the page's routes
@@ -429,7 +433,11 @@ tabs in the top bar, in place of the single demo's line (keys 1–9 open
 that map, p / n the one before / after); the other maps are fetched ahead and
 held in memory (`preloadMaps` in `src/app/match.js`; not for a browser
 set to save data), so a tab loads that map without a download, with `keepTab`, so the
-same view is compared map by map. A local file has no match. All of it is
+same view is compared map by map. A local file has no match. A game played
+on QWLeague's servers (`src/lib/qwl.js`: a `*.qwleague.com` hostname on the
+hub row) carries a "QWL" badge before its tag, in the list and in the map
+tabs, and the Search tab's "QWL only" checkbox (`?qwl=1`) searches those
+games alone — directly on the hub, mvd-api's search having no server filter. All of it is
 in the page: the API and the Result know nothing of matches.
 
 On viewports below 800 px the sidebar reflows into a horizontal scroll
@@ -1727,8 +1735,14 @@ attribution — no UI change beyond losing the wall-bleed correction
 for that map. Skipping `make bsps` entirely is supported for local
 dev; the build still works, you just get V1 everywhere.
 
-The Netlify deploy chains `make bsps && make build`, so production
-gets the visibility filter on every push.
+`make bsps` takes a set (`BSP_SET`): `curated`, the default above;
+`preview`, the few maps the Netlify branch previews carry; and `all`,
+the curated set plus every other map of vikpe/qw-assets at the commit
+`scripts/qw-assets-bsps.txt` pins (about 1080 maps, 1.8 GB), each checked
+against the git blob hash listed there. Production uses `all`, fetched
+once into a directory on the host that mvd-api reads and Caddy serves as
+`/bsps/*` — outside the web bundle, so a publish does not carry the maps
+([`deploy/README.md`](../deploy/README.md) §2b).
 
 ## Pickups tab
 
@@ -2348,7 +2362,12 @@ triangles), or version 5 (adds `liquids[].volume`, the closed liquid
 cells for the volume haze). The frontend is presence-based and accepts every version
 (v1 — 6 floats, XY only — is flattened to each region's median z on load;
 missing `walls`/`liquids`/`submodels` simply render nothing). A
-usage-pruned file carries a `pruned` provenance block.
+usage-pruned file carries a `pruned` provenance block. The committed
+files are version 5, regenerated 2026-11 from the BSPs of
+`scripts/fetch-bsps.sh all` — except the 26 usage-pruned curated maps, which keep
+their prune (same BSP builds; zite and ultrav are pruned from the
+regenerated files), and some 50 maps qw-assets does not carry,
+which stay as they were (version 2).
 See
 [mvd-analytics/README.md](../mvd-analytics/README.md) (the `cmd/mapgen`
 entry) and `CLAUDE.md`'s quick reference for the workflow.

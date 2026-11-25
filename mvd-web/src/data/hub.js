@@ -8,6 +8,7 @@
 
 import { apiJSON } from './api.js';
 import { siblingFilters, groupMatches, matchWith, mergeGames } from '../lib/matches.js';
+import { QWL_SERVER } from '../lib/qwl.js';
 
 const SUPABASE_URL = 'https://ncsphkjfominimxztjip.supabase.co/rest/v1/v1_games';
 const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jc3Boa2pmb21pbmlteHp0amlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY5Mzg1NjMsImV4cCI6MjAxMjUxNDU2M30.NN6hjlEW-qB4Og9hWAVlgvUdwrbBO13s8OkAJuBGVbo';
@@ -25,10 +26,10 @@ const SEARCH_SELECT = 'id,timestamp,mode,matchtag,map,teams,players,demo_sha256,
  * its shape.
  * @typedef {Record<string, any>} HubGame
  * @typedef {typeof fetch} FetchImpl
- * @typedef {Partial<Record<'player' | 'team' | 'map' | 'mode' | 'tag' | 'from' | 'to', string>>} SearchFilters
+ * @typedef {Partial<Record<'player' | 'team' | 'map' | 'mode' | 'tag' | 'from' | 'to' | 'qwl', string>>} SearchFilters  `qwl`: '1' = only games played on QWLeague's servers
  */
 
-export const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 'to'];
+export const SEARCH_FIELDS = ['player', 'team', 'map', 'mode', 'tag', 'from', 'to', 'qwl'];
 
 // Page size for the search tab. The hub itself pages at 1000 (PostgREST
 // max-rows); 100 keeps a single response light (~90 KB) while "Load more"
@@ -80,7 +81,9 @@ export async function fetchGame(gameId, fetchImpl = fetch) {
 // are comma-separated lists, AND'd, where the direct query takes each as
 // one term. A team goes in lower case: the hub's team filter is an exact
 // match on its lower-cased team names ("D2s" finds nothing, "d2s" the
-// team), where the player one folds case.
+// team), where the player one folds case. A search for QWLeague's games
+// alone (`qwl`) filters on the server's hostname, which mvd-api's search
+// does not offer: it asks the hub directly.
 /**
  * @param {SearchFilters} filters
  * @param {number} [offset]
@@ -98,6 +101,7 @@ export async function searchGames(filters, offset = 0, fetchImpl = fetch, limit 
     if (filters.tag) q.set('matchtag', filters.tag);
     if (filters.from) q.set('from', filters.from);
     if (filters.to) q.set('to', filters.to);
+    if (filters.qwl) return searchHub(filters, offset, fetchImpl, limit);
     try {
         const body = await apiJSON(`games/search?${q}`, {}, fetchImpl);
         return { games: body.games || [], total: typeof body.total === 'number' ? body.total : null };
@@ -129,6 +133,7 @@ async function searchHub(filters, offset, fetchImpl, limit) {
     if (filters.tag)    parts.push(`matchtag=ilike.%25${encodeURIComponent(filters.tag)}%25`);
     if (filters.from)   parts.push(`timestamp=gte.${encodeURIComponent(filters.from)}`);
     if (filters.to)     parts.push(`timestamp=lte.${encodeURIComponent(filters.to + 'T23:59:59')}`);
+    if (filters.qwl)    parts.push(`server_hostname=ilike.%25${QWL_SERVER}%25`);
 
     const resp = await fetchImpl(`${SUPABASE_URL}?${parts.join('&')}`, {
         // Ask PostgREST for the exact total (Content-Range: 0-99/1234) so

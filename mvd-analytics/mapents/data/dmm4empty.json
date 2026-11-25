@@ -1,0 +1,72 @@
+{
+ "map": "dmm4empty",
+ "version": 1,
+ "entities": [
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-1",
+   "x": 1184,
+   "y": -320,
+   "z": 368
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-2",
+   "x": 1184,
+   "y": -192,
+   "z": 368
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-3",
+   "x": 1184,
+   "y": -64,
+   "z": 368
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-4",
+   "x": 1184,
+   "y": 64,
+   "z": 368
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-5",
+   "x": 1184,
+   "y": 192,
+   "z": 368
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "spawn-6",
+   "x": 1184,
+   "y": 320,
+   "z": 368
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-1",
+   "x": 0,
+   "y": 0,
+   "z": 192,
+   "targetName": "tele2"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "tele-dst-2",
+   "x": 320,
+   "y": 0,
+   "z": 64,
+   "targetName": "tele1"
+  }
+ ]
+}

@@ -1,0 +1,1795 @@
+{
+ "map": "e2m1",
+ "version": 1,
+ "entities": [
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "LG.way",
+   "x": 384,
+   "y": 1644,
+   "z": 48,
+   "loc": "LG.way",
+   "bounds": {
+    "min": [
+     369,
+     1641,
+     33
+    ],
+    "max": [
+     399,
+     1647,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "base.SSG",
+   "x": 256,
+   "y": 1492,
+   "z": 200,
+   "loc": "base.SSG",
+   "bounds": {
+    "min": [
+     241,
+     1489,
+     185
+    ],
+    "max": [
+     271,
+     1495,
+     215
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "base.low",
+   "x": 1108,
+   "y": 1968,
+   "z": 48,
+   "loc": "base.low",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1105,
+     1953,
+     33
+    ],
+    "max": [
+     1111,
+     1983,
+     63
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "high.GA",
+   "x": 1296,
+   "y": 1084,
+   "z": 240,
+   "loc": "high.GA",
+   "bounds": {
+    "min": [
+     1281,
+     1081,
+     225
+    ],
+    "max": [
+     1311,
+     1087,
+     255
+    ]
+   }
+  },
+  {
+   "type": "button",
+   "class": "func_button",
+   "name": "high.path",
+   "x": 1192,
+   "y": 1084,
+   "z": 64,
+   "loc": "high.path",
+   "bounds": {
+    "min": [
+     1177,
+     1081,
+     49
+    ],
+    "max": [
+     1207,
+     1087,
+     79
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.entry",
+   "x": 72,
+   "y": 448,
+   "z": 48,
+   "loc": "LG.entry",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     65,
+     401,
+     -15
+    ],
+    "max": [
+     79,
+     495,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "LG.way-1",
+   "x": 72,
+   "y": 1088,
+   "z": 64,
+   "loc": "LG.way",
+   "spawnflags": 3,
+   "bounds": {
+    "min": [
+     65,
+     1025,
+     1
+    ],
+    "max": [
+     79,
+     1151,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "LG.way-2",
+   "x": 256,
+   "y": 1568,
+   "z": 76,
+   "loc": "LG.way",
+   "bounds": {
+    "min": [
+     177,
+     1489,
+     1
+    ],
+    "max": [
+     335,
+     1647,
+     151
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "LG.way-3",
+   "x": 264,
+   "y": 248,
+   "z": 48,
+   "loc": "LG.way",
+   "spawnflags": 3,
+   "bounds": {
+    "min": [
+     209,
+     241,
+     1
+    ],
+    "max": [
+     319,
+     255,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "Pent",
+   "x": 572,
+   "y": 1992,
+   "z": 4,
+   "loc": "Pent",
+   "spawnflags": 5,
+   "bounds": {
+    "min": [
+     529,
+     1985,
+     -55
+    ],
+    "max": [
+     615,
+     1999,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG-1",
+   "x": 424,
+   "y": -224,
+   "z": 48,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     417,
+     -255,
+     1
+    ],
+    "max": [
+     431,
+     -193,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG-2",
+   "x": 424,
+   "y": -192,
+   "z": 24,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     417,
+     -255,
+     1
+    ],
+    "max": [
+     431,
+     -129,
+     47
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG-3",
+   "x": 424,
+   "y": -192,
+   "z": 72,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     417,
+     -255,
+     49
+    ],
+    "max": [
+     431,
+     -129,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG-4",
+   "x": 424,
+   "y": -160,
+   "z": 48,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     417,
+     -191,
+     1
+    ],
+    "max": [
+     431,
+     -129,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG-5",
+   "x": 744,
+   "y": -224,
+   "z": 48,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     737,
+     -255,
+     1
+    ],
+    "max": [
+     751,
+     -193,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG-6",
+   "x": 744,
+   "y": -192,
+   "z": 24,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     737,
+     -255,
+     1
+    ],
+    "max": [
+     751,
+     -129,
+     47
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG-7",
+   "x": 744,
+   "y": -192,
+   "z": 72,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     737,
+     -255,
+     49
+    ],
+    "max": [
+     751,
+     -129,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG-8",
+   "x": 744,
+   "y": -160,
+   "z": 48,
+   "loc": "SNG",
+   "bounds": {
+    "min": [
+     737,
+     -191,
+     1
+    ],
+    "max": [
+     751,
+     -129,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "SNG.way-1",
+   "x": 264,
+   "y": -196,
+   "z": -8,
+   "loc": "SNG.way",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     209,
+     -255,
+     -15
+    ],
+    "max": [
+     319,
+     -137,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "SNG.way-2",
+   "x": 264,
+   "y": -120,
+   "z": 48,
+   "loc": "SNG.way",
+   "spawnflags": 3,
+   "bounds": {
+    "min": [
+     209,
+     -127,
+     1
+    ],
+    "max": [
+     319,
+     -113,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "base.Quad-1",
+   "x": 920,
+   "y": 1976,
+   "z": 48,
+   "loc": "base.Quad",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     913,
+     1937,
+     1
+    ],
+    "max": [
+     927,
+     2015,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "base.Quad-2",
+   "x": 976,
+   "y": 1656,
+   "z": 72,
+   "loc": "base.Quad",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     929,
+     1649,
+     1
+    ],
+    "max": [
+     1023,
+     1663,
+     143
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "base.SSG-1",
+   "x": 576,
+   "y": 1564,
+   "z": 256,
+   "loc": "base.SSG",
+   "spawnflags": 2064,
+   "bounds": {
+    "min": [
+     561,
+     1513,
+     193
+    ],
+    "max": [
+     591,
+     1615,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "base.SSG-2",
+   "x": 576,
+   "y": 1590,
+   "z": 256,
+   "loc": "base.SSG",
+   "spawnflags": 2064,
+   "bounds": {
+    "min": [
+     561,
+     1541,
+     193
+    ],
+    "max": [
+     591,
+     1639,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "bridge.high",
+   "x": 2296,
+   "y": -416,
+   "z": 176,
+   "loc": "bridge.high",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     2289,
+     -511,
+     97
+    ],
+    "max": [
+     2303,
+     -321,
+     255
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "bridge.high/box",
+   "x": 1888,
+   "y": 568,
+   "z": 160,
+   "loc": "bridge.high/box",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     1881,
+     497,
+     113
+    ],
+    "max": [
+     1895,
+     639,
+     207
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "bridge.room-1",
+   "x": 1696,
+   "y": 776,
+   "z": 32,
+   "loc": "bridge.room",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     1625,
+     721,
+     -31
+    ],
+    "max": [
+     1767,
+     831,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "bridge.room-2",
+   "x": 1848,
+   "y": 848,
+   "z": 144,
+   "loc": "bridge.room",
+   "bounds": {
+    "min": [
+     1817,
+     833,
+     97
+    ],
+    "max": [
+     1879,
+     863,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "bridge.room-3",
+   "x": 2000,
+   "y": 776,
+   "z": 32,
+   "loc": "bridge.room",
+   "spawnflags": 1,
+   "bounds": {
+    "min": [
+     1929,
+     721,
+     -31
+    ],
+    "max": [
+     2071,
+     831,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cross-1",
+   "x": 792,
+   "y": -192,
+   "z": 56,
+   "loc": "cross",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     769,
+     -295,
+     1
+    ],
+    "max": [
+     815,
+     -89,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cross-2",
+   "x": 1216,
+   "y": 184,
+   "z": -8,
+   "loc": "cross",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     1153,
+     177,
+     -15
+    ],
+    "max": [
+     1279,
+     191,
+     -1
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "cross-3",
+   "x": 1216,
+   "y": 184,
+   "z": 24,
+   "loc": "cross",
+   "spawnflags": 2049,
+   "bounds": {
+    "min": [
+     1153,
+     177,
+     17
+    ],
+    "max": [
+     1279,
+     191,
+     31
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "high.GA-1",
+   "x": 1288,
+   "y": 672,
+   "z": 272,
+   "loc": "high.GA",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1281,
+     641,
+     225
+    ],
+    "max": [
+     1295,
+     703,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "high.GA-2",
+   "x": 1360,
+   "y": 584,
+   "z": 272,
+   "loc": "high.GA",
+   "spawnflags": 2048,
+   "bounds": {
+    "min": [
+     1297,
+     577,
+     225
+    ],
+    "max": [
+     1423,
+     591,
+     319
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "high.path-1",
+   "x": 1080,
+   "y": 532,
+   "z": 48,
+   "loc": "high.path",
+   "spawnflags": 2056,
+   "bounds": {
+    "min": [
+     1073,
+     481,
+     -15
+    ],
+    "max": [
+     1087,
+     583,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "high.path-2",
+   "x": 1080,
+   "y": 558,
+   "z": 48,
+   "loc": "high.path",
+   "spawnflags": 2056,
+   "bounds": {
+    "min": [
+     1073,
+     509,
+     -15
+    ],
+    "max": [
+     1087,
+     607,
+     111
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "high.path-3",
+   "x": 1296,
+   "y": 1024,
+   "z": 112,
+   "loc": "high.path",
+   "bounds": {
+    "min": [
+     1233,
+     961,
+     33
+    ],
+    "max": [
+     1359,
+     1087,
+     191
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "water.hatch",
+   "x": 576,
+   "y": 1064,
+   "z": -247,
+   "loc": "water.hatch",
+   "spawnflags": 4,
+   "bounds": {
+    "min": [
+     497,
+     993,
+     -255
+    ],
+    "max": [
+     655,
+     1135,
+     -239
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "high.GA",
+   "x": 1848,
+   "y": 416,
+   "z": 224,
+   "loc": "high.GA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "low.GA",
+   "x": 2072,
+   "y": -240,
+   "z": -32,
+   "loc": "low.GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "Pent",
+   "x": 648,
+   "y": 1776,
+   "z": -56,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "Pent",
+   "x": 416,
+   "y": 1928,
+   "z": -56,
+   "loc": "Pent",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "base.mid-1",
+   "x": 1000,
+   "y": 1600,
+   "z": 160,
+   "loc": "base.mid",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "base.mid-2",
+   "x": 1128,
+   "y": 1544,
+   "z": 168,
+   "loc": "base.mid",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "bridge.high/rox",
+   "x": 1208,
+   "y": 328,
+   "z": 112,
+   "loc": "bridge.high/rox",
+   "spawnflags": 257
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "high.GA",
+   "x": 1432,
+   "y": 632,
+   "z": 224,
+   "loc": "high.GA",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "high.path",
+   "x": 832,
+   "y": 216,
+   "z": 0,
+   "loc": "high.path",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG",
+   "x": -360,
+   "y": 56,
+   "z": -64,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.way-1",
+   "x": 472,
+   "y": 1504,
+   "z": 0,
+   "loc": "LG.way"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "LG.way-2",
+   "x": 472,
+   "y": 1608,
+   "z": 0,
+   "loc": "LG.way"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.water-1",
+   "x": 1728,
+   "y": 1656,
+   "z": -80,
+   "loc": "RA.water"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.water-2",
+   "x": 1896,
+   "y": 1776,
+   "z": -80,
+   "loc": "RA.water"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.water-3",
+   "x": 1944,
+   "y": 1656,
+   "z": -80,
+   "loc": "RA.water"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.water-4",
+   "x": 1984,
+   "y": 1816,
+   "z": -80,
+   "loc": "RA.water"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "bridge.high/rox-1",
+   "x": 1176,
+   "y": 448,
+   "z": 112,
+   "loc": "bridge.high/rox",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "bridge.high/rox-2",
+   "x": 1208,
+   "y": 552,
+   "z": 112,
+   "loc": "bridge.high/rox"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "bridge.room",
+   "x": 1696,
+   "y": 1240,
+   "z": 32,
+   "loc": "bridge.room"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "bridge.water/box-1",
+   "x": 1552,
+   "y": -304,
+   "z": -32,
+   "loc": "bridge.water/box"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "bridge.water/box-2",
+   "x": 1616,
+   "y": -304,
+   "z": -32,
+   "loc": "bridge.water/box"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "cross-1",
+   "x": 880,
+   "y": 72,
+   "z": -32,
+   "loc": "cross"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "cross-2",
+   "x": 1232,
+   "y": 304,
+   "z": -32,
+   "loc": "cross"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.GA-1",
+   "x": 1320,
+   "y": 616,
+   "z": 224,
+   "loc": "high.GA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.GA-2",
+   "x": 1512,
+   "y": 616,
+   "z": 224,
+   "loc": "high.GA",
+   "spawnflags": 1024
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "high.path",
+   "x": 920,
+   "y": 200,
+   "z": 0,
+   "loc": "high.path"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "low.GA-1",
+   "x": 2024,
+   "y": -288,
+   "z": -32,
+   "loc": "low.GA"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "low.GA-2",
+   "x": 2112,
+   "y": -192,
+   "z": -32,
+   "loc": "low.GA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": -64,
+   "y": 144,
+   "z": -64,
+   "loc": "LG",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "MH.ledge",
+   "x": 560,
+   "y": 1416,
+   "z": -96,
+   "loc": "MH.ledge",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "bridge.room/MH",
+   "x": 2200,
+   "y": 1104,
+   "z": 160,
+   "loc": "bridge.room/MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "LG",
+   "x": -360,
+   "y": 128,
+   "z": -64,
+   "loc": "LG",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "LG.way",
+   "x": 256,
+   "y": 544,
+   "z": 0,
+   "loc": "LG.way"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Pent",
+   "x": 512,
+   "y": 1872,
+   "z": -56,
+   "loc": "Pent",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "bridge.high/box",
+   "x": 1800,
+   "y": 424,
+   "z": 112,
+   "loc": "bridge.high/box"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "bridge.high/rox",
+   "x": 928,
+   "y": 1048,
+   "z": 128,
+   "loc": "bridge.high/rox",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "bridge.room",
+   "x": 1616,
+   "y": 1088,
+   "z": 32,
+   "loc": "bridge.room",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "bridge.water-1",
+   "x": 1008,
+   "y": 352,
+   "z": -256,
+   "loc": "bridge.water"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "bridge.water-2",
+   "x": 1056,
+   "y": 352,
+   "z": -256,
+   "loc": "bridge.water"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "bridge.water-3",
+   "x": 2000,
+   "y": 664,
+   "z": -56,
+   "loc": "bridge.water",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "high.path",
+   "x": 1360,
+   "y": 544,
+   "z": -16,
+   "loc": "high.path"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_invulnerability",
+   "kind": "pent",
+   "name": "Pent",
+   "x": 576,
+   "y": 2168,
+   "z": -32,
+   "loc": "Pent"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "base.Quad",
+   "x": 864,
+   "y": 2072,
+   "z": 24,
+   "loc": "base.Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA.water",
+   "x": 1808,
+   "y": 1792,
+   "z": -80,
+   "loc": "RA.water",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "base.RA",
+   "x": 1080,
+   "y": 1880,
+   "z": 0,
+   "loc": "base.RA",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "high.path",
+   "x": 1256,
+   "y": 664,
+   "z": -32,
+   "loc": "high.path"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "bridge.high",
+   "x": 1952,
+   "y": -96,
+   "z": 112,
+   "loc": "bridge.high",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "LG.way",
+   "x": 256,
+   "y": 416,
+   "z": 0,
+   "loc": "LG.way",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "Pent",
+   "x": 600,
+   "y": 1920,
+   "z": -56,
+   "loc": "Pent",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "base.rox",
+   "x": 1152,
+   "y": 1752,
+   "z": 32,
+   "loc": "base.rox",
+   "spawnflags": 1793
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "bridge.high/rox",
+   "x": 944,
+   "y": 928,
+   "z": 128,
+   "loc": "bridge.high/rox",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "high.GA",
+   "x": 1832,
+   "y": 576,
+   "z": 224,
+   "loc": "high.GA",
+   "spawnflags": 1793
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "LG.way",
+   "x": 144,
+   "y": 1088,
+   "z": 0,
+   "loc": "LG.way"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "MH.ledge",
+   "x": 560,
+   "y": 200,
+   "z": -96,
+   "loc": "MH.ledge",
+   "spawnflags": 2048
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "Pent",
+   "x": 400,
+   "y": 1752,
+   "z": -56,
+   "loc": "Pent",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RA.water",
+   "x": 1752,
+   "y": 1800,
+   "z": -80,
+   "loc": "RA.water",
+   "spawnflags": 2048
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "base.Quad",
+   "x": 952,
+   "y": 1976,
+   "z": 0,
+   "loc": "base.Quad",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "base.entry",
+   "x": 784,
+   "y": 1520,
+   "z": 160,
+   "loc": "base.entry"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "bridge.high-1",
+   "x": 1184,
+   "y": 64,
+   "z": 112,
+   "loc": "bridge.high",
+   "spawnflags": 1536
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "bridge.high-2",
+   "x": 1400,
+   "y": -136,
+   "z": 112,
+   "loc": "bridge.high",
+   "spawnflags": 1536
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "bridge.high-3",
+   "x": 1968,
+   "y": 32,
+   "z": 112,
+   "loc": "bridge.high",
+   "spawnflags": 1536
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "bridge.high/box",
+   "x": 1728,
+   "y": 656,
+   "z": 112,
+   "loc": "bridge.high/box"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "bridge.low",
+   "x": 1752,
+   "y": 360,
+   "z": -32,
+   "loc": "bridge.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "cross",
+   "x": 1056,
+   "y": -400,
+   "z": -24,
+   "loc": "cross",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "SNG",
+   "x": 576,
+   "y": -144,
+   "z": 0,
+   "loc": "SNG",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RA.water",
+   "x": 1728,
+   "y": 1728,
+   "z": -80,
+   "loc": "RA.water",
+   "spawnflags": 1792
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "base.SSG",
+   "x": 456,
+   "y": 1568,
+   "z": 176,
+   "loc": "base.SSG"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_envirosuit",
+   "kind": "suit",
+   "name": "Pent.water",
+   "x": 576,
+   "y": 1464,
+   "z": -488,
+   "loc": "Pent.water"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "base.RA",
+   "x": 1088,
+   "y": 1880,
+   "z": 0,
+   "loc": "base.RA",
+   "spawnflags": 2048
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LG",
+   "x": -64,
+   "y": 88,
+   "z": -40,
+   "loc": "LG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "base.SSG",
+   "x": 832,
+   "y": 1576,
+   "z": 184,
+   "loc": "base.SSG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "bridge.high/rox",
+   "x": 1024,
+   "y": 936,
+   "z": 152,
+   "loc": "bridge.high/rox"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "bridge.room",
+   "x": 2032,
+   "y": 1136,
+   "z": 56,
+   "loc": "bridge.room"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "high.GA",
+   "x": 1744,
+   "y": 672,
+   "z": 248,
+   "loc": "high.GA"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "SNG",
+   "x": 576,
+   "y": -272,
+   "z": 8,
+   "loc": "SNG",
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "bridge.high-1",
+   "x": 1664,
+   "y": -128,
+   "z": 120,
+   "loc": "bridge.high",
+   "targetName": "t65"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "bridge.high-2",
+   "x": 1984,
+   "y": 224,
+   "z": 120,
+   "loc": "bridge.high",
+   "targetName": "t66"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "bridge.high/rox",
+   "x": 1216,
+   "y": 416,
+   "z": 120,
+   "loc": "bridge.high/rox",
+   "targetName": "t57",
+   "spawnflags": 1792
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "bridge.low",
+   "x": 1544,
+   "y": 248,
+   "z": -24,
+   "loc": "bridge.low",
+   "targetName": "t64"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "bridge.room",
+   "x": 1848,
+   "y": 808,
+   "z": -40,
+   "loc": "bridge.room",
+   "targetName": "t3"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "Pent",
+   "x": 744,
+   "y": 1856,
+   "z": 0,
+   "loc": "Pent",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     737,
+     1833,
+     -23
+    ],
+    "max": [
+     751,
+     1879,
+     23
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.water",
+   "x": 1684,
+   "y": 1792,
+   "z": -20,
+   "loc": "RA.water",
+   "target": "t3",
+   "bounds": {
+    "min": [
+     1673,
+     1769,
+     -55
+    ],
+    "max": [
+     1695,
+     1815,
+     15
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "bridge.high-1",
+   "x": 2264,
+   "y": -416,
+   "z": 176,
+   "loc": "bridge.high",
+   "target": "t65",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     2257,
+     -447,
+     97
+    ],
+    "max": [
+     2271,
+     -385,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "bridge.high-2",
+   "x": 2264,
+   "y": -352,
+   "z": 176,
+   "loc": "bridge.high",
+   "target": "t64",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     2257,
+     -383,
+     97
+    ],
+    "max": [
+     2271,
+     -321,
+     255
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "bridge.water",
+   "x": 1048,
+   "y": 328,
+   "z": -224,
+   "loc": "bridge.water",
+   "target": "t57",
+   "spawnflags": 1792,
+   "bounds": {
+    "min": [
+     977,
+     321,
+     -255
+    ],
+    "max": [
+     1119,
+     335,
+     -193
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "low.GA",
+   "x": 2264,
+   "y": -480,
+   "z": 176,
+   "loc": "low.GA",
+   "target": "t66",
+   "spawnflags": 2,
+   "bounds": {
+    "min": [
+     2257,
+     -511,
+     97
+    ],
+    "max": [
+     2271,
+     -449,
+     255
+    ]
+   }
+  }
+ ]
+}

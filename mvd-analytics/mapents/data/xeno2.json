@@ -1,0 +1,1280 @@
+{
+ "map": "xeno2",
+ "version": 1,
+ "entities": [
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "BLUE 100 HEALTH ROOM",
+   "x": -600,
+   "y": 0,
+   "z": 48,
+   "loc": "BLUE 100 HEALTH ROOM",
+   "bounds": {
+    "min": [
+     -607,
+     -47,
+     1
+    ],
+    "max": [
+     -593,
+     47,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE UPPER CORRIDOR TO BASE-1",
+   "x": -352,
+   "y": -400,
+   "z": 64,
+   "loc": "BLUE UPPER CORRIDOR TO BASE",
+   "bounds": {
+    "min": [
+     -383,
+     -407,
+     1
+    ],
+    "max": [
+     -321,
+     -393,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE UPPER CORRIDOR TO BASE-2",
+   "x": -352,
+   "y": 400,
+   "z": 64,
+   "loc": "BLUE UPPER CORRIDOR TO BASE",
+   "bounds": {
+    "min": [
+     -383,
+     393,
+     1
+    ],
+    "max": [
+     -321,
+     407,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE UPPER CORRIDOR TO BASE-3",
+   "x": -288,
+   "y": -400,
+   "z": 64,
+   "loc": "BLUE UPPER CORRIDOR TO BASE",
+   "bounds": {
+    "min": [
+     -319,
+     -407,
+     1
+    ],
+    "max": [
+     -257,
+     -393,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "BLUE UPPER CORRIDOR TO BASE-4",
+   "x": -288,
+   "y": 400,
+   "z": 64,
+   "loc": "BLUE UPPER CORRIDOR TO BASE",
+   "bounds": {
+    "min": [
+     -319,
+     393,
+     1
+    ],
+    "max": [
+     -257,
+     407,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "BLUE UPPER LEDGE-1",
+   "x": -1264,
+   "y": -232,
+   "z": 32,
+   "loc": "BLUE UPPER LEDGE",
+   "bounds": {
+    "min": [
+     -1295,
+     -239,
+     1
+    ],
+    "max": [
+     -1233,
+     -225,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "BLUE UPPER LEDGE-2",
+   "x": -1264,
+   "y": 232,
+   "z": 32,
+   "loc": "BLUE UPPER LEDGE",
+   "bounds": {
+    "min": [
+     -1295,
+     225,
+     1
+    ],
+    "max": [
+     -1233,
+     239,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED 100 HEALTH ROOM",
+   "x": 600,
+   "y": 0,
+   "z": 48,
+   "loc": "RED 100 HEALTH ROOM",
+   "bounds": {
+    "min": [
+     593,
+     -47,
+     1
+    ],
+    "max": [
+     607,
+     47,
+     95
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED UPPER CORRIDOR TO BASE-1",
+   "x": 288,
+   "y": -400,
+   "z": 64,
+   "loc": "RED UPPER CORRIDOR TO BASE",
+   "bounds": {
+    "min": [
+     257,
+     -407,
+     1
+    ],
+    "max": [
+     319,
+     -393,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED UPPER CORRIDOR TO BASE-2",
+   "x": 288,
+   "y": 400,
+   "z": 64,
+   "loc": "RED UPPER CORRIDOR TO BASE",
+   "bounds": {
+    "min": [
+     257,
+     393,
+     1
+    ],
+    "max": [
+     319,
+     407,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED UPPER CORRIDOR TO BASE-3",
+   "x": 352,
+   "y": -400,
+   "z": 64,
+   "loc": "RED UPPER CORRIDOR TO BASE",
+   "bounds": {
+    "min": [
+     321,
+     -407,
+     1
+    ],
+    "max": [
+     383,
+     -393,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door",
+   "name": "RED UPPER CORRIDOR TO BASE-4",
+   "x": 352,
+   "y": 400,
+   "z": 64,
+   "loc": "RED UPPER CORRIDOR TO BASE",
+   "bounds": {
+    "min": [
+     321,
+     393,
+     1
+    ],
+    "max": [
+     383,
+     407,
+     127
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED UPPER LEDGE-1",
+   "x": 1264,
+   "y": -232,
+   "z": 32,
+   "loc": "RED UPPER LEDGE",
+   "bounds": {
+    "min": [
+     1233,
+     -239,
+     1
+    ],
+    "max": [
+     1295,
+     -225,
+     63
+    ]
+   }
+  },
+  {
+   "type": "door",
+   "class": "func_door_secret",
+   "name": "RED UPPER LEDGE-2",
+   "x": 1264,
+   "y": 232,
+   "z": 32,
+   "loc": "RED UPPER LEDGE",
+   "bounds": {
+    "min": [
+     1233,
+     225,
+     1
+    ],
+    "max": [
+     1295,
+     239,
+     63
+    ]
+   }
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE LOWER CORRIDOR-1",
+   "x": -544,
+   "y": -80,
+   "z": -192,
+   "loc": "BLUE LOWER CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "BLUE LOWER CORRIDOR-2",
+   "x": -544,
+   "y": 48,
+   "z": -192,
+   "loc": "BLUE LOWER CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED LOWER CORRIDOR-1",
+   "x": 512,
+   "y": -80,
+   "z": -192,
+   "loc": "RED LOWER CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "RED LOWER CORRIDOR-2",
+   "x": 512,
+   "y": 48,
+   "z": -192,
+   "loc": "RED LOWER CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "BLUE GL BY WINDTUNNEL",
+   "x": -1280,
+   "y": 0,
+   "z": -192,
+   "loc": "BLUE GL BY WINDTUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "RED GL BY WINDTUNNEL",
+   "x": 1280,
+   "y": 0,
+   "z": -192,
+   "loc": "RED GL BY WINDTUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE GL BY WINDTUNNEL-1",
+   "x": -1296,
+   "y": -80,
+   "z": -192,
+   "loc": "BLUE GL BY WINDTUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE GL BY WINDTUNNEL-2",
+   "x": -1296,
+   "y": 48,
+   "z": -192,
+   "loc": "BLUE GL BY WINDTUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE LG AREA IN WATER-1",
+   "x": -832,
+   "y": -304,
+   "z": -400,
+   "loc": "BLUE LG AREA IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE LG AREA IN WATER-2",
+   "x": -832,
+   "y": -240,
+   "z": -400,
+   "loc": "BLUE LG AREA IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE LG AREA IN WATER-3",
+   "x": -832,
+   "y": 208,
+   "z": -400,
+   "loc": "BLUE LG AREA IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE LG AREA IN WATER-4",
+   "x": -832,
+   "y": 272,
+   "z": -400,
+   "loc": "BLUE LG AREA IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE LOWER CORRIDOR",
+   "x": -304,
+   "y": -16,
+   "z": -192,
+   "loc": "BLUE LOWER CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE SUPER NAILGUN",
+   "x": -1312,
+   "y": 176,
+   "z": 0,
+   "loc": "BLUE SUPER NAILGUN"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE UPPER LEDGE",
+   "x": -1312,
+   "y": -208,
+   "z": 0,
+   "loc": "BLUE UPPER LEDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE WINDTUNNEL EXIT-1",
+   "x": -1296,
+   "y": -48,
+   "z": 160,
+   "loc": "BLUE WINDTUNNEL EXIT"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "BLUE WINDTUNNEL EXIT-2",
+   "x": -1296,
+   "y": 16,
+   "z": 160,
+   "loc": "BLUE WINDTUNNEL EXIT"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "Quad SPOT",
+   "x": -16,
+   "y": -80,
+   "z": 0,
+   "loc": "Quad SPOT"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED GL BY WINDTUNNEL-1",
+   "x": 1264,
+   "y": -80,
+   "z": -192,
+   "loc": "RED GL BY WINDTUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED GL BY WINDTUNNEL-2",
+   "x": 1264,
+   "y": 48,
+   "z": -192,
+   "loc": "RED GL BY WINDTUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED LG AREA IN WATER-1",
+   "x": 800,
+   "y": 208,
+   "z": -400,
+   "loc": "RED LG AREA IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED LG AREA IN WATER-2",
+   "x": 800,
+   "y": 272,
+   "z": -400,
+   "loc": "RED LG AREA IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED LOWER CORRIDOR-1",
+   "x": 304,
+   "y": -80,
+   "z": -192,
+   "loc": "RED LOWER CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED LOWER CORRIDOR-2",
+   "x": 304,
+   "y": 48,
+   "z": -192,
+   "loc": "RED LOWER CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED SUPER NAILGUN",
+   "x": 1280,
+   "y": 176,
+   "z": 0,
+   "loc": "RED SUPER NAILGUN"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED UPPER LEDGE",
+   "x": 1280,
+   "y": -208,
+   "z": 0,
+   "loc": "RED UPPER LEDGE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED WINDTUNNEL ENTRANCE-1",
+   "x": 800,
+   "y": -304,
+   "z": -400,
+   "loc": "RED WINDTUNNEL ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED WINDTUNNEL ENTRANCE-2",
+   "x": 800,
+   "y": -240,
+   "z": -400,
+   "loc": "RED WINDTUNNEL ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED WINDTUNNEL EXIT-1",
+   "x": 1264,
+   "y": -48,
+   "z": 160,
+   "loc": "RED WINDTUNNEL EXIT"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RED WINDTUNNEL EXIT-2",
+   "x": 1264,
+   "y": 16,
+   "z": 160,
+   "loc": "RED WINDTUNNEL EXIT"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RL SPOT",
+   "x": -16,
+   "y": 48,
+   "z": 0,
+   "loc": "RL SPOT"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "BLUE LG AREA IN WATER",
+   "x": -1104,
+   "y": 0,
+   "z": -400,
+   "loc": "BLUE LG AREA IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "RED LG AREA IN WATER",
+   "x": 1104,
+   "y": 0,
+   "z": -400,
+   "loc": "RED LG AREA IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "BLUE 100 HEALTH ROOM",
+   "x": -544,
+   "y": -16,
+   "z": 0,
+   "loc": "BLUE 100 HEALTH ROOM",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "RED 100 HEALTH ROOM",
+   "x": 512,
+   "y": -16,
+   "z": 0,
+   "loc": "RED 100 HEALTH ROOM",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE GL BY WINDTUNNEL",
+   "x": -1120,
+   "y": -192,
+   "z": -192,
+   "loc": "BLUE GL BY WINDTUNNEL"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE LOWER CORRIDOR-1",
+   "x": -336,
+   "y": -80,
+   "z": -192,
+   "loc": "BLUE LOWER CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE LOWER CORRIDOR-2",
+   "x": -336,
+   "y": 48,
+   "z": -192,
+   "loc": "BLUE LOWER CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE SUPER NAILGUN-1",
+   "x": -1296,
+   "y": -80,
+   "z": 0,
+   "loc": "BLUE SUPER NAILGUN"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "BLUE SUPER NAILGUN-2",
+   "x": -1296,
+   "y": 48,
+   "z": 0,
+   "loc": "BLUE SUPER NAILGUN"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED SUPER NAILGUN-1",
+   "x": 1264,
+   "y": -80,
+   "z": 0,
+   "loc": "RED SUPER NAILGUN"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED SUPER NAILGUN-2",
+   "x": 1264,
+   "y": 48,
+   "z": 0,
+   "loc": "RED SUPER NAILGUN"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "RED WINDTUNNEL ENTRANCE",
+   "x": 1088,
+   "y": -192,
+   "z": -192,
+   "loc": "RED WINDTUNNEL ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_nailgun",
+   "kind": "ng",
+   "name": "RED LOWER CORRIDOR",
+   "x": 288,
+   "y": 0,
+   "z": -192,
+   "loc": "RED LOWER CORRIDOR"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad SPOT",
+   "x": 0,
+   "y": 0,
+   "z": -72,
+   "loc": "Quad SPOT"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "RL SPOT",
+   "x": 0,
+   "y": 0,
+   "z": 0,
+   "loc": "RL SPOT"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE 100 HEALTH ROOM-1",
+   "x": -544,
+   "y": -128,
+   "z": 0,
+   "loc": "BLUE 100 HEALTH ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "BLUE 100 HEALTH ROOM-2",
+   "x": -544,
+   "y": 96,
+   "z": 0,
+   "loc": "BLUE 100 HEALTH ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "LOWER CORRIDOR BY Quad-1",
+   "x": -16,
+   "y": -272,
+   "z": -192,
+   "loc": "LOWER CORRIDOR BY Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "LOWER CORRIDOR BY Quad-2",
+   "x": -16,
+   "y": 240,
+   "z": -192,
+   "loc": "LOWER CORRIDOR BY Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED 100 HEALTH ROOM-1",
+   "x": 512,
+   "y": -128,
+   "z": 0,
+   "loc": "RED 100 HEALTH ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RED 100 HEALTH ROOM-2",
+   "x": 512,
+   "y": 96,
+   "z": 0,
+   "loc": "RED 100 HEALTH ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE 100 HEALTH ROOM-1",
+   "x": -656,
+   "y": -48,
+   "z": 0,
+   "loc": "BLUE 100 HEALTH ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE 100 HEALTH ROOM-2",
+   "x": -656,
+   "y": 16,
+   "z": 0,
+   "loc": "BLUE 100 HEALTH ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "BLUE LG AREA IN WATER",
+   "x": -1120,
+   "y": 160,
+   "z": -192,
+   "loc": "BLUE LG AREA IN WATER"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED 100 HEALTH ROOM-1",
+   "x": 624,
+   "y": -48,
+   "z": 0,
+   "loc": "RED 100 HEALTH ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED 100 HEALTH ROOM-2",
+   "x": 624,
+   "y": 16,
+   "z": 0,
+   "loc": "RED 100 HEALTH ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "RED WINDTUNNEL ENTRANCE",
+   "x": 1088,
+   "y": 160,
+   "z": -192,
+   "loc": "RED WINDTUNNEL ENTRANCE"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "BLUE SUPER NAILGUN",
+   "x": -1280,
+   "y": 0,
+   "z": 0,
+   "loc": "BLUE SUPER NAILGUN"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "RED SUPER NAILGUN",
+   "x": 1280,
+   "y": 0,
+   "z": 0,
+   "loc": "RED SUPER NAILGUN"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "BLUE 100 HEALTH ROOM",
+   "x": -672,
+   "y": 0,
+   "z": 0,
+   "loc": "BLUE 100 HEALTH ROOM"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RED 100 HEALTH ROOM",
+   "x": 672,
+   "y": 0,
+   "z": 0,
+   "loc": "RED 100 HEALTH ROOM"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "BLUE 150 ARMOUR",
+   "x": -960,
+   "y": 0,
+   "z": 0,
+   "loc": "BLUE 150 ARMOUR"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "RED 150 ARMOUR",
+   "x": 960,
+   "y": 0,
+   "z": 0,
+   "loc": "RED 150 ARMOUR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE 100 HEALTH ROOM",
+   "x": -672,
+   "y": -160,
+   "z": 24,
+   "loc": "BLUE 100 HEALTH ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE 150 ARMOUR-1",
+   "x": -992,
+   "y": -160,
+   "z": 24,
+   "loc": "BLUE 150 ARMOUR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE 150 ARMOUR-2",
+   "x": -992,
+   "y": 160,
+   "z": 24,
+   "loc": "BLUE 150 ARMOUR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE FLAG SPOT",
+   "x": -672,
+   "y": 160,
+   "z": 24,
+   "loc": "BLUE FLAG SPOT"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE GL BY WINDTUNNEL-1",
+   "x": -1280,
+   "y": -192,
+   "z": -168,
+   "loc": "BLUE GL BY WINDTUNNEL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE GL BY WINDTUNNEL-2",
+   "x": -1280,
+   "y": 192,
+   "z": -168,
+   "loc": "BLUE GL BY WINDTUNNEL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE LOWER CORRIDOR-1",
+   "x": -640,
+   "y": 0,
+   "z": -168,
+   "loc": "BLUE LOWER CORRIDOR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE LOWER CORRIDOR-2",
+   "x": -528,
+   "y": -256,
+   "z": -168,
+   "loc": "BLUE LOWER CORRIDOR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE LOWER CORRIDOR-3",
+   "x": -528,
+   "y": 256,
+   "z": -168,
+   "loc": "BLUE LOWER CORRIDOR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE LOWER CORRIDOR-4",
+   "x": -352,
+   "y": 0,
+   "z": -168,
+   "loc": "BLUE LOWER CORRIDOR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE UPPER CORRIDOR TO BASE-1",
+   "x": -576,
+   "y": -480,
+   "z": 24,
+   "loc": "BLUE UPPER CORRIDOR TO BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "BLUE UPPER CORRIDOR TO BASE-2",
+   "x": -576,
+   "y": 480,
+   "z": 24,
+   "loc": "BLUE UPPER CORRIDOR TO BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE UPPER LEDGE-1",
+   "x": -1264,
+   "y": -288,
+   "z": 184,
+   "loc": "BLUE UPPER LEDGE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE UPPER LEDGE-2",
+   "x": -1264,
+   "y": 144,
+   "z": 184,
+   "loc": "BLUE UPPER LEDGE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE UPPER LEDGE-3",
+   "x": -1264,
+   "y": 288,
+   "z": 184,
+   "loc": "BLUE UPPER LEDGE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team2",
+   "name": "BLUE WINDTUNNEL EXIT",
+   "x": -1264,
+   "y": -144,
+   "z": 184,
+   "loc": "BLUE WINDTUNNEL EXIT"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED 100 HEALTH ROOM-1",
+   "x": 672,
+   "y": -160,
+   "z": 24,
+   "loc": "RED 100 HEALTH ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED 100 HEALTH ROOM-2",
+   "x": 672,
+   "y": 160,
+   "z": 24,
+   "loc": "RED 100 HEALTH ROOM"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED 150 ARMOUR-1",
+   "x": 992,
+   "y": -160,
+   "z": 24,
+   "loc": "RED 150 ARMOUR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED 150 ARMOUR-2",
+   "x": 992,
+   "y": 160,
+   "z": 24,
+   "loc": "RED 150 ARMOUR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED GL BY WINDTUNNEL-1",
+   "x": 1280,
+   "y": -192,
+   "z": -168,
+   "loc": "RED GL BY WINDTUNNEL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED GL BY WINDTUNNEL-2",
+   "x": 1280,
+   "y": 192,
+   "z": -168,
+   "loc": "RED GL BY WINDTUNNEL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED LOWER CORRIDOR-1",
+   "x": 352,
+   "y": 0,
+   "z": -168,
+   "loc": "RED LOWER CORRIDOR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED LOWER CORRIDOR-2",
+   "x": 528,
+   "y": -256,
+   "z": -168,
+   "loc": "RED LOWER CORRIDOR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED LOWER CORRIDOR-3",
+   "x": 528,
+   "y": 256,
+   "z": -168,
+   "loc": "RED LOWER CORRIDOR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED LOWER CORRIDOR-4",
+   "x": 640,
+   "y": 0,
+   "z": -168,
+   "loc": "RED LOWER CORRIDOR"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED UPPER CORRIDOR TO BASE-1",
+   "x": 576,
+   "y": -480,
+   "z": 24,
+   "loc": "RED UPPER CORRIDOR TO BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RED UPPER CORRIDOR TO BASE-2",
+   "x": 576,
+   "y": 480,
+   "z": 24,
+   "loc": "RED UPPER CORRIDOR TO BASE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED UPPER LEDGE-1",
+   "x": 1264,
+   "y": -304,
+   "z": 184,
+   "loc": "RED UPPER LEDGE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED UPPER LEDGE-2",
+   "x": 1264,
+   "y": 288,
+   "z": 184,
+   "loc": "RED UPPER LEDGE"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED WINDTUNNEL EXIT-1",
+   "x": 1264,
+   "y": -144,
+   "z": 184,
+   "loc": "RED WINDTUNNEL EXIT"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_team1",
+   "name": "RED WINDTUNNEL EXIT-2",
+   "x": 1264,
+   "y": 144,
+   "z": 184,
+   "loc": "RED WINDTUNNEL EXIT"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "UPPER WALKWAY BY RL-1",
+   "x": 0,
+   "y": -256,
+   "z": 24,
+   "loc": "UPPER WALKWAY BY RL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "UPPER WALKWAY BY RL-2",
+   "x": 0,
+   "y": 256,
+   "z": 24,
+   "loc": "UPPER WALKWAY BY RL"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "Quad SPOT",
+   "x": 0,
+   "y": 48,
+   "z": -88,
+   "loc": "Quad SPOT",
+   "targetName": "t1"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "WATER BY TELEPORT",
+   "x": 0,
+   "y": 0,
+   "z": -392,
+   "loc": "WATER BY TELEPORT",
+   "target": "t1",
+   "bounds": {
+    "min": [
+     -63,
+     -63,
+     -399
+    ],
+    "max": [
+     63,
+     63,
+     -385
+    ]
+   }
+  }
+ ]
+}

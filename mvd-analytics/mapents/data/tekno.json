@@ -1,0 +1,523 @@
+{
+ "map": "tekno",
+ "version": 1,
+ "entities": [
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Quad.MH-1",
+   "x": 216,
+   "y": 1024,
+   "z": 144,
+   "loc": "Quad.MH"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "Quad.MH-2",
+   "x": 264,
+   "y": 1024,
+   "z": 144,
+   "loc": "Quad.MH"
+  },
+  {
+   "type": "item",
+   "class": "item_cells",
+   "kind": "cells",
+   "name": "YA",
+   "x": -16,
+   "y": -28,
+   "z": 144,
+   "loc": "YA"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "LG.low",
+   "x": 192,
+   "y": 176,
+   "z": 32,
+   "loc": "LG.low"
+  },
+  {
+   "type": "item",
+   "class": "item_armor1",
+   "kind": "ga",
+   "name": "Quad",
+   "x": -144,
+   "y": 1264,
+   "z": 0,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "weapon_grenadelauncher",
+   "kind": "gl",
+   "name": "top.GL",
+   "x": 512,
+   "y": 992,
+   "z": 272,
+   "loc": "top.GL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "LG.low-1",
+   "x": 48,
+   "y": 160,
+   "z": 32,
+   "loc": "LG.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "LG.low-2",
+   "x": 48,
+   "y": 224,
+   "z": 32,
+   "loc": "LG.low",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "mid.RL",
+   "x": 640,
+   "y": 432,
+   "z": 144,
+   "loc": "mid.RL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "top.ledge-1",
+   "x": 0,
+   "y": 816,
+   "z": 272,
+   "loc": "top.ledge",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h15",
+   "name": "top.ledge-2",
+   "x": 48,
+   "y": 816,
+   "z": 272,
+   "loc": "top.ledge",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "RA.tele",
+   "x": -94,
+   "y": 672,
+   "z": 1,
+   "loc": "RA.tele"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA.ledge-1",
+   "x": -576,
+   "y": 656,
+   "z": 144,
+   "loc": "YA.ledge"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "YA.ledge-2",
+   "x": -576,
+   "y": 704,
+   "z": 144,
+   "loc": "YA.ledge"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "mid.RL",
+   "x": 688,
+   "y": 432,
+   "z": 144,
+   "loc": "mid.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "h25",
+   "name": "top.GL",
+   "x": 848,
+   "y": 680,
+   "z": 272,
+   "loc": "top.GL"
+  },
+  {
+   "type": "item",
+   "class": "weapon_lightning",
+   "kind": "lg",
+   "name": "LG",
+   "x": 352,
+   "y": 112,
+   "z": 144,
+   "loc": "LG"
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "Quad.MH",
+   "x": -64,
+   "y": 976,
+   "z": 144,
+   "loc": "Quad.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_health",
+   "kind": "mh",
+   "name": "top.MH",
+   "x": 120,
+   "y": 448,
+   "z": 272,
+   "loc": "top.MH",
+   "spawnflags": 2
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad-1",
+   "x": -336,
+   "y": 896,
+   "z": 0,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "Quad-2",
+   "x": -336,
+   "y": 944,
+   "z": 0,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "mid.walk-1",
+   "x": 256,
+   "y": 816,
+   "z": 144,
+   "loc": "mid.walk"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "mid.walk-2",
+   "x": 304,
+   "y": 816,
+   "z": 144,
+   "loc": "mid.walk"
+  },
+  {
+   "type": "item",
+   "class": "item_spikes",
+   "kind": "nails",
+   "name": "top.ledge",
+   "x": 328,
+   "y": 776,
+   "z": 272,
+   "loc": "top.ledge"
+  },
+  {
+   "type": "item",
+   "class": "item_artifact_super_damage",
+   "kind": "quad",
+   "name": "Quad",
+   "x": -144,
+   "y": 1368,
+   "z": 105,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "item_armorInv",
+   "kind": "ra",
+   "name": "RA",
+   "x": 368,
+   "y": 1136,
+   "z": 0,
+   "loc": "RA"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "YA.low",
+   "x": -288,
+   "y": 464,
+   "z": 32,
+   "loc": "YA.low"
+  },
+  {
+   "type": "item",
+   "class": "weapon_rocketlauncher",
+   "kind": "rl",
+   "name": "mid.RL",
+   "x": 712,
+   "y": 592,
+   "z": 145,
+   "loc": "mid.RL"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "RA.lift",
+   "x": 704,
+   "y": 960,
+   "z": 112,
+   "loc": "RA.lift"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA.low-1",
+   "x": -520,
+   "y": 364,
+   "z": 32,
+   "loc": "YA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "YA.low-2",
+   "x": -520,
+   "y": 420,
+   "z": 32,
+   "loc": "YA.low"
+  },
+  {
+   "type": "item",
+   "class": "item_rockets",
+   "kind": "rockets",
+   "name": "mid.walk",
+   "x": -224,
+   "y": 640,
+   "z": 272,
+   "loc": "mid.walk"
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "mid.walk",
+   "x": -192,
+   "y": 640,
+   "z": 144,
+   "loc": "mid.walk",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "top.GL",
+   "x": 528,
+   "y": 656,
+   "z": 272,
+   "loc": "top.GL",
+   "spawnflags": 1
+  },
+  {
+   "type": "item",
+   "class": "item_shells",
+   "kind": "shells",
+   "name": "top.ledge",
+   "x": -80,
+   "y": 432,
+   "z": 272,
+   "loc": "top.ledge"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supernailgun",
+   "kind": "sng",
+   "name": "Quad",
+   "x": -48,
+   "y": 912,
+   "z": 0,
+   "loc": "Quad"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "RA.tele",
+   "x": 336,
+   "y": 784,
+   "z": 0,
+   "loc": "RA.tele"
+  },
+  {
+   "type": "item",
+   "class": "weapon_supershotgun",
+   "kind": "ssg",
+   "name": "mid.walk",
+   "x": -48,
+   "y": 816,
+   "z": 144,
+   "loc": "mid.walk"
+  },
+  {
+   "type": "item",
+   "class": "item_armor2",
+   "kind": "ya",
+   "name": "YA",
+   "x": -320,
+   "y": 208,
+   "z": 144,
+   "loc": "YA"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "LG",
+   "x": 496,
+   "y": -65,
+   "z": 170,
+   "loc": "LG"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "Quad",
+   "x": 32,
+   "y": 1120,
+   "z": 26,
+   "loc": "Quad"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "RA.tele",
+   "x": 272,
+   "y": 632,
+   "z": 26,
+   "loc": "RA.tele"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "YA.ledge",
+   "x": -624,
+   "y": 208,
+   "z": 171,
+   "loc": "YA.ledge"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "top.GL",
+   "x": 800,
+   "y": 696,
+   "z": 298,
+   "loc": "top.GL"
+  },
+  {
+   "type": "spawn",
+   "class": "info_player_deathmatch",
+   "name": "top.ledge",
+   "x": -80,
+   "y": 816,
+   "z": 298,
+   "loc": "top.ledge"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "YA.ledge",
+   "x": -624,
+   "y": 200,
+   "z": 147,
+   "loc": "YA.ledge",
+   "targetName": "teleya"
+  },
+  {
+   "type": "teleportDst",
+   "class": "info_teleport_destination",
+   "name": "top.GL",
+   "x": 288,
+   "y": 1036,
+   "z": 278,
+   "loc": "top.GL",
+   "targetName": "telehigh"
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "RA.tele",
+   "x": 128,
+   "y": 786,
+   "z": 48,
+   "loc": "RA.tele",
+   "target": "telehigh",
+   "bounds": {
+    "min": [
+     89,
+     781,
+     1
+    ],
+    "max": [
+     167,
+     791,
+     95
+    ]
+   }
+  },
+  {
+   "type": "teleportSrc",
+   "class": "trigger_teleport",
+   "name": "YA.low",
+   "x": -464,
+   "y": 157,
+   "z": 80,
+   "loc": "YA.low",
+   "target": "teleya",
+   "bounds": {
+    "min": [
+     -503,
+     153,
+     33
+    ],
+    "max": [
+     -425,
+     161,
+     127
+    ]
+   }
+  }
+ ]
+}

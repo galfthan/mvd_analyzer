@@ -5,6 +5,39 @@ the merge dates on `main`; schema bumps reference
 [RESULT_SCHEMA.md](mvd-analytics/RESULT_SCHEMA.md) for field-level
 detail.
 
+## unreleased (maps-deploy) — every qw-assets map on the production host
+
+`scripts/fetch-bsps.sh` takes a set: `curated` (the competitive maps, as
+before), `preview` (dm2, dm3, e1m2, schloss — the Netlify branch previews,
+which fetched all 29 on every deploy) and `all` (curated plus every other
+map of [vikpe/qw-assets](https://github.com/vikpe/qw-assets), about 1080
+maps and 1.8 GB, at the commit `scripts/qw-assets-bsps.txt` pins;
+`make bsps BSP_SET=…`). On the production host the maps now live in
+`/opt/mvd/bsps`, read by mvd-api and served to the page as `/bsps/*`,
+outside the web bundle: a publish does not carry them, and a later fetch
+downloads only what is new (`deploy/README.md` §2b). More maps get the
+visibility-aware loc attribution, floor heights, line of sight and
+airgibs. No schema change.
+
+The map geometry and the map-entity corpus are regenerated from that set:
+248 maps gain a drawn map and 279 an entity file, and the 801 geometry
+files of an older generator version are now version 5, with lifts, doors
+and liquid volumes (liquid surfaces no longer count as floor). The 26
+usage-pruned maps keep their pruned floors, and zite and ultrav are now
+pruned too. dust2, end and phantoma are
+now the builds qw-assets and the quake.world CDN carry, which differ from
+the ones drawn before; phantoma loses its prune with that. Six qw-assets
+maps are in BSP formats mapgen does not read (arena, sewerctf, hj,
+qw_ubj_pro, qw_uj_pro, qw_urj_pro) and get neither.
+
+## unreleased (qwleague) — a QWL badge and "QWL only" on the Search tab
+
+- A game played on QWLeague's servers (a `*.qwleague.com` hostname on its
+  hub row) carries a "QWL" badge before its tag in the search list and in
+  the map tabs above a loaded demo. A new "QWL only" checkbox (`?qwl=1`)
+  searches those games alone; that search asks the hub directly, as
+  mvd-api's search has no server filter. Web only: no API change.
+
 ## unreleased (playlists-description) — POST /v1/playlists answers with the playlist
 
 - **`POST /v1/playlists`** (experimental) replaces `POST /v1/playlist-links`,
